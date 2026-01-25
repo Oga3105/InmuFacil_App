@@ -167,7 +167,7 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Anchor-based redaction using pure OpenCV visual detection.
+    Hybrid redaction: Contour detection + Visual anchors + Aspect ratio classification.
     
     Args:
         input_path: Path to original document image
@@ -177,17 +177,18 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
     Returns:
         True if redaction successful, False otherwise
         
-    Anchor Detection Strategy:
-    1. Blue E Symbol: Color detection in HSV for NIE/Residencia
-    2. MRZ Detection: Morphological operations to find <<< blocks
-    3. Face Protection: Haar cascade to ensure face is never covered
-    4. Fallback: Aggressive redaction if anchors not found
+    Strategy:
+    1. Contour detection to find document rectangle
+    2. Aspect ratio classification (1.4-1.8 = Card, <1 = Passport vertical)
+    3. Color anchor detection (Blue E for NIE)
+    4. Apply standard redaction masks per document type
+    5. Fallback: Standard mask if detection fails
     
-    @Jules: Anchor-based visual detection (no OCR)
-    @Shield: Face protection guaranteed
+    @Jules: Hybrid approach - restored contour detection + anchors
+    @Shield: Standard fallback guarantees coverage
     """
     try:
-        logger.info(f"[ANCHOR] Loading image for anchor-based redaction...")
+        logger.info(f"[HYBRID] Loading image for hybrid redaction...")
         
         img = cv2.imread(input_path)
         if img is None:
@@ -195,151 +196,223 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             return False
         
         img_h, img_w = img.shape[:2]
-        logger.info(f"[ANCHOR] Image size: {img_w}x{img_h}")
+        logger.info(f"[HYBRID] Image size: {img_w}x{img_h}")
         
-        # Track what we found
+        # =====================================================================
+        # STEP 1: Contour Detection for Document Bounds
+        # =====================================================================
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        
+        # Adaptive threshold for better edge detection
+        thresh = cv2.adaptiveThreshold(
+            blurred, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            11, 2
+        )
+        
+        # Morphological cleanup
+        kernel = np.ones((5, 5), np.uint8)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        
+        # Find contours
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Default: full image as document
+        doc_x, doc_y, doc_w, doc_h = 0, 0, img_w, img_h
+        doc_detected = False
+        
+        if contours:
+            # Find largest contour
+            largest = max(contours, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(largest)
+            area_ratio = (w * h) / (img_w * img_h)
+            
+            if area_ratio > 0.3:
+                doc_x, doc_y, doc_w, doc_h = x, y, w, h
+                doc_detected = True
+                logger.info(f"[CONTOUR] Document detected: {doc_w}x{doc_h} at ({doc_x},{doc_y})")
+        
+        if not doc_detected:
+            # Use center 90%
+            margin_x = int(img_w * 0.05)
+            margin_y = int(img_h * 0.05)
+            doc_x, doc_y = margin_x, margin_y
+            doc_w = img_w - 2 * margin_x
+            doc_h = img_h - 2 * margin_y
+            logger.warning(f"[CONTOUR] Document not detected, using center 90%")
+        
+        # =====================================================================
+        # STEP 2: Aspect Ratio Classification
+        # =====================================================================
+        aspect = doc_w / doc_h if doc_h > 0 else 1.0
+        logger.info(f"[CLASSIFY] Aspect ratio: {aspect:.2f}")
+        
+        if 1.4 <= aspect <= 1.8:
+            doc_class = "CARD"  # DNI/NIE horizontal
+        elif 0.5 <= aspect < 0.9:
+            doc_class = "PASSPORT_VERT"  # Passport vertical (stacked pages)
+        elif aspect > 1.9:
+            doc_class = "PASSPORT_WIDE"  # Passport horizontal
+        else:
+            doc_class = "UNKNOWN"
+        
+        logger.info(f"[CLASSIFY] Document class: {doc_class}")
+        
+        # =====================================================================
+        # STEP 3: Blue E Anchor Detection (NIE/Residencia)
+        # =====================================================================
         found_blue_e = False
-        found_mrz = False
-        face_bbox = None
+        blue_e_box = None
         
-        # =====================================================================
-        # ANCHOR 1: Blue E Symbol Detection (NIE/Residencia cards)
-        # =====================================================================
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-        
-        # Blue color range for the E symbol (EU flag blue)
-        lower_blue = np.array([100, 100, 50])
+        lower_blue = np.array([100, 80, 50])
         upper_blue = np.array([130, 255, 255])
         blue_mask = cv2.inRange(hsv, lower_blue, upper_blue)
         
-        # Find blue regions
         blue_contours, _ = cv2.findContours(blue_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         if blue_contours:
-            # Find the largest blue region (likely the E symbol area)
             largest_blue = max(blue_contours, key=cv2.contourArea)
             bx, by, bw, bh = cv2.boundingRect(largest_blue)
-            blue_area = bw * bh
             
-            # Validate: should be in left 30% and reasonable size
-            if bx < img_w * 0.35 and blue_area > 500:
+            # Validate: Blue E should be in top-left quadrant
+            if bx < img_w * 0.4 and by < img_h * 0.4 and bw * bh > 200:
                 found_blue_e = True
-                logger.info(f"[ANCHOR] Blue E symbol found at ({bx},{by})")
-                
-                # Redact support number: right side of document, same height as E
-                support_x1 = int(img_w * 0.70)
-                support_y1 = max(0, by - int(bh * 0.5))
-                support_x2 = img_w
-                support_y2 = by + bh + int(bh * 0.5)
-                cv2.rectangle(img, (support_x1, support_y1), (support_x2, support_y2), (0, 0, 0), -1)
-                logger.info(f"[REDACT] Support number (right of E): ({support_x1},{support_y1}) to ({support_x2},{support_y2})")
-                
-                # Also redact NIE number next to E symbol
-                nie_x1 = bx + bw
-                nie_y1 = by
-                nie_x2 = min(int(img_w * 0.35), bx + bw + int(bw * 3))
-                nie_y2 = by + bh
-                cv2.rectangle(img, (nie_x1, nie_y1), (nie_x2, nie_y2), (0, 0, 0), -1)
-                logger.info(f"[REDACT] NIE number (next to E): ({nie_x1},{nie_y1}) to ({nie_x2},{nie_y2})")
+                blue_e_box = (bx, by, bw, bh)
+                logger.info(f"[ANCHOR] Blue E symbol detected at ({bx},{by})")
         
         # =====================================================================
-        # ANCHOR 2: MRZ Detection (bottom text blocks with <<<)
+        # STEP 4: Apply Standard Redaction Masks
         # =====================================================================
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
-        # Focus on bottom 40% of image where MRZ typically is
-        mrz_region_y = int(img_h * 0.60)
-        mrz_region = gray[mrz_region_y:, :]
-        
-        # Apply blackhat morphology to reveal dark text on light background
-        rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 7))
-        blackhat = cv2.morphologyEx(mrz_region, cv2.MORPH_BLACKHAT, rect_kernel)
-        
-        # Threshold to get text regions
-        _, thresh = cv2.threshold(blackhat, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-        
-        # Close gaps horizontally to merge MRZ characters
-        close_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (30, 5))
-        closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, close_kernel)
-        
-        # Find MRZ-like contours
-        mrz_contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        for cnt in mrz_contours:
-            x, y, w, h = cv2.boundingRect(cnt)
-            aspect = w / h if h > 0 else 0
+        if doc_class == "CARD":
+            # === DNI/NIE Card Redaction ===
             
-            # MRZ lines are very wide and thin (aspect > 10)
-            if aspect > 8 and w > img_w * 0.5:
-                found_mrz = True
-                # Redact entire MRZ line with margin
-                mrz_x1 = 0
-                mrz_y1 = mrz_region_y + y - 10
-                mrz_x2 = img_w
-                mrz_y2 = mrz_region_y + y + h + 10
-                cv2.rectangle(img, (mrz_x1, mrz_y1), (mrz_x2, mrz_y2), (0, 0, 0), -1)
-                logger.info(f"[REDACT] MRZ line detected and redacted")
-        
-        if not found_mrz:
-            # Fallback: redact bottom 25%
-            mrz_y1 = int(img_h * 0.75)
-            cv2.rectangle(img, (0, mrz_y1), (img_w, img_h), (0, 0, 0), -1)
-            logger.info(f"[FALLBACK] MRZ not detected, redacting bottom 25%")
-        
-        # =====================================================================
-        # ANCHOR 3: Face Protection (Haar Cascade)
-        # =====================================================================
-        try:
-            face_cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
-            face_cascade = cv2.CascadeClassifier(face_cascade_path)
+            # Top-right: Support number (25% width, 18% height)
+            tr_x1 = doc_x + int(doc_w * 0.75)
+            tr_y1 = doc_y
+            tr_x2 = doc_x + doc_w
+            tr_y2 = doc_y + int(doc_h * 0.18)
+            cv2.rectangle(img, (tr_x1, tr_y1), (tr_x2, tr_y2), (0, 0, 0), -1)
+            logger.info(f"[MASK] Top-right (support number)")
             
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
+            # Top-left: NIE number if Blue E detected
+            if found_blue_e:
+                bx, by, bw, bh = blue_e_box
+                # Cover from E symbol to ~30% of width
+                tl_x1 = bx
+                tl_y1 = by
+                tl_x2 = doc_x + int(doc_w * 0.30)
+                tl_y2 = by + bh + int(bh * 0.3)
+                cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
+                logger.info(f"[MASK] Top-left (NIE number near E)")
+            else:
+                # Fallback: cover top-left 25% anyway
+                tl_x1 = doc_x
+                tl_y1 = doc_y
+                tl_x2 = doc_x + int(doc_w * 0.25)
+                tl_y2 = doc_y + int(doc_h * 0.15)
+                cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
+                logger.info(f"[MASK] Top-left (fallback)")
             
-            if len(faces) > 0:
-                # Get largest face
-                largest_face = max(faces, key=lambda f: f[2] * f[3])
-                fx, fy, fw, fh = largest_face
-                face_bbox = (fx, fy, fw, fh)
-                logger.info(f"[ANCHOR] Face detected at ({fx},{fy}), size {fw}x{fh}")
-                
-                # Ensure face area is NOT covered - restore original pixels if accidentally covered
-                face_region = cv2.imread(input_path)[fy:fy+fh, fx:fx+fw]
-                if face_region is not None:
-                    img[fy:fy+fh, fx:fx+fw] = face_region
-                    logger.info(f"[PROTECT] Face area restored/protected")
-        except Exception as e:
-            logger.warning(f"[WARN] Face detection failed: {str(e)}")
-        
-        # =====================================================================
-        # Additional Redaction: Signature area (if not covered by MRZ)
-        # =====================================================================
-        if not found_mrz:
-            # Signature typically in center-bottom
-            sig_x1 = int(img_w * 0.40)
-            sig_y1 = int(img_h * 0.65)
-            sig_x2 = int(img_w * 0.85)
-            sig_y2 = int(img_h * 0.75)
+            # Bottom: MRZ zone (25% height)
+            mrz_y1 = doc_y + int(doc_h * 0.75)
+            cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[MASK] Bottom MRZ zone")
+            
+            # Center-bottom: Signature (avoiding face on left)
+            sig_x1 = doc_x + int(doc_w * 0.40)
+            sig_y1 = doc_y + int(doc_h * 0.62)
+            sig_x2 = doc_x + int(doc_w * 0.75)
+            sig_y2 = doc_y + int(doc_h * 0.75)
             cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
-            logger.info(f"[REDACT] Signature zone: ({sig_x1},{sig_y1}) to ({sig_x2},{sig_y2})")
-        
-        # =====================================================================
-        # Fallback: If no anchors found, apply aggressive redaction
-        # =====================================================================
-        if not found_blue_e and not found_mrz:
-            logger.warning(f"[FALLBACK] No anchors detected, applying aggressive redaction")
+            logger.info(f"[MASK] Signature zone")
+            
+        elif doc_class == "PASSPORT_VERT":
+            # === Passport Vertical (stacked pages) ===
+            half_h = doc_h // 2
+            
+            # Top page: passport number + signature
+            pn_x1 = doc_x + int(doc_w * 0.70)
+            pn_y1 = doc_y
+            pn_x2 = doc_x + doc_w
+            pn_y2 = doc_y + int(half_h * 0.15)
+            cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
+            
+            sig_x1 = doc_x + int(doc_w * 0.45)
+            sig_y1 = doc_y + int(half_h * 0.45)
+            sig_x2 = doc_x + doc_w
+            sig_y2 = doc_y + int(half_h * 0.70)
+            cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
+            logger.info(f"[MASK] Top page: number + signature")
+            
+            # Bottom page: passport number + MRZ
+            bottom_y = doc_y + half_h
+            pn_x1 = doc_x + int(doc_w * 0.70)
+            pn_y1 = bottom_y
+            pn_x2 = doc_x + doc_w
+            pn_y2 = bottom_y + int(half_h * 0.12)
+            cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
+            
+            # MRZ: bottom 35% of bottom page
+            mrz_y1 = bottom_y + int(half_h * 0.65)
+            cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[MASK] Bottom page: number + MRZ")
+            
+        elif doc_class == "PASSPORT_WIDE":
+            # === Passport Wide (side by side) ===
+            half_w = doc_w // 2
+            
+            # Both pages: top-right numbers
+            cv2.rectangle(img, 
+                (doc_x + int(half_w * 0.70), doc_y),
+                (doc_x + half_w, doc_y + int(doc_h * 0.12)),
+                (0, 0, 0), -1)
+            cv2.rectangle(img,
+                (doc_x + half_w + int(half_w * 0.70), doc_y),
+                (doc_x + doc_w, doc_y + int(doc_h * 0.12)),
+                (0, 0, 0), -1)
+            
+            # Right page MRZ (30%)
+            mrz_y1 = doc_y + int(doc_h * 0.70)
+            cv2.rectangle(img, (doc_x + half_w, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[MASK] Wide passport: both numbers + MRZ")
+            
+        else:
+            # === FALLBACK: Standard mask for unknown documents ===
+            logger.warning(f"[FALLBACK] Anchor detection failed, applying standard mask")
+            
             # Top-right 25%
-            cv2.rectangle(img, (int(img_w * 0.70), 0), (img_w, int(img_h * 0.20)), (0, 0, 0), -1)
-            # Top-left 25%
-            cv2.rectangle(img, (0, 0), (int(img_w * 0.25), int(img_h * 0.18)), (0, 0, 0), -1)
+            cv2.rectangle(img, 
+                (doc_x + int(doc_w * 0.75), doc_y),
+                (doc_x + doc_w, doc_y + int(doc_h * 0.20)),
+                (0, 0, 0), -1)
+            
+            # Top-left 20%
+            cv2.rectangle(img, 
+                (doc_x, doc_y),
+                (doc_x + int(doc_w * 0.20), doc_y + int(doc_h * 0.15)),
+                (0, 0, 0), -1)
+            
+            # Bottom 30%
+            cv2.rectangle(img,
+                (doc_x, doc_y + int(doc_h * 0.70)),
+                (doc_x + doc_w, doc_y + doc_h),
+                (0, 0, 0), -1)
         
-        # Save
+        # =====================================================================
+        # STEP 5: Save Image
+        # =====================================================================
         success = cv2.imwrite(output_path, img)
         if not success:
             logger.error(f"[ERROR] Failed to save image")
             return False
         
         logger.info(f"[OK] Document redacted: {output_path}")
-        logger.info(f"[OK] Anchors found: Blue_E={found_blue_e}, MRZ={found_mrz}, Face={'yes' if face_bbox else 'no'}")
+        logger.info(f"[OK] Class: {doc_class}, Blue_E: {found_blue_e}, Contour: {doc_detected}")
         return True
         
     except Exception as e:
