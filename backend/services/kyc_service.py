@@ -289,65 +289,94 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === NIE/DNI v9 - FINAL AJUSTE ===
-            # Mantiene lo que funciona + añade zonas rojas adicionales
+            # Diferenciamos DNI vs NIE usando la detección del Blue E
+            is_nie = found_blue_e  # NIE tiene el símbolo E azul
             
-            # =========================================================
-            # MÁSCARA 1: E29576945 ARRIBA IZQUIERDA
-            # y: 0.08 -> 0.20, x: 0.0 -> 0.22
-            # =========================================================
-            m1_x1 = doc_x
-            m1_y1 = doc_y + int(doc_h * 0.08)
-            m1_x2 = doc_x + int(doc_w * 0.22)
-            m1_y2 = doc_y + int(doc_h * 0.20)
-            cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M1] TOP-LEFT (E29576945)")
+            if is_nie:
+                # ===================================================
+                # MÁSCARAS PARA NIE (con símbolo E azul)
+                # ===================================================
+                logger.info(f"[NIE] Aplicando máscaras para NIE")
+                
+                # MÁSCARA 1: E29576945 ARRIBA IZQUIERDA
+                m1_x1 = doc_x
+                m1_y1 = doc_y + int(doc_h * 0.05)
+                m1_x2 = doc_x + int(doc_w * 0.28)
+                m1_y2 = doc_y + int(doc_h * 0.22)
+                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[NIE-M1] TOP-LEFT")
+                
+                # MÁSCARA 2: ARRIBA DERECHA
+                m2_x1 = doc_x + int(doc_w * 0.45)
+                m2_y1 = doc_y
+                m2_x2 = doc_x + doc_w
+                m2_y2 = doc_y + int(doc_h * 0.22)
+                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[NIE-M2] TOP-RIGHT")
+                
+                # MÁSCARA 3: BORDE DERECHO COMPLETO
+                m3_x1 = doc_x + int(doc_w * 0.45)
+                m3_y1 = doc_y + int(doc_h * 0.50)
+                m3_x2 = doc_x + doc_w
+                m3_y2 = doc_y + int(doc_h * 0.75)
+                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[NIE-M3] CENTER-RIGHT")
+                
+                # MÁSCARA 4: FIRMA
+                m4_x1 = doc_x + int(doc_w * 0.25)
+                m4_y1 = doc_y + int(doc_h * 0.68)
+                m4_x2 = doc_x + int(doc_w * 0.65)
+                m4_y2 = doc_y + int(doc_h * 0.92)
+                cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[NIE-M4] FIRMA")
+                
+                # MÁSCARA 5: INFERIOR DERECHA
+                m5_x1 = doc_x + int(doc_w * 0.60)
+                m5_y1 = doc_y + int(doc_h * 0.50)
+                m5_x2 = doc_x + doc_w
+                m5_y2 = doc_y + doc_h
+                cv2.rectangle(img, (m5_x1, m5_y1), (m5_x2, m5_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[NIE-M5] BOTTOM-RIGHT")
+                
+            else:
+                # ===================================================
+                # MÁSCARAS PARA DNI (sin símbolo E azul)
+                # ===================================================
+                logger.info(f"[DNI] Aplicando máscaras para DNI")
+                
+                # MÁSCARA 1: ARRIBA IZQUIERDA (ESP)
+                m1_x1 = doc_x
+                m1_y1 = doc_y
+                m1_x2 = doc_x + int(doc_w * 0.25)
+                m1_y2 = doc_y + int(doc_h * 0.20)
+                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI-M1] TOP-LEFT")
+                
+                # MÁSCARA 2: ARRIBA DERECHA (Número soporte)
+                m2_x1 = doc_x + int(doc_w * 0.60)
+                m2_y1 = doc_y
+                m2_x2 = doc_x + doc_w
+                m2_y2 = doc_y + int(doc_h * 0.18)
+                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI-M2] TOP-RIGHT")
+                
+                # MÁSCARA 3: FIRMA
+                m3_x1 = doc_x + int(doc_w * 0.40)
+                m3_y1 = doc_y + int(doc_h * 0.62)
+                m3_x2 = doc_x + int(doc_w * 0.75)
+                m3_y2 = doc_y + int(doc_h * 0.75)
+                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI-M3] FIRMA")
+                
+                # MÁSCARA 4: MRZ INFERIOR
+                m4_x1 = doc_x
+                m4_y1 = doc_y + int(doc_h * 0.75)
+                m4_x2 = doc_x + doc_w
+                m4_y2 = doc_y + doc_h
+                cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI-M4] MRZ")
             
-            # =========================================================
-            # MÁSCARA 2: NÚMERO ARRIBA DERECHA
-            # y: 0.0 -> 0.15, x: 0.55 -> 1.0
-            # =========================================================
-            m2_x1 = doc_x + int(doc_w * 0.55)
-            m2_y1 = doc_y
-            m2_x2 = doc_x + doc_w
-            m2_y2 = doc_y + int(doc_h * 0.15)
-            cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M2] TOP-RIGHT (número)")
-            
-            # =========================================================
-            # MÁSCARA 3: NIE:Y8... (CENTRO-DERECHA) - NUEVA
-            # y: 0.58 -> 0.72, x: 0.50 -> 0.90
-            # =========================================================
-            m3_x1 = doc_x + int(doc_w * 0.50)
-            m3_y1 = doc_y + int(doc_h * 0.58)
-            m3_x2 = doc_x + int(doc_w * 0.90)
-            m3_y2 = doc_y + int(doc_h * 0.72)
-            cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M3] CENTER-RIGHT (NIE:Y8)")
-            
-            # =========================================================
-            # MÁSCARA 4: FIRMA (CENTRO-ABAJO) - NUEVA
-            # y: 0.72 -> 0.85, x: 0.35 -> 0.55
-            # =========================================================
-            m4_x1 = doc_x + int(doc_w * 0.35)
-            m4_y1 = doc_y + int(doc_h * 0.72)
-            m4_x2 = doc_x + int(doc_w * 0.55)
-            m4_y2 = doc_y + int(doc_h * 0.85)
-            cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M4] CENTER-BOTTOM (Firma)")
-            
-            # =========================================================
-            # MÁSCARA 5: ESQUINA INFERIOR DERECHA
-            # y: 0.72 -> 1.0, x: 0.75 -> 1.0
-            # =========================================================
-            m5_x1 = doc_x + int(doc_w * 0.75)
-            m5_y1 = doc_y + int(doc_h * 0.72)
-            m5_x2 = doc_x + doc_w
-            m5_y2 = doc_y + doc_h
-            cv2.rectangle(img, (m5_x1, m5_y1), (m5_x2, m5_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M5] BOTTOM-RIGHT corner")
-            
-            logger.info(f"[OK] v9: 5 máscaras aplicadas - cara y datos visibles LIBRE")
+            logger.info(f"[OK] Máscaras aplicadas para {'NIE' if is_nie else 'DNI'}")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
