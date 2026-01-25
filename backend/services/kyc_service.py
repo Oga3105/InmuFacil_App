@@ -289,51 +289,49 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === NIE/DNI v7 - BASADO EN FEEDBACK VISUAL ===
-            # AZUL = LIBERAR (cara + NIE inferior izquierdo)
-            # ROJO = OCULTAR (E29576945 arriba derecha + esquina inferior derecha)
+            # === NIE/DNI v8 - FEEDBACK VISUAL ACTUALIZADO ===
+            # ROJO = OCULTAR: E29576945 (arriba izq) + número (arriba der) + esquina inferior der
+            # AZUL = VISIBLE: Zona central (datos como SEXO, TIPO, etc.)
             
             # =========================================================
-            # MÁSCARA 1: NÚMERO SOPORTE ARRIBA DERECHA (ROJO)
-            # Solo la esquina superior derecha donde está E29576945
+            # MÁSCARA 1: E29576945 ARRIBA IZQUIERDA (ROJO)
+            # y: 0.08 -> 0.20, x: 0.0 -> 0.22
+            # =========================================================
+            m1_x1 = doc_x
+            m1_y1 = doc_y + int(doc_h * 0.08)
+            m1_x2 = doc_x + int(doc_w * 0.22)
+            m1_y2 = doc_y + int(doc_h * 0.20)
+            cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M1] TOP-LEFT (E29576945): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
+            
+            # =========================================================
+            # MÁSCARA 2: NÚMERO ARRIBA DERECHA (ROJO)
             # y: 0.0 -> 0.15, x: 0.55 -> 1.0
             # =========================================================
-            m1_x1 = doc_x + int(doc_w * 0.55)
-            m1_y1 = doc_y
-            m1_x2 = doc_x + doc_w
-            m1_y2 = doc_y + int(doc_h * 0.15)
-            cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M1] TOP-RIGHT (E29576945): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
-            
-            # =========================================================
-            # MÁSCARA 2: DATOS CENTRALES (derecha de la cara)
-            # Solo la mitad derecha, empieza DESPUÉS de la cara
-            # y: 0.15 -> 0.70, x: 0.50 -> 1.0 (cara libre en 0-50%)
-            # =========================================================
-            m2_x1 = doc_x + int(doc_w * 0.50)  # CRÍTICO: 50% = cara libre
-            m2_y1 = doc_y + int(doc_h * 0.15)
+            m2_x1 = doc_x + int(doc_w * 0.55)
+            m2_y1 = doc_y
             m2_x2 = doc_x + doc_w
-            m2_y2 = doc_y + int(doc_h * 0.70)
+            m2_y2 = doc_y + int(doc_h * 0.15)
             cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M2] CENTER-RIGHT (datos): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2} | CARA 50% LIBRE")
+            logger.info(f"[M2] TOP-RIGHT (número): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2}")
             
             # =========================================================
             # MÁSCARA 3: ESQUINA INFERIOR DERECHA (ROJO)
-            # Solo la esquina inferior derecha, NO el NIE izquierdo
-            # y: 0.70 -> 1.0, x: 0.50 -> 1.0
+            # Solo la esquina, el resto del bottom queda libre
+            # y: 0.75 -> 1.0, x: 0.85 -> 1.0
             # =========================================================
-            m3_x1 = doc_x + int(doc_w * 0.50)  # No toca NIE inferior izquierdo
-            m3_y1 = doc_y + int(doc_h * 0.70)
+            m3_x1 = doc_x + int(doc_w * 0.85)
+            m3_y1 = doc_y + int(doc_h * 0.75)
             m3_x2 = doc_x + doc_w
             m3_y2 = doc_y + doc_h
             cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M3] BOTTOM-RIGHT: {m3_x1},{m3_y1} -> {m3_x2},{m3_y2}")
+            logger.info(f"[M3] BOTTOM-RIGHT corner: {m3_x1},{m3_y1} -> {m3_x2},{m3_y2}")
             
             # =========================================================
-            # NO HAY MÁSCARA EN LADO IZQUIERDO
-            # Cara + NIE inferior = TODO LIBRE (0-50% ancho)
+            # SIN MÁSCARA CENTRAL - ZONA AZUL LIBRE
+            # Los datos (SEXO, TIPO, RESIDENCIA, etc.) quedan visibles
             # =========================================================
-            logger.info(f"[OK] v7: Cara + NIE izquierdo LIBRES (0-50%), Solo derecha tapada")
+            logger.info(f"[OK] v8: Solo 3 zonas rojas tapadas, centro LIBRE")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
