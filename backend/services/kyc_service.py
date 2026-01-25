@@ -85,7 +85,7 @@ def calculate_file_hash(file_path: str) -> str:
 
 def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, str]:
     """
-    Validate file type using multiple methods to prevent bypass.
+    Validate file type using OpenCV (Pure OpenCV - no PIL dependency).
     
     Args:
         file_path: Path to uploaded file
@@ -96,11 +96,12 @@ def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, st
         
     Security Notes:
     - Checks file extension
-    - Validates MIME type from content (not just extension)
+    - Validates image can be decoded by OpenCV
     - Prevents malicious files disguised as images
     - Defense in depth approach
     
     @Shield: Multi-layer validation prevents bypass attacks
+    @Jules: Pure OpenCV implementation
     """
     # Check 1: File extension
     file_ext = Path(original_filename).suffix.lower()
@@ -108,22 +109,31 @@ def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, st
         logger.warning(f"[BLOCKED] Invalid file extension: {file_ext}")
         return False, f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
     
-    # Check 2: MIME type from content
+    # Check 2: Try to decode as image with OpenCV
     try:
-        # Try to open as image (will fail if not a real image)
-        with Image.open(file_path) as img:
-            # Get format from PIL
-            image_format = img.format
-            if image_format not in ['JPEG', 'PNG']:
-                logger.warning(f"[BLOCKED] Invalid image format: {image_format}")
-                return False, "Invalid image format. Only JPEG and PNG are allowed."
-            
-            logger.info(f"[OK] File validated: {image_format} image")
-            return True, ""
+        # Attempt to read image with OpenCV
+        img = cv2.imread(file_path)
+        
+        if img is None:
+            logger.warning(f"[BLOCKED] File could not be decoded as image")
+            return False, "File is not a valid image or is corrupted."
+        
+        # Validate image has reasonable dimensions
+        height, width = img.shape[:2]
+        if width < 100 or height < 100:
+            logger.warning(f"[BLOCKED] Image too small: {width}x{height}")
+            return False, "Image dimensions too small (minimum 100x100 pixels)."
+        
+        if width > 10000 or height > 10000:
+            logger.warning(f"[BLOCKED] Image too large: {width}x{height}")
+            return False, "Image dimensions too large (maximum 10000x10000 pixels)."
+        
+        logger.info(f"[OK] File validated: {width}x{height} image")
+        return True, ""
             
     except Exception as e:
         logger.error(f"[ERROR] File validation failed: {str(e)}")
-        return False, "File is not a valid image or is corrupted."
+        return False, "Error decoding image or unsupported format."
 
 
 def validate_file_size(file_path: str) -> Tuple[bool, str]:
