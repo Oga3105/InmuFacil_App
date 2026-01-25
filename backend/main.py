@@ -8,6 +8,21 @@ FastAPI application for P2P real estate platform
 Token Consumption Tracking: ~400 tokens for integration
 """
 
+# ============================================================================
+# @Architect - Environment Loading (MUST BE FIRST)
+# ============================================================================
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+
+# Load .env from project root
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# ============================================================================
+# Application Imports
+# ============================================================================
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
