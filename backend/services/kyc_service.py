@@ -367,7 +367,39 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                         break  # Only redact once per text block
             
             # =====================================================================
-            # PHASE 3: CONTEXT-BASED PATTERNS - Find label, redact adjacent value
+            # PHASE 3A: AGGRESSIVE NUM SOPORT AREA REDACTION (PRIORITY)
+            # =====================================================================
+            logger.info(f"[AGGRESSIVE] Checking for NUM SOPORT label...")
+            
+            # Look for NUM SOPORT label specifically
+            for item in detected_texts:
+                text_upper = item['text'].upper()
+                
+                # Check if this contains NUM SOPORT or variations
+                has_num = 'NUM' in text_upper
+                has_soport = 'SOPORT' in text_upper or 'SOPORTE' in text_upper
+                
+                if has_num and has_soport:
+                    x1, y1, x2, y2 = item['bbox']
+                    label_width = x2 - x1
+                    label_height = y2 - y1
+                    
+                    logger.info(f"[AGGRESSIVE] Found NUM SOPORT at ({x1},{y1})")
+                    
+                    # DESTRUCTIVE ACTION: Expand redaction area
+                    # Right: 200% of label width
+                    # Down: 150% of label height
+                    expand_x1 = x1
+                    expand_y1 = y1
+                    expand_x2 = min(img_w, x2 + int(label_width * 2.0))  # 200% expansion right
+                    expand_y2 = min(img_h, y2 + int(label_height * 1.5))  # 150% expansion down
+                    
+                    cv2.rectangle(img, (expand_x1, expand_y1), (expand_x2, expand_y2), (0, 0, 0), cv2.FILLED)
+                    logger.info(f"[AGGRESSIVE] Redacted expanded area: ({expand_x1},{expand_y1})-({expand_x2},{expand_y2})")
+                    break  # Only process first NUM SOPORT found
+            
+            # =====================================================================
+            # PHASE 3B: CONTEXT-BASED PATTERNS - Find label, redact adjacent value
             # =====================================================================
             logger.info(f"[CONTEXT] Applying context-based redaction...")
             
