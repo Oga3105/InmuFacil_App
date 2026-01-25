@@ -289,40 +289,39 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === DNI/NIE Card Redaction (CALIBRATED) ===
+            # === DNI/NIE Card Redaction (CALIBRATED v2) ===
             
-            # NEW: Country indicator E/ESP - extreme top-left corner
+            # Country indicator E/ESP - EXPANDED (wider and taller)
             esp_x1 = doc_x
             esp_y1 = doc_y
-            esp_x2 = doc_x + int(doc_w * 0.12)
-            esp_y2 = doc_y + int(doc_h * 0.12)
+            esp_x2 = doc_x + int(doc_w * 0.18)  # Was 0.12, now wider
+            esp_y2 = doc_y + int(doc_h * 0.18)  # Was 0.12, now taller
             cv2.rectangle(img, (esp_x1, esp_y1), (esp_x2, esp_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Country indicator (E/ESP)")
+            logger.info(f"[MASK] Country indicator (E/ESP) - expanded")
             
-            # Top-right: Support number - EXPANDED (30% width, 20% height)
-            tr_x1 = doc_x + int(doc_w * 0.70)  # Was 0.75, now 15% more left
+            # Top-right: Support number - MOVED LEFT to cover E prefix
+            tr_x1 = doc_x + int(doc_w * 0.62)  # Was 0.70, now more left
             tr_y1 = doc_y
             tr_x2 = doc_x + doc_w
-            tr_y2 = doc_y + int(doc_h * 0.20)  # Was 0.18, now 5% more down
+            tr_y2 = doc_y + int(doc_h * 0.22)  # Was 0.20, now taller
             cv2.rectangle(img, (tr_x1, tr_y1), (tr_x2, tr_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Top-right (support number) - expanded")
+            logger.info(f"[MASK] Top-right (support number) - covers E prefix")
             
             # Top-left: NIE number if Blue E detected
             if found_blue_e:
                 bx, by, bw, bh = blue_e_box
-                # Cover from E symbol to ~30% of width
                 tl_x1 = bx
                 tl_y1 = by
-                tl_x2 = doc_x + int(doc_w * 0.32)
-                tl_y2 = by + bh + int(bh * 0.4)
+                tl_x2 = doc_x + int(doc_w * 0.35)  # Was 0.32
+                tl_y2 = by + bh + int(bh * 0.5)  # Was 0.4
                 cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
                 logger.info(f"[MASK] Top-left (NIE number near E)")
             else:
-                # Fallback: cover top-left 25%
-                tl_x1 = doc_x + int(doc_w * 0.10)  # After country indicator
+                # Fallback: cover top-left after country indicator
+                tl_x1 = doc_x + int(doc_w * 0.15)  # After country indicator
                 tl_y1 = doc_y
-                tl_x2 = doc_x + int(doc_w * 0.28)
-                tl_y2 = doc_y + int(doc_h * 0.15)
+                tl_x2 = doc_x + int(doc_w * 0.35)
+                tl_y2 = doc_y + int(doc_h * 0.18)
                 cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
                 logger.info(f"[MASK] Top-left (fallback)")
             
@@ -331,15 +330,14 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
             logger.info(f"[MASK] Bottom MRZ zone")
             
-            # Center-bottom: Signature - REDUCED width to protect face
-            # Starts at 42% (was 40%) - leaves more space for face
-            # Ends at 72% (was 75%) - tighter to avoid over-coverage
-            sig_x1 = doc_x + int(doc_w * 0.42)  # Face protection: first 42% untouched
+            # Center-bottom: Signature - MOVED RIGHT to protect face 100%
+            # Face occupies ~45% of width, signature starts AFTER that
+            sig_x1 = doc_x + int(doc_w * 0.48)  # Was 0.42, now 48% - face fully protected
             sig_y1 = doc_y + int(doc_h * 0.62)
-            sig_x2 = doc_x + int(doc_w * 0.72)  # Reduced from 0.75
+            sig_x2 = doc_x + int(doc_w * 0.75)  # Was 0.72
             sig_y2 = doc_y + int(doc_h * 0.75)
             cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Signature zone - face protected")
+            logger.info(f"[MASK] Signature zone - face 100% protected")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
@@ -359,12 +357,12 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
             logger.info(f"[MASK] Top page: number (expanded) + signature")
             
-            # Bottom page: passport number - EXPANDED + MRZ
+            # Bottom page: passport number - LOWERED to cover number properly
             bottom_y = doc_y + half_h
-            pn_x1 = doc_x + int(doc_w * 0.55)  # Was 0.70, now 15% more left
-            pn_y1 = bottom_y
+            pn_x1 = doc_x + int(doc_w * 0.55)
+            pn_y1 = bottom_y + int(half_h * 0.03)  # Was 0, now starts 3% lower
             pn_x2 = doc_x + doc_w
-            pn_y2 = bottom_y + int(half_h * 0.17)  # Was 0.12, now 5% more down
+            pn_y2 = bottom_y + int(half_h * 0.22)  # Was 0.17, now 22% - covers more
             cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
             
             # MRZ: bottom 35% of bottom page
