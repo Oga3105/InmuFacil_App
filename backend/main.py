@@ -9,15 +9,21 @@ Token Consumption Tracking: ~400 tokens for integration
 """
 
 # ============================================================================
-# @Architect - Environment Loading (Native Python)
+# @Architect - Environment Loading (CRITICAL - MUST BE FIRST)
 # ============================================================================
-import os
-# No external dependencies needed - using native os.environ
+from dotenv import load_dotenv
+from pathlib import Path
+
+# Load .env file BEFORE any other imports that use environment variables
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+print(f"[ENV] Loaded .env from: {env_path.absolute()}")
+print(f"[ENV] .env exists: {env_path.exists()}")
 
 # ============================================================================
 # Application Imports
 # ============================================================================
-
+import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
