@@ -20,8 +20,8 @@ alembic==1.12.1
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
-python-dotenv==1.0.0  # Environment variable loading from .env file
-cryptography==41.0.7  # AES-256-GCM encryption
+python-dotenv==1.0.0
+cryptography==41.0.7
 
 # ============================================================================
 # Testing (@Jules)
@@ -45,8 +45,6 @@ mypy==1.7.1
 # ============================================================================
 # KYC - Modern Image Processing (@Jules)
 # ============================================================================
-numpy>=2.1.0  # Modern NumPy for Python 3.13
-opencv-python-headless>=4.10.0.84  # Modern OpenCV with NumPy 2.x support
-
-
-
+numpy>=2.1.0
+opencv-python-headless>=4.10.0.84
+# Anchor detection uses pure OpenCV (color detection, morphology, Haar cascade)
