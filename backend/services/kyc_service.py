@@ -167,133 +167,206 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Detect document contour and apply proportional masks on original image.
+    Intelligent document detection with aspect ratio classification and surgical redaction.
     
     Args:
         input_path: Path to original document image
         output_path: Path to save redacted image
-        document_type: Type of document (DNI, NIE, or PASSPORT)
+        document_type: Hint for document type (DNI, NIE, or PASSPORT)
         
     Returns:
         True if redaction successful, False otherwise
         
-    Processing Flow:
-    1. Load original image (NO DEFORMATION)
-    2. Detect largest rectangle (document) via contours
-    3. Calculate mask zones as percentages OF THE DETECTED RECTANGLE
-    4. Apply cv2.rectangle() directly on original image
-    5. Save redacted image (same dimensions as original)
+    Detection Strategy:
+    1. Adaptive thresholding to separate document from background
+    2. Contour detection to find document rectangle
+    3. Aspect ratio classification:
+       - Ratio ~1.58 (85.6/54mm) → ID Card (DNI/NIE)
+       - Ratio ~0.7 or ~1.4 → Passport (portrait or landscape)
+    4. Apply surgical redaction zones per document type
     
-    Redaction Zones (relative to detected document rectangle):
-    - ID/Support: Top-right 20% of document
-    - MRZ (Passport): Bottom 25% of document
-    - Signature (DNI/NIE): Center-bottom (avoiding face on left 40%)
-    
-    @Jules: Contour detection with proportional masks (no deformation)
+    @Jules: Intelligent vision with aspect ratio classification
+    @Shield: Surgical redaction zones
     """
     try:
-        # Step 1: Load original image (NO resize, NO warp)
-        logger.info(f"[IMAGE] Loading image for proportional redaction...")
+        # Step 1: Load image
+        logger.info(f"[VISION] Loading image for intelligent analysis...")
         
         img = cv2.imread(input_path)
         if img is None:
             logger.error(f"[ERROR] Could not decode image")
             return False
         
-        img_height, img_width = img.shape[:2]
-        logger.info(f"[IMAGE] Original size: {img_width}x{img_height}")
+        img_h, img_w = img.shape[:2]
+        logger.info(f"[VISION] Image size: {img_w}x{img_h}")
         
-        # Step 2: Detect document rectangle via contours
+        # Step 2: Adaptive thresholding (handles white on white)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         
-        # Adaptive threshold for better edge detection
+        # Multiple threshold attempts for robustness
         thresh = cv2.adaptiveThreshold(
-            blurred, 255,
+            gray, 255,
             cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
             cv2.THRESH_BINARY_INV,
-            11, 2
+            21, 5  # Larger block size for document detection
         )
         
-        # Find contours
+        # Morphological cleanup
+        kernel = np.ones((7, 7), np.uint8)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+        thresh = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+        
+        # Step 3: Find document contour
         contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
-        # Default: use full image as document area
-        doc_x, doc_y, doc_w, doc_h = 0, 0, img_width, img_height
-        detection_success = False
+        # Default: full image
+        doc_x, doc_y, doc_w, doc_h = 0, 0, img_w, img_h
+        detected = False
         
         if contours:
-            # Find largest contour
-            largest = max(contours, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(largest)
+            # Sort by area, find largest
+            contours = sorted(contours, key=cv2.contourArea, reverse=True)
             
-            # Validate: must be at least 30% of image area
-            area_ratio = (w * h) / (img_width * img_height)
-            
-            if area_ratio > 0.3:
-                doc_x, doc_y, doc_w, doc_h = x, y, w, h
-                detection_success = True
-                logger.info(f"[OK] Document detected: {doc_w}x{doc_h} at ({doc_x},{doc_y})")
-            else:
-                logger.warning(f"[WARN] Contour too small ({area_ratio:.1%}), using full image")
+            for cnt in contours[:3]:
+                x, y, w, h = cv2.boundingRect(cnt)
+                area_ratio = (w * h) / (img_w * img_h)
+                
+                if area_ratio > 0.25:  # At least 25% of image
+                    doc_x, doc_y, doc_w, doc_h = x, y, w, h
+                    detected = True
+                    logger.info(f"[OK] Document found: {doc_w}x{doc_h} at ({doc_x},{doc_y})")
+                    break
+        
+        if not detected:
+            logger.warning(f"[WARN] No document detected, using center 90%")
+            margin = int(min(img_w, img_h) * 0.05)
+            doc_x, doc_y = margin, margin
+            doc_w, doc_h = img_w - 2*margin, img_h - 2*margin
+        
+        # Step 4: Classify document by aspect ratio
+        aspect_ratio = doc_w / doc_h if doc_h > 0 else 1.0
+        logger.info(f"[CLASSIFY] Aspect ratio: {aspect_ratio:.2f}")
+        
+        # Classification logic
+        if 1.4 <= aspect_ratio <= 1.8:
+            detected_type = "CARD"  # DNI/NIE (horizontal card)
+            logger.info(f"[CLASSIFY] Detected: ID CARD (DNI/NIE)")
+        elif 0.55 <= aspect_ratio <= 0.75:
+            detected_type = "CARD_VERTICAL"  # Vertical card
+            logger.info(f"[CLASSIFY] Detected: ID CARD (vertical orientation)")
+        elif aspect_ratio > 1.8:
+            detected_type = "PASSPORT_OPEN"  # Open passport (double page)
+            logger.info(f"[CLASSIFY] Detected: PASSPORT (open/double page)")
+        elif 1.2 <= aspect_ratio < 1.4:
+            detected_type = "PASSPORT_PAGE"  # Single passport page
+            logger.info(f"[CLASSIFY] Detected: PASSPORT (single page)")
         else:
-            logger.warning(f"[WARN] No contours found, using full image")
+            detected_type = "UNKNOWN"
+            logger.warning(f"[CLASSIFY] Unknown document type, using default redaction")
         
-        if not detection_success:
-            # Fallback: use center 90% of image
-            margin_x = int(img_width * 0.05)
-            margin_y = int(img_height * 0.05)
-            doc_x, doc_y = margin_x, margin_y
-            doc_w = img_width - 2 * margin_x
-            doc_h = img_height - 2 * margin_y
-            logger.info(f"[FALLBACK] Using center crop: {doc_w}x{doc_h}")
+        # Step 5: Apply surgical redaction zones
+        logger.info(f"[REDACT] Applying surgical redaction for {detected_type}...")
         
-        # Step 3: Apply proportional masks ON THE DETECTED DOCUMENT AREA
-        # All coordinates are relative to (doc_x, doc_y, doc_w, doc_h)
-        
-        # Zone 1: ID/Support Number - Top-right 20% of document
-        id_x1 = doc_x + int(doc_w * 0.80)
-        id_y1 = doc_y
-        id_x2 = doc_x + doc_w
-        id_y2 = doc_y + int(doc_h * 0.20)
-        cv2.rectangle(img, (id_x1, id_y1), (id_x2, id_y2), (0, 0, 0), -1)
-        logger.info(f"[REDACT] ID zone: ({id_x1},{id_y1}) to ({id_x2},{id_y2})")
-        
-        if document_type == "PASSPORT":
-            # Zone 2: MRZ - Bottom 25% for passports
-            mrz_x1 = doc_x
+        if detected_type in ["CARD", "CARD_VERTICAL"]:
+            # === DNI/NIE REDACTION ===
+            
+            # Zone 1: ID/Support Number - Top-right 20%
+            id_x1 = doc_x + int(doc_w * 0.78)
+            id_y1 = doc_y
+            id_x2 = doc_x + doc_w
+            id_y2 = doc_y + int(doc_h * 0.22)
+            cv2.rectangle(img, (id_x1, id_y1), (id_x2, id_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] DNI ID zone: top-right")
+            
+            # Zone 2: MRZ - Bottom 25%
             mrz_y1 = doc_y + int(doc_h * 0.75)
-            mrz_x2 = doc_x + doc_w
-            mrz_y2 = doc_y + doc_h
-            cv2.rectangle(img, (mrz_x1, mrz_y1), (mrz_x2, mrz_y2), (0, 0, 0), -1)
-            logger.info(f"[REDACT] MRZ zone: ({mrz_x1},{mrz_y1}) to ({mrz_x2},{mrz_y2})")
-        else:
-            # Zone 2: Signature - Center-bottom (avoiding left 40% where face is)
-            sig_x1 = doc_x + int(doc_w * 0.40)  # Start after face area
-            sig_y1 = doc_y + int(doc_h * 0.70)
-            sig_x2 = doc_x + int(doc_w * 0.90)
-            sig_y2 = doc_y + int(doc_h * 0.85)
-            cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
-            logger.info(f"[REDACT] Signature zone: ({sig_x1},{sig_y1}) to ({sig_x2},{sig_y2})")
+            cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[REDACT] DNI MRZ zone: bottom 25%")
             
-            # Zone 3: MRZ/Equipment ID - Bottom 15% for DNI/NIE
-            mrz_x1 = doc_x
-            mrz_y1 = doc_y + int(doc_h * 0.85)
-            mrz_x2 = doc_x + doc_w
-            mrz_y2 = doc_y + doc_h
-            cv2.rectangle(img, (mrz_x1, mrz_y1), (mrz_x2, mrz_y2), (0, 0, 0), -1)
-            logger.info(f"[REDACT] Bottom zone: ({mrz_x1},{mrz_y1}) to ({mrz_x2},{mrz_y2})")
+            # Zone 3: Signature - Center-bottom (avoiding face on left 40%)
+            sig_x1 = doc_x + int(doc_w * 0.42)
+            sig_y1 = doc_y + int(doc_h * 0.62)
+            sig_x2 = doc_x + int(doc_w * 0.78)
+            sig_y2 = doc_y + int(doc_h * 0.75)
+            cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] DNI Signature zone: center-bottom")
+            
+        elif detected_type == "PASSPORT_OPEN":
+            # === PASSPORT DOUBLE PAGE REDACTION ===
+            half_w = doc_w // 2
+            
+            # Left page (usually photo page)
+            left_x = doc_x
+            right_x = doc_x + half_w
+            
+            # Zone 1: Passport number - Top-right of BOTH pages
+            # Left page
+            pn_x1 = left_x + int(half_w * 0.70)
+            pn_y1 = doc_y
+            pn_x2 = left_x + half_w
+            pn_y2 = doc_y + int(doc_h * 0.15)
+            cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
+            
+            # Right page
+            pn_x1 = right_x + int(half_w * 0.70)
+            pn_x2 = right_x + half_w
+            cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Passport numbers: both pages")
+            
+            # Zone 2: MRZ - Bottom 30% of data page (usually right)
+            mrz_y1 = doc_y + int(doc_h * 0.70)
+            cv2.rectangle(img, (right_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Passport MRZ: bottom 30%")
+            
+            # Zone 3: Digital signature area
+            sig_y1 = doc_y + int(doc_h * 0.50)
+            sig_y2 = doc_y + int(doc_h * 0.70)
+            sig_x1 = left_x + int(half_w * 0.50)
+            sig_x2 = left_x + half_w
+            cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Passport signature: left page")
+            
+        elif detected_type == "PASSPORT_PAGE":
+            # === SINGLE PASSPORT PAGE ===
+            
+            # Zone 1: Passport number - Top-right
+            pn_x1 = doc_x + int(doc_w * 0.70)
+            pn_y1 = doc_y
+            pn_x2 = doc_x + doc_w
+            pn_y2 = doc_y + int(doc_h * 0.12)
+            cv2.rectangle(img, (pn_x1, pn_y1), (pn_x2, pn_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Passport number: top-right")
+            
+            # Zone 2: MRZ - Bottom 30%
+            mrz_y1 = doc_y + int(doc_h * 0.70)
+            cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Passport MRZ: bottom 30%")
+            
+        else:
+            # === FALLBACK: Aggressive redaction ===
+            logger.warning(f"[FALLBACK] Applying aggressive redaction")
+            
+            # Top-right 25%
+            cv2.rectangle(img, 
+                (doc_x + int(doc_w * 0.75), doc_y),
+                (doc_x + doc_w, doc_y + int(doc_h * 0.25)),
+                (0, 0, 0), -1)
+            
+            # Bottom 30%
+            cv2.rectangle(img,
+                (doc_x, doc_y + int(doc_h * 0.70)),
+                (doc_x + doc_w, doc_y + doc_h),
+                (0, 0, 0), -1)
         
-        # Step 4: Save redacted image (same size as original)
+        # Step 6: Save redacted image
         success = cv2.imwrite(output_path, img)
         if not success:
-            logger.error(f"[ERROR] Failed to save redacted image")
+            logger.error(f"[ERROR] Failed to save image")
             return False
         
         logger.info(f"[OK] Document redacted: {output_path}")
-        logger.info(f"[OK] Output size: {img_width}x{img_height} (original preserved)")
-        logger.info(f"[OK] Detection: {'success' if detection_success else 'fallback'}")
-        logger.info(f"[OK] Face area preserved (left 40% of document)")
+        logger.info(f"[OK] Type: {detected_type}, Detection: {'success' if detected else 'fallback'}")
+        logger.info(f"[OK] Face area preserved (left 40%)")
         return True
         
     except Exception as e:
