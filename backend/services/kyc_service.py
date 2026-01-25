@@ -309,9 +309,9 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         
         if doc_class == "CARD":
             # =====================================================================
-            # OCR-BASED SEMANTIC REDACTION SYSTEM
+            # REGEX-BASED 'SEARCH AND DESTROY' REDACTION SYSTEM
             # =====================================================================
-            logger.info(f"[OCR] Starting semantic document analysis...")
+            logger.info(f"[OCR] Starting pattern-based redaction...")
             
             # PHASE 1: Extract all text with bounding boxes
             reader = get_ocr_reader()
@@ -321,122 +321,112 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             detected_texts = []
             for (bbox, text, conf) in ocr_results:
                 # bbox is [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
-                # Convert to simple (x1, y1, x2, y2)
                 x_coords = [point[0] for point in bbox]
                 y_coords = [point[1] for point in bbox]
                 x1, y1 = int(min(x_coords)), int(min(y_coords))
                 x2, y2 = int(max(x_coords)), int(max(y_coords))
                 detected_texts.append({
                     'bbox': (x1, y1, x2, y2),
-                    'text': text.upper(),
+                    'text': text,
+                    'text_clean': text.upper().replace(" ", "").replace("-", ""),
                     'conf': conf
                 })
-                logger.info(f"[OCR] Detected: '{text}' at ({x1},{y1})-({x2},{y2}) conf={conf:.2f}")
+                logger.info(f"[OCR] '{text}' at ({x1},{y1})-({x2},{y2})")
             
-            # PHASE 2: Document Type Detection
-            doc_type = "UNKNOWN"
+            # =====================================================================
+            # PHASE 2: CRITICAL PATTERNS - Redact ALWAYS
+            # =====================================================================
+            logger.info(f"[REGEX] Applying critical pattern matching...")
+            
+            patterns_critical = {
+                'DNI/NIF': r'\b\d{8}[A-Z]\b',  # 8 digits + letter
+                'NIE': r'\b[XYZ]\d{7}[A-Z]\b',  # X/Y/Z + 7 digits + letter
+                'SOPORTE_TIE': r'\b[A-Z]{3}\d{6}\b',  # 3 letters + 6 numbers
+                'SOPORTE_E': r'\bE\d{8}\b',  # E + 8 numbers
+                'PASSPORT': r'\b[A-Z]{2,3}\d{6,7}\b',  # 2/3 letters + 6/7 numbers
+                'CAN_NUMERIC': r'\b\d{6}\b',  # 6 isolated digits
+            }
+            
             for item in detected_texts:
-                text = item['text']
-                if "IDESP" in text:
-                    doc_type = "DNI_3.0"
-                    break
-                elif "NUM" in text and "SOPORT" in text:
-                    doc_type = "DNI_4.0"
-                    break
-                elif "SOPORT" in text:
-                    doc_type = "DNI_4.0"
-                    break
-                elif "RESIDENCIA" in text or "EXTRANJERO" in text:
-                    doc_type = "TIE"
-                    break
-                elif "PASAPORTE" in text:
-                    doc_type = "PASSPORT"
-                    break
-            
-            logger.info(f"[OCR] Document type detected: {doc_type}")
-            
-            # PHASE 3: Surgical Redaction Based on Document Type
-            if doc_type == "DNI_3.0":
-                # =========================================================
-                # DNI 3.0: Redact IDESP value (text below "IDESP" label)
-                # =========================================================
-                logger.info(f"[DNI 3.0] Applying surgical redaction...")
+                text_clean = item['text_clean']
+                x1, y1, x2, y2 = item['bbox']
                 
-                # Find "IDESP" label
-                idesp_label = None
-                for item in detected_texts:
-                    if "IDESP" in item['text']:
-                        idesp_label = item
-                        break
+                for pattern_name, pattern in patterns_critical.items():
+                    if re.search(pattern, text_clean):
+                        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
+                        logger.info(f"[REDACT] {pattern_name}: '{item['text']}' at ({x1},{y1})")
+                        break  # Only redact once per text block
+            
+            # =====================================================================
+            # PHASE 3: CONTEXT-BASED PATTERNS - Find label, redact adjacent value
+            # =====================================================================
+            logger.info(f"[CONTEXT] Applying context-based redaction...")
+            
+            context_labels = ['ESP', 'IDESP', 'NUM', 'SOPORT', 'SOPORTE']
+            
+            for i, item in enumerate(detected_texts):
+                text_upper = item['text'].upper()
                 
-                if idesp_label:
-                    x1, y1, x2, y2 = idesp_label['bbox']
-                    logger.info(f"[DNI 3.0] Found IDESP label at ({x1},{y1})")
+                # Check if this is a context label
+                if any(label in text_upper for label in context_labels):
+                    x1, y1, x2, y2 = item['bbox']
+                    logger.info(f"[CONTEXT] Found label '{item['text']}' at ({x1},{y1})")
                     
-                    # Find text immediately below (Y > label_y2)
-                    for item in detected_texts:
-                        ix1, iy1, ix2, iy2 = item['bbox']
-                        # Check if below and horizontally aligned
-                        if iy1 > y2 and abs(ix1 - x1) < 100:
-                            cv2.rectangle(img, (ix1, iy1), (ix2, iy2), (0, 0, 0), cv2.FILLED)
-                            logger.info(f"[DNI 3.0] Redacted IDESP value: '{item['text']}'")
-                            break
-                
-            elif doc_type == "DNI_4.0":
-                # =========================================================
-                # DNI 4.0: Redact NUM SOPORT value (text to right or below)
-                # =========================================================
-                logger.info(f"[DNI 4.0] Applying surgical redaction...")
-                
-                # Find "NUM SOPORT" or "SOPORT" label
-                soport_label = None
-                for item in detected_texts:
-                    if "SOPORT" in item['text']:
-                        soport_label = item
-                        break
-                
-                if soport_label:
-                    x1, y1, x2, y2 = soport_label['bbox']
-                    logger.info(f"[DNI 4.0] Found SOPORT label at ({x1},{y1})")
-                    
-                    # Find text to the right or below
-                    for item in detected_texts:
-                        ix1, iy1, ix2, iy2 = item['bbox']
-                        # To the right: X > label_x2, similar Y
-                        # Below: Y > label_y2, similar X
-                        if (ix1 > x2 and abs(iy1 - y1) < 50) or (iy1 > y2 and abs(ix1 - x1) < 100):
-                            # Check if it looks like a support number (alphanumeric)
-                            if re.match(r'[A-Z0-9]{5,}', item['text']):
-                                cv2.rectangle(img, (ix1, iy1), (ix2, iy2), (0, 0, 0), cv2.FILLED)
-                                logger.info(f"[DNI 4.0] Redacted SOPORT value: '{item['text']}'")
-                                break
-                
-            elif doc_type == "TIE":
-                # =========================================================
-                # TIE: Redact E-number in top-right quadrant
-                # =========================================================
-                logger.info(f"[TIE] Applying surgical redaction...")
-                
-                # Find E-number pattern (E + 7-8 digits) in top-right
-                for item in detected_texts:
-                    text = item['text'].replace(" ", "")
-                    if re.match(r'E\d{7,8}', text):
-                        x1, y1, x2, y2 = item['bbox']
-                        # Check if in top-right quadrant
-                        if x1 > img_w * 0.5 and y1 < img_h * 0.3:
-                            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
-                            logger.info(f"[TIE] Redacted card number: '{item['text']}'")
-                            break
+                    # Look for adjacent text (to the right or below)
+                    for j, adjacent in enumerate(detected_texts):
+                        if i == j:
+                            continue  # Skip self
+                        
+                        ax1, ay1, ax2, ay2 = adjacent['bbox']
+                        
+                        # To the right: X > label_x2, similar Y (within 50px)
+                        is_right = ax1 > x2 and abs(ay1 - y1) < 50
+                        
+                        # Below: Y > label_y2, similar X (within 100px)
+                        is_below = ay1 > y2 and abs(ax1 - x1) < 100
+                        
+                        if is_right or is_below:
+                            # Redact if it looks like a value (not another label)
+                            adj_text = adjacent['text'].upper()
+                            if not any(label in adj_text for label in context_labels):
+                                cv2.rectangle(img, (ax1, ay1), (ax2, ay2), (0, 0, 0), cv2.FILLED)
+                                logger.info(f"[CONTEXT] Redacted value '{adjacent['text']}' adjacent to label")
+                                break  # Only redact first adjacent value
             
-            # PHASE 4: Universal MRZ Redaction
-            # Find text blocks with many "<<<" characters
+            # =====================================================================
+            # PHASE 4: SIGNATURE REDACTION
+            # =====================================================================
+            logger.info(f"[SIGNATURE] Looking for signature area...")
+            
+            # Find FIRMA or VALIDEZ keywords
+            for item in detected_texts:
+                text_upper = item['text'].upper()
+                if 'FIRMA' in text_upper or 'VALIDEZ' in text_upper:
+                    x1, y1, x2, y2 = item['bbox']
+                    logger.info(f"[SIGNATURE] Found signature keyword at ({x1},{y1})")
+                    
+                    # Redact large area below (signature zone)
+                    sig_x1 = max(0, x1 - 50)
+                    sig_y1 = y2  # Start below the label
+                    sig_x2 = min(img_w, x2 + 150)
+                    sig_y2 = min(img_h, y2 + 100)
+                    
+                    cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), cv2.FILLED)
+                    logger.info(f"[SIGNATURE] Redacted signature zone")
+                    break
+            
+            # =====================================================================
+            # PHASE 5: UNIVERSAL MRZ CLEANING
+            # =====================================================================
+            logger.info(f"[MRZ] Cleaning MRZ blocks...")
+            
             for item in detected_texts:
                 if item['text'].count('<') > 3:  # MRZ contains many <
                     x1, y1, x2, y2 = item['bbox']
                     cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
                     logger.info(f"[MRZ] Redacted MRZ block at ({x1},{y1})")
             
-            logger.info(f"[OK] Semantic redaction completed for {doc_type}")
+            logger.info(f"[OK] Pattern-based redaction completed")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
