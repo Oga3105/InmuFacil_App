@@ -308,32 +308,24 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                 
                 # MÁSCARA 2: ARRIBA DERECHA
                 m2_x1 = doc_x + int(doc_w * 0.45)
-                m2_y1 = doc_y
-                m2_x2 = doc_x + doc_w
-                m2_y2 = doc_y + int(doc_h * 0.22)
+                m2_y1 = doc_y + int(doc_h * -0.05)
+                m2_x2 = doc_x + doc_w + int(doc_w * 0.1)
+                m2_y2 = doc_y + int(doc_h * 0.10)
                 cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[NIE-M2] TOP-RIGHT")
                 
-                # MÁSCARA 3: BORDE DERECHO COMPLETO
-                m3_x1 = doc_x + int(doc_w * 0.45)
-                m3_y1 = doc_y + int(doc_h * 0.50)
-                m3_x2 = doc_x + doc_w
-                m3_y2 = doc_y + int(doc_h * 0.75)
-                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[NIE-M3] CENTER-RIGHT")
-                
                 # MÁSCARA 4: FIRMA
-                m4_x1 = doc_x + int(doc_w * 0.25)
-                m4_y1 = doc_y + int(doc_h * 0.68)
+                m4_x1 = doc_x + int(doc_w * 0.35)
+                m4_y1 = doc_y + int(doc_h * 0.78)
                 m4_x2 = doc_x + int(doc_w * 0.65)
-                m4_y2 = doc_y + int(doc_h * 0.92)
+                m4_y2 = doc_y + int(doc_h * 0.99)
                 cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[NIE-M4] FIRMA")
                 
                 # MÁSCARA 5: INFERIOR DERECHA
-                m5_x1 = doc_x + int(doc_w * 0.60)
-                m5_y1 = doc_y + int(doc_h * 0.50)
-                m5_x2 = doc_x + doc_w
+                m5_x1 = doc_x + int(doc_w * 0.80)
+                m5_y1 = doc_y + int(doc_h * 0.70)
+                m5_x2 = doc_x + doc_w + int(doc_w * 0.1)
                 m5_y2 = doc_y + doc_h
                 cv2.rectangle(img, (m5_x1, m5_y1), (m5_x2, m5_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[NIE-M5] BOTTOM-RIGHT")
@@ -344,35 +336,35 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                 # ===================================================
                 logger.info(f"[DNI] Aplicando máscaras para DNI")
                 
-                # MÁSCARA 1: ARRIBA IZQUIERDA (ESP)
-                m1_x1 = doc_x
-                m1_y1 = doc_y
-                m1_x2 = doc_x + int(doc_w * 0.25)
-                m1_y2 = doc_y + int(doc_h * 0.20)
-                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI-M1] TOP-LEFT")
+                # # MÁSCARA 1: ARRIBA IZQUIERDA (ESP)
+                # m1_x1 = doc_x
+                # m1_y1 = doc_y + int(doc_h * 0.05)
+                # m1_x2 = doc_x + int(doc_w * 0.28)
+                # m1_y2 = doc_y + int(doc_h * 0.22)
+                # cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+                # logger.info(f"[DNI-M1] TOP-LEFT")
                 
-                # MÁSCARA 2: ARRIBA DERECHA (Número soporte)
-                m2_x1 = doc_x + int(doc_w * 0.60)
-                m2_y1 = doc_y
-                m2_x2 = doc_x + doc_w
-                m2_y2 = doc_y + int(doc_h * 0.18)
-                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI-M2] TOP-RIGHT")
+                # # MÁSCARA 2: ARRIBA DERECHA (Número soporte)
+                # m2_x1 = doc_x + int(doc_w * 0.45)
+                # m2_y1 = doc_y + int(doc_h * -0.05)
+                # m2_x2 = doc_x + doc_w + int(doc_w * 0.1)
+                # m2_y2 = doc_y + int(doc_h * 0.10)
+                # cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+                # logger.info(f"[DNI-M2] TOP-RIGHT")
                 
                 # MÁSCARA 3: FIRMA
-                m3_x1 = doc_x + int(doc_w * 0.40)
-                m3_y1 = doc_y + int(doc_h * 0.62)
-                m3_x2 = doc_x + int(doc_w * 0.75)
-                m3_y2 = doc_y + int(doc_h * 0.75)
+                m4_x1 = doc_x + int(doc_w * 0.35)
+                m4_y1 = doc_y + int(doc_h * 0.78)
+                m4_x2 = doc_x + int(doc_w * 0.65)
+                m4_y2 = doc_y + int(doc_h * 0.99)
                 cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[DNI-M3] FIRMA")
                 
                 # MÁSCARA 4: MRZ INFERIOR
-                m4_x1 = doc_x
-                m4_y1 = doc_y + int(doc_h * 0.75)
-                m4_x2 = doc_x + doc_w
-                m4_y2 = doc_y + doc_h
+                m5_x1 = doc_x + int(doc_w * 0.80)
+                m5_y1 = doc_y + int(doc_h * 0.70)
+                m5_x2 = doc_x + doc_w + int(doc_w * 0.1)
+                m5_y2 = doc_y + doc_h
                 cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[DNI-M4] MRZ")
             
