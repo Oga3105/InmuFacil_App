@@ -3,10 +3,12 @@ InmuFácil - Backend API
 FastAPI application for P2P real estate platform
 
 @Watcher - Observability & Logging Configuration
-Token Consumption Tracking: ~300 tokens for logging setup
+@Architect - Integration of Anti-Agency Filter
+
+Token Consumption Tracking: ~400 tokens for integration
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from datetime import datetime
@@ -38,7 +40,7 @@ logger.info("InmuFácil API starting up...")
 app = FastAPI(
     title="InmuFácil API",
     description="API REST para la plataforma P2P de compraventa inmobiliaria",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 # Configure CORS
@@ -51,17 +53,43 @@ app.add_middleware(
 )
 
 
+# ============================================================================
+# @Watcher - Request Logging Middleware
+# ============================================================================
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """
+    Middleware to log all incoming requests.
+    
+    @Watcher: Tracks IP addresses and request patterns
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    logger.info(f"📥 Request: {request.method} {request.url.path} | IP: {client_ip}")
+    
+    response = await call_next(request)
+    
+    logger.info(f"📤 Response: {request.url.path} | Status: {response.status_code}")
+    return response
+
+
+# ============================================================================
+# Application Events
+# ============================================================================
+
 @app.on_event("startup")
 async def startup_event():
     """
     Application startup event handler.
     
     @Watcher: Logs application initialization
+    @Architect: Initializes Escudo Anti-Inmo
     """
     logger.info("=" * 60)
     logger.info("InmuFácil API - Startup Complete")
     logger.info(f"Timestamp: {datetime.now().isoformat()}")
     logger.info("Environment: Development")
+    logger.info("🛡️  ESCUDO ANTI-INMO: ACTIVE")
     logger.info("=" * 60)
 
 
@@ -75,14 +103,19 @@ async def shutdown_event():
     logger.info("InmuFácil API shutting down...")
 
 
+# ============================================================================
+# Health & Status Endpoints
+# ============================================================================
+
 @app.get("/")
 async def root():
     """Root endpoint - API information"""
     logger.info("Root endpoint accessed")
     return {
         "message": "Bienvenido a InmuFácil API",
-        "version": "0.2.0",
+        "version": "0.3.0",
         "docs": "/docs",
+        "escudo_anti_inmo": "active",
     }
 
 
@@ -96,8 +129,70 @@ async def health_check():
     logger.debug("Health check performed")
     return {
         "status": "InmuFacil Online",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "escudo_anti_inmo": "active",
     }
+
+
+@app.get("/status")
+async def status():
+    """
+    Detailed status endpoint
+    
+    @Architect: Shows system status including filter status
+    """
+    return {
+        "api_version": "0.3.0",
+        "status": "operational",
+        "features": {
+            "user_registration": "active",
+            "escudo_anti_inmo": "active",
+            "authentication": "pending",
+        },
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+# ============================================================================
+# @Architect - Future Registration Endpoint (Placeholder)
+# ============================================================================
+
+# NOTE: Full registration endpoint will be implemented in next mission
+# This is a placeholder showing where the filter will be integrated
+
+"""
+Example integration of anti-agency filter in registration:
+
+from backend.filters import validate_user_is_not_agency, log_blocked_attempt
+from backend.schemas import UserCreate, UserResponse
+
+@app.post("/auth/register", response_model=UserResponse)
+async def register_user(user_data: UserCreate, request: Request):
+    # @Architect: Integration point for Escudo Anti-Inmo
+    is_valid, reason = await validate_user_is_not_agency(
+        email=user_data.email,
+        full_name=user_data.full_name,
+        user_type=user_data.user_type
+    )
+    
+    if not is_valid:
+        # @Watcher: Log blocked attempt with IP tracking
+        client_ip = request.client.host if request.client else "unknown"
+        log_blocked_attempt(
+            email=user_data.email,
+            full_name=user_data.full_name,
+            reason=reason,
+            ip_address=client_ip,
+            country="ES"  # TODO: Add geolocation service
+        )
+        raise HTTPException(
+            status_code=403,
+            detail="Registration not allowed: " + reason
+        )
+    
+    # Continue with normal registration...
+    # (Database creation, password hashing, etc.)
+"""
 
 
 if __name__ == "__main__":
