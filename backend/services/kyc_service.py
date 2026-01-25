@@ -19,13 +19,32 @@ import os
 import secrets
 import mimetypes
 import hashlib
+import re
 from pathlib import Path
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional, Dict, List
 import cv2
 import numpy as np
 import logging
 
 logger = logging.getLogger("inmufacil.kyc")
+
+# Lazy load EasyOCR to avoid startup delay
+_ocr_reader = None
+
+def get_ocr_reader():
+    """
+    Get or initialize the EasyOCR reader (lazy loading).
+    
+    Returns:
+        easyocr.Reader instance for Spanish text recognition
+    """
+    global _ocr_reader
+    if _ocr_reader is None:
+        import easyocr
+        logger.info("[OCR] Initializing EasyOCR reader (Spanish)...")
+        _ocr_reader = easyocr.Reader(['es'], gpu=False)  # CPU mode for compatibility
+        logger.info("[OCR] Reader initialized successfully")
+    return _ocr_reader
 
 
 # ============================================================================
@@ -290,135 +309,134 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         
         if doc_class == "CARD":
             # =====================================================================
-            # 4-BRANCH HIERARCHICAL DOCUMENT CLASSIFICATION
+            # OCR-BASED SEMANTIC REDACTION SYSTEM
             # =====================================================================
+            logger.info(f"[OCR] Starting semantic document analysis...")
             
-            # PHASE 1: Blue Flag Detection (DNI 4.0 / TIE indicator)
-            has_blue_flag = False
-            top_left_region = img[doc_y:doc_y + int(doc_h * 0.25), doc_x:doc_x + int(doc_w * 0.25)]
+            # PHASE 1: Extract all text with bounding boxes
+            reader = get_ocr_reader()
+            ocr_results = reader.readtext(img)
             
-            if top_left_region.size > 0:
-                hsv_region = cv2.cvtColor(top_left_region, cv2.COLOR_BGR2HSV)
-                lower_blue = np.array([100, 80, 50])
-                upper_blue = np.array([130, 255, 255])
-                blue_mask = cv2.inRange(hsv_region, lower_blue, upper_blue)
-                blue_pixels = cv2.countNonZero(blue_mask)
-                
-                if blue_pixels > 500:
-                    has_blue_flag = True
-                    logger.info(f"[CLASSIFY] Blue flag detected")
+            # Parse results: [(bbox, text, confidence)]
+            detected_texts = []
+            for (bbox, text, conf) in ocr_results:
+                # bbox is [[x1,y1], [x2,y2], [x3,y3], [x4,y4]]
+                # Convert to simple (x1, y1, x2, y2)
+                x_coords = [point[0] for point in bbox]
+                y_coords = [point[1] for point in bbox]
+                x1, y1 = int(min(x_coords)), int(min(y_coords))
+                x2, y2 = int(max(x_coords)), int(max(y_coords))
+                detected_texts.append({
+                    'bbox': (x1, y1, x2, y2),
+                    'text': text.upper(),
+                    'conf': conf
+                })
+                logger.info(f"[OCR] Detected: '{text}' at ({x1},{y1})-({x2},{y2}) conf={conf:.2f}")
             
-            # PHASE 2: TIE Detection (if has blue flag)
-            is_tie = False
-            if has_blue_flag:
-                # Look for "RESIDENCIA" or "EXTRANJERO" text pattern in top area
-                top_area = img[doc_y:doc_y + int(doc_h * 0.30), doc_x:doc_x + doc_w]
-                gray_top = cv2.cvtColor(top_area, cv2.COLOR_BGR2GRAY)
-                
-                # Simple edge detection to find dense text areas (PERMISO DE RESIDENCIA)
-                edges = cv2.Canny(gray_top, 50, 150)
-                text_density = cv2.countNonZero(edges)
-                
-                # TIE has more text in top area than DNI 4.0
-                if text_density > 5000:
-                    is_tie = True
-                    logger.info(f"[CLASSIFY] TIE detected (RESIDENCIA pattern)")
+            # PHASE 2: Document Type Detection
+            doc_type = "UNKNOWN"
+            for item in detected_texts:
+                text = item['text']
+                if "IDESP" in text:
+                    doc_type = "DNI_3.0"
+                    break
+                elif "NUM" in text and "SOPORT" in text:
+                    doc_type = "DNI_4.0"
+                    break
+                elif "SOPORT" in text:
+                    doc_type = "DNI_4.0"
+                    break
+                elif "RESIDENCIA" in text or "EXTRANJERO" in text:
+                    doc_type = "TIE"
+                    break
+                elif "PASAPORTE" in text:
+                    doc_type = "PASSPORT"
+                    break
             
-            # PHASE 3: Apply Branch-Specific Masks
-            if not has_blue_flag:
-                # =========================================================
-                # RAMA A: DNI 3.0 (Sin Bandera - "Sepia")
-                # =========================================================
-                logger.info(f"[RAMA A] DNI 3.0 - Legacy Document")
-                
-                # MÁSCARA 1: IDESP CENTRO (CRÍTICO)
-                # x=0.40 a 0.65, y=0.45 a 0.60
-                m1_x1 = doc_x + int(doc_w * 0.40)
-                m1_y1 = doc_y + int(doc_h * 0.45)
-                m1_x2 = doc_x + int(doc_w * 0.65)
-                m1_y2 = doc_y + int(doc_h * 0.60)
-                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI3-M1] IDESP CENTER: 40-65% × 45-60%")
-                
-                # MÁSCARA 2: MRZ Inferior
-                m2_x1 = doc_x
-                m2_y1 = doc_y + int(doc_h * 0.75)
-                m2_x2 = doc_x + doc_w
-                m2_y2 = doc_y + doc_h
-                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI3-M2] MRZ")
-                
-                logger.info(f"[DNI3] Face protected: LEFT (photo left)")
-                
-            elif is_tie:
-                # =========================================================
-                # RAMA C: TIE (Extranjeros - "Permiso de Residencia")
-                # =========================================================
-                logger.info(f"[RAMA C] TIE - Residence Permit")
-                
-                # MÁSCARA 1: CARD NO (IxESP) ESQUINA SUPERIOR DERECHA
-                # x=0.65 a 1.0, y=0.0 a 0.20
-                m1_x1 = doc_x + int(doc_w * 0.65)
-                m1_y1 = doc_y
-                m1_x2 = doc_x + doc_w
-                m1_y2 = doc_y + int(doc_h * 0.20)
-                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[TIE-M1] CARD NO TOP-RIGHT: 65-100% × 0-20%")
-                
-                # MÁSCARA 2: Tipo Documento (PERMISO DE RESIDENCIA + Bandera)
-                m2_x1 = doc_x
-                m2_y1 = doc_y
-                m2_x2 = doc_x + int(doc_w * 0.30)
-                m2_y2 = doc_y + int(doc_h * 0.25)
-                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[TIE-M2] Document Type + Flag")
-                
-                # MÁSCARA 3: MRZ Inferior Completo
-                m3_x1 = doc_x
-                m3_y1 = doc_y + int(doc_h * 0.75)
-                m3_x2 = doc_x + doc_w
-                m3_y2 = doc_y + doc_h
-                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[TIE-M3] MRZ: 0-100%")
-                
-                logger.info(f"[TIE] Face protected: 0-40% (photo left)")
-                
-            else:
-                # =========================================================
-                # RAMA B: DNI 4.0 (Nacional con Bandera)
-                # =========================================================
-                logger.info(f"[RAMA B] DNI 4.0 - Modern National ID")
-                
-                # MÁSCARA 1: NUM SOPORT CENTRO-DERECHA
-                # x=0.55 a 0.85, y=0.20 a 0.35
-                m1_x1 = doc_x + int(doc_w * 0.55)
-                m1_y1 = doc_y + int(doc_h * 0.20)
-                m1_x2 = doc_x + int(doc_w * 0.85)
-                m1_y2 = doc_y + int(doc_h * 0.35)
-                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M1] NUM SOPORT CENTER-RIGHT: 55-85% × 20-35%")
-                
-                # MÁSCARA 2: País (Bandera EU)
-                m2_x1 = doc_x
-                m2_y1 = doc_y
-                m2_x2 = doc_x + int(doc_w * 0.25)
-                m2_y2 = doc_y + int(doc_h * 0.20)
-                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M2] EU Flag")
-                
-                # MÁSCARA 3: MRZ Inferior
-                m3_x1 = doc_x
-                m3_y1 = doc_y + int(doc_h * 0.75)
-                m3_x2 = doc_x + doc_w
-                m3_y2 = doc_y + doc_h
-                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M3] MRZ")
-                
-                logger.info(f"[DNI4] Face protected: LEFT (photo left)")
+            logger.info(f"[OCR] Document type detected: {doc_type}")
             
-            # Log final classification
-            doc_type = "DNI 3.0" if not has_blue_flag else ("TIE" if is_tie else "DNI 4.0")
-            logger.info(f"[OK] Document classified as: {doc_type}")
+            # PHASE 3: Surgical Redaction Based on Document Type
+            if doc_type == "DNI_3.0":
+                # =========================================================
+                # DNI 3.0: Redact IDESP value (text below "IDESP" label)
+                # =========================================================
+                logger.info(f"[DNI 3.0] Applying surgical redaction...")
+                
+                # Find "IDESP" label
+                idesp_label = None
+                for item in detected_texts:
+                    if "IDESP" in item['text']:
+                        idesp_label = item
+                        break
+                
+                if idesp_label:
+                    x1, y1, x2, y2 = idesp_label['bbox']
+                    logger.info(f"[DNI 3.0] Found IDESP label at ({x1},{y1})")
+                    
+                    # Find text immediately below (Y > label_y2)
+                    for item in detected_texts:
+                        ix1, iy1, ix2, iy2 = item['bbox']
+                        # Check if below and horizontally aligned
+                        if iy1 > y2 and abs(ix1 - x1) < 100:
+                            cv2.rectangle(img, (ix1, iy1), (ix2, iy2), (0, 0, 0), cv2.FILLED)
+                            logger.info(f"[DNI 3.0] Redacted IDESP value: '{item['text']}'")
+                            break
+                
+            elif doc_type == "DNI_4.0":
+                # =========================================================
+                # DNI 4.0: Redact NUM SOPORT value (text to right or below)
+                # =========================================================
+                logger.info(f"[DNI 4.0] Applying surgical redaction...")
+                
+                # Find "NUM SOPORT" or "SOPORT" label
+                soport_label = None
+                for item in detected_texts:
+                    if "SOPORT" in item['text']:
+                        soport_label = item
+                        break
+                
+                if soport_label:
+                    x1, y1, x2, y2 = soport_label['bbox']
+                    logger.info(f"[DNI 4.0] Found SOPORT label at ({x1},{y1})")
+                    
+                    # Find text to the right or below
+                    for item in detected_texts:
+                        ix1, iy1, ix2, iy2 = item['bbox']
+                        # To the right: X > label_x2, similar Y
+                        # Below: Y > label_y2, similar X
+                        if (ix1 > x2 and abs(iy1 - y1) < 50) or (iy1 > y2 and abs(ix1 - x1) < 100):
+                            # Check if it looks like a support number (alphanumeric)
+                            if re.match(r'[A-Z0-9]{5,}', item['text']):
+                                cv2.rectangle(img, (ix1, iy1), (ix2, iy2), (0, 0, 0), cv2.FILLED)
+                                logger.info(f"[DNI 4.0] Redacted SOPORT value: '{item['text']}'")
+                                break
+                
+            elif doc_type == "TIE":
+                # =========================================================
+                # TIE: Redact E-number in top-right quadrant
+                # =========================================================
+                logger.info(f"[TIE] Applying surgical redaction...")
+                
+                # Find E-number pattern (E + 7-8 digits) in top-right
+                for item in detected_texts:
+                    text = item['text'].replace(" ", "")
+                    if re.match(r'E\d{7,8}', text):
+                        x1, y1, x2, y2 = item['bbox']
+                        # Check if in top-right quadrant
+                        if x1 > img_w * 0.5 and y1 < img_h * 0.3:
+                            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
+                            logger.info(f"[TIE] Redacted card number: '{item['text']}'")
+                            break
+            
+            # PHASE 4: Universal MRZ Redaction
+            # Find text blocks with many "<<<" characters
+            for item in detected_texts:
+                if item['text'].count('<') > 3:  # MRZ contains many <
+                    x1, y1, x2, y2 = item['bbox']
+                    cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
+                    logger.info(f"[MRZ] Redacted MRZ block at ({x1},{y1})")
+            
+            logger.info(f"[OK] Semantic redaction completed for {doc_type}")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
