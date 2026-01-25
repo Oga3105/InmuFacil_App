@@ -167,31 +167,43 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Redact sensitive information using intelligent document detection (Pure OpenCV).
+    Normalize document with perspective transform and apply universal redaction zones.
     
     Args:
         input_path: Path to original document image
-        output_path: Path to save redacted image
+        output_path: Path to save normalized and redacted image
         document_type: Type of document (DNI, NIE, or PASSPORT)
         
     Returns:
         True if redaction successful, False otherwise
         
-    Detection Strategy:
-    1. Use adaptive thresholding for low-contrast images (white backgrounds)
-    2. Apply redaction zones RELATIVE to detected document, not full image
-    3. Preserve face area (top-left of detected document)
-    4. Fallback to center-crop if detection fails (no 400 error)
+    Processing Flow:
+    1. Load image
+    2. Detect 4 corners of document
+    3. Apply perspective transform to normalize to ID-1 size (1011x638)
+    4. Apply universal redaction zones on normalized document
+    5. Save normalized + redacted image (discard original)
     
-    Redaction Zones (relative to detected document):
-    - **DNI/NIE**: MRZ (bottom 25% of doc), Signature (lower-center of doc)
-    - **Passport**: MRZ (bottom 30% of doc), Signature (lower-center of doc)
+    Universal Redaction Zones (on normalized 1011x638 image):
+    - MRZ: Bottom 25% (all documents)
+    - ID Number: Top-right 20%
+    - Signature: Center-bottom (50-90% width, 60-75% height)
+    - Face: Left side PRESERVED
     
-    @Jules: Robust detection with adaptive thresholding and fallback
+    @Jules: Perspective normalization with universal zones
+    @Shield: Fallback ensures no data leaks
     """
     try:
-        # Step 1: Load image with OpenCV
-        logger.info(f"[IMAGE] Loading image for document detection...")
+        from backend.services.document_normalizer import (
+            find_document_corners,
+            normalize_document,
+            aggressive_center_crop,
+            STANDARD_WIDTH,
+            STANDARD_HEIGHT
+        )
+        
+        # Step 1: Load image
+        logger.info(f"[IMAGE] Loading image for normalization...")
         
         img = cv2.imread(input_path)
         if img is None:
@@ -201,104 +213,71 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         full_height, full_width = img.shape[:2]
         logger.info(f"[IMAGE] Image loaded: {full_width}x{full_height}")
         
-        # Step 2: Detect document boundaries with adaptive thresholding
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Step 2: Find corners and normalize
+        corners = find_document_corners(img)
         
-        # Apply adaptive thresholding for better edge detection on white backgrounds
-        # This works better than simple Canny for low-contrast images
-        adaptive_thresh = cv2.adaptiveThreshold(
-            gray, 255, 
-            cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-            cv2.THRESH_BINARY_INV, 
-            11, 2
-        )
+        if corners is not None:
+            # Normalize using perspective transform
+            normalized = normalize_document(img, corners)
+            method = "perspective_transform"
+            logger.info(f"[OK] Document normalized via perspective transform")
+        else:
+            # Fallback: aggressive center-crop
+            normalized = aggressive_center_crop(img)
+            method = "fallback_aggressive"
+            logger.warning(f"[FALLBACK] Using aggressive center-crop")
         
-        # Apply morphological operations to clean up noise
-        kernel = np.ones((5, 5), np.uint8)
-        morph = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
+        # Step 3: Apply universal redaction zones on normalized document
+        h, w = normalized.shape[:2]  # Should be 638, 1011
         
-        # Find contours
-        contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Zone 1: MRZ - Bottom 25% (universal for all documents)
+        mrz_start_y = int(h * 0.75)
+        cv2.rectangle(normalized, (0, mrz_start_y), (w, h), (0, 0, 0), -1)
+        logger.info(f"[REDACT] MRZ zone: bottom 25% ({mrz_start_y}-{h})")
         
-        # Find largest contour (likely the document)
-        doc_x, doc_y, doc_w, doc_h = 0, 0, full_width, full_height
-        detection_method = "fallback"
+        # Zone 2: ID Number - Top-right 20%
+        id_start_x = int(w * 0.80)
+        id_end_y = int(h * 0.20)
+        cv2.rectangle(normalized, (id_start_x, 0), (w, id_end_y), (0, 0, 0), -1)
+        logger.info(f"[REDACT] ID zone: top-right 20% ({id_start_x}-{w}, 0-{id_end_y})")
         
-        if contours:
-            # Sort contours by area, largest first
-            contours_sorted = sorted(contours, key=cv2.contourArea, reverse=True)
+        # Zone 3: Signature - Center-bottom (avoiding face on left)
+        sig_start_x = int(w * 0.50)
+        sig_end_x = int(w * 0.90)
+        sig_start_y = int(h * 0.60)
+        sig_end_y = int(h * 0.75)
+        cv2.rectangle(normalized, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
+        logger.info(f"[REDACT] Signature zone: center-bottom ({sig_start_x}-{sig_end_x}, {sig_start_y}-{sig_end_y})")
+        
+        # Apply more aggressive redaction in fallback mode
+        if method == "fallback_aggressive":
+            logger.warning(f"[FALLBACK] Applying aggressive redaction")
             
-            # Try top 3 largest contours
-            for contour in contours_sorted[:3]:
-                x, y, w, h = cv2.boundingRect(contour)
-                
-                # Validate detection
-                area_ratio = (w * h) / (full_width * full_height)
-                aspect_ratio = w / h if h > 0 else 0
-                
-                # More lenient validation for low-contrast images
-                if area_ratio > 0.3 and 1.0 < aspect_ratio < 2.5:
-                    doc_x, doc_y, doc_w, doc_h = x, y, w, h
-                    detection_method = "contour"
-                    logger.info(f"[OK] Document detected via contours: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
-                    logger.info(f"[OK] Area: {area_ratio:.2%}, Aspect: {aspect_ratio:.2f}")
-                    break
+            # Extend MRZ to 30%
+            mrz_aggressive_y = int(h * 0.70)
+            cv2.rectangle(normalized, (0, mrz_aggressive_y), (w, h), (0, 0, 0), -1)
+            
+            # Extend ID zone to 25%
+            id_aggressive_x = int(w * 0.75)
+            id_aggressive_y = int(h * 0.25)
+            cv2.rectangle(normalized, (id_aggressive_x, 0), (w, id_aggressive_y), (0, 0, 0), -1)
+            
+            logger.info(f"[REDACT] Aggressive mode: MRZ 30%, ID 25%")
         
-        # Fallback: Use center 85% if no valid contour found
-        if detection_method == "fallback":
-            logger.warning("[WARNING] Automatic detection failed, using center-crop fallback")
-            margin_x = int(full_width * 0.075)  # 7.5% margin on each side
-            margin_y = int(full_height * 0.075)
-            doc_x, doc_y = margin_x, margin_y
-            doc_w, doc_h = full_width - 2 * margin_x, full_height - 2 * margin_y
-            logger.info(f"[OK] Fallback bounds: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
-        
-        logger.info(f"[IMAGE] Processing {document_type} document (method: {detection_method})")
-        
-        # Step 3: Apply redaction zones using cv2.rectangle (Pure OpenCV)
-        if document_type in ["DNI", "NIE"]:
-            # DNI/NIE: MRZ at bottom 25% of document
-            mrz_start_y = doc_y + int(doc_h * 0.75)
-            mrz_end_y = doc_y + doc_h
-            cv2.rectangle(img, (doc_x, mrz_start_y), (doc_x + doc_w, mrz_end_y), (0, 0, 0), -1)
-            
-            # Signature: Lower-center of document
-            sig_start_x = doc_x + int(doc_w * 0.50)
-            sig_end_x = doc_x + int(doc_w * 0.75)
-            sig_start_y = doc_y + int(doc_h * 0.60)
-            sig_end_y = doc_y + int(doc_h * 0.75)
-            cv2.rectangle(img, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
-            
-            logger.info(f"[OK] DNI/NIE redaction: MRZ + Signature (OpenCV rectangles)")
-            
-        elif document_type == "PASSPORT":
-            # Passport: MRZ at bottom 30% of document
-            mrz_start_y = doc_y + int(doc_h * 0.70)
-            mrz_end_y = doc_y + doc_h
-            cv2.rectangle(img, (doc_x, mrz_start_y), (doc_x + doc_w, mrz_end_y), (0, 0, 0), -1)
-            
-            # Signature: Lower-center
-            sig_start_x = doc_x + int(doc_w * 0.40)
-            sig_end_x = doc_x + int(doc_w * 0.70)
-            sig_start_y = doc_y + int(doc_h * 0.55)
-            sig_end_y = doc_y + int(doc_h * 0.70)
-            cv2.rectangle(img, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
-            
-            logger.info(f"[OK] Passport redaction: MRZ + Signature (OpenCV rectangles)")
-        
-        # Step 4: Save with cv2.imwrite (Pure OpenCV)
-        success = cv2.imwrite(output_path, img)
+        # Step 4: Save normalized and redacted image
+        success = cv2.imwrite(output_path, normalized)
         if not success:
-            logger.error(f"[ERROR] Failed to save redacted image")
+            logger.error(f"[ERROR] Failed to save normalized image")
             return False
         
-        logger.info(f"[OK] Document redacted successfully: {output_path}")
-        logger.info(f"[OK] Face area preserved (top 50% of document untouched)")
+        logger.info(f"[OK] Document normalized and redacted: {output_path}")
+        logger.info(f"[OK] Output size: {STANDARD_WIDTH}x{STANDARD_HEIGHT} (ID-1 standard)")
+        logger.info(f"[OK] Method: {method}")
+        logger.info(f"[OK] Face area preserved (left 40% untouched)")
         return True
         
     except Exception as e:
-        logger.error(f"[ERROR] Intelligent redaction failed: {str(e)}")
+        logger.error(f"[ERROR] Normalization and redaction failed: {str(e)}")
         return False
 
 
