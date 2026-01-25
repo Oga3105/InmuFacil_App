@@ -289,12 +289,11 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === NIE/DNI v8 - FEEDBACK VISUAL ACTUALIZADO ===
-            # ROJO = OCULTAR: E29576945 (arriba izq) + número (arriba der) + esquina inferior der
-            # AZUL = VISIBLE: Zona central (datos como SEXO, TIPO, etc.)
+            # === NIE/DNI v9 - FINAL AJUSTE ===
+            # Mantiene lo que funciona + añade zonas rojas adicionales
             
             # =========================================================
-            # MÁSCARA 1: E29576945 ARRIBA IZQUIERDA (ROJO)
+            # MÁSCARA 1: E29576945 ARRIBA IZQUIERDA
             # y: 0.08 -> 0.20, x: 0.0 -> 0.22
             # =========================================================
             m1_x1 = doc_x
@@ -302,10 +301,10 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             m1_x2 = doc_x + int(doc_w * 0.22)
             m1_y2 = doc_y + int(doc_h * 0.20)
             cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M1] TOP-LEFT (E29576945): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
+            logger.info(f"[M1] TOP-LEFT (E29576945)")
             
             # =========================================================
-            # MÁSCARA 2: NÚMERO ARRIBA DERECHA (ROJO)
+            # MÁSCARA 2: NÚMERO ARRIBA DERECHA
             # y: 0.0 -> 0.15, x: 0.55 -> 1.0
             # =========================================================
             m2_x1 = doc_x + int(doc_w * 0.55)
@@ -313,25 +312,42 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             m2_x2 = doc_x + doc_w
             m2_y2 = doc_y + int(doc_h * 0.15)
             cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M2] TOP-RIGHT (número): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2}")
+            logger.info(f"[M2] TOP-RIGHT (número)")
             
             # =========================================================
-            # MÁSCARA 3: ESQUINA INFERIOR DERECHA (ROJO)
-            # Solo la esquina, el resto del bottom queda libre
-            # y: 0.75 -> 1.0, x: 0.85 -> 1.0
+            # MÁSCARA 3: NIE:Y8... (CENTRO-DERECHA) - NUEVA
+            # y: 0.58 -> 0.72, x: 0.50 -> 0.90
             # =========================================================
-            m3_x1 = doc_x + int(doc_w * 0.85)
-            m3_y1 = doc_y + int(doc_h * 0.75)
-            m3_x2 = doc_x + doc_w
-            m3_y2 = doc_y + doc_h
+            m3_x1 = doc_x + int(doc_w * 0.50)
+            m3_y1 = doc_y + int(doc_h * 0.58)
+            m3_x2 = doc_x + int(doc_w * 0.90)
+            m3_y2 = doc_y + int(doc_h * 0.72)
             cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M3] BOTTOM-RIGHT corner: {m3_x1},{m3_y1} -> {m3_x2},{m3_y2}")
+            logger.info(f"[M3] CENTER-RIGHT (NIE:Y8)")
             
             # =========================================================
-            # SIN MÁSCARA CENTRAL - ZONA AZUL LIBRE
-            # Los datos (SEXO, TIPO, RESIDENCIA, etc.) quedan visibles
+            # MÁSCARA 4: FIRMA (CENTRO-ABAJO) - NUEVA
+            # y: 0.72 -> 0.85, x: 0.35 -> 0.55
             # =========================================================
-            logger.info(f"[OK] v8: Solo 3 zonas rojas tapadas, centro LIBRE")
+            m4_x1 = doc_x + int(doc_w * 0.35)
+            m4_y1 = doc_y + int(doc_h * 0.72)
+            m4_x2 = doc_x + int(doc_w * 0.55)
+            m4_y2 = doc_y + int(doc_h * 0.85)
+            cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M4] CENTER-BOTTOM (Firma)")
+            
+            # =========================================================
+            # MÁSCARA 5: ESQUINA INFERIOR DERECHA
+            # y: 0.72 -> 1.0, x: 0.75 -> 1.0
+            # =========================================================
+            m5_x1 = doc_x + int(doc_w * 0.75)
+            m5_y1 = doc_y + int(doc_h * 0.72)
+            m5_x2 = doc_x + doc_w
+            m5_y2 = doc_y + doc_h
+            cv2.rectangle(img, (m5_x1, m5_y1), (m5_x2, m5_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M5] BOTTOM-RIGHT corner")
+            
+            logger.info(f"[OK] v9: 5 máscaras aplicadas - cara y datos visibles LIBRE")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
