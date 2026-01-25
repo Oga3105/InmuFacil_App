@@ -22,6 +22,8 @@ import hashlib
 from pathlib import Path
 from typing import Tuple, Optional, Dict
 from PIL import Image, ImageDraw
+import cv2
+import numpy as np
 import logging
 
 logger = logging.getLogger("inmufacil.kyc")
@@ -156,7 +158,7 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Redact sensitive information from identity document with adaptive zones.
+    Redact sensitive information using intelligent document detection.
     
     Args:
         input_path: Path to original document image
@@ -166,93 +168,125 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
     Returns:
         True if redaction successful, False otherwise
         
-    Redaction Strategy (Quadrant-based, Face-Preserving):
-    - **FACE PROTECTION**: Top 50% of image NEVER redacted (preserves photo)
-    - **DNI/NIE**: 
-      - MRZ zone: Bottom 25% (75-100% height, full width)
-      - Signature zone: Lower-center (50-75% width, 60-75% height)
-    - **Passport**: 
-      - MRZ zone: Bottom 30% (70-100% height, full width)
-      - Signature zone: Lower-center (40-70% width, 55-70% height)
+    Detection Strategy:
+    1. Use OpenCV to detect document boundaries (contour detection)
+    2. Apply redaction zones RELATIVE to detected document, not full image
+    3. Preserve face area (top-left of detected document)
     
-    @Jules: Professional quadrant-based redaction with face preservation
+    Redaction Zones (relative to detected document):
+    - **DNI/NIE**: MRZ (bottom 25% of doc), Signature (lower-center of doc)
+    - **Passport**: MRZ (bottom 30% of doc), Signature (lower-center of doc)
+    
+    @Jules: Intelligent document localization with OpenCV
     """
     try:
-        # Open image
+        # Step 1: Detect document boundaries using OpenCV
+        logger.info(f"[IMAGE] Detecting document boundaries...")
+        
+        # Read image with OpenCV for detection
+        img_cv = cv2.imread(input_path)
+        if img_cv is None:
+            logger.error(f"[ERROR] Could not read image with OpenCV")
+            return False
+        
+        full_height, full_width = img_cv.shape[:2]
+        
+        # Convert to grayscale
+        gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+        
+        # Apply Gaussian blur
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        
+        # Edge detection
+        edges = cv2.Canny(blurred, 50, 150)
+        
+        # Find contours
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Find largest contour (likely the document)
+        doc_x, doc_y, doc_w, doc_h = 0, 0, full_width, full_height
+        
+        if contours:
+            largest_contour = max(contours, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(largest_contour)
+            
+            # Validate detection
+            area_ratio = (w * h) / (full_width * full_height)
+            aspect_ratio = w / h if h > 0 else 0
+            
+            if area_ratio > 0.4 and 1.2 < aspect_ratio < 2.0:
+                doc_x, doc_y, doc_w, doc_h = x, y, w, h
+                logger.info(f"[OK] Document detected: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
+                logger.info(f"[OK] Area: {area_ratio:.2%}, Aspect: {aspect_ratio:.2f}")
+            else:
+                logger.warning(f"[WARNING] Detection failed validation, using center 80%")
+                margin_x = int(full_width * 0.10)
+                margin_y = int(full_height * 0.10)
+                doc_x, doc_y = margin_x, margin_y
+                doc_w, doc_h = full_width - 2 * margin_x, full_height - 2 * margin_y
+        else:
+            logger.warning(f"[WARNING] No contours found, using full image")
+        
+        # Step 2: Open image with PIL for redaction
         img = Image.open(input_path)
-        width, height = img.size
         draw = ImageDraw.Draw(img)
         
-        logger.info(f"[IMAGE] Processing {document_type} document ({width}x{height})")
+        logger.info(f"[IMAGE] Processing {document_type} document")
+        logger.info(f"[IMAGE] Document bounds: x={doc_x}, y={doc_y}, w={doc_w}, h={doc_h}")
         
-        # Define redaction zones based on document type
+        # Step 3: Apply redaction zones RELATIVE to detected document
         if document_type in ["DNI", "NIE"]:
-            # DNI/NIE Standard Zones
-            
-            # Zone 1: MRZ (Machine Readable Zone) - Bottom 25%
-            # This covers the bottom strip with encoded data
+            # DNI/NIE: MRZ at bottom 25% of document
             mrz_zone = [
-                0,                      # x1 (left edge)
-                int(height * 0.75),     # y1 (start at 75% down)
-                width,                  # x2 (right edge)
-                height                  # y2 (bottom edge)
+                doc_x,                          # Start at document left edge
+                doc_y + int(doc_h * 0.75),      # Start at 75% down the document
+                doc_x + doc_w,                  # End at document right edge
+                doc_y + doc_h                   # End at document bottom
             ]
             
-            # Zone 2: Signature - Lower-center area
-            # Between 50-75% width, 60-75% height
-            # This avoids the face (top-left) and name area (top-right)
+            # Signature: Lower-center of document (50-75% width, 60-75% height)
             sig_zone = [
-                int(width * 0.50),      # x1 (start at 50% from left)
-                int(height * 0.60),     # y1 (start at 60% down)
-                int(width * 0.75),      # x2 (end at 75% from left)
-                int(height * 0.75)      # y2 (end at 75% down, just above MRZ)
+                doc_x + int(doc_w * 0.50),      # Start at 50% across document
+                doc_y + int(doc_h * 0.60),      # Start at 60% down document
+                doc_x + int(doc_w * 0.75),      # End at 75% across document
+                doc_y + int(doc_h * 0.75)       # End at 75% down document
             ]
             
-            # Draw redaction zones
             draw.rectangle(mrz_zone, fill='black')
             draw.rectangle(sig_zone, fill='black')
             
-            logger.info(f"[OK] DNI/NIE redaction: MRZ (bottom 25%) + Signature (lower-center)")
+            logger.info(f"[OK] DNI/NIE redaction: MRZ + Signature (relative to detected doc)")
             
         elif document_type == "PASSPORT":
-            # Passport has larger MRZ (2 lines of text)
-            
-            # Zone 1: MRZ - Bottom 30% (larger for passport)
+            # Passport: MRZ at bottom 30% of document
             mrz_zone = [
-                0,                      # x1 (left edge)
-                int(height * 0.70),     # y1 (start at 70% down)
-                width,                  # x2 (right edge)
-                height                  # y2 (bottom edge)
+                doc_x,
+                doc_y + int(doc_h * 0.70),
+                doc_x + doc_w,
+                doc_y + doc_h
             ]
             
-            # Zone 2: Signature - Lower-center area (wider for passport)
+            # Signature: Lower-center (40-70% width, 55-70% height)
             sig_zone = [
-                int(width * 0.40),      # x1 (start at 40% from left)
-                int(height * 0.55),     # y1 (start at 55% down)
-                int(width * 0.70),      # x2 (end at 70% from left)
-                int(height * 0.70)      # y2 (end at 70% down, just above MRZ)
+                doc_x + int(doc_w * 0.40),
+                doc_y + int(doc_h * 0.55),
+                doc_x + int(doc_w * 0.70),
+                doc_y + int(doc_h * 0.70)
             ]
             
-            # Draw redaction zones
             draw.rectangle(mrz_zone, fill='black')
             draw.rectangle(sig_zone, fill='black')
             
-            logger.info(f"[OK] Passport redaction: MRZ (bottom 30%) + Signature (lower-center)")
-        
-        else:
-            logger.warning(f"[WARNING] Unknown document type: {document_type}, using DNI defaults")
-            # Fallback to DNI redaction
-            mrz_zone = [0, int(height * 0.75), width, height]
-            draw.rectangle(mrz_zone, fill='black')
+            logger.info(f"[OK] Passport redaction: MRZ + Signature (relative to detected doc)")
         
         # Save redacted image
         img.save(output_path)
         logger.info(f"[OK] Document redacted successfully: {output_path}")
-        logger.info(f"[OK] Face area preserved (top 50% untouched)")
+        logger.info(f"[OK] Face area preserved (top 50% of document untouched)")
         return True
         
     except Exception as e:
-        logger.error(f"[ERROR] Document redaction failed: {str(e)}")
+        logger.error(f"[ERROR] Intelligent redaction failed: {str(e)}")
         return False
 
 

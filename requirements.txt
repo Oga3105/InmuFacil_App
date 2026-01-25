@@ -47,3 +47,5 @@ cryptography==41.0.7  # AES-256-GCM encryption
 Pillow==10.1.0  # Image processing for DNI redaction
 python-magic==0.4.27  # MIME type detection
 python-magic-bin==0.4.14  # Windows support for python-magic
+opencv-python==4.8.1.78  # Intelligent document detection and contour analysis
+
