@@ -341,8 +341,9 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             patterns_critical = {
                 'DNI/NIF': r'\b\d{8}[A-Z]\b',  # 8 digits + letter
                 'NIE': r'\b[XYZ]\d{7}[A-Z]\b',  # X/Y/Z + 7 digits + letter
-                'SOPORTE_TIE': r'\b[A-Z]{3}\d{6}\b',  # 3 letters + 6 numbers
-                'SOPORTE_E': r'\bE\d{8}\b',  # E + 8 numbers
+                'SOPORTE_DNI': r'\b[A-Z]{3}\s*\d{6}\b',  # 3 letters + 6 numbers (with optional space)
+                'SOPORTE_NIE': r'\bE\s*\d{8}\b',  # E + 8 numbers (with optional space)
+                'SOPORTE_ORPHAN': r'\b[A-Z0-9]{9}\b',  # 9 alphanumeric characters (orphan support)
                 'PASSPORT': r'\b[A-Z]{2,3}\d{6,7}\b',  # 2/3 letters + 6/7 numbers
                 'CAN_NUMERIC': r'\b\d{6}\b',  # 6 isolated digits
             }
@@ -351,7 +352,15 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                 text_clean = item['text_clean']
                 x1, y1, x2, y2 = item['bbox']
                 
+                # Check if in right/top half for orphan pattern
+                is_right_half = x1 > img_w * 0.5
+                is_top_half = y1 < img_h * 0.5
+                
                 for pattern_name, pattern in patterns_critical.items():
+                    # For orphan pattern, only match in right/top half
+                    if pattern_name == 'SOPORTE_ORPHAN' and not (is_right_half or is_top_half):
+                        continue
+                    
                     if re.search(pattern, text_clean):
                         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 0), cv2.FILLED)
                         logger.info(f"[REDACT] {pattern_name}: '{item['text']}' at ({x1},{y1})")
@@ -362,7 +371,8 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
             # =====================================================================
             logger.info(f"[CONTEXT] Applying context-based redaction...")
             
-            context_labels = ['ESP', 'IDESP', 'NUM', 'SOPORT', 'SOPORTE']
+            # Expanded anchor keywords for better detection
+            context_labels = ['ESP', 'IDESP', 'NUM', 'SOPORT', 'SOPORTE', 'CARD', 'NO']
             
             for i, item in enumerate(detected_texts):
                 text_upper = item['text'].upper()
@@ -380,10 +390,12 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                         ax1, ay1, ax2, ay2 = adjacent['bbox']
                         
                         # To the right: X > label_x2, similar Y (within 50px)
-                        is_right = ax1 > x2 and abs(ay1 - y1) < 50
+                        # Increased tolerance to 80px for better capture
+                        is_right = ax1 > x2 and abs(ay1 - y1) < 80
                         
                         # Below: Y > label_y2, similar X (within 100px)
-                        is_below = ay1 > y2 and abs(ax1 - x1) < 100
+                        # Increased tolerance to 150px
+                        is_below = ay1 > y2 and abs(ax1 - x1) < 150
                         
                         if is_right or is_below:
                             # Redact if it looks like a value (not another label)
