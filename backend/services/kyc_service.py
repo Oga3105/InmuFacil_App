@@ -289,55 +289,57 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === DNI/NIE Card Redaction (CALIBRATED v2) ===
+            # === DNI/NIE Card Redaction (CALIBRATED v3 - NIE Priority) ===
             
-            # Country indicator E/ESP - EXPANDED (wider and taller)
+            # Country indicator E/ESP
             esp_x1 = doc_x
             esp_y1 = doc_y
-            esp_x2 = doc_x + int(doc_w * 0.18)  # Was 0.12, now wider
-            esp_y2 = doc_y + int(doc_h * 0.18)  # Was 0.12, now taller
+            esp_x2 = doc_x + int(doc_w * 0.18)
+            esp_y2 = doc_y + int(doc_h * 0.18)
             cv2.rectangle(img, (esp_x1, esp_y1), (esp_x2, esp_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Country indicator (E/ESP) - expanded")
+            logger.info(f"[MASK] Country indicator (E/ESP)")
             
-            # Top-right: Support number - MOVED LEFT to cover E prefix
-            tr_x1 = doc_x + int(doc_w * 0.62)  # Was 0.70, now more left
-            tr_y1 = doc_y
-            tr_x2 = doc_x + doc_w
-            tr_y2 = doc_y + int(doc_h * 0.22)  # Was 0.20, now taller
+            # CORRECCIÓN 2: Top-right support number - STARTS AT TOP EDGE
+            # Must touch top border of document (y = doc_y, not offset)
+            tr_x1 = doc_x + int(doc_w * 0.60)  # Wider coverage
+            tr_y1 = doc_y  # Starts at very top of document
+            tr_x2 = doc_x + doc_w  # Full width to right edge
+            tr_y2 = doc_y + int(doc_h * 0.18)  # Covers first 18%
             cv2.rectangle(img, (tr_x1, tr_y1), (tr_x2, tr_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Top-right (support number) - covers E prefix")
+            logger.info(f"[MASK] Top-right (support) - touches top edge")
             
             # Top-left: NIE number if Blue E detected
             if found_blue_e:
                 bx, by, bw, bh = blue_e_box
                 tl_x1 = bx
                 tl_y1 = by
-                tl_x2 = doc_x + int(doc_w * 0.35)  # Was 0.32
-                tl_y2 = by + bh + int(bh * 0.5)  # Was 0.4
+                tl_x2 = doc_x + int(doc_w * 0.35)
+                tl_y2 = by + bh + int(bh * 0.5)
                 cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
-                logger.info(f"[MASK] Top-left (NIE number near E)")
+                logger.info(f"[MASK] Top-left (NIE number)")
             else:
-                # Fallback: cover top-left after country indicator
-                tl_x1 = doc_x + int(doc_w * 0.15)  # After country indicator
+                tl_x1 = doc_x + int(doc_w * 0.15)
                 tl_y1 = doc_y
                 tl_x2 = doc_x + int(doc_w * 0.35)
                 tl_y2 = doc_y + int(doc_h * 0.18)
                 cv2.rectangle(img, (tl_x1, tl_y1), (tl_x2, tl_y2), (0, 0, 0), -1)
                 logger.info(f"[MASK] Top-left (fallback)")
             
-            # Bottom: MRZ zone (25% height)
+            # CORRECCIÓN 3: Bottom MRZ - HERMETIC SEAL to right edge
+            # Uses doc_x + doc_w to ensure full width coverage
             mrz_y1 = doc_y + int(doc_h * 0.75)
-            cv2.rectangle(img, (doc_x, mrz_y1), (doc_x + doc_w, doc_y + doc_h), (0, 0, 0), -1)
-            logger.info(f"[MASK] Bottom MRZ zone")
+            mrz_x2 = doc_x + doc_w  # Explicitly to right edge
+            cv2.rectangle(img, (doc_x, mrz_y1), (mrz_x2, doc_y + doc_h), (0, 0, 0), -1)
+            logger.info(f"[MASK] Bottom MRZ - hermetic seal to right edge")
             
-            # Center-bottom: Signature - MOVED RIGHT to protect face 100%
-            # Face occupies ~45% of width, signature starts AFTER that
-            sig_x1 = doc_x + int(doc_w * 0.48)  # Was 0.42, now 48% - face fully protected
-            sig_y1 = doc_y + int(doc_h * 0.62)
-            sig_x2 = doc_x + int(doc_w * 0.75)  # Was 0.72
+            # CORRECCIÓN 1: Signature - FACE COMPLETELY FREE
+            # Face occupies left 40%, signature starts at 50% to be safe
+            sig_x1 = doc_x + int(doc_w * 0.50)  # Was 0.48, now 50% - FACE 100% FREE
+            sig_y1 = doc_y + int(doc_h * 0.60)  # Was 0.62
+            sig_x2 = doc_x + int(doc_w * 0.78)  # Was 0.75
             sig_y2 = doc_y + int(doc_h * 0.75)
             cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
-            logger.info(f"[MASK] Signature zone - face 100% protected")
+            logger.info(f"[MASK] Signature - FACE 100% FREE (starts at 50%)")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
