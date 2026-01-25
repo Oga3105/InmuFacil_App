@@ -167,117 +167,137 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Normalize document with perspective transform and apply universal redaction zones.
+    Detect document contour and apply proportional masks on original image.
     
     Args:
         input_path: Path to original document image
-        output_path: Path to save normalized and redacted image
+        output_path: Path to save redacted image
         document_type: Type of document (DNI, NIE, or PASSPORT)
         
     Returns:
         True if redaction successful, False otherwise
         
     Processing Flow:
-    1. Load image
-    2. Detect 4 corners of document
-    3. Apply perspective transform to normalize to ID-1 size (1011x638)
-    4. Apply universal redaction zones on normalized document
-    5. Save normalized + redacted image (discard original)
+    1. Load original image (NO DEFORMATION)
+    2. Detect largest rectangle (document) via contours
+    3. Calculate mask zones as percentages OF THE DETECTED RECTANGLE
+    4. Apply cv2.rectangle() directly on original image
+    5. Save redacted image (same dimensions as original)
     
-    Universal Redaction Zones (on normalized 1011x638 image):
-    - MRZ: Bottom 25% (all documents)
-    - ID Number: Top-right 20%
-    - Signature: Center-bottom (50-90% width, 60-75% height)
-    - Face: Left side PRESERVED
+    Redaction Zones (relative to detected document rectangle):
+    - ID/Support: Top-right 20% of document
+    - MRZ (Passport): Bottom 25% of document
+    - Signature (DNI/NIE): Center-bottom (avoiding face on left 40%)
     
-    @Jules: Perspective normalization with universal zones
-    @Shield: Fallback ensures no data leaks
+    @Jules: Contour detection with proportional masks (no deformation)
     """
     try:
-        from backend.services.document_normalizer import (
-            find_document_corners,
-            normalize_document,
-            aggressive_center_crop,
-            STANDARD_WIDTH,
-            STANDARD_HEIGHT
-        )
-        
-        # Step 1: Load image
-        logger.info(f"[IMAGE] Loading image for normalization...")
+        # Step 1: Load original image (NO resize, NO warp)
+        logger.info(f"[IMAGE] Loading image for proportional redaction...")
         
         img = cv2.imread(input_path)
         if img is None:
-            logger.error(f"[ERROR] Could not decode image or unsupported dimensions")
+            logger.error(f"[ERROR] Could not decode image")
             return False
         
-        full_height, full_width = img.shape[:2]
-        logger.info(f"[IMAGE] Image loaded: {full_width}x{full_height}")
+        img_height, img_width = img.shape[:2]
+        logger.info(f"[IMAGE] Original size: {img_width}x{img_height}")
         
-        # Step 2: Find corners and normalize
-        corners = find_document_corners(img)
+        # Step 2: Detect document rectangle via contours
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
         
-        if corners is not None:
-            # Normalize using perspective transform
-            normalized = normalize_document(img, corners)
-            method = "perspective_transform"
-            logger.info(f"[OK] Document normalized via perspective transform")
+        # Adaptive threshold for better edge detection
+        thresh = cv2.adaptiveThreshold(
+            blurred, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY_INV,
+            11, 2
+        )
+        
+        # Find contours
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Default: use full image as document area
+        doc_x, doc_y, doc_w, doc_h = 0, 0, img_width, img_height
+        detection_success = False
+        
+        if contours:
+            # Find largest contour
+            largest = max(contours, key=cv2.contourArea)
+            x, y, w, h = cv2.boundingRect(largest)
+            
+            # Validate: must be at least 30% of image area
+            area_ratio = (w * h) / (img_width * img_height)
+            
+            if area_ratio > 0.3:
+                doc_x, doc_y, doc_w, doc_h = x, y, w, h
+                detection_success = True
+                logger.info(f"[OK] Document detected: {doc_w}x{doc_h} at ({doc_x},{doc_y})")
+            else:
+                logger.warning(f"[WARN] Contour too small ({area_ratio:.1%}), using full image")
         else:
-            # Fallback: aggressive center-crop
-            normalized = aggressive_center_crop(img)
-            method = "fallback_aggressive"
-            logger.warning(f"[FALLBACK] Using aggressive center-crop")
+            logger.warning(f"[WARN] No contours found, using full image")
         
-        # Step 3: Apply universal redaction zones on normalized document
-        h, w = normalized.shape[:2]  # Should be 638, 1011
+        if not detection_success:
+            # Fallback: use center 90% of image
+            margin_x = int(img_width * 0.05)
+            margin_y = int(img_height * 0.05)
+            doc_x, doc_y = margin_x, margin_y
+            doc_w = img_width - 2 * margin_x
+            doc_h = img_height - 2 * margin_y
+            logger.info(f"[FALLBACK] Using center crop: {doc_w}x{doc_h}")
         
-        # Zone 1: MRZ - Bottom 25% (universal for all documents)
-        mrz_start_y = int(h * 0.75)
-        cv2.rectangle(normalized, (0, mrz_start_y), (w, h), (0, 0, 0), -1)
-        logger.info(f"[REDACT] MRZ zone: bottom 25% ({mrz_start_y}-{h})")
+        # Step 3: Apply proportional masks ON THE DETECTED DOCUMENT AREA
+        # All coordinates are relative to (doc_x, doc_y, doc_w, doc_h)
         
-        # Zone 2: ID Number - Top-right 20%
-        id_start_x = int(w * 0.80)
-        id_end_y = int(h * 0.20)
-        cv2.rectangle(normalized, (id_start_x, 0), (w, id_end_y), (0, 0, 0), -1)
-        logger.info(f"[REDACT] ID zone: top-right 20% ({id_start_x}-{w}, 0-{id_end_y})")
+        # Zone 1: ID/Support Number - Top-right 20% of document
+        id_x1 = doc_x + int(doc_w * 0.80)
+        id_y1 = doc_y
+        id_x2 = doc_x + doc_w
+        id_y2 = doc_y + int(doc_h * 0.20)
+        cv2.rectangle(img, (id_x1, id_y1), (id_x2, id_y2), (0, 0, 0), -1)
+        logger.info(f"[REDACT] ID zone: ({id_x1},{id_y1}) to ({id_x2},{id_y2})")
         
-        # Zone 3: Signature - Center-bottom (avoiding face on left)
-        sig_start_x = int(w * 0.50)
-        sig_end_x = int(w * 0.90)
-        sig_start_y = int(h * 0.60)
-        sig_end_y = int(h * 0.75)
-        cv2.rectangle(normalized, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
-        logger.info(f"[REDACT] Signature zone: center-bottom ({sig_start_x}-{sig_end_x}, {sig_start_y}-{sig_end_y})")
-        
-        # Apply more aggressive redaction in fallback mode
-        if method == "fallback_aggressive":
-            logger.warning(f"[FALLBACK] Applying aggressive redaction")
+        if document_type == "PASSPORT":
+            # Zone 2: MRZ - Bottom 25% for passports
+            mrz_x1 = doc_x
+            mrz_y1 = doc_y + int(doc_h * 0.75)
+            mrz_x2 = doc_x + doc_w
+            mrz_y2 = doc_y + doc_h
+            cv2.rectangle(img, (mrz_x1, mrz_y1), (mrz_x2, mrz_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] MRZ zone: ({mrz_x1},{mrz_y1}) to ({mrz_x2},{mrz_y2})")
+        else:
+            # Zone 2: Signature - Center-bottom (avoiding left 40% where face is)
+            sig_x1 = doc_x + int(doc_w * 0.40)  # Start after face area
+            sig_y1 = doc_y + int(doc_h * 0.70)
+            sig_x2 = doc_x + int(doc_w * 0.90)
+            sig_y2 = doc_y + int(doc_h * 0.85)
+            cv2.rectangle(img, (sig_x1, sig_y1), (sig_x2, sig_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Signature zone: ({sig_x1},{sig_y1}) to ({sig_x2},{sig_y2})")
             
-            # Extend MRZ to 30%
-            mrz_aggressive_y = int(h * 0.70)
-            cv2.rectangle(normalized, (0, mrz_aggressive_y), (w, h), (0, 0, 0), -1)
-            
-            # Extend ID zone to 25%
-            id_aggressive_x = int(w * 0.75)
-            id_aggressive_y = int(h * 0.25)
-            cv2.rectangle(normalized, (id_aggressive_x, 0), (w, id_aggressive_y), (0, 0, 0), -1)
-            
-            logger.info(f"[REDACT] Aggressive mode: MRZ 30%, ID 25%")
+            # Zone 3: MRZ/Equipment ID - Bottom 15% for DNI/NIE
+            mrz_x1 = doc_x
+            mrz_y1 = doc_y + int(doc_h * 0.85)
+            mrz_x2 = doc_x + doc_w
+            mrz_y2 = doc_y + doc_h
+            cv2.rectangle(img, (mrz_x1, mrz_y1), (mrz_x2, mrz_y2), (0, 0, 0), -1)
+            logger.info(f"[REDACT] Bottom zone: ({mrz_x1},{mrz_y1}) to ({mrz_x2},{mrz_y2})")
         
-        # Step 4: Save normalized and redacted image
-        success = cv2.imwrite(output_path, normalized)
+        # Step 4: Save redacted image (same size as original)
+        success = cv2.imwrite(output_path, img)
         if not success:
-            logger.error(f"[ERROR] Failed to save normalized image")
+            logger.error(f"[ERROR] Failed to save redacted image")
             return False
         
-        logger.info(f"[OK] Document normalized and redacted: {output_path}")
-        logger.info(f"[OK] Output size: {STANDARD_WIDTH}x{STANDARD_HEIGHT} (ID-1 standard)")
-        logger.info(f"[OK] Method: {method}")
-        logger.info(f"[OK] Face area preserved (left 40% untouched)")
+        logger.info(f"[OK] Document redacted: {output_path}")
+        logger.info(f"[OK] Output size: {img_width}x{img_height} (original preserved)")
+        logger.info(f"[OK] Detection: {'success' if detection_success else 'fallback'}")
+        logger.info(f"[OK] Face area preserved (left 40% of document)")
         return True
         
     except Exception as e:
-        logger.error(f"[ERROR] Normalization and redaction failed: {str(e)}")
+        logger.error(f"[ERROR] Redaction failed: {str(e)}")
         return False
 
 
