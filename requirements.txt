@@ -1,5 +1,5 @@
-# InmuFácil Project Dependencies (Lean Configuration)
-# Minimized for security and maintainability
+# InmuFácil Project Dependencies (Modern Stack - Python 3.13)
+# Optimized for latest Python with modern dependencies
 
 # ============================================================================
 # Core Framework
@@ -42,9 +42,10 @@ flake8==6.1.0
 mypy==1.7.1
 
 # ============================================================================
-# KYC - Lean Image Processing (@Jules)
+# KYC - Modern Image Processing (@Jules)
 # ============================================================================
-numpy>=1.21.0,<2.0.0  # OpenCV dependency - pinned to avoid breaking changes
-opencv-python-headless==4.8.1.78  # Lightweight OpenCV (no GUI dependencies)
+numpy>=2.1.0  # Modern NumPy for Python 3.13
+opencv-python-headless>=4.10.0.84  # Modern OpenCV with NumPy 2.x support
+
 
 
