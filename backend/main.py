@@ -113,8 +113,9 @@ async def add_security_headers(request: Request, call_next):
     - X-Content-Type-Options: Prevent MIME sniffing
     - X-Frame-Options: Prevent clickjacking
     - X-XSS-Protection: Enable XSS filter
+    - CSP: Adjusted for Swagger UI compatibility
     
-    @Shield: Security by Default
+    @Shield: Security by Default with Swagger UI support
     """
     response = await call_next(request)
     
@@ -131,8 +132,17 @@ async def add_security_headers(request: Request, call_next):
     # Enable XSS protection
     response.headers["X-XSS-Protection"] = "1; mode=block"
     
-    # Content Security Policy (basic)
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    # Content Security Policy - Adjusted for Swagger UI
+    # Swagger UI requires unsafe-inline for styles and scripts, and CDN access
+    csp_policy = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https://fastapi.tiangolo.com; "
+        "font-src 'self' data:; "
+        "connect-src 'self'"
+    )
+    response.headers["Content-Security-Policy"] = csp_policy
     
     return response
 
