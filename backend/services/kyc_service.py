@@ -289,53 +289,59 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === NIE/DNI RIGID ZONE PROTOCOL v5 ===
-            # REGLA DE ORO: Ningún parche puede empezar antes de x=0.42
+            # === NIE/DNI 4 MÁSCARAS INDEPENDIENTES v6 ===
+            # Coordenadas relativas exactas (0.0 a 1.0)
             
             # =========================================================
-            # ZONA SEGURA (ROSTRO): x < 0.42 * width = INVIOLABLE
+            # MÁSCARA 1: PROTECCIÓN SUPERIOR DERECHA (Soporte)
+            # Objetivo: Número E... arriba a la derecha, tocando techo
+            # y: 0.0 -> 0.22, x: 0.60 -> 1.0
             # =========================================================
-            face_exclusion_x = doc_x + int(doc_w * 0.42)
-            logger.info(f"[ZONE] Face exclusion: x < {face_exclusion_x} (42%)")
+            m1_x1 = doc_x + int(doc_w * 0.60)
+            m1_y1 = doc_y + int(doc_h * 0.0)   # Borde superior absoluto
+            m1_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho absoluto
+            m1_y2 = doc_y + int(doc_h * 0.22)
+            cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M1] TOP-RIGHT (Soporte): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
             
             # =========================================================
-            # ZONA DE ATAQUE SUPERIOR (SOPORTE) - Más agresivo
-            # Inicio X: 0.60, Inicio Y: 0, Fin X: width, Fin Y: 0.18
+            # MÁSCARA 2: CIERRE INFERIOR TOTAL (MRZ Fondo)
+            # Objetivo: Banda inferior lado a lado
+            # y: 0.78 -> 1.0, x: 0.0 -> 1.0
             # =========================================================
-            attack_top_x1 = doc_x + int(doc_w * 0.60)  # Start at 60%
-            attack_top_y1 = doc_y  # Borde superior absoluto (0)
-            attack_top_x2 = doc_x + doc_w  # Borde derecho absoluto (100%)
-            attack_top_y2 = doc_y + int(doc_h * 0.18)  # 18% height
-            cv2.rectangle(img, (attack_top_x1, attack_top_y1), (attack_top_x2, attack_top_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[ATTACK] TOP: {attack_top_x1},{attack_top_y1} -> {attack_top_x2},{attack_top_y2}")
+            m2_x1 = doc_x + int(doc_w * 0.0)   # Borde izquierdo
+            m2_y1 = doc_y + int(doc_h * 0.78)  # DEBAJO de foto
+            m2_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho CRÍTICO
+            m2_y2 = doc_y + int(doc_h * 1.0)   # Borde inferior absoluto
+            cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M2] BOTTOM (MRZ): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2}")
             
             # =========================================================
-            # ZONA DE ATAQUE INFERIOR (FIRMA + MRZ UNIFICADOS)
-            # Inicio Y: 0.65, Inicio X: 0, Fin Y: height, Fin X: width EXACTO
+            # MÁSCARA 3: ZONA CENTRAL/FIRMA (Protege la cara)
+            # Objetivo: Datos entre foto y borde derecho, encima del MRZ
+            # y: 0.40 -> 0.78, x: 0.45 -> 1.0
+            # CRÍTICO: x_start=0.45, LA CARA QUEDA LIBRE
             # =========================================================
-            attack_bottom_x1 = doc_x  # Borde izquierdo absoluto (0)
-            attack_bottom_y1 = doc_y + int(doc_h * 0.65)  # 65% - cubre firma + MRZ
-            attack_bottom_x2 = doc_x + doc_w  # CRÍTICO: Borde derecho EXACTO
-            attack_bottom_y2 = doc_y + doc_h  # Borde inferior absoluto (100%)
-            cv2.rectangle(img, (attack_bottom_x1, attack_bottom_y1), (attack_bottom_x2, attack_bottom_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[ATTACK] BOTTOM: {attack_bottom_x1},{attack_bottom_y1} -> {attack_bottom_x2},{attack_bottom_y2}")
+            m3_x1 = doc_x + int(doc_w * 0.45)  # CRÍTICO: 45%
+            m3_y1 = doc_y + int(doc_h * 0.40)
+            m3_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho absoluto
+            m3_y2 = doc_y + int(doc_h * 0.78)  # Conecta con M2
+            cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M3] CENTER (Firma): {m3_x1},{m3_y1} -> {m3_x2},{m3_y2} | CARA 45% LIBRE")
             
             # =========================================================
-            # ZONA SUPERIOR IZQUIERDA (NIE NUMBER) - Solo si no invade rostro
-            # Respeta la regla de exclusión: empieza después de 42% si es necesario
+            # MÁSCARA 4: ESQUINA SUPERIOR IZQUIERDA (País ESP)
+            # Objetivo: Indicador "ESP"
+            # y: 0.0 -> 0.22, x: 0.0 -> 0.35
             # =========================================================
-            if found_blue_e:
-                bx, by, bw, bh = blue_e_box
-                # Asegurar que no invade zona de rostro
-                nie_x1 = max(bx, face_exclusion_x - int(doc_w * 0.20))  # Puede empezar antes de 42% solo para NIE
-                nie_y1 = by
-                nie_x2 = min(doc_x + int(doc_w * 0.40), face_exclusion_x)  # No pasa de 42%
-                nie_y2 = by + bh + int(bh * 0.5)
-                if nie_x1 < nie_x2:  # Solo si tiene sentido
-                    cv2.rectangle(img, (nie_x1, nie_y1), (nie_x2, nie_y2), (0, 0, 0), cv2.FILLED)
-                    logger.info(f"[ATTACK] NIE: {nie_x1},{nie_y1} -> {nie_x2},{nie_y2}")
+            m4_x1 = doc_x + int(doc_w * 0.0)   # Borde izquierdo
+            m4_y1 = doc_y + int(doc_h * 0.0)   # Borde superior
+            m4_x2 = doc_x + int(doc_w * 0.35)  # Antes de tocar pelo/frente
+            m4_y2 = doc_y + int(doc_h * 0.22)
+            cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
+            logger.info(f"[M4] TOP-LEFT (ESP): {m4_x1},{m4_y1} -> {m4_x2},{m4_y2}")
             
-            logger.info(f"[OK] NIE Rigid Zone Protocol applied - Face 42% PROTECTED")
+            logger.info(f"[OK] 4 MÁSCARAS APLICADAS - Cara 45% LIBRE, Bordes SELLADOS")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
