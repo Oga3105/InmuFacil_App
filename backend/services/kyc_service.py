@@ -290,14 +290,13 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         
         if doc_class == "CARD":
             # =====================================================================
-            # VISUAL DOCUMENT CLASSIFICATION SYSTEM
+            # 4-BRANCH HIERARCHICAL DOCUMENT CLASSIFICATION
             # =====================================================================
             
-            # STEP 1: Detect Blue Flag (DNI 4.0 / TIE indicator)
+            # PHASE 1: Blue Flag Detection (DNI 4.0 / TIE indicator)
             has_blue_flag = False
-            
-            # Look for blue rectangle in top-left corner (EU flag on DNI 4.0)
             top_left_region = img[doc_y:doc_y + int(doc_h * 0.25), doc_x:doc_x + int(doc_w * 0.25)]
+            
             if top_left_region.size > 0:
                 hsv_region = cv2.cvtColor(top_left_region, cv2.COLOR_BGR2HSV)
                 lower_blue = np.array([100, 80, 50])
@@ -305,59 +304,41 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                 blue_mask = cv2.inRange(hsv_region, lower_blue, upper_blue)
                 blue_pixels = cv2.countNonZero(blue_mask)
                 
-                # If significant blue pixels found, it's DNI 4.0
                 if blue_pixels > 500:
                     has_blue_flag = True
-                    logger.info(f"[CLASSIFY] Blue flag detected: DNI 4.0 / TIE")
+                    logger.info(f"[CLASSIFY] Blue flag detected")
             
-            # STEP 2: Apply type-specific masks
+            # PHASE 2: TIE Detection (if has blue flag)
+            is_tie = False
             if has_blue_flag:
+                # Look for "RESIDENCIA" or "EXTRANJERO" text pattern in top area
+                top_area = img[doc_y:doc_y + int(doc_h * 0.30), doc_x:doc_x + doc_w]
+                gray_top = cv2.cvtColor(top_area, cv2.COLOR_BGR2GRAY)
+                
+                # Simple edge detection to find dense text areas (PERMISO DE RESIDENCIA)
+                edges = cv2.Canny(gray_top, 50, 150)
+                text_density = cv2.countNonZero(edges)
+                
+                # TIE has more text in top area than DNI 4.0
+                if text_density > 5000:
+                    is_tie = True
+                    logger.info(f"[CLASSIFY] TIE detected (RESIDENCIA pattern)")
+            
+            # PHASE 3: Apply Branch-Specific Masks
+            if not has_blue_flag:
                 # =========================================================
-                # CASO A: DNI 4.0 / TIE (Con Bandera Azul)
+                # RAMA A: DNI 3.0 (Sin Bandera - "Sepia")
                 # =========================================================
-                logger.info(f"[DNI 4.0] Applying masks for modern DNI")
+                logger.info(f"[RAMA A] DNI 3.0 - Legacy Document")
                 
-                # MÁSCARA 1: País (Bandera EU)
-                m1_x1 = doc_x
-                m1_y1 = doc_y
-                m1_x2 = doc_x + int(doc_w * 0.25)
-                m1_y2 = doc_y + int(doc_h * 0.20)
-                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M1] EU Flag")
-                
-                # MÁSCARA 2: Soporte ARRIBA DERECHA (CRÍTICO)
-                m2_x1 = doc_x + int(doc_w * 0.60)
-                m2_y1 = doc_y
-                m2_x2 = doc_x + doc_w
-                m2_y2 = doc_y + int(doc_h * 0.20)
-                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M2] Support Number TOP-RIGHT")
-                
-                # MÁSCARA 3: MRZ Inferior
-                m3_x1 = doc_x
-                m3_y1 = doc_y + int(doc_h * 0.75)
-                m3_x2 = doc_x + doc_w
-                m3_y2 = doc_y + doc_h
-                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI4-M3] MRZ")
-                
-                # ZONA SEGURA: Rostro (0-40% ancho) - NO TOCAR
-                logger.info(f"[DNI4] Face zone protected: 0-40%")
-                
-            else:
-                # =========================================================
-                # CASO B: DNI 3.0 (Sin Bandera - "Sepia")
-                # =========================================================
-                logger.info(f"[DNI 3.0] Applying masks for legacy DNI")
-                
-                # MÁSCARA 1: IDESP CENTRO-IZQUIERDA (CRÍTICO - DIFERENTE)
-                # El soporte está debajo de la fecha de nacimiento
-                m1_x1 = doc_x + int(doc_w * 0.35)
+                # MÁSCARA 1: IDESP CENTRO (CRÍTICO)
+                # x=0.40 a 0.65, y=0.45 a 0.60
+                m1_x1 = doc_x + int(doc_w * 0.40)
                 m1_y1 = doc_y + int(doc_h * 0.45)
-                m1_x2 = doc_x + int(doc_w * 0.60)
+                m1_x2 = doc_x + int(doc_w * 0.65)
                 m1_y2 = doc_y + int(doc_h * 0.60)
                 cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-                logger.info(f"[DNI3-M1] IDESP CENTER-LEFT")
+                logger.info(f"[DNI3-M1] IDESP CENTER: 40-65% × 45-60%")
                 
                 # MÁSCARA 2: MRZ Inferior
                 m2_x1 = doc_x
@@ -367,10 +348,77 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
                 cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
                 logger.info(f"[DNI3-M2] MRZ")
                 
-                # ZONA SEGURA: Rostro (65-100% ancho en DNI 3.0, foto a la derecha)
-                logger.info(f"[DNI3] Face zone protected: 65-100%")
+                logger.info(f"[DNI3] Face protected: LEFT (photo left)")
+                
+            elif is_tie:
+                # =========================================================
+                # RAMA C: TIE (Extranjeros - "Permiso de Residencia")
+                # =========================================================
+                logger.info(f"[RAMA C] TIE - Residence Permit")
+                
+                # MÁSCARA 1: CARD NO (IxESP) ESQUINA SUPERIOR DERECHA
+                # x=0.65 a 1.0, y=0.0 a 0.20
+                m1_x1 = doc_x + int(doc_w * 0.65)
+                m1_y1 = doc_y
+                m1_x2 = doc_x + doc_w
+                m1_y2 = doc_y + int(doc_h * 0.20)
+                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[TIE-M1] CARD NO TOP-RIGHT: 65-100% × 0-20%")
+                
+                # MÁSCARA 2: Tipo Documento (PERMISO DE RESIDENCIA + Bandera)
+                m2_x1 = doc_x
+                m2_y1 = doc_y
+                m2_x2 = doc_x + int(doc_w * 0.30)
+                m2_y2 = doc_y + int(doc_h * 0.25)
+                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[TIE-M2] Document Type + Flag")
+                
+                # MÁSCARA 3: MRZ Inferior Completo
+                m3_x1 = doc_x
+                m3_y1 = doc_y + int(doc_h * 0.75)
+                m3_x2 = doc_x + doc_w
+                m3_y2 = doc_y + doc_h
+                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[TIE-M3] MRZ: 0-100%")
+                
+                logger.info(f"[TIE] Face protected: 0-40% (photo left)")
+                
+            else:
+                # =========================================================
+                # RAMA B: DNI 4.0 (Nacional con Bandera)
+                # =========================================================
+                logger.info(f"[RAMA B] DNI 4.0 - Modern National ID")
+                
+                # MÁSCARA 1: NUM SOPORT CENTRO-DERECHA
+                # x=0.55 a 0.85, y=0.20 a 0.35
+                m1_x1 = doc_x + int(doc_w * 0.55)
+                m1_y1 = doc_y + int(doc_h * 0.20)
+                m1_x2 = doc_x + int(doc_w * 0.85)
+                m1_y2 = doc_y + int(doc_h * 0.35)
+                cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI4-M1] NUM SOPORT CENTER-RIGHT: 55-85% × 20-35%")
+                
+                # MÁSCARA 2: País (Bandera EU)
+                m2_x1 = doc_x
+                m2_y1 = doc_y
+                m2_x2 = doc_x + int(doc_w * 0.25)
+                m2_y2 = doc_y + int(doc_h * 0.20)
+                cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI4-M2] EU Flag")
+                
+                # MÁSCARA 3: MRZ Inferior
+                m3_x1 = doc_x
+                m3_y1 = doc_y + int(doc_h * 0.75)
+                m3_x2 = doc_x + doc_w
+                m3_y2 = doc_y + doc_h
+                cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
+                logger.info(f"[DNI4-M3] MRZ")
+                
+                logger.info(f"[DNI4] Face protected: LEFT (photo left)")
             
-            logger.info(f"[OK] Document type: {'DNI 4.0' if has_blue_flag else 'DNI 3.0'}")
+            # Log final classification
+            doc_type = "DNI 3.0" if not has_blue_flag else ("TIE" if is_tie else "DNI 4.0")
+            logger.info(f"[OK] Document classified as: {doc_type}")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
