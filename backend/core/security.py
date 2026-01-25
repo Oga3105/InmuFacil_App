@@ -1,27 +1,23 @@
 """
-@Shield - Core Security Module (Secret Management)
+@Shield - Security Module
 
-Centralized cryptography and secret management for InmuFácil.
-Implements AES-256-GCM encryption with fail-safe key validation.
+AES-256-GCM encryption/decryption with master key management.
+Fail-safe validation ensures application won't start without proper configuration.
 
-Security Features:
-- AES-256-GCM authenticated encryption
-- Environment-based key management
-- Fail-safe startup validation
-- Key length verification
-
-Token Consumption Tracking: ~600 tokens for security module
+Token Consumption Tracking: ~400 tokens for security module
 """
 
 import os
 import base64
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
-from typing import Optional
 import logging
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
+from typing import Optional
 
-logger = logging.getLogger("inmufacil.core.security")
+logger = logging.getLogger("inmufacil.security")
 
 
 # ============================================================================
