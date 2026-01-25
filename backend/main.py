@@ -27,6 +27,23 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 from datetime import datetime
+from enum import Enum
+
+# ============================================================================
+# @Architect - Document Type Enum
+# ============================================================================
+
+class DocumentType(str, Enum):
+    """
+    Supported identity document types for KYC verification.
+    
+    - DNI: Spanish National Identity Document
+    - NIE: Foreign Identity Number (Spain)
+    - PASSPORT: International Passport
+    """
+    DNI = "DNI"
+    NIE = "NIE"
+    PASSPORT = "PASSPORT"
 
 # ============================================================================
 # @Watcher - Logging Configuration
@@ -443,14 +460,16 @@ ensure_upload_directory()
 )
 async def verify_identity(
     user_id: int = Form(..., description="User ID for KYC verification"),
-    dni_file: UploadFile = File(..., description="DNI image file (JPEG or PNG, max 5MB)")
+    dni_file: UploadFile = File(..., description="Identity document image (JPEG or PNG, max 5MB)"),
+    document_type: DocumentType = Form(DocumentType.DNI, description="Type of identity document (DNI, NIE, or PASSPORT)")
 ):
     """
-    Verify user identity via DNI upload with automatic redaction.
+    Verify user identity via document upload with adaptive automatic redaction.
     
     Args:
         user_id: User ID for KYC verification
-        dni_file: Uploaded DNI image file
+        dni_file: Uploaded identity document image file
+        document_type: Type of document (DNI, NIE, or PASSPORT)
         
     Returns:
         Success message with processing details
@@ -458,12 +477,14 @@ async def verify_identity(
     Security Flow:
     1. @Shield: Validate file type (JPEG/PNG only - prevent RCE)
     2. @Watcher: Calculate file hash for audit trail
-    3. @Jules: Redact sensitive zones (Firma, Equipo Emisor, MRZ)
+    3. @Jules: Adaptive redaction based on document type:
+       - DNI/NIE: 30% bottom (MRZ) + center signature block
+       - Passport: 40% bottom (MRZ lines) + signature zone
     4. @Shield: Encrypt extracted data (simulated OCR)
     5. @Shield: Secure cleanup - delete original file
     6. @Watcher: Log KYC_PROCESS_COMPLETED event
     
-    @Architect: Complete KYC flow orchestration
+    @Architect: Complete KYC flow orchestration with adaptive redaction
     """
     temp_file_path = None
     
