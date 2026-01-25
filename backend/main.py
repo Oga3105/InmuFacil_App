@@ -82,14 +82,57 @@ async def startup_event():
     """
     Application startup event handler.
     
-    @Watcher: Logs application initialization
+    @Watcher: Fail-safe validation - app won't start without encryption key
+    @Shield: Validates encryption system before accepting requests
     @Architect: Initializes Escudo Anti-Inmo
+    
+    Security by Default: Application fails to start if security is not properly configured
     """
     logger.info("=" * 60)
-    logger.info("InmuFácil API - Startup Complete")
+    logger.info("InmuFácil API - Starting Up...")
     logger.info(f"Timestamp: {datetime.now().isoformat()}")
     logger.info("Environment: Development")
+    
+    # ========================================================================
+    # @Watcher + @Shield - FAIL-SAFE VALIDATION
+    # ========================================================================
+    # CRITICAL: Validate encryption system before starting
+    # If validation fails, application will NOT start (RuntimeError raised)
+    
+    try:
+        from backend.core.security import validate_encryption_setup
+        
+        logger.info("🔐 Validating encryption system...")
+        is_valid = validate_encryption_setup()
+        
+        if not is_valid:
+            error_msg = (
+                "CRITICAL: Encryption validation failed. "
+                "Application cannot start. Check logs for details."
+            )
+            logger.critical(error_msg)
+            raise RuntimeError(error_msg)
+        
+        logger.info("✅ Encryption system validated successfully")
+        logger.info("🔐 VAULT: ACTIVATED")
+        
+    except RuntimeError as e:
+        # Re-raise RuntimeError to prevent app startup
+        logger.critical(f"🚨 STARTUP FAILED: {str(e)}")
+        logger.critical("Application will NOT start until security is properly configured")
+        raise
+    except Exception as e:
+        error_msg = f"Unexpected error during encryption validation: {str(e)}"
+        logger.critical(error_msg)
+        raise RuntimeError(error_msg)
+    
+    # ========================================================================
+    # @Architect - Feature Activation
+    # ========================================================================
+    
     logger.info("🛡️  ESCUDO ANTI-INMO: ACTIVE")
+    logger.info("=" * 60)
+    logger.info("✅ InmuFácil API - Startup Complete")
     logger.info("=" * 60)
 
 

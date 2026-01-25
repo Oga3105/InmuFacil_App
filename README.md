@@ -121,15 +121,67 @@ pip install -r requirements.txt
 
 ### Configuración de Seguridad
 
-**Variables de Entorno (.env):**
+**1. Copiar template de configuración:**
 ```bash
-# CRÍTICO: Nunca commitear este archivo
-ENCRYPTION_SECRET=your-super-secret-key-change-in-production
-DATABASE_URL=sqlite:///./inmufacil.db
-SECRET_KEY=your-jwt-secret-key
+cp .env.example .env
 ```
 
-**⚠️ IMPORTANTE:** El archivo `.env` está protegido por `.gitignore` y pre-commit hooks.
+**2. Generar clave de cifrado:**
+```bash
+python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
+```
+
+**3. Configurar variables en `.env`:**
+```bash
+# CRÍTICO: Nunca commitear este archivo
+INMUFACIL_MASTER_KEY=<tu_clave_generada_aquí>
+DATABASE_URL=sqlite:///./inmufacil.db
+SECRET_KEY_JWT=<genera_otra_clave_para_jwt>
+```
+
+**⚠️ IMPORTANTE:** 
+- El archivo `.env` está protegido por `.gitignore` y pre-commit hooks
+- La aplicación NO arrancará sin `INMUFACIL_MASTER_KEY` (fail-safe)
+- La clave debe ser exactamente 32 bytes en base64
+
+### Rotación de Claves (Key Rotation)
+
+**Procedimiento de rotación de la clave maestra:**
+
+> [!WARNING]
+> La rotación de claves requiere re-cifrar todos los datos sensibles en la base de datos.
+> Realiza este procedimiento solo durante ventanas de mantenimiento.
+
+**Pasos para rotación segura:**
+
+1. **Backup completo de la base de datos:**
+   ```bash
+   # Crear backup antes de rotación
+   cp inmufacil.db inmufacil.db.backup.$(date +%Y%m%d_%H%M%S)
+   ```
+
+2. **Generar nueva clave:**
+   ```bash
+   python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
+   ```
+
+3. **Ejecutar script de rotación (futuro):**
+   ```bash
+   # TODO: Implementar en próxima misión
+   python scripts/rotate_encryption_key.py --old-key OLD_KEY --new-key NEW_KEY
+   ```
+
+4. **Actualizar `.env` con nueva clave**
+
+5. **Verificar integridad:**
+   ```bash
+   # Verificar que todos los datos se descifraron correctamente
+   python scripts/verify_encryption.py
+   ```
+
+6. **Reiniciar aplicación**
+
+**Frecuencia recomendada:** Cada 90 días o inmediatamente si se sospecha compromiso.
 
 ### Ejecutar la Aplicación
 
