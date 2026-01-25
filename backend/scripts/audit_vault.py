@@ -25,9 +25,8 @@ from datetime import datetime
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-# Load environment variables
-from dotenv import load_dotenv
-load_dotenv(dotenv_path=project_root / '.env')
+# Environment variables loaded natively via os.environ
+# No external dependencies needed
 
 # Import security and database modules
 from backend.core.security import decrypt_data, get_master_key

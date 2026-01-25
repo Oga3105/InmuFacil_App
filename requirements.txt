@@ -1,4 +1,5 @@
-# InmuFácil Project Dependencies
+# InmuFácil Project Dependencies (Lean Configuration)
+# Minimized for security and maintainability
 
 # ============================================================================
 # Core Framework
@@ -19,7 +20,7 @@ alembic==1.12.1
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.6
-python-dotenv==1.0.0  # Environment variable loading
+cryptography==41.0.7  # AES-256-GCM encryption
 
 # ============================================================================
 # Testing (@Jules)
@@ -41,11 +42,9 @@ flake8==6.1.0
 mypy==1.7.1
 
 # ============================================================================
-# Mission 4 - Secure KYC (@Shield, @Jules)
+# KYC - Lean Image Processing (@Jules)
 # ============================================================================
-cryptography==41.0.7  # AES-256-GCM encryption
-Pillow==10.1.0  # Image processing for DNI redaction
-python-magic==0.4.27  # MIME type detection
-python-magic-bin==0.4.14  # Windows support for python-magic
-opencv-python==4.8.1.78  # Intelligent document detection and contour analysis
+numpy>=1.21.0,<2.0.0  # OpenCV dependency - pinned to avoid breaking changes
+opencv-python-headless==4.8.1.78  # Lightweight OpenCV (no GUI dependencies)
+
 

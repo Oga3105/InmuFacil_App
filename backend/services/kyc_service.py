@@ -21,7 +21,6 @@ import mimetypes
 import hashlib
 from pathlib import Path
 from typing import Tuple, Optional, Dict
-from PIL import Image, ImageDraw
 import cv2
 import numpy as np
 import logging
@@ -158,7 +157,7 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
 
 def redact_document_image(input_path: str, output_path: str, document_type: str = "DNI") -> bool:
     """
-    Redact sensitive information using intelligent document detection.
+    Redact sensitive information using intelligent document detection (Pure OpenCV).
     
     Args:
         input_path: Path to original document image
@@ -172,27 +171,28 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
     1. Use OpenCV to detect document boundaries (contour detection)
     2. Apply redaction zones RELATIVE to detected document, not full image
     3. Preserve face area (top-left of detected document)
+    4. Pure OpenCV implementation (no Pillow dependency)
     
     Redaction Zones (relative to detected document):
     - **DNI/NIE**: MRZ (bottom 25% of doc), Signature (lower-center of doc)
     - **Passport**: MRZ (bottom 30% of doc), Signature (lower-center of doc)
     
-    @Jules: Intelligent document localization with OpenCV
+    @Jules: Lean implementation with OpenCV only
     """
     try:
-        # Step 1: Detect document boundaries using OpenCV
+        # Step 1: Load image with OpenCV
         logger.info(f"[IMAGE] Detecting document boundaries...")
         
-        # Read image with OpenCV for detection
-        img_cv = cv2.imread(input_path)
-        if img_cv is None:
+        img = cv2.imread(input_path)
+        if img is None:
             logger.error(f"[ERROR] Could not read image with OpenCV")
             return False
         
-        full_height, full_width = img_cv.shape[:2]
+        full_height, full_width = img.shape[:2]
         
+        # Step 2: Detect document boundaries
         # Convert to grayscale
-        gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         # Apply Gaussian blur
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -227,60 +227,46 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         else:
             logger.warning(f"[WARNING] No contours found, using full image")
         
-        # Step 2: Open image with PIL for redaction
-        img = Image.open(input_path)
-        draw = ImageDraw.Draw(img)
-        
         logger.info(f"[IMAGE] Processing {document_type} document")
         logger.info(f"[IMAGE] Document bounds: x={doc_x}, y={doc_y}, w={doc_w}, h={doc_h}")
         
-        # Step 3: Apply redaction zones RELATIVE to detected document
+        # Step 3: Apply redaction zones using cv2.rectangle (Pure OpenCV)
         if document_type in ["DNI", "NIE"]:
             # DNI/NIE: MRZ at bottom 25% of document
-            mrz_zone = [
-                doc_x,                          # Start at document left edge
-                doc_y + int(doc_h * 0.75),      # Start at 75% down the document
-                doc_x + doc_w,                  # End at document right edge
-                doc_y + doc_h                   # End at document bottom
-            ]
+            mrz_start_y = doc_y + int(doc_h * 0.75)
+            mrz_end_y = doc_y + doc_h
+            cv2.rectangle(img, (doc_x, mrz_start_y), (doc_x + doc_w, mrz_end_y), (0, 0, 0), -1)
             
-            # Signature: Lower-center of document (50-75% width, 60-75% height)
-            sig_zone = [
-                doc_x + int(doc_w * 0.50),      # Start at 50% across document
-                doc_y + int(doc_h * 0.60),      # Start at 60% down document
-                doc_x + int(doc_w * 0.75),      # End at 75% across document
-                doc_y + int(doc_h * 0.75)       # End at 75% down document
-            ]
+            # Signature: Lower-center of document
+            sig_start_x = doc_x + int(doc_w * 0.50)
+            sig_end_x = doc_x + int(doc_w * 0.75)
+            sig_start_y = doc_y + int(doc_h * 0.60)
+            sig_end_y = doc_y + int(doc_h * 0.75)
+            cv2.rectangle(img, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
             
-            draw.rectangle(mrz_zone, fill='black')
-            draw.rectangle(sig_zone, fill='black')
-            
-            logger.info(f"[OK] DNI/NIE redaction: MRZ + Signature (relative to detected doc)")
+            logger.info(f"[OK] DNI/NIE redaction: MRZ + Signature (OpenCV rectangles)")
             
         elif document_type == "PASSPORT":
             # Passport: MRZ at bottom 30% of document
-            mrz_zone = [
-                doc_x,
-                doc_y + int(doc_h * 0.70),
-                doc_x + doc_w,
-                doc_y + doc_h
-            ]
+            mrz_start_y = doc_y + int(doc_h * 0.70)
+            mrz_end_y = doc_y + doc_h
+            cv2.rectangle(img, (doc_x, mrz_start_y), (doc_x + doc_w, mrz_end_y), (0, 0, 0), -1)
             
-            # Signature: Lower-center (40-70% width, 55-70% height)
-            sig_zone = [
-                doc_x + int(doc_w * 0.40),
-                doc_y + int(doc_h * 0.55),
-                doc_x + int(doc_w * 0.70),
-                doc_y + int(doc_h * 0.70)
-            ]
+            # Signature: Lower-center
+            sig_start_x = doc_x + int(doc_w * 0.40)
+            sig_end_x = doc_x + int(doc_w * 0.70)
+            sig_start_y = doc_y + int(doc_h * 0.55)
+            sig_end_y = doc_y + int(doc_h * 0.70)
+            cv2.rectangle(img, (sig_start_x, sig_start_y), (sig_end_x, sig_end_y), (0, 0, 0), -1)
             
-            draw.rectangle(mrz_zone, fill='black')
-            draw.rectangle(sig_zone, fill='black')
-            
-            logger.info(f"[OK] Passport redaction: MRZ + Signature (relative to detected doc)")
+            logger.info(f"[OK] Passport redaction: MRZ + Signature (OpenCV rectangles)")
         
-        # Save redacted image
-        img.save(output_path)
+        # Step 4: Save with cv2.imwrite (Pure OpenCV)
+        success = cv2.imwrite(output_path, img)
+        if not success:
+            logger.error(f"[ERROR] Failed to save redacted image")
+            return False
+        
         logger.info(f"[OK] Document redacted successfully: {output_path}")
         logger.info(f"[OK] Face area preserved (top 50% of document untouched)")
         return True
