@@ -389,24 +389,24 @@ ensure_upload_directory()
 @app.post(
     "/auth/verify-identity",
     summary="Verify User Identity (KYC)",
-    description="""Upload DNI image for identity verification with automatic privacy redaction.
+    description="""Process DNI image for identity verification with automatic privacy redaction.
     
-    **Security Flow:**
-    1. [SHIELD] File validation (JPEG/PNG only, max 5MB) - Prevents RCE attacks
-    2. [HASH] SHA-256 hash calculation for audit trail
-    3. [IMAGE] Automatic redaction of sensitive zones:
+    **Process Flow:**
+    1. 🛡️ File validation (JPEG/PNG only, max 5MB) - Prevents RCE attacks
+    2. 📊 SHA-256 hash calculation for audit trail
+    3. 🖼️ Automatic redaction of sensitive zones:
        - Firma (signature)
        - Equipo Emisor (issuing equipment)
        - MRZ (Machine Readable Zone)
-    4. [VAULT] AES-256-GCM encryption of extracted data
-    5. [DELETE] Secure cleanup - original file deleted immediately
-    6. [LOG] Audit log: KYC_PROCESS_COMPLETED event
+    4. 🔐 AES-256-GCM encryption of extracted DNI data
+    5. 🗑️ Secure cleanup - original file deleted immediately
+    6. 📝 Audit log: KYC_PROCESS_COMPLETED event
     
     **Privacy Guarantee:** 100% opacity verified on redacted zones (170,000+ pixels tested)
     
-    **Returns:** Verification ID and processing details
+    **Returns:** Verification details with encrypted data confirmation
     """,
-    tags=["Authentication", "KYC"],
+    tags=["KYC"],
     responses={
         200: {
             "description": "Identity verification successful",
