@@ -163,18 +163,19 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         output_path: Path to save redacted image
         document_type: Type of document (DNI, NIE, or PASSPORT)
         
-        document_type: Type of document (DNI, NIE, or PASSPORT)
-        
     Returns:
         True if redaction successful, False otherwise
         
-    Redaction Strategy (Percentage-based):
-    - DNI/NIE: 30% bottom (MRZ) + 10% center height (signature)
-    - Passport: 40% bottom (MRZ lines) + signature zone (30-40% from bottom)
-    - Orientation detection: Adjusts zones if image is vertical (height > width)
-    - Face protection: Top 40% never redacted
+    Redaction Strategy (Quadrant-based, Face-Preserving):
+    - **FACE PROTECTION**: Top 50% of image NEVER redacted (preserves photo)
+    - **DNI/NIE**: 
+      - MRZ zone: Bottom 25% (75-100% height, full width)
+      - Signature zone: Lower-center (50-75% width, 60-75% height)
+    - **Passport**: 
+      - MRZ zone: Bottom 30% (70-100% height, full width)
+      - Signature zone: Lower-center (40-70% width, 55-70% height)
     
-    @Jules: Adaptive privacy redaction with orientation detection
+    @Jules: Professional quadrant-based redaction with face preservation
     """
     try:
         # Open image
@@ -182,82 +183,72 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         width, height = img.size
         draw = ImageDraw.Draw(img)
         
-        # Detect orientation
-        is_vertical = height > width
-        logger.info(f"[IMAGE] Document orientation: {'Vertical' if is_vertical else 'Horizontal'} ({width}x{height})")
+        logger.info(f"[IMAGE] Processing {document_type} document ({width}x{height})")
         
         # Define redaction zones based on document type
         if document_type in ["DNI", "NIE"]:
-            # DNI/NIE: 30% bottom for MRZ + center signature block
-            if is_vertical:
-                # Vertical: Adjust proportionally
-                mrz_start_y = int(height * 0.70)  # Start at 70% down
-                mrz_end_y = height  # To bottom
-                
-                # Signature zone: 40-50% from top (center area)
-                sig_start_y = int(height * 0.40)
-                sig_end_y = int(height * 0.50)
-                sig_start_x = int(width * 0.10)
-                sig_end_x = int(width * 0.90)
-            else:
-                # Horizontal: Standard zones
-                mrz_start_y = int(height * 0.70)
-                mrz_end_y = height
-                
-                # Signature zone: Center 10% height
-                sig_start_y = int(height * 0.45)
-                sig_end_y = int(height * 0.55)
-                sig_start_x = int(width * 0.10)
-                sig_end_x = int(width * 0.40)
+            # DNI/NIE Standard Zones
             
-            # Draw MRZ redaction (full width, bottom 30%)
-            draw.rectangle([0, mrz_start_y, width, mrz_end_y], fill='black')
+            # Zone 1: MRZ (Machine Readable Zone) - Bottom 25%
+            # This covers the bottom strip with encoded data
+            mrz_zone = [
+                0,                      # x1 (left edge)
+                int(height * 0.75),     # y1 (start at 75% down)
+                width,                  # x2 (right edge)
+                height                  # y2 (bottom edge)
+            ]
             
-            # Draw signature redaction
-            draw.rectangle([sig_start_x, sig_start_y, sig_end_x, sig_end_y], fill='black')
+            # Zone 2: Signature - Lower-center area
+            # Between 50-75% width, 60-75% height
+            # This avoids the face (top-left) and name area (top-right)
+            sig_zone = [
+                int(width * 0.50),      # x1 (start at 50% from left)
+                int(height * 0.60),     # y1 (start at 60% down)
+                int(width * 0.75),      # x2 (end at 75% from left)
+                int(height * 0.75)      # y2 (end at 75% down, just above MRZ)
+            ]
             
-            logger.info(f"[OK] DNI/NIE redaction applied: MRZ zone + signature block")
+            # Draw redaction zones
+            draw.rectangle(mrz_zone, fill='black')
+            draw.rectangle(sig_zone, fill='black')
+            
+            logger.info(f"[OK] DNI/NIE redaction: MRZ (bottom 25%) + Signature (lower-center)")
             
         elif document_type == "PASSPORT":
-            # Passport: 40% bottom for MRZ lines + signature zone above
-            if is_vertical:
-                # Vertical: Adjust proportionally
-                mrz_start_y = int(height * 0.60)  # Start at 60% down (40% coverage)
-                mrz_end_y = height
-                
-                # Signature zone: 50-60% from top
-                sig_start_y = int(height * 0.50)
-                sig_end_y = int(height * 0.60)
-                sig_start_x = int(width * 0.10)
-                sig_end_x = int(width * 0.90)
-            else:
-                # Horizontal: Standard zones
-                mrz_start_y = int(height * 0.60)
-                mrz_end_y = height
-                
-                # Signature zone: 30-40% from bottom
-                sig_start_y = int(height * 0.60)
-                sig_end_y = int(height * 0.70)
-                sig_start_x = int(width * 0.10)
-                sig_end_x = int(width * 0.50)
+            # Passport has larger MRZ (2 lines of text)
             
-            # Draw MRZ redaction (full width, bottom 40%)
-            draw.rectangle([0, mrz_start_y, width, mrz_end_y], fill='black')
+            # Zone 1: MRZ - Bottom 30% (larger for passport)
+            mrz_zone = [
+                0,                      # x1 (left edge)
+                int(height * 0.70),     # y1 (start at 70% down)
+                width,                  # x2 (right edge)
+                height                  # y2 (bottom edge)
+            ]
             
-            # Draw signature redaction
-            draw.rectangle([sig_start_x, sig_start_y, sig_end_x, sig_end_y], fill='black')
+            # Zone 2: Signature - Lower-center area (wider for passport)
+            sig_zone = [
+                int(width * 0.40),      # x1 (start at 40% from left)
+                int(height * 0.55),     # y1 (start at 55% down)
+                int(width * 0.70),      # x2 (end at 70% from left)
+                int(height * 0.70)      # y2 (end at 70% down, just above MRZ)
+            ]
             
-            logger.info(f"[OK] Passport redaction applied: Extended MRZ zone + signature")
+            # Draw redaction zones
+            draw.rectangle(mrz_zone, fill='black')
+            draw.rectangle(sig_zone, fill='black')
+            
+            logger.info(f"[OK] Passport redaction: MRZ (bottom 30%) + Signature (lower-center)")
         
         else:
             logger.warning(f"[WARNING] Unknown document type: {document_type}, using DNI defaults")
             # Fallback to DNI redaction
-            mrz_start_y = int(height * 0.70)
-            draw.rectangle([0, mrz_start_y, width, height], fill='black')
+            mrz_zone = [0, int(height * 0.75), width, height]
+            draw.rectangle(mrz_zone, fill='black')
         
         # Save redacted image
         img.save(output_path)
-        logger.info(f"[OK] Document image redacted successfully: {output_path}")
+        logger.info(f"[OK] Document redacted successfully: {output_path}")
+        logger.info(f"[OK] Face area preserved (top 50% untouched)")
         return True
         
     except Exception as e:
