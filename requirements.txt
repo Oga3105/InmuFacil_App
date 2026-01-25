@@ -38,3 +38,11 @@ python-json-logger==2.0.7
 black==23.11.0
 flake8==6.1.0
 mypy==1.7.1
+
+# ============================================================================
+# Mission 4 - Secure KYC (@Shield, @Jules)
+# ============================================================================
+cryptography==41.0.7  # AES-256-GCM encryption
+Pillow==10.1.0  # Image processing for DNI redaction
+python-magic==0.4.27  # MIME type detection
+python-magic-bin==0.4.14  # Windows support for python-magic
