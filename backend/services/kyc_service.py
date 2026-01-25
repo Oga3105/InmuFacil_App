@@ -18,8 +18,9 @@ Token Consumption Tracking: ~900 tokens for KYC service
 import os
 import secrets
 import mimetypes
+import hashlib
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 from PIL import Image, ImageDraw
 import logging
 
@@ -42,6 +43,39 @@ MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB in bytes
 
 # Upload directory (should be outside web root in production)
 UPLOAD_DIR = Path("uploads/dni_documents")
+
+
+# ============================================================================
+# @Watcher - File Hashing for Audit Trail
+# ============================================================================
+
+def calculate_file_hash(file_path: str) -> str:
+    """
+    Calculate SHA-256 hash of file for integrity verification.
+    
+    Args:
+        file_path: Path to file
+        
+    Returns:
+        Hexadecimal SHA-256 hash
+        
+    Security Notes:
+    - Used for audit trail (not for sensitive data)
+    - Verifies file integrity
+    - Detects tampering or corruption
+    
+    @Watcher: Audit logging without exposing content
+    """
+    sha256_hash = hashlib.sha256()
+    
+    with open(file_path, "rb") as f:
+        # Read file in chunks to handle large files
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    
+    file_hash = sha256_hash.hexdigest()
+    logger.debug(f"📊 File hash calculated: {file_hash[:16]}...")
+    return file_hash
 
 
 # ============================================================================
@@ -200,6 +234,91 @@ def redact_dni_image(image_path: str, output_path: str) -> bool:
         return False
 
 
+def redact_dni(image_path: str) -> Tuple[bool, Optional[str], Optional[Dict[str, str]]]:
+    """
+    Main DNI redaction function with OCR simulation.
+    
+    Args:
+        image_path: Path to original DNI image
+        
+    Returns:
+        Tuple of (success, redacted_image_path, extracted_data)
+        
+    Security Flow:
+    1. Simulate OCR data extraction
+    2. Redact sensitive zones
+    3. Return redacted image and extracted data for encryption
+    
+    @Jules: Complete redaction pipeline
+    @Shield: Data extraction for encryption
+    """
+    try:
+        # Generate output path
+        output_path = image_path.replace('.', '_redacted.')
+        
+        # Redact image
+        success = redact_dni_image(image_path, output_path)
+        
+        if not success:
+            return False, None, None
+        
+        # Simulate OCR data extraction (in production, use real OCR)
+        # This data would be encrypted before storage
+        extracted_data = {
+            "dni_number": "SIMULATED_DNI_12345678A",  # Would come from OCR
+            "full_name": "SIMULATED_NAME",  # Would come from OCR
+            "birth_date": "SIMULATED_DATE",  # Would come from OCR
+        }
+        
+        logger.info("✅ DNI redaction and OCR simulation completed")
+        return True, output_path, extracted_data
+        
+    except Exception as e:
+        logger.error(f"❌ DNI redaction failed: {str(e)}")
+        return False, None, None
+
+
+# ============================================================================
+# @Shield - Secure Cleanup
+# ============================================================================
+
+def secure_delete_file(file_path: str) -> bool:
+    """
+    Securely delete file with verification.
+    
+    Args:
+        file_path: Path to file to delete
+        
+    Returns:
+        True if deletion successful and verified
+        
+    Security Notes:
+    - Deletes original file immediately after processing
+    - Verifies file no longer exists
+    - "No se guarda lo que no se necesita" principle
+    
+    @Shield: Secure cleanup to minimize data exposure
+    """
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            
+            # Verify deletion
+            if os.path.exists(file_path):
+                logger.error(f"❌ File still exists after deletion: {file_path}")
+                return False
+            
+            logger.info(f"🗑️  File securely deleted: {file_path}")
+            return True
+        else:
+            logger.debug(f"File already deleted: {file_path}")
+            return True
+            
+    except Exception as e:
+        logger.error(f"❌ Secure deletion failed: {str(e)}")
+        return False
+
+
 # ============================================================================
 # @Jules - Secure File Upload Processing
 # ============================================================================
@@ -234,7 +353,7 @@ async def process_dni_upload(
     file_path: str,
     original_filename: str,
     user_id: int
-) -> Tuple[bool, str, Optional[str]]:
+) -> Tuple[bool, str, Optional[str], Optional[str]]:
     """
     Process DNI image upload with validation and redaction.
     
@@ -244,54 +363,66 @@ async def process_dni_upload(
         user_id: User ID for organizing uploads
         
     Returns:
-        Tuple of (success, message, saved_file_path)
+        Tuple of (success, message, saved_file_path, file_hash)
         
     Security Flow:
-    1. Validate file size
-    2. Validate file type (MIME)
-    3. Redact sensitive zones
-    4. Save with secure filename
-    5. Delete original temporary file
+    1. Calculate file hash for audit
+    2. Validate file size
+    3. Validate file type (MIME)
+    4. Redact sensitive zones
+    5. Save with secure filename
+    6. Delete original temporary file (verified)
     
     @Jules: Complete upload processing pipeline
-    @Shield: Multi-layer security validation
+    @Shield: Multi-layer security validation + secure cleanup
+    @Watcher: File hashing for audit trail
     """
+    file_hash = None
+    
     try:
-        # Step 1: Validate file size
+        # Step 1: Calculate file hash for audit (before any processing)
+        file_hash = calculate_file_hash(file_path)
+        logger.info(f"📊 File hash: {file_hash[:16]}... (for audit)")
+        
+        # Step 2: Validate file size
         is_valid, error = validate_file_size(file_path)
         if not is_valid:
-            return False, error, None
+            secure_delete_file(file_path)  # Clean up
+            return False, error, None, file_hash
         
-        # Step 2: Validate file type
+        # Step 3: Validate file type
         is_valid, error = validate_file_type(file_path, original_filename)
         if not is_valid:
-            return False, error, None
+            secure_delete_file(file_path)  # Clean up
+            return False, error, None, file_hash
         
-        # Step 3: Create user upload directory
+        # Step 4: Create user upload directory
         user_upload_dir = UPLOAD_DIR / str(user_id)
         user_upload_dir.mkdir(parents=True, exist_ok=True)
         
-        # Step 4: Generate secure filename
+        # Step 5: Generate secure filename
         secure_filename = generate_secure_filename(original_filename)
         output_path = user_upload_dir / secure_filename
         
-        # Step 5: Redact DNI image
+        # Step 6: Redact DNI image
         success = redact_dni_image(file_path, str(output_path))
         if not success:
-            return False, "Failed to process DNI image. Please try again.", None
+            secure_delete_file(file_path)  # Clean up
+            return False, "Failed to process DNI image. Please try again.", None, file_hash
         
-        # Step 6: Clean up temporary file
-        try:
-            os.remove(file_path)
-        except:
-            pass  # Ignore cleanup errors
+        # Step 7: Secure cleanup - delete original file
+        cleanup_success = secure_delete_file(file_path)
+        if not cleanup_success:
+            logger.warning("⚠️  Original file cleanup verification failed")
         
         logger.info(f"✅ DNI upload processed successfully for user {user_id}")
-        return True, "DNI image uploaded and processed successfully.", str(output_path)
+        return True, "DNI image uploaded and processed successfully.", str(output_path), file_hash
         
     except Exception as e:
         logger.error(f"❌ DNI upload processing failed: {str(e)}")
-        return False, "An error occurred while processing your DNI. Please try again.", None
+        # Attempt cleanup on error
+        secure_delete_file(file_path)
+        return False, "An error occurred while processing your DNI. Please try again.", None, file_hash
 
 
 # ============================================================================
