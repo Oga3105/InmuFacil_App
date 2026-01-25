@@ -168,67 +168,83 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         True if redaction successful, False otherwise
         
     Detection Strategy:
-    1. Use OpenCV to detect document boundaries (contour detection)
+    1. Use adaptive thresholding for low-contrast images (white backgrounds)
     2. Apply redaction zones RELATIVE to detected document, not full image
     3. Preserve face area (top-left of detected document)
-    4. Pure OpenCV implementation (no Pillow dependency)
+    4. Fallback to center-crop if detection fails (no 400 error)
     
     Redaction Zones (relative to detected document):
     - **DNI/NIE**: MRZ (bottom 25% of doc), Signature (lower-center of doc)
     - **Passport**: MRZ (bottom 30% of doc), Signature (lower-center of doc)
     
-    @Jules: Lean implementation with OpenCV only
+    @Jules: Robust detection with adaptive thresholding and fallback
     """
     try:
         # Step 1: Load image with OpenCV
-        logger.info(f"[IMAGE] Detecting document boundaries...")
+        logger.info(f"[IMAGE] Loading image for document detection...")
         
         img = cv2.imread(input_path)
         if img is None:
-            logger.error(f"[ERROR] Could not read image with OpenCV")
+            logger.error(f"[ERROR] Could not decode image or unsupported dimensions")
             return False
         
         full_height, full_width = img.shape[:2]
+        logger.info(f"[IMAGE] Image loaded: {full_width}x{full_height}")
         
-        # Step 2: Detect document boundaries
+        # Step 2: Detect document boundaries with adaptive thresholding
         # Convert to grayscale
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
-        # Apply Gaussian blur
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        # Apply adaptive thresholding for better edge detection on white backgrounds
+        # This works better than simple Canny for low-contrast images
+        adaptive_thresh = cv2.adaptiveThreshold(
+            gray, 255, 
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+            cv2.THRESH_BINARY_INV, 
+            11, 2
+        )
         
-        # Edge detection
-        edges = cv2.Canny(blurred, 50, 150)
+        # Apply morphological operations to clean up noise
+        kernel = np.ones((5, 5), np.uint8)
+        morph = cv2.morphologyEx(adaptive_thresh, cv2.MORPH_CLOSE, kernel)
         
         # Find contours
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         
         # Find largest contour (likely the document)
         doc_x, doc_y, doc_w, doc_h = 0, 0, full_width, full_height
+        detection_method = "fallback"
         
         if contours:
-            largest_contour = max(contours, key=cv2.contourArea)
-            x, y, w, h = cv2.boundingRect(largest_contour)
+            # Sort contours by area, largest first
+            contours_sorted = sorted(contours, key=cv2.contourArea, reverse=True)
             
-            # Validate detection
-            area_ratio = (w * h) / (full_width * full_height)
-            aspect_ratio = w / h if h > 0 else 0
-            
-            if area_ratio > 0.4 and 1.2 < aspect_ratio < 2.0:
-                doc_x, doc_y, doc_w, doc_h = x, y, w, h
-                logger.info(f"[OK] Document detected: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
-                logger.info(f"[OK] Area: {area_ratio:.2%}, Aspect: {aspect_ratio:.2f}")
-            else:
-                logger.warning(f"[WARNING] Detection failed validation, using center 80%")
-                margin_x = int(full_width * 0.10)
-                margin_y = int(full_height * 0.10)
-                doc_x, doc_y = margin_x, margin_y
-                doc_w, doc_h = full_width - 2 * margin_x, full_height - 2 * margin_y
-        else:
-            logger.warning(f"[WARNING] No contours found, using full image")
+            # Try top 3 largest contours
+            for contour in contours_sorted[:3]:
+                x, y, w, h = cv2.boundingRect(contour)
+                
+                # Validate detection
+                area_ratio = (w * h) / (full_width * full_height)
+                aspect_ratio = w / h if h > 0 else 0
+                
+                # More lenient validation for low-contrast images
+                if area_ratio > 0.3 and 1.0 < aspect_ratio < 2.5:
+                    doc_x, doc_y, doc_w, doc_h = x, y, w, h
+                    detection_method = "contour"
+                    logger.info(f"[OK] Document detected via contours: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
+                    logger.info(f"[OK] Area: {area_ratio:.2%}, Aspect: {aspect_ratio:.2f}")
+                    break
         
-        logger.info(f"[IMAGE] Processing {document_type} document")
-        logger.info(f"[IMAGE] Document bounds: x={doc_x}, y={doc_y}, w={doc_w}, h={doc_h}")
+        # Fallback: Use center 85% if no valid contour found
+        if detection_method == "fallback":
+            logger.warning("[WARNING] Automatic detection failed, using center-crop fallback")
+            margin_x = int(full_width * 0.075)  # 7.5% margin on each side
+            margin_y = int(full_height * 0.075)
+            doc_x, doc_y = margin_x, margin_y
+            doc_w, doc_h = full_width - 2 * margin_x, full_height - 2 * margin_y
+            logger.info(f"[OK] Fallback bounds: {doc_w}x{doc_h} at ({doc_x}, {doc_y})")
+        
+        logger.info(f"[IMAGE] Processing {document_type} document (method: {detection_method})")
         
         # Step 3: Apply redaction zones using cv2.rectangle (Pure OpenCV)
         if document_type in ["DNI", "NIE"]:
