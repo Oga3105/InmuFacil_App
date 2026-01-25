@@ -90,10 +90,10 @@ def verify_token(
     
     # Constant-time comparison to prevent timing attacks
     if not secrets.compare_digest(provided_token, stored_token):
-        logger.warning("❌ Token verification failed: mismatch")
+        logger.warning("[ERROR] Token verification failed: mismatch")
         return False, "Invalid verification code. Please check and try again."
     
-    logger.info("✅ Token verified successfully")
+    logger.info("[OK] Token verified successfully")
     return True, ""
 
 
@@ -137,7 +137,7 @@ def can_request_token(email: str, max_requests: int = 5, window_minutes: int = 6
     
     # Check if limit exceeded
     if len(_token_request_tracker[email]) >= max_requests:
-        logger.warning(f"🚫 Rate limit exceeded for email: {email}")
+        logger.warning(f"[BLOCKED] Rate limit exceeded for email: {email}")
         return False, f"Too many verification requests. Please try again in {window_minutes} minutes."
     
     # Record this request

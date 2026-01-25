@@ -42,11 +42,11 @@ app = FastAPI(
     description="""API REST para la plataforma P2P de compraventa inmobiliaria con seguridad DevSecOps.
     
     Características:
-    - 🔐 Cifrado AES-256-GCM para datos sensibles
-    - 🛡️ Escudo Anti-Agencias activo
-    - 🖼️ Redacción automática de DNI (100% opacidad verificada)
-    - 📝 Audit logging completo
-    - ✅ Compliance: GDPR, OWASP, PCI DSS
+    - [VAULT] Cifrado AES-256-GCM para datos sensibles
+    - [SHIELD] Escudo Anti-Agencias activo
+    - [IMAGE] Redacción automática de DNI (100% opacidad verificada)
+    - [LOG] Audit logging completo
+    - [OK] Compliance: GDPR, OWASP, PCI DSS
     """,
     version="0.4.0",
     contact={
@@ -138,7 +138,7 @@ async def log_requests(request: Request, call_next):
     
     # Log external connection attempt
     logger.info(
-        f"📥 EXTERNAL_CONNECTION | "
+        f"[IN] EXTERNAL_CONNECTION | "
         f"IP: {client_ip} | "
         f"Method: {request.method} | "
         f"Path: {request.url.path} | "
@@ -151,7 +151,7 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     
     logger.info(
-        f"📤 Response: {request.url.path} | "
+        f"[OUT] Response: {request.url.path} | "
         f"Status: {response.status_code} | "
         f"IP: {client_ip}"
     )
@@ -188,7 +188,7 @@ async def startup_event():
     try:
         from backend.core.security import validate_encryption_setup
         
-        logger.info("🔐 Validating encryption system...")
+        logger.info("[VAULT] Validating encryption system...")
         is_valid = validate_encryption_setup()
         
         if not is_valid:
@@ -199,12 +199,12 @@ async def startup_event():
             logger.critical(error_msg)
             raise RuntimeError(error_msg)
         
-        logger.info("✅ Encryption system validated successfully")
-        logger.info("🔐 VAULT: ACTIVATED")
+        logger.info("[OK] Encryption system validated successfully")
+        logger.info("[VAULT] VAULT: ACTIVATED")
         
     except RuntimeError as e:
         # Re-raise RuntimeError to prevent app startup
-        logger.critical(f"🚨 STARTUP FAILED: {str(e)}")
+        logger.critical(f"[ALERT] STARTUP FAILED: {str(e)}")
         logger.critical("Application will NOT start until security is properly configured")
         raise
     except Exception as e:
@@ -216,9 +216,9 @@ async def startup_event():
     # @Architect - Feature Activation
     # ========================================================================
     
-    logger.info("🛡️  ESCUDO ANTI-INMO: ACTIVE")
+    logger.info("[SHIELD]  ESCUDO ANTI-INMO: ACTIVE")
     logger.info("=" * 60)
-    logger.info("✅ InmuFácil API - Startup Complete")
+    logger.info("[OK] InmuFácil API - Startup Complete")
     logger.info("=" * 60)
 
 
@@ -367,15 +367,15 @@ ensure_upload_directory()
     description="""Upload DNI image for identity verification with automatic privacy redaction.
     
     **Security Flow:**
-    1. 🛡️ File validation (JPEG/PNG only, max 5MB) - Prevents RCE attacks
-    2. 📊 SHA-256 hash calculation for audit trail
-    3. 🖼️ Automatic redaction of sensitive zones:
+    1. [SHIELD] File validation (JPEG/PNG only, max 5MB) - Prevents RCE attacks
+    2. [HASH] SHA-256 hash calculation for audit trail
+    3. [IMAGE] Automatic redaction of sensitive zones:
        - Firma (signature)
        - Equipo Emisor (issuing equipment)
        - MRZ (Machine Readable Zone)
-    4. 🔐 AES-256-GCM encryption of extracted data
-    5. 🗑️ Secure cleanup - original file deleted immediately
-    6. 📝 Audit log: KYC_PROCESS_COMPLETED event
+    4. [VAULT] AES-256-GCM encryption of extracted data
+    5. [DELETE] Secure cleanup - original file deleted immediately
+    6. [LOG] Audit log: KYC_PROCESS_COMPLETED event
     
     **Privacy Guarantee:** 100% opacity verified on redacted zones (170,000+ pixels tested)
     
@@ -443,7 +443,7 @@ async def verify_identity(
     temp_file_path = None
     
     try:
-        logger.info(f"🔐 KYC verification started for user {user_id}")
+        logger.info(f"[VAULT] KYC verification started for user {user_id}")
         
         # Step 1: Save uploaded file to temporary location
         with tempfile.NamedTemporaryFile(delete=False, suffix=".tmp") as temp_file:
@@ -458,7 +458,7 @@ async def verify_identity(
         )
         
         if not success:
-            logger.warning(f"⚠️  KYC verification failed for user {user_id}: {message}")
+            logger.warning(f"[WARNING]  KYC verification failed for user {user_id}: {message}")
             raise HTTPException(status_code=400, detail=message)
         
         # Step 3: Simulate OCR data extraction and encryption
@@ -470,11 +470,11 @@ async def verify_identity(
         
         # Encrypt sensitive data before storage
         encrypted_dni = encrypt_data(simulated_dni_data["dni_number"])
-        logger.info(f"🔒 DNI data encrypted for user {user_id}")
+        logger.info(f"[ENCRYPT] DNI data encrypted for user {user_id}")
         
         # Step 4: @Watcher - Log KYC completion event
         logger.info(
-            f"✅ KYC_PROCESS_COMPLETED | "
+            f"[OK] KYC_PROCESS_COMPLETED | "
             f"user_id={user_id} | "
             f"file_hash={file_hash[:16]}... | "
             f"redacted_path={saved_path}"
@@ -496,7 +496,7 @@ async def verify_identity(
     except HTTPException:
         raise  # Re-raise HTTP exceptions
     except Exception as e:
-        logger.error(f"❌ KYC verification error for user {user_id}: {str(e)}")
+        logger.error(f"[ERROR] KYC verification error for user {user_id}: {str(e)}")
         raise HTTPException(
             status_code=500,
             detail="An error occurred during identity verification. Please try again."

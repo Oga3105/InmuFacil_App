@@ -47,7 +47,7 @@ def get_encryption_key() -> bytes:
     
     if not secret:
         # For development only - in production, this should fail
-        logger.warning("⚠️  ENCRYPTION_SECRET not set, using default (INSECURE for production)")
+        logger.warning("[WARNING]  ENCRYPTION_SECRET not set, using default (INSECURE for production)")
         secret = "dev-secret-change-in-production-12345678"
     
     # Use PBKDF2 to derive a 256-bit key
@@ -112,7 +112,7 @@ def encrypt_data(plaintext: str) -> str:
     encrypted_data = iv + ciphertext
     encoded = base64.b64encode(encrypted_data).decode('utf-8')
     
-    logger.debug(f"🔒 Data encrypted (length: {len(plaintext)} -> {len(encoded)})")
+    logger.debug(f"[ENCRYPT] Data encrypted (length: {len(plaintext)} -> {len(encoded)})")
     return encoded
 
 
@@ -160,11 +160,11 @@ def decrypt_data(encrypted: str) -> str:
         plaintext = aesgcm.decrypt(iv, ciphertext, associated_data)
         
         decrypted = plaintext.decode('utf-8')
-        logger.debug(f"🔓 Data decrypted successfully")
+        logger.debug(f"[DECRYPT] Data decrypted successfully")
         return decrypted
         
     except Exception as e:
-        logger.error(f"❌ Decryption failed: {str(e)}")
+        logger.error(f"[ERROR] Decryption failed: {str(e)}")
         raise ValueError("Failed to decrypt data - data may be corrupted or key is incorrect")
 
 
@@ -225,7 +225,7 @@ def validate_encryption_setup() -> bool:
         decrypted = decrypt_data(encrypted)
         
         if decrypted != test_data:
-            logger.error("❌ Encryption validation failed: round-trip mismatch")
+            logger.error("[ERROR] Encryption validation failed: round-trip mismatch")
             return False
         
         # Test IV uniqueness
@@ -233,12 +233,12 @@ def validate_encryption_setup() -> bool:
         encrypted2 = encrypt_data(test_data)
         
         if encrypted1 == encrypted2:
-            logger.error("❌ Encryption validation failed: IV not unique")
+            logger.error("[ERROR] Encryption validation failed: IV not unique")
             return False
         
-        logger.info("✅ Encryption system validated successfully")
+        logger.info("[OK] Encryption system validated successfully")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Encryption validation failed: {str(e)}")
+        logger.error(f"[ERROR] Encryption validation failed: {str(e)}")
         return False

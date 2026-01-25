@@ -190,19 +190,19 @@ async def validate_user_is_not_agency(
     
     if is_agency_domain:
         reason = f"Email domain '{matched_domain}' belongs to a known real estate agency"
-        logger.warning(f"🚫 BLOCKED: {reason} | Email: {email}")
+        logger.warning(f"[BLOCKED] BLOCKED: {reason} | Email: {email}")
         return False, reason
     
     if has_keywords and user_type == "profesional":
         # If user explicitly selected "profesional" AND has keywords, likely an agency
         reason = f"Professional account with agency keywords: {', '.join(matched_keywords)}"
-        logger.warning(f"🚫 BLOCKED: {reason} | Name: {full_name}")
+        logger.warning(f"[BLOCKED] BLOCKED: {reason} | Name: {full_name}")
         return False, reason
     
     # @Shield: Allow registration if not clearly an agency
     # Single keyword in name is not enough to block (could be false positive)
     if has_keywords:
-        logger.info(f"⚠️  WARNING: Keywords detected but not blocking (single factor): {matched_keywords}")
+        logger.info(f"[WARNING]  WARNING: Keywords detected but not blocking (single factor): {matched_keywords}")
     
     return True, ""
 
@@ -242,7 +242,7 @@ def log_blocked_attempt(
     }
     
     logger.warning(
-        f"🛡️  ESCUDO ANTI-INMO ACTIVATED | "
+        f"[SHIELD]  ESCUDO ANTI-INMO ACTIVATED | "
         f"Domain: {log_data['email_domain']} | "
         f"Reason: {reason} | "
         f"IP: {ip_address or 'N/A'} | "

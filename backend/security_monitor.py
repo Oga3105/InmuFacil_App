@@ -70,7 +70,7 @@ def record_failed_dni_upload(user_id: int) -> Tuple[bool, int, str]:
         
         # @Watcher: CRITICAL SECURITY ALERT
         logger.warning(
-            f"🚨 SECURITY ALERT - BRUTE FORCE DETECTED | "
+            f"[ALERT] SECURITY ALERT - BRUTE FORCE DETECTED | "
             f"User ID: {user_id} | "
             f"Failed attempts: {attempt_count} | "
             f"Locked until: {lockout_until.isoformat()} | "
@@ -80,7 +80,7 @@ def record_failed_dni_upload(user_id: int) -> Tuple[bool, int, str]:
         return True, attempt_count, f"Account temporarily locked due to multiple failed attempts. Try again in {LOCKOUT_DURATION_MINUTES} minutes."
     
     logger.warning(
-        f"⚠️  Failed DNI upload attempt | "
+        f"[WARNING]  Failed DNI upload attempt | "
         f"User ID: {user_id} | "
         f"Attempt {attempt_count}/{MAX_FAILED_ATTEMPTS}"
     )
@@ -115,14 +115,14 @@ def is_account_locked(user_id: int) -> Tuple[bool, str]:
         # Auto-unlock
         del _locked_accounts[user_id]
         _failed_attempts[user_id] = []
-        logger.info(f"🔓 Account auto-unlocked: User ID {user_id}")
+        logger.info(f"[DECRYPT] Account auto-unlocked: User ID {user_id}")
         return False, ""
     
     # Still locked
     remaining = lockout_until - now
     minutes = int(remaining.total_seconds() / 60)
     
-    logger.info(f"🔒 Account locked: User ID {user_id} | Remaining: {minutes} minutes")
+    logger.info(f"[ENCRYPT] Account locked: User ID {user_id} | Remaining: {minutes} minutes")
     return True, f"Account is temporarily locked. Try again in {minutes} minutes."
 
 
@@ -140,7 +140,7 @@ def clear_failed_attempts(user_id: int):
     if user_id in _failed_attempts:
         _failed_attempts[user_id] = []
     
-    logger.info(f"✅ Failed attempts cleared for user {user_id}")
+    logger.info(f"[OK] Failed attempts cleared for user {user_id}")
 
 
 # ============================================================================
@@ -178,11 +178,11 @@ def log_security_event(
     }
     
     if severity == "CRITICAL":
-        logger.critical(f"🚨 SECURITY EVENT | {log_entry}")
+        logger.critical(f"[ALERT] SECURITY EVENT | {log_entry}")
     elif severity == "WARNING":
-        logger.warning(f"⚠️  SECURITY EVENT | {log_entry}")
+        logger.warning(f"[WARNING]  SECURITY EVENT | {log_entry}")
     else:
-        logger.info(f"ℹ️  SECURITY EVENT | {log_entry}")
+        logger.info(f"[INFO]  SECURITY EVENT | {log_entry}")
 
 
 def log_kyc_operation(
@@ -260,7 +260,7 @@ class SensitiveDataFilter(logging.Filter):
                 # If sensitive keyword found without redaction marker
                 # This is a safety check - code should already redact
                 logger.warning(
-                    f"⚠️  Attempted to log potentially sensitive data. "
+                    f"[WARNING]  Attempted to log potentially sensitive data. "
                     f"Log blocked for security."
                 )
                 return False
@@ -283,4 +283,4 @@ def configure_secure_logging():
     root_logger = logging.getLogger()
     root_logger.addFilter(SensitiveDataFilter())
     
-    logger.info("✅ Secure logging configured with sensitive data filters")
+    logger.info("[OK] Secure logging configured with sensitive data filters")

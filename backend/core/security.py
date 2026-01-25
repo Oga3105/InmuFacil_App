@@ -66,7 +66,7 @@ def get_master_key() -> bytes:
             logger.critical(error_msg)
             raise RuntimeError(error_msg)
         
-        logger.info("✅ Master encryption key loaded and validated successfully")
+        logger.info("[OK] Master encryption key loaded and validated successfully")
         return master_key
         
     except Exception as e:
@@ -129,7 +129,7 @@ def encrypt_data(plaintext: str) -> str:
     encrypted_data = iv + ciphertext
     encoded = base64.b64encode(encrypted_data).decode('utf-8')
     
-    logger.debug(f"🔒 Data encrypted (length: {len(plaintext)} -> {len(encoded)})")
+    logger.debug(f"[ENCRYPT] Data encrypted (length: {len(plaintext)} -> {len(encoded)})")
     return encoded
 
 
@@ -177,11 +177,11 @@ def decrypt_data(encrypted: str) -> str:
         plaintext = aesgcm.decrypt(iv, ciphertext, associated_data)
         
         decrypted = plaintext.decode('utf-8')
-        logger.debug(f"🔓 Data decrypted successfully")
+        logger.debug(f"[DECRYPT] Data decrypted successfully")
         return decrypted
         
     except Exception as e:
-        logger.error(f"❌ Decryption failed: {str(e)}")
+        logger.error(f"[ERROR] Decryption failed: {str(e)}")
         raise ValueError("Failed to decrypt data - data may be corrupted or key is incorrect")
 
 
@@ -241,7 +241,7 @@ def validate_encryption_setup() -> bool:
     try:
         # Test 1: Master key validation (will raise if invalid)
         master_key = get_master_key()
-        logger.info(f"✅ Master key validated: {len(master_key)} bytes")
+        logger.info(f"[OK] Master key validated: {len(master_key)} bytes")
         
         # Test 2: Encryption/decryption round-trip
         test_data = "TEST_DATA_12345"
@@ -249,7 +249,7 @@ def validate_encryption_setup() -> bool:
         decrypted = decrypt_data(encrypted)
         
         if decrypted != test_data:
-            logger.error("❌ Encryption validation failed: round-trip mismatch")
+            logger.error("[ERROR] Encryption validation failed: round-trip mismatch")
             return False
         
         # Test 3: IV uniqueness
@@ -257,15 +257,15 @@ def validate_encryption_setup() -> bool:
         encrypted2 = encrypt_data(test_data)
         
         if encrypted1 == encrypted2:
-            logger.error("❌ Encryption validation failed: IV not unique")
+            logger.error("[ERROR] Encryption validation failed: IV not unique")
             return False
         
-        logger.info("✅ Encryption system validated successfully")
-        logger.info("🔐 VAULT ACTIVATED - All security checks passed")
+        logger.info("[OK] Encryption system validated successfully")
+        logger.info("[VAULT] VAULT ACTIVATED - All security checks passed")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Encryption validation failed: {str(e)}")
+        logger.error(f"[ERROR] Encryption validation failed: {str(e)}")
         raise  # Re-raise to prevent app startup
 
 
@@ -292,5 +292,5 @@ def rotate_master_key(old_key_b64: str, new_key_b64: str) -> bool:
     
     TODO: Implement in future mission
     """
-    logger.warning("⚠️  Key rotation not yet implemented")
+    logger.warning("[WARNING]  Key rotation not yet implemented")
     return False

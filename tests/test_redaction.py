@@ -85,11 +85,11 @@ def generate_test_dni_image(output_path: str) -> bool:
         
         # Save image as PNG (lossless) to avoid JPEG compression artifacts
         img.save(output_path, 'PNG')
-        logger.info(f"✅ Test DNI image generated: {output_path}")
+        logger.info(f"[OK] Test DNI image generated: {output_path}")
         return True
         
     except Exception as e:
-        logger.error(f"❌ Test image generation failed: {str(e)}")
+        logger.error(f"[ERROR] Test image generation failed: {str(e)}")
         return False
 
 
@@ -184,14 +184,14 @@ def verify_redaction_pixels(image_path: str) -> tuple[bool, dict]:
         all_black = report['non_black_pixels'] == 0
         
         if all_black:
-            logger.info(f"✅ Redaction verification PASSED: All {report['total_pixels_checked']} pixels are black")
+            logger.info(f"[OK] Redaction verification PASSED: All {report['total_pixels_checked']} pixels are black")
         else:
-            logger.error(f"❌ Redaction verification FAILED: {report['non_black_pixels']} non-black pixels found")
+            logger.error(f"[ERROR] Redaction verification FAILED: {report['non_black_pixels']} non-black pixels found")
         
         return all_black, report
         
     except Exception as e:
-        logger.error(f"❌ Pixel verification failed: {str(e)}")
+        logger.error(f"[ERROR] Pixel verification failed: {str(e)}")
         return False, {'error': str(e)}
 
 
@@ -214,25 +214,25 @@ def generate_security_report(test_passed: bool, report: dict) -> str:
     """
     lines = []
     lines.append("=" * 70)
-    lines.append("🔐 PRIVACY REDACTION VERIFICATION REPORT")
+    lines.append("[VAULT] PRIVACY REDACTION VERIFICATION REPORT")
     lines.append("=" * 70)
     
     if test_passed:
-        lines.append("✅ STATUS: PASSED")
-        lines.append(f"✅ Total pixels verified: {report['total_pixels_checked']:,}")
-        lines.append("✅ All redacted zones are 100% opaque (black)")
+        lines.append("[OK] STATUS: PASSED")
+        lines.append(f"[OK] Total pixels verified: {report['total_pixels_checked']:,}")
+        lines.append("[OK] All redacted zones are 100% opaque (black)")
         lines.append("")
         lines.append("ZONE VERIFICATION:")
         for zone_name, zone_data in report['zones_verified'].items():
-            lines.append(f"  ✅ {zone_name}: {zone_data['pixels_checked']:,} pixels - 100% BLACK")
+            lines.append(f"  [OK] {zone_name}: {zone_data['pixels_checked']:,} pixels - 100% BLACK")
     else:
-        lines.append("❌ STATUS: FAILED")
-        lines.append(f"❌ Non-black pixels found: {report['non_black_pixels']}")
-        lines.append(f"❌ Failed zones: {', '.join(report['failed_zones'])}")
+        lines.append("[ERROR] STATUS: FAILED")
+        lines.append(f"[ERROR] Non-black pixels found: {report['non_black_pixels']}")
+        lines.append(f"[ERROR] Failed zones: {', '.join(report['failed_zones'])}")
         lines.append("")
         lines.append("ZONE VERIFICATION:")
         for zone_name, zone_data in report['zones_verified'].items():
-            status = "✅" if zone_data['is_100_percent_black'] else "❌"
+            status = "[OK]" if zone_data['is_100_percent_black'] else "[ERROR]"
             lines.append(f"  {status} {zone_name}: {zone_data['non_black_pixels']} non-black pixels")
             
             if zone_data['samples']:
@@ -242,7 +242,7 @@ def generate_security_report(test_passed: bool, report: dict) -> str:
     
     lines.append("=" * 70)
     lines.append("SECURITY STANDARD: 100% Opacity Required")
-    lines.append("COMPLIANCE: " + ("✅ PASSED" if test_passed else "❌ FAILED"))
+    lines.append("COMPLIANCE: " + ("[OK] PASSED" if test_passed else "[ERROR] FAILED"))
     lines.append("=" * 70)
     
     return "\n".join(lines)
@@ -271,14 +271,14 @@ def test_redaction_complete():
     redacted_image_path = None
     
     try:
-        logger.info("🧪 Starting redaction verification test...")
+        logger.info("[TEST] Starting redaction verification test...")
         
         # Step 1: Generate test image (PNG for lossless quality)
         test_image_path = os.path.join(temp_dir, "test_dni.png")
         success = generate_test_dni_image(test_image_path)
         
         if not success:
-            logger.error("❌ Test image generation failed")
+            logger.error("[ERROR] Test image generation failed")
             return False
         
         # Step 2: Apply redaction (PNG output for lossless quality)
@@ -286,7 +286,7 @@ def test_redaction_complete():
         success = redact_dni_image(test_image_path, redacted_image_path)
         
         if not success:
-            logger.error("❌ Redaction failed")
+            logger.error("[ERROR] Redaction failed")
             return False
         
         # Step 3: Verify pixels
@@ -299,7 +299,7 @@ def test_redaction_complete():
         return all_black
         
     except Exception as e:
-        logger.error(f"❌ Test failed with exception: {str(e)}")
+        logger.error(f"[ERROR] Test failed with exception: {str(e)}")
         return False
         
     finally:
@@ -307,30 +307,30 @@ def test_redaction_complete():
         try:
             if test_image_path and os.path.exists(test_image_path):
                 os.remove(test_image_path)
-                logger.info(f"🗑️  Deleted test image: {test_image_path}")
+                logger.info(f"[DELETE]  Deleted test image: {test_image_path}")
             
             if redacted_image_path and os.path.exists(redacted_image_path):
                 os.remove(redacted_image_path)
-                logger.info(f"🗑️  Deleted redacted image: {redacted_image_path}")
+                logger.info(f"[DELETE]  Deleted redacted image: {redacted_image_path}")
             
             if os.path.exists(temp_dir):
                 os.rmdir(temp_dir)
-                logger.info(f"🗑️  Deleted temp directory: {temp_dir}")
+                logger.info(f"[DELETE]  Deleted temp directory: {temp_dir}")
                 
         except Exception as e:
-            logger.warning(f"⚠️  Cleanup warning: {str(e)}")
+            logger.warning(f"[WARNING]  Cleanup warning: {str(e)}")
 
 
 if __name__ == "__main__":
     # Run test when executed directly
-    print("\n🔐 Executing Privacy Redaction Verification Suite...\n")
+    print("\n[VAULT] Executing Privacy Redaction Verification Suite...\n")
     test_passed = test_redaction_complete()
     
     if test_passed:
-        print("\n✅ REDACTION TEST: PASSED")
-        print("✅ System meets 100% opacity standard\n")
+        print("\n[OK] REDACTION TEST: PASSED")
+        print("[OK] System meets 100% opacity standard\n")
         exit(0)
     else:
-        print("\n❌ REDACTION TEST: FAILED")
-        print("❌ System does NOT meet 100% opacity standard\n")
+        print("\n[ERROR] REDACTION TEST: FAILED")
+        print("[ERROR] System does NOT meet 100% opacity standard\n")
         exit(1)

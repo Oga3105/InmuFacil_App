@@ -74,7 +74,7 @@ def calculate_file_hash(file_path: str) -> str:
             sha256_hash.update(byte_block)
     
     file_hash = sha256_hash.hexdigest()
-    logger.debug(f"📊 File hash calculated: {file_hash[:16]}...")
+    logger.debug(f"[HASH] File hash calculated: {file_hash[:16]}...")
     return file_hash
 
 
@@ -104,7 +104,7 @@ def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, st
     # Check 1: File extension
     file_ext = Path(original_filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
-        logger.warning(f"🚫 Invalid file extension: {file_ext}")
+        logger.warning(f"[BLOCKED] Invalid file extension: {file_ext}")
         return False, f"Invalid file type. Allowed: {', '.join(ALLOWED_EXTENSIONS)}"
     
     # Check 2: MIME type from content
@@ -114,14 +114,14 @@ def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, st
             # Get format from PIL
             image_format = img.format
             if image_format not in ['JPEG', 'PNG']:
-                logger.warning(f"🚫 Invalid image format: {image_format}")
+                logger.warning(f"[BLOCKED] Invalid image format: {image_format}")
                 return False, "Invalid image format. Only JPEG and PNG are allowed."
             
-            logger.info(f"✅ File validated: {image_format} image")
+            logger.info(f"[OK] File validated: {image_format} image")
             return True, ""
             
     except Exception as e:
-        logger.error(f"❌ File validation failed: {str(e)}")
+        logger.error(f"[ERROR] File validation failed: {str(e)}")
         return False, "File is not a valid image or is corrupted."
 
 
@@ -143,10 +143,10 @@ def validate_file_size(file_path: str) -> Tuple[bool, str]:
     
     if file_size > MAX_FILE_SIZE:
         size_mb = file_size / (1024 * 1024)
-        logger.warning(f"🚫 File too large: {size_mb:.2f}MB")
+        logger.warning(f"[BLOCKED] File too large: {size_mb:.2f}MB")
         return False, f"File too large ({size_mb:.2f}MB). Maximum size is 5MB."
     
-    logger.info(f"✅ File size OK: {file_size / 1024:.2f}KB")
+    logger.info(f"[OK] File size OK: {file_size / 1024:.2f}KB")
     return True, ""
 
 
@@ -226,11 +226,11 @@ def redact_dni_image(image_path: str, output_path: str) -> bool:
             # Save redacted image
             img.save(output_path, quality=85, optimize=True)
             
-            logger.info(f"✅ DNI image redacted successfully: {output_path}")
+            logger.info(f"[OK] DNI image redacted successfully: {output_path}")
             return True
             
     except Exception as e:
-        logger.error(f"❌ DNI redaction failed: {str(e)}")
+        logger.error(f"[ERROR] DNI redaction failed: {str(e)}")
         return False
 
 
@@ -270,11 +270,11 @@ def redact_dni(image_path: str) -> Tuple[bool, Optional[str], Optional[Dict[str,
             "birth_date": "SIMULATED_DATE",  # Would come from OCR
         }
         
-        logger.info("✅ DNI redaction and OCR simulation completed")
+        logger.info("[OK] DNI redaction and OCR simulation completed")
         return True, output_path, extracted_data
         
     except Exception as e:
-        logger.error(f"❌ DNI redaction failed: {str(e)}")
+        logger.error(f"[ERROR] DNI redaction failed: {str(e)}")
         return False, None, None
 
 
@@ -305,17 +305,17 @@ def secure_delete_file(file_path: str) -> bool:
             
             # Verify deletion
             if os.path.exists(file_path):
-                logger.error(f"❌ File still exists after deletion: {file_path}")
+                logger.error(f"[ERROR] File still exists after deletion: {file_path}")
                 return False
             
-            logger.info(f"🗑️  File securely deleted: {file_path}")
+            logger.info(f"[DELETE]  File securely deleted: {file_path}")
             return True
         else:
             logger.debug(f"File already deleted: {file_path}")
             return True
             
     except Exception as e:
-        logger.error(f"❌ Secure deletion failed: {str(e)}")
+        logger.error(f"[ERROR] Secure deletion failed: {str(e)}")
         return False
 
 
@@ -382,7 +382,7 @@ async def process_dni_upload(
     try:
         # Step 1: Calculate file hash for audit (before any processing)
         file_hash = calculate_file_hash(file_path)
-        logger.info(f"📊 File hash: {file_hash[:16]}... (for audit)")
+        logger.info(f"[HASH] File hash: {file_hash[:16]}... (for audit)")
         
         # Step 2: Validate file size
         is_valid, error = validate_file_size(file_path)
@@ -413,13 +413,13 @@ async def process_dni_upload(
         # Step 7: Secure cleanup - delete original file
         cleanup_success = secure_delete_file(file_path)
         if not cleanup_success:
-            logger.warning("⚠️  Original file cleanup verification failed")
+            logger.warning("[WARNING]  Original file cleanup verification failed")
         
-        logger.info(f"✅ DNI upload processed successfully for user {user_id}")
+        logger.info(f"[OK] DNI upload processed successfully for user {user_id}")
         return True, "DNI image uploaded and processed successfully.", str(output_path), file_hash
         
     except Exception as e:
-        logger.error(f"❌ DNI upload processing failed: {str(e)}")
+        logger.error(f"[ERROR] DNI upload processing failed: {str(e)}")
         # Attempt cleanup on error
         secure_delete_file(file_path)
         return False, "An error occurred while processing your DNI. Please try again.", None, file_hash
@@ -439,4 +439,4 @@ def ensure_upload_directory():
     - Set proper permissions (owner read/write only)
     """
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    logger.info(f"📁 Upload directory ready: {UPLOAD_DIR}")
+    logger.info(f"[DIR] Upload directory ready: {UPLOAD_DIR}")

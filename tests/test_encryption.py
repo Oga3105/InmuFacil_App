@@ -87,7 +87,7 @@ def test_special_characters():
         "DNI: 12345678-A",
         "Teléfono: +34 600 123 456",
         "Ñoño García",
-        "Test with émojis 🔐🏠",
+        "Test with émojis [VAULT]🏠",
     ]
     
     for test_data in test_cases:
@@ -165,49 +165,49 @@ def quick_encryption_test():
     @Shield: Manual verification tool
     """
     print("=" * 60)
-    print("🔐 AES-256-GCM Encryption Test")
+    print("[VAULT] AES-256-GCM Encryption Test")
     print("=" * 60)
     
     test_data = "DNI_TEST_1234"
-    print(f"\n📝 Original data: {test_data}")
+    print(f"\n[LOG] Original data: {test_data}")
     
     # Test 1: Encrypt
     encrypted1 = encrypt_data(test_data)
-    print(f"🔒 Encrypted (1): {encrypted1[:50]}...")
+    print(f"[ENCRYPT] Encrypted (1): {encrypted1[:50]}...")
     
     # Test 2: Encrypt again (should be different)
     encrypted2 = encrypt_data(test_data)
-    print(f"🔒 Encrypted (2): {encrypted2[:50]}...")
+    print(f"[ENCRYPT] Encrypted (2): {encrypted2[:50]}...")
     
     # Test 3: Verify they're different
     if encrypted1 != encrypted2:
-        print("✅ IV uniqueness: PASS (different ciphertext each time)")
+        print("[OK] IV uniqueness: PASS (different ciphertext each time)")
     else:
-        print("❌ IV uniqueness: FAIL (same ciphertext)")
+        print("[ERROR] IV uniqueness: FAIL (same ciphertext)")
     
     # Test 4: Decrypt both
     decrypted1 = decrypt_data(encrypted1)
     decrypted2 = decrypt_data(encrypted2)
     
-    print(f"\n🔓 Decrypted (1): {decrypted1}")
-    print(f"🔓 Decrypted (2): {decrypted2}")
+    print(f"\n[DECRYPT] Decrypted (1): {decrypted1}")
+    print(f"[DECRYPT] Decrypted (2): {decrypted2}")
     
     # Test 5: Verify decryption
     if decrypted1 == test_data and decrypted2 == test_data:
-        print("✅ Decryption: PASS (correct plaintext)")
+        print("[OK] Decryption: PASS (correct plaintext)")
     else:
-        print("❌ Decryption: FAIL")
+        print("[ERROR] Decryption: FAIL")
     
     # Test 6: Master key
     master_key = get_master_key()
     print(f"\n🔑 Master key length: {len(master_key)} bytes")
     if len(master_key) == 32:
-        print("✅ Key length: PASS (256 bits)")
+        print("[OK] Key length: PASS (256 bits)")
     else:
-        print(f"❌ Key length: FAIL (expected 32, got {len(master_key)})")
+        print(f"[ERROR] Key length: FAIL (expected 32, got {len(master_key)})")
     
     print("\n" + "=" * 60)
-    print("✅ All tests completed successfully!")
+    print("[OK] All tests completed successfully!")
     print("=" * 60)
 
 
