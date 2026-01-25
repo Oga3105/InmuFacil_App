@@ -289,59 +289,51 @@ def redact_document_image(input_path: str, output_path: str, document_type: str 
         logger.info(f"[REDACT] Applying redaction for {doc_class}...")
         
         if doc_class == "CARD":
-            # === NIE/DNI 4 MÁSCARAS INDEPENDIENTES v6 ===
-            # Coordenadas relativas exactas (0.0 a 1.0)
+            # === NIE/DNI v7 - BASADO EN FEEDBACK VISUAL ===
+            # AZUL = LIBERAR (cara + NIE inferior izquierdo)
+            # ROJO = OCULTAR (E29576945 arriba derecha + esquina inferior derecha)
             
             # =========================================================
-            # MÁSCARA 1: PROTECCIÓN SUPERIOR DERECHA (Soporte)
-            # Objetivo: Número E... arriba a la derecha, tocando techo
-            # y: 0.0 -> 0.22, x: 0.60 -> 1.0
+            # MÁSCARA 1: NÚMERO SOPORTE ARRIBA DERECHA (ROJO)
+            # Solo la esquina superior derecha donde está E29576945
+            # y: 0.0 -> 0.15, x: 0.55 -> 1.0
             # =========================================================
-            m1_x1 = doc_x + int(doc_w * 0.60)
-            m1_y1 = doc_y + int(doc_h * 0.0)   # Borde superior absoluto
-            m1_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho absoluto
-            m1_y2 = doc_y + int(doc_h * 0.22)
+            m1_x1 = doc_x + int(doc_w * 0.55)
+            m1_y1 = doc_y
+            m1_x2 = doc_x + doc_w
+            m1_y2 = doc_y + int(doc_h * 0.15)
             cv2.rectangle(img, (m1_x1, m1_y1), (m1_x2, m1_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M1] TOP-RIGHT (Soporte): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
+            logger.info(f"[M1] TOP-RIGHT (E29576945): {m1_x1},{m1_y1} -> {m1_x2},{m1_y2}")
             
             # =========================================================
-            # MÁSCARA 2: CIERRE INFERIOR TOTAL (MRZ Fondo)
-            # Objetivo: Banda inferior lado a lado
-            # y: 0.78 -> 1.0, x: 0.0 -> 1.0
+            # MÁSCARA 2: DATOS CENTRALES (derecha de la cara)
+            # Solo la mitad derecha, empieza DESPUÉS de la cara
+            # y: 0.15 -> 0.70, x: 0.50 -> 1.0 (cara libre en 0-50%)
             # =========================================================
-            m2_x1 = doc_x + int(doc_w * 0.0)   # Borde izquierdo
-            m2_y1 = doc_y + int(doc_h * 0.78)  # DEBAJO de foto
-            m2_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho CRÍTICO
-            m2_y2 = doc_y + int(doc_h * 1.0)   # Borde inferior absoluto
+            m2_x1 = doc_x + int(doc_w * 0.50)  # CRÍTICO: 50% = cara libre
+            m2_y1 = doc_y + int(doc_h * 0.15)
+            m2_x2 = doc_x + doc_w
+            m2_y2 = doc_y + int(doc_h * 0.70)
             cv2.rectangle(img, (m2_x1, m2_y1), (m2_x2, m2_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M2] BOTTOM (MRZ): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2}")
+            logger.info(f"[M2] CENTER-RIGHT (datos): {m2_x1},{m2_y1} -> {m2_x2},{m2_y2} | CARA 50% LIBRE")
             
             # =========================================================
-            # MÁSCARA 3: ZONA CENTRAL/FIRMA (Protege la cara)
-            # Objetivo: Datos entre foto y borde derecho, encima del MRZ
-            # y: 0.40 -> 0.78, x: 0.45 -> 1.0
-            # CRÍTICO: x_start=0.45, LA CARA QUEDA LIBRE
+            # MÁSCARA 3: ESQUINA INFERIOR DERECHA (ROJO)
+            # Solo la esquina inferior derecha, NO el NIE izquierdo
+            # y: 0.70 -> 1.0, x: 0.50 -> 1.0
             # =========================================================
-            m3_x1 = doc_x + int(doc_w * 0.45)  # CRÍTICO: 45%
-            m3_y1 = doc_y + int(doc_h * 0.40)
-            m3_x2 = doc_x + int(doc_w * 1.0)   # Borde derecho absoluto
-            m3_y2 = doc_y + int(doc_h * 0.78)  # Conecta con M2
+            m3_x1 = doc_x + int(doc_w * 0.50)  # No toca NIE inferior izquierdo
+            m3_y1 = doc_y + int(doc_h * 0.70)
+            m3_x2 = doc_x + doc_w
+            m3_y2 = doc_y + doc_h
             cv2.rectangle(img, (m3_x1, m3_y1), (m3_x2, m3_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M3] CENTER (Firma): {m3_x1},{m3_y1} -> {m3_x2},{m3_y2} | CARA 45% LIBRE")
+            logger.info(f"[M3] BOTTOM-RIGHT: {m3_x1},{m3_y1} -> {m3_x2},{m3_y2}")
             
             # =========================================================
-            # MÁSCARA 4: ESQUINA SUPERIOR IZQUIERDA (País ESP)
-            # Objetivo: Indicador "ESP"
-            # y: 0.0 -> 0.22, x: 0.0 -> 0.35
+            # NO HAY MÁSCARA EN LADO IZQUIERDO
+            # Cara + NIE inferior = TODO LIBRE (0-50% ancho)
             # =========================================================
-            m4_x1 = doc_x + int(doc_w * 0.0)   # Borde izquierdo
-            m4_y1 = doc_y + int(doc_h * 0.0)   # Borde superior
-            m4_x2 = doc_x + int(doc_w * 0.35)  # Antes de tocar pelo/frente
-            m4_y2 = doc_y + int(doc_h * 0.22)
-            cv2.rectangle(img, (m4_x1, m4_y1), (m4_x2, m4_y2), (0, 0, 0), cv2.FILLED)
-            logger.info(f"[M4] TOP-LEFT (ESP): {m4_x1},{m4_y1} -> {m4_x2},{m4_y2}")
-            
-            logger.info(f"[OK] 4 MÁSCARAS APLICADAS - Cara 45% LIBRE, Bordes SELLADOS")
+            logger.info(f"[OK] v7: Cara + NIE izquierdo LIBRES (0-50%), Solo derecha tapada")
             
         elif doc_class == "PASSPORT_VERT":
             # === Passport Vertical (stacked pages) ===
