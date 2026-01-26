@@ -93,3 +93,33 @@ class UserInDB(UserBase):
 
     class Config:
         from_attributes = True
+
+
+# ============================================================================
+# Token Schemas
+# ============================================================================
+
+class Token(BaseModel):
+    """
+    JWT token response schema.
+    Returned after successful login.
+    """
+    access_token: str
+    token_type: str = "bearer"
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                "token_type": "bearer"
+            }
+        }
+
+
+class TokenData(BaseModel):
+    """
+    Token payload data (decoded JWT).
+    Used internally for authentication.
+    """
+    email: Optional[str] = None
+    user_id: Optional[int] = None

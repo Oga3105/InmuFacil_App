@@ -391,6 +391,16 @@ async def status():
 
 
 # ============================================================================
+# @Architect - Router Integration
+# ============================================================================
+
+from backend.routers import auth
+
+# Include authentication router
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
+
+
+# ============================================================================
 # @Architect - KYC Verification Endpoint
 # ============================================================================
 
