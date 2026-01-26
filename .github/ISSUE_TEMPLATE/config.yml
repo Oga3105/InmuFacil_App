@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/Oga3105/InmuFacil_App/discussions
+    about: Para preguntas generales, ideas o discusiones sobre el proyecto
+  - name: 📚 Documentación
+    url: https://github.com/Oga3105/InmuFacil_App/blob/develop/README.md
+    about: Consulta la documentación del proyecto
+  - name: 🔐 Reportar Vulnerabilidad Crítica
+    url: https://github.com/Oga3105/InmuFacil_App/security/advisories/new
+    about: Usa Security Advisories para reportar vulnerabilidades críticas de forma privada
