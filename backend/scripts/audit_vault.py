@@ -1,14 +1,8 @@
 """
-@Shield - Vault Audit Script (Async with Native .env Loading)
+@Shield - Vault Audit Script V3 (Debug Mode)
 
 Provides transparency into encrypted vault data.
-Allows authorized personnel to decrypt and view stored verification data.
-
-Security Features:
-- Native .env parsing (no python-dotenv needed)
-- Async database access (compatible with project structure)
-- Read-only operations (no modifications)
-- Requires INMUFACIL_MASTER_KEY from .env
+No try/except on imports to show real errors.
 
 Usage:
     python -m backend.scripts.audit_vault
@@ -18,94 +12,79 @@ import sys
 import os
 import asyncio
 
-# ============================================================================
-# STEP 1: NATIVE .ENV LOADING
-# ============================================================================
+# --- 1. CARGA NATIVA DE VARIABLES .ENV ---
 def load_env_native():
-    """Read .env file line by line without external dependencies."""
     env_path = os.path.join(os.getcwd(), '.env')
     if not os.path.exists(env_path):
+        print("⚠️ .env no encontrado.")
         return
     with open(env_path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
-            if not line or line.startswith('#'):
+            if not line or line.startswith('#') or '=' not in line:
                 continue
-            if '=' in line:
-                key, value = line.split('=', 1)
-                value = value.strip().strip("'").strip('"')
-                if key not in os.environ:
-                    os.environ[key] = value
+            key, value = line.split('=', 1)
+            os.environ[key.strip()] = value.strip().strip("'").strip('"')
 
 load_env_native()
+
+# --- 2. CONFIGURACIÓN DE RUTAS ---
+# Añadimos el directorio actual al path para que Python encuentre 'backend'
 sys.path.append(os.getcwd())
 
-# ============================================================================
-# STEP 2: IMPORTS
-# ============================================================================
-try:
-    from backend.database import get_db_context
-    from backend.core.security import decrypt_data
-    from sqlalchemy import text
-except ImportError as e:
-    print(f"❌ Falta librería: {e.name}")
-    print("   Ejecuta: pip install sqlalchemy cryptography")
-    sys.exit(1)
+print("⚙️ Cargando módulos del sistema...")
 
+# --- 3. IMPORTS (Sin Try/Except para ver errores reales) ---
+from sqlalchemy import text  # Necesario para consultas raw en SQLA 2.0
+from backend.database import get_db_context
+from backend.core.security import decrypt_data
 
 async def audit_vault():
-    """
-    Audit the encryption vault by querying database and decrypting stored data.
-    """
-    print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA...")
+    print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA")
     print("=" * 60)
 
-    # Verify master key
     key = os.getenv("INMUFACIL_MASTER_KEY")
     if not key:
-        print("❌ ERROR: No hay llave maestra en .env")
+        print("❌ ERROR: INMUFACIL_MASTER_KEY no encontrada en .env")
         return
-
-    print("🔐 Llave cargada.")
     
+    print("🔐 Llave Maestra cargada.")
+
     try:
         async with get_db_context() as db:
-            # Use text() explicitly for SQLAlchemy 2.0
-            sql_query = text(
-                "SELECT id, dni_encrypted, status FROM kyc_verifications "
-                "ORDER BY id DESC LIMIT 5"
-            )
+            print("📡 Conectado a Base de Datos. Consultando...")
             
-            result = await db.execute(sql_query)
+            # CORRECCIÓN: Usamos text() para la consulta SQL
+            sql = text("SELECT id, dni_encrypted, status FROM kyc_verifications ORDER BY id DESC LIMIT 5")
+            result = await db.execute(sql)
             rows = result.fetchall()
 
             if not rows:
-                print("📭 Base de datos vacía. Sube un DNI para ver datos aquí.")
+                print("📭 La tabla 'kyc_verifications' está vacía.")
                 return
             
             print(f"\n📊 Encontrados {len(rows)} registros:\n")
             
             for row in rows:
-                # Access by index for compatibility
-                verif_id = row[0]
-                encrypted_data = row[1]
-                status = row[2]
+                # Acceso seguro por índice
+                rid, encrypted, status = row[0], row[1], row[2]
 
                 print(f"{'─' * 60}")
-                print(f"📄 ID: {verif_id} | ESTADO: {status}")
-                print(f"   🔒 Cifrado: {str(encrypted_data)[:15]}...")
+                print(f"📄 ID: {rid} | ESTADO: {status}")
+                print(f"   🔒 RAW: {str(encrypted)[:15]}...")
                 
                 try:
-                    decrypted = decrypt_data(encrypted_data)
-                    print(f"   🔓 REAL:    {decrypted}")
-                    print("   ✅ Integridad: OK")
+                    decrypted = decrypt_data(encrypted)
+                    print(f"   🔓 REAL: {decrypted}")
+                    print("   ✅ Integridad OK")
                 except Exception as e:
-                    print(f"   ❌ ERROR DESCIFRADO: {e}")
+                    print(f"   ❌ Error Descifrado: {e}")
             
             print(f"{'─' * 60}")
 
     except Exception as e:
-        print(f"❌ Error BD: {e}")
+        print(f"\n❌ ERROR DE EJECUCIÓN: {e}")
+        print("CONSEJO: Verifica que Docker esté corriendo y la base de datos exista.")
         import traceback
         traceback.print_exc()
     
@@ -113,20 +92,18 @@ async def audit_vault():
     print("✅ AUDITORÍA FINALIZADA")
     print("=" * 60)
 
-
 if __name__ == "__main__":
     print("\n🔐 InmuFácil Vault Audit Tool")
     print("Provides transparency into encrypted data storage\n")
     
-    # Windows event loop policy
     if os.name == 'nt':
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     
     try:
         asyncio.run(audit_vault())
     except KeyboardInterrupt:
-        print("\n⚠️  Auditoría interrumpida")
-        sys.exit(1)
+        print("\n⚠️ Auditoría interrumpida")
     except Exception as e:
         print(f"\n❌ Error fatal: {e}")
-        sys.exit(1)
+        import traceback
+        traceback.print_exc()
