@@ -21,7 +21,7 @@ import os
 from backend.database import get_db
 from backend.models import User, UserType, DNIStatus
 from backend.schemas import UserCreate, UserResponse, Token
-from backend.core.security import get_password_hash, verify_password
+from backend.security import get_password_hash, verify_password
 from backend.filters import validate_user_is_not_agency, log_blocked_attempt
 import logging
 
