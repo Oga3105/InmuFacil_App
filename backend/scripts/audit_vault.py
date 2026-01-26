@@ -1,64 +1,78 @@
 """
-@Shield - Vault Audit Script (Fixed .env Loading)
+@Shield - Vault Audit Script (Native .env Loading - No External Dependencies)
 
 Provides transparency into encrypted vault data.
 Allows authorized personnel to decrypt and view stored verification data.
 
 Security Features:
-- Explicit .env loading with python-dotenv
+- Native .env parsing (no python-dotenv needed)
 - Read-only operations (no modifications)
 - Requires INMUFACIL_MASTER_KEY from .env
-- Logs all audit access
 - Displays decrypted data for verification
 
 Usage:
     python -m backend.scripts.audit_vault
-
-Token Consumption Tracking: ~400 tokens for audit script
 """
 
 import sys
 import os
-import asyncio
-from dotenv import load_dotenv
 
 # ============================================================================
-# STEP 1: CRITICAL - LOAD ENVIRONMENT VARIABLES FIRST
+# STEP 1: NATIVE .ENV LOADING (No external dependencies)
 # ============================================================================
-# This must happen BEFORE any other imports that depend on env vars
-load_dotenv()
+def load_env_native():
+    """
+    Read .env file line by line without external dependencies.
+    Parses KEY=VALUE format and sets environment variables.
+    """
+    env_path = os.path.join(os.getcwd(), '.env')
+    if not os.path.exists(env_path):
+        print("⚠️  WARNING: .env file not found in project root.")
+        return
+
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            # Ignore comments and empty lines
+            if not line or line.startswith('#'):
+                continue
+            if '=' in line:
+                key, value = line.split('=', 1)
+                # Clean quotes and whitespace
+                key = key.strip()
+                value = value.strip().strip("'").strip('"')
+                # Only set if not already in environment
+                if key not in os.environ:
+                    os.environ[key] = value
+
+# Execute native .env loading BEFORE importing project modules
+load_env_native()
 
 # ============================================================================
 # STEP 2: PATH ADJUSTMENT
 # ============================================================================
-# Ensure Python can find the 'backend' module when run as script
 sys.path.append(os.getcwd())
 
 # ============================================================================
-# STEP 3: IMPORTS (Only after .env is loaded)
+# STEP 3: IMPORTS (After .env is loaded)
 # ============================================================================
-from backend.database import get_db_context
-from backend.core.security import decrypt_data
-from sqlalchemy import text
-from datetime import datetime
-import logging
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger("vault_audit")
+try:
+    from backend.database import SessionLocal
+    from backend.core.security import decrypt_data
+    from datetime import datetime
+except ImportError as e:
+    print(f"\n❌ ENVIRONMENT ERROR: Missing library '{e.name}'.")
+    print("   Run: pip install sqlalchemy cryptography")
+    sys.exit(1)
 
 
-async def audit_vault():
+def audit_vault():
     """
     Audit the encryption vault by querying database and decrypting stored data.
     
     @Shield: Vault transparency for authorized personnel
-    @Watcher: Logs all audit access
     """
-    print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA...")
+    print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA (Modo Nativo)...")
     print("=" * 60)
     
     # ========================================================================
@@ -66,77 +80,72 @@ async def audit_vault():
     # ========================================================================
     key = os.getenv("INMUFACIL_MASTER_KEY")
     if not key:
-        logger.error("[ERROR] INMUFACIL_MASTER_KEY not found in environment")
-        print("❌ ERROR CRÍTICO: No se encuentra 'INMUFACIL_MASTER_KEY' en las variables de entorno.")
-        print("   Asegúrate de que el archivo .env existe y tiene la clave.")
-        print("   Ejemplo: INMUFACIL_MASTER_KEY=your_base64_key_here")
+        print("❌ ERROR CRÍTICO: No se detectó 'INMUFACIL_MASTER_KEY' en el .env")
+        print("   Asegúrate de que el archivo .env existe y contiene:")
+        print("   INMUFACIL_MASTER_KEY=your_base64_key_here")
         return False
     
-    print("🔐 Llave Maestra detectada en memoria.")
-    logger.info(f"[VAULT] Audit initiated at: {datetime.now().isoformat()}")
+    print("🔐 Llave Maestra cargada en memoria.")
+    print(f"📅 Fecha de auditoría: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
     # ========================================================================
     # DATABASE QUERY: Fetch encrypted verification records
     # ========================================================================
+    db = SessionLocal()
     try:
-        async with get_db_context() as db:
-            # Query last 5 KYC verifications
-            query = text("""
-                SELECT id, dni_encrypted, status, created_at 
-                FROM kyc_verifications 
-                ORDER BY id DESC 
-                LIMIT 5
-            """)
-            result = await db.execute(query)
-            rows = result.fetchall()
-            
-            if not rows:
-                print("📭 La base de datos está vacía. No hay registros de KYC para auditar.")
-                logger.info("[VAULT] No records found in database")
-                return True
-            
-            print(f"\n📊 Encontrados {len(rows)} registros de verificación:\n")
-            
-            # ================================================================
-            # DECRYPT AND DISPLAY: Each verification record
-            # ================================================================
-            for row in rows:
-                verif_id = row[0]
-                encrypted_data = row[1]
-                status = row[2]
-                created_at = row[3] if len(row) > 3 else "N/A"
-                
-                print(f"{'─' * 60}")
-                print(f"📄 REGISTRO ID: {verif_id} | ESTADO: {status}")
-                print(f"   📅 Fecha: {created_at}")
-                print(f"   🔒 Dato Cifrado (Raw): {encrypted_data[:30]}...[OCULTO]")
-                
-                # Attempt decryption
-                try:
-                    decrypted_data = decrypt_data(encrypted_data)
-                    print(f"   🔓 DATO DESCIFRADO (REAL): {decrypted_data}")
-                    print("   ✅ Integridad Criptográfica: VERIFICADA")
-                    logger.info(f"[VAULT] Successfully decrypted record {verif_id}")
-                    
-                except Exception as e:
-                    print(f"   ❌ ERROR DE DESCIFRADO: {str(e)}")
-                    print("      (La clave actual no coincide con la que cifró este dato)")
-                    logger.error(f"[VAULT] Failed to decrypt record {verif_id}: {str(e)}")
+        # Query last 5 KYC verifications
+        result = db.execute(
+            "SELECT id, dni_encrypted, status FROM kyc_verifications ORDER BY id DESC LIMIT 5"
+        )
+        rows = result.fetchall()
+        
+        if not rows:
+            print("\n📭 La base de datos está vacía. Sube un DNI para ver datos aquí.")
+            return True
+        
+        print(f"\n📊 Encontrados {len(rows)} registros de verificación:\n")
+        
+        # ================================================================
+        # DECRYPT AND DISPLAY: Each verification record
+        # ================================================================
+        for row in rows:
+            verif_id = row[0]
+            encrypted_data = row[1]
+            status = row[2]
             
             print(f"{'─' * 60}")
+            print(f"📄 REGISTRO ID: {verif_id} | ESTADO: {status}")
             
+            # Show preview of encrypted data
+            preview = str(encrypted_data)[:15] + "..." if encrypted_data else "N/A"
+            print(f"   🔒 Cifrado: {preview}")
+            
+            # Attempt decryption (proof of concept)
+            try:
+                decrypted = decrypt_data(encrypted_data)
+                print(f"   🔓 REAL:    {decrypted}")
+                print("   ✅ Integridad: VERIFICADA")
+                
+            except Exception as e:
+                print(f"   ❌ ERROR DESCIFRADO: {e}")
+                print("      (La clave actual no coincide con la que cifró este dato)")
+        
+        print(f"{'─' * 60}")
+        
     except Exception as e:
-        logger.error(f"[ERROR] Database connection failed: {str(e)}")
-        print(f"❌ Error de conexión a la Base de Datos: {e}")
+        print(f"\n❌ Error conectando a la BD: {e}")
+        print("   Verifica que la base de datos esté accesible.")
         return False
+        
+    finally:
+        db.close()
     
     # ========================================================================
     # AUDIT COMPLETE
     # ========================================================================
     print("\n" + "=" * 60)
-    print("✅ AUDITORÍA FINALIZADA CON ÉXITO")
+    print("✅ AUDITORÍA FINALIZADA")
     print("=" * 60)
-    logger.info("[VAULT] Audit completed successfully")
     
     return True
 
@@ -145,18 +154,14 @@ if __name__ == "__main__":
     print("\n🔐 InmuFácil Vault Audit Tool")
     print("Provides transparency into encrypted data storage\n")
     
-    # Windows-specific event loop policy
-    if os.name == 'nt':
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-    
-    # Run async audit
     try:
-        success = asyncio.run(audit_vault())
+        success = audit_vault()
         sys.exit(0 if success else 1)
     except KeyboardInterrupt:
         print("\n\n⚠️  Auditoría interrumpida por el usuario")
         sys.exit(1)
     except Exception as e:
         print(f"\n❌ Error fatal: {str(e)}")
-        logger.exception("[FATAL] Unexpected error during audit")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
