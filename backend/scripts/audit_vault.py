@@ -35,8 +35,15 @@ print("⚙️ Cargando módulos del sistema...")
 
 # --- 3. IMPORTS (Sin Try/Except para ver errores reales) ---
 from sqlalchemy import text  # Necesario para consultas raw en SQLA 2.0
-from backend.database import SessionLocal  # Use SessionLocal directly
+from backend.database import SessionLocal, engine, Base  # Use SessionLocal directly
 from backend.core.security import decrypt_data
+
+# Import models to register them with SQLAlchemy
+import backend.models
+
+# Create tables if they don't exist
+print("🔧 Verificando estructura de base de datos...")
+Base.metadata.create_all(bind=engine)
 
 def audit_vault():
     print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA")
@@ -54,31 +61,34 @@ def audit_vault():
     try:
         print("📡 Conectado a Base de Datos. Consultando...")
         
-        # CORRECCIÓN: Usamos text() para la consulta SQL
-        sql = text("SELECT id, dni_encrypted, status FROM kyc_verifications ORDER BY id DESC LIMIT 5")
+        # CORRECCIÓN: Tabla real es 'users', columna es 'encrypted_dni'
+        sql = text("SELECT id, encrypted_dni, dni_verified FROM users ORDER BY id DESC LIMIT 5")
         result = db.execute(sql)
         rows = result.fetchall()
 
         if not rows:
-            print("📭 La tabla 'kyc_verifications' está vacía.")
+            print("📭 La tabla 'users' está vacía. No hay usuarios registrados.")
             return
         
         print(f"\n📊 Encontrados {len(rows)} registros:\n")
         
         for row in rows:
             # Acceso seguro por índice
-            rid, encrypted, status = row[0], row[1], row[2]
+            rid, encrypted, verified = row[0], row[1], row[2]
 
             print(f"{'─' * 60}")
-            print(f"📄 ID: {rid} | ESTADO: {status}")
-            print(f"   🔒 RAW: {str(encrypted)[:15]}...")
+            print(f"📄 USER ID: {rid} | DNI VERIFICADO: {verified}")
+            print(f"   🔒 RAW: {str(encrypted)[:15] if encrypted else 'N/A'}...")
             
-            try:
-                decrypted = decrypt_data(encrypted)
-                print(f"   🔓 REAL: {decrypted}")
-                print("   ✅ Integridad OK")
-            except Exception as e:
-                print(f"   ❌ Error Descifrado: {e}")
+            if encrypted:
+                try:
+                    decrypted = decrypt_data(encrypted)
+                    print(f"   🔓 REAL: {decrypted}")
+                    print("   ✅ Integridad OK")
+                except Exception as e:
+                    print(f"   ❌ Error Descifrado: {e}")
+            else:
+                print(f"   ⚠️  Usuario sin DNI cifrado")
         
         print(f"{'─' * 60}")
 
