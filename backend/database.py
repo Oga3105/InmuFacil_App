@@ -1,33 +1,42 @@
-"""
-Database configuration and session management
-"""
-
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
+import os
+from dotenv import load_dotenv
 
-# SQLite database URL for development
-# TODO: Replace with PostgreSQL in production
-SQLALCHEMY_DATABASE_URL = "sqlite:///./inmufacil.db"
+# 1.# Cargamos variables de entorno (.env)
+load_dotenv()
 
-# Create database engine
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
-    connect_args={"check_same_thread": False}  # Needed for SQLite
-)
+# Obtenemos la URL. Si no existe, fallback a SQLite local (por seguridad)
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-# Create SessionLocal class for database sessions
+# Configuración del Motor
+# Postgres no necesita 'check_same_thread', SQLite sí.
+if "sqlite" in SQLALCHEMY_DATABASE_URL:
+    print(f"[WARNING] MODO BASE DE DATOS: SQLite Local ({SQLALCHEMY_DATABASE_URL})")
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+else:
+    print("[INFO] MODO BASE DE DATOS: PostgreSQL (Docker)")
+    # Usar parámetros explícitos para evitar problemas de encoding en Windows
+    from sqlalchemy.engine.url import URL
+    db_url = URL.create(
+        drivername="postgresql+psycopg2",
+        username="inmufacil_user",
+        password="passwordSeguro123",
+        host="localhost",
+        port=5432,
+        database="inmufacil_db",
+        query={"client_encoding": "utf8"}
+    )
+    engine = create_engine(db_url)
+
+# 4. Crear Sesión y Base
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for models
 Base = declarative_base()
 
-
+# 5. Dependencia para inyección (Dependency Injection)
 def get_db():
-    """
-    Dependency function to get database session.
-    Yields a database session and ensures it's closed after use.
-    """
     db = SessionLocal()
     try:
         yield db
