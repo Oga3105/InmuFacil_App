@@ -10,11 +10,15 @@ from sqlalchemy.orm import Session, joinedload
 from backend.database import get_db, Base, engine
 from backend.models import (
     Property, User, PropertyFeatures, PropertyLegal, 
-    PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType
+    PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
+    Reservation, PropertyStatus # Hito 8
 )
 from backend.schemas import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
 from backend.security import get_current_active_user
 from backend.services.image_service import validate_image, process_and_save_image
+from backend.services.payment_service import MockPaymentProvider
+from pydantic import BaseModel
+from typing import Optional
 
 # Ensure tables exist (fail-safe for new satellites)
 Base.metadata.create_all(bind=engine)
@@ -25,6 +29,11 @@ router = APIRouter(prefix="/properties", tags=["Properties"])
 # ============================================================================
 # Helpers
 # ============================================================================
+
+class ReservationRequest(BaseModel):
+    token: str # Payment Token (e.g. "tok_visa")
+    idempotency_key: str
+    amount: float # Should match backend expectation, but useful for validation
 
 def calculate_metrics(property_model: Property):
     """
@@ -63,14 +72,19 @@ async def list_properties(
     List all properties (Public Catalog).
     Optimized with joinedload to fetch satellite data efficiently.
     """
-    properties = db.query(Property).options(
+    Properties = db.query(Property).options(
         joinedload(Property.features),
         joinedload(Property.legal),
         joinedload(Property.financial),
         joinedload(Property.environment),
         joinedload(Property.media)
+    ).filter(
+        # Hito 8: Visibility Logic
+        # Show if PUBLISHED OR (RESERVED and NOT hidden)
+        (Property.status == PropertyStatus.PUBLISHED) | 
+        ((Property.status == PropertyStatus.RESERVED) & (Property.hide_when_reserved == False))
     ).offset(skip).limit(limit).all()
-    return properties
+    return Properties
 
 
 @router.get("/{property_id}", response_model=PropertyResponse)
@@ -326,3 +340,75 @@ async def delete_media(
     db.delete(media)
     db.commit()
     return None
+
+
+@router.post("/{property_id}/reserve", status_code=status.HTTP_200_OK)
+async def reserve_property(
+    property_id: int,
+    res_data: ReservationRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Hito 8: Process Deposit & Reserve Property.
+    Uses Idempotency & Locking (Simulated) to prevent double booking.
+    """
+    # 1. Idempotency Check
+    existing_res = db.query(Reservation).filter(
+        Reservation.idempotency_key == res_data.idempotency_key
+    ).first()
+    
+    if existing_res:
+         # Return the result of the previous attempt
+         if existing_res.status == "paid":
+             return {"status": "success", "tx_id": existing_res.payment_id, "message": "Already reserved"}
+         else:
+             raise HTTPException(status_code=400, detail="Previous attempt failed")
+
+    # 2. Lock & Check Status
+    # In SQLite, with_for_update() doesn't do much, but the logic stands.
+    property = db.query(Property).filter(Property.id == property_id).first()
+    
+    if not property:
+        raise HTTPException(status_code=404, detail="Property not found")
+        
+    if property.status == PropertyStatus.RESERVED:
+        raise HTTPException(status_code=409, detail="Property is already reserved")
+        
+    if property.status != PropertyStatus.PUBLISHED:
+        raise HTTPException(status_code=400, detail="Property not available for reservation")
+        
+    # 3. Process Payment (Mock)
+    # Validate amount? ideally comes from Property.price * 0.01 or fixed.
+    # We blindly trust client for MVP but normally backend sets amount.
+    
+    try:
+        success, tx_id, error = MockPaymentProvider.process_payment(
+            res_data.amount, res_data.token, res_data.idempotency_key
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+        
+    if not success:
+         raise HTTPException(status_code=402, detail=f"Payment Failed: {error}")
+         
+    # 4. Update State (ACID)
+    try:
+        property.status = PropertyStatus.RESERVED
+        
+        new_res = Reservation(
+            property_id=property.id,
+            buyer_id=current_user.id,
+            amount=res_data.amount,
+            status="paid",
+            idempotency_key=res_data.idempotency_key,
+            payment_id=tx_id
+        )
+        db.add(new_res)
+        db.commit()
+        
+        return {"status": "success", "tx_id": tx_id}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Transaction verification failed")

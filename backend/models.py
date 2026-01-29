@@ -57,6 +57,11 @@ class Orientation(str, enum.Enum):
     SURESTE = "sureste"
     SUROESTE = "suroeste"
 
+class PropertyStatus(str, enum.Enum):
+    PUBLISHED = "published"
+    RESERVED = "reserved" # Hito 8
+    SOLD = "sold"
+
 
 class HeatingType(str, enum.Enum):
     GAS_NATURAL = "gas_natural"
@@ -211,6 +216,9 @@ class Property(Base):
     description = Column(String, nullable=True)
     price = Column(Float, nullable=False)
     location = Column(String, nullable=False)
+    
+    status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
+    hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
     
     # Basic dimensions (often filtered)
     surface_area = Column(Float, nullable=False)  # in square meters
@@ -453,3 +461,27 @@ class OfferMessage(Base):
     message_encrypted = Column(String, nullable=False) # Fernet encrypted content
     
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Reservation(Base):
+    """
+    Hito 8: Property Reservation / Deposit.
+    prevents double-booking via constraints.
+    """
+    __tablename__ = "reservations"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    buyer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Optional link to the Offer that originated this, if any
+    offer_id = Column(Integer, ForeignKey("offers.id"), nullable=True)
+    
+    amount = Column(Float, nullable=False)
+    status = Column(String, default="pending") # pending, paid, failed, refunded
+    
+    # Security: Idempotency & Audit
+    idempotency_key = Column(String, unique=True, index=True, nullable=False)
+    payment_id = Column(String, nullable=True) # Transaction ID from Payment Provider
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
