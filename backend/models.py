@@ -4,6 +4,7 @@
 
 SQLAlchemy models for InmuFácil platform.
 Implements User model with security and validation fields.
+Updated for Mission 5: Advanced Property Data Intelligence.
 """
 
 from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey
@@ -13,6 +14,10 @@ import enum
 
 from .database import Base
 
+
+# ============================================================================
+# Enums
+# ============================================================================
 
 class DNIStatus(str, enum.Enum):
     """DNI validation status enumeration"""
@@ -25,6 +30,88 @@ class UserType(str, enum.Enum):
     PARTICULAR = "particular"
     PROFESIONAL = "profesional"
 
+
+class PropertyType(str, enum.Enum):
+    PISO = "piso"
+    CHALET = "chalet"
+    LOCAL = "local"
+    OFICINA = "oficina"
+    TERRENO = "terreno"
+    EDIFICIO = "edificio"
+
+
+class OperationType(str, enum.Enum):
+    VENTA = "venta"
+    ALQUILER = "alquiler"
+    BTR = "btr"  # Build to Rent
+    INVERSION = "inversion"
+
+
+class Orientation(str, enum.Enum):
+    NORTE = "norte"
+    SUR = "sur"
+    ESTE = "este"
+    OESTE = "oeste"
+    NORESTE = "noreste"
+    NOROESTE = "noroeste"
+    SURESTE = "sureste"
+    SUROESTE = "suroeste"
+
+
+class HeatingType(str, enum.Enum):
+    GAS_NATURAL = "gas_natural"
+    ELECTRICA = "electrica"
+    CENTRAL = "central"
+    AEROTERMIA = "aerotermia"
+    OTRO = "otro"
+
+
+class ConservationState(str, enum.Enum):
+    A_ESTRENAR = "a_estrenar"
+    BUEN_ESTADO = "buen_estado"
+    A_REFORMAR = "a_reformar"
+
+
+class EnergyCertification(str, enum.Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    D = "D"
+    E = "E"
+    F = "F"
+    G = "G"
+    EXENTO = "exento"
+    EN_TRAMITE = "en_tramite"
+
+
+class ITEStatus(str, enum.Enum):
+    PASADA = "pasada"
+    PENDIENTE = "pendiente"
+    DESFAVORABLE = "desfavorable"
+    NO_OBLIGADO = "no_obligado"
+
+
+class NotaSimpleStatus(str, enum.Enum):
+    PENDING = "pending"
+    VERIFIED = "verified"
+    REJECTED = "rejected"
+
+
+class CrimeRate(str, enum.Enum):
+    BAJO = "bajo"
+    MEDIO = "medio"
+    ALTO = "alto"
+
+
+class MediaType(str, enum.Enum):
+    IMAGE = "image"
+    VIDEO = "video"
+    VIRTUAL_TOUR = "virtual_tour"
+
+
+# ============================================================================
+# User Models
+# ============================================================================
 
 class User(Base):
     """
@@ -67,7 +154,6 @@ class User(Base):
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
 
-    
     # Relationships
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")
 
@@ -89,10 +175,14 @@ class KYCVerification(Base):
     upload_date = Column(DateTime(timezone=True), server_default=func.now())
 
 
+# ============================================================================
+# Property Core & Satellites
+# ============================================================================
+
 class Property(Base):
     """
-    Property model for real estate listings.
-    Linked to a User (owner).
+    Property model (CORE). Contains essential indexing data.
+    Linked to satellite tables for extended intelligence.
     """
     __tablename__ = "properties"
 
@@ -101,10 +191,138 @@ class Property(Base):
     description = Column(String, nullable=True)
     price = Column(Float, nullable=False)
     location = Column(String, nullable=False)
+    
+    # Basic dimensions (often filtered)
     surface_area = Column(Float, nullable=False)  # in square meters
     
+    # Classification
+    property_type = Column(Enum(PropertyType), default=PropertyType.PISO, nullable=False)
+    operation_type = Column(Enum(OperationType), default=OperationType.VENTA, nullable=False)
+    
+    # Ownership
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="properties")
     
+    # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Satellite Relationships (1:1)
+    features = relationship("PropertyFeatures", back_populates="property", uselist=False, cascade="all, delete-orphan")
+    legal = relationship("PropertyLegal", back_populates="property", uselist=False, cascade="all, delete-orphan")
+    financial = relationship("PropertyFinancial", back_populates="property", uselist=False, cascade="all, delete-orphan")
+    environment = relationship("PropertyEnvironment", back_populates="property", uselist=False, cascade="all, delete-orphan")
+    
+    # Media Relationship (1:N)
+    media = relationship("PropertyMedia", back_populates="property", cascade="all, delete-orphan", order_by="PropertyMedia.order")
+
+
+class PropertyFeatures(Base):
+    """
+    Physical characteristics of the property.
+    """
+    __tablename__ = "property_features"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), unique=True, nullable=False)
+    property = relationship("Property", back_populates="features")
+    
+    bedrooms = Column(Integer, default=0)
+    bathrooms = Column(Integer, default=0)
+    construction_year = Column(Integer, nullable=True)
+    
+    orientation = Column(Enum(Orientation), nullable=True)
+    heating_type = Column(Enum(HeatingType), nullable=True)
+    
+    has_lift = Column(Boolean, default=False)
+    has_ac = Column(Boolean, default=False)
+    has_heating = Column(Boolean, default=False)
+    has_terrace = Column(Boolean, default=False)
+    has_pool = Column(Boolean, default=False)
+    has_garden = Column(Boolean, default=False)
+    
+    conservation_state = Column(Enum(ConservationState), default=ConservationState.BUEN_ESTADO)
+
+
+class PropertyLegal(Base):
+    """
+    Legal and Certification data.
+    """
+    __tablename__ = "property_legal"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), unique=True, nullable=False)
+    property = relationship("Property", back_populates="legal")
+    
+    energy_certification = Column(Enum(EnergyCertification), default=EnergyCertification.EN_TRAMITE)
+    energy_consumption_kwh_m2 = Column(Float, nullable=True)
+    emissions_kg_co2_m2 = Column(Float, nullable=True)
+    
+    ite_status = Column(Enum(ITEStatus), default=ITEStatus.PENDIENTE)
+    ite_year = Column(Integer, nullable=True)
+    
+    cadastral_reference = Column(String, nullable=True)
+    nota_simple_status = Column(Enum(NotaSimpleStatus), default=NotaSimpleStatus.PENDING)
+
+
+class PropertyFinancial(Base):
+    """
+    Financial metrics and investment data.
+    """
+    __tablename__ = "property_financial"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), unique=True, nullable=False)
+    property = relationship("Property", back_populates="financial")
+    
+    ibi_yearly_tax = Column(Float, default=0.0)
+    community_fees_monthly = Column(Float, default=0.0)
+    
+    # Investment Logic
+    estimated_rent_monthly = Column(Float, nullable=True)  # Can be auto-calculated or manual
+    gross_yield = Column(Float, nullable=True)  # (Annual Rent / Purchase Price) * 100
+    price_m2 = Column(Float, nullable=True)  # Price / Surface Area
+
+
+class PropertyEnvironment(Base):
+    """
+    Contextual data (Neighborhood Intelligence).
+    To be populated via External APIs or Data Caching.
+    """
+    __tablename__ = "property_environment"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), unique=True, nullable=False)
+    property = relationship("Property", back_populates="environment")
+    
+    # Noise (MER Data)
+    noise_level_day_db = Column(Float, nullable=True)
+    noise_level_night_db = Column(Float, nullable=True)
+    
+    # Safety
+    crime_rate_level = Column(Enum(CrimeRate), default=CrimeRate.BAJO)
+    
+    # Services
+    proximity_subway_min = Column(Integer, nullable=True)
+    proximity_school_min = Column(Integer, nullable=True)
+    healthcare_quality_index = Column(Float, nullable=True)  # 0-100 Score
+
+
+class PropertyMedia(Base):
+    """
+    Multimedia assets for property listings.
+    Supports Images (local/cloud), Videos (links), Tours (links).
+    """
+    __tablename__ = "property_media"
+
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    property = relationship("Property", back_populates="media")
+    
+    media_type = Column(Enum(MediaType), default=MediaType.IMAGE, nullable=False)
+    file_path = Column(String, nullable=False)  # Local path or URL
+    
+    is_main = Column(Boolean, default=False)  # Cover image
+    order = Column(Integer, default=0)
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
