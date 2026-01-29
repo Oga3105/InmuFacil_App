@@ -203,7 +203,7 @@ async def health_check():
         "status": "active",
         "system": "InmuFácil Shield",
         "database": db_status,
-        "modules": ["Auth", "Users", "KYC", "Properties"]
+        "modules": ["Auth", "Users", "KYC", "Properties", "Visits"]
     }
 
 
@@ -211,13 +211,14 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.routers import auth, users, kyc, properties
+from backend.routers import auth, users, kyc, properties, visits
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(users.router, prefix="/users", tags=["Users", "Admin"])
 app.include_router(kyc.router, prefix="/kyc", tags=["KYC", "Admin"])
 app.include_router(properties.router)
+app.include_router(visits.router)
 
 
 if __name__ == "__main__":

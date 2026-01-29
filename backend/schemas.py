@@ -233,3 +233,73 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     email: Optional[str] = None
     user_id: Optional[int] = None
+
+
+
+# ============================================================================
+# Visits System Schemas
+# ============================================================================
+
+class VisitWindowCreate(BaseModel):
+    """
+    Schema for creating a visit availability window.
+    """
+    property_id: int
+    start_time: datetime
+    end_time: datetime
+    slot_duration_minutes: int = 20
+
+    @validator('end_time')
+    def validate_times(cls, v, values):
+        if 'start_time' in values and v <= values['start_time']:
+            raise ValueError('end_time must be after start_time')
+        return v
+
+
+class VisitWindowResponse(BaseModel):
+    id: int
+    property_id: int
+    start_time: datetime
+    end_time: datetime
+    slot_duration_minutes: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class VisitSlotResponse(BaseModel):
+    """
+    Calculated available slot.
+    """
+    start_time: datetime
+    end_time: datetime
+    is_available: bool = True
+    window_id: int
+
+
+class VisitRequest(BaseModel):
+    """
+    Buyer request to book a specific slot.
+    """
+    window_id: int
+    start_time: datetime
+
+
+class VisitAppointmentResponse(BaseModel):
+    """
+    Full appointment details.
+    """
+    id: int
+    window_id: int
+    buyer_id: int
+    start_time: datetime
+    status: str # requested, approved, rejected
+    created_at: datetime
+    
+    # Optional: include basic user/property info if needed, but keeping it light for now
+    
+    class Config:
+        from_attributes = True
+
+
