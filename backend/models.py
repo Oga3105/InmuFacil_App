@@ -7,7 +7,7 @@ Implements User model with security and validation fields.
 Updated for Mission 5: Advanced Property Data Intelligence.
 """
 
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -115,6 +115,14 @@ class VisitStatus(str, enum.Enum):
     # Execution States
     COMPLETED = "completed"
     NO_SHOW = "no_show"
+    CANCELLED = "cancelled"
+
+
+class OfferStatus(str, enum.Enum):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    EXPIRED = "expired"
     CANCELLED = "cancelled"
 
 
@@ -382,4 +390,27 @@ class VisitAppointment(Base):
     start_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(Enum(VisitStatus), default=VisitStatus.REQUESTED, nullable=False)
     
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PropertyOffer(Base):
+    """
+    Formal offer made by a Buyer for a Property.
+    Transparent: Seller sees Amount + Buyer Identity + Conditions.
+    """
+    __tablename__ = "offers"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    # Removing backref here to avoid conflict if defined elsewhere or redefining relationships
+    # Using simple foreign keys for now, backrefs defined in Property/User if needed or transparently here
+    # Actually, let's keep it simple and clean.
+    
+    buyer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    amount = Column(Float, nullable=False) 
+    conditions = Column(Text, nullable=True)
+    status = Column(Enum(OfferStatus), default=OfferStatus.PENDING, nullable=False)
+    
+    valid_until = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
