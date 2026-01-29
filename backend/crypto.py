@@ -17,7 +17,7 @@ import os
 import base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from typing import Optional
 import logging
 
@@ -51,7 +51,7 @@ def get_encryption_key() -> bytes:
         secret = "dev-secret-change-in-production-12345678"
     
     # Use PBKDF2 to derive a 256-bit key
-    kdf = PBKDF2(
+    kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,  # 256 bits
         salt=b"inmufacil-salt-v1",  # Static salt (acceptable for this use case)

@@ -124,6 +124,8 @@ class OfferStatus(str, enum.Enum):
     REJECTED = "rejected"
     EXPIRED = "expired"
     CANCELLED = "cancelled"
+    COUNTERED = "countered"
+    PAUSED = "paused" # For when another offer is accepted
 
 
 # ============================================================================
@@ -412,5 +414,42 @@ class PropertyOffer(Base):
     conditions = Column(Text, nullable=True)
     status = Column(Enum(OfferStatus), default=OfferStatus.PENDING, nullable=False)
     
+    
     valid_until = Column(DateTime(timezone=True))
+    is_chat_enabled = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # History & Chat
+    history = relationship("OfferHistory", backref="offer", cascade="all, delete-orphan")
+    messages = relationship("OfferMessage", backref="offer", cascade="all, delete-orphan")
+
+
+class OfferHistory(Base):
+    """
+    Audit log for negotiation steps (The 'Legal' truth).
+    """
+    __tablename__ = "offer_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    offer_id = Column(Integer, ForeignKey("offers.id"), nullable=False)
+    
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action = Column(String, nullable=False) # MAKE, COUNTER, ACCEPT, REJECT
+    amount = Column(Float, nullable=True) # Snapshot of amount at that time
+    
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class OfferMessage(Base):
+    """
+    Encrypted chat messages between Buyer and Seller for a specific offer.
+    """
+    __tablename__ = "offer_messages"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    offer_id = Column(Integer, ForeignKey("offers.id"), nullable=False)
+    
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    message_encrypted = Column(String, nullable=False) # Fernet encrypted content
+    
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())

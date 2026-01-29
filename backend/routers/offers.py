@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, condecimal
 
 from backend.database import get_db
-from backend.models import User, Property, PropertyOffer, OfferStatus
+from backend.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
 from backend.security import get_current_active_user
+from backend.crypto import encrypt_data, decrypt_data
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
 
@@ -34,6 +35,21 @@ class OfferResponse(BaseModel):
     status: str
     valid_until: Optional[datetime]
     created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class OfferCounter(BaseModel):
+    amount: float
+
+class ChatMessageCreate(BaseModel):
+    message: str
+
+class ChatMessageResponse(BaseModel):
+    id: int
+    sender_id: int
+    message: str # Decrypted
+    timestamp: datetime
     
     class Config:
         from_attributes = True
@@ -118,3 +134,151 @@ async def list_received_offers(
     return db.query(PropertyOffer).join(Property).filter(
         Property.owner_id == current_user.id
     ).all()
+
+
+@router.post("/{offer_id}/counter", response_model=OfferResponse)
+async def counter_offer(
+    offer_id: int,
+    counter_data: OfferCounter,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Seller sends a counter-offer.
+    Updates Offer Status and logs History.
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    # Verify Owner
+    if offer.property.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only owner can counter")
+        
+    if offer.status not in [OfferStatus.PENDING, OfferStatus.COUNTERED]:
+        raise HTTPException(status_code=400, detail="Cannot counter a closed offer")
+
+    # Update Logic
+    offer.status = OfferStatus.COUNTERED
+    offer.amount = counter_data.amount
+    
+    # Log History
+    history = OfferHistory(
+        offer_id=offer.id,
+        actor_id=current_user.id,
+        action="COUNTER",
+        amount=counter_data.amount
+    )
+    db.add(history)
+    db.commit()
+    db.refresh(offer)
+    return offer
+
+
+@router.post("/{offer_id}/chat/enable", status_code=status.HTTP_200_OK)
+async def enable_chat(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Seller enables chat for this offer.
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    if offer.property.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only owner can enable chat")
+        
+    offer.is_chat_enabled = True
+    db.commit()
+    return {"status": "chat_enabled"}
+
+
+@router.post("/{offer_id}/chat", response_model=ChatMessageResponse)
+async def send_chat_message(
+    offer_id: int,
+    msg_data: ChatMessageCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Send encrypted message.
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    
+    # Access Control: Sender must be Buyer or Owner
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+    
+    if not (is_owner or is_buyer):
+         raise HTTPException(status_code=403, detail="Not authorized")
+         
+    # Logic: Chat Enabled?
+    if not offer.is_chat_enabled:
+        # Auto-enable if Owner speaks first? Let's stick to explicit enable for MVP as per plan
+        if is_owner:
+             pass # Owner override? No, strict to plan: Enable first.
+        raise HTTPException(status_code=403, detail="Chat is disabled by seller")
+
+    # Encrypt
+    encrypted_text = encrypt_data(msg_data.message)
+    
+    msg = OfferMessage(
+        offer_id=offer.id,
+        sender_id=current_user.id,
+        message_encrypted=encrypted_text
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    
+    # Return decrypted for response (it's the sender, they know what they sent)
+    return ChatMessageResponse(
+        id=msg.id,
+        sender_id=msg.sender_id,
+        message=msg_data.message,
+        timestamp=msg.timestamp
+    )
+
+
+@router.get("/{offer_id}/chat", response_model=List[ChatMessageResponse])
+async def get_chat_history(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get and decrypt chat history.
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    # Access Control
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+    
+    if not (is_owner or is_buyer):
+         raise HTTPException(status_code=403, detail="Not authorized")
+         
+    messages = db.query(OfferMessage).filter(OfferMessage.offer_id == offer.id).order_by(OfferMessage.timestamp.asc()).all()
+    
+    response = []
+    for m in messages:
+        try:
+            plaintext = decrypt_data(m.message_encrypted)
+        except:
+            plaintext = "[Error Decrypting]"
+            
+        response.append(ChatMessageResponse(
+            id=m.id,
+            sender_id=m.sender_id,
+            message=plaintext,
+            timestamp=m.timestamp
+        ))
+        
+    return response
