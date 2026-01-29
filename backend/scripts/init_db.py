@@ -5,7 +5,7 @@ import time
 
 # Configurar codificación UTF-8 para Windows y desactivar lectura de archivos de config
 if sys.platform == "win32":
-    os.environ['PGCLIENTENCODING'] = 'UTF8'
+    os.environ['PGCLIENTENCODING'] = 'latin-1'
     # Desactivar lectura de archivos de configuración de PostgreSQL
     os.environ['PGSYSCONFDIR'] = ''
     os.environ['PGSERVICEFILE'] = ''
