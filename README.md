@@ -35,9 +35,35 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ CRUD Vendedor (Publicación y Gestión)
   - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
   - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
-- 🎯 **Hito 4:** Sistema de Visitas en Bloque (Próximo)
+- ✅ **Hito 3:** Módulo de Propiedades e Inteligencia de Datos
+  - ✅ CRUD Vendedor (Publicación y Gestión)
+  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
+  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
+- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
+  - ✅ Ventanas de Disponibilidad (Vendedor)
+  - ✅ Algoritmo de Slots Dinámicos (Comprador)
+  - ✅ Gestión de Citas (Approve/Reject)
+- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
+  - ✅ Anti-Malware (MIME Type Validation)
+  - ✅ Bloqueo de Fuerza Bruta (Automated)
+  - ✅ Tests de Prevención IDOR
 
-- 🔜 **Hitos 4-15:** En planificación
+- ✅ **Hito 5:** Realización de Visitas (Ejecución)
+  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
+  - ✅ Dashboard (Agenda de Vendedor/Comprador)
+  - ✅ Defensa de Roles (Solo el dueño valida la visita)
+
+- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
+  - ✅ Modelo de Ofertas Transparentes
+  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
+  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
+
+- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
+  - ✅ Protocolo de Contraofertas (Historial Auditado)
+  - ✅ Chat Encriptado (Opcional, Defense in Depth)
+  - ✅ Modelo de Cierre (Accept/Reject)
+
+- 🎯 **Hito 8:** Reserva y Señal (Siguiente Paso)
 
 **Rama Activa:** `develop`  
 **Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`

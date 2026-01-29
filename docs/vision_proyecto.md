@@ -122,11 +122,11 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 1. ✅ **Publicación de Inmueble** - El vendedor crea y publica su propiedad
 2. ✅ **Búsqueda y Filtrado** - Compradores encuentran propiedades de interés
 3. 🔄 **Solicitud de Visita** - Compradores solicitan visitas a inmuebles
-4. 🔄 **Coordinación de Visitas en Bloque** - Sistema agrupa visitas eficientemente
-5. 🔜 **Realización de Visitas** - Visitas presenciales coordinadas
-6. 🔜 **Manifestación de Interés** - Comprador expresa interés formal
-7. 🔜 **Negociación de Precio** - Comunicación directa vendedor-comprador
-8. 🔜 **Reserva del Inmueble** - Comprador reserva con señal económica
+4. ✅ **Coordinación de Visitas en Bloque** - Sistema agrupa visitas eficientemente
+5. ✅ **Realización de Visitas** - Dashboard de ejecución y estados seguros
+6. ✅ **Manifestación de Interés** - Ofertas Transparentes formalizadas
+7. ✅ **Negociación de Precio** - Protocolo de Contraofertas + Chat Encriptado
+8. 🎯 **Reserva del Inmueble** - Comprador reserva con señal económica
 9. 🔜 **Verificación Documental** - Validación de documentación legal
 10. 🔜 **Tasación del Inmueble** - Valoración profesional del inmueble
 11. 🔜 **Solicitud de Hipoteca** - Gestión de financiación bancaria
