@@ -11,12 +11,14 @@ from backend.database import get_db, Base, engine
 from backend.models import (
     Property, User, PropertyFeatures, PropertyLegal, 
     PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
-    Reservation, PropertyStatus, PropertyType, OperationType # Hito 8 + Search
+    Reservation, PropertyStatus, PropertyType, OperationType, # Hito 8 + Search
+    PropertyDocument, DocumentType # Hito 9
 )
 from backend.schemas import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
 from backend.security import get_current_active_user
 from backend.services.image_service import validate_image, process_and_save_image
 from backend.services.payment_service import MockPaymentProvider
+from backend.services.document_service import process_document, get_decrypted_document, ComplianceError
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import or_
@@ -476,3 +478,103 @@ async def reserve_property(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Transaction verification failed")
+
+
+# ============================================================================
+# Hito 9: Compliance & Documents
+# ============================================================================
+
+@router.post("/{property_id}/documents", status_code=status.HTTP_201_CREATED)
+async def upload_document(
+    property_id: int,
+    doc_type: DocumentType = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Secure Upload of Legal Documents (Nota Simple, etc).
+    Encrypts content at rest and performs OCR for validation.
+    """
+    property = verify_property_ownership(db, property_id, current_user.id)
+    
+    try:
+        # Use Secure Service (Encryption + OCR)
+        result = process_document(file, property_id, doc_type.value)
+        
+        # Check Compliance (OCR Logic)
+        status_doc = "verified" # Default for now
+        metadata_str = ""
+        
+        if "metadata" in result and result["metadata"]:
+            import json
+            metadata_str = json.dumps(result["metadata"])
+            
+            # Auto-Verify if Catastral Ref matches?
+            # For now just store metadata.
+            
+        new_doc = PropertyDocument(
+            property_id=property.id,
+            doc_type=doc_type,
+            filename=file.filename,
+            file_path=result["file_path"],
+            is_encrypted=True,
+            status=status_doc,
+            extracted_metadata=metadata_str
+        )
+        db.add(new_doc)
+        db.commit()
+        db.refresh(new_doc)
+        
+        return {"id": new_doc.id, "status": status_doc, "metadata": result["metadata"]}
+        
+    except ComplianceError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Upload processing failed: {str(e)}")
+
+@router.get("/{property_id}/documents")
+async def list_documents(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    List compliance documents (Metadata Only).
+    """
+    property = verify_property_ownership(db, property_id, current_user.id)
+    
+    docs = db.query(PropertyDocument).filter(PropertyDocument.property_id == property_id).all()
+    return docs
+
+@router.get("/documents/{doc_id}/download")
+async def download_document(
+    doc_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Secure Download: Decrypts file on the fly and streams it.
+    """
+    doc = db.query(PropertyDocument).join(Property).filter(PropertyDocument.id == doc_id).first()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    # Access Control: Owner or Admin (Admin logic not here yet, assuming Owner)
+    if doc.property.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    try:
+        # Decrypt
+        decrypted_bytes = get_decrypted_document(doc.file_path)
+        
+        from fastapi.responses import Response
+        # Return as downloadable stream
+        return Response(
+            content=decrypted_bytes,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={doc.filename}"}
+        )
+    except Exception:
+         raise HTTPException(status_code=500, detail="Decryption failed")

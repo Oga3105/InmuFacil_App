@@ -63,6 +63,14 @@ class PropertyStatus(str, enum.Enum):
     SOLD = "sold"
 
 
+class DocumentType(str, enum.Enum):
+    NOTA_SIMPLE = "nota_simple"
+    CERTIFICADO_ENERGETICO = "certificado_energetico"
+    RECIBO_IBI = "recibo_ibi"
+    ESTATUTOS = "estatutos"
+    OTRO = "otro"
+
+
 class HeatingType(str, enum.Enum):
     GAS_NATURAL = "gas_natural"
     ELECTRICA = "electrica"
@@ -246,6 +254,9 @@ class Property(Base):
     
     # Visits Relationship (1:N)
     visit_windows = relationship("VisitWindow", back_populates="property", cascade="all, delete-orphan")
+    
+    # Compliance Documents (1:N)
+    documents = relationship("PropertyDocument", back_populates="property", cascade="all, delete-orphan")
 
 
 class PropertyFeatures(Base):
@@ -485,3 +496,28 @@ class Reservation(Base):
     payment_id = Column(String, nullable=True) # Transaction ID from Payment Provider
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class PropertyDocument(Base):
+    """
+    Hito 9: Compliance Documents (Nota Simple, etc).
+    Encrypted at rest if sensitive (Nota Simple).
+    """
+    __tablename__ = "property_documents"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(Integer, ForeignKey("properties.id"), nullable=False)
+    property = relationship("Property", back_populates="documents")
+    
+    doc_type = Column(Enum(DocumentType), nullable=False)
+    filename = Column(String, nullable=False)
+    
+    # Security: Encrypted Content (Blob) or Path
+    file_path = Column(String, nullable=False) # Path to encrypted file
+    is_encrypted = Column(Boolean, default=True) 
+    
+    # Compliance
+    status = Column(String, default="pending") # pending, verified, rejected
+    extracted_metadata = Column(Text, nullable=True) # JSON with OCR results
+    
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
