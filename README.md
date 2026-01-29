@@ -31,7 +31,12 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ Misión 6: Security Breach Remediation
   - ✅ Misión 7: Automated DNI Redaction (100% opacity verified)
   - ✅ Misión 8: API Frontend Integration (Secure CORS)
-- 🎯 **Hito 3:** Endpoints de Autenticación JWT (Próximo)
+- ✅ **Hito 3:** Módulo de Propiedades e Inteligencia de Datos
+  - ✅ CRUD Vendedor (Publicación y Gestión)
+  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
+  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
+- 🎯 **Hito 4:** Sistema de Visitas en Bloque (Próximo)
+
 - 🔜 **Hitos 4-15:** En planificación
 
 **Rama Activa:** `develop`  
@@ -323,6 +328,10 @@ InmuFacil_Project/
 │   └── services/
 │       ├── email_service.py # MFA tokens
 │       └── kyc_service.py   # DNI processing
+│   ├── routers/
+│   │   ├── users.py         # User & Admin routes
+│   │   ├── kyc.py           # KYC routes
+│   │   └── properties.py    # Properties routes (Core + Satellites)
 ├── tests/
 │   ├── test_auth.py         # Authentication tests
 │   └── test_filters.py      # Filter tests
