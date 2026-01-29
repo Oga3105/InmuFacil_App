@@ -11,7 +11,7 @@ from backend.database import get_db, Base, engine
 from backend.models import (
     Property, User, PropertyFeatures, PropertyLegal, 
     PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
-    Reservation, PropertyStatus # Hito 8
+    Reservation, PropertyStatus, PropertyType, OperationType # Hito 8 + Search
 )
 from backend.schemas import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
 from backend.security import get_current_active_user
@@ -19,6 +19,7 @@ from backend.services.image_service import validate_image, process_and_save_imag
 from backend.services.payment_service import MockPaymentProvider
 from pydantic import BaseModel
 from typing import Optional
+from sqlalchemy import or_
 
 # Ensure tables exist (fail-safe for new satellites)
 Base.metadata.create_all(bind=engine)
@@ -66,25 +67,88 @@ def verify_property_ownership(db: Session, property_id: int, user_id: int) -> Pr
 async def list_properties(
     skip: int = 0, 
     limit: int = 100, 
+    q: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
+    property_type: Optional[PropertyType] = None,
+    operation_type: Optional[OperationType] = None,
+    # Features
+    min_surface: Optional[float] = None,
+    bedrooms: Optional[int] = None,
+    has_elevator: Optional[bool] = None,
+    has_pool: Optional[bool] = None,
+    has_terrace: Optional[bool] = None,
+    has_garage: Optional[bool] = None,
     db: Session = Depends(get_db)
 ):
     """
-    List all properties (Public Catalog).
-    Optimized with joinedload to fetch satellite data efficiently.
+    List properties with Advanced Filtering (Dynamic Query Builder).
+    Supports: Price Range, Text Search, Type, and Features (Pool, etc).
     """
-    Properties = db.query(Property).options(
+    # 1. Start Query with Joins for Satellites (Left Join for filtering)
+    query = db.query(Property).outerjoin(PropertyFeatures).options(
         joinedload(Property.features),
         joinedload(Property.legal),
         joinedload(Property.financial),
         joinedload(Property.environment),
         joinedload(Property.media)
-    ).filter(
-        # Hito 8: Visibility Logic
-        # Show if PUBLISHED OR (RESERVED and NOT hidden)
+    )
+    
+    # 2. Logic: Visibility (Hito 8)
+    query = query.filter(
         (Property.status == PropertyStatus.PUBLISHED) | 
         ((Property.status == PropertyStatus.RESERVED) & (Property.hide_when_reserved == False))
-    ).offset(skip).limit(limit).all()
-    return Properties
+    )
+    
+    # 3. Dynamic Filters
+    
+    # Text Search (Title or Location)
+    if q:
+        search = f"%{q}%"
+        query = query.filter(
+            or_(
+                Property.title.ilike(search),
+                Property.location.ilike(search)
+            )
+        )
+        
+    # Price
+    if min_price is not None:
+        query = query.filter(Property.price >= min_price)
+    if max_price is not None:
+        query = query.filter(Property.price <= max_price)
+        
+    # Types
+    if property_type:
+        query = query.filter(Property.property_type == property_type)
+    if operation_type:
+        query = query.filter(Property.operation_type == operation_type)
+        
+    # Surface
+    if min_surface:
+        query = query.filter(Property.surface_area >= min_surface)
+        
+    # Features (Require Join with PropertyFeatures)
+    if bedrooms:
+        query = query.filter(PropertyFeatures.bedrooms >= bedrooms)
+        
+    # Boolean Features
+    # Note: If record is NULL (no features), it counts as False
+    if has_pool:
+        query = query.filter(PropertyFeatures.has_pool == True)
+        
+    if has_terrace:
+        query = query.filter(PropertyFeatures.has_terrace == True)
+        
+    if has_garage:
+        query = query.filter(PropertyFeatures.has_garage == True)
+        
+    if has_elevator:
+        query = query.filter(PropertyFeatures.has_elevator == True)
+
+    # 4. Execute
+    properties = query.offset(skip).limit(limit).all()
+    return properties
 
 
 @router.get("/{property_id}", response_model=PropertyResponse)
