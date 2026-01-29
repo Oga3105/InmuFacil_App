@@ -122,16 +122,20 @@ async def list_visit_requests(
     return requests
 
 
-@router.put("/{appointment_id}/status", response_model=VisitAppointmentResponse)
+@router.patch("/{appointment_id}/status", response_model=VisitAppointmentResponse)
 async def update_visit_status(
     appointment_id: int,
-    new_status: str, # approved, rejected
+    new_status: str, 
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Seller approves or rejects a visit.
-    NOTE: If approved, should trigger notification (Email service).
+    Update visit status with Security & State Machine Enforcement.
+    
+    Transitions:
+    - REQUESTED -> APPROVED/REJECTED (Seller)
+    - REQUESTED/APPROVED -> CANCELLED (Buyer/Seller)
+    - APPROVED -> COMPLETED/NO_SHOW (Seller ONLY)
     """
     appointment = db.query(VisitAppointment).join(VisitWindow).join(Property).filter(
         VisitAppointment.id == appointment_id
@@ -140,16 +144,72 @@ async def update_visit_status(
     if not appointment:
         raise HTTPException(status_code=404, detail="Appointment not found")
         
-    if appointment.window.property.owner_id != current_user.id:
+    is_seller = appointment.window.property.owner_id == current_user.id
+    is_buyer = appointment.buyer_id == current_user.id
+    
+    if not (is_seller or is_buyer):
         raise HTTPException(status_code=403, detail="Not authorized")
+
+    current_status = appointment.status
+    
+    # 1. State Machine Logic
+    # ----------------------------------------------------------------
+    
+    # CANCELLED (Universal)
+    if new_status == VisitStatus.CANCELLED:
+        if current_status in [VisitStatus.COMPLETED, VisitStatus.NO_SHOW, VisitStatus.REJECTED]:
+             raise HTTPException(status_code=400, detail="Cannot cancel finalized visit")
+        # Proceed
         
-    if new_status not in [VisitStatus.APPROVED, VisitStatus.REJECTED]:
-        raise HTTPException(status_code=400, detail="Invalid status")
-        
+    # SELLER ACTIONS
+    elif is_seller:
+        if new_status in [VisitStatus.APPROVED, VisitStatus.REJECTED]:
+            if current_status != VisitStatus.REQUESTED:
+                raise HTTPException(status_code=400, detail=f"Cannot change from {current_status} to {new_status}")
+                
+        elif new_status in [VisitStatus.COMPLETED, VisitStatus.NO_SHOW]:
+            if current_status != VisitStatus.APPROVED:
+                raise HTTPException(status_code=400, detail="Visit must be APPROVED before completion")
+        else:
+             raise HTTPException(status_code=400, detail="Invalid status for Seller")
+
+    # BUYER ACTIONS
+    elif is_buyer:
+        if new_status == VisitStatus.CANCELLED:
+             pass # Allowed checks done above
+        else:
+            raise HTTPException(status_code=403, detail="Buyer can only CANCEL visits")
+            
+    # 2. Update
     appointment.status = new_status
     db.commit()
     db.refresh(appointment)
     return appointment
+
+
+@router.get("/agenda", response_model=List[VisitAppointmentResponse])
+async def get_visit_agenda(
+    role: str = "seller", # seller / buyer
+    status_filter: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Dashboard Agenda: List visits based on role.
+    """
+    query = db.query(VisitAppointment).join(VisitWindow).join(Property)
+    
+    if role == "seller":
+        query = query.filter(Property.owner_id == current_user.id)
+    elif role == "buyer":
+        query = query.filter(VisitAppointment.buyer_id == current_user.id)
+    else:
+        raise HTTPException(status_code=400, detail="Invalid role")
+        
+    if status_filter:
+        query = query.filter(VisitAppointment.status == status_filter)
+        
+    return query.order_by(VisitAppointment.start_time.asc()).all()
 
 
 # ============================================================================

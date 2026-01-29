@@ -112,6 +112,10 @@ class VisitStatus(str, enum.Enum):
     REQUESTED = "requested"
     APPROVED = "approved"
     REJECTED = "rejected"
+    # Execution States
+    COMPLETED = "completed"
+    NO_SHOW = "no_show"
+    CANCELLED = "cancelled"
 
 
 # ============================================================================
