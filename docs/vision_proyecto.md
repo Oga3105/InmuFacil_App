@@ -107,13 +107,17 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Escudo Anti-Agencias activo
 - ✅ Audit logging sin datos sensibles
 
+**Hito 8: Reserva y Señal (Payment Mock)** ✅
+- ✅ Gestión de Pagos (Mock Provider)
+- ✅ Bloqueo de Concurrencia (Idempotencia)
+- ✅ Visibilidad Configurable
+
 ### Próximo Hito 🎯
 
-**Hito 3: Activación de Bóveda** (Próximo paso crítico)
-- Endpoints de autenticación (Login/Register)
-- Integración completa del flujo KYC
-- JWT token generation
-- Password reset con MFA
+**Hito 9: Verificación Documental** (Compliance)
+- Subida de Nota Simple
+- Validación Jurídica
+- OCR para documentos legales
 
 ---
 
@@ -126,8 +130,8 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 5. ✅ **Realización de Visitas** - Dashboard de ejecución y estados seguros
 6. ✅ **Manifestación de Interés** - Ofertas Transparentes formalizadas
 7. ✅ **Negociación de Precio** - Protocolo de Contraofertas + Chat Encriptado
-8. 🎯 **Reserva del Inmueble** - Comprador reserva con señal económica
-9. 🔜 **Verificación Documental** - Validación de documentación legal
+8. ✅ **Reserva del Inmueble** - Comprador reserva con señal y bloqueo
+9. 🎯 **Verificación Documental** - Validación de documentación legal
 10. 🔜 **Tasación del Inmueble** - Valoración profesional del inmueble
 11. 🔜 **Solicitud de Hipoteca** - Gestión de financiación bancaria
 12. 🔜 **Elaboración de Contrato** - Generación de contrato de compraventa
@@ -230,5 +234,5 @@ InmuFácil aspira a convertirse en la plataforma de referencia para la compraven
 ---
 
 *Documento de Visión - InmuFácil Project*  
-*Versión 2.0 - Enero 2026*  
-*Actualizado con DevSecOps Standards - Hito 2 Completado*
+*Versión 8.0 - Enero 2026*  
+*Actualizado con DevSecOps Standards - Hito 8 Completado*

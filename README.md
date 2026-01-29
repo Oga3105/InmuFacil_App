@@ -20,7 +20,7 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** 🔐 **Hito 2 - Validación de Identidad** ✅ COMPLETADO Y VERIFICADO
+**Hito Actual:** 🔐 **Hito 8 - Reserva y Señal** ✅ COMPLETADO Y VERIFICADO
 
 **API Version:** `0.4.0` - Frontend-Ready
 
@@ -35,10 +35,7 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ CRUD Vendedor (Publicación y Gestión)
   - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
   - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
-- ✅ **Hito 3:** Módulo de Propiedades e Inteligencia de Datos
-  - ✅ CRUD Vendedor (Publicación y Gestión)
-  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
-  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
+
 - ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
   - ✅ Ventanas de Disponibilidad (Vendedor)
   - ✅ Algoritmo de Slots Dinámicos (Comprador)
@@ -58,12 +55,23 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ Reglas de Negocio (Anti-Auto-Oferta)
   - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
 
+- ✅ **Hito: Búsqueda Avanzada (Extra)**
+  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
+  - ✅ Búsqueda Combinatoria (Features + Core)
+  - ✅ TDD (`tests/test_search_logic.py`)
+
 - ✅ **Hito 7:** Negociación y Cierre (Híbrido)
   - ✅ Protocolo de Contraofertas (Historial Auditado)
   - ✅ Chat Encriptado (Opcional, Defense in Depth)
   - ✅ Modelo de Cierre (Accept/Reject)
 
-- 🎯 **Hito 8:** Reserva y Señal (Siguiente Paso)
+- ✅ **Hito 8:** Reserva y Señal (Híbrido)
+  - ✅ Modelo de Reservas e Idempotencia
+  - ✅ Mock Payment Provider (Simulación Financiera)
+  - ✅ Bloqueo de Concurrencia (Race Conditions)
+  - ✅ Configuración de Visibilidad (Hide when Reserved)
+
+- 🎯 **Hito 9:** Verificación Documental (Siguiente Paso)
 
 **Rama Activa:** `develop`  
 **Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`
