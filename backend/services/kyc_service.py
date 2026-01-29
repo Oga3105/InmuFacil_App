@@ -155,6 +155,37 @@ def validate_file_type(file_path: str, original_filename: str) -> Tuple[bool, st
         return False, "Error decoding image or unsupported format."
 
 
+def validate_mime_type(file):
+    """
+    Validate MIME type using python-magic (Libmagic).
+    Checks the actual file content, not just extension.
+    Raises HTTPException if invalid.
+    
+    Args:
+        file: UploadFile object or similar with .file interface (read/seek)
+    """
+    import magic
+    from fastapi import HTTPException
+    
+    # Read initial bytes to guess MIME
+    initial_pos = file.file.tell()
+    header = file.file.read(2048)
+    file.file.seek(initial_pos) # Reset pointer
+    
+    mime = magic.Magic(mime=True)
+    detected_type = mime.from_buffer(header)
+    
+    if detected_type not in ALLOWED_MIME_TYPES:
+        logger.warning(f"[BLOCKED] Invalid MIME type detected: {detected_type}")
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid file type ({detected_type}). Only images allowed."
+        )
+    
+    logger.info(f"[OK] MIME validated: {detected_type}")
+    return True
+
+
 def validate_file_size(file_path: str) -> Tuple[bool, str]:
     """
     Validate file size is within limits.
