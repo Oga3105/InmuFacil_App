@@ -24,10 +24,10 @@ else:
         drivername="postgresql+psycopg2",
         username="inmufacil_user",
         password="passwordSeguro123",
-        host="localhost",
+        host="127.0.0.1",
         port=5432,
         database="inmufacil_db",
-        query={"client_encoding": "utf8"}
+        query={"client_encoding": "latin1"}
     )
     engine = create_engine(db_url)
 

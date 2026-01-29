@@ -47,12 +47,14 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     """
     Schema for user profile updates.
-    All fields are optional to allow partial updates.
+    RESTRICTION: Email cannot be updated via this endpoint.
     
-    RLS Policy: Users can only update their own profile
+    Allowed fields:
+    - full_name
+    - phone (will be encrypted on server side)
     """
     full_name: Optional[str] = Field(None, min_length=3, max_length=100)
-    email: Optional[EmailStr] = None
+    phone: Optional[str] = Field(None, min_length=9, max_length=15)
 
 
 class UserResponse(UserBase):
@@ -63,13 +65,16 @@ class UserResponse(UserBase):
     - Does NOT include hashed_password
     - Does NOT include sensitive internal fields
     - Safe to return to clients
-    
-    RLS Policy: Users can only view their own profile data
     """
     id: int
     dni_status: str
+    is_active: bool = True
     created_at: datetime
     updated_at: Optional[datetime] = None
+    
+    # New Fields for KYC Feedback & Profile Editing
+    rejection_reason: Optional[str] = None
+    phone: Optional[str] = None  # Decrypted phone number (if available/allowed)
 
     class Config:
         from_attributes = True  # Allows conversion from SQLAlchemy models
@@ -77,17 +82,68 @@ class UserResponse(UserBase):
 
 class UserInDB(UserBase):
     """
-    Schema representing user data as stored in database.
-    Used internally only, NEVER returned to clients.
-    
-    Security Notes:
-    - Includes hashed_password for authentication
-    - Only used for internal operations
-    - Never exposed via API endpoints
+    Internal use only.
     """
     id: int
     hashed_password: str
     dni_status: str
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ============================================================================
+# KYC Schemas
+# ============================================================================
+
+class KYCStatusUpdate(BaseModel):
+    """
+    Schema for Admin KYC review operations.
+    """
+    status: str = Field(..., pattern="^(validado|rechazado)$")
+    rejection_reason: Optional[str] = None
+
+
+class KYCUploadResponse(BaseModel):
+    """
+    Response after successful document upload.
+    """
+    filename: str
+    status: str
+    message: str
+
+
+# ============================================================================
+# Property Schemas
+# ============================================================================
+
+class PropertyBase(BaseModel):
+    """
+    Base schema for properties.
+    """
+    title: str = Field(..., min_length=5, max_length=200)
+    description: Optional[str] = None
+    price: float = Field(..., gt=0)
+    location: str = Field(..., min_length=3, max_length=200)
+    surface_area: float = Field(..., gt=0)
+
+
+class PropertyCreate(PropertyBase):
+    """
+    Schema for property creation. 
+    Owner ID is automatically assigned from the authenticated user.
+    """
+    pass
+
+
+class PropertyResponse(PropertyBase):
+    """
+    Schema for property details in responses.
+    """
+    id: int
+    owner_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -102,7 +158,6 @@ class UserInDB(UserBase):
 class Token(BaseModel):
     """
     JWT token response schema.
-    Returned after successful login.
     """
     access_token: str
     token_type: str = "bearer"
@@ -119,7 +174,6 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """
     Token payload data (decoded JWT).
-    Used internally for authentication.
     """
     email: Optional[str] = None
     user_id: Optional[int] = None

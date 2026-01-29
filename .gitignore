@@ -70,3 +70,5 @@ Thumbs.db
 *.pem
 *.key
 secrets/
+
+*.code-workspace
