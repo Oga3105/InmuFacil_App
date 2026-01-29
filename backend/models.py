@@ -67,6 +67,7 @@ class DocumentType(str, enum.Enum):
     NOTA_SIMPLE = "nota_simple"
     CERTIFICADO_ENERGETICO = "certificado_energetico"
     RECIBO_IBI = "recibo_ibi"
+    CERTIFICADO_DEUDA = "certificado_deuda" # Hito 9 Refinement
     ESTATUTOS = "estatutos"
     OTRO = "otro"
 

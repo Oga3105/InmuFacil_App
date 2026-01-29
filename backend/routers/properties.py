@@ -578,3 +578,51 @@ async def download_document(
         )
     except Exception:
          raise HTTPException(status_code=500, detail="Decryption failed")
+
+
+@router.delete("/{property_id}/documents/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(
+    property_id: int,
+    doc_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Conditional Deletion of Compliance Documents.
+    - PENDING/REJECTED: Allowed (Clean up file & DB).
+    - VERIFIED: Forbidden (Immutable unless Admin overrides).
+    """
+    # 1. Verify Ownership & Existence
+    doc = db.query(PropertyDocument).join(Property).filter(
+        PropertyDocument.id == doc_id,
+        PropertyDocument.property_id == property_id
+    ).first()
+    
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+        
+    if doc.property.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    # 2. Check Conditional Policy
+    if doc.status == "verified":
+        raise HTTPException(
+            status_code=403, 
+            detail="Cannot delete a VERIFIED document. Please request a change if necessary."
+        )
+        
+    # 3. Execute Deletion
+    try:
+        # Delete File from Disk
+        import os
+        if os.path.exists(doc.file_path):
+             os.remove(doc.file_path)
+             
+        # Delete from DB
+        db.delete(doc)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Deletion failed: {str(e)}")
+    
+    return None
