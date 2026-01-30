@@ -71,7 +71,12 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ Bloqueo de Concurrencia (Race Conditions)
   - ✅ Configuración de Visibilidad (Hide when Reserved)
 
-- 🎯 **Hito 9:** Verificación Documental (Siguiente Paso)
+- ✅ **Hito 9:** Verificación Documental (Compliance)
+  - ✅ Subida Cifrada (AES-256) de Nota Simple
+  - ✅ Extracción OCR de Referencia Catastral
+  - ✅ Modelo `PropertyDocument` Seguro
+
+- 🎯 **Hito 10:** Tasación (Siguiente Paso)
 
 **Rama Activa:** `develop`  
 **Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`

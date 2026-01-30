@@ -36,9 +36,9 @@ from datetime import datetime
 # Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(message)s',
     handlers=[
-        logging.FileHandler('inmufacil.log'),
+        logging.FileHandler('inmufacil.log', encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
@@ -46,7 +46,7 @@ logging.basicConfig(
 logger = logging.getLogger("inmufacil")
 
 # Log application startup
-logger.info("InmuFácil API starting up...")
+logger.info("InmuFacil API starting up...")
 
 # ============================================================================
 # FastAPI Application
@@ -54,7 +54,7 @@ logger.info("InmuFácil API starting up...")
 
 # Initialize FastAPI application
 app = FastAPI(
-    title="InmuFácil API",
+    title="InmuFacil API",
     description="""API REST para la plataforma P2P de compraventa inmobiliaria con seguridad DevSecOps.
     
     Características:
@@ -151,10 +151,10 @@ async def startup_event():
     Application startup event handler.
     """
     logger.info("=" * 60)
-    logger.info("InmuFácil API - Starting Up...")
+    logger.info("InmuFacil API - Starting Up...")
     
     try:
-        from backend.security import SECRET_KEY
+        from backend.src.utils.security import SECRET_KEY
         if len(SECRET_KEY) < 32:
              logger.warning("JWT SECRET_KEY might be weak.")
              
@@ -170,7 +170,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("InmuFácil API shutting down...")
+    logger.info("InmuFacil API shutting down...")
 
 
 # ============================================================================
@@ -181,7 +181,7 @@ async def shutdown_event():
 async def root():
     """Root endpoint - API information"""
     return {
-        "message": "Bienvenido a InmuFácil API",
+        "message": "Bienvenido a InmuFacil API",
         "version": "1.2.0",
         "modules": ["Auth", "Users", "KYC"]
     }
@@ -190,7 +190,7 @@ async def root():
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Comprehensive health check."""
-    from backend.database import engine
+    from backend.src.config.database import engine
     
     db_status = "unknown"
     try:
@@ -201,7 +201,7 @@ async def health_check():
 
     return {
         "status": "active",
-        "system": "InmuFácil Shield",
+        "system": "InmuFacil Shield",
         "database": db_status,
         "modules": ["Auth", "Users", "KYC", "Properties", "Visits"]
     }
@@ -211,7 +211,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.routers import auth, users, kyc, properties, visits, offers
+from backend.src.routes import auth, users, kyc, properties, visits, offers
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])

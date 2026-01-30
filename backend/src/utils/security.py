@@ -15,9 +15,9 @@ from datetime import datetime, timedelta
 from typing import Optional
 from cryptography.fernet import Fernet # Added for encrypt_data
 
-from backend.database import get_db
-from backend.models import User, UserType
-from backend.schemas import TokenData
+from backend.src.config.database import get_db
+from backend.src.models import User, UserType
+from backend.src.schemas.base import TokenData
 
 # ============================================================================
 # Configuration

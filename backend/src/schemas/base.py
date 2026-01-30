@@ -9,7 +9,7 @@ Prevents sensitive data exposure in API responses.
 from pydantic import BaseModel, EmailStr, Field, validator
 from typing import Optional, List
 from datetime import datetime
-from backend.models import (
+from backend.src.models import (
     PropertyType, OperationType, Orientation, HeatingType, 
     ConservationState, EnergyCertification, ITEStatus, 
     NotaSimpleStatus, CrimeRate, MediaType

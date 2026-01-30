@@ -131,8 +131,8 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 6. ✅ **Manifestación de Interés** - Ofertas Transparentes formalizadas
 7. ✅ **Negociación de Precio** - Protocolo de Contraofertas + Chat Encriptado
 8. ✅ **Reserva del Inmueble** - Comprador reserva con señal y bloqueo
-9. 🎯 **Verificación Documental** - Validación de documentación legal
-10. 🔜 **Tasación del Inmueble** - Valoración profesional del inmueble
+9. ✅ **Verificación Documental** - Validación de documentación legal (OCR + Cifrado)
+10. 🎯 **Tasación del Inmueble** - Valoración profesional del inmueble
 11. 🔜 **Solicitud de Hipoteca** - Gestión de financiación bancaria
 12. 🔜 **Elaboración de Contrato** - Generación de contrato de compraventa
 13. 🔜 **Firma de Arras** - Formalización del compromiso de compra

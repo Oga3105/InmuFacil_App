@@ -7,24 +7,24 @@ Handles CRUD operations for real estate listings with Advanced Data Intelligence
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
 from sqlalchemy.orm import Session, joinedload
-from backend.database import get_db, Base, engine
-from backend.models import (
+from backend.src.config.database import get_db, engine
+from backend.src.models import (
     Property, User, PropertyFeatures, PropertyLegal, 
     PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
     Reservation, PropertyStatus, PropertyType, OperationType, # Hito 8 + Search
     PropertyDocument, DocumentType # Hito 9
 )
-from backend.schemas import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
-from backend.security import get_current_active_user
-from backend.services.image_service import validate_image, process_and_save_image
-from backend.services.payment_service import MockPaymentProvider
-from backend.services.document_service import process_document, get_decrypted_document, ComplianceError
+from backend.src.schemas.base import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
+from backend.src.utils.security import get_current_active_user
+from backend.src.services.image_service import validate_image, process_and_save_image
+from backend.src.services.payment_service import MockPaymentProvider
+from backend.src.services.document_service import process_document, get_decrypted_document, ComplianceError
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import or_
 
 # Ensure tables exist (fail-safe for new satellites)
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 router = APIRouter(prefix="/properties", tags=["Properties"])
 

@@ -5,7 +5,7 @@
 - **Último Commit:** 6fba00e - docs: finalize professional README with security specifications
 - **Verificación:** ✅ .env protegido | ✅ README actualizado | ✅ 0 commits pendientes
 - **Misiones Completadas:** M1-M8 | **Próximo Hito:** 🎯 HITO 3 - Endpoints de Autenticación JWT
-- **Agentes:** Architect (✅ Activo), Jules (✅ Activo), Shield (✅ Activo), Watcher (✅ Activo)
+- **Agentes:** Architect (✅ Activo), Jules (✅ Activo), Shield (✅ Activo), Watcher (✅ Activo), **FrontendProxy (🆕 Flutter/Mobile)**, **DevOps (✅ GitHub Actions)**
 
 ## Estrategia de Ramificación (Git Flow)
 - **Rama Activa de Desarrollo:** `develop` ⚡
@@ -223,3 +223,22 @@
 - **Misión 2 Total:** ~1,800 tokens
 
 ### **Total Acumulado:** ~6,600 tokens
+
+---
+
+## 📢 Protocolos de Operación
+
+### 🚨 Protocolo: "Agentes, reuníos"
+**Trigger:** El usuario pronuncia la frase clave "Agentes, reuníos".
+**Acción:** Todos los agentes deben detener su trabajo actual y realizar una revisión de sus responsabilidades.
+**Objetivo:** Identificar tareas pendientes de mantenimiento, documentación, git, o limpieza que se hayan pasado por alto.
+
+**Checklist por Agente:**
+- **@Architect:** Revisar coherencia de ADRs, estructura de carpetas y deuda técnica.
+- **@Jules:** Verificar tareas pendientes en `task.md`, estado de tests y cobertura.
+- **@Shield:** Auditar logs recientes, verificar alertas de seguridad y secretos.
+- **@Watcher:** Revisar estado de métricas, logs de auditoría y rendimiento.
+- **@FrontendProxy:** Validar paridad API vs UI Mockups, necesidades de endpoints.
+- **@DevOps:** Verificar estado de ramas git, commits pendientes, y pipelines.
+
+**Salida Esperada:** Un reporte conciso de cada agente indicando "Sin tareas pendientes" o listando las acciones requeridas.

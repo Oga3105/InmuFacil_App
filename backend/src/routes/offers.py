@@ -9,10 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, condecimal
 
-from backend.database import get_db
-from backend.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
-from backend.security import get_current_active_user
-from backend.crypto import encrypt_data, decrypt_data
+from backend.src.config.database import get_db
+from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
+from backend.src.utils.security import get_current_active_user
+from backend.src.utils.crypto import encrypt_data, decrypt_data
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
 

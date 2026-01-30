@@ -1,0 +1,134 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project
+plugins: anyio-4.12.1
+collecting ... collected 4 items
+
+tests/test_visits_logic.py::test_create_visit_window PASSED              [ 25%]
+tests/test_visits_logic.py::test_generate_slots_algorithm FAILED         [ 50%]
+tests/test_visits_logic.py::test_book_slot_reduces_availability PASSED   [ 75%]
+tests/test_visits_logic.py::test_prevent_overlap PASSED                  [100%]
+
+================================== FAILURES ===================================
+________________________ test_generate_slots_algorithm ________________________
+
+db_session = <sqlalchemy.orm.session.Session object at 0x000001B93E262FD0>
+mock_property = <backend.models.Property object at 0x000001B93E263390>
+
+    def test_generate_slots_algorithm(db_session, mock_property):
+        """
+        Test 2 (CRITICAL): Calculate slots dynamically.
+        Window: 10:00 - 11:00 (60 mins)
+        Slot Duration: 20 mins
+        Expected: 3 slots (10:00, 10:20, 10:40)
+        """
+        start = datetime(2026, 5, 20, 10, 0)
+        end = datetime(2026, 5, 20, 11, 0)
+    
+        window = VisitWindow(
+            property_id=mock_property.id,
+            start_time=start,
+            end_time=end,
+            slot_duration_minutes=20
+        )
+    
+        # Logic unit test (no existing appointments)
+>       slots = calculate_slots(window, [])
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_visits_logic.py:105: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+window = <backend.models.VisitWindow object at 0x000001B93E260B90>
+existing_appointments = []
+
+    def calculate_slots(window: VisitWindow, existing_appointments: List[VisitAppointment]) -> List[VisitSlotResponse]:
+        """
+        Divides a window into slots of `slot_duration_minutes`.
+        Checks against existing appointments to mark availability.
+        """
+        slots = []
+        current_time = window.start_time.replace(tzinfo=None) # Simplify TZ handling for calc
+        end_time = window.end_time.replace(tzinfo=None)
+    
+        # Normalize appointment times
+        booked_times = {
+            appt.start_time.replace(tzinfo=None)
+            for appt in existing_appointments
+            if appt.status != VisitStatus.REJECTED
+        }
+    
+        while current_time + timedelta(minutes=window.slot_duration_minutes) <= end_time:
+            slot_end = current_time + timedelta(minutes=window.slot_duration_minutes)
+    
+            is_taken = current_time in booked_times
+    
+            # Add TZ info back if needed, or assume UTC from DB
+            # For response, we keep it transparent
+    
+>           slots.append(VisitSlotResponse(
+                start_time=current_time, # Pydantic will serialize to ISO
+                end_time=slot_end,
+                is_available=not is_taken,
+                window_id=window.id
+            ))
+E           pydantic_core._pydantic_core.ValidationError: 1 validation error for VisitSlotResponse
+E           window_id
+E             Input should be a valid integer [type=int_type, input_value=None, input_type=NoneType]
+E               For further information visit https://errors.pydantic.dev/2.12/v/int_type
+
+backend\routers\visits.py:55: ValidationError
+============================== warnings summary ===============================
+backend\schemas.py:41
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:41: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserResponse(UserBase):
+
+backend\schemas.py:55
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:55: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class UserInDB(UserBase):
+
+backend\schemas.py:86
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:86: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyFeaturesSchema(BaseModel):
+
+backend\schemas.py:104
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:104: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyLegalSchema(BaseModel):
+
+backend\schemas.py:117
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:117: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyFinancialSchema(BaseModel):
+
+backend\schemas.py:127
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:127: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyEnvironmentSchema(BaseModel):
+
+backend\schemas.py:143
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:143: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyMediaResponse(BaseModel):
+
+backend\schemas.py:185
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:185: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyCreate(PropertyBase):
+
+backend\schemas.py:199
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:199: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class PropertyResponse(PropertyBase):
+
+backend\schemas.py:252
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:252: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    @validator('end_time')
+
+backend\schemas.py:259
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:259: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class VisitWindowResponse(BaseModel):
+
+backend\schemas.py:289
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\schemas.py:289: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class VisitAppointmentResponse(BaseModel):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_visits_logic.py::test_generate_slots_algorithm - pydantic_c...
+================== 1 failed, 3 passed, 12 warnings in 1.90s ===================

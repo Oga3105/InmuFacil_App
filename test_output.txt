@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project
+plugins: anyio-4.12.1
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+______________ ERROR collecting tests/test_negotiation_logic.py _______________
+ImportError while importing test module 'C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\tests\test_negotiation_logic.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\Os\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_negotiation_logic.py:15: in <module>
+    from backend.crypto import encrypt_data, decrypt_data
+backend\crypto.py:20: in <module>
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+E   ImportError: cannot import name 'PBKDF2' from 'cryptography.hazmat.primitives.kdf.pbkdf2' (C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\.venv\Lib\site-packages\cryptography\hazmat\primitives\kdf\pbkdf2.py)
+------------------------------- Captured stdout -------------------------------
+[WARNING] MODO BASE DE DATOS: SQLite Local (sqlite:///./sql_app.db)
+=========================== short test summary info ===========================
+ERROR tests/test_negotiation_logic.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.66s ===============================

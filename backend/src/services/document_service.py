@@ -8,11 +8,11 @@ Handles upload, encryption, and OCR Verification of legal documents.
 import os
 from datetime import datetime
 from fastapi import UploadFile
-from backend.crypto import encrypt_data, decrypt_data
+from backend.src.utils.crypto import encrypt_data, decrypt_data
 # Reuse OCR from KYC service? Or import easyocr directly?
 # Ideally we reuse the Reader instance to save memory.
 # We will import the lazy loader from kyc_service if possible, or replicate the pattern.
-from backend.services.kyc_service import get_ocr_reader
+from backend.src.services.kyc_service import get_ocr_reader
 import shutil
 import cv2
 import numpy as np

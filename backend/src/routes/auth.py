@@ -18,11 +18,11 @@ from typing import Optional
 import jwt
 import os
 
-from backend.database import get_db
-from backend.models import User, UserType, DNIStatus
-from backend.schemas import UserCreate, UserResponse, Token
-from backend.security import get_password_hash, verify_password
-from backend.filters import validate_user_is_not_agency, log_blocked_attempt
+from backend.src.config.database import get_db
+from backend.src.models import User, UserType, DNIStatus
+from backend.src.schemas.base import UserCreate, UserResponse, Token
+from backend.src.utils.security import get_password_hash, verify_password
+from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
 import logging
 
 logger = logging.getLogger("inmufacil.auth")

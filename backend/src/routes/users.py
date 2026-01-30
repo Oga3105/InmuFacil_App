@@ -1,10 +1,10 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from backend.database import get_db
-from backend.models import User
-from backend.schemas import UserCreate, UserResponse, UserUpdate
-from backend.security import get_current_active_user, get_password_hash, encrypt_data, decrypt_data, get_current_admin_user
+from backend.src.config.database import get_db
+from backend.src.models import User
+from backend.src.schemas.base import UserCreate, UserResponse, UserUpdate
+from backend.src.utils.security import get_current_active_user, get_password_hash, encrypt_data, decrypt_data, get_current_admin_user
 # Usamos encrypt_data de security.py, no filters.py
 
 router = APIRouter(tags=["Users"])

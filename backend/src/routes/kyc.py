@@ -3,13 +3,13 @@ import shutil
 from typing import List
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, status
 from sqlalchemy.orm import Session
-from backend.database import get_db, engine, Base
-from backend.models import KYCVerification, User
-from backend.security import encrypt_data, get_current_active_user, get_current_admin_user
-from backend.schemas import KYCStatusUpdate
+from backend.src.config.database import get_db, engine
+from backend.src.models import KYCVerification, User
+from backend.src.utils.security import encrypt_data, get_current_active_user, get_current_admin_user
+from backend.src.schemas.base import KYCStatusUpdate
 
 # Aseguramos que la tabla exista (aunque ya la creamos via docker exec, esto es fail-safe)
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 router = APIRouter(prefix="/kyc", tags=["KYC"])
 

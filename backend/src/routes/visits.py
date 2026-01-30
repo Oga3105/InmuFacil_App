@@ -10,16 +10,16 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 
-from backend.database import get_db
-from backend.models import (
+from backend.src.config.database import get_db
+from backend.src.models import (
     User, Property, VisitWindow, VisitAppointment, VisitStatus
 )
-from backend.schemas import (
+from backend.src.schemas.base import (
     VisitWindowCreate, VisitWindowResponse, 
     VisitSlotResponse, VisitRequest, VisitAppointmentResponse
 )
-from backend.security import get_current_active_user
-from backend.routers.properties import verify_property_ownership
+from backend.src.utils.security import get_current_active_user
+from backend.src.routes.properties import verify_property_ownership
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
 
