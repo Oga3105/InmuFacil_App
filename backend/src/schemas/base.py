@@ -230,9 +230,25 @@ class Token(BaseModel):
     token_type: str = "bearer"
 
 
+
 class TokenData(BaseModel):
     email: Optional[str] = None
     user_id: Optional[int] = None
+
+
+class VerifyEmailRequest(BaseModel):
+    email: EmailStr
+    token: str = Field(..., min_length=6, max_length=6)
+
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    email: EmailStr
+    token: str = Field(..., min_length=6, max_length=6)
+    new_password: str = Field(..., min_length=8, max_length=100)
 
 
 

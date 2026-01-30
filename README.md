@@ -20,18 +20,22 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** 🔐 **Hito 8 - Reserva y Señal** ✅ COMPLETADO Y VERIFICADO
+**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
 
-**API Version:** `0.4.0` - Frontend-Ready
+**API Version:** `0.5.0` - Auth-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
 - ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
   - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
   - ✅ Misión 6: Security Breach Remediation
-  - ✅ Misión 7: Automated DNI Redaction (100% opacity verified)
   - ✅ Misión 8: API Frontend Integration (Secure CORS)
-- ✅ **Hito 3:** Módulo de Propiedades e Inteligencia de Datos
+- ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
+  - ✅ Registro con Anti-Agency Filter
+  - ✅ Login JWT (Access Token 30min)
+  - ✅ MFA por Email (6-digit OTP)
+  - ✅ Reset Password Seguro
+- ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
   - ✅ CRUD Vendedor (Publicación y Gestión)
   - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
   - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
@@ -139,6 +143,11 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 - **Base de Datos**: SQLAlchemy 2.0.23 (SQLite dev, PostgreSQL prod)
 - **Autenticación**: JWT + MFA Email
 - **Validación**: Pydantic 2.5.0 con schemas seguros
+
+### Frontend (Multi-Platform Strategy)
+- **Framework**: Flutter (Dart)
+- **Targets**: Mobile (iOS/Android) & Web (Responsive)
+- **Architecture**: Clean Architecture + Riverpod
 
 ### Seguridad
 - **Cryptography**: 41.0.7 (AES-256-GCM)

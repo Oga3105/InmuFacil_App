@@ -107,6 +107,13 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Escudo Anti-Agencias activo
 - ✅ Audit logging sin datos sensibles
 
+**Hito 3 / Misión 9: Autenticación Completa** 🔐
+- ✅ Registro de Usuarios (Particular/Profesional)
+- ✅ Login Seguro con JWT
+- ✅ MFA V2 (Email Token)
+- ✅ Recuperación de Contraseña
+
+
 **Hito 8: Reserva y Señal (Payment Mock)** ✅
 - ✅ Gestión de Pagos (Mock Provider)
 - ✅ Bloqueo de Concurrencia (Idempotencia)

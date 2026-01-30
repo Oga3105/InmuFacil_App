@@ -20,9 +20,15 @@ import os
 
 from backend.src.config.database import get_db
 from backend.src.models import User, UserType, DNIStatus
-from backend.src.schemas.base import UserCreate, UserResponse, Token
-from backend.src.utils.security import get_password_hash, verify_password
 from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
+from backend.src.services.email_service import (
+    generate_verification_token, get_token_expiration, 
+    send_verification_email, verify_token
+)
+from backend.src.schemas.base import (
+    UserCreate, UserResponse, Token, VerifyEmailRequest, 
+    PasswordResetRequest, PasswordResetConfirm
+)
 import logging
 
 logger = logging.getLogger("inmufacil.auth")
@@ -143,7 +149,11 @@ async def register(
     # Step 3: Hash password
     hashed_password = get_password_hash(user_data.password)
     
-    # Step 4: Create new user
+    # Step 4: Generate MFA Token
+    verification_token = generate_verification_token()
+    token_expires = get_token_expiration() # 15 min
+
+    # Step 5: Create new user
     new_user = User(
         email=user_data.email,
         hashed_password=hashed_password,
@@ -151,6 +161,8 @@ async def register(
         user_type=UserType(user_data.user_type),
         dni_status=DNIStatus.PENDIENTE,
         email_verified=False,
+        verification_token=verification_token,
+        token_expires_at=token_expires,
         dni_verified=False,
         failed_upload_attempts=0
     )
@@ -158,6 +170,10 @@ async def register(
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Step 6: Send Verification Email
+    # In production use background task for this
+    await send_verification_email(new_user.email, verification_token)
     
     logger.info(f"[OK] User registered successfully: {new_user.email} (ID: {new_user.id})")
     
@@ -234,3 +250,109 @@ async def login(
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+
+# ============================================================================
+# MFA & Password Reset Endpoints
+# ============================================================================
+
+@router.post("/verify-email", 
+            summary="Verify Email Address (MFA)",
+            description="Verify user email with 6-digit MFA code")
+async def verify_email(
+    request: VerifyEmailRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Verify email with MFA token.
+    @Shield: Constant-time comparison
+    """
+    user = get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found")
+        
+    if user.email_verified:
+        return {"message": "Email already verified"}
+        
+    # Verify Token
+    is_valid, error = verify_token(
+        request.token, 
+        user.verification_token, 
+        user.token_expires_at
+    )
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error)
+        
+    # Mark as verified
+    user.email_verified = True
+    user.verification_token = None
+    user.token_expires_at = None
+    db.commit()
+    
+    logger.info(f"[OK] Email verified for: {user.email}")
+    return {"message": "Email verified successfully"}
+
+
+@router.post("/request-password-reset", 
+            summary="Request Password Reset",
+            description="Send 6-digit code to email for password reset")
+async def request_password_reset(
+    request: PasswordResetRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Initiate password reset flow.
+    """
+    user = get_user_by_email(db, request.email)
+    if not user:
+        # Prevent user enumeration - return OK even if user not found
+        # But for dev debug we might want to know.
+        # Strict security: return OK.
+        return {"message": "If email exists, code has been sent"}
+        
+    # Generate new token
+    token = generate_verification_token()
+    user.verification_token = token
+    user.token_expires_at = get_token_expiration()
+    db.commit()
+    
+    # Send Email
+    await send_verification_email(user.email, token)
+    
+    logger.info(f"[AUTH] Password reset requested for: {user.email}")
+    return {"message": "Verification code sent to email"}
+
+
+@router.post("/reset-password", 
+            summary="Confirm Password Reset",
+            description="Reset password using 6-digit code")
+async def reset_password(
+    request: PasswordResetConfirm,
+    db: Session = Depends(get_db)
+):
+    """
+    Complete password reset.
+    """
+    user = get_user_by_email(db, request.email)
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid request")
+        
+    # Verify Token
+    is_valid, error = verify_token(
+        request.token, 
+        user.verification_token, 
+        user.token_expires_at
+    )
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error)
+        
+    # Update Password
+    user.hashed_password = get_password_hash(request.new_password)
+    user.verification_token = None
+    user.token_expires_at = None
+    db.commit()
+    
+    logger.info(f"[AUTH] Password reset successful for: {user.email}")
+    return {"message": "Password reset successfully"}

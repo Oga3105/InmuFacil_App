@@ -207,4 +207,61 @@ def test_password_verification_fails_for_wrong_password():
     hashed = hash_password(correct_password)
     
     assert verify_password(correct_password, hashed)
+    assert verify_password(correct_password, hashed)
     assert not verify_password(wrong_password, hashed)
+
+
+# ============================================================================
+# MFA Service Tests
+# ============================================================================
+
+from backend.src.services.email_service import (
+    generate_verification_token, verify_token, get_token_expiration
+)
+from datetime import datetime, timedelta
+
+def test_mfa_token_generation_and_verification():
+    """
+    Test: MFA token lifecycle (generate -> verify)
+    
+    @Shield: Validates token security properties
+    """
+    # 1. Generate
+    token = generate_verification_token()
+    assert len(token) == 6
+    assert token.isdigit()
+    
+    expires_at = get_token_expiration()
+    assert expires_at > datetime.utcnow()
+    
+    # 2. Verify Valid
+    is_valid, _ = verify_token(token, token, expires_at)
+    assert is_valid
+    
+    # 3. Verify Invalid (Wrong Code)
+    is_valid, error = verify_token("000000", token, expires_at)
+    assert not is_valid
+    assert "Invalid" in error
+    
+    # 4. Verify Expired
+    expired_time = datetime.utcnow() - timedelta(minutes=1)
+    is_valid, error = verify_token(token, token, expired_time)
+    assert not is_valid
+    assert "expired" in error
+
+
+def test_user_mfa_defaults(db_session):
+    """
+    Test: User is created with email_verified=False by default
+    """
+    user = User(
+        email="mfa_test@inmufacil.com",
+        hashed_password=hash_password("Pass123!"),
+        full_name="MFA User"
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    
+    assert user.email_verified is False
+    assert user.verification_token is None
