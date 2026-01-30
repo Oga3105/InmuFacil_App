@@ -12,9 +12,11 @@ from backend.src.models import (
     Property, User, PropertyFeatures, PropertyLegal, 
     PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
     Reservation, PropertyStatus, PropertyType, OperationType, # Hito 8 + Search
-    PropertyDocument, DocumentType # Hito 9
+    PropertyDocument, DocumentType, PropertyValuation # Hito 9 + Valuation
 )
 from backend.src.schemas.base import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
+from backend.src.schemas.valuation import ValuationRequest, ValuationResponse
+from backend.src.services.valuation_service import ValuationService
 from backend.src.utils.security import get_current_active_user
 from backend.src.services.image_service import validate_image, process_and_save_image
 from backend.src.services.payment_service import MockPaymentProvider
@@ -380,8 +382,82 @@ async def add_property_media_link(
     
     db.add(new_media)
     db.commit()
+    db.commit()
     db.refresh(new_media)
     return new_media
+
+# ============================================================================
+# Valuation Endpoints (Hito 10)
+# ============================================================================
+
+@router.post("/{property_id}/valuation", response_model=ValuationResponse)
+async def request_valuation(
+    property_id: int,
+    request: ValuationRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Request a new property valuation (Tasación).
+    Only the owner can request this.
+    """
+    verify_property_ownership(db, property_id, current_user.id)
+    
+    try:
+        valuation = ValuationService.calculate_valuation(
+            db, property_id, request.provider
+        )
+        
+        # Calculate ranges for display (e.g. +/- 10%)
+        val_float = float(valuation.estimated_value)
+        return ValuationResponse(
+            id=valuation.id,
+            property_id=valuation.property_id,
+            valuation_date=valuation.valuation_date,
+            estimated_value=val_float,
+            currency=valuation.currency,
+            confidence_score=valuation.confidence_score,
+            provider=valuation.provider,
+            report_path=valuation.report_path,
+            value_range_min=val_float * 0.9,
+            value_range_max=val_float * 1.1
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/{property_id}/valuation", response_model=List[ValuationResponse])
+async def get_valuation_history(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Get valuation history for a property.
+    Only the owner can view this sensitive financial data.
+    """
+    verify_property_ownership(db, property_id, current_user.id)
+    
+    valuations = ValuationService.get_valuation_history(db, property_id)
+    
+    # Map to schema (adding calculated ranges)
+    results = []
+    for v in valuations:
+        val_float = float(v.estimated_value)
+        results.append(ValuationResponse(
+            id=v.id,
+            property_id=v.property_id,
+            valuation_date=v.valuation_date,
+            estimated_value=val_float,
+            currency=v.currency,
+            confidence_score=v.confidence_score,
+            provider=v.provider,
+            report_path=v.report_path,
+            value_range_min=val_float * 0.9,
+            value_range_max=val_float * 1.1
+        ))
+    
+    return results
 
 @router.delete("/media/{media_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_media(

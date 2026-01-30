@@ -53,6 +53,9 @@ class Property(Base):
     
     # Compliance Documents (1:N)
     documents = relationship("PropertyDocument", back_populates="property", cascade="all, delete-orphan")
+    
+    # Valuations (Hito 10) (1:N)
+    valuations = relationship("PropertyValuation", back_populates="property", cascade="all, delete-orphan")
 
 
 class PropertyFeatures(Base):
