@@ -9,6 +9,7 @@ class UserType(str, enum.Enum):
     """User type enumeration"""
     PARTICULAR = "particular"
     PROFESIONAL = "profesional"
+    FINANCIERO = "financiero" # Hito 11
 
 class PropertyType(str, enum.Enum):
     PISO = "piso"

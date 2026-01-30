@@ -107,9 +107,10 @@
 - ✅ Endpoint `GET /valuation` (History)
 - ✅ Tests verificados (`tests/test_valuation.py`)
 
-### 🎯 Misión 11: SIGUIENTE PASO - ?
-**Esperando Definición...**
-
+### 🎯 Misión 11 (Hito 11): Sistema de Financiación - EN PROCESO 🚧
+**Rama:** `feature/hito11-financing`
+**Objetivo:** Implementar calculadora hipotecaria, perfilado de solvencia y mock de bancos/agregadores.
+**Agente:** @Jules (Lógica) + @Architect (Modelos)
 
 ---
 

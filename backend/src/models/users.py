@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -49,6 +49,14 @@ class User(Base):
     # Using string references to avoid circular imports
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")
     appointments = relationship("VisitAppointment", back_populates="buyer")
+
+    # Hito 11: Financing
+    mortgage_profile = relationship("MortgageProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    simulations = relationship("MortgageSimulation", back_populates="user", cascade="all, delete-orphan")
+    
+    # Advisor Relationship (Self-Referential)
+    financial_advisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    financial_advisor = relationship("User", remote_side="User.id", backref="advisees")
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, type={self.user_type})>"
