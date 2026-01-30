@@ -247,3 +247,23 @@
 - Si @Architect mueve archivos -> @DevOps debe preguntar por Commit/Push.
 - Si @Jules crea código -> @Shield debe preguntar por revisión de seguridad.
 **Objetivo:** Evitar silos y asegurar la integridad del ciclo de vida (Git, Docs, Tests).
+
+### 🌳 Protocolo: Gestión de Ramas (Git Flow + PRs)
+**Trigger:** Inicio de cualquier nueva tarea o feature.
+**Responsable:** @DevOps
+
+**Reglas de Actuación:**
+1.  **Inicio:** NUNCA trabajar en `develop` directo.
+    *   Comando: `git checkout -b feature/[nombre-tarea]`
+2.  **Desarrollo:** Commits atómicos y frecuentes.
+    *   Formato: `feat: implement logic for X`
+3.  **Validación Local:**
+    *   Ejecutar tests: `pytest` (Si ❌ -> Corregir).
+4.  **Publicación (Pull Request):**
+    *   Subir rama: `git push origin feature/[nombre-tarea]`
+    *   **ACCIÓN MANUAL:** Crear Pull Request en GitHub.
+5.  **Cierre (Post-Merge):**
+    *   Tras fusión en GitHub:
+    *   `git checkout develop`
+    *   `git pull origin develop`
+    *   `git branch -d feature/[nombre-tarea]`
