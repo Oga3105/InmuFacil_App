@@ -10,9 +10,9 @@ Token Consumption Tracking: ~600 tokens for test implementation
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, DNIStatus, UserType
-from backend.security import hash_password, verify_password
+from backend.src.models.base import Base
+from backend.src.models import User, DNIStatus, UserType
+from backend.src.utils.security import hash_password, verify_password
 
 
 # ============================================================================
