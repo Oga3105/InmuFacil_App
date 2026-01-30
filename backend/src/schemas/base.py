@@ -300,6 +300,10 @@ class VisitRequest(BaseModel):
     """
     window_id: int
     start_time: datetime
+    # Filtering Questions
+    q_solvency: str = Field(..., description="Funding status (Contado, Hipoteca aprobada...)")
+    q_timeline: str = Field(..., description="Desired move-in date")
+    q_maturity: str = Field(..., description="Experience level (First visit, etc)")
 
 
 class VisitAppointmentResponse(BaseModel):
@@ -311,6 +315,12 @@ class VisitAppointmentResponse(BaseModel):
     buyer_id: int
     start_time: datetime
     status: str # requested, approved, rejected
+    
+    # Answers (Visible to Seller)
+    q_solvency: Optional[str] = None
+    q_timeline: Optional[str] = None
+    q_maturity: Optional[str] = None
+    
     created_at: datetime
     
     # Optional: include basic user/property info if needed, but keeping it light for now

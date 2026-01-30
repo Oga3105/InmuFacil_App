@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Enum, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, Enum, DateTime, ForeignKey, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -40,5 +40,10 @@ class VisitAppointment(Base):
     
     start_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(Enum(VisitStatus), default=VisitStatus.REQUESTED, nullable=False)
+    
+    # Filtering Questions (Hito Visits Refinement)
+    q_solvency = Column(String, nullable=True) # "Financiación Aprobada", "Contado", "Hipoteca Pendiente"
+    q_timeline = Column(String, nullable=True) # "Inmediato", "3-6 meses", "Solo mirando"
+    q_maturity = Column(String, nullable=True) # "Primera visita", "He visto 10 pisos", "Indeciso"
     
     created_at = Column(DateTime(timezone=True), server_default=func.now())

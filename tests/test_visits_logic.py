@@ -12,10 +12,10 @@ import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, Property, VisitWindow, VisitAppointment, VisitStatus
-from backend.routers.visits import calculate_slots
-from backend.schemas import VisitWindowCreate
+from backend.src.models.base import Base
+from backend.src.models import User, Property, VisitWindow, VisitAppointment, VisitStatus
+from backend.src.routes.visits import calculate_slots
+from backend.src.schemas.base import VisitWindowCreate
 
 # ============================================================================
 # Test Database Setup
@@ -184,3 +184,34 @@ def test_prevent_overlap(db_session, mock_property):
     
     assert overlap is not None
     assert overlap.id == w1.id
+
+def test_booking_with_filtering_questions(db_session, mock_property, mock_buyer):
+    """
+    Test 5: Explicitly verify storage of Hito 10 filtering questions.
+    """
+    # Create Window
+    w = VisitWindow(
+        property_id=mock_property.id,
+        start_time=datetime(2026, 6, 1, 10, 0),
+        end_time=datetime(2026, 6, 1, 12, 0)
+    )
+    db_session.add(w)
+    db_session.commit()
+    
+    # Book with Questions
+    appt = VisitAppointment(
+        window_id=w.id,
+        buyer_id=mock_buyer.id,
+        start_time=datetime(2026, 6, 1, 10, 0),
+        status=VisitStatus.REQUESTED,
+        q_solvency="Contado",
+        q_timeline="Inmediato",
+        q_maturity="Primera visita"
+    )
+    db_session.add(appt)
+    db_session.commit()
+    db_session.refresh(appt)
+    
+    assert appt.q_solvency == "Contado"
+    assert appt.q_timeline == "Inmediato"
+    assert appt.q_maturity == "Primera visita"

@@ -278,7 +278,11 @@ async def book_visit_slot(
         window_id=window.id,
         buyer_id=current_user.id,
         start_time=request.start_time,
-        status=VisitStatus.REQUESTED
+        status=VisitStatus.REQUESTED,
+        # Filtering Answers
+        q_solvency=request.q_solvency,
+        q_timeline=request.q_timeline,
+        q_maturity=request.q_maturity
     )
     
     db.add(appointment)
