@@ -242,3 +242,11 @@
 - **@DevOps:** Verificar estado de ramas git, commits pendientes, y pipelines.
 
 **Salida Esperada:** Un reporte conciso de cada agente indicando "Sin tareas pendientes" o listando las acciones requeridas.
+
+### 🔄 Protocolo: "Check Cruzado Continuo"
+**Trigger:** Después de cada acción significativa (refactor, cleanup, feature).
+**Acción:** El sistema debe evaluar automáticamente si la acción completada dispara responsabilidades en otros agentes.
+**Ejemplo:**
+- Si @Architect mueve archivos -> @DevOps debe preguntar por Commit/Push.
+- Si @Jules crea código -> @Shield debe preguntar por revisión de seguridad.
+**Objetivo:** Evitar silos y asegurar la integridad del ciclo de vida (Git, Docs, Tests).
