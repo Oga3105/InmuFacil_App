@@ -107,10 +107,17 @@
 - ✅ Endpoint `GET /valuation` (History)
 - ✅ Tests verificados (`tests/test_valuation.py`)
 
-### 🎯 Misión 11 (Hito 11): Sistema de Financiación - EN PROCESO 🚧
-**Rama:** `feature/hito11-financing`
-**Objetivo:** Implementar calculadora hipotecaria, perfilado de solvencia y mock de bancos/agregadores.
-**Agente:** @Jules (Lógica) + @Architect (Modelos)
+### ✅ Misión 11 (Hito 11): Sistema de Financiación - COMPLETADA
+**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
+**Entregables:**
+- ✅ Modelo `MortgageProfile` y `MortgageSimulation`
+- ✅ Servicio `FinancingService` con Scoring de Solvencia
+- ✅ Mock "Meta-Buscador": iAhorro, BBVA, Santander
+- ✅ Rol `FINANCIERO` y asignación de asesores
+- ✅ Tests verificados (`tests/test_financing.py`)
+
+### 🎯 Misión 12: SIGUIENTE PASO - Frontend?
+**Esperando Definición...**
 
 ---
 
@@ -256,6 +263,21 @@
 - Si @Architect mueve archivos -> @DevOps debe preguntar por Commit/Push.
 - Si @Jules crea código -> @Shield debe preguntar por revisión de seguridad.
 **Objetivo:** Evitar silos y asegurar la integridad del ciclo de vida (Git, Docs, Tests).
+
+### 📚 Protocolo: "Documentación Primero" (Docs First)
+**Trigger:** Antes de cualquier `git push` o Pull Request.
+**Regla de Oro:** **PROHIBIDO subir código sin actualizar su documentación asociada.**
+
+**Flujo de Trabajo:**
+1.  **Agente Implementador (@Jules/@Architect):** Termina el código y los tests.
+2.  **Agente Documentador (@Watcher):**
+    *   Actualiza `scratchpad.md` (Estado de Misión).
+    *   Actualiza `task.md` (Checklists).
+    *   Actualiza `ADRs` si hubo cambios de arquitectura.
+    *   Actualiza `vision_proyecto.md` si cambió el alcance.
+3.  **Agente DevOps (@DevOps):**
+    *   Verifica que los docs han sido modificados.
+    *   Ejecuta: `git add .`, `git commit`, `git push`.
 
 ### 🌳 Protocolo: Gestión de Ramas (Git Flow + PRs)
 **Trigger:** Inicio de cualquier nueva tarea o feature.
