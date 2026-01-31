@@ -116,8 +116,13 @@
 - ✅ Rol `FINANCIERO` y asignación de asesores
 - ✅ Tests verificados (`tests/test_financing.py`)
 
-### 🎯 Misión 12: SIGUIENTE PASO - Frontend?
-**Esperando Definición...**
+### ✅ Misión 12 (Hito 12): Generador de Contratos - COMPLETADA
+**Estado:** CONSOLIDADO EN GITHUB (Merge a `develop`)
+**Entregables:**
+- ✅ Motor de Contratos con ReportLab
+- ✅ Endpoint Seguro de Descarga (RBAC)
+- ✅ Tests de Integración y Seguridad
+- ✅ ADR 012 Documentado
 
 ---
 

@@ -56,3 +56,8 @@ opencv-python-headless>=4.10.0.84
 easyocr>=1.7.0
 # EasyOCR for text detection and recognition
 # Note: First run will download Spanish language model (~500MB)
+
+# ============================================================================
+# Legal & Documents (@Architect)
+# ============================================================================
+reportlab>=4.0.0

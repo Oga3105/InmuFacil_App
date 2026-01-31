@@ -19,6 +19,10 @@ class PropertyOffer(Base):
     
     buyer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
+    # Relationships
+    buyer = relationship("User", foreign_keys=[buyer_id])
+    property = relationship("Property", foreign_keys=[property_id])
+    
     amount = Column(Float, nullable=False) 
     conditions = Column(Text, nullable=True)
     status = Column(Enum(OfferStatus), default=OfferStatus.PENDING, nullable=False)
