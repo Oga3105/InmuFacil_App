@@ -124,6 +124,15 @@
 - ✅ Tests de Integración y Seguridad
 - ✅ ADR 012 Documentado
 
+### ✅ Refinamiento 12.5: Cuestionario Legal (Feedback Usuario)
+**Estado:** COMPLETADO
+- ✅ OCR de contrato aportado por usuario
+- ✅ ADR 013 (Contratos Dinámicos)
+- ✅ Schema `PropertyOffer.contract_data` (JSON)
+- ✅ Endpoint `PUT /details` para cuestionario
+- ✅ Generador PDF con cláusulas condicionales (Cuerpo Cierto, AML, etc.)
+
+
 ---
 
 ## 🛡️ Principios de Diseño Activos

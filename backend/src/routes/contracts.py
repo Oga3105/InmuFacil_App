@@ -10,8 +10,60 @@ from backend.src.models.properties import Property
 from backend.src.services.contract_service import ContractGenerator
 from datetime import datetime, timedelta
 import io
+import json
+from backend.src.schemas.contracts import ContractDetailsUpdate, ContractDetailsResponse
 
 router = APIRouter()
+
+@router.put("/offers/{offer_id}/details", response_model=ContractDetailsResponse)
+def update_contract_details(
+    offer_id: int,
+    details: ContractDetailsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Updates the legal details for the contract questionnaire.
+    Only Buyer or Seller can update.
+    """
+    offer = db.query(PropertyOffer).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+
+    # Security: Only Buyer/Seller
+    is_buyer = offer.buyer_id == current_user.id
+    prop = db.query(Property).filter(Property.id == offer.property_id).first()
+    header_owner = prop.owner_id == current_user.id # Assuming property loaded relation or query
+    
+    if not (is_buyer or header_owner):
+         raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Update Data
+    # Store as dict/json
+    offer.contract_data = details.model_dump()
+    db.commit()
+    db.refresh(offer)
+    return offer.contract_data
+
+@router.get("/offers/{offer_id}/details", response_model=ContractDetailsResponse)
+def get_contract_details(
+    offer_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    offer = db.query(PropertyOffer).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    prop = db.query(Property).filter(Property.id == offer.property_id).first()
+    
+    if not (offer.buyer_id == current_user.id or prop.owner_id == current_user.id):
+        raise HTTPException(status_code=403, detail="Not authorized")
+        
+    if not offer.contract_data:
+        return ContractDetailsResponse() # Return defaults
+        
+    return offer.contract_data
 
 @router.get("/arras/draft/{offer_id}", response_class=StreamingResponse)
 def download_arras_draft(
@@ -63,7 +115,8 @@ def download_arras_draft(
         property_registry_ref="98765432101234", # Mock Ref
         price_total=float(offer.amount),
         deposit_amount=float(offer.amount * 0.10), # 10% Arras
-        limit_date=limit_date
+        limit_date=limit_date,
+        contract_data=offer.contract_data or {}
     )
     
     # 5. Return Stream

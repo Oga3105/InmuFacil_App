@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import JSON
 from sqlalchemy.sql import func
 from .base import Base
 from .enums import OfferStatus
@@ -26,6 +27,8 @@ class PropertyOffer(Base):
     amount = Column(Float, nullable=False) 
     conditions = Column(Text, nullable=True)
     status = Column(Enum(OfferStatus), default=OfferStatus.PENDING, nullable=False)
+    
+    contract_data = Column(JSON, nullable=True) # Refinement Hito 12.5
     
     
     valid_until = Column(DateTime(timezone=True))

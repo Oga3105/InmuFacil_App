@@ -106,7 +106,44 @@ def test_download_endpoint_security(client, db_session):
     response = client.get(f"/contracts/arras/draft/{offer.id}")
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/pdf"
-    assert response.content.startswith(b"%PDF")
+
+def test_contract_questionnaire_flow(client, db_session):
+    # 1. Setup Data
+    user = User(email="legal@test.com", hashed_password="pw", full_name="LegalUser")
+    db_session.add(user)
+    db_session.commit()
+    
+    prop = Property(owner_id=user.id, title="LegalProp", price=200000, 
+                   location="Legal St", surface_area=90, property_type="piso", operation_type="venta")
+    db_session.add(prop)
+    db_session.commit()
+    
+    offer = PropertyOffer(buyer_id=user.id, property_id=prop.id, amount=200000, status=OfferStatus.ACCEPTED)
+    # Note: Buyer is same as owner for simplicity in setup, logic allows both to edit
+    db_session.add(offer)
+    db_session.commit()
+    
+    app.dependency_overrides[get_current_user] = lambda: user
+
+    # 2. Update Details
+    details = {
+        "has_foreign_funds": True,
+        "is_cuerpo_cierto": False,
+        "community_fees_monthly": 150.0,
+        "delivery_condition": "Con inquilinos"
+    }
+    response = client.put(f"/contracts/offers/{offer.id}/details", json=details)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["has_foreign_funds"] is True
+    assert data["community_fees_monthly"] == 150.0
+
+    # 3. Generate Contract with New Details
+    response_pdf = client.get(f"/contracts/arras/draft/{offer.id}")
+    assert response_pdf.status_code == 200
+    # Ideally checking PDF content, but byte check confirms generation with new path
+    assert len(response_pdf.content) > 1000
+    assert response_pdf.content.startswith(b"%PDF")
 
 def test_download_endpoint_status_check(client, db_session):
     # Setup Offer in PENDING status
