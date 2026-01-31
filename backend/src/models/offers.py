@@ -28,7 +28,9 @@ class PropertyOffer(Base):
     conditions = Column(Text, nullable=True)
     status = Column(Enum(OfferStatus), default=OfferStatus.PENDING, nullable=False)
     
+    
     contract_data = Column(JSON, nullable=True) # Refinement Hito 12.5
+    custom_contract_path = Column(String, nullable=True) # Refinement Hito 12.6
     
     
     valid_until = Column(DateTime(timezone=True))
@@ -38,6 +40,31 @@ class PropertyOffer(Base):
     # History & Chat
     history = relationship("OfferHistory", backref="offer", cascade="all, delete-orphan")
     messages = relationship("OfferMessage", backref="offer", cascade="all, delete-orphan")
+    contract_analysis = relationship("ContractAnalysis", backref="offer", uselist=False, cascade="all, delete-orphan") # 1:1 usually? Or 1:N? User asked "cualquiera de las dos partes". Both can analyze? Then 1:N.
+    # Logic: Buyer uploads, Seller uploads? If 1 offer has only 1 active contract, maybe 1:1 is enough for the "latest".
+    # But if "cualquiera de las dos partes", maybe duplicate analysis?
+    # Let's assume 1:N but typically 1.
+
+class ContractAnalysis(Base):
+    """
+    Hito 12.6: AI Analysis of Custom Contracts.
+    Includes Liability Waivers.
+    """
+    __tablename__ = "contract_analysis"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    offer_id = Column(Integer, ForeignKey("offers.id"), nullable=False)
+    
+    analysis_json = Column(JSON, nullable=True)
+    role = Column(String, nullable=False) # BUYER or SELLER
+    cost = Column(Float, default=0.0)
+    
+    # Legal / Liability
+    consent_timestamp = Column(DateTime(timezone=True), nullable=False) 
+    disclaimer_version = Column(String, nullable=False) # e.g. "v1.0"
+    
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
 
 class OfferHistory(Base):

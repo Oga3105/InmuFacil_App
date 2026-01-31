@@ -130,12 +130,22 @@
 - ✅ ADR 013 (Contratos Dinámicos)
 - ✅ Schema `PropertyOffer.contract_data` (JSON)
 - ✅ Endpoint `PUT /details` para cuestionario
-- ✅ Generador PDF con cláusulas condicionales (Cuerpo Cierto, AML, etc.)
+- ✅ Endpoint `PUT /details` para cuestionario
+- ✅ Generado PDF con cláusulas condicionales (Cuerpo Cierto, AML, etc.)
 
+### ✅ Refinamiento 12.6: Contratos Personalizados e IA 🤖
+**Estado:** COMPLETADO
+- ✅ Subida de contratos propios (PDF/Word)
+- ✅ Análisis de riesgos con IA (Simulado en Mock)
+- ✅ **Legal:** Consentimiento expreso + Descarga de responsabilidad (Liability Waiver) guarda en DB.
 
----
+### 📢 Protocolo: AGENTES REUNÍOS (Health Check)
+Cuando se invoca sin objetivo específico, implica una revisión general:
+- **@DevOps:** Git Status, archivos sin trackear, ramas limpias.
+- **@Watcher:** Coherencia documental (`README.md`, `vision_proyecto.md`, `task.md` vs Realidad).
+- **@Architect:** Limpieza de deuda técnica (scripts temporales, imports no usados).
+- **@Shield:** Revisión de secretos o configs expuestas.
 
-## 🛡️ Principios de Diseño Activos
 
 ### Security by Design
 **Filosofía:** La seguridad se considera desde el diseño inicial, no como añadido posterior.

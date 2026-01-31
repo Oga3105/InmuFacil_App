@@ -20,70 +20,28 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
+**Hito Actual:** ✍️ **Hito 13: Firma Digital (eSignature Integration)** 🚀 EN PROGRESO
+**(Anterior: Hito 12.5 Contratos Dinámicos - COMPLETADO)**
 
-**API Version:** `0.5.0` - Auth-Ready
+**API Version:** `0.8.0` - Contract-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
 - ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
-  - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
-  - ✅ Misión 6: Security Breach Remediation
-  - ✅ Misión 8: API Frontend Integration (Secure CORS)
 - ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
-  - ✅ Registro con Anti-Agency Filter
-  - ✅ Login JWT (Access Token 30min)
-  - ✅ MFA por Email (6-digit OTP)
-  - ✅ Reset Password Seguro
 - ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
-  - ✅ CRUD Vendedor (Publicación y Gestión)
-  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
-  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
-
 - ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
-  - ✅ Ventanas de Disponibilidad (Vendedor)
-  - ✅ Algoritmo de Slots Dinámicos (Comprador)
-  - ✅ Gestión de Citas (Approve/Reject)
-- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
-  - ✅ Anti-Malware (MIME Type Validation)
-  - ✅ Bloqueo de Fuerza Bruta (Automated)
-  - ✅ Tests de Prevención IDOR
-
 - ✅ **Hito 5:** Realización de Visitas (Ejecución)
-  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
-  - ✅ Dashboard (Agenda de Vendedor/Comprador)
-  - ✅ Defensa de Roles (Solo el dueño valida la visita)
-
 - ✅ **Hito 6:** Manifestación de Interés (Ofertas)
-  - ✅ Modelo de Ofertas Transparentes
-  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
-  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
-
-- ✅ **Hito: Búsqueda Avanzada (Extra)**
-  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
-  - ✅ Búsqueda Combinatoria (Features + Core)
-  - ✅ TDD (`tests/test_search_logic.py`)
-
 - ✅ **Hito 7:** Negociación y Cierre (Híbrido)
-  - ✅ Protocolo de Contraofertas (Historial Auditado)
-  - ✅ Chat Encriptado (Opcional, Defense in Depth)
-  - ✅ Modelo de Cierre (Accept/Reject)
-
 - ✅ **Hito 8:** Reserva y Señal (Híbrido)
-  - ✅ Modelo de Reservas e Idempotencia
-  - ✅ Mock Payment Provider (Simulación Financiera)
-  - ✅ Bloqueo de Concurrencia (Race Conditions)
-  - ✅ Configuración de Visibilidad (Hide when Reserved)
-
 - ✅ **Hito 9:** Verificación Documental (Compliance)
-  - ✅ Subida Cifrada (AES-256) de Nota Simple
-  - ✅ Extracción OCR de Referencia Catastral
-  - ✅ Modelo `PropertyDocument` Seguro
+- ✅ **Hito 10:** Tasación del Inmueble (Valuation Service)
+- ✅ **Hito 11:** Financiación (Mortgage Simulation)
+- ✅ **Hito 12:** Elaboración de Contrato (PDF Generator + Questionnaire)
+  - ✅ **Hito 12.5:** Lógica Contractual Avanzada (AML, Cuerpo Cierto, etc.)
 
-- 🎯 **Hito 10:** Tasación (Siguiente Paso)
-
-**Rama Activa:** `develop`  
-**Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`
+**Rama Activa:** `develop`
 
 ---
 

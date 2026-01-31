@@ -29,3 +29,18 @@ class ContractDetailsUpdate(BaseModel):
 
 class ContractDetailsResponse(ContractDetailsUpdate):
     pass
+
+class ContractAnalysisResponse(BaseModel):
+    """
+    Hito 12.6: AI Analysis Result
+    """
+    risk_score: int # 0-100 (High Risk)
+    summary: str
+    red_flags: list[str]
+    green_lights: list[str]
+    missing_clauses: list[str]
+    cost_estimate: float
+    disclaimer: str
+
+class ContractUploadMetadata(BaseModel):
+    accept_ai_processing: bool

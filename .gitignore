@@ -71,4 +71,6 @@ Thumbs.db
 *.key
 secrets/
 
+
 *.code-workspace
+uploads/

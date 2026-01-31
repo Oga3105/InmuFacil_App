@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from backend.src.services.contract_service import ContractGenerator
 from backend.src.models.users import User, UserType
 from backend.src.models.properties import Property
-from backend.src.models.offers import PropertyOffer, OfferStatus
+from backend.src.models.offers import PropertyOffer, OfferStatus, ContractAnalysis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from backend.src.models.base import Base
@@ -173,3 +173,52 @@ def test_download_endpoint_status_check(client, db_session):
     response = client.get(f"/contracts/arras/draft/{offer.id}")
     
     assert response.status_code == 400 # Bad Request (Not Accepted)
+
+def test_custom_contract_upload_ai(client, db_session):
+    # 1. Setup Data
+    user = User(email="upload@test.com", hashed_password="pw", full_name="Uploader")
+    db_session.add(user)
+    db_session.commit()
+    
+    prop = Property(owner_id=user.id, title="UploadProp", price=300000, 
+                   location="Upload St", surface_area=100)
+    db_session.add(prop)
+    db_session.commit()
+    
+    offer = PropertyOffer(buyer_id=user.id, property_id=prop.id, amount=300000, status=OfferStatus.ACCEPTED)
+    db_session.add(offer)
+    db_session.commit()
+    
+    app.dependency_overrides[get_current_user] = lambda: user
+    
+    # 2. Prepare File and Form Data
+    file_content = b"This is a dummy contract for testing AI analysis."
+    files = {"file": ("contract.txt", file_content, "text/plain")}
+    data = {"accept_ai_processing": True}
+    
+    # 3. Call Endpoint
+    response = client.post(f"/contracts/offers/{offer.id}/upload", files=files, data=data)
+    
+    # 4. Assertions
+    assert response.status_code == 200
+    json_resp = response.json()
+    
+    # Check Analysis Structure
+    assert "risk_score" in json_resp
+    assert "cost_estimate" in json_resp
+    assert json_resp["cost_estimate"] > 0
+    assert "disclaimer" in json_resp
+    
+    # Check DB Storage (Liability)
+    analysis = db_session.query(ContractAnalysis).filter(ContractAnalysis.offer_id == offer.id).first()
+    assert analysis is not None
+    assert analysis.role == "BUYER" # Because user is buyer
+    assert analysis.consent_timestamp is not None
+    assert analysis.disclaimer_version == "v1.0"
+    
+    # Check File Path updated (Mock logic assumes local saving, but test uses separate DB. 
+    # File saving is FS operation. We should verify offer.custom_contract_path)
+    db_session.refresh(offer)
+    assert offer.custom_contract_path is not None
+    assert "contract.txt" in offer.custom_contract_path
+
