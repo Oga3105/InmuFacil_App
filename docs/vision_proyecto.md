@@ -114,35 +114,62 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Recuperación de Contraseña
 
 
+**Hito 4: Búsqueda y Filtrado (Search Engine)** ✅
+- ✅ Algoritmo de filtrado combinatorio (Precio, Ubicación, Características)
+- ✅ Optimización de consultas SQL (Query Builder dinámico)
+- ✅ Prevención de SQL Injection en filtros
+
+**Hito 5: Gestión de Visitas (Block Scheduling)** ✅
+- ✅ Algoritmo de Visitas en Bloque (Slots automáticos)
+- ✅ Dashboard de Estado (Requested, Approved, Completed)
+- ✅ Control de Acceso basado en Roles (Owner vs Buyer)
+
+**Hito 6: Ofertas Transparentes** ✅
+- ✅ Modelo `PropertyOffer` transparente
+- ✅ Prevención de auto-ofertas
+- ✅ Estados de oferta gestionados (Pending, Accepted, Rejected)
+
+**Hito 7: Negociación y Chat (Híbrido)** ✅
+- ✅ Protocolo de Contraofertas
+- ✅ Chat Encriptado (Fernet) activado bajo demanda
+- ✅ Historial de negociación inmutable (Audit Log)
+
 **Hito 8: Reserva y Señal (Payment Mock)** ✅
 - ✅ Gestión de Pagos (Mock Provider)
 - ✅ Bloqueo de Concurrencia (Idempotencia)
-- ✅ Visibilidad Configurable
-
+- ✅ Visibilidad Configurable (Ocultar al reservar)
 
 **Hito 9: Verificación Documental (Compliance)** ✅
 - ✅ Upload de Notas Simples con OCR
 - ✅ Detección automática de Ref. Catastral
 - ✅ Política de Retención de Datos
+- ✅ Borrado seguro y anonimización
 
 **Hito 10: Tasación (Valuation)** ✅
 - ✅ Algoritmo de valoración comparativa
 - ✅ Histórico de tasaciones
+- ✅ Integración (Mock) con fuentes externas
 
 **Hito 11: Financiación** ✅
-- ✅ Perfiles hipotecarios
-- ✅ Simulación de cuotas
+- ✅ Perfiles hipotecarios y Scoring
+- ✅ Simulación de cuotas en tiempo real
+- ✅ Asignación de asesores financieros
 
 **Hito 12: Contratos (Drafts)** ✅
-- ✅ Generación PDF con ReportLab
-- ✅ Análisis de Contratos Propios con IA
-- ✅ Cuestionario Legal
+- ✅ Generación PDF con ReportLab (Arras Penitenciales)
+- ✅ Análisis de Contratos Propios con IA (Gemini)
+- ✅ Cuestionario Legal para personalización de cláusulas
+
+**Hito 13: Firma Digital** ✅
+- ✅ Infraestructura de Firma Remota (Mock Provider Hexagonal)
+- ✅ Tokens de un solo uso (One-Time Token)
+- ✅ Trazabilidad del ciclo de vida de la firma
 
 ### Próximo Hito 🎯
 
-**Hito 13: Firma Digital**
-- Firma Remota
-- Validez Legal (Simulada)
+**Hito 14: Preparación Notarial**
+- Coordinación de agenda con Notarías
+- Envío seguro de documentación final
 
 ---
 
