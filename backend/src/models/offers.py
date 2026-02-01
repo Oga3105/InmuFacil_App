@@ -36,6 +36,10 @@ class PropertyOffer(Base):
     valid_until = Column(DateTime(timezone=True))
     is_chat_enabled = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Hito 13: Digital Signature
+    signature_token = Column(String, unique=True, index=True, nullable=True) # One-time token
+    signed_contract_path = Column(String, nullable=True) # Path to final signed PDF
     
     # History & Chat
     history = relationship("OfferHistory", backref="offer", cascade="all, delete-orphan")

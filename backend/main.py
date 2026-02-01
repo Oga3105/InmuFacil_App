@@ -211,7 +211,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
@@ -222,6 +222,7 @@ app.include_router(visits.router)
 app.include_router(offers.router)
 app.include_router(financing.router)
 app.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
+app.include_router(signature.router) # Prefix defined in router (/contracts)
 
 
 if __name__ == "__main__":

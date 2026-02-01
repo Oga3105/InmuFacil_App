@@ -3,20 +3,20 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-# 1. Cargar variables de entorno
+# 1. Load Environment Variables
 load_dotenv()
 
-# 2. Obtener URL de Base de Datos
+# 2. Get Database URL
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-# 3. Configurar Motor
+# 3. Configure Engine
 if "sqlite" in SQLALCHEMY_DATABASE_URL:
-    print(f"[WARNING] MODO BASE DE DATOS: SQLite Local ({SQLALCHEMY_DATABASE_URL})")
+    print(f"[WARNING] DATABASE MODE: SQLite Local ({SQLALCHEMY_DATABASE_URL})")
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
     )
 else:
-    print("[INFO] MODO BASE DE DATOS: PostgreSQL (Docker)")
+    print("[INFO] DATABASE MODE: PostgreSQL (Docker)")
     from sqlalchemy.engine.url import URL
     db_url = URL.create(
         drivername="postgresql+psycopg2",
@@ -28,10 +28,10 @@ else:
     )
     engine = create_engine(db_url)
 
-# 4. Configurar Sesión
+# 4. Configurations Session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 5. Dependencia para inyección (Dependency Injection)
+# 5. Dependency Injection
 def get_db():
     db = SessionLocal()
     try:

@@ -105,7 +105,10 @@ class OfferStatus(str, enum.Enum):
     PENDING = "pending"
     ACCEPTED = "accepted"
     REJECTED = "rejected"
-    EXPIRED = "expired"
-    CANCELLED = "cancelled"
+    # Hito 7: Negotiation
+    COUNTER_OFFER = "counter_offer"
+    # Hito 13: Digital Signature
+    SIGNING_PENDING = "signing_pending"
+    SIGNED = "signed"
     COUNTERED = "countered"
     PAUSED = "paused" # For when another offer is accepted
