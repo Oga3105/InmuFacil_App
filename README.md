@@ -20,10 +20,10 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** ✍️ **Hito 14: Preparación Notarial** 🚀 PRÓXIMAMENTE
-**(Anterior: Hito 13 Firma Digital - COMPLETADO)**
+**Hito Actual:** ✍️ **Hito 15: Firma Notarial y Cierre** 🚀 PRÓXIMAMENTE
+**(Anterior: Hito 14 Preparación Notarial - COMPLETADO)**
 
-**API Version:** `0.9.0` - Signature-Ready
+**API Version:** `0.9.5` - Notary-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
@@ -42,6 +42,7 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ **Hito 12.5:** Lógica Contractual Avanzada (AML, Cuerpo Cierto, etc.)
   - ✅ **Hito 12.6:** Análisis de Contratos Propios con IA
 - ✅ **Hito 13:** Firma Digital (Mock Provider + One-Time Tokens)
+- ✅ **Hito 14:** Preparación Notarial (Dossier Seguro + Manifest)
 
 **Rama Activa:** `develop`
 

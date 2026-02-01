@@ -165,11 +165,17 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Tokens de un solo uso (One-Time Token)
 - ✅ Trazabilidad del ciclo de vida de la firma
 
+**Hito 14: Preparación Notarial** ✅
+- ✅ Gestión de Notarios
+- ✅ Generación de Dossier Seguro (Unmasking bajo demanda)
+- ✅ Manifest de Integridad (SHA256)
+
 ### Próximo Hito 🎯
 
-**Hito 14: Preparación Notarial**
-- Coordinación de agenda con Notarías
-- Envío seguro de documentación final
+**Hito 15: Firma y Cierre Definitivo**
+- Escritura Pública
+- Entrega de Llaves
+- Pago Final (Integración Bancaria)
 
 ---
 
@@ -187,8 +193,9 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 10. ✅ **Tasación del Inmueble** - Valoración profesional del inmueble
 11. ✅ **Solicitud de Hipoteca** - Gestión de financiación bancaria
 12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
-13. 🔜 **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
-14. 🔜 **Preparación Notarial** - Coordinación con notaría
+13. ✅ **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
+14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
+15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
 15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
 
 ---
