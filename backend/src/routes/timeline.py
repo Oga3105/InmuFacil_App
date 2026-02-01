@@ -25,7 +25,7 @@ class TimelineStepResponse(BaseModel):
     seller_confirmed_at: Optional[datetime]
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ConfirmAction(BaseModel):
     notes: Optional[str] = None

@@ -30,7 +30,7 @@ class HandoverResponse(BaseModel):
     # We map fields manually in route to avoid exposing raw paths
     
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.get("/{offer_id}")
 async def get_handover_dossier(
