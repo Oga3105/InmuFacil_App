@@ -175,6 +175,58 @@ async def counter_offer(
     return offer
 
 
+@router.post("/{offer_id}/accept", response_model=OfferResponse)
+async def accept_offer(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Accept an offer or counter-offer.
+    Triggers the Transaction Timeline (Hito 14.5).
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+    
+    # Logic: 
+    # If Status is PENDING, only Owner can accept.
+    # If Status is COUNTERED (by Owner), Buyer can accept.
+    
+    if offer.status == OfferStatus.PENDING:
+        if not is_owner:
+             raise HTTPException(status_code=403, detail="Only owner can accept a pending offer")
+    elif offer.status == OfferStatus.COUNTERED:
+         if not is_buyer:
+              raise HTTPException(status_code=403, detail="Only buyer can accept a counter-offer")
+    else:
+         raise HTTPException(status_code=400, detail="Cannot accept an offer in this state")
+
+    # Update Status
+    offer.status = OfferStatus.ACCEPTED
+    
+    # Log History
+    history = OfferHistory(
+        offer_id=offer.id,
+        actor_id=current_user.id,
+        action="ACCEPT",
+        amount=offer.amount
+    )
+    db.add(history)
+    
+    # Hook: Initialize Timeline (Hito 14.5)
+    from backend.src.services.timeline_service import TimelineService
+    timeline_service = TimelineService(db)
+    timeline_service.initialize_timeline(offer)
+    
+    db.commit()
+    db.refresh(offer)
+    return offer
+
+
 @router.post("/{offer_id}/chat/enable", status_code=status.HTTP_200_OK)
 async def enable_chat(
     offer_id: int,
