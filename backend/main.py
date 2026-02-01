@@ -155,12 +155,22 @@ async def startup_event():
     
     try:
         from backend.src.utils.security import SECRET_KEY
+        from backend.src.config.database import engine
+        from backend.src.models.base import Base
+        # Ensure models are loaded for metadata
+        from backend.src.models import timeline 
+
         if len(SECRET_KEY) < 32:
              logger.warning("JWT SECRET_KEY might be weak.")
              
         # Feature Activation
         logger.info("[SHIELD]  ESCUDO ANTI-INMO: ACTIVE")
         logger.info("[VAULT]   SECURITY VAULT: ACTIVE")
+        
+        # Auto-Migration (Dev Mode)
+        logger.info("[DB] Checking database schema...")
+        Base.metadata.create_all(bind=engine)
+        logger.info("[DB] Schema synchronized.")
         
     except Exception as e:
         logger.critical(f"[ALERT] STARTUP WARNING: {str(e)}")

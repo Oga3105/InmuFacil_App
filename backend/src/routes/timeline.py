@@ -5,7 +5,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from backend.src.config.database import get_db
-from backend.src.services.auth_service import get_current_user
+from backend.src.routes.auth import get_current_user
 from backend.src.models.users import User
 from backend.src.models.offers import PropertyOffer
 from backend.src.services.timeline_service import TimelineService
