@@ -1,0 +1,87 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project
+plugins: anyio-4.12.1
+collecting ... collected 3 items
+
+tests/test_handover.py::test_upsert_handover_data PASSED                 [ 33%]
+tests/test_handover.py::test_get_handover_acl FAILED                     [ 66%]
+tests/test_handover.py::test_upload_bill_mocked FAILED                   [100%]
+
+================================== FAILURES ===================================
+____________________________ test_get_handover_acl ____________________________
+
+db_session = <sqlalchemy.orm.session.Session object at 0x0000020DBF17F610>
+keys_setup = (<User(id=1, email=owner@h.com, type=UserType.PARTICULAR)>, <User(id=2, email=buyer@h.com, type=UserType.PARTICULAR)>,...email=random@h.com, type=UserType.PARTICULAR)>, <backend.src.models.offers.PropertyOffer object at 0x0000020DBF17F890>)
+
+    def test_get_handover_acl(db_session, keys_setup):
+        owner, buyer, random, offer = keys_setup
+    
+        # Init data
+        HandoverService.upsert_handover_data(db_session, offer.id, owner, {"water_reference": "W123"})
+    
+        # 1. Buyer reads -> Success
+>       h_buyer = HandoverService.get_handover(db_session, offer.id, buyer)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_handover.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+db = <sqlalchemy.orm.session.Session object at 0x0000020DBF17F610>, offer_id = 1
+user = <User(id=2, email=buyer@h.com, type=UserType.PARTICULAR)>
+
+    @staticmethod
+    def get_handover(db: Session, offer_id: int, user: User) -> PropertyHandover:
+        """
+        Retrieve handover dossier.
+        Security: Only SELLER (owner), BUYER (winner), or ADMIN can view.
+        """
+        handover = db.query(PropertyHandover).filter(PropertyHandover.offer_id == offer_id).first()
+        if not handover:
+            raise HTTPException(status_code=404, detail="Handover dossier not initialized")
+    
+        # Security Check
+        offer = handover.offer
+        is_buyer = (offer.buyer_id == user.id)
+        is_seller = (offer.property.owner_id == user.id)
+>       is_admin = (user.user_type == UserType.ADMIN)
+                                      ^^^^^^^^^^^^^^
+E       AttributeError: type object 'UserType' has no attribute 'ADMIN'
+
+backend\src\services\handover_service.py:31: AttributeError
+___________________________ test_upload_bill_mocked ___________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+============================== warnings summary ===============================
+backend\src\models\base.py:3
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\src\models\base.py:3: MovedIn20Warning: The ``declarative_base()`` function is now available as sqlalchemy.orm.declarative_base(). (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    Base = declarative_base()
+
+tests\test_handover.py:102
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\tests\test_handover.py:102: PytestUnknownMarkWarning: Unknown pytest.mark.asyncio - is this a typo?  You can register custom marks to avoid this warning - for details, see https://docs.pytest.org/en/stable/how-to/mark.html
+    @pytest.mark.asyncio
+
+tests/test_handover.py::test_upsert_handover_data
+tests/test_handover.py::test_upsert_handover_data
+tests/test_handover.py::test_upsert_handover_data
+tests/test_handover.py::test_get_handover_acl
+  C:\Users\Os\.gemini\antigravity\scratch\InmuFacil_Project\backend\src\services\handover_service.py:45: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    offer = db.query(PropertyOffer).get(offer_id)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_handover.py::test_get_handover_acl - AttributeError: type object 'UserType' has no attribute 'ADMIN'
+FAILED tests/test_handover.py::test_upload_bill_mocked - Failed: async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+=================== 2 failed, 1 passed, 6 warnings in 2.04s ===================

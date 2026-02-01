@@ -107,6 +107,46 @@ def get_decrypted_document(file_path: str) -> bytes:
     try:
         decrypted_b64 = decrypt_data(encrypted_blob)
         import base64
-        return base64.b64decode(decrypted_b64)
     except Exception:
         raise ComplianceError("Decryption failed")
+
+class DocumentService:
+    """
+    Service wrapper for document operations.
+    """
+    @staticmethod
+    async def save_protected_document(file: UploadFile, filename_prefix: str) -> str:
+        """
+        Generic secure text/file saver.
+        Encrypts and saves with a specific prefix/name logic.
+        """
+        try:
+            content = await file.read() # Async read
+        except Exception:
+            raise ComplianceError("Failed to read file")
+        finally:
+            await file.seek(0)
+
+        # Encrypt
+        import base64
+        # Handle if content is str or bytes
+        if isinstance(content, str):
+            content_b = content.encode()
+        else:
+            content_b = content
+            
+        content_b64 = base64.b64encode(content_b).decode('utf-8')
+        encrypted_blob = encrypt_data(content_b64)
+        
+        # Save
+        filename = f"{filename_prefix}_{datetime.now().timestamp()}.enc"
+        # Sanitize filename
+        filename = "".join([c for c in filename if c.isalnum() or c in "._-"])
+        
+        file_path = os.path.join(UPLOAD_DIR, filename)
+        
+        with open(file_path, "w") as f:
+            f.write(encrypted_blob)
+            
+        return file_path
+
