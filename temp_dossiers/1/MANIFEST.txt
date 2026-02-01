@@ -1,0 +1,11 @@
+MANIFESTO DE SEGURIDAD - DOSSIER NOTARIAL
+Fecha: 2026-02-01T12:59:22.773505
+----------------------------------------
+Archivos incluidos y firmas SHA256:
+
+contrato_arras_firmado.pdf: 577e65e6fedd477b42673b7f6e650d81070aaca7bb82674950a74c03c6be7216
+nota_simple.pdf: 9d0bdc8971a827f5cb0dae7a21954cb946bfb94c04d5333f815f8ccb8057c982
+dni_vendedor_1_unmasked.jpg: cff19ff461ab3a83f3aca2ab0af00e68bd9849f0ef46a9d1b1b6378341125ef0
+dni_comprador_1_unmasked.jpg: b877bd3500b5b870135b4fefb4ae4da838feaa1f41103c812d227bf0df6e1200
+
+CONFIDENCIAL: Este paquete contiene datos personales desprotegidos bajo secreto notarial.

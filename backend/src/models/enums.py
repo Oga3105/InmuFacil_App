@@ -102,13 +102,15 @@ class VisitStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 class OfferStatus(str, enum.Enum):
-    PENDING = "pending"
-    ACCEPTED = "accepted"
-    REJECTED = "rejected"
-    # Hito 7: Negotiation
-    COUNTER_OFFER = "counter_offer"
-    # Hito 13: Digital Signature
-    SIGNING_PENDING = "signing_pending"
-    SIGNED = "signed"
-    COUNTERED = "countered"
-    PAUSED = "paused" # For when another offer is accepted
+    PENDING = "pending"       # Offer sent, waiting for seller
+    ACCEPTED = "accepted"     # Seller accepted
+    REJECTED = "rejected"     # Seller rejected
+    COUNTER_OFFER = "counter_offer" # Seller made a counter-offer
+    SIGNING_PENDING = "signing_pending" # Hito 13: Waiting for signature
+    SIGNED = "signed"         # Hito 13: Signed by both parties
+
+class NotaryStatus(str, enum.Enum):
+    NOT_ASSIGNED = "not_assigned"
+    ASSIGNED = "assigned"
+    DOSSIER_SENT = "dossier_sent"
+    COMPLETED = "completed"

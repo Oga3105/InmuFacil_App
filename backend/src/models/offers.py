@@ -41,6 +41,14 @@ class PropertyOffer(Base):
     signature_token = Column(String, unique=True, index=True, nullable=True) # One-time token
     signed_contract_path = Column(String, nullable=True) # Path to final signed PDF
     
+    # Hito 14: Notary Integration
+    notary_id = Column(Integer, ForeignKey("notaries.id"), nullable=True)
+    notary_appointment_date = Column(DateTime(timezone=True), nullable=True)
+    notary_status = Column(Enum("not_assigned", "assigned", "dossier_sent", "completed", name="notarystatus"), default="not_assigned")
+    
+    # Relationships
+    notary = relationship("Notary")
+    
     # History & Chat
     history = relationship("OfferHistory", backref="offer", cascade="all, delete-orphan")
     messages = relationship("OfferMessage", backref="offer", cascade="all, delete-orphan")
