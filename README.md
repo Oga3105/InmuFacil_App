@@ -20,10 +20,10 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** ✍️ **Hito 13: Firma Digital (eSignature Integration)** 🚀 EN PROGRESO
-**(Anterior: Hito 12.5 Contratos Dinámicos - COMPLETADO)**
+**Hito Actual:** ✍️ **Hito 14: Preparación Notarial** 🚀 PRÓXIMAMENTE
+**(Anterior: Hito 13 Firma Digital - COMPLETADO)**
 
-**API Version:** `0.8.0` - Contract-Ready
+**API Version:** `0.9.0` - Signature-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
@@ -40,6 +40,8 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 - ✅ **Hito 11:** Financiación (Mortgage Simulation)
 - ✅ **Hito 12:** Elaboración de Contrato (PDF Generator + Questionnaire)
   - ✅ **Hito 12.5:** Lógica Contractual Avanzada (AML, Cuerpo Cierto, etc.)
+  - ✅ **Hito 12.6:** Análisis de Contratos Propios con IA
+- ✅ **Hito 13:** Firma Digital (Mock Provider + One-Time Tokens)
 
 **Rama Activa:** `develop`
 
@@ -384,7 +386,7 @@ Este proyecto sigue estándares DevSecOps estrictos:
 
 ## 📄 Licencia
 
-[Pendiente de definir]
+[MIT License](LICENSE)
 
 ---
 
