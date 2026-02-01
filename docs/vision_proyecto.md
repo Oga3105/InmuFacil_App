@@ -195,8 +195,8 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
 13. ✅ **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
 14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
-15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
-15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
+15. ✅ **Control de Pasos (Timeline)** - Trazabilidad y Doble Confirmación de hitos financieros
+16. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
 
 ---
 

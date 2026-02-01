@@ -43,6 +43,7 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ **Hito 12.6:** Análisis de Contratos Propios con IA
 - ✅ **Hito 13:** Firma Digital (Mock Provider + One-Time Tokens)
 - ✅ **Hito 14:** Preparación Notarial (Dossier Seguro + Manifest)
+- ✅ **Hito 14.5:** Timeline de Transacción (Control de Pasos + Doble Confirmación)
 
 **Rama Activa:** `develop`
 
