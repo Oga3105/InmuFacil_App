@@ -4,6 +4,7 @@ from sqlalchemy.types import JSON
 from sqlalchemy.sql import func
 from .base import Base
 import enum
+from backend.src.models.offers import PropertyOffer # Direct Import
 
 class StepStatus(str, enum.Enum):
     PENDING = "PENDING"
@@ -45,4 +46,4 @@ class TransactionStep(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationship
-    offer = relationship("PropertyOffer", backref="timeline_steps")
+    offer = relationship(PropertyOffer, backref="timeline_steps")

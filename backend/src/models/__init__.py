@@ -7,5 +7,7 @@ from .properties import (
 )
 from .visits import VisitWindow, VisitAppointment
 from .offers import PropertyOffer, OfferHistory, OfferMessage, Reservation
+from .notaries import Notary
 from .valuation import PropertyValuation, ValuationProvider
 from .financing import MortgageProfile, MortgageSimulation, EmploymentStatus
+from .timeline import TransactionStep

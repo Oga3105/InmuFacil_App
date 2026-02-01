@@ -334,3 +334,40 @@ async def get_chat_history(
         ))
         
     return response
+
+
+@router.get("/{offer_id}/closing-certificate", status_code=status.HTTP_200_OK)
+async def get_closing_certificate(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Hito 15: Retrieve Closing Certificate for a Completed Transaction.
+    """
+    offer = db.query(PropertyOffer).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+        
+    # Access: Buyer, Seller (via Property), or Admin
+    prop = db.query(Property).filter(Property.id == offer.property_id).first()
+    is_buyer = offer.buyer_id == current_user.id
+    is_seller = prop.owner_id == current_user.id
+    
+    if not (is_buyer or is_seller):
+         raise HTTPException(status_code=403, detail="Not authorized")
+         
+    if offer.status != OfferStatus.COMPLETED:
+        raise HTTPException(status_code=404, detail="Transaction not closed yet")
+        
+    return {
+        "certificate_id": f"CERT-{offer.id}-{int(datetime.utcnow().timestamp())}",
+        "property_id": prop.id,
+        "offer_id": offer.id,
+        "status": "OFFICIALLY_SOLD",
+        "closing_date": datetime.utcnow(), # Ideally from the 'sold' timestamp in Property or Timeline
+        "buyer_id": offer.buyer_id, # Masked in UI
+        "owner_id": prop.owner_id,
+        "final_price": offer.amount,
+        "legal_note": "This transaction has been verified and closed securely via InmuFácil."
+    }

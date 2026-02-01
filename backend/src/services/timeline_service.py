@@ -139,6 +139,17 @@ class TimelineService:
 
         self.db.commit()
         self.db.refresh(step)
+        
+        # Hito 15: Check for Auto-Closing
+        # If this was the last pending step, trigger closing
+        if step.status == StepStatus.COMPLETED:
+            from backend.src.services.closing_service import ClosingService # Lazy import to avoid circular dependency
+            try:
+                if ClosingService.validate_closing_eligibility(self.db, step.offer_id):
+                    ClosingService.execute_closing(self.db, step.offer_id)
+            except Exception as e:
+                logger.error(f"Auto-Closing Failed: {e}")
+                
         return step
 
     def get_timeline(self, offer_id: int) -> List[TransactionStep]:

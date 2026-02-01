@@ -108,6 +108,7 @@ class OfferStatus(str, enum.Enum):
     COUNTER_OFFER = "counter_offer" # Seller made a counter-offer
     SIGNING_PENDING = "signing_pending" # Hito 13: Waiting for signature
     SIGNED = "signed"         # Hito 13: Signed by both parties
+    COMPLETED = "completed"   # Hito 15: Transaction Finalized
 
 class NotaryStatus(str, enum.Enum):
     NOT_ASSIGNED = "not_assigned"
