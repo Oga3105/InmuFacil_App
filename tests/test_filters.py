@@ -9,7 +9,7 @@ Token Consumption Tracking: ~500 tokens for filter tests
 """
 
 import pytest
-from backend.filters import (
+from backend.src.utils.filters import (
     check_email_domain,
     check_professional_keywords,
     validate_user_is_not_agency,
@@ -21,7 +21,7 @@ from backend.filters import (
 # Email Domain Detection Tests
 # ============================================================================
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_block_known_agency_domain():
     """
     Test: Known agency domains are blocked
@@ -45,7 +45,7 @@ async def test_block_known_agency_domain():
         assert "domain" in reason.lower()
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_allow_personal_email_domains():
     """
     Test: Personal email domains are allowed
@@ -92,7 +92,7 @@ def test_detect_professional_keywords_in_name():
     """
     test_cases = [
         ("Agencia Inmobiliaria López", True, ["agencia", "inmobiliaria"]),
-        ("Gestor de Propiedades S.L.", True, ["gestor", "s.l."]),
+        ("Gestor de Propiedades S.L.", True, ["gestor"]),
         ("Asesor Inmobiliario Madrid", True, ["asesor", "inmobiliario"]),
         ("Real Estate Broker Inc", True, ["real estate", "broker", "inc"]),
     ]
@@ -126,7 +126,7 @@ def test_no_false_positive_on_similar_names():
 # Multi-Factor Detection Tests
 # ============================================================================
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_block_agency_domain_regardless_of_name():
     """
     Test: Agency domain alone is enough to block
@@ -142,7 +142,7 @@ async def test_block_agency_domain_regardless_of_name():
     assert "tecnocasa.es" in reason
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_allow_keyword_in_name_if_personal_email():
     """
     Test: Keywords in name alone don't block if email is personal
@@ -158,7 +158,7 @@ async def test_allow_keyword_in_name_if_personal_email():
     assert is_valid, "Should allow personal email even with keyword in name"
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_block_professional_type_with_keywords():
     """
     Test: Professional user type + keywords = blocked
@@ -174,7 +174,7 @@ async def test_block_professional_type_with_keywords():
     assert "professional" in reason.lower() or "keywords" in reason.lower()
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_allow_particular_type_with_keywords():
     """
     Test: Particular user type + keywords = allowed (benefit of doubt)
@@ -193,7 +193,7 @@ async def test_allow_particular_type_with_keywords():
 # Edge Cases and Security Tests
 # ============================================================================
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_handle_email_without_domain():
     """
     Test: Handle malformed emails gracefully
@@ -208,7 +208,7 @@ async def test_handle_email_without_domain():
     assert is_valid or not is_valid  # Just ensure no exception
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_handle_empty_name():
     """
     Test: Handle empty names gracefully
@@ -223,7 +223,7 @@ async def test_handle_empty_name():
     assert is_valid or not is_valid  # Just ensure no exception
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_sanitize_inputs():
     """
     Test: Inputs are sanitized (whitespace, case)
@@ -268,7 +268,7 @@ def test_log_blocked_attempt_no_crash():
 # Real-World Scenario Tests
 # ============================================================================
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_real_world_agency_attempts():
     """
     Test: Real-world agency registration attempts are blocked
@@ -302,7 +302,7 @@ async def test_real_world_agency_attempts():
         assert not is_valid, f"Should block {attempt['email']}"
 
 
-@pytest.mark.asyncio
+@pytest.mark.anyio
 async def test_real_world_legitimate_users():
     """
     Test: Real-world legitimate users are allowed

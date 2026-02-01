@@ -9,8 +9,8 @@ import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, Property, PropertyOffer, OfferStatus
+from backend.src.models.base import Base
+from backend.src.models import User, Property, PropertyOffer, OfferStatus
 
 # Test DB Setup (Can refactor to conftest.py later for DRY)
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_offers.db"

@@ -8,6 +8,11 @@ Token Consumption Tracking: ~300 tokens for encryption tests
 """
 
 import pytest
+import os
+from unittest.mock import MagicMock, patch
+
+# Inject Mock Key for Test Environment (Base64 encoded 32-byte key)
+os.environ["INMUFACIL_MASTER_KEY"] = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="
 from backend.core.security import (
     encrypt_data,
     decrypt_data,

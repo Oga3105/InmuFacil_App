@@ -10,9 +10,9 @@ import pytest
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
-from backend.crypto import encrypt_data, decrypt_data
+from backend.src.models.base import Base
+from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
+from backend.src.utils.crypto import encrypt_data, decrypt_data
 
 # ============================================================================
 # Setup

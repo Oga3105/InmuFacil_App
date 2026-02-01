@@ -12,9 +12,9 @@ import uuid
 import threading
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, Property, PropertyStatus, Reservation, OfferStatus, PropertyOffer
-from backend.services.payment_service import MockPaymentProvider
+from backend.src.models.base import Base
+from backend.src.models import User, Property, PropertyStatus, Reservation, OfferStatus, PropertyOffer
+from backend.src.services.payment_service import MockPaymentProvider
 
 # ============================================================================
 # Setup

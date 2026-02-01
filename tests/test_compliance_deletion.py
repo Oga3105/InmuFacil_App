@@ -4,11 +4,12 @@
 import pytest
 from fastapi.testclient import TestClient
 from backend.main import app
-from backend.models import Property, User, PropertyDocument, DocumentType, PropertyStatus
-from backend.database import get_db, Base
+from backend.src.models import Property, User, PropertyDocument, DocumentType, PropertyStatus
+from backend.src.config.database import get_db
+from backend.src.models.base import Base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.security import create_access_token
+from backend.src.utils.security import create_access_token
 
 # Setup Test DB
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_deletion_integ.db"

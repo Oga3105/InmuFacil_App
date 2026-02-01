@@ -3,8 +3,8 @@
 """
 import pytest
 from unittest.mock import MagicMock, patch
-from backend.services.document_service import process_document, get_decrypted_document
-from backend.models import DocumentType
+from backend.src.services.document_service import process_document, get_decrypted_document
+from backend.src.models import DocumentType
 from fastapi import UploadFile
 import os
 import io
@@ -21,8 +21,8 @@ def mock_upload_file():
     file.file = io.BytesIO(FAKE_IMAGE_CONTENT)
     return file
 
-@patch("backend.services.document_service.get_ocr_reader")
-@patch("backend.services.document_service.encrypt_data")
+@patch("backend.src.services.document_service.get_ocr_reader")
+@patch("backend.src.services.document_service.encrypt_data")
 def test_process_document_flow(mock_encrypt, mock_get_reader, mock_upload_file, tmp_path):
     # Setup Mocks
     mock_encrypt.return_value = "ENCRYPTED_BLOB"
@@ -33,7 +33,7 @@ def test_process_document_flow(mock_encrypt, mock_get_reader, mock_upload_file, 
     mock_get_reader.return_value = mock_reader
     
     # Redirect upload dir to tmp_path for test safety
-    with patch("backend.services.document_service.UPLOAD_DIR", str(tmp_path)):
+    with patch("backend.src.services.document_service.UPLOAD_DIR", str(tmp_path)):
         # Execute
         result = process_document(mock_upload_file, property_id=1, doc_type="nota_simple")
         
@@ -50,7 +50,7 @@ def test_process_document_flow(mock_encrypt, mock_get_reader, mock_upload_file, 
         assert "metadata" in result
         assert result["metadata"]["catastral_ref"] == FAKE_CATASTRAL
 
-@patch("backend.services.document_service.decrypt_data")
+@patch("backend.src.services.document_service.decrypt_data")
 def test_decrypt_flow(mock_decrypt, tmp_path):
     # Setup
     fake_confidential = "CONFIDENTIAL_DATA"

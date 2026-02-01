@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from unittest.mock import MagicMock, patch
 
-from backend.security_monitor import (
+from backend.src.utils.security_monitor import (
     record_failed_dni_upload, 
     is_account_locked, 
     MAX_FAILED_ATTEMPTS,
@@ -20,7 +20,7 @@ from backend.security_monitor import (
 )
 # We will mock the validation function if it doesn't exist yet, or import it
 # assuming it should be in backend.services.kyc_service or utils
-from backend.services.kyc_service import validate_mime_type 
+from backend.src.services.kyc_service import validate_mime_type 
 
 # ============================================================================
 # Layer 4: Brute Force Prevention Tests
@@ -34,7 +34,7 @@ def test_brute_force_lockout_mechanism():
     # Reset state for this user (mocking internal state reset would be ideal, 
     # but for unit test we can rely on isolation or manual clear if globals used)
     # Ideally implementation uses Redis/DB, here it uses globals in memory
-    from backend.security_monitor import _failed_attempts, _locked_accounts
+    from backend.src.utils.security_monitor import _failed_attempts, _locked_accounts
     _failed_attempts[user_id] = []
     if user_id in _locked_accounts:
         del _locked_accounts[user_id]
@@ -99,7 +99,7 @@ def test_idor_prevention_on_property_edit():
     Test 3: User A cannot edit User B's property.
     """
     # This logic usually resides in `verify_property_ownership` dependency in routers
-    from backend.routers.properties import verify_property_ownership
+    from backend.src.routes.properties import verify_property_ownership
     
     # Mock DB Session
     mock_db = MagicMock()

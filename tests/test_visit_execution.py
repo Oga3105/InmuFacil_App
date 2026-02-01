@@ -10,8 +10,8 @@ import pytest
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import User, Property, VisitWindow, VisitAppointment, VisitStatus
+from backend.src.models.base import Base
+from backend.src.models import User, Property, VisitWindow, VisitAppointment, VisitStatus
 
 # ============================================================================
 # Test Database Setup

@@ -10,8 +10,8 @@ Tests dynamic filtering capabilities:
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.database import Base
-from backend.models import Property, PropertyFeatures, PropertyType, PropertyStatus, User
+from backend.src.models.base import Base
+from backend.src.models import Property, PropertyFeatures, PropertyType, PropertyStatus, User
 
 # ============================================================================
 # Setup
