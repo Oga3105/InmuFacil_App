@@ -170,12 +170,15 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Generación de Dossier Seguro (Unmasking bajo demanda)
 - ✅ Manifest de Integridad (SHA256)
 
-### Próximo Hito 🎯
+**Hito 15: Cierre Definitivo (Closing)** ✅
+- ✅ Automatización de cambio de estado a SOLD/COMPLETED
+- ✅ Certificado de Cierre Digital
+- ✅ Integración con Timeline
 
-**Hito 15: Firma y Cierre Definitivo**
-- Escritura Pública
-- Entrega de Llaves
-- Pago Final (Integración Bancaria)
+**Hito 16: Post-Sales Management** ✅
+- ✅ **Parte A: Inteligencia Financiera**: Estimador de Costes (ITP, Notaría, Registro)
+- ✅ **Parte B: Digital Vault**: Traspaso seguro de suministros (CUPS, Facturas cifradas)
+- ✅ Compliance Legal (Disclaimers obligatorios)
 
 ---
 
@@ -195,8 +198,8 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
 13. ✅ **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
 14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
-15. ✅ **Control de Pasos (Timeline)** - Trazabilidad y Doble Confirmación de hitos financieros
-16. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
+15. ✅ **Cierre Definitivo** - Control automatizado de estados y Certificado de Cierre
+16. ✅ **Post-Sales Intelligence** - Estimación de Costes (Parte A) y Traspaso de Suministros (Parte B)
 
 ---
 
