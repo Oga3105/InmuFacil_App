@@ -119,12 +119,30 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Bloqueo de Concurrencia (Idempotencia)
 - ✅ Visibilidad Configurable
 
+
+**Hito 9: Verificación Documental (Compliance)** ✅
+- ✅ Upload de Notas Simples con OCR
+- ✅ Detección automática de Ref. Catastral
+- ✅ Política de Retención de Datos
+
+**Hito 10: Tasación (Valuation)** ✅
+- ✅ Algoritmo de valoración comparativa
+- ✅ Histórico de tasaciones
+
+**Hito 11: Financiación** ✅
+- ✅ Perfiles hipotecarios
+- ✅ Simulación de cuotas
+
+**Hito 12: Contratos (Drafts)** ✅
+- ✅ Generación PDF con ReportLab
+- ✅ Análisis de Contratos Propios con IA
+- ✅ Cuestionario Legal
+
 ### Próximo Hito 🎯
 
-**Hito 12: Elaboración de Contrato**
-- Generación PDF Automática
-- Plantillas Legales Verificadas
-- Integración de Datos (Propiedad, Usuario, Oferta)
+**Hito 13: Firma Digital**
+- Firma Remota
+- Validez Legal (Simulada)
 
 ---
 
@@ -142,7 +160,7 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 10. ✅ **Tasación del Inmueble** - Valoración profesional del inmueble
 11. ✅ **Solicitud de Hipoteca** - Gestión de financiación bancaria
 12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
-13. 🎯 **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
+13. 🔜 **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
 14. 🔜 **Preparación Notarial** - Coordinación con notaría
 15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
 
