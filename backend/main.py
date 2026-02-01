@@ -233,6 +233,7 @@ app.include_router(visits.router)
 app.include_router(offers.router)
 app.include_router(financing.router)
 app.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
+app.include_router(financial.router) # Hito 16 Part A
 app.include_router(signature.router) # Prefix defined in router (/contracts)
 app.include_router(notary.router) # Prefix defined in router (/notaries)
 app.include_router(timeline.router) # Prefix defined in router (/timeline)
