@@ -173,7 +173,8 @@ async def startup_event():
         logger.info("[DB] Schema synchronized.")
         
     except Exception as e:
-        logger.critical(f"[ALERT] STARTUP WARNING: {str(e)}")
+        # Use repr() to avoid UnicodeDecodeError if the system error message contains localized non-UTF-8 characters (Windows)
+        logger.critical(f"[ALERT] STARTUP WARNING: {repr(e)}")
     
     logger.info("=" * 60)
 
@@ -240,3 +241,5 @@ app.include_router(timeline.router) # Prefix defined in router (/timeline)
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+

@@ -6,7 +6,7 @@ services:
     container_name: inmufacil_postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "5435:5432"
     environment:
       POSTGRES_USER: inmufacil_user
       POSTGRES_PASSWORD: passwordSeguro123
@@ -14,7 +14,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U inmufacil_user -d inmufacil_db"]
+      test: [ "CMD-SHELL", "pg_isready -U inmufacil_user -d inmufacil_db" ]
       interval: 10s
       timeout: 5s
       retries: 5
