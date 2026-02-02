@@ -45,6 +45,10 @@ class User(Base):
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
 
+    # Provider Fields (Hito 17 - Service Marketplace)
+    provider_category = Column(String, nullable=True) # e.g. "NOTARY", "VALUER"
+    service_zone = Column(String, nullable=True) # e.g. "Madrid", "Barcelona"
+
     # Relationships
     # Using string references to avoid circular imports
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")

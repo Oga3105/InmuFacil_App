@@ -10,6 +10,37 @@ class UserType(str, enum.Enum):
     PARTICULAR = "particular"
     PROFESIONAL = "profesional"
     FINANCIERO = "financiero" # Hito 11
+    ADMIN = "admin"           # Explicit Admin
+    PROVIDER = "provider"     # External Service Agent
+
+class ServiceType(str, enum.Enum):
+    # Compliance & Listing
+    ENERGY_CERTIFICATE = "energy_certificate"
+    NOTA_SIMPLE_REQUEST = "nota_simple_request"
+    PROFESSIONAL_PHOTOGRAPHY = "professional_photography"
+    
+    # Validation & Financial
+    VALUATION = "valuation"
+    MORTGAGE_BROKERAGE = "mortgage_brokerage"
+    INSURANCE = "insurance"
+    
+    # Legal & Closing
+    NOTARY_ASSIGNMENT = "notary_assignment"
+    LEGAL_ADVICE = "legal_advice"
+    
+    # Post-Sales
+    MOVING_SERVICE = "moving_service"
+    REFORM_ESTIMATE = "reform_estimate"
+    UTILITY_CHANGE = "utility_change" # Hito 16B support
+
+class ServiceStatus(str, enum.Enum):
+    REQUESTED = "requested"   # User asked for it
+    QUOTED = "quoted"         # Provider sent price
+    ASSIGNED = "assigned"     # User accepted provider
+    IN_PROGRESS = "in_progress"
+    REVIEW_PENDING = "review_pending" # Provider finished, Admin/User checking
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
 
 class PropertyType(str, enum.Enum):
     PISO = "piso"

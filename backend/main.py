@@ -222,7 +222,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
@@ -235,6 +235,7 @@ app.include_router(financing.router)
 app.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
 app.include_router(financial.router) # Hito 16 Part A
 app.include_router(handover.router) # Hito 16 Part B
+app.include_router(services.router) # Hito 17 - Unified Services
 app.include_router(signature.router) # Prefix defined in router (/contracts)
 app.include_router(notary.router) # Prefix defined in router (/notaries)
 app.include_router(timeline.router) # Prefix defined in router (/timeline)
