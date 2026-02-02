@@ -84,7 +84,7 @@ def test_counter_offer_flow(db_session, nego_fixtures):
     new_amount = 480000
     
     # Logic Simulation
-    offer.status = OfferStatus.COUNTERED
+    offer.status = OfferStatus.COUNTER_OFFER
     offer.amount = new_amount # Update current visible amount
     
     history_entry = OfferHistory(
@@ -98,7 +98,7 @@ def test_counter_offer_flow(db_session, nego_fixtures):
     
     # Assertions
     updated_offer = db_session.query(PropertyOffer).first()
-    assert updated_offer.status == OfferStatus.COUNTERED
+    assert updated_offer.status == OfferStatus.COUNTER_OFFER
     assert updated_offer.amount == 480000
     
     history = db_session.query(OfferHistory).filter_by(offer_id=offer.id).all()

@@ -85,7 +85,7 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
     *   **Acción:** Ejecutar "Protocolo de Salud General" y revisión de congruencia.
 
 **Protocolo de Salud General (Checklist Automático):**
-*   **Congruencia Documental:** Verificar que `README.md`, `task.md` y `scratchpad.md` reflejan fielmente el estado actual del código.
+*   **Congruencia Documental:** Verificar que `README.md`, `vision_proyecto.md`, `task.md` y `scratchpad.md` reflejan fielmente el estado actual del código.
 *   **Limpieza:** Eliminar inmediatamente archivos basura o temporales.
 *   **Git Sync:** Asegurar que TODA rama local (`feature/` o `fix/`) se suba al remoto.
 *   **Merge Policy:** Fusionar a `develop` **SI Y SOLO SI** los tests están en VERDE (Pasando).

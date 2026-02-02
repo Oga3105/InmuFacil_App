@@ -5,7 +5,7 @@
 - **Último Commit:** 6fba00e - docs: finalize professional README with security specifications
 - **Verificación:** ✅ .env protegido | ✅ README actualizado | ✅ 0 commits pendientes
 - **Misiones Completadas:** M1-M9 | **Próximo Hito:** 🎯 HITO 10 - Frontend App (Flutter)
-- **Agentes:** Architect (✅ Activo), Jules (✅ Activo), Shield (✅ Activo), Watcher (✅ Activo), **FrontendProxy (🆕 Flutter/Mobile)**, **DevOps (✅ GitHub Actions)**
+
 
 ## Estrategia de Ramificación (Git Flow)
 - **Rama Activa de Desarrollo:** `develop` ⚡
@@ -139,12 +139,7 @@
 - ✅ Análisis de riesgos con IA (Simulado en Mock)
 - ✅ **Legal:** Consentimiento expreso + Descarga de responsabilidad (Liability Waiver) guarda en DB.
 
-### 📢 Protocolo: AGENTES REUNÍOS (Health Check)
-Cuando se invoca sin objetivo específico, implica una revisión general:
-- **@DevOps:** Git Status, archivos sin trackear, ramas limpias.
-- **@Watcher:** Coherencia documental (`README.md`, `vision_proyecto.md`, `task.md` vs Realidad).
-- **@Architect:** Limpieza de deuda técnica (scripts temporales, imports no usados).
-- **@Shield:** Revisión de secretos o configs expuestas.
+
 
 
 ### Security by Design
@@ -263,62 +258,4 @@ Cuando se invoca sin objetivo específico, implica una revisión general:
 
 ---
 
-## 📢 Protocolos de Operación
 
-### 🚨 Protocolo: "Agentes, reuníos"
-**Trigger:** El usuario pronuncia la frase clave "Agentes, reuníos".
-**Acción:** Todos los agentes deben detener su trabajo actual y realizar una revisión de sus responsabilidades.
-**Objetivo:** Identificar tareas pendientes de mantenimiento, documentación, git, o limpieza que se hayan pasado por alto.
-
-**Checklist por Agente:**
-- **@Architect:** Revisar coherencia de ADRs, estructura de carpetas y deuda técnica.
-- **@Jules:** Verificar tareas pendientes en `task.md`, estado de tests y cobertura.
-- **@Shield:** Auditar logs recientes, verificar alertas de seguridad y secretos.
-- **@Watcher:** Revisar estado de métricas, logs de auditoría y rendimiento.
-- **@FrontendProxy:** Validar paridad API vs UI Mockups, necesidades de endpoints.
-- **@DevOps:** Verificar estado de ramas git, commits pendientes, y pipelines.
-
-**Salida Esperada:** Un reporte conciso de cada agente indicando "Sin tareas pendientes" o listando las acciones requeridas.
-
-### 🔄 Protocolo: "Check Cruzado Continuo"
-**Trigger:** Después de cada acción significativa (refactor, cleanup, feature).
-**Acción:** El sistema debe evaluar automáticamente si la acción completada dispara responsabilidades en otros agentes.
-**Ejemplo:**
-- Si @Architect mueve archivos -> @DevOps debe preguntar por Commit/Push.
-- Si @Jules crea código -> @Shield debe preguntar por revisión de seguridad.
-**Objetivo:** Evitar silos y asegurar la integridad del ciclo de vida (Git, Docs, Tests).
-
-### 📚 Protocolo: "Documentación Primero" (Docs First)
-**Trigger:** Antes de cualquier `git push` o Pull Request.
-**Regla de Oro:** **PROHIBIDO subir código sin actualizar su documentación asociada.**
-
-**Flujo de Trabajo:**
-1.  **Agente Implementador (@Jules/@Architect):** Termina el código y los tests.
-2.  **Agente Documentador (@Watcher):**
-    *   Actualiza `scratchpad.md` (Estado de Misión).
-    *   Actualiza `task.md` (Checklists).
-    *   Actualiza `ADRs` si hubo cambios de arquitectura.
-    *   Actualiza `vision_proyecto.md` si cambió el alcance.
-3.  **Agente DevOps (@DevOps):**
-    *   Verifica que los docs han sido modificados.
-    *   Ejecuta: `git add .`, `git commit`, `git push`.
-
-### 🌳 Protocolo: Gestión de Ramas (Git Flow + PRs)
-**Trigger:** Inicio de cualquier nueva tarea o feature.
-**Responsable:** @DevOps
-
-**Reglas de Actuación:**
-1.  **Inicio:** NUNCA trabajar en `develop` directo.
-    *   Comando: `git checkout -b feature/[nombre-tarea]`
-2.  **Desarrollo:** Commits atómicos y frecuentes.
-    *   Formato: `feat: implement logic for X`
-3.  **Validación Local:**
-    *   Ejecutar tests: `pytest` (Si ❌ -> Corregir).
-4.  **Publicación (Pull Request):**
-    *   Subir rama: `git push origin feature/[nombre-tarea]`
-    *   **ACCIÓN MANUAL:** Crear Pull Request en GitHub.
-5.  **Cierre (Post-Merge):**
-    *   Tras fusión en GitHub:
-    *   `git checkout develop`
-    *   `git pull origin develop`
-    *   `git branch -d feature/[nombre-tarea]`

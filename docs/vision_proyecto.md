@@ -180,7 +180,15 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ **Parte B: Digital Vault**: Traspaso seguro de suministros (CUPS, Facturas cifradas)
 - ✅ Compliance Legal (Disclaimers obligatorios)
 
----
+183: ---
+184: 
+185: **Hito 17: Arquitectura de Mercado de Servicios** ✅
+186: - ✅ API Router Unificado (`/services/*`)
+187: - ✅ Control de Acceso basado en Roles (Admin/Provider/User)
+188: - ✅ Sistema de Tickets y Seguimiento de Órdenes
+189: - ✅ Modelos extensibles para nuevos servicios (Mudanzas, Reformas, Certificados)
+190: 
+191: ---
 
 ## 🏗️ Los 15 Hitos de Compraventa
 
@@ -200,6 +208,7 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
 15. ✅ **Cierre Definitivo** - Control automatizado de estados y Certificado de Cierre
 16. ✅ **Post-Sales Intelligence** - Estimación de Costes (Parte A) y Traspaso de Suministros (Parte B)
+17. ✅ **Arquitectura de Mercado de Servicios** - Backend unificado para proveedores (Notarios, Tasadores, etc.)
 
 ---
 

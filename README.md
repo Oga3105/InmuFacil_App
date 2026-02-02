@@ -20,35 +20,70 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** ✍️ **Hito 15: Firma Notarial y Cierre** 🚀 PRÓXIMAMENTE
-**(Anterior: Hito 14 Preparación Notarial - COMPLETADO)**
+**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
 
-**API Version:** `0.9.5` - Notary-Ready
+**API Version:** `0.5.0` - Auth-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
 - ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
+  - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
+  - ✅ Misión 6: Security Breach Remediation
+  - ✅ Misión 8: API Frontend Integration (Secure CORS)
 - ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
+  - ✅ Registro con Anti-Agency Filter
+  - ✅ Login JWT (Access Token 30min)
+  - ✅ MFA por Email (6-digit OTP)
+  - ✅ Reset Password Seguro
 - ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
-- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
-- ✅ **Hito 5:** Realización de Visitas (Ejecución)
-- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
-- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
-- ✅ **Hito 8:** Reserva y Señal (Híbrido)
-- ✅ **Hito 9:** Verificación Documental (Compliance)
-- ✅ **Hito 10:** Tasación del Inmueble (Valuation Service)
-- ✅ **Hito 11:** Financiación (Mortgage Simulation)
-- ✅ **Hito 12:** Elaboración de Contrato (PDF Generator + Questionnaire)
-  - ✅ **Hito 12.5:** Lógica Contractual Avanzada (AML, Cuerpo Cierto, etc.)
-  - ✅ **Hito 12.6:** Análisis de Contratos Propios con IA
-- ✅ **Hito 13:** Firma Digital (Mock Provider + One-Time Tokens)
-- ✅ **Hito 14:** Preparación Notarial (Dossier Seguro + Manifest)
-- ✅ **Hito 14.5:** Timeline de Transacción (Control de Pasos + Doble Confirmación)
-- ✅ **Hito 15:** Cierre Definitivo (Status Automation + Certificate)
-- ✅ **Hito 16 Part A:** Inteligencia Financiera (Cost Estimator + Compliance Disclaimer)
-- ✅ **Hito 16 Part B:** Post-Sales Handover (Digital Vault + Secure Bill Upload)
+  - ✅ CRUD Vendedor (Publicación y Gestión)
+  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
+  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
 
-**Rama Activa:** `develop`
+- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
+  - ✅ Ventanas de Disponibilidad (Vendedor)
+  - ✅ Algoritmo de Slots Dinámicos (Comprador)
+  - ✅ Gestión de Citas (Approve/Reject)
+- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
+  - ✅ Anti-Malware (MIME Type Validation)
+  - ✅ Bloqueo de Fuerza Bruta (Automated)
+  - ✅ Tests de Prevención IDOR
+
+- ✅ **Hito 5:** Realización de Visitas (Ejecución)
+  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
+  - ✅ Dashboard (Agenda de Vendedor/Comprador)
+  - ✅ Defensa de Roles (Solo el dueño valida la visita)
+
+- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
+  - ✅ Modelo de Ofertas Transparentes
+  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
+  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
+
+- ✅ **Hito: Búsqueda Avanzada (Extra)**
+  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
+  - ✅ Búsqueda Combinatoria (Features + Core)
+  - ✅ TDD (`tests/test_search_logic.py`)
+
+- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
+  - ✅ Protocolo de Contraofertas (Historial Auditado)
+  - ✅ Chat Encriptado (Opcional, Defense in Depth)
+  - ✅ Modelo de Cierre (Accept/Reject)
+
+- ✅ **Hito 8:** Reserva y Señal (Híbrido)
+  - ✅ Modelo de Reservas e Idempotencia
+  - ✅ Mock Payment Provider (Simulación Financiera)
+  - ✅ Bloqueo de Concurrencia (Race Conditions)
+  - ✅ Configuración de Visibilidad (Hide when Reserved)
+
+- ✅ **Hito 9:** Verificación Documental (Compliance)
+  - ✅ Subida Cifrada (AES-256) de Nota Simple
+  - ✅ Extracción OCR de Referencia Catastral
+  - ✅ Modelo `PropertyDocument` Seguro
+
+- 🎯 **Hito 10:** Tasación (Siguiente Paso)
+
+**Rama Activa:** `develop`  
+**Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`
 
 ---
 
@@ -354,7 +389,6 @@ InmuFacil_Project/
 │   └── pre-commit           # Secret detection
 ├── requirements.txt         # Dependencies
 ├── .gitignore              # Git exclusions
-├── Agents.md               # Protocolo de Agentes Internos
 └── README.md               # This file
 ```
 
@@ -392,7 +426,7 @@ Este proyecto sigue estándares DevSecOps estrictos:
 
 ## 📄 Licencia
 
-[MIT License](LICENSE)
+[Pendiente de definir]
 
 ---
 
