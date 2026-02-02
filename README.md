@@ -354,6 +354,7 @@ InmuFacil_Project/
 │   └── pre-commit           # Secret detection
 ├── requirements.txt         # Dependencies
 ├── .gitignore              # Git exclusions
+├── Agents.md               # Protocolo de Agentes Internos
 └── README.md               # This file
 ```
 
