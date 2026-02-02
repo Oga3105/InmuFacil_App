@@ -87,8 +87,10 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 **Protocolo de Salud General (Checklist Automático):**
 *   **Congruencia Documental:** Verificar que `README.md`, `vision_proyecto.md`, `task.md` y `scratchpad.md` reflejan fielmente el estado actual del código.
 *   **Limpieza:** Eliminar inmediatamente archivos basura o temporales.
-*   **Git Sync:** Asegurar que TODA rama local (`feature/` o `fix/`) se suba al remoto.
-*   **Merge Policy:** Fusionar a `develop` **SI Y SOLO SI** los tests están en VERDE (Pasando).
+*   **Git Sync:** Asegurar que TODA rama local (`feature/` o `fix/`) se suba al remoto ANTES de fusionar.
+*   **Merge Policy:** Fusionar a `develop` **SI Y SOLO SI**:
+    1.  La rama feature existe en remoto.
+    2.  Los tests están en VERDE (Pasando).
 *   **Revisión de Tareas:** Identificar pendientes no asignados.
 
 **Checklist del Consejo:**
@@ -133,10 +135,13 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
     *   Formato: `feat: implement logic for X`
 3.  **Validación Local:**
     *   Ejecutar tests: `pytest` (Si ❌ -> Corregir).
-4.  **Publicación (Pull Request):**
-    *   Subir rama: `git push origin feature/[nombre-tarea]`
-    *   **ACCIÓN MANUAL:** Crear Pull Request en GitHub.
-5.  **Cierre (Post-Merge):**
-    *   Tras fusión:
+4.  **Publicación OBLIGATORIA (Remote Sync):**
+    *   **CRÍTICO:** ANTES de cualquier fusión a `develop`, la feature DEBE existir en remoto.
+    *   Ejecutar: `git push origin feature/[nombre-tarea]`
+    *   Verificar que la rama aparece en el repositorio remoto.
+
+5.  **Fusión (Merge Policy):**
+    *   **Condición:** Paso 4 completado + Tests en Verde.
     *   `git checkout develop`
-    *   `git pull origin develop`
+    *   `git merge --no-ff feature/[nombre-tarea]` (Preservar historia)
+    *   `git push origin develop`
