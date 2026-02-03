@@ -1,0 +1,56 @@
+name: inmufacil_frontend
+description: InmuFácil - Plataforma P2P de Compraventa Inmobiliaria
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  flutter_riverpod: ^2.5.1
+  
+  # Networking
+  dio: ^5.4.0
+  
+  # Routing
+  go_router: ^13.0.0
+  
+  # Environment Config
+  flutter_dotenv: ^5.1.0
+  
+  # Secure Storage (JWT tokens)
+  flutter_secure_storage: ^9.0.0
+  
+  # JSON Serialization
+  json_annotation: ^4.8.1
+  
+  # Utilities
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  
+  # Code Generation
+  build_runner: ^2.4.7
+  json_serializable: ^6.7.1
+  
+  # Linting
+  flutter_lints: ^3.0.1
+  
+  # Testing
+  mockito: ^5.4.4
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+    - .env.development
+    - .env.production
