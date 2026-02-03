@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentación
+    url: https://github.com/Oga3105/InmuFacil_App/blob/main/README.md
+    about: Consulta la documentación del proyecto
+  - name: 💬 Discusiones
+    url: https://github.com/Oga3105/InmuFacil_App/discussions
+    about: Participa en discusiones sobre el proyecto
+  - name: 🔒 Reporte de Seguridad Privado
+    url: mailto:security@inmufacil.com
+    about: Para vulnerabilidades críticas, reporta de forma privada

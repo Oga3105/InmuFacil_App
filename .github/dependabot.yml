@@ -1,0 +1,57 @@
+version: 2
+
+updates:
+  # Backend Python
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "backend"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "Oga3105"
+    assignees:
+      - "Oga3105"
+
+  # Frontend Flutter (cuando se añadan dependencias)
+  - package-ecosystem: "pub"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "flutter"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    reviewers:
+      - "Oga3105"
+    assignees:
+      - "Oga3105"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
