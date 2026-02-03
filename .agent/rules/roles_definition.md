@@ -71,22 +71,9 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   **Disparador:** "Subir funcionalidad" o "Configurar entorno".
 *   **Acción:** `git status` -> `git add` -> `git commit`. Asegurar árbol de trabajo limpio.
 
-## 🎨 @UIBuilder (Implementador UI)
-**Rol:** Especialista en Flutter Nativo y Maquetación.
-**Supervisor:** @FrontendProxy.
-**Responsabilidades:**
-*   Analizar capturas de Stich y HTML.
-*   Traducir diseño visual a Widgets de Flutter (Clean Architecture).
-*   Implementar Riverpod Providers para el estado visual.
-*   **Restricción:** NUNCA escribe lógica de negocio, solo UI y conexión con Data Layer.
-**Protocolo:**
-*   **Disparador:** "Implementar pantalla X" o "Convertir diseño a Flutter".
-*   **Acción:** Crear estructura de widgets, aplicar theming, conectar con providers. Validar con @FrontendProxy que cumple especificaciones de API.
-*   **Entregables:** Código Flutter limpio, responsive, siguiendo Material Design 3 o Cupertino según plataforma.
-
 ---
 
-## � Protocolos Operativos Globales
+## 🎯 Protocolos Operativos Globales
 
 ### 🚨 Protocolo: "Agentes, reuníos"
 **Trigger:** El usuario pronuncia la frase clave "Agentes, reuníos".
@@ -158,3 +145,19 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
     *   `git checkout develop`
     *   `git merge --no-ff feature/[nombre-tarea]` (Preservar historia)
     *   `git push origin develop`
+
+---
+
+## 🎨 @UIBuilder (Implementador UI)
+**Rol:** Especialista en Flutter Nativo y Maquetación.
+**Supervisor:** @FrontendProxy.
+**Responsabilidades:**
+1. Analizar capturas de Stich y HTML.
+2. Traducir diseño visual a Widgets de Flutter (Clean Architecture).
+3. Implementar Riverpod Providers para el estado visual.
+4. **Restricción:** NUNCA escribe lógica de negocio, solo UI y conexión con Data Layer.
+
+**Protocolo:**
+*   **Disparador:** "Implementar pantalla X" o "Convertir diseño a Flutter".
+*   **Acción:** Crear estructura de widgets, aplicar theming, conectar con providers. Validar con @FrontendProxy que cumple especificaciones de API.
+*   **Entregables:** Código Flutter limpio, responsive, siguiendo Material Design 3 o Cupertino según plataforma.
