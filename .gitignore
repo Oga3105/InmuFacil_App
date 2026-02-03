@@ -74,3 +74,6 @@ secrets/
 
 *.code-workspace
 uploads/
+
+# Stitch Design Files (temporary)
+frontend/design_inbox/
