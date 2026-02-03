@@ -161,3 +161,85 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   **Disparador:** "Implementar pantalla X" o "Convertir diseño a Flutter".
 *   **Acción:** Crear estructura de widgets, aplicar theming, conectar con providers. Validar con @FrontendProxy que cumple especificaciones de API.
 *   **Entregables:** Código Flutter limpio, responsive, siguiendo Material Design 3 o Cupertino según plataforma.
+
+---
+
+## ⚖️ PROTOCOLO DE GOBERNANZA GIT (AUTONOMÍA OBLIGATORIA)
+
+**Trigger:** Antes de cualquier comando `git checkout -b`, `git merge` o `gh pr create`.
+
+**REGLA DE ORO:**
+Los agentes deben detenerse y DEBATIR entre @DevOps y @Shield antes de alterar el repositorio. El usuario delega esta decisión para no micro-gestionar.
+
+### MATRIZ DE DECISIÓN (Debate Requerido)
+
+#### 1. ¿Feature o Fix?
+- **Nueva funcionalidad** → `feature/[nombre-descriptivo]`
+- **Arreglo de bug** → `fix/[nombre-bug]`
+- **Refactor sin cambios lógicos** → `chore/[nombre-tarea]`
+- **Documentación** → `docs/[nombre-doc]`
+
+#### 2. ¿PR o Directo?
+- **Si afecta a `develop` o `main`** → **PR OBLIGATORIA** (`gh pr create`)
+- **Si es sub-tarea experimental** → Commit directo permitido en rama `feature`
+- **Hotfix crítico** → PR express con aprobación rápida
+
+#### 3. ¿Cuándo fusionar?
+- ✅ **Condición 1:** Tests pasando (verde)
+- ✅ **Condición 2:** @Shield valida seguridad
+- ✅ **Condición 3:** Rama pusheada a remoto
+- ✅ **Método:** Usar siempre `git merge --no-ff` para preservar historia
+
+### POLÍTICA DE RAMAS REMOTAS
+
+**Para TFM (Trabajo Fin de Máster):**
+- ✅ **PRESERVAR** todas las ramas remotas como registro histórico
+- ✅ **ELIMINAR** solo ramas locales obsoletas
+- ✅ Mantener evidencia de desarrollo iterativo para evaluación académica
+
+### FLUJO DE TRABAJO ESTÁNDAR
+
+```bash
+# 1. Crear feature branch
+git checkout -b feature/nombre-tarea
+
+# 2. Desarrollo iterativo
+git add .
+git commit -m "feat: descripción del cambio"
+
+# 3. Push a remoto (OBLIGATORIO antes de merge)
+git push -u origin feature/nombre-tarea
+
+# 4. Abrir PR (si afecta develop/main)
+gh pr create --title "feat: Título" --body "Descripción"
+
+# 5. Merge (solo si tests verdes + @Shield OK)
+git checkout develop
+git merge --no-ff feature/nombre-tarea
+git push origin develop
+
+# 6. Limpieza local (preservar remoto)
+git branch -d feature/nombre-tarea
+```
+
+### CRITERIOS DE APROBACIÓN DE PR
+
+**@DevOps verifica:**
+- [ ] Rama existe en remoto
+- [ ] Commits atómicos y descriptivos
+- [ ] Sin conflictos con develop
+
+**@Shield verifica:**
+- [ ] Sin secretos hardcodeados
+- [ ] Sin vulnerabilidades evidentes
+- [ ] Manejo correcto de PII
+
+**@Jules verifica:**
+- [ ] Tests pasando
+- [ ] Cobertura adecuada
+- [ ] Sin regresiones
+
+**@Architect verifica:**
+- [ ] Arquitectura consistente
+- [ ] Sin deuda técnica innecesaria
+- [ ] Documentación actualizada
