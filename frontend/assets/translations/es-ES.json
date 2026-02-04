@@ -1,0 +1,60 @@
+{
+  "app": {
+    "name": "InmuFácil",
+    "tagline": "Compraventa P2P sin intermediarios"
+  },
+  "auth": {
+    "login_title": "Iniciar Sesión",
+    "login_button": "Entrar",
+    "register_title": "Crear Cuenta",
+    "register_button": "Registrarse",
+    "email_label": "Correo electrónico",
+    "password_label": "Contraseña",
+    "confirm_password_label": "Confirmar contraseña",
+    "forgot_password": "¿Olvidaste tu contraseña?",
+    "no_account": "¿No tienes cuenta?",
+    "have_account": "¿Ya tienes cuenta?",
+    "logout": "Cerrar sesión"
+  },
+  "home": {
+    "welcome": "Bienvenido a InmuFácil",
+    "search_placeholder": "Buscar propiedades...",
+    "featured_properties": "Propiedades destacadas",
+    "recent_properties": "Propiedades recientes"
+  },
+  "property": {
+    "title": "Propiedad",
+    "price": "Precio",
+    "location": "Ubicación",
+    "bedrooms": "Habitaciones",
+    "bathrooms": "Baños",
+    "surface": "Superficie",
+    "description": "Descripción",
+    "features": "Características",
+    "contact_seller": "Contactar vendedor"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "finish": "Finalizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar"
+  },
+  "errors": {
+    "network_error": "Error de conexión",
+    "server_error": "Error del servidor",
+    "validation_error": "Error de validación",
+    "unauthorized": "No autorizado",
+    "not_found": "No encontrado",
+    "unknown_error": "Error desconocido"
+  }
+}

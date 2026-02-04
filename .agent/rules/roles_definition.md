@@ -177,6 +177,13 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   **Acción:** Crear estructura de widgets, aplicar theming, conectar con providers. Validar con @FrontendProxy que cumple especificaciones de API.
 *   **Entregables:** Código Flutter limpio, responsive, siguiendo Material Design 3 o Cupertino según plataforma.
 
+**🌍 i18n STRICT POLICY (Non-Negotiable):**
+- **PROHIBIDO:** Hardcoded strings en widgets (`Text('Hola')`)
+- **OBLIGATORIO:** Usar `easy_localization` (`.tr()` method)
+- **Ejemplo:** `Text('auth.login_button').tr()`
+- **Validación:** Rechazar PRs con strings hardcodeados
+- **Referencia:** `frontend/I18N_GUIDELINES.md`
+
 ---
 
 ## ⚖️ PROTOCOLO DE GOBERNANZA GIT (AUTONOMÍA OBLIGATORIA)

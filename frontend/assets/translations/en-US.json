@@ -1,0 +1,60 @@
+{
+    "app": {
+        "name": "InmuFácil",
+        "tagline": "P2P property trading without intermediaries"
+    },
+    "auth": {
+        "login_title": "Log In",
+        "login_button": "Enter",
+        "register_title": "Create Account",
+        "register_button": "Sign Up",
+        "email_label": "Email address",
+        "password_label": "Password",
+        "confirm_password_label": "Confirm password",
+        "forgot_password": "Forgot your password?",
+        "no_account": "Don't have an account?",
+        "have_account": "Already have an account?",
+        "logout": "Log out"
+    },
+    "home": {
+        "welcome": "Welcome to InmuFácil",
+        "search_placeholder": "Search properties...",
+        "featured_properties": "Featured properties",
+        "recent_properties": "Recent properties"
+    },
+    "property": {
+        "title": "Property",
+        "price": "Price",
+        "location": "Location",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "surface": "Surface",
+        "description": "Description",
+        "features": "Features",
+        "contact_seller": "Contact seller"
+    },
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "edit": "Edit",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "confirm": "Confirm",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Finish",
+        "search": "Search",
+        "filter": "Filter",
+        "sort": "Sort"
+    },
+    "errors": {
+        "network_error": "Connection error",
+        "server_error": "Server error",
+        "validation_error": "Validation error",
+        "unauthorized": "Unauthorized",
+        "not_found": "Not found",
+        "unknown_error": "Unknown error"
+    }
+}

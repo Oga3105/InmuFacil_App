@@ -1,0 +1,60 @@
+{
+    "app": {
+        "name": "InmuFácil",
+        "tagline": "Compravenda P2P sen intermediarios"
+    },
+    "auth": {
+        "login_title": "Iniciar Sesión",
+        "login_button": "Entrar",
+        "register_title": "Crear Conta",
+        "register_button": "Rexistrarse",
+        "email_label": "Correo electrónico",
+        "password_label": "Contrasinal",
+        "confirm_password_label": "Confirmar contrasinal",
+        "forgot_password": "Esqueciches o contrasinal?",
+        "no_account": "Non tes conta?",
+        "have_account": "Xa tes conta?",
+        "logout": "Pechar sesión"
+    },
+    "home": {
+        "welcome": "Benvido a InmuFácil",
+        "search_placeholder": "Buscar propiedades...",
+        "featured_properties": "Propiedades destacadas",
+        "recent_properties": "Propiedades recentes"
+    },
+    "property": {
+        "title": "Propiedade",
+        "price": "Prezo",
+        "location": "Localización",
+        "bedrooms": "Cuartos",
+        "bathrooms": "Baños",
+        "surface": "Superficie",
+        "description": "Descrición",
+        "features": "Características",
+        "contact_seller": "Contactar vendedor"
+    },
+    "common": {
+        "save": "Gardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "loading": "Cargando...",
+        "error": "Erro",
+        "success": "Éxito",
+        "confirm": "Confirmar",
+        "back": "Volver",
+        "next": "Seguinte",
+        "finish": "Finalizar",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "sort": "Ordenar"
+    },
+    "errors": {
+        "network_error": "Erro de conexión",
+        "server_error": "Erro do servidor",
+        "validation_error": "Erro de validación",
+        "unauthorized": "Non autorizado",
+        "not_found": "Non atopado",
+        "unknown_error": "Erro descoñecido"
+    }
+}

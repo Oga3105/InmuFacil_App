@@ -1,0 +1,60 @@
+{
+    "app": {
+        "name": "InmuFácil",
+        "tagline": "Compravenda P2P sense intermediaris"
+    },
+    "auth": {
+        "login_title": "Iniciar Sessió",
+        "login_button": "Entrar",
+        "register_title": "Crear Compte",
+        "register_button": "Registrar-se",
+        "email_label": "Correu electrònic",
+        "password_label": "Contrasenya",
+        "confirm_password_label": "Confirmar contrasenya",
+        "forgot_password": "Has oblidat la contrasenya?",
+        "no_account": "No tens compte?",
+        "have_account": "Ja tens compte?",
+        "logout": "Tancar sessió"
+    },
+    "home": {
+        "welcome": "Benvingut a InmuFácil",
+        "search_placeholder": "Cercar propietats...",
+        "featured_properties": "Propietats destacades",
+        "recent_properties": "Propietats recents"
+    },
+    "property": {
+        "title": "Propietat",
+        "price": "Preu",
+        "location": "Ubicació",
+        "bedrooms": "Habitacions",
+        "bathrooms": "Banys",
+        "surface": "Superfície",
+        "description": "Descripció",
+        "features": "Característiques",
+        "contact_seller": "Contactar venedor"
+    },
+    "common": {
+        "save": "Desar",
+        "cancel": "Cancel·lar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "loading": "Carregant...",
+        "error": "Error",
+        "success": "Èxit",
+        "confirm": "Confirmar",
+        "back": "Tornar",
+        "next": "Següent",
+        "finish": "Finalitzar",
+        "search": "Cercar",
+        "filter": "Filtrar",
+        "sort": "Ordenar"
+    },
+    "errors": {
+        "network_error": "Error de connexió",
+        "server_error": "Error del servidor",
+        "validation_error": "Error de validació",
+        "unauthorized": "No autoritzat",
+        "not_found": "No trobat",
+        "unknown_error": "Error desconegut"
+    }
+}

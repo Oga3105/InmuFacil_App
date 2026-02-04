@@ -1,0 +1,60 @@
+{
+    "app": {
+        "name": "InmuFácil",
+        "tagline": "P2P salmenta bitartekariak gabe"
+    },
+    "auth": {
+        "login_title": "Saioa Hasi",
+        "login_button": "Sartu",
+        "register_title": "Kontua Sortu",
+        "register_button": "Erregistratu",
+        "email_label": "Helbide elektronikoa",
+        "password_label": "Pasahitza",
+        "confirm_password_label": "Pasahitza berretsi",
+        "forgot_password": "Pasahitza ahaztu duzu?",
+        "no_account": "Ez duzu konturik?",
+        "have_account": "Badaukazu konturik?",
+        "logout": "Saioa itxi"
+    },
+    "home": {
+        "welcome": "Ongi etorri InmuFácil-era",
+        "search_placeholder": "Jabetzak bilatu...",
+        "featured_properties": "Nabarmendutako jabetzak",
+        "recent_properties": "Azken jabetzak"
+    },
+    "property": {
+        "title": "Jabetza",
+        "price": "Prezioa",
+        "location": "Kokapena",
+        "bedrooms": "Logelak",
+        "bathrooms": "Bainugelak",
+        "surface": "Azalera",
+        "description": "Deskribapena",
+        "features": "Ezaugarriak",
+        "contact_seller": "Saltzailearekin harremanetan jarri"
+    },
+    "common": {
+        "save": "Gorde",
+        "cancel": "Ezeztatu",
+        "delete": "Ezabatu",
+        "edit": "Editatu",
+        "loading": "Kargatzen...",
+        "error": "Errorea",
+        "success": "Arrakasta",
+        "confirm": "Berretsi",
+        "back": "Atzera",
+        "next": "Hurrengoa",
+        "finish": "Amaitu",
+        "search": "Bilatu",
+        "filter": "Iragazi",
+        "sort": "Ordenatu"
+    },
+    "errors": {
+        "network_error": "Konexio errorea",
+        "server_error": "Zerbitzariaren errorea",
+        "validation_error": "Balidazio errorea",
+        "unauthorized": "Baimenik gabe",
+        "not_found": "Ez da aurkitu",
+        "unknown_error": "Errore ezezaguna"
+    }
+}

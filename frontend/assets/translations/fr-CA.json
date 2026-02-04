@@ -1,0 +1,60 @@
+{
+    "app": {
+        "name": "InmuFácil",
+        "tagline": "Achat-vente P2P sans intermédiaires"
+    },
+    "auth": {
+        "login_title": "Se Connecter",
+        "login_button": "Entrer",
+        "register_title": "Créer un Compte",
+        "register_button": "S'inscrire",
+        "email_label": "Adresse courriel",
+        "password_label": "Mot de passe",
+        "confirm_password_label": "Confirmer le mot de passe",
+        "forgot_password": "Mot de passe oublié?",
+        "no_account": "Vous n'avez pas de compte?",
+        "have_account": "Vous avez déjà un compte?",
+        "logout": "Se déconnecter"
+    },
+    "home": {
+        "welcome": "Bienvenue sur InmuFácil",
+        "search_placeholder": "Rechercher des propriétés...",
+        "featured_properties": "Propriétés en vedette",
+        "recent_properties": "Propriétés récentes"
+    },
+    "property": {
+        "title": "Propriété",
+        "price": "Prix",
+        "location": "Emplacement",
+        "bedrooms": "Chambres",
+        "bathrooms": "Salles de bain",
+        "surface": "Surface",
+        "description": "Description",
+        "features": "Caractéristiques",
+        "contact_seller": "Contacter le vendeur"
+    },
+    "common": {
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "confirm": "Confirmer",
+        "back": "Retour",
+        "next": "Suivant",
+        "finish": "Terminer",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "sort": "Trier"
+    },
+    "errors": {
+        "network_error": "Erreur de connexion",
+        "server_error": "Erreur du serveur",
+        "validation_error": "Erreur de validation",
+        "unauthorized": "Non autorisé",
+        "not_found": "Non trouvé",
+        "unknown_error": "Erreur inconnue"
+    }
+}
