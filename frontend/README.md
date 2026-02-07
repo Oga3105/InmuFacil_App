@@ -25,6 +25,15 @@ The application uses **OpenStreetMap Nominatim API** for city search functionali
 - **Input Sanitization:** Search queries are trimmed, length-limited (200 chars), and validated against a whitelist.
 - **User-Agent:** Compliant headers included in all requests.
 
+## 🎨 404 "Not Found" Experience
+
+A custom, secure, and internationally friendly 404 page.
+
+- **Design:** Pixel-Perfect reproduction of isometric 3D art using native Flutter widgets (No heavy assets).
+- **Security:** "Notify Me" form includes robust email validation (Regex) and state management to prevent spam.
+- **i18n:** Fully translated into 9 languages including error messages and UI elements.
+- **Responsiveness:** Adapts layout for mobile (Column) and desktop (Row).
+
 ## 🚀 Getting Started
 
 1. **Install Dependencies:**
