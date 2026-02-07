@@ -158,7 +158,7 @@ async def startup_event():
         from backend.src.config.database import engine
         from backend.src.models.base import Base
         # Ensure models are loaded for metadata
-        from backend.src.models import timeline 
+        from backend.src.models import timeline, leads 
 
         if len(SECRET_KEY) < 32:
              logger.warning("JWT SECRET_KEY might be weak.")
@@ -222,7 +222,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads
 
 from fastapi import APIRouter
 
@@ -243,7 +243,11 @@ api_v1_router.include_router(handover.router) # Hito 16 Part B
 api_v1_router.include_router(services.router) # Hito 17 - Unified Services
 api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
 api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
+api_v1_router.include_router(services.router) # Hito 17 - Unified Services
+api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
+api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
 api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
+api_v1_router.include_router(leads.router) # Hito 18 - Lead Magnet (404)
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
