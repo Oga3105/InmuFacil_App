@@ -59,6 +59,19 @@
         "location_permission_denied": "Permís d'ubicació denegat",
         "reset_filters": "Restablir filtres"
     },
+    "not_found": {
+        "building_future_part1": "Estem construint el ",
+        "building_future_part2": "futur entre particulars.",
+        "description": "Els nostres arquitectes digitals estan assegurant cada maó de codi perquè compris i venguis sense intermediaris.",
+        "notify_me_label": "Vols que t'avisem?",
+        "email_placeholder": "El teu correu electrònic",
+        "notify_button": "Avisa'm",
+        "security_text": "Les teves dades estan protegides amb xifratge de grau bancari.",
+        "secure_infrastructure": "Infraestructura Segura",
+        "direct_architecture": "Arquitectura Directa",
+        "copyright_text": "InmuFácil. Tots els drets reservats.",
+        "notify_me_success": "Gràcies! T'avisarem quan estiguem llestos."
+    },
     "property": {
         "title": "Propietat",
         "price": "Preu",

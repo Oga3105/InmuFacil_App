@@ -57,7 +57,20 @@
         "map_loading": "Mapa kargatzen...",
         "map_error": "Errorea mapa kargatzean",
         "location_permission_denied": "Kokapenaren baimena ukatua",
-        "reset_filters": "Berrezarri iragazkiak"
+        "reset_filters": "Iragazkiak berrezarri"
+    },
+    "not_found": {
+        "building_future_part1": "Eraikitzen ari gara ",
+        "building_future_part2": "etorkizuna partikularren artean.",
+        "description": "Gure arkitekto digitalak kodearen adreilu bakoitza ziurtatzen ari dira, bitartekaririk gabe erosi eta saldu ahal izateko.",
+        "notify_me_label": "Abisatzea nahi duzu?",
+        "email_placeholder": "Zure posta elektronikoa",
+        "notify_button": "Abisatu",
+        "security_text": "Datuak banku-mailako enkriptatzearekin babestuta daude.",
+        "secure_infrastructure": "Azpiegitura Segurua",
+        "direct_architecture": "Arkitektura Zuzena",
+        "copyright_text": "InmuFácil. Eskubide guztiak erreserbatuta.",
+        "notify_me_success": "Eskerrik asko! Prest gaudenean abisatuko dizugu."
     },
     "property": {
         "title": "Jabetza",

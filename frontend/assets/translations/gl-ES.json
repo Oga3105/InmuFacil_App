@@ -59,6 +59,19 @@
         "location_permission_denied": "Permiso de localización denegado",
         "reset_filters": "Restablecer filtros"
     },
+    "not_found": {
+        "building_future_part1": "Estamos construíndo o ",
+        "building_future_part2": "futuro entre particulares.",
+        "description": "Os nosos arquitectos dixitais están asegurando cada ladrillo de código para que compres e vendas sen intermediarios.",
+        "notify_me_label": "Queres que te avisemos?",
+        "email_placeholder": "O teu correo electrónico",
+        "notify_button": "Avísame",
+        "security_text": "Os teus datos están protexidos baixo cifrado de grao bancari.",
+        "secure_infrastructure": "Infraestrutura Segura",
+        "direct_architecture": "Arquitectura Directa",
+        "copyright_text": "InmuFácil. Todos os dereitos reservados.",
+        "notify_me_success": "Grazas! Avisarémosche cando esteamos listos."
+    },
     "property": {
         "title": "Propiedade",
         "price": "Prezo",

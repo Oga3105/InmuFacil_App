@@ -59,6 +59,19 @@
         "location_permission_denied": "Location permission denied",
         "reset_filters": "Reset filters"
     },
+    "not_found": {
+        "building_future_part1": "We are building the ",
+        "building_future_part2": "future between individuals.",
+        "description": "Our digital architects are securing every brick of code so you can buy and sell without intermediaries.",
+        "notify_me_label": "Want us to notify you?",
+        "email_placeholder": "Your email",
+        "notify_button": "Notify me",
+        "security_text": "Your data is protected under bank-grade encryption.",
+        "secure_infrastructure": "Secure Infrastructure",
+        "direct_architecture": "Direct Architecture",
+        "copyright_text": "InmuFácil. All rights reserved.",
+        "notify_me_success": "Thanks! We will notify you when we are ready."
+    },
     "property": {
         "title": "Property",
         "price": "Price",
