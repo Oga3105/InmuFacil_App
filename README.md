@@ -87,7 +87,8 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ API client con interceptores JWT
   - ✅ Tema Material Design 3
   - ✅ Routing con go_router
-  - ✅ Placeholder screens (Login, Home)
+  - ✅ **Geocoding Integrado:** Nominatim API (Local First) + Mapa Reactivo
+  - ✅ **Página 404:** Diseño Isométrico, Segura e Internacionalizada (9 idiomas)
   - ⏳ Implementación UI pendiente (@UIBuilder)
 
 - ✅ **DevOps:** Automatización GitHub (CodeQL, Dependabot, Templates)
@@ -98,7 +99,7 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
   - ✅ Documentación completa en español
 
 **Rama Activa:** `develop`  
-**Último Commit:** `02b6f97 - feat: Add GitHub automation in Spanish (CodeQL, Dependabot, Templates)`
+**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
 
 ---
 
@@ -395,6 +396,20 @@ InmuFacil_Project/
 │   │   ├── users.py         # User & Admin routes
 │   │   ├── kyc.py           # KYC routes
 │   │   └── properties.py    # Properties routes (Core + Satellites)
+├── frontend/
+│   ├── lib/
+│   │   ├── main.dart        # Entry point
+│   │   ├── core/            # Config & Utils
+│   │   ├── data/            # Repositories & Data Sources
+│   │   ├── domain/          # Entities & Use Cases
+│   │   └── presentation/
+│   │       ├── screens/     # UI Screens (Home, NotFound, etc.)
+│   │       ├── widgets/     # Reusable Components
+│   │       └── providers/   # State Management (Riverpod)
+│   ├── assets/
+│   │   └── translations/    # i18n JSON files (9 languages)
+│   ├── web/                 # Web entrypoint
+│   └── pubspec.yaml         # Dependencies
 ├── tests/
 │   ├── test_auth.py         # Authentication tests
 │   └── test_filters.py      # Filter tests
