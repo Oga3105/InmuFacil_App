@@ -224,22 +224,178 @@ async def health_check():
 
 from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services
 
-# Include routers
-app.include_router(auth.router, prefix="/auth", tags=["Auth"])
-app.include_router(users.router, prefix="/users", tags=["Users", "Admin"])
-app.include_router(kyc.router, prefix="/kyc", tags=["KYC", "Admin"])
-app.include_router(properties.router)
-app.include_router(visits.router)
-app.include_router(offers.router)
-app.include_router(financing.router)
-app.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
-app.include_router(financial.router) # Hito 16 Part A
-app.include_router(handover.router) # Hito 16 Part B
-app.include_router(services.router) # Hito 17 - Unified Services
-app.include_router(signature.router) # Prefix defined in router (/contracts)
-app.include_router(notary.router) # Prefix defined in router (/notaries)
-app.include_router(timeline.router) # Prefix defined in router (/timeline)
+from fastapi import APIRouter
 
+# Create API V1 Router
+api_v1_router = APIRouter(prefix="/api/v1")
+
+# Include routers into V1
+api_v1_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
+api_v1_router.include_router(users.router, prefix="/users", tags=["Users", "Admin"])
+api_v1_router.include_router(kyc.router, prefix="/kyc", tags=["KYC", "Admin"])
+api_v1_router.include_router(properties.router) # has internal /properties prefix
+api_v1_router.include_router(visits.router)
+api_v1_router.include_router(offers.router)
+api_v1_router.include_router(financing.router)
+api_v1_router.include_router(contracts.router, prefix="/contracts", tags=["Contracts"])
+api_v1_router.include_router(financial.router) # Hito 16 Part A
+api_v1_router.include_router(handover.router) # Hito 16 Part B
+api_v1_router.include_router(services.router) # Hito 17 - Unified Services
+api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
+api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
+api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
+
+# Include V1 Router in App
+app.include_router(api_v1_router)
+
+
+# ============================================================================
+# @DevOps - Temporary Seeding & Reset Endpoints
+# ============================================================================
+@app.post("/developer/reset", tags=["Internal"])
+async def reset_database():
+    """
+    Temporary endpoint to DROP and RECREATE all tables.
+    WARNING: DELETES ALL DATA.
+    """
+    try:
+        from backend.src.config.database import engine
+        from backend.src.models.base import Base
+        
+        # Import all models to ensure metadata is populated
+        # (Importing them registers them with Base.metadata)
+        from backend.src.models import users, properties, timeline
+        
+        logger.warning("RESET: Dropping all tables...")
+        Base.metadata.drop_all(bind=engine)
+        
+        logger.info("RESET: Creating all tables...")
+        Base.metadata.create_all(bind=engine)
+        
+        return {"status": "success", "message": "Database reset complete. All tables recreated."}
+    except Exception as e:
+        logger.error(f"RESET ERROR: {str(e)}")
+        # Import HTTPException locally
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/developer/seed", tags=["Internal"])
+async def seed_database():
+    """
+    Temporary endpoint to seed database with test data.
+    Bypasses console encoding issues by running within the API process.
+    """
+    # Import dependencies locally to avoid polluting global namespace for a temp endpoint
+    from fastapi import HTTPException
+    from backend.src.config.database import SessionLocal
+    
+    db = SessionLocal()
+    try:
+        from backend.src.models.users import User
+        from backend.src.models.properties import Property, PropertyFeatures, PropertyLegal, PropertyFinancial, PropertyEnvironment
+        from backend.src.models.enums import (
+            PropertyStatus, PropertyType, OperationType, UserType, 
+            ConservationState, EnergyCertification
+        )
+        from backend.src.utils.security import get_password_hash
+        
+        # 1. Create Owner
+        owner = db.query(User).filter(User.email == "propietario@test.com").first()
+        if not owner:
+            owner = User(
+                email="propietario@test.com",
+                hashed_password=get_password_hash("password123"),
+                full_name="Propietario Test",
+                user_type=UserType.PARTICULAR,
+                is_active=True,
+                email_verified=True # Corrected from is_verified
+            )
+            db.add(owner)
+            db.commit()
+            db.refresh(owner)
+            logger.info("SEED: Owner created")
+            
+        # 2. Check & Create Properties
+        if db.query(Property).count() > 0:
+            return {"status": "skipped", "message": "Database already has properties"}
+
+        properties_data = [
+            {
+                "title": "Ático de Lujo en Triana",
+                "description": "Espectacular ático con vistas al Guadalquivir. Terraza de 40m2, reformado integralmente.",
+                "price": 450000.0,
+                "location": "Calle Betis, Sevilla",
+                "surface_area": 120.0,
+                "property_type": PropertyType.PISO, # Corrected from ATICO
+                "features": {
+                    "bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, 
+                    "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO # Corrected from REFORMADO
+                }
+            },
+            {
+                "title": "Piso Familiar en Nervión",
+                "description": "Gran piso cerca del estadio y centro comercial. Ideal familias. Garaje incluido.",
+                "price": 320000.0,
+                "location": "Avenida Eduardo Dato, Sevilla",
+                "surface_area": 145.0,
+                "property_type": PropertyType.PISO,
+                "features": {
+                    "bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True,
+                    "conservation_state": ConservationState.BUEN_ESTADO
+                }
+            },
+            {
+                "title": "Loft Industrial en Alameda",
+                "description": "Espacio abierto diseño moderno en pleno centro. Techos altos.",
+                "price": 210000.0,
+                "location": "Alameda de Hércules, Sevilla",
+                "surface_area": 85.0,
+                "property_type": PropertyType.PISO, # Corrected from LOFT
+                "features": {
+                    "bedrooms": 1, "bathrooms": 1, "has_ac": True, 
+                    "conservation_state": ConservationState.BUEN_ESTADO # Corrected from REFORMADO
+                }
+            },
+            {
+                "title": "Casa Palacio en Santa Cruz",
+                "description": "Casa histórica con patio andaluz. Oportunidad única para inversión turística.",
+                "price": 850000.0,
+                "location": "Barrio de Santa Cruz, Sevilla",
+                "surface_area": 250.0,
+                "property_type": PropertyType.CHALET, # Corrected from CASA
+                "features": {
+                    "bedrooms": 5, "bathrooms": 4, "has_garden": True, "construction_year": 1920,
+                    "conservation_state": ConservationState.A_REFORMAR
+                }
+            }
+        ]
+
+        for p_data in properties_data:
+            features = p_data.pop("features")
+            
+            prop = Property(
+                **p_data,
+                owner_id=owner.id,
+                status=PropertyStatus.PUBLISHED,
+                operation_type=OperationType.VENTA
+            )
+            db.add(prop)
+            db.flush()
+            
+            db.add(PropertyFeatures(property_id=prop.id, **features))
+            db.add(PropertyLegal(property_id=prop.id, energy_certification=EnergyCertification.E))
+            db.add(PropertyFinancial(property_id=prop.id, price_m2=p_data["price"]/p_data["surface_area"]))
+            db.add(PropertyEnvironment(property_id=prop.id))
+            
+        db.commit()
+        return {"status": "success", "message": f"Seeded {len(properties_data)} properties"}
+
+    except Exception as e:
+        logger.error(f"SEED ERROR: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
 
 if __name__ == "__main__":
     import uvicorn

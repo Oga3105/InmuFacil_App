@@ -38,10 +38,18 @@
         "verified_subtitle": "Tu compra segura",
         "properties_today": "Propiedades hoy",
         "verified_this_week": "Verificadas esta semana",
-        "property_type_apartment": "Departamento",
+        "property_type_all": "Todos",
+        "property_type_apartment": "Piso",
         "property_type_house": "Casa",
         "property_type_land": "Terreno",
-        "property_type_office": "Oficina"
+        "property_type_office": "Oficina",
+        "price_range_label": "Rango de Precio",
+        "price_from": "Desde",
+        "price_to": "Hasta",
+        "map_loading": "Cargando mapa...",
+        "map_error": "Error al cargar el mapa",
+        "location_permission_denied": "Permiso de ubicación denegado",
+        "reset_filters": "Restablecer filtros"
     },
     "property": {
         "title": "Propiedad",

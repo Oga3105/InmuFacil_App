@@ -36,6 +36,12 @@ dependencies:
   # Internationalization
   easy_localization: ^3.0.3
   intl: ^0.20.2
+  
+  # Maps Integration (OpenStreetMap)
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  geocoding: ^2.1.1
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
