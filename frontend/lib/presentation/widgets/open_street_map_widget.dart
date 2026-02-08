@@ -296,9 +296,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
           
           if (searchState.error != null)
              Positioned(
-              top: 20,
+              bottom: 40,
               left: 20,
-              right: 20,
+              right: 80, // Avoid overlapping with Toolbar
               child: _AutoDismissErrorBanner(
                 errorMessage: searchState.error!,
                 onDismiss: () => ref.read(searchProvider.notifier).clearError(),

@@ -40,7 +40,7 @@ El proyecto se encuentra en un estado híbrido de desarrollo:
 
 **Hito Activo:** 🚧 **Frontend Hito 4: Búsqueda y Resultados**
 **Rama Activa:** `feature/valuation-engine` (Reutilizada para integración Frontend)
-**Último Commit:** `b8f9807` - `feat(map): implement real-shape geocoding and lasso drawing (Hito 4.4)`
+**Último Commit:** `e6e946b` - `feat(listing): implement property listing UI and card widget (Hito 4.2)`
 
 ---
 

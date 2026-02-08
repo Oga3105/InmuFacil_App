@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/not_found/not_found_screen.dart';
+import '../../presentation/screens/property_listing_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -26,16 +27,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginScreen(),
       ),
       
-      // Search Results (placeholder)
+      
+      // Search Results
       GoRoute(
         path: '/search',
         name: 'search',
-        builder: (context, state) => Scaffold(
-          appBar: AppBar(title: const Text('Search Results')),
-          body: const Center(
-            child: Text('Search results will appear here'),
-          ),
-        ),
+        builder: (context, state) => const PropertyListingScreen(),
       ),
       
       // Property Details (placeholder)
