@@ -21,10 +21,10 @@ dependencies:
   go_router: ^13.0.0
    
   # Environment Config
-  flutter_dotenv: ^5.1.0
+  flutter_dotenv: ^6.0.0
    
   # Secure Storage
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.0.0
    
   # JSON Serialization
   json_annotation: ^4.8.1
@@ -40,8 +40,8 @@ dependencies:
   # Maps Integration (CRÍTICO: MANTENER)
   flutter_map: ^6.1.0
   latlong2: ^0.9.0
-  geocoding: ^2.1.1
-  geolocator: ^10.1.0
+  geocoding: ^4.0.0
+  geolocator: ^14.0.2
   http: ^1.2.0
 
 dev_dependencies:
@@ -49,7 +49,7 @@ dev_dependencies:
     sdk: flutter
    
   # Linting
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
    
   # Code Generation
   build_runner: ^2.4.8
