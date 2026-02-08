@@ -1382,3 +1382,14 @@ InmuFacil API shutting down...
 2026-02-08 12:48:13,719 - inmufacil.security - ERROR - [ERROR] Encryption validation failed: CRITICAL SECURITY ERROR: INMUFACIL_MASTER_KEY environment variable not set. Application cannot start without encryption key. Please set INMUFACIL_MASTER_KEY in your .env file.
 2026-02-08 12:48:13,719 - inmufacil - CRITICAL - [ALERT] STARTUP FAILED: CRITICAL SECURITY ERROR: INMUFACIL_MASTER_KEY environment variable not set. Application cannot start without encryption key. Please set INMUFACIL_MASTER_KEY in your .env file.
 2026-02-08 12:48:13,719 - inmufacil - CRITICAL - Application will NOT start until security is properly configured
+2026-02-08 13:20:41,481 - inmufacil - INFO - InmuFácil API starting up...
+2026-02-08 13:20:41,594 - inmufacil.kyc - INFO - [DIR] Upload directory ready: uploads\dni_documents
+2026-02-08 13:20:41,621 - inmufacil - INFO - ============================================================
+2026-02-08 13:20:41,621 - inmufacil - INFO - InmuFácil API - Starting Up...
+2026-02-08 13:20:41,621 - inmufacil - INFO - Timestamp: 2026-02-08T13:20:41.621580
+2026-02-08 13:20:41,621 - inmufacil - INFO - Environment: Development
+2026-02-08 13:20:41,621 - inmufacil - INFO - [VAULT] Validating encryption system...
+2026-02-08 13:20:41,622 - inmufacil.security - CRITICAL - CRITICAL SECURITY ERROR: INMUFACIL_MASTER_KEY environment variable not set. Application cannot start without encryption key. Please set INMUFACIL_MASTER_KEY in your .env file.
+2026-02-08 13:20:41,622 - inmufacil.security - ERROR - [ERROR] Encryption validation failed: CRITICAL SECURITY ERROR: INMUFACIL_MASTER_KEY environment variable not set. Application cannot start without encryption key. Please set INMUFACIL_MASTER_KEY in your .env file.
+2026-02-08 13:20:41,622 - inmufacil - CRITICAL - [ALERT] STARTUP FAILED: CRITICAL SECURITY ERROR: INMUFACIL_MASTER_KEY environment variable not set. Application cannot start without encryption key. Please set INMUFACIL_MASTER_KEY in your .env file.
+2026-02-08 13:20:41,622 - inmufacil - CRITICAL - Application will NOT start until security is properly configured
