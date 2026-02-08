@@ -79,6 +79,8 @@ ALLOWED_ORIGINS = [
     "http://localhost:8080",      # Alternative local port
     "http://127.0.0.1:3000",      # Local IP
     "http://127.0.0.1:8080",      # Alternative local IP
+    "http://localhost:8001",      # Flutter Web custom port
+    "http://127.0.0.1:8001",      # Flutter Web custom port IP
     "*"                           # Temporary for development flexibility if strict fails
 ]
 
