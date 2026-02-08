@@ -39,23 +39,21 @@ A custom, secure, and internationally friendly 404 page.
 1. **Install Dependencies:**
    ```bash
    flutter pub get
-   ```
-
-2. **Run Development Server:**
+   
+2. Run Development Server:
    ```bash
    flutter run -d chrome --web-port 8001
-   ```
 
-## 🏗️ Project Structure
+🏗️ Project Structure
 
-- `lib/presentation/`: UI components (Screens, Widgets, Providers).
-- `lib/domain/`: Business logic and Entities.
-- `lib/data/`: Repositories and API implementation.
-- `lib/core/`: Utilities, Services, and Configuration.
-- `assets/translations/`: i18n JSON files.
+- lib/presentation/: UI components (Screens, Widgets, Providers).
+- lib/domain/: Business logic and Entities.
+- lib/data/: Repositories and API implementation.
+- lib/core/: Utilities, Services, and Configuration.
+- assets/translations/: i18n JSON files.
 
-## 📝 Configuration
+📝 Configuration
 
-- **Map Provider:** OpenStreetMap (No API key required).
-- **Geocoding:** Nominatim (Free, rate-limited).
-- **Backend:** Expects API at `localhost:8000` (configurable in `.env`).
+- Map Provider: OpenStreetMap (No API key required).
+- Geocoding: Nominatim (Free, rate-limited).
+- Backend: Expects API at localhost:8000 (configurable in .env).
