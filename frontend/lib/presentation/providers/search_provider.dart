@@ -24,6 +24,8 @@ class SearchState {
   final bool isLoading;
   final String? error;
   final bool isUsingFallbackLocation;
+  final List<String>? lastSearchResultBbox; // [south, north, west, east] from Nominatim
+  final Map<String, dynamic>? lastSearchResultGeoJson; // NEW: GeoJSON for real shape
   
   // Spain center coordinates for initial wide view (shows entire country)
   static const LatLng _spainCenter = LatLng(40.4, -3.7);
@@ -38,6 +40,8 @@ class SearchState {
     this.isLoading = false,
     this.error,
     this.isUsingFallbackLocation = false,
+    this.lastSearchResultBbox,
+    this.lastSearchResultGeoJson,
   });
   
   SearchState copyWith({
@@ -50,6 +54,8 @@ class SearchState {
     bool? isLoading,
     String? error,
     bool? isUsingFallbackLocation,
+    List<String>? lastSearchResultBbox,
+    Map<String, dynamic>? lastSearchResultGeoJson,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -61,6 +67,8 @@ class SearchState {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
+      lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
+      lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
     );
   }
 }
@@ -110,6 +118,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(
         location: '',
         mapCenter: LocationService.sevillaFallback,
+        lastSearchResultBbox: null,
       );
       return;
     }
@@ -213,9 +222,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
       
       try {
         // STEP 1: Primary attempt - Search only in Spain
-        // This ensures "Córdoba" or "Valencia" lead to Spanish cities by default
+        // Added polygon_geojson=1 to get the real shape of the city
         final urlSpain = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es'
+          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1'
         );
         
         var response = await http.get(urlSpain, headers: {
@@ -225,13 +234,11 @@ class SearchNotifier extends StateNotifier<SearchState> {
         var data = json.decode(response.body);
         
         // STEP 2: Verification and Fallback
-        // If empty list, location is not in Spain OR user searches outside (e.g., "Paris", "Córdoba, Argentina")
         if (data is List && data.isEmpty) {
           debugPrint("📍 Not found in Spain. Searching globally...");
           
-          // Launch WORLDWIDE search (without countrycodes)
           final urlGlobal = Uri.parse(
-            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1'
+            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1'
           );
           
           response = await http.get(urlGlobal, headers: {
@@ -241,38 +248,53 @@ class SearchNotifier extends StateNotifier<SearchState> {
           data = json.decode(response.body);
         }
         
-        // STEP 3: Final Processing (if we found something in step 1 or 2)
+        // STEP 3: Final Processing
         if (data is List && data.isNotEmpty) {
-          final lat = double.parse(data[0]['lat']);
-          final lon = double.parse(data[0]['lon']);
-          final displayName = data[0]['display_name']; // Full name for confirmation
+          final item = data[0];
+          
+          // ROBUST PARSING: Handle potential nulls or types safely
+          final lat = double.tryParse(item['lat'].toString()) ?? 0.0;
+          final lon = double.tryParse(item['lon'].toString()) ?? 0.0;
+          final displayName = item['display_name']?.toString() ?? sanitized;
+          
+          // Extract Bounding Box safely
+          List<String>? bbox;
+          if (item['boundingbox'] != null && item['boundingbox'] is List) {
+            bbox = (item['boundingbox'] as List).map((e) => e.toString()).toList();
+          }
+          
+          // Extract GeoJSON for "Real Shape"
+          // We pass this raw map to the MapState to handle the complex parsing
+          Map<String, dynamic>? geoJson;
+          if (item['geojson'] != null) {
+            geoJson = item['geojson'] as Map<String, dynamic>;
+          }
           
           // Update state
           state = state.copyWith(
             mapCenter: LatLng(lat, lon),
-            location: displayName.split(',')[0], // Take only city name for input
+            location: displayName.split(',')[0],
             isUsingFallbackLocation: false,
             isLoading: false,
+            lastSearchResultBbox: bbox,
+            lastSearchResultGeoJson: geoJson, // NEW: Store GeoJSON
           );
           
-          // Visual feedback (useful for TFM demonstration)
           debugPrint("✅ Location found: $displayName");
           
-          // Reload properties for new location
           await _loadProperties();
         } else {
-          // STEP 4: If everything fails (neither in Spain nor worldwide)
           debugPrint("❌ Location not found anywhere.");
           state = state.copyWith(
             error: 'No se encontró la ubicación: $sanitized',
             isLoading: false,
           );
         }
-      } catch (e) {
-        // SECURITY: Generic error message (don't expose exception details to user)
+      } catch (e, stackTrace) {
         debugPrint("⚠️ Error in search algorithm: $e");
+        debugPrint(stackTrace.toString());
         state = state.copyWith(
-          error: 'Error al buscar ubicación. Inténtalo de nuevo.',
+          error: 'Error al buscar: $e',
           isLoading: false,
         );
       }

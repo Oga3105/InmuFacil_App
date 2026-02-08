@@ -29,7 +29,7 @@ El proyecto se encuentra en un estado híbrido de desarrollo:
 | **1. Auth & Core** | ✅ Completado | ✅ Completado |
 | **2. KYC & Vault** | ✅ Completado | ✅ Completado (DNI Upload) |
 | **3. Anti-Agencias** | ✅ Completado | ✅ Completado |
-| **4. Búsqueda** | ✅ Completado | 🚧 **WIP (Siguiente Paso)** |
+| **4. Búsqueda y Mapa** | ✅ Completado | ✅ **Completo (Hito 4)** |
 | **5. Visitas** | ✅ Completado | 🔴 Pendiente |
 | **6. Ofertas** | ✅ Completado | 🔴 Pendiente |
 | **7-9. Negociación**| ✅ Completado | 🔴 Pendiente |
@@ -40,7 +40,7 @@ El proyecto se encuentra en un estado híbrido de desarrollo:
 
 **Hito Activo:** 🚧 **Frontend Hito 4: Búsqueda y Resultados**
 **Rama Activa:** `feature/valuation-engine` (Reutilizada para integración Frontend)
-**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
+**Último Commit:** `b8f9807` - `feat(map): implement real-shape geocoding and lasso drawing (Hito 4.4)`
 
 ---
 
