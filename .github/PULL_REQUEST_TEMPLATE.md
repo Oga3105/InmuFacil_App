@@ -1,97 +1,79 @@
-## 📝 Descripción
+## 📝 Descripción de los Cambios
 
-<!-- Describe brevemente los cambios realizados en esta PR -->
+<!-- Proporciona una descripción clara de qué cambia este PR -->
 
 ## 🎯 Tipo de Cambio
 
-<!-- Marca con una X el tipo de cambio -->
+<!-- Marca con una X las opciones que apliquen -->
 
-- [ ] 🐛 Bug fix (cambio que corrige un problema)
+- [ ] 🐛 Bug fix (cambio que corrige un issue)
 - [ ] ✨ Nueva funcionalidad (cambio que añade funcionalidad)
 - [ ] 💥 Breaking change (cambio que rompe compatibilidad)
-- [ ] 📚 Documentación (cambios solo en documentación)
-- [ ] 🎨 Refactoring (cambios que no afectan funcionalidad)
-- [ ] ⚡ Performance (mejoras de rendimiento)
-- [ ] 🔒 Seguridad (cambios relacionados con seguridad)
-- [ ] 🧪 Tests (añadir o modificar tests)
+- [ ] 🔒 Security fix (corrección de vulnerabilidad)
+- [ ] 📚 Documentación
+- [ ] ♻️ Refactoring
+- [ ] ⚡ Performance improvement
+- [ ] 🧪 Tests
 
 ## 🔗 Issues Relacionados
 
-<!-- Enlaza los issues que esta PR resuelve -->
+<!-- Referencias a issues que este PR resuelve -->
 
-Closes #
-Relates to #
+Fixes #(issue)
+Relates to #(issue)
 
 ## 📋 Checklist
 
-<!-- Marca con X los items completados -->
+<!-- Marca con X cuando hayas completado cada paso -->
 
-### General
 - [ ] Mi código sigue las guías de estilo del proyecto
 - [ ] He realizado una auto-revisión de mi código
-- [ ] He comentado mi código en áreas complejas
+- [ ] He comentado el código en áreas difíciles de entender
 - [ ] He actualizado la documentación correspondiente
 - [ ] Mis cambios no generan nuevos warnings
-- [ ] He añadido tests que prueban mi fix/feature
-- [ ] Tests nuevos y existentes pasan localmente
+- [ ] He añadido tests que prueban que mi fix funciona o que mi feature funciona
+- [ ] Los tests nuevos y existentes pasan localmente con mis cambios
+- [ ] He verificado que no hay problemas de seguridad
 
-### Backend (si aplica)
-- [ ] He actualizado `requirements.txt` si añadí dependencias
-- [ ] He ejecutado `pytest` y todos los tests pasan
-- [ ] He verificado que no hay secretos hardcodeados
-- [ ] He validado el manejo de PII (encriptación)
-- [ ] He actualizado los modelos de base de datos si fue necesario
-- [ ] He probado los endpoints con Swagger/Postman
+## 🧪 Tests Realizados
 
-### Frontend (si aplica)
-- [ ] He actualizado `pubspec.yaml` si añadí dependencias
-- [ ] He ejecutado `flutter test` y todos los tests pasan
-- [ ] He verificado que la UI es responsive
-- [ ] He probado en modo debug y release
-- [ ] He seguido Clean Architecture (domain/data/presentation)
+<!-- Describe los tests que has ejecutado -->
 
-### Seguridad (@Shield)
-- [ ] No hay secretos o credenciales en el código
-- [ ] Los datos sensibles están encriptados
-- [ ] He validado inputs del usuario
-- [ ] He considerado posibles vulnerabilidades (SQL injection, XSS, etc.)
-- [ ] He actualizado dependencias vulnerables si las había
+```bash
+# Comando de tests ejecutados
+pytest tests/ -v
+```
 
-### Git Flow
-- [ ] Mi rama está actualizada con `develop`
-- [ ] He seguido la convención de commits (feat/fix/chore)
-- [ ] He pusheado mi rama al remoto antes de crear esta PR
-- [ ] Los tests de CI/CD pasan (si aplica)
+**Resultado:**
+- [ ] Todos los tests pasan
+- [ ] Algunos tests fallan (explicar cuáles y por qué)
 
-## 🧪 Cómo se ha Probado
+## 🔒 Consideraciones de Seguridad
 
-<!-- Describe las pruebas que has realizado -->
+<!-- ¿Este PR tiene implicaciones de seguridad? -->
 
-- [ ] Test unitarios
-- [ ] Test de integración
-- [ ] Test manual
-- [ ] Test en diferentes navegadores/dispositivos
+- [ ] Este PR NO tiene implicaciones de seguridad
+- [ ] Este PR mejora la seguridad
+- [ ] Este PR requiere revisión de seguridad
 
-**Detalles de las pruebas:**
-<!-- Describe los escenarios probados -->
+**Detalles:**
 
-## 📸 Screenshots/Recordings
+## 📸 Capturas de Pantalla
 
-<!-- Si aplica, añade capturas de pantalla o grabaciones -->
+<!-- Si aplica, incluye capturas de pantalla de cambios visuales -->
 
-## 📌 Notas Adicionales
+## 📊 Impacto en el Rendimiento
 
-<!-- Cualquier información adicional relevante para los revisores -->
+<!-- ¿Este cambio afecta el rendimiento? -->
 
-## 🎓 Contexto TFM
+- [ ] Sin impacto en rendimiento
+- [ ] Mejora el rendimiento
+- [ ] Posible degradación de rendimiento (explicar)
 
-<!-- Si aplica, explica cómo este cambio contribuye al TFM -->
+## 📝 Notas Adicionales para Reviewers
+
+<!-- Información adicional que los revisores deberían saber -->
 
 ---
 
-**Para Revisores:**
-- [ ] Código revisado
-- [ ] Tests verificados
-- [ ] Documentación revisada
-- [ ] Seguridad validada
-- [ ] Aprobado para merge
+**🤖 Este PR será revisado automáticamente por nuestros workflows de CI/CD**

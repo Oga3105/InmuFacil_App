@@ -1,5 +1,5 @@
 """
-@Shield - Vault Audit Script V3 (Debug Mode)
+@Shield - Vault Audit Script V3 (Fused)
 
 Provides transparency into encrypted vault data.
 No try/except on imports to show real errors.
@@ -10,12 +10,22 @@ Usage:
 
 import sys
 import os
+import logging
+from pathlib import Path
+from datetime import datetime
 
-# --- 1. CARGA NATIVA DE VARIABLES .ENV ---
+# --- 1. CONFIGURACIÓN DE LOGGING ---
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# --- 2. CARGA NATIVA DE VARIABLES .ENV ---
 def load_env_native():
     env_path = os.path.join(os.getcwd(), '.env')
     if not os.path.exists(env_path):
-        print("⚠️ .env no encontrado.")
+        logger.warning("⚠️ .env no encontrado.")
         return
     with open(env_path, 'r', encoding='utf-8') as f:
         for line in f:
@@ -27,39 +37,41 @@ def load_env_native():
 
 load_env_native()
 
-# --- 2. CONFIGURACIÓN DE RUTAS ---
+# --- 3. CONFIGURACIÓN DE RUTAS ---
 # Añadimos el directorio actual al path para que Python encuentre 'backend'
 sys.path.append(os.getcwd())
 
-print("⚙️ Cargando módulos del sistema...")
+logger.info("⚙️ Cargando módulos del sistema...")
 
-# --- 3. IMPORTS (Sin Try/Except para ver errores reales) ---
-from sqlalchemy import text  # Necesario para consultas raw en SQLA 2.0
-from backend.database import SessionLocal, engine, Base  # Use SessionLocal directly
-from backend.core.security import decrypt_data
+# --- 4. IMPORTS ---
+from sqlalchemy import text
+from backend.database import SessionLocal, engine, Base
+from backend.core.security import decrypt_data, get_master_key
 
 # Import models to register them with SQLAlchemy
 import backend.models
 
 # Create tables if they don't exist
-print("🔧 Verificando estructura de base de datos...")
+logger.info("🔧 Verificando estructura de base de datos...")
 Base.metadata.create_all(bind=engine)
 
 def audit_vault():
-    print("\n🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA")
+    logger.info("=" * 60)
 
-    key = os.getenv("INMUFACIL_MASTER_KEY")
-    if not key:
-        print("❌ ERROR: INMUFACIL_MASTER_KEY no encontrada en .env")
+    # Validar Clave Maestra
+    try:
+        key = get_master_key()
+        logger.info(f"🔐 Llave Maestra cargada y validada ({len(key)} bytes).")
+    except Exception as e:
+        logger.critical(f"❌ ERROR: No se pudo cargar la llave maestra: {e}")
         return
-    
-    print("🔐 Llave Maestra cargada.")
 
     # Create database session
     db = SessionLocal()
     try:
-        print("📡 Conectado a Base de Datos. Consultando...")
+        logger.info("📡 Conectado a Base de Datos. Consultando...")
         
         # CORRECCIÓN: Tabla real es 'users', columna es 'encrypted_dni'
         sql = text("SELECT id, encrypted_dni, dni_verified FROM users ORDER BY id DESC LIMIT 5")
@@ -67,53 +79,50 @@ def audit_vault():
         rows = result.fetchall()
 
         if not rows:
-            print("📭 La tabla 'users' está vacía. No hay usuarios registrados.")
+            logger.warning("📭 La tabla 'users' está vacía. No hay usuarios registrados.")
             return
         
-        print(f"\n📊 Encontrados {len(rows)} registros:\n")
+        logger.info(f"📊 Encontrados {len(rows)} registros recientes:")
         
         for row in rows:
             # Acceso seguro por índice
             rid, encrypted, verified = row[0], row[1], row[2]
 
-            print(f"{'─' * 60}")
-            print(f"📄 USER ID: {rid} | DNI VERIFICADO: {verified}")
-            print(f"   🔒 RAW: {str(encrypted)[:15] if encrypted else 'N/A'}...")
+            logger.info("-" * 60)
+            logger.info(f"📄 USER ID: {rid} | DNI VERIFICADO: {verified}")
+            logger.info(f"   🔒 RAW: {str(encrypted)[:15] if encrypted else 'N/A'}...")
             
             if encrypted:
                 try:
                     decrypted = decrypt_data(encrypted)
-                    print(f"   🔓 REAL: {decrypted}")
-                    print("   ✅ Integridad OK")
+                    logger.info(f"   🔓 REAL: {decrypted}")
+                    logger.info("   ✅ Integridad OK")
                 except Exception as e:
-                    print(f"   ❌ Error Descifrado: {e}")
+                    logger.error(f"   ❌ Error Descifrado: {e}")
             else:
-                print(f"   ⚠️  Usuario sin DNI cifrado")
+                logger.warning(f"   ⚠️  Usuario sin DNI cifrado")
         
-        print(f"{'─' * 60}")
+        logger.info("-" * 60)
 
     except Exception as e:
-        print(f"\n❌ ERROR DE EJECUCIÓN: {e}")
-        print("CONSEJO: Verifica que Docker esté corriendo y la base de datos exista.")
+        logger.error(f"❌ ERROR DE EJECUCIÓN: {e}")
+        logger.info("CONSEJO: Verifica que Docker esté corriendo y la base de datos exista.")
         import traceback
-        traceback.print_exc()
+        logger.error(traceback.format_exc())
     
     finally:
         db.close()
     
-    print("\n" + "=" * 60)
-    print("✅ AUDITORÍA FINALIZADA")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("✅ AUDITORÍA FINALIZADA")
+    logger.info("=" * 60)
 
 if __name__ == "__main__":
-    print("\n🔐 InmuFácil Vault Audit Tool")
-    print("Provides transparency into encrypted data storage\n")
+    logger.info("🔐 InmuFácil Vault Audit Tool")
     
     try:
         audit_vault()
     except KeyboardInterrupt:
-        print("\n⚠️ Auditoría interrumpida")
+        logger.warning("⚠️ Auditoría interrumpida")
     except Exception as e:
-        print(f"\n❌ Error fatal: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.critical(f"❌ Error fatal: {e}")
