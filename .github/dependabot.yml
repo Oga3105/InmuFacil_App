@@ -1,13 +1,13 @@
 version: 2
 updates:
-  # Dependencias de Python (pip)
+  # 1. Backend Python (FUSIÓN: Grupos Inteligentes de Copilot + Config Base)
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
-    # Agrupar actualizaciones por tipo
+      time: "09:00"
+    # Grupos inteligentes para reducir ruido (De Copilot)
     groups:
       security-updates:
         patterns:
@@ -34,29 +34,50 @@ updates:
           - "sqlalchemy"
         update-types:
           - "patch"
-    # Configuración de PRs
     open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "backend"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
     reviewers:
       - "Oga3105"
     assignees:
       - "Oga3105"
+
+  # 2. Frontend Flutter (DE DEVELOP - CRÍTICO CONSERVARLO)
+  - package-ecosystem: "pub"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
-      - "security"
+      - "frontend"
+      - "flutter"
     commit-message:
-      prefix: "deps"
+      prefix: "chore(deps)"
       include: "scope"
+    reviewers:
+      - "Oga3105"
+    assignees:
+      - "Oga3105"
 
-  # GitHub Actions
+  # 3. GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:00"
-    open-pull-requests-limit: 5
+      time: "09:00"
+    open-pull-requests-limit: 3
     labels:
       - "dependencies"
       - "github-actions"
     commit-message:
-      prefix: "ci"
+      prefix: "chore(deps)"
+      include: "scope"

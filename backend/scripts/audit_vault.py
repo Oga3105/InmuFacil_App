@@ -1,130 +1,128 @@
 """
-@Shield - Vault Audit Script
+@Shield - Vault Audit Script V3 (Fused)
 
 Provides transparency into encrypted vault data.
-Allows authorized personnel to decrypt and view stored verification data.
-
-Security Features:
-- Read-only operations (no modifications)
-- Requires INMUFACIL_MASTER_KEY from .env
-- Logs all audit access
-- Displays decrypted data for verification
+No try/except on imports to show real errors.
 
 Usage:
-    python backend/scripts/audit_vault.py
-
-Token Consumption Tracking: ~300 tokens for audit script
+    python -m backend.scripts.audit_vault
 """
 
 import sys
 import os
+import logging
 from pathlib import Path
 from datetime import datetime
-import logging
 
-# Add project root to path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
-
-# Environment variables loaded natively via os.environ
-# No external dependencies needed
-
-# Import security and database modules
-from backend.core.security import decrypt_data, get_master_key
-
-# Configure logging
+# --- 1. CONFIGURACIÓN DE LOGGING ---
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
+# --- 2. CARGA NATIVA DE VARIABLES .ENV ---
+def load_env_native():
+    env_path = os.path.join(os.getcwd(), '.env')
+    if not os.path.exists(env_path):
+        logger.warning("⚠️ .env no encontrado.")
+        return
+    with open(env_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            os.environ[key.strip()] = value.strip().strip("'").strip('"')
+
+load_env_native()
+
+# --- 3. CONFIGURACIÓN DE RUTAS ---
+# Añadimos el directorio actual al path para que Python encuentre 'backend'
+sys.path.append(os.getcwd())
+
+logger.info("⚙️ Cargando módulos del sistema...")
+
+# --- 4. IMPORTS ---
+from sqlalchemy import text
+from backend.database import SessionLocal, engine, Base
+from backend.core.security import decrypt_data, get_master_key
+
+# Import models to register them with SQLAlchemy
+import backend.models
+
+# Create tables if they don't exist
+logger.info("🔧 Verificando estructura de base de datos...")
+Base.metadata.create_all(bind=engine)
 
 def audit_vault():
-    """
-    Audit the encryption vault by decrypting and displaying stored data.
-    
-    @Shield: Vault transparency for authorized personnel
-    @Watcher: Logs all audit access
-    """
-    try:
-        logger.info("[VAULT] Starting vault audit...")
-        logger.info(f"[VAULT] Audit initiated at: {datetime.now().isoformat()}")
-        
-        # Step 1: Validate master key is loaded
-        try:
-            master_key = get_master_key()
-            logger.info(f"[OK] Master key loaded successfully ({len(master_key)} bytes)")
-        except Exception as e:
-            logger.error(f"[ERROR] Failed to load master key: {str(e)}")
-            logger.error("[ERROR] Cannot access vault: Master key not available")
-            logger.error("Please ensure INMUFACIL_MASTER_KEY is set in your .env file")
-            return False
-        
-        # Step 2: Display vault information
-        logger.info("-" * 70)
-        logger.info("🔐 INMUFACIL VAULT AUDIT")
-        logger.info("-" * 70)
-        logger.info(f"Audit Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        logger.info(f"Master Key Status: [OK] Loaded and validated")
-        logger.info("-" * 70)
-        
-        # Step 3: Demonstrate encryption/decryption
-        logger.info("📋 ENCRYPTION SYSTEM TEST:")
-        logger.info("-" * 70)
-        
-        # Test data
-        test_documents = [
-            {"type": "DNI", "id": "12345678A"},
-            {"type": "NIE", "id": "X1234567B"},
-            {"type": "PASSPORT", "id": "ABC123456"}
-        ]
-        
-        for doc in test_documents:
-            # Encrypt
-            encrypted = decrypt_data.__globals__['encrypt_data'](doc['id'])
-            
-            # Decrypt
-            decrypted = decrypt_data(encrypted)
-            
-            # Display
-            logger.info(f"Document Type: {doc['type']}")
-            logger.info(f"  Original ID:    {doc['id']}")
-            logger.info(f"  Encrypted:      {encrypted[:40]}... ({len(encrypted)} chars)")
-            logger.info(f"  Decrypted:      {decrypted}")
-            logger.info(f"  Match:          {'[OK]' if decrypted == doc['id'] else '[ERROR]'}")
-        
-        logger.info("-" * 70)
-        
-        # Step 4: Database query simulation
-        logger.info("📊 DATABASE VERIFICATION ENTRIES:")
-        logger.info("-" * 70)
-        logger.info("NOTE: Database integration pending - showing test data")
-        logger.info("Example encrypted entry:")
-        logger.info(f"  User ID:        123")
-        logger.info(f"  Document Type:  DNI")
-        logger.info(f"  Encrypted DNI:  {decrypt_data.__globals__['encrypt_data']('12345678A')[:50]}...")
-        logger.info(f"  Process Date:   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        logger.info(f"  Status:         VERIFIED")
-        
-        logger.info("-" * 70)
-        logger.info("✅ VAULT AUDIT COMPLETED SUCCESSFULLY")
-        logger.info("-" * 70)
-        
-        logger.info("[OK] Vault audit completed successfully")
-        return True
-        
-    except Exception as e:
-        logger.error(f"[ERROR] Vault audit failed: {str(e)}")
-        return False
+    logger.info("=" * 60)
+    logger.info("🔍 INICIANDO AUDITORÍA FORENSE DE LA BÓVEDA")
+    logger.info("=" * 60)
 
+    # Validar Clave Maestra
+    try:
+        key = get_master_key()
+        logger.info(f"🔐 Llave Maestra cargada y validada ({len(key)} bytes).")
+    except Exception as e:
+        logger.critical(f"❌ ERROR: No se pudo cargar la llave maestra: {e}")
+        return
+
+    # Create database session
+    db = SessionLocal()
+    try:
+        logger.info("📡 Conectado a Base de Datos. Consultando...")
+        
+        # CORRECCIÓN: Tabla real es 'users', columna es 'encrypted_dni'
+        sql = text("SELECT id, encrypted_dni, dni_verified FROM users ORDER BY id DESC LIMIT 5")
+        result = db.execute(sql)
+        rows = result.fetchall()
+
+        if not rows:
+            logger.warning("📭 La tabla 'users' está vacía. No hay usuarios registrados.")
+            return
+        
+        logger.info(f"📊 Encontrados {len(rows)} registros recientes:")
+        
+        for row in rows:
+            # Acceso seguro por índice
+            rid, encrypted, verified = row[0], row[1], row[2]
+
+            logger.info("-" * 60)
+            logger.info(f"📄 USER ID: {rid} | DNI VERIFICADO: {verified}")
+            logger.info(f"   🔒 RAW: {str(encrypted)[:15] if encrypted else 'N/A'}...")
+            
+            if encrypted:
+                try:
+                    decrypted = decrypt_data(encrypted)
+                    logger.info(f"   🔓 REAL: {decrypted}")
+                    logger.info("   ✅ Integridad OK")
+                except Exception as e:
+                    logger.error(f"   ❌ Error Descifrado: {e}")
+            else:
+                logger.warning(f"   ⚠️  Usuario sin DNI cifrado")
+        
+        logger.info("-" * 60)
+
+    except Exception as e:
+        logger.error(f"❌ ERROR DE EJECUCIÓN: {e}")
+        logger.info("CONSEJO: Verifica que Docker esté corriendo y la base de datos exista.")
+        import traceback
+        logger.error(traceback.format_exc())
+    
+    finally:
+        db.close()
+    
+    logger.info("=" * 60)
+    logger.info("✅ AUDITORÍA FINALIZADA")
+    logger.info("=" * 60)
 
 if __name__ == "__main__":
     logger.info("🔐 InmuFácil Vault Audit Tool")
-    logger.info("Provides transparency into encrypted data storage")
     
-    # Run audit
-    success = audit_vault()
-    
-    # Exit with appropriate code
-    sys.exit(0 if success else 1)
+    try:
+        audit_vault()
+    except KeyboardInterrupt:
+        logger.warning("⚠️ Auditoría interrumpida")
+    except Exception as e:
+        logger.critical(f"❌ Error fatal: {e}")

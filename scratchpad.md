@@ -4,8 +4,8 @@
 - **Rama Activa:** `develop` ⚡
 - **Último Commit:** 6fba00e - docs: finalize professional README with security specifications
 - **Verificación:** ✅ .env protegido | ✅ README actualizado | ✅ 0 commits pendientes
-- **Misiones Completadas:** M1-M8 | **Próximo Hito:** 🎯 HITO 3 - Endpoints de Autenticación JWT
-- **Agentes:** Architect (✅ Activo), Jules (✅ Activo), Shield (✅ Activo), Watcher (✅ Activo)
+- **Misiones Completadas:** M1-M9 | **Próximo Hito:** 🎯 HITO 10 - Frontend App (Flutter)
+
 
 ## Estrategia de Ramificación (Git Flow)
 - **Rama Activa de Desarrollo:** `develop` ⚡
@@ -86,29 +86,61 @@
 
 ---
 
-### 🎯 Misión 9: SIGUIENTE PASO - Endpoints de Autenticación JWT
-**Prioridad:** ALTA  
-**Objetivo:** Implementar endpoints de autenticación completos
+### ✅ Misión 9: Autenticación JWT - COMPLETADA
+**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
+**Entregables:**
+- ✅ Endpoint POST /auth/register con integración KYC
+- ✅ Endpoint POST /auth/login con JWT generation
+- ✅ Endpoint POST /auth/verify-email (MFA)
+- [/] Endpoint POST /auth/upload-dni con redacción (Integrado en flujo)
+- ✅ Endpoint POST /auth/request-password-reset
+- ✅ Endpoint POST /auth/reset-password con MFA
+- ✅ Middleware de autenticación JWT
+- ✅ Tests de integración end-to-end (`tests/test_auth.py`)
 
-**Tareas Pendientes:**
-- [ ] Endpoint POST /auth/register con integración KYC
-- [ ] Endpoint POST /auth/login con JWT generation
-- [ ] Endpoint POST /auth/verify-email (MFA)
-- [ ] Endpoint POST /auth/upload-dni con redacción
-- [ ] Endpoint POST /auth/reset-password con MFA
-- [ ] Middleware de autenticación JWT
-- [ ] Tests de integración end-to-end
+### ✅ Misión 10 (Hito 10): Sistema de Tasación - COMPLETADA
+**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
+**Entregables:**
+- ✅ Modelo `PropertyValuation` (SQLAlchemy)
+- ✅ Servicio `ValuationService` (Internal Algo + External Mock)
+- ✅ Endpoint `POST /valuation` (Owner Only)
+- ✅ Endpoint `GET /valuation` (History)
+- ✅ Tests verificados (`tests/test_valuation.py`)
 
-**Dependencias:**
-- ✅ Crypto module (AES-256-GCM)
-- ✅ Email service (MFA tokens)
-- ✅ KYC service (DNI redaction)
-- ✅ Security monitor (brute force)
-- ✅ Filters (anti-agency)
+### ✅ Misión 11 (Hito 11): Sistema de Financiación - COMPLETADA
+**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
+**Entregables:**
+- ✅ Modelo `MortgageProfile` y `MortgageSimulation`
+- ✅ Servicio `FinancingService` con Scoring de Solvencia
+- ✅ Mock "Meta-Buscador": iAhorro, BBVA, Santander
+- ✅ Rol `FINANCIERO` y asignación de asesores
+- ✅ Tests verificados (`tests/test_financing.py`)
 
----
+### ✅ Misión 12 (Hito 12): Generador de Contratos - COMPLETADA
+**Estado:** CONSOLIDADO EN GITHUB (Merge a `develop`)
+**Entregables:**
+- ✅ Motor de Contratos con ReportLab
+- ✅ Endpoint Seguro de Descarga (RBAC)
+- ✅ Tests de Integración y Seguridad
+- ✅ ADR 012 Documentado
 
-## 🛡️ Principios de Diseño Activos
+### ✅ Refinamiento 12.5: Cuestionario Legal (Feedback Usuario)
+**Estado:** COMPLETADO
+- ✅ OCR de contrato aportado por usuario
+- ✅ ADR 013 (Contratos Dinámicos)
+- ✅ Schema `PropertyOffer.contract_data` (JSON)
+- ✅ Endpoint `PUT /details` para cuestionario
+- ✅ Endpoint `PUT /details` para cuestionario
+- ✅ Generado PDF con cláusulas condicionales (Cuerpo Cierto, AML, etc.)
+
+### ✅ Refinamiento 12.6: Contratos Personalizados e IA 🤖
+**Estado:** COMPLETADO
+- ✅ Subida de contratos propios (PDF/Word)
+- ✅ Análisis de riesgos con IA (Simulado en Mock)
+- ✅ **Legal:** Consentimiento expreso + Descarga de responsabilidad (Liability Waiver) guarda en DB.
+
+
+
 
 ### Security by Design
 **Filosofía:** La seguridad se considera desde el diseño inicial, no como añadido posterior.
@@ -223,3 +255,7 @@
 - **Misión 2 Total:** ~1,800 tokens
 
 ### **Total Acumulado:** ~6,600 tokens
+
+---
+
+

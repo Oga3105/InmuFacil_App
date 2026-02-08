@@ -107,33 +107,108 @@ InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa 
 - ✅ Escudo Anti-Agencias activo
 - ✅ Audit logging sin datos sensibles
 
-### Próximo Hito 🎯
+**Hito 3 / Misión 9: Autenticación Completa** 🔐
+- ✅ Registro de Usuarios (Particular/Profesional)
+- ✅ Login Seguro con JWT
+- ✅ MFA V2 (Email Token)
+- ✅ Recuperación de Contraseña
 
-**Hito 3: Activación de Bóveda** (Próximo paso crítico)
-- Endpoints de autenticación (Login/Register)
-- Integración completa del flujo KYC
-- JWT token generation
-- Password reset con MFA
 
----
+**Hito 4: Búsqueda y Filtrado (Search Engine)** ✅
+- ✅ Algoritmo de filtrado combinatorio (Precio, Ubicación, Características)
+- ✅ Optimización de consultas SQL (Query Builder dinámico)
+- ✅ Prevención de SQL Injection en filtros
+
+**Hito 5: Gestión de Visitas (Block Scheduling)** ✅
+- ✅ Algoritmo de Visitas en Bloque (Slots automáticos)
+- ✅ Dashboard de Estado (Requested, Approved, Completed)
+- ✅ Control de Acceso basado en Roles (Owner vs Buyer)
+
+**Hito 6: Ofertas Transparentes** ✅
+- ✅ Modelo `PropertyOffer` transparente
+- ✅ Prevención de auto-ofertas
+- ✅ Estados de oferta gestionados (Pending, Accepted, Rejected)
+
+**Hito 7: Negociación y Chat (Híbrido)** ✅
+- ✅ Protocolo de Contraofertas
+- ✅ Chat Encriptado (Fernet) activado bajo demanda
+- ✅ Historial de negociación inmutable (Audit Log)
+
+**Hito 8: Reserva y Señal (Payment Mock)** ✅
+- ✅ Gestión de Pagos (Mock Provider)
+- ✅ Bloqueo de Concurrencia (Idempotencia)
+- ✅ Visibilidad Configurable (Ocultar al reservar)
+
+**Hito 9: Verificación Documental (Compliance)** ✅
+- ✅ Upload de Notas Simples con OCR
+- ✅ Detección automática de Ref. Catastral
+- ✅ Política de Retención de Datos
+- ✅ Borrado seguro y anonimización
+
+**Hito 10: Tasación (Valuation)** ✅
+- ✅ Algoritmo de valoración comparativa
+- ✅ Histórico de tasaciones
+- ✅ Integración (Mock) con fuentes externas
+
+**Hito 11: Financiación** ✅
+- ✅ Perfiles hipotecarios y Scoring
+- ✅ Simulación de cuotas en tiempo real
+- ✅ Asignación de asesores financieros
+
+**Hito 12: Contratos (Drafts)** ✅
+- ✅ Generación PDF con ReportLab (Arras Penitenciales)
+- ✅ Análisis de Contratos Propios con IA (Gemini)
+- ✅ Cuestionario Legal para personalización de cláusulas
+
+**Hito 13: Firma Digital** ✅
+- ✅ Infraestructura de Firma Remota (Mock Provider Hexagonal)
+- ✅ Tokens de un solo uso (One-Time Token)
+- ✅ Trazabilidad del ciclo de vida de la firma
+
+**Hito 14: Preparación Notarial** ✅
+- ✅ Gestión de Notarios
+- ✅ Generación de Dossier Seguro (Unmasking bajo demanda)
+- ✅ Manifest de Integridad (SHA256)
+
+**Hito 15: Cierre Definitivo (Closing)** ✅
+- ✅ Automatización de cambio de estado a SOLD/COMPLETED
+- ✅ Certificado de Cierre Digital
+- ✅ Integración con Timeline
+
+**Hito 16: Post-Sales Management** ✅
+- ✅ **Parte A: Inteligencia Financiera**: Estimador de Costes (ITP, Notaría, Registro)
+- ✅ **Parte B: Digital Vault**: Traspaso seguro de suministros (CUPS, Facturas cifradas)
+- ✅ Compliance Legal (Disclaimers obligatorios)
+
+183: ---
+184: 
+185: **Hito 17: Arquitectura de Mercado de Servicios** ✅
+186: - ✅ API Router Unificado (`/services/*`)
+187: - ✅ Control de Acceso basado en Roles (Admin/Provider/User)
+188: - ✅ Sistema de Tickets y Seguimiento de Órdenes
+189: - ✅ Modelos extensibles para nuevos servicios (Mudanzas, Reformas, Certificados)
+190: 
+191: ---
 
 ## 🏗️ Los 15 Hitos de Compraventa
 
 1. ✅ **Publicación de Inmueble** - El vendedor crea y publica su propiedad
 2. ✅ **Búsqueda y Filtrado** - Compradores encuentran propiedades de interés
-3. 🔄 **Solicitud de Visita** - Compradores solicitan visitas a inmuebles
-4. 🔄 **Coordinación de Visitas en Bloque** - Sistema agrupa visitas eficientemente
-5. 🔜 **Realización de Visitas** - Visitas presenciales coordinadas
-6. 🔜 **Manifestación de Interés** - Comprador expresa interés formal
-7. 🔜 **Negociación de Precio** - Comunicación directa vendedor-comprador
-8. 🔜 **Reserva del Inmueble** - Comprador reserva con señal económica
-9. 🔜 **Verificación Documental** - Validación de documentación legal
-10. 🔜 **Tasación del Inmueble** - Valoración profesional del inmueble
-11. 🔜 **Solicitud de Hipoteca** - Gestión de financiación bancaria
-12. 🔜 **Elaboración de Contrato** - Generación de contrato de compraventa
-13. 🔜 **Firma de Arras** - Formalización del compromiso de compra
-14. 🔜 **Preparación Notarial** - Coordinación con notaría
-15. 🔜 **Firma ante Notario** - Cierre definitivo de la transacción
+3. ✅ **Solicitud de Visita** - Compradores solicitan visitas a inmuebles
+4. ✅ **Coordinación de Visitas en Bloque** - Sistema agrupa visitas eficientemente
+5. ✅ **Realización de Visitas** - Dashboard de ejecución y estados seguros
+6. ✅ **Manifestación de Interés** - Ofertas Transparentes formalizadas
+7. ✅ **Negociación de Precio** - Protocolo de Contraofertas + Chat Encriptado
+8. ✅ **Reserva del Inmueble** - Comprador reserva con señal y bloqueo
+9. ✅ **Verificación Documental** - Validación de documentación legal (OCR + Cifrado)
+10. ✅ **Tasación del Inmueble** - Valoración profesional del inmueble
+11. ✅ **Solicitud de Hipoteca** - Gestión de financiación bancaria
+12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
+13. ✅ **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
+14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
+15. ✅ **Cierre Definitivo** - Control automatizado de estados y Certificado de Cierre
+16. ✅ **Post-Sales Intelligence** - Estimación de Costes (Parte A) y Traspaso de Suministros (Parte B)
+17. ✅ **Arquitectura de Mercado de Servicios** - Backend unificado para proveedores (Notarios, Tasadores, etc.)
 
 ---
 
@@ -230,5 +305,5 @@ InmuFácil aspira a convertirse en la plataforma de referencia para la compraven
 ---
 
 *Documento de Visión - InmuFácil Project*  
-*Versión 2.0 - Enero 2026*  
-*Actualizado con DevSecOps Standards - Hito 2 Completado*
+*Versión 8.0 - Enero 2026*  
+*Actualizado con DevSecOps Standards - Hito 8 Completado*

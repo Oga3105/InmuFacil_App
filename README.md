@@ -20,22 +20,86 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ## 📊 Estado Actual del Proyecto
 
-**Hito Actual:** 🔐 **Hito 2 - Validación de Identidad** ✅ COMPLETADO Y VERIFICADO
+**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
 
-**API Version:** `0.4.0` - Frontend-Ready
+**API Version:** `0.5.0` - Auth-Ready
 
 **Progreso:**
 - ✅ **Hito 1:** Estructura Base y Autenticación
 - ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
   - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
   - ✅ Misión 6: Security Breach Remediation
-  - ✅ Misión 7: Automated DNI Redaction (100% opacity verified)
   - ✅ Misión 8: API Frontend Integration (Secure CORS)
-- 🎯 **Hito 3:** Endpoints de Autenticación JWT (Próximo)
-- 🔜 **Hitos 4-15:** En planificación
+- ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
+  - ✅ Registro con Anti-Agency Filter
+  - ✅ Login JWT (Access Token 30min)
+  - ✅ MFA por Email (6-digit OTP)
+  - ✅ Reset Password Seguro
+- ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
+  - ✅ CRUD Vendedor (Publicación y Gestión)
+  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
+  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
+
+- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
+  - ✅ Ventanas de Disponibilidad (Vendedor)
+  - ✅ Algoritmo de Slots Dinámicos (Comprador)
+  - ✅ Gestión de Citas (Approve/Reject)
+- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
+  - ✅ Anti-Malware (MIME Type Validation)
+  - ✅ Bloqueo de Fuerza Bruta (Automated)
+  - ✅ Tests de Prevención IDOR
+
+- ✅ **Hito 5:** Realización de Visitas (Ejecución)
+  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
+  - ✅ Dashboard (Agenda de Vendedor/Comprador)
+  - ✅ Defensa de Roles (Solo el dueño valida la visita)
+
+- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
+  - ✅ Modelo de Ofertas Transparentes
+  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
+  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
+
+- ✅ **Hito: Búsqueda Avanzada (Extra)**
+  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
+  - ✅ Búsqueda Combinatoria (Features + Core)
+  - ✅ TDD (`tests/test_search_logic.py`)
+
+- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
+  - ✅ Protocolo de Contraofertas (Historial Auditado)
+  - ✅ Chat Encriptado (Opcional, Defense in Depth)
+  - ✅ Modelo de Cierre (Accept/Reject)
+
+- ✅ **Hito 8:** Reserva y Señal (Híbrido)
+  - ✅ Modelo de Reservas e Idempotencia
+  - ✅ Mock Payment Provider (Simulación Financiera)
+  - ✅ Bloqueo de Concurrencia (Race Conditions)
+  - ✅ Configuración de Visibilidad (Hide when Reserved)
+
+- ✅ **Hito 9:** Verificación Documental (Compliance)
+  - ✅ Subida Cifrada (AES-256) de Nota Simple
+  - ✅ Extracción OCR de Referencia Catastral
+  - ✅ Modelo `PropertyDocument` Seguro
+
+- 🎯 **Hito 10:** Tasación (Siguiente Paso)
+
+- ✅ **Frontend:** Inicialización Flutter con Clean Architecture
+  - ✅ Estructura domain/data/presentation
+  - ✅ API client con interceptores JWT
+  - ✅ Tema Material Design 3
+  - ✅ Routing con go_router
+  - ✅ **Geocoding Integrado:** Nominatim API (Local First) + Mapa Reactivo
+  - ✅ **Página 404:** Diseño Isométrico, Segura e Internacionalizada (9 idiomas)
+  - ⏳ Implementación UI pendiente (@UIBuilder)
+
+- ✅ **DevOps:** Automatización GitHub (CodeQL, Dependabot, Templates)
+  - ✅ CodeQL para análisis de seguridad Python
+  - ✅ Dependabot (Python, Flutter, GitHub Actions)
+  - ✅ Templates de issues (bug, feature, vulnerabilidad)
+  - ✅ Template de Pull Request con checklists
+  - ✅ Documentación completa en español
 
 **Rama Activa:** `develop`  
-**Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`
+**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
 
 ---
 
@@ -99,6 +163,11 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 - **Base de Datos**: SQLAlchemy 2.0.23 (SQLite dev, PostgreSQL prod)
 - **Autenticación**: JWT + MFA Email
 - **Validación**: Pydantic 2.5.0 con schemas seguros
+
+### Frontend (Multi-Platform Strategy)
+- **Framework**: Flutter (Dart)
+- **Targets**: Mobile (iOS/Android) & Web (Responsive)
+- **Architecture**: Clean Architecture + Riverpod
 
 ### Seguridad
 - **Cryptography**: 41.0.7 (AES-256-GCM)
@@ -372,6 +441,24 @@ InmuFacil_Project/
 │   └── services/
 │       ├── email_service.py # MFA tokens
 │       └── kyc_service.py   # DNI processing
+│   ├── routers/
+│   │   ├── users.py         # User & Admin routes
+│   │   ├── kyc.py           # KYC routes
+│   │   └── properties.py    # Properties routes (Core + Satellites)
+├── frontend/
+│   ├── lib/
+│   │   ├── main.dart        # Entry point
+│   │   ├── core/            # Config & Utils
+│   │   ├── data/            # Repositories & Data Sources
+│   │   ├── domain/          # Entities & Use Cases
+│   │   └── presentation/
+│   │       ├── screens/     # UI Screens (Home, NotFound, etc.)
+│   │       ├── widgets/     # Reusable Components
+│   │       └── providers/   # State Management (Riverpod)
+│   ├── assets/
+│   │   └── translations/    # i18n JSON files (9 languages)
+│   ├── web/                 # Web entrypoint
+│   └── pubspec.yaml         # Dependencies
 ├── tests/
 │   ├── test_auth.py         # Authentication tests
 │   └── test_filters.py      # Filter tests
@@ -381,6 +468,9 @@ InmuFacil_Project/
 │   └── pre-commit           # Secret detection
 ├── requirements.txt         # Dependencies
 ├── .gitignore              # Git exclusions
+├── .agent/
+│   └── rules/
+│       └── roles_definition.md  # Agent governance & protocols
 └── README.md               # This file
 ```
 

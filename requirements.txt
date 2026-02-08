@@ -13,6 +13,7 @@ pydantic[email]==2.5.0
 # ============================================================================
 sqlalchemy==2.0.23
 alembic==1.12.1
+psycopg2-binary==2.9.9  # PostgreSQL driver
 
 # ============================================================================
 # Security (@Shield)
@@ -45,6 +46,7 @@ mypy==1.7.1
 # ============================================================================
 # KYC - Modern Image Processing (@Jules)
 # ============================================================================
+pillow==10.1.0  # Image processing
 numpy>=2.1.0
 opencv-python-headless>=4.10.0.84
 
@@ -54,3 +56,8 @@ opencv-python-headless>=4.10.0.84
 easyocr>=1.7.0
 # EasyOCR for text detection and recognition
 # Note: First run will download Spanish language model (~500MB)
+
+# ============================================================================
+# Legal & Documents (@Architect)
+# ============================================================================
+reportlab>=4.0.0

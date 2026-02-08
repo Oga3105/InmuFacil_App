@@ -13,7 +13,7 @@ import os
 import tempfile
 from pathlib import Path
 from PIL import Image, ImageDraw
-from backend.services.kyc_service import redact_dni_image, redact_dni
+from backend.src.services.kyc_service import redact_dni_image, redact_dni
 import logging
 
 logger = logging.getLogger("inmufacil.test.redaction")

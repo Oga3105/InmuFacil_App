@@ -1,7 +1,38 @@
-build/
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.env
+# Python (De Copilot)
 .venv/
 __pycache__/
+
+# Environment (De Develop)
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Documentation
+docs/_build/
+site/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project specific
+*.pem
+*.key
+secrets/
+
+*.code-workspace
+uploads/
+
+# Stitch Design Files (temporary)
+frontend/design_inbox/
