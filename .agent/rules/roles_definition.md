@@ -38,6 +38,21 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   **Disparador:** Tocar `auth.py`, `config/`, o manejar datos de usuario.
 *   **Acción:** Escanear en busca de secretos. Asegurar el uso de `OAuth2PasswordBearer`. Verificar que la PII sea tratada como "Residuo Tóxico" (Encriptada en reposo).
 
+**🛑 COMPLIANCE IMPERATIVO (Non-Negotiable):**
+1.  **GDPR (Privacidad):** TODO dato personal (PII) debe ir cifrado (AES-256) o redactado. El "Derecho al Olvido" debe ser técnicamente viable (borrado seguro).
+2.  **OWASP Top 10:** Validación estricta de inputs (No SQLi/XSS). Gestión de sesiones segura.
+3.  **PCI DSS (Pagos):** Cifrado *at-rest* obligatorio. Audit logging de acceso a datos sensibles. NUNCA guardar CVV/PAN en claro.
+4.  **ISO 27001:** Controles de acceso (RBAC) implementados por defecto.
+5.  **MITRE ATT&CK:** Defensa proactiva. Monitorizar técnicas de ataque comunes (Brute Force, Phishing).
+
+**Validación de Código:**
+- Todo código debe pasar revisión de compliance antes de merge
+- Verificar cifrado de PII (GDPR)
+- Validar inputs contra OWASP Top 10
+- Confirmar audit logging para datos sensibles (PCI DSS)
+- Verificar RBAC en endpoints (ISO 27001)
+- Revisar defensa contra técnicas MITRE ATT&CK
+
 ## 🔭 @Watcher (Observabilidad y Rendimiento)
 **Rol:** El Monitor.
 **Responsabilidades:**
@@ -67,9 +82,11 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   Gestión de Dependencias (`requirements.txt`, `.venv`).
 *   Pipelines CI/CD (Hooks de pre-commit).
 *   Control de Variables de Entorno (`.env`).
+*   Revisión y fusión de PRs de Dependabot.
 **Protocolo:**
 *   **Disparador:** "Subir funcionalidad" o "Configurar entorno".
 *   **Acción:** `git status` -> `git add` -> `git commit`. Asegurar árbol de trabajo limpio.
+*   **Dependabot:** Revisar PRs de Dependabot periódicamente. Si los tests pasan (CI green), fusionar todas las PRs para mantener dependencias actualizadas.
 
 ---
 
@@ -161,3 +178,92 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   **Disparador:** "Implementar pantalla X" o "Convertir diseño a Flutter".
 *   **Acción:** Crear estructura de widgets, aplicar theming, conectar con providers. Validar con @FrontendProxy que cumple especificaciones de API.
 *   **Entregables:** Código Flutter limpio, responsive, siguiendo Material Design 3 o Cupertino según plataforma.
+
+**🌍 i18n STRICT POLICY (Non-Negotiable):**
+- **PROHIBIDO:** Hardcoded strings en widgets (`Text('Hola')`)
+- **OBLIGATORIO:** Usar `easy_localization` (`.tr()` method)
+- **Ejemplo:** `Text('auth.login_button').tr()`
+- **Validación:** Rechazar PRs con strings hardcodeados
+- **Referencia:** `frontend/I18N_GUIDELINES.md`
+
+---
+
+## ⚖️ PROTOCOLO DE GOBERNANZA GIT (AUTONOMÍA OBLIGATORIA)
+
+**Trigger:** Antes de cualquier comando `git checkout -b`, `git merge` o `gh pr create`.
+
+**REGLA DE ORO:**
+Los agentes deben detenerse y DEBATIR entre @DevOps y @Shield antes de alterar el repositorio. El usuario delega esta decisión para no micro-gestionar.
+
+### MATRIZ DE DECISIÓN (Debate Requerido)
+
+#### 1. ¿Feature o Fix?
+- **Nueva funcionalidad** → `feature/[nombre-descriptivo]`
+- **Arreglo de bug** → `fix/[nombre-bug]`
+- **Refactor sin cambios lógicos** → `chore/[nombre-tarea]`
+- **Documentación** → `docs/[nombre-doc]`
+
+#### 2. ¿PR o Directo?
+- **Si afecta a `develop` o `main`** → **PR OBLIGATORIA** (`gh pr create`)
+- **Si es sub-tarea experimental** → Commit directo permitido en rama `feature`
+- **Hotfix crítico** → PR express con aprobación rápida
+
+#### 3. ¿Cuándo fusionar?
+- ✅ **Condición 1:** Tests pasando (verde)
+- ✅ **Condición 2:** @Shield valida seguridad
+- ✅ **Condición 3:** Rama pusheada a remoto
+- ✅ **Método:** Usar siempre `git merge --no-ff` para preservar historia
+
+### POLÍTICA DE RAMAS REMOTAS
+
+**Para TFM (Trabajo Fin de Máster):**
+- ✅ **PRESERVAR** todas las ramas remotas como registro histórico
+- ✅ **ELIMINAR** solo ramas locales obsoletas
+- ✅ Mantener evidencia de desarrollo iterativo para evaluación académica
+
+### FLUJO DE TRABAJO ESTÁNDAR
+
+```bash
+# 1. Crear feature branch
+git checkout -b feature/nombre-tarea
+
+# 2. Desarrollo iterativo
+git add .
+git commit -m "feat: descripción del cambio"
+
+# 3. Push a remoto (OBLIGATORIO antes de merge)
+git push -u origin feature/nombre-tarea
+
+# 4. Abrir PR (si afecta develop/main)
+gh pr create --title "feat: Título" --body "Descripción"
+
+# 5. Merge (solo si tests verdes + @Shield OK)
+git checkout develop
+git merge --no-ff feature/nombre-tarea
+git push origin develop
+
+# 6. Limpieza local (preservar remoto)
+git branch -d feature/nombre-tarea
+```
+
+### CRITERIOS DE APROBACIÓN DE PR
+
+**@DevOps verifica:**
+- [ ] Rama existe en remoto
+- [ ] Commits atómicos y descriptivos
+- [ ] Sin conflictos con develop
+
+**@Shield verifica:**
+- [ ] Sin secretos hardcodeados
+- [ ] Sin vulnerabilidades evidentes
+- [ ] Manejo correcto de PII
+
+**@Jules verifica:**
+- [ ] Tests pasando
+- [ ] Cobertura adecuada
+- [ ] Sin regresiones
+
+**@Architect verifica:**
+- [ ] Arquitectura consistente
+- [ ] Sin deuda técnica innecesaria
+- [ ] Documentación actualizada

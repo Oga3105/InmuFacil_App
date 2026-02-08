@@ -1,7 +1,7 @@
 name: inmufacil_frontend
 description: InmuFácil - Plataforma P2P de Compraventa Inmobiliaria
 publish_to: 'none'
-version: 1.0.0+1
+version: 0.1.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -9,48 +9,74 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+   
   # State Management
   flutter_riverpod: ^2.5.1
-  
+  riverpod_annotation: ^2.3.5
+   
   # Networking
   dio: ^5.4.0
-  
+   
   # Routing
   go_router: ^13.0.0
-  
+   
   # Environment Config
   flutter_dotenv: ^5.1.0
-  
-  # Secure Storage (JWT tokens)
+   
+  # Secure Storage
   flutter_secure_storage: ^9.0.0
-  
+   
   # JSON Serialization
   json_annotation: ^4.8.1
-  
+   
   # Utilities
   equatable: ^2.0.5
   dartz: ^0.10.1
+   
+  # Internationalization (CRÍTICO: MANTENER)
+  easy_localization: ^3.0.3
+  intl: ^0.20.2
+   
+  # Maps Integration (CRÍTICO: MANTENER)
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  geocoding: ^2.1.1
+  geolocator: ^10.1.0
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  
-  # Code Generation
-  build_runner: ^2.4.7
-  json_serializable: ^6.7.1
-  
+   
   # Linting
   flutter_lints: ^3.0.1
+   
+  # Code Generation
+  build_runner: ^2.4.8
+  riverpod_generator: ^2.3.11
+  json_serializable: ^6.7.1
   
   # Testing
   mockito: ^5.4.4
 
 flutter:
   uses-material-design: true
-  
+   
   assets:
+    - assets/translations/
     - assets/images/
     - assets/icons/
-    - .env.development
-    - .env.production
+    - .env
+    # - .env.development
+    # - .env.production
+   
+  # fonts:
+  #   - family: Inter
+  #     fonts:
+  #       - asset: assets/fonts/Inter-Regular.ttf
+  #       - asset: assets/fonts/Inter-Medium.ttf
+  #         weight: 500
+  #       - asset: assets/fonts/Inter-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/Inter-Bold.ttf
+  #         weight: 700

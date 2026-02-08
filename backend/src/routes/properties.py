@@ -67,7 +67,7 @@ def verify_property_ownership(db: Session, property_id: int, user_id: int) -> Pr
 # Public Endpoints
 # ============================================================================
 
-@router.get("/", response_model=List[PropertyResponse])
+@router.get("", response_model=List[PropertyResponse])
 async def list_properties(
     skip: int = 0, 
     limit: int = 100, 

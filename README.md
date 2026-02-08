@@ -82,8 +82,24 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 - 🎯 **Hito 10:** Tasación (Siguiente Paso)
 
+- ✅ **Frontend:** Inicialización Flutter con Clean Architecture
+  - ✅ Estructura domain/data/presentation
+  - ✅ API client con interceptores JWT
+  - ✅ Tema Material Design 3
+  - ✅ Routing con go_router
+  - ✅ **Geocoding Integrado:** Nominatim API (Local First) + Mapa Reactivo
+  - ✅ **Página 404:** Diseño Isométrico, Segura e Internacionalizada (9 idiomas)
+  - ⏳ Implementación UI pendiente (@UIBuilder)
+
+- ✅ **DevOps:** Automatización GitHub (CodeQL, Dependabot, Templates)
+  - ✅ CodeQL para análisis de seguridad Python
+  - ✅ Dependabot (Python, Flutter, GitHub Actions)
+  - ✅ Templates de issues (bug, feature, vulnerabilidad)
+  - ✅ Template de Pull Request con checklists
+  - ✅ Documentación completa en español
+
 **Rama Activa:** `develop`  
-**Último Commit:** `410de18 - docs: update scratchpad with Missions 5-8 status and synchronized state`
+**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
 
 ---
 
@@ -128,11 +144,15 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 - ✅ **T1552 (Unsecured Credentials)**: Cifrado at-rest + vault
 - ✅ **T1078 (Valid Accounts)**: MFA por email
 
-### CI/CD Security
+### CI/CD Security & Automation
 - 🔍 **Pre-Commit Hooks**: Detección de secretos antes de commit
 - 📝 **Audit Logging**: Trazabilidad completa sin datos sensibles
 - 🚨 **Security Monitoring**: Alertas en tiempo real
 - 🧪 **Automated Testing**: Suite de tests de seguridad
+- 🤖 **CodeQL Scanning**: Análisis automático de vulnerabilidades con GitHub CodeQL
+- 🔐 **Dependabot**: Monitoreo y actualización automática de dependencias vulnerables
+- 📊 **PR Reviews**: Revisiones automáticas de código y detección de malas prácticas
+- 📝 **Issue Templates**: Plantillas estructuradas para bugs, features y vulnerabilidades
 
 ---
 
@@ -328,6 +348,51 @@ pytest tests/ --cov=backend --cov-report=html
 
 ---
 
+## 🤖 GitHub Automation
+
+InmuFácil incluye un completo sistema de automatización en GitHub para mejorar la calidad del código, seguridad y colaboración.
+
+### Características Implementadas
+
+#### 📊 PR Summaries & Code Review Automático
+- **Resúmenes automáticos** de cambios en cada Pull Request
+- **Análisis de código** con Flake8, Pylint y Bandit
+- **Detección de malas prácticas**: `print()` statements, código duplicado, vulnerabilidades
+- **Comentarios automáticos** en PRs con recomendaciones
+
+#### 🔍 Code Scanning con CodeQL
+- **Análisis continuo** de código Python
+- **Detección de vulnerabilidades** (SQL Injection, XSS, Command Injection, etc.)
+- **Escaneo automático** en push, PR y semanalmente
+- **Reportes en GitHub Security** para trazabilidad
+
+#### 🔐 Dependabot
+- **Monitoreo de dependencias** vulnerables (Python pip + GitHub Actions)
+- **PRs automáticos** con actualizaciones seguras
+- **Agrupación inteligente** por tipo (security, development, core framework)
+- **Alertas de seguridad** proactivas
+
+#### 📝 Issue & PR Templates
+- **Plantillas estructuradas** para Bug Reports, Feature Requests y Security Vulnerabilities
+- **PR Template** con checklist completo de revisión
+- **Discussion Templates** para ideas y preguntas
+- **Guías claras** para reportar problemas con pasos de reproducción
+
+### Documentación Completa
+
+Para más detalles sobre cómo usar y configurar estas características, consulta:
+
+📖 **[GitHub Automation Guide](.github/GITHUB_AUTOMATION.md)**
+
+### Activación Rápida
+
+1. **CodeQL**: Ve a Settings → Code security and analysis → Habilita Code scanning
+2. **Dependabot**: Ve a Settings → Code security and analysis → Habilita Dependabot alerts
+3. **Discussions**: Ve a Settings → Features → Habilita Discussions
+4. **Templates**: Se activan automáticamente al crear issues/PRs
+
+---
+
 ## 🔐 Características de Seguridad
 
 ### 1. Escudo Anti-Agencias 🛡️
@@ -380,6 +445,20 @@ InmuFacil_Project/
 │   │   ├── users.py         # User & Admin routes
 │   │   ├── kyc.py           # KYC routes
 │   │   └── properties.py    # Properties routes (Core + Satellites)
+├── frontend/
+│   ├── lib/
+│   │   ├── main.dart        # Entry point
+│   │   ├── core/            # Config & Utils
+│   │   ├── data/            # Repositories & Data Sources
+│   │   ├── domain/          # Entities & Use Cases
+│   │   └── presentation/
+│   │       ├── screens/     # UI Screens (Home, NotFound, etc.)
+│   │       ├── widgets/     # Reusable Components
+│   │       └── providers/   # State Management (Riverpod)
+│   ├── assets/
+│   │   └── translations/    # i18n JSON files (9 languages)
+│   ├── web/                 # Web entrypoint
+│   └── pubspec.yaml         # Dependencies
 ├── tests/
 │   ├── test_auth.py         # Authentication tests
 │   └── test_filters.py      # Filter tests
