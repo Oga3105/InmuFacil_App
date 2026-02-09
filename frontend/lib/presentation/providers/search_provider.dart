@@ -26,9 +26,10 @@ class SearchState {
   final bool isUsingFallbackLocation;
   final List<String>? lastSearchResultBbox; // [south, north, west, east] from Nominatim
   final Map<String, dynamic>? lastSearchResultGeoJson; // NEW: GeoJSON for real shape
+  final bool isSearchActive; // NEW: Track if search button has been pressed
   
-  // Spain center coordinates for initial wide view (shows entire country)
-  static const LatLng _spainCenter = LatLng(40.4, -3.7);
+  // Default view centered on Sevilla for MVP/Demo purposes
+  static const LatLng _spainCenter = LatLng(37.3891, -5.9845);
   
   const SearchState({
     this.propertyType = PropertyType.all,
@@ -42,6 +43,7 @@ class SearchState {
     this.isUsingFallbackLocation = false,
     this.lastSearchResultBbox,
     this.lastSearchResultGeoJson,
+    this.isSearchActive = false,
   });
   
   SearchState copyWith({
@@ -56,6 +58,7 @@ class SearchState {
     bool? isUsingFallbackLocation,
     List<String>? lastSearchResultBbox,
     Map<String, dynamic>? lastSearchResultGeoJson,
+    bool? isSearchActive,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -69,6 +72,7 @@ class SearchState {
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
       lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
       lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
+      isSearchActive: isSearchActive ?? this.isSearchActive,
     );
   }
 }
@@ -109,6 +113,10 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// Update property type filter
   void updatePropertyType(PropertyType type) {
     state = state.copyWith(propertyType: type);
+    // Don't auto-search on every change if we want strict "Search" button behavior,
+    // but usually instant feedback is better.
+    // User requested "List appears when search is pressed".
+    // So maybe we keep auto-update for MAP, but LIST visibility depends on isSearchActive.
     _loadProperties();
   }
   
@@ -175,7 +183,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
   }
   
   /// Execute search with current filters
+  /// This activates the "Results Mode"
   void search() {
+    state = state.copyWith(isSearchActive: true);
     _loadProperties();
   }
   
@@ -278,6 +288,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
             isLoading: false,
             lastSearchResultBbox: bbox,
             lastSearchResultGeoJson: geoJson, // NEW: Store GeoJSON
+            isSearchActive: true, // AUTO-ACTIVATE Search when location found
           );
           
           debugPrint("✅ Location found: $displayName");
@@ -338,9 +349,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(error: null);
   }
   
-  /// Reset all filters
+  /// Reset all filters and view mode
   void reset() {
-    state = const SearchState();
+    state = const SearchState(isSearchActive: false); // Reset to Landing View
     initLocation();
   }
 }

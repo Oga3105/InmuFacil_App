@@ -116,14 +116,29 @@ class _Header extends StatelessWidget {
     return Row(
       mainAxisAlignment: isDesktop ? MainAxisAlignment.start : MainAxisAlignment.center,
       children: [
-        Icon(Icons.hexagon_outlined, color: primaryColor, size: 40),
+        Image.asset(
+          'assets/images/logo_inmufacil.png',
+          height: 60,
+          fit: BoxFit.contain,
+        ),
         const SizedBox(width: 12),
-        Text(
-          'app.name'.tr(),
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            letterSpacing: -1.0,
+        Text.rich(
+          TextSpan(
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -1.0,
+            ),
+            children: [
+              const TextSpan(
+                text: 'Inmu',
+                style: TextStyle(color: Color(0xFF2563EB)), // Blue
+              ),
+              const TextSpan(
+                text: 'Fácil',
+                style: TextStyle(color: Color(0xFF16A34A)), // Green
+              ),
+            ],
           ),
         ),
         if (isDesktop) ...[

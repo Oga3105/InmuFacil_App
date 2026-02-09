@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
+import 'package:inmufacil_frontend/presentation/widgets/property/property_card.dart'; // NEW IMPORT
+import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT (Fix for Property not found)
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 
 /// Home/Landing Screen with Google Maps Integration
@@ -98,11 +100,17 @@ class _MapSection extends StatelessWidget {
 }
 
 /// Search panel with hero section and search form
-class _SearchPanel extends StatelessWidget {
+class _SearchPanel extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final searchState = ref.watch(searchProvider);
     
+    // TOGGLE VIEW: Landing vs Results
+    if (searchState.isSearchActive) {
+      return _PropertyResultsView();
+    }
+
     return Container(
       color: theme.colorScheme.surface,
       child: SafeArea(
@@ -114,16 +122,27 @@ class _SearchPanel extends StatelessWidget {
               // Logo
               Row(
                 children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    color: theme.colorScheme.primary,
-                    size: 32,
+                  Image.asset(
+                    'assets/images/logo_inmufacil.png',
+                    height: 50,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'app.name'.tr(),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                  Text.rich(
+                    TextSpan(
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                      children: [
+                        const TextSpan(
+                          text: 'Inmu',
+                          style: TextStyle(color: Color(0xFF2563EB)), // Blue
+                        ),
+                        const TextSpan(
+                          text: 'Fácil',
+                          style: TextStyle(color: Color(0xFF16A34A)), // Green
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -249,6 +268,111 @@ class _SearchPanel extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Results View: Shows list of properties with header and filters
+class _PropertyResultsView extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchState = ref.watch(searchProvider);
+    final theme = Theme.of(context);
+    
+    return Container(
+      color: theme.colorScheme.surface,
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => ref.read(searchProvider.notifier).reset(),
+                  tooltip: 'Volver a búsqueda',
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        searchState.location.isEmpty ? 'Todas las propiedades' : searchState.location,
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${searchState.filteredProperties.length} resultados',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const Divider(height: 1),
+          
+          // List
+          Expanded(
+            child: searchState.isLoading 
+                ? const Center(child: CircularProgressIndicator())
+                : searchState.filteredProperties.isEmpty 
+                    ? _buildEmptyState(context)
+                    : _PropertyListView(properties: searchState.filteredProperties),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 64, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          Text(
+            'No se encontraron propiedades',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: () {}, // Filters are in the header/modal in future
+            child: const Text('Intenta ajustar los filtros'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Scrollable list of properties
+class _PropertyListView extends StatelessWidget {
+  final List<Property> properties;
+  
+  const _PropertyListView({required this.properties});
+  
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(24),
+      itemCount: properties.length,
+      itemBuilder: (context, index) {
+        final property = properties[index];
+        return PropertyCard(
+          property: property,
+          onTap: () {
+             // Navigate to details or show modal
+             // For now, same behavior as map marker: show details
+             // But usually lists navigate to full page
+             // We'll mimic map behavior or show modal for consistency
+          },
+        );
+      },
     );
   }
 }

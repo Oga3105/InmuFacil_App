@@ -26,6 +26,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   // Sevilla coordinates for geolocation fallback
   static const LatLng _sevillaFallback = LatLng(37.3891, -5.9845);
   
+  // Track zoom level for marker adaptivity
+  double _currentZoom = 13.0; // Default matching initial logic
+
   @override
   void dispose() {
     _mapController.dispose();
@@ -48,6 +51,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
             : 12.0; 
         
         _mapController.move(searchState.mapCenter!, zoom);
+        if (_currentZoom != zoom) {
+             setState(() => _currentZoom = zoom);
+        }
       }
       
       // 2. Handle City Boundary (GeoJSON > Bbox)
@@ -118,6 +124,15 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 minZoom: 5,
                 maxZoom: 18,
                 
+                // TRACK ZOOM LEVEL
+                onPositionChanged: (position, hasGesture) {
+                  if (position.zoom != null && position.zoom != _currentZoom) {
+                    setState(() {
+                      _currentZoom = position.zoom!;
+                    });
+                  }
+                },
+                
                 // INTERACTION: Disable panning/zooming when drawing
                 interactionOptions: InteractionOptions(
                    flags: mapState.isDrawingMode 
@@ -177,15 +192,15 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 // Only show start point? No, cleaner without.
                 
                 // 4. Property Markers (Hide when drawing)
-                if (searchState.filteredProperties.isNotEmpty && !mapState.isDrawingMode)
-                  MarkerLayer(
-                    markers: _buildMarkers(searchState.filteredProperties),
-                  ),
+                // Use mapPropertiesProvider as primary source, falling back to searchState if needed (or replacing entirely)
+                if (!mapState.isDrawingMode)
+                  _buildPropertyMarkers(ref),
               ],
             ),
           ),
           
           // --- UI OVERLAYS ---
+          // ... (Rest of UI overlays remain unchanged) ...
           
           // A. Drawing Instructions Banner
           if (mapState.isDrawingMode)
@@ -324,19 +339,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     _mapController.move(searchState.mapCenter ?? _sevillaFallback, 13.0);
   }
 
-  List<Marker> _buildMarkers(List<Property> properties) {
-    return properties.map((property) {
-      return Marker(
-        point: property.location,
-        width: 80,
-        height: 40,
-        child: GestureDetector(
-          onTap: () => _showPropertyDetails(property),
-          child: _PriceMarker(price: property.formattedPrice),
-        ),
-      );
-    }).toList();
-  }
+  // OLD _buildMarkers removed, logic now in _buildPropertyMarkers
   
   void _showPropertyDetails(Property property) {
     // Implementation remains same as before...
@@ -365,6 +368,34 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     );
   }
   
+  Widget _buildPropertyMarkers(WidgetRef ref) {
+    final searchState = ref.watch(searchProvider);
+    final properties = searchState.filteredProperties;
+    
+    if (properties.isEmpty) return const SizedBox.shrink();
+    
+    // Zoom Logic: 
+    // < 13: Show simple GPS Pin
+    // >= 13: Show Price Label
+    final bool showPrice = _currentZoom >= 13.0;
+
+    return MarkerLayer(
+      markers: properties.map((property) {
+        return Marker(
+          point: property.location,
+          width: showPrice ? 80 : 40, // Adjust width based on type
+          height: 40,
+          child: GestureDetector(
+            onTap: () => _showPropertyDetails(property),
+            child: showPrice 
+                ? _CompactPriceMarker(price: property.formattedPrice)
+                : const _GpsPinMarker(),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   /// Helper to convert screen coordinates to LatLng and add to drawing
   void _addPointFromEvent(Offset localPosition) {
     // Convert screen point to LatLng using the map camera
@@ -411,21 +442,63 @@ class _MapToolButton extends StatelessWidget {
   }
 }
 
-class _PriceMarker extends StatelessWidget {
-  final String price;
-  const _PriceMarker({required this.price});
+/// Simple GPS Pin for Low Zoom
+class _GpsPinMarker extends StatelessWidget {
+  const _GpsPinMarker();
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF135BEC),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: const [BoxShadow(blurRadius: 2, color: Colors.black26)],
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        price,
-        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+    return const Icon(
+      Icons.location_on,
+      color: Color(0xFF2563EB), // Primary Blue
+      size: 40,
+      shadows: [
+        Shadow(
+          blurRadius: 4,
+          color: Colors.black26,
+          offset: Offset(0, 2),
+        ),
+      ],
+    );
+  }
+}
+
+/// Compact Price Label for High Zoom
+class _CompactPriceMarker extends StatelessWidget {
+  final String price;
+  const _CompactPriceMarker({required this.price});
+  
+  @override
+  Widget build(BuildContext context) {
+    // Simplify price string "€350K" -> "350K" to save space? 
+    // Or keep formatted but use smaller font.
+    // Let's keep formatted property.formattedPrice e.g. "€350K"
+    
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2563EB), // Primary Blue
+          borderRadius: BorderRadius.circular(12), // Rounded capsule
+          boxShadow: const [
+            BoxShadow(
+              blurRadius: 2, 
+              color: Colors.black26,
+              offset: Offset(0, 1)
+            )
+          ],
+        ),
+        child: Text(
+          price,
+          style: const TextStyle(
+            color: Colors.white, 
+            fontSize: 11, // Smaller font
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
     );
   }
