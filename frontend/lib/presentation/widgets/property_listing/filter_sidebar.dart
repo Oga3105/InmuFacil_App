@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/search_provider.dart';
 
-class FilterSidebar extends StatelessWidget {
+class FilterSidebar extends ConsumerWidget {
   const FilterSidebar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final searchState = ref.watch(searchProvider);
     const navyColor = Color(0xFF0F172A);
     const primaryBlue = Color(0xFF2563EB); // User Brand Blue
 
@@ -37,7 +41,7 @@ class FilterSidebar extends StatelessWidget {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () => context.push('/404'),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(0, 0),
@@ -68,13 +72,13 @@ class FilterSidebar extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildRoomButton('1', false),
+                    _buildRoomButton(context, ref, '1', 1, searchState.minBedrooms == 1),
                     const SizedBox(width: 8),
-                    _buildRoomButton('2', false),
+                    _buildRoomButton(context, ref, '2', 2, searchState.minBedrooms == 2),
                     const SizedBox(width: 8),
-                    _buildRoomButton('3+', true), // Selected example
+                    _buildRoomButton(context, ref, '3+', 3, searchState.minBedrooms == 3),
                     const SizedBox(width: 8),
-                    _buildRoomButton('4+', false),
+                    _buildRoomButton(context, ref, '4+', 4, searchState.minBedrooms == 4),
                   ],
                 ),
 
@@ -82,20 +86,20 @@ class FilterSidebar extends StatelessWidget {
 
                 // Property Type
                 _buildSectionTitle('Tipo de Vivienda'),
-                const SizedBox(height: 8),
-                _buildCheckbox('Piso', true),
-                _buildCheckbox('Ático', false),
-                _buildCheckbox('Dúplex', false),
+                const SizedBox(width: 8),
+                _buildCheckbox(context, ref, 'Piso', false, isDeadLink: true),
+                _buildCheckbox(context, ref, 'Ático', false, isDeadLink: true),
+                _buildCheckbox(context, ref, 'Dúplex', false, isDeadLink: true),
 
                 const SizedBox(height: 24),
 
                 // Extras
                 _buildSectionTitle('Extras'),
                 const SizedBox(height: 8),
-                _buildCheckbox('Terraza', false),
-                _buildCheckbox('Ascensor', false),
-                _buildCheckbox('Garaje', false),
-                _buildCheckbox('Piscina', false),
+                _buildCheckbox(context, ref, 'Terraza', searchState.selectedExtras.contains('Terraza')),
+                _buildCheckbox(context, ref, 'Ascensor', false, isDeadLink: true),
+                _buildCheckbox(context, ref, 'Garaje', searchState.selectedExtras.contains('Garaje')),
+                _buildCheckbox(context, ref, 'Piscina', searchState.selectedExtras.contains('Piscina')),
 
                 const SizedBox(height: 24),
                 const Divider(),
@@ -113,7 +117,7 @@ class FilterSidebar extends StatelessWidget {
                     const Spacer(),
                     Switch(
                       value: false, 
-                      onChanged: (val) {},
+                      onChanged: (val) => context.push('/404'),
                       activeColor: const Color(0xFF16A34A),
                     ),
                   ],
@@ -152,7 +156,7 @@ class FilterSidebar extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 InkWell(
-                  onTap: () {},
+                  onTap: () => context.push('/404'),
                   child: Row(
                     children: [
                       Text(
@@ -211,30 +215,33 @@ class FilterSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildRoomButton(String label, bool isSelected) {
-    return Container(
-      width: 36,
-      height: 36,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade200
+  Widget _buildRoomButton(BuildContext context, WidgetRef ref, String label, int value, bool isSelected) {
+    return InkWell(
+      onTap: () => ref.read(searchProvider.notifier).updateMinBedrooms(value),
+      child: Container(
+        width: 36,
+        height: 36,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade200
+          ),
         ),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          color: isSelected ? Colors.white : Colors.grey.shade700,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.grey.shade700,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCheckbox(String label, bool isChecked) {
+  Widget _buildCheckbox(BuildContext context, WidgetRef ref, String label, bool isChecked, {bool isDeadLink = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -244,7 +251,9 @@ class FilterSidebar extends StatelessWidget {
             height: 20,
             child: Checkbox(
               value: isChecked,
-              onChanged: (val) {},
+              onChanged: isDeadLink 
+                ? (val) => context.push('/404') 
+                : (val) => ref.read(searchProvider.notifier).toggleExtra(label),
               activeColor: const Color(0xFF2563EB),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               side: BorderSide(color: Colors.grey.shade300, width: 1.5),

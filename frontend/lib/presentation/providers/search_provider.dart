@@ -31,6 +31,11 @@ class SearchState {
   final int minBedrooms; // NEW: Filter
   final List<String> selectedExtras; // NEW: Filter
   
+  // Pagination & Sorting
+  final int currentPage;
+  final int itemsPerPage;
+  final SortOption sortBy;
+  
   // Default view centered on Sevilla for MVP/Demo purposes
   static const LatLng _spainCenter = LatLng(37.3891, -5.9845);
   
@@ -49,6 +54,9 @@ class SearchState {
     this.isSearchActive = false,
     this.minBedrooms = 0,
     this.selectedExtras = const [],
+    this.currentPage = 1,
+    this.itemsPerPage = 5,
+    this.sortBy = SortOption.relevance,
   });
   
   SearchState copyWith({
@@ -66,6 +74,9 @@ class SearchState {
     bool? isSearchActive,
     int? minBedrooms,
     List<String>? selectedExtras,
+    int? currentPage,
+    int? itemsPerPage,
+    SortOption? sortBy,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -82,8 +93,19 @@ class SearchState {
       isSearchActive: isSearchActive ?? this.isSearchActive,
       minBedrooms: minBedrooms ?? this.minBedrooms,
       selectedExtras: selectedExtras ?? this.selectedExtras,
+      currentPage: currentPage ?? this.currentPage,
+      itemsPerPage: itemsPerPage ?? this.itemsPerPage,
+      sortBy: sortBy ?? this.sortBy,
     );
   }
+}
+
+/// Sorting options for property listing
+enum SortOption {
+  relevance,
+  priceLowToHigh,
+  priceHighToLow,
+  newest,
 }
 
 /// Search provider for managing property search state
@@ -140,6 +162,55 @@ class SearchNotifier extends StateNotifier<SearchState> {
     }
     state = state.copyWith(selectedExtras: currentExtras);
     _loadProperties();
+  }
+  
+  /// Set current page for pagination
+  void setPage(int page) {
+    state = state.copyWith(currentPage: page);
+  }
+  
+  /// Set sorting option and re-sort properties
+  void setSortBy(SortOption option) {
+    state = state.copyWith(sortBy: option, currentPage: 1); // Reset to page 1 on sort change
+    _applySorting();
+  }
+  
+  /// Get paginated slice of filtered properties
+  List<Property> getPaginatedProperties() {
+    final startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    final endIndex = startIndex + state.itemsPerPage;
+    
+    if (startIndex >= state.filteredProperties.length) {
+      return [];
+    }
+    
+    return state.filteredProperties.sublist(
+      startIndex,
+      endIndex > state.filteredProperties.length ? state.filteredProperties.length : endIndex,
+    );
+  }
+  
+  /// Apply sorting to current filtered properties
+  void _applySorting() {
+    final sorted = List<Property>.from(state.filteredProperties);
+    
+    switch (state.sortBy) {
+      case SortOption.priceLowToHigh:
+        sorted.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SortOption.priceHighToLow:
+        sorted.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case SortOption.newest:
+        // Assuming properties are already in newest-first order from API
+        // If not, would need a createdAt field
+        break;
+      case SortOption.relevance:
+        // Keep original order
+        break;
+    }
+    
+    state = state.copyWith(filteredProperties: sorted);
   }
   
   /// Update location and geocode to coordinates
@@ -403,7 +474,11 @@ class SearchNotifier extends StateNotifier<SearchState> {
           isLoading: false,
           error: null,
           filteredProperties: results,
+          currentPage: 1, // Reset to page 1 when filters change
         );
+        
+        // Apply current sorting
+        _applySorting();
       },
     );
   }

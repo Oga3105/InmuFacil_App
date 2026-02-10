@@ -11,7 +11,7 @@ class PropertyListingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchProvider);
-    final properties = searchState.filteredProperties;
+    final paginatedProperties = ref.read(searchProvider.notifier).getPaginatedProperties();
     const navyColor = Color(0xFF0F172A);
     const bgLight = Color(0xFFF8FAFC);
 
@@ -98,7 +98,7 @@ class PropertyListingScreen extends ConsumerWidget {
             child: Column(
               children: [
                 // Breadcrumbs & Title Row
-                _buildHeaderDetails(context, properties.length, searchState),
+                _buildHeaderDetails(context, searchState.filteredProperties.length, searchState, ref),
                 
                 const SizedBox(height: 32),
 
@@ -116,14 +116,14 @@ class PropertyListingScreen extends ConsumerWidget {
                         children: [
                           if (searchState.isLoading)
                              const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()))
-                          else if (properties.isEmpty)
+                          else if (paginatedProperties.isEmpty)
                              _buildEmptyState()
                           else
-                            ...properties.map((p) => PropertyListingItem(property: p)),
+                            ...paginatedProperties.map((p) => PropertyListingItem(property: p)),
                           
                           // Pagination
                           const SizedBox(height: 40),
-                          _buildPagination(),
+                          _buildPagination(ref, searchState),
                         ],
                       ),
                     ),
@@ -143,7 +143,7 @@ class PropertyListingScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderDetails(BuildContext context, int count, SearchState searchState) {
+  Widget _buildHeaderDetails(BuildContext context, int count, SearchState searchState, WidgetRef ref) {
     final theme = Theme.of(context);
     final navyColor = theme.colorScheme.onSurface;
 
@@ -279,28 +279,55 @@ class PropertyListingScreen extends ConsumerWidget {
      );
   }
 
-  Widget _buildPagination() {
+  Widget _buildPagination(WidgetRef ref, SearchState searchState) {
+    final totalProperties = searchState.filteredProperties.length;
+    final totalPages = (totalProperties / searchState.itemsPerPage).ceil();
+    final currentPage = searchState.currentPage;
+    
+    if (totalPages <= 1) return const SizedBox.shrink();
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildPageBtn(Icons.chevron_left, null, false),
+        // Previous button
+        InkWell(
+          onTap: currentPage > 1 ? () => ref.read(searchProvider.notifier).setPage(currentPage - 1) : null,
+          child: _buildPageBtn(Icons.chevron_left, null, false, enabled: currentPage > 1),
+        ),
         const SizedBox(width: 8),
-        _buildPageBtn(null, '1', true),
+        
+        // Page numbers
+        ...List.generate(totalPages, (index) {
+          final pageNum = index + 1;
+          // Show first 3, last 1, and current +/- 1
+          if (pageNum <= 3 || pageNum == totalPages || (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: InkWell(
+                onTap: () => ref.read(searchProvider.notifier).setPage(pageNum),
+                child: _buildPageBtn(null, '$pageNum', pageNum == currentPage),
+              ),
+            );
+          } else if (pageNum == 4 && currentPage > 5) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4),
+              child: Text('...', style: TextStyle(color: Colors.grey)),
+            );
+          }
+          return const SizedBox.shrink();
+        }),
+        
         const SizedBox(width: 8),
-        _buildPageBtn(null, '2', false),
-        const SizedBox(width: 8),
-        _buildPageBtn(null, '3', false),
-        const SizedBox(width: 8),
-        const Text('...', style: TextStyle(color: Colors.grey)),
-        const SizedBox(width: 8),
-        _buildPageBtn(null, '12', false),
-        const SizedBox(width: 8),
-        _buildPageBtn(Icons.chevron_right, null, false),
+        // Next button
+        InkWell(
+          onTap: currentPage < totalPages ? () => ref.read(searchProvider.notifier).setPage(currentPage + 1) : null,
+          child: _buildPageBtn(Icons.chevron_right, null, false, enabled: currentPage < totalPages),
+        ),
       ],
     );
   }
 
-  Widget _buildPageBtn(IconData? icon, String? text, bool isActive) {
+  Widget _buildPageBtn(IconData? icon, String? text, bool isActive, {bool enabled = true}) {
     const primaryBlue = Color(0xFF2563EB);
     return Container(
       width: 40,
@@ -312,7 +339,7 @@ class PropertyListingScreen extends ConsumerWidget {
         border: isActive ? null : Border.all(color: Colors.grey.shade200),
       ),
       child: icon != null 
-        ? Icon(icon, color: Colors.grey.shade400, size: 20)
+        ? Icon(icon, color: enabled ? Colors.grey.shade600 : Colors.grey.shade300, size: 20)
         : Text(
             text!, 
             style: TextStyle(
@@ -320,6 +347,44 @@ class PropertyListingScreen extends ConsumerWidget {
               color: isActive ? Colors.white : Colors.grey.shade600
             )
           ),
+    );
+  }
+  
+  Widget _buildSortingDropdown(BuildContext context, SearchState searchState, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final navyColor = theme.colorScheme.onSurface;
+    
+    final sortOptions = {
+      SortOption.relevance: 'Relevancia',
+      SortOption.priceLowToHigh: 'Precio: Menor a Mayor',
+      SortOption.priceHighToLow: 'Precio: Mayor a Menor',
+      SortOption.newest: 'Más recientes',
+    };
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: DropdownButton<SortOption>(
+        value: searchState.sortBy,
+        underline: const SizedBox.shrink(),
+        icon: Icon(Icons.expand_more, color: Colors.grey.shade400),
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
+        items: sortOptions.entries.map((entry) {
+          return DropdownMenuItem(
+            value: entry.key,
+            child: Text('Ordenar: ${entry.value}'),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value != null) {
+            ref.read(searchProvider.notifier).setSortBy(value);
+          }
+        },
+      ),
     );
   }
   
