@@ -1,6 +1,6 @@
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_map/flutter_map.dart'; // Required for LatLngBounds
 
 /// State for Map interactions (Drawing, Zoning)
 class MapState {
@@ -8,12 +8,14 @@ class MapState {
   final List<LatLng> currentDrawingPoints; // Points being drawn right now
   final List<LatLng> currentZonePolygon;   // Completed polygon (Search Filter)
   final List<LatLng> cityBoundaryPolygon;  // Visual boundary from Nominatim (e.g. Madrid)
+  final LatLngBounds? visibleBounds;       // Current Map Viewport
   
   const MapState({
     this.isDrawingMode = false,
     this.currentDrawingPoints = const [],
     this.currentZonePolygon = const [],
     this.cityBoundaryPolygon = const [],
+    this.visibleBounds,
   });
   
   MapState copyWith({
@@ -21,12 +23,14 @@ class MapState {
     List<LatLng>? currentDrawingPoints,
     List<LatLng>? currentZonePolygon,
     List<LatLng>? cityBoundaryPolygon,
+    LatLngBounds? visibleBounds,
   }) {
     return MapState(
       isDrawingMode: isDrawingMode ?? this.isDrawingMode,
       currentDrawingPoints: currentDrawingPoints ?? this.currentDrawingPoints,
       currentZonePolygon: currentZonePolygon ?? this.currentZonePolygon,
       cityBoundaryPolygon: cityBoundaryPolygon ?? this.cityBoundaryPolygon,
+      visibleBounds: visibleBounds ?? this.visibleBounds,
     );
   }
 }
@@ -34,6 +38,11 @@ class MapState {
 class MapStateNotifier extends StateNotifier<MapState> {
   MapStateNotifier() : super(const MapState());
   
+  /// Set visible bounds (Viewport)
+  void setVisibleBounds(LatLngBounds bounds) {
+    state = state.copyWith(visibleBounds: bounds);
+  }
+
   /// Toggle drawing mode
   void toggleDrawingMode() {
     state = state.copyWith(

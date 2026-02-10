@@ -25,7 +25,10 @@ class Property {
     this.bathrooms = 0,
     this.squareMeters = 0,
     this.imageUrl,
+    this.features = const [],
   });
+
+  final List<String> features;
   
   /// Format price as currency string
   String get formattedPrice {

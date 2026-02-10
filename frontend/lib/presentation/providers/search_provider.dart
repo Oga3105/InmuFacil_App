@@ -12,6 +12,7 @@ import 'package:inmufacil_frontend/domain/repositories/property_repository.dart'
 import 'package:inmufacil_frontend/data/repositories/property_repository_impl.dart';
 import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
+import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
 
 /// Search state for property filtering
 class SearchState {
@@ -27,6 +28,8 @@ class SearchState {
   final List<String>? lastSearchResultBbox; // [south, north, west, east] from Nominatim
   final Map<String, dynamic>? lastSearchResultGeoJson; // NEW: GeoJSON for real shape
   final bool isSearchActive; // NEW: Track if search button has been pressed
+  final int minBedrooms; // NEW: Filter
+  final List<String> selectedExtras; // NEW: Filter
   
   // Default view centered on Sevilla for MVP/Demo purposes
   static const LatLng _spainCenter = LatLng(37.3891, -5.9845);
@@ -44,6 +47,8 @@ class SearchState {
     this.lastSearchResultBbox,
     this.lastSearchResultGeoJson,
     this.isSearchActive = false,
+    this.minBedrooms = 0,
+    this.selectedExtras = const [],
   });
   
   SearchState copyWith({
@@ -59,6 +64,8 @@ class SearchState {
     List<String>? lastSearchResultBbox,
     Map<String, dynamic>? lastSearchResultGeoJson,
     bool? isSearchActive,
+    int? minBedrooms,
+    List<String>? selectedExtras,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -73,6 +80,8 @@ class SearchState {
       lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
       lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
       isSearchActive: isSearchActive ?? this.isSearchActive,
+      minBedrooms: minBedrooms ?? this.minBedrooms,
+      selectedExtras: selectedExtras ?? this.selectedExtras,
     );
   }
 }
@@ -93,7 +102,6 @@ class SearchNotifier extends StateNotifier<SearchState> {
     super.dispose();
   }
   
-  
   /// Initialize user location (or fallback to Sevilla)
   Future<void> initLocation() async {
     state = state.copyWith(isLoading: true);
@@ -113,10 +121,24 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// Update property type filter
   void updatePropertyType(PropertyType type) {
     state = state.copyWith(propertyType: type);
-    // Don't auto-search on every change if we want strict "Search" button behavior,
-    // but usually instant feedback is better.
-    // User requested "List appears when search is pressed".
-    // So maybe we keep auto-update for MAP, but LIST visibility depends on isSearchActive.
+    _loadProperties();
+  }
+
+  /// Update min bedrooms filter
+  void updateMinBedrooms(int bedrooms) {
+    state = state.copyWith(minBedrooms: bedrooms);
+    _loadProperties();
+  }
+
+  /// Update extras filter
+  void toggleExtra(String extra) {
+    final currentExtras = List<String>.from(state.selectedExtras);
+    if (currentExtras.contains(extra)) {
+      currentExtras.remove(extra);
+    } else {
+      currentExtras.add(extra);
+    }
+    state = state.copyWith(selectedExtras: currentExtras);
     _loadProperties();
   }
   
@@ -231,10 +253,10 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(isLoading: true, error: null);
       
       try {
-        // STEP 1: Primary attempt - Search only in Spain
-        // Added polygon_geojson=1 to get the real shape of the city
+        // STEP 1: Primary attempt - Search only in Spain with MULTIPLE results
+        // fetching 5 results to filter the best match (City vs Province)
         final urlSpain = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1'
+          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=5&countrycodes=es&polygon_geojson=1&addressdetails=1'
         );
         
         var response = await http.get(urlSpain, headers: {
@@ -248,7 +270,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
           debugPrint("📍 Not found in Spain. Searching globally...");
           
           final urlGlobal = Uri.parse(
-            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1'
+            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=5&polygon_geojson=1&addressdetails=1'
           );
           
           response = await http.get(urlGlobal, headers: {
@@ -258,9 +280,26 @@ class SearchNotifier extends StateNotifier<SearchState> {
           data = json.decode(response.body);
         }
         
-        // STEP 3: Final Processing
+        // STEP 3: Final Processing - INTELLIGENT SELECTION
         if (data is List && data.isNotEmpty) {
-          final item = data[0];
+          // Default to the first result
+          var item = data[0];
+          
+          // Try to find a specific CITY/TOWN/MUNICIPALITY result
+          // This fixes the issue where "Sevilla" returns the Province (huge area) first
+          final preferredTypes = ['city', 'town', 'municipality', 'village'];
+          
+          final bestMatch = data.firstWhere(
+            (element) => preferredTypes.contains(element['addresstype']),
+            orElse: () => null,
+          );
+          
+          if (bestMatch != null) {
+            debugPrint("🎯 Found preferred match: ${bestMatch['addresstype']} - ${bestMatch['display_name']}");
+            item = bestMatch;
+          } else {
+             debugPrint("ℹ️ Using default match: ${item['type']} - ${item['display_name']}");
+          }
           
           // ROBUST PARSING: Handle potential nulls or types safely
           final lat = double.tryParse(item['lat'].toString()) ?? 0.0;
@@ -335,10 +374,35 @@ class SearchNotifier extends StateNotifier<SearchState> {
         );
       },
       (properties) {
+        // Apply Client-Side Filtering for fields not supported by API yet
+        // Apply Client-Side Filtering
+        
+        // 1. Filter by Bedrooms
+        var results = properties.where((p) => p.bedrooms >= state.minBedrooms).toList();
+        
+        // 2. Filter by Extras
+        if (state.selectedExtras.isNotEmpty) {
+          results = results.where((p) {
+            for (final extra in state.selectedExtras) {
+              if (extra == 'Piscina') {
+                if (!p.features.contains('pool')) return false;
+              } else if (extra == 'Terraza') {
+                if (!p.features.contains('terrace')) return false;
+              } else if (extra == 'Garaje') {
+                final text = '${p.title} ${p.address}'.toLowerCase(); 
+                if (!text.contains('garaje') && !text.contains('parking') && !text.contains('plaza')) return false;
+              } else if (extra == 'Jardín') {
+                 if (!p.features.contains('garden')) return false;
+              }
+            }
+            return true;
+          }).toList();
+        }
+
         state = state.copyWith(
           isLoading: false,
           error: null,
-          filteredProperties: properties, // Can be empty list (estado cero)
+          filteredProperties: results,
         );
       },
     );
@@ -378,3 +442,42 @@ final searchProvider = StateNotifierProvider<SearchNotifier, SearchState>((ref) 
   final locationService = ref.watch(locationServiceProvider);
   return SearchNotifier(repository, locationService);
 });
+
+/// Provider for dynamic map filtering (Polygon vs Viewport)
+final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
+  final searchState = ref.watch(searchProvider);
+  final mapState = ref.watch(mapStateProvider);
+  
+  final allFiltered = searchState.filteredProperties;
+  
+  // 1. Polygon Mode (Priority)
+  if (mapState.currentZonePolygon.isNotEmpty) {
+    if (mapState.currentZonePolygon.length < 3) return []; // Invalid polygon
+    return allFiltered.where((p) => _isPointInPolygon(p.location, mapState.currentZonePolygon)).toList();
+  }
+  
+  // 2. Viewport Mode
+  if (mapState.visibleBounds != null) {
+    return allFiltered.where((p) => mapState.visibleBounds!.contains(p.location)).toList();
+  }
+  
+  // Fallback (e.g. map not initialized yet), return all or none?
+  // If map is loading, maybe return all.
+  return allFiltered;
+});
+
+/// Ray Casting algorithm to check if point is in polygon
+bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
+  int intersectCount = 0;
+  for (int i = 0; i < polygon.length; i++) {
+    final j = (i + 1) % polygon.length;
+    final vert1 = polygon[i];
+    final vert2 = polygon[j];
+    
+    if ((vert1.latitude > point.latitude) != (vert2.latitude > point.latitude) &&
+        (point.longitude < (vert2.longitude - vert1.longitude) * (point.latitude - vert1.latitude) / (vert2.latitude - vert1.latitude) + vert1.longitude)) {
+      intersectCount++;
+    }
+  }
+  return (intersectCount % 2) == 1;
+}

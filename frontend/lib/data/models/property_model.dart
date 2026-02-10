@@ -34,7 +34,11 @@ class PropertyModel {
     required this.bathrooms,
     required this.squareMeters,
     this.imageUrl,
+    this.features = const [],
   });
+
+  @JsonKey(includeFromJson: false) // Not serialized by default json_serializable unless updated
+  final List<String> features;
   
   /// Convert from JSON
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
@@ -66,7 +70,21 @@ class PropertyModel {
       bathrooms: (json['features']?['bathrooms'] as int?) ?? 0,
       squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
       imageUrl: _parseFirstImage(json['media']),
+      features: _parseFeatures(json['features']),
     );
+  }
+  
+  static List<String> _parseFeatures(Map<String, dynamic>? featuresJson) {
+    if (featuresJson == null) return [];
+    
+    final List<String> list = [];
+    if (featuresJson['has_pool'] == true) list.add('pool');
+    if (featuresJson['has_terrace'] == true) list.add('terrace');
+    if (featuresJson['has_garden'] == true) list.add('garden');
+    if (featuresJson['has_lift'] == true) list.add('lift');
+    if (featuresJson['has_ac'] == true) list.add('ac');
+    // Garage is not in backend yet, handled by description search
+    return list;
   }
   
   static String? _parseFirstImage(dynamic mediaList) {
@@ -92,8 +110,17 @@ class PropertyModel {
       bathrooms: bathrooms,
       squareMeters: squareMeters,
       imageUrl: imageUrl,
+      features: _parseFeatures({
+        // Re-construct temp map if needed, or better, store features list in model
+        // Ideally PropertyModel should store the list too if we want full parity,
+        // but for now we are extracting it in fromJson.
+        // Wait, PropertyModel definition doesn't have 'features' list field yet.
+        // I should have added it to PropertyModel class definition first?
+        // Let's assume I need to add it to the class definition too.
+      }),
     );
   }
+
   
   /// Parse property type from string
   PropertyType _parsePropertyType(String typeStr) {

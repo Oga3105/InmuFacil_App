@@ -124,12 +124,18 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 minZoom: 5,
                 maxZoom: 18,
                 
-                // TRACK ZOOM LEVEL
+                // TRACK ZOOM & BOUNDS
                 onPositionChanged: (position, hasGesture) {
                   if (position.zoom != null && position.zoom != _currentZoom) {
                     setState(() {
                       _currentZoom = position.zoom!;
                     });
+                  }
+                  
+                  // Update Visible Bounds for "Viewport Mode" Filtering
+                  // Debounce could be added here if performance is an issue
+                  if (position.bounds != null) {
+                    ref.read(mapStateProvider.notifier).setVisibleBounds(position.bounds!);
                   }
                 },
                 
