@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart'; // Required for LatLngBounds
@@ -141,6 +142,8 @@ class MapStateNotifier extends StateNotifier<MapState> {
       final type = geoJson['type'];
       final coordinates = geoJson['coordinates'];
       
+      debugPrint("🗺️ GeoJSON Type: $type");
+      
       List<LatLng> polygonPoints = [];
       
       if (type == 'Polygon') {
@@ -148,21 +151,45 @@ class MapStateNotifier extends StateNotifier<MapState> {
         // We take the first ring (exterior boundary)
         final outerRing = coordinates[0] as List;
         polygonPoints = _parseRing(outerRing);
+        debugPrint("✅ Parsed Polygon with ${polygonPoints.length} points");
       } else if (type == 'MultiPolygon') {
         // MultiPolygon coordinates: [ [ [ [lon, lat], ... ] ] ]
-        // We take the first polygon's first ring for now (usually the main landmass)
-        // Improved logic: could iterate to find largest, but first is safe start
-        final firstPolygon = coordinates[0] as List;
-        final outerRing = firstPolygon[0] as List;
-        polygonPoints = _parseRing(outerRing);
+        // CRITICAL FIX: Take the LARGEST polygon, not the first
+        // The first polygon might be a small administrative island/district
+        // The largest polygon is usually the main city area
+        final allPolygons = coordinates as List;
+        
+        // Find the polygon with the most points (largest area approximation)
+        int maxPoints = 0;
+        List? largestOuterRing;
+        
+        for (var polygon in allPolygons) {
+          final outerRing = polygon[0] as List;
+          if (outerRing.length > maxPoints) {
+            maxPoints = outerRing.length;
+            largestOuterRing = outerRing;
+          }
+        }
+        
+        if (largestOuterRing != null) {
+          polygonPoints = _parseRing(largestOuterRing);
+          debugPrint("✅ Parsed MultiPolygon (LARGEST of ${allPolygons.length} polygons) with ${polygonPoints.length} points");
+        }
+      } else {
+        debugPrint("⚠️ Unknown GeoJSON type: $type");
       }
       
       if (polygonPoints.isNotEmpty) {
+        debugPrint("🎯 Setting cityBoundaryPolygon with ${polygonPoints.length} points");
+        debugPrint("   First point: ${polygonPoints.first}");
+        debugPrint("   Last point: ${polygonPoints.last}");
         state = state.copyWith(cityBoundaryPolygon: polygonPoints);
+      } else {
+        debugPrint("❌ No polygon points extracted from GeoJSON");
       }
     } catch (e) {
       // Fallback or ignore
-      print("Error parsing GeoJSON: $e");
+      debugPrint("❌ Error parsing GeoJSON: $e");
     }
   }
   

@@ -353,6 +353,14 @@ class SearchNotifier extends StateNotifier<SearchState> {
         
         // STEP 3: Final Processing - INTELLIGENT SELECTION
         if (data is List && data.isNotEmpty) {
+          // DEBUG: Print all results
+          debugPrint("📊 Nominatim returned ${data.length} results:");
+          for (var i = 0; i < data.length; i++) {
+            final result = data[i];
+            debugPrint("  [$i] ${result['display_name']}");
+            debugPrint("      addresstype: ${result['addresstype']}, type: ${result['type']}, place_rank: ${result['place_rank']}");
+          }
+          
           // Default to the first result
           var item = data[0];
           
@@ -360,16 +368,46 @@ class SearchNotifier extends StateNotifier<SearchState> {
           // This fixes the issue where "Sevilla" returns the Province (huge area) first
           final preferredTypes = ['city', 'town', 'municipality', 'village'];
           
-          final bestMatch = data.firstWhere(
+          // Strategy 1: Check 'addresstype' field (most reliable)
+          var bestMatch = data.firstWhere(
             (element) => preferredTypes.contains(element['addresstype']),
             orElse: () => null,
           );
           
           if (bestMatch != null) {
-            debugPrint("🎯 Found preferred match: ${bestMatch['addresstype']} - ${bestMatch['display_name']}");
+            debugPrint("✅ Strategy 1 (addresstype) found: ${bestMatch['addresstype']}");
+          }
+          
+          // Strategy 2: If no match, check 'type' field (alternative)
+          if (bestMatch == null) {
+            bestMatch = data.firstWhere(
+              (element) => preferredTypes.contains(element['type']),
+              orElse: () => null,
+            );
+            if (bestMatch != null) {
+              debugPrint("✅ Strategy 2 (type) found: ${bestMatch['type']}");
+            }
+          }
+          
+          // Strategy 3: If still no match, use place_rank (lower = more important)
+          // Cities typically have place_rank 12-16, provinces have 8-10
+          if (bestMatch == null && data.length > 1) {
+            // Sort by place_rank (descending) - higher rank = more specific location
+            final sortedByRank = List.from(data);
+            sortedByRank.sort((a, b) {
+              final rankA = a['place_rank'] ?? 0;
+              final rankB = b['place_rank'] ?? 0;
+              return rankB.compareTo(rankA); // Descending
+            });
+            bestMatch = sortedByRank.first;
+            debugPrint("✅ Strategy 3 (place_rank) found: rank ${bestMatch['place_rank']}");
+          }
+          
+          if (bestMatch != null) {
+            debugPrint("🎯 SELECTED: ${bestMatch['addresstype'] ?? bestMatch['type']} - ${bestMatch['display_name']}");
             item = bestMatch;
           } else {
-             debugPrint("ℹ️ Using default match: ${item['type']} - ${item['display_name']}");
+             debugPrint("ℹ️ Using default (first result): ${item['type']} - ${item['display_name']}");
           }
           
           // ROBUST PARSING: Handle potential nulls or types safely
