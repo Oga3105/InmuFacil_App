@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/search_provider.dart';
 import '../widgets/property_listing/property_listing_item.dart';
 import '../widgets/property_listing/filter_sidebar.dart';
+import '../../domain/entities/property.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
   const PropertyListingScreen({super.key});
@@ -11,7 +12,8 @@ class PropertyListingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchProvider);
-    final paginatedProperties = ref.watch(searchProvider.notifier).getPaginatedProperties();
+    final allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
+    final paginatedProperties = _getPaginatedSlice(allFilteredProperties, searchState.currentPage, searchState.itemsPerPage);
     final theme = Theme.of(context); // Added
     final navyColor = theme.colorScheme.onSurface; // Changed to use theme
     const bgLight = Color(0xFFF8FAFC);
@@ -99,7 +101,7 @@ class PropertyListingScreen extends ConsumerWidget {
             child: Column(
               children: [
                 // Breadcrumbs & Title Row
-                _buildHeaderDetails(context, searchState.filteredProperties.length, searchState, ref),
+                _buildHeaderDetails(context, allFilteredProperties.length, searchState, ref),
                 
                 const SizedBox(height: 32),
 
@@ -124,7 +126,7 @@ class PropertyListingScreen extends ConsumerWidget {
                           
                           // Pagination
                           const SizedBox(height: 40),
-                          _buildPagination(ref, searchState),
+                          _buildPagination(ref, searchState, allFilteredProperties.length),
                         ],
                       ),
                     ),
@@ -262,9 +264,8 @@ class PropertyListingScreen extends ConsumerWidget {
      );
   }
 
-  Widget _buildPagination(WidgetRef ref, SearchState searchState) {
-    final totalProperties = searchState.filteredProperties.length;
-    final totalPages = (totalProperties / searchState.itemsPerPage).ceil();
+  Widget _buildPagination(WidgetRef ref, SearchState searchState, int totalFilteredCount) {
+    final totalPages = (totalFilteredCount / searchState.itemsPerPage).ceil();
     final currentPage = searchState.currentPage;
     
     if (totalPages <= 1) return const SizedBox.shrink();
@@ -368,6 +369,19 @@ class PropertyListingScreen extends ConsumerWidget {
           }
         },
       ),
+    );
+  }
+  
+  /// Helper method to paginate a list of properties manually
+  List<Property> _getPaginatedSlice(List<Property> properties, int page, int itemsPerPage) {
+    final startIndex = (page - 1) * itemsPerPage;
+    final endIndex = startIndex + itemsPerPage;
+    
+    if (startIndex >= properties.length) return [];
+    
+    return properties.sublist(
+      startIndex,
+      endIndex > properties.length ? properties.length : endIndex,
     );
   }
   
