@@ -120,7 +120,7 @@ class FilterSidebar extends ConsumerWidget {
                   ),
                 ),
 
-                const SizedBox(height: 24);
+                const SizedBox(height: 24),
 
                 // Property Type (matching Home screen)
                 _buildSectionTitle('¿Qué buscas?'),
