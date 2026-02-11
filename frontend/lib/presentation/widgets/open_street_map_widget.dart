@@ -23,8 +23,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   LatLng? _previousCenter; // Track previous center to detect changes
   Map<String, dynamic>? _previousGeoJson; // Track GeoJSON changes
   
-  // Sevilla coordinates for geolocation fallback
-  static const LatLng _sevillaFallback = LatLng(37.3891, -5.9845);
+  // Spain (Madrid) coordinates for geolocation fallback
+  static const LatLng _spainFallback = LatLng(40.4168, -3.7038);
   
   // Track zoom level for marker adaptivity
   double _currentZoom = 13.0; // Default matching initial logic
@@ -47,7 +47,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
         _previousCenter = searchState.mapCenter;
         
         final zoom = searchState.isUsingFallbackLocation 
-            ? 13.0  
+            ? 6.0  // Zoom 6 to show all of Spain  
             : 12.0; 
         
         _mapController.move(searchState.mapCenter!, zoom);
@@ -119,7 +119,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
-                initialCenter: searchState.mapCenter ?? _sevillaFallback,
+                initialCenter: searchState.mapCenter ?? _spainFallback,
                 initialZoom: 6.0,
                 minZoom: 5,
                 maxZoom: 18,
@@ -342,7 +342,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   
   void _goToMyLocation() {
     final searchState = ref.read(searchProvider);
-    _mapController.move(searchState.mapCenter ?? _sevillaFallback, 13.0);
+    _mapController.move(searchState.mapCenter ?? _spainFallback, 6.0);
   }
 
   // OLD _buildMarkers removed, logic now in _buildPropertyMarkers
