@@ -11,8 +11,9 @@ class PropertyListingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchProvider);
-    final paginatedProperties = ref.read(searchProvider.notifier).getPaginatedProperties();
-    const navyColor = Color(0xFF0F172A);
+    final paginatedProperties = ref.watch(searchProvider.notifier).getPaginatedProperties();
+    final theme = Theme.of(context); // Added
+    final navyColor = theme.colorScheme.onSurface; // Changed to use theme
     const bgLight = Color(0xFFF8FAFC);
 
     // Responsive helper
@@ -205,26 +206,8 @@ class PropertyListingScreen extends ConsumerWidget {
                      ],
                    ),
                  ),
-                 const SizedBox(width: 12),
-                 InkWell(
-                   onTap: () => context.push('/404-sort'),
-                   borderRadius: BorderRadius.circular(8),
-                   child: Container(
-                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                     decoration: BoxDecoration(
-                       color: theme.colorScheme.surface,
-                       borderRadius: BorderRadius.circular(8),
-                       border: Border.all(color: Colors.grey.shade200),
-                     ),
-                     child: Row(
-                       children: [
-                         Text('Ordenar: Relevancia', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor)),
-                         const SizedBox(width: 4),
-                         Icon(Icons.expand_more, color: Colors.grey.shade400),
-                       ],
-                     ),
-                   ),
-                 )
+                  const SizedBox(width: 12),
+                  _buildSortingDropdown(context, searchState, ref),
                ],
              )
           ],

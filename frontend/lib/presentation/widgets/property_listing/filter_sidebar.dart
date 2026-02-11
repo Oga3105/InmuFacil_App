@@ -92,22 +92,35 @@ class FilterSidebar extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // Rooms
+                // Rooms (matching Home screen)
                 _buildSectionTitle('Habitaciones'),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _buildRoomButton(context, ref, '1', 1, searchState.minBedrooms == 1),
-                    const SizedBox(width: 8),
-                    _buildRoomButton(context, ref, '2', 2, searchState.minBedrooms == 2),
-                    const SizedBox(width: 8),
-                    _buildRoomButton(context, ref, '3+', 3, searchState.minBedrooms == 3),
-                    const SizedBox(width: 8),
-                    _buildRoomButton(context, ref, '4+', 4, searchState.minBedrooms == 4),
-                  ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButton<int>(
+                    value: searchState.minBedrooms > 0 ? searchState.minBedrooms : null,
+                    hint: const Text('Habitaciones', style: TextStyle(fontSize: 13)),
+                    underline: Container(),
+                    icon: const Icon(Icons.arrow_drop_down),
+                    isExpanded: true,
+                    items: [1, 2, 3, 4, 5].map((e) => DropdownMenuItem(
+                      value: e,
+                      child: Text('$e+ Hab.', style: const TextStyle(fontSize: 13)),
+                    )).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        ref.read(searchProvider.notifier).updateMinBedrooms(val);
+                      }
+                    },
+                  ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: 24);
 
                 // Property Type (matching Home screen)
                 _buildSectionTitle('¿Qué buscas?'),
