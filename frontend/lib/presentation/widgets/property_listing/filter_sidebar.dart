@@ -57,12 +57,35 @@ class FilterSidebar extends ConsumerWidget {
                 // Price Range
                 _buildSectionTitle('Rango de Precio'),
                 const SizedBox(height: 8),
+                // Display current range values
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(child: _buildInput('Min')),
-                    const SizedBox(width: 8),
-                    Expanded(child: _buildInput('Max')),
+                    Text(
+                      '€${_formatPrice(searchState.priceRange.start)}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
+                    ),
+                    Text(
+                      '€${_formatPrice(searchState.priceRange.end)}',
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
+                    ),
                   ],
+                ),
+                const SizedBox(height: 8),
+                // RangeSlider
+                RangeSlider(
+                  values: searchState.priceRange,
+                  min: 0,
+                  max: searchState.currentMaxPriceLimit,
+                  divisions: 100,
+                  activeColor: primaryBlue,
+                  labels: RangeLabels(
+                    '€${_formatPrice(searchState.priceRange.start)}',
+                    '€${_formatPrice(searchState.priceRange.end)}',
+                  ),
+                  onChanged: (RangeValues values) {
+                    ref.read(searchProvider.notifier).updatePriceRange(values);
+                  },
                 ),
 
                 const SizedBox(height: 24),
@@ -271,5 +294,14 @@ class FilterSidebar extends ConsumerWidget {
         ],
       ),
     );
+  }
+  
+  String _formatPrice(double price) {
+    if (price >= 1000000) {
+      return '${(price / 1000000).toStringAsFixed(1)}M';
+    } else if (price >= 1000) {
+      return '${(price / 1000).toStringAsFixed(0)}K';
+    }
+    return price.toStringAsFixed(0);
   }
 }
