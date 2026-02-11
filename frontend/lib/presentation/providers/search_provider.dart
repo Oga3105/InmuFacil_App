@@ -451,7 +451,12 @@ class SearchNotifier extends StateNotifier<SearchState> {
         // 1. Filter by Bedrooms
         var results = properties.where((p) => p.bedrooms >= state.minBedrooms).toList();
         
-        // 2. Filter by Extras
+        // 2. Filter by PropertyType
+        if (state.propertyType != PropertyType.all) {
+          results = results.where((p) => p.type == state.propertyType).toList();
+        }
+        
+        // 3. Filter by Extras
         if (state.selectedExtras.isNotEmpty) {
           results = results.where((p) {
             for (final extra in state.selectedExtras) {

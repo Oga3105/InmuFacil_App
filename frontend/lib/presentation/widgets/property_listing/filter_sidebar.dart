@@ -123,7 +123,7 @@ class FilterSidebar extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // Property Type (matching Home screen)
-                _buildSectionTitle('¿Qué buscas?'),
+                _buildSectionTitle('Tipo de inmueble'),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<PropertyType>(
                   value: searchState.propertyType,

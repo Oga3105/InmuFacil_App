@@ -370,7 +370,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
         children: [
           // Property type dropdown
           Text(
-            'home.search_what_label'.tr(),
+            'Tipo de inmueble',
             style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
