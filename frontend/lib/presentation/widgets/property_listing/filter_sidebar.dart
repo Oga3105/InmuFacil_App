@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/search_provider.dart';
+import '../../../domain/entities/property_type.dart';
+import '../../../core/utils/temp_translations.dart';
 
 class FilterSidebar extends ConsumerWidget {
   const FilterSidebar({super.key});
@@ -107,22 +109,49 @@ class FilterSidebar extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                // Property Type
-                _buildSectionTitle('Tipo de Vivienda'),
-                const SizedBox(width: 8),
-                _buildCheckbox(context, ref, 'Piso', false, isDeadLink: true),
-                _buildCheckbox(context, ref, 'Ático', false, isDeadLink: true),
-                _buildCheckbox(context, ref, 'Dúplex', false, isDeadLink: true),
+                // Property Type (matching Home screen)
+                _buildSectionTitle('¿Qué buscas?'),
+                const SizedBox(height: 8),
+                DropdownButtonFormField<PropertyType>(
+                  value: searchState.propertyType,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey.shade200),
+                    ),
+                  ),
+                  items: PropertyType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(
+                        type.translationKey.tr(),
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(searchProvider.notifier).updatePropertyType(value);
+                    }
+                  },
+                ),
 
                 const SizedBox(height: 24),
 
-                // Extras
+                // Extras (matching Home screen)
                 _buildSectionTitle('Extras'),
                 const SizedBox(height: 8),
-                _buildCheckbox(context, ref, 'Terraza', searchState.selectedExtras.contains('Terraza')),
-                _buildCheckbox(context, ref, 'Ascensor', false, isDeadLink: true),
-                _buildCheckbox(context, ref, 'Garaje', searchState.selectedExtras.contains('Garaje')),
                 _buildCheckbox(context, ref, 'Piscina', searchState.selectedExtras.contains('Piscina')),
+                _buildCheckbox(context, ref, 'Garaje', searchState.selectedExtras.contains('Garaje')),
+                _buildCheckbox(context, ref, 'Terraza', searchState.selectedExtras.contains('Terraza')),
+                _buildCheckbox(context, ref, 'Jardín', searchState.selectedExtras.contains('Jardín')),
 
                 const SizedBox(height: 24),
                 const Divider(),
