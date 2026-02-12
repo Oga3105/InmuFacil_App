@@ -2,6 +2,14 @@
 import sys
 import os
 import time
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Configurar codificación UTF-8 para Windows y desactivar lectura de archivos de config
 if sys.platform == "win32":
@@ -19,37 +27,37 @@ from backend.models import User, UserType
 from backend.security import get_password_hash
 
 def init_db():
-    print("[INFO] Intentando conectar a PostgreSQL en Docker...")
+    logger.info("[INFO] Intentando conectar a PostgreSQL en Docker...")
     
     # Reintento simple por si la DB está despertando
     db_up = False
     for i in range(5):
         try:
             with engine.connect() as connection:
-                print("[OK] Conexion establecida con exito!")
+                logger.info("[OK] Conexion establecida con exito!")
                 db_up = True
                 break
         except OperationalError as e:
-            print(f"[WAIT] La base de datos esta calentando... (Intento {i+1}/5)")
-            print(f"[DEBUG] Error: {e}")
+            logger.warning(f"[WAIT] La base de datos esta calentando... (Intento {i+1}/5)")
+            logger.debug(f"[DEBUG] Error: {e}")
             time.sleep(2)
         except Exception as e:
-            print(f"[ERROR] Error inesperado: {type(e).__name__}: {e}")
+            logger.error(f"[ERROR] Error inesperado: {type(e).__name__}: {e}")
             return
     
     if not db_up:
-        print("[ERROR] No se pudo conectar a Postgres. Revisa si Docker esta corriendo.")
+        logger.error("[ERROR] No se pudo conectar a Postgres. Revisa si Docker esta corriendo.")
         return
 
-    print("[INFO] Creando tablas en la base de datos nueva...")
+    logger.info("[INFO] Creando tablas en la base de datos nueva...")
     Base.metadata.create_all(bind=engine)
-    print("[OK] Tablas creadas (Users, etc.)")
+    logger.info("[OK] Tablas creadas (Users, etc.)")
 
     # Crear usuario Admin
     db = SessionLocal()
     try:
         if not db.query(User).filter(User.email == "admin@inmufacil.com").first():
-            print("[INFO] Creando usuario Admin inicial...")
+            logger.info("[INFO] Creando usuario Admin inicial...")
             admin = User(
                 email="admin@inmufacil.com",
                 hashed_password=get_password_hash("Admin123!"),
@@ -58,11 +66,11 @@ def init_db():
             )
             db.add(admin)
             db.commit()
-            print("[OK] Usuario Admin creado: admin@inmufacil.com / Admin123!")
+            logger.info("[OK] Usuario Admin creado: admin@inmufacil.com / Admin123!")
         else:
-            print("[INFO] El usuario Admin ya existe.")
+            logger.info("[INFO] El usuario Admin ya existe.")
     except Exception as e:
-        print(f"[ERROR] Error creando usuario: {e}")
+        logger.error(f"[ERROR] Error creando usuario: {e}")
         db.rollback()
     finally:
         db.close()
