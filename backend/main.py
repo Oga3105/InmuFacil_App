@@ -17,8 +17,12 @@ from pathlib import Path
 # Load .env file BEFORE any other imports that use environment variables
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
-print(f"[ENV] Loaded .env from: {env_path.absolute()}")
-print(f"[ENV] .env exists: {env_path.exists()}")
+
+# Import logging after dotenv is loaded
+from backend.core.logging_config import get_logger
+env_logger = get_logger(__name__)
+env_logger.info(f"Loaded .env from: {env_path.absolute()}")
+env_logger.info(f".env exists: {env_path.exists()}")
 
 # ============================================================================
 # Application Imports
