@@ -21,6 +21,7 @@ class OpenStreetMapWidget extends ConsumerStatefulWidget {
 class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   final MapController _mapController = MapController();
   LatLng? _previousCenter; // Track previous center to detect changes
+  bool? _previousIsFallback; // Track previous fallback state
   Map<String, dynamic>? _previousGeoJson; // Track GeoJSON changes
   
   // Spain (Madrid) coordinates for geolocation fallback
@@ -39,15 +40,21 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
     final mapState = ref.watch(mapStateProvider);
+    // [FIX] Use the same provider as counter for Strict Sync
+    final filteredProperties = ref.watch(filteredByMapPropertiesProvider);
     
     // EFFECT: Update camera/boundary when search location changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 1. Handle Center Change
-      if (searchState.mapCenter != null && searchState.mapCenter != _previousCenter) {
+      // Updated to also trigger if fallback status changes (e.g. initial load vs detected 'no location')
+      if (searchState.mapCenter != null && 
+          (searchState.mapCenter != _previousCenter || searchState.isUsingFallbackLocation != _previousIsFallback)) {
+        
         _previousCenter = searchState.mapCenter;
+        _previousIsFallback = searchState.isUsingFallbackLocation;
         
         final zoom = searchState.isUsingFallbackLocation 
-            ? 6.0  // Zoom 6 to show all of Spain  
+            ? 6.2  // Zoom 6.2 to show Spain closer (Step 17525)
             : 12.0; 
         
         _mapController.move(searchState.mapCenter!, zoom);
@@ -120,7 +127,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
               mapController: _mapController,
               options: MapOptions(
                 initialCenter: searchState.mapCenter ?? _spainFallback,
-                initialZoom: 6.0,
+                initialZoom: 6.2,
                 minZoom: 5,
                 maxZoom: 18,
                 
@@ -254,7 +261,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 1. Clear Map (Trash) - Conditional
+                // 2. Clear Map (Trash) - Show when active components exist
                 if (mapState.currentZonePolygon.isNotEmpty || 
                     mapState.cityBoundaryPolygon.isNotEmpty || 
                     mapState.isDrawingMode)
@@ -271,13 +278,16 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 
                 const SizedBox(height: 8),
                 
-                // 2. Draw Toggle
-                _MapToolButton(
-                  icon: mapState.isDrawingMode ? Icons.close : Icons.draw,
-                  tooltip: mapState.isDrawingMode ? 'Cancelar dibujo' : 'Dibujar zona',
-                  isActive: mapState.isDrawingMode,
-                  onPressed: () => ref.read(mapStateProvider.notifier).toggleDrawingMode(),
-                ),
+                // 3. Draw Toggle - Hide when ANY Zone Exists (Prevent Overlap)
+                if (mapState.currentZonePolygon.isEmpty && mapState.cityBoundaryPolygon.isEmpty) 
+                   _MapToolButton(
+                    icon: mapState.isDrawingMode ? Icons.close : Icons.draw,
+                    tooltip: mapState.isDrawingMode ? 'Cancelar dibujo' : 'Dibujar zona',
+                    isActive: mapState.isDrawingMode,
+                    // If drawing is active, allow cancelling via toggle. 
+                    // If not active, allow starting ONLY if no zones exist (double check logic)
+                    onPressed: () => ref.read(mapStateProvider.notifier).toggleDrawingMode(),
+                  ),
                 
                 const SizedBox(height: 16), // Spacer between tools and zoom
                 
@@ -375,8 +385,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   }
   
   Widget _buildPropertyMarkers(WidgetRef ref) {
-    final searchState = ref.watch(searchProvider);
-    final properties = searchState.filteredProperties;
+    // [FIX] Use parameters captured in build() or re-watch here (better to pass from build)
+    // Re-watching for safety within helper
+    final properties = ref.watch(filteredByMapPropertiesProvider); 
     
     if (properties.isEmpty) return const SizedBox.shrink();
     

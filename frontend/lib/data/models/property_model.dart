@@ -83,7 +83,12 @@ class PropertyModel {
     if (featuresJson['has_garden'] == true) list.add('garden');
     if (featuresJson['has_lift'] == true) list.add('lift');
     if (featuresJson['has_ac'] == true) list.add('ac');
-    // Garage is not in backend yet, handled by description search
+    if (featuresJson['has_heating'] == true) list.add('heating');
+    if (featuresJson['has_storage_room'] == true) list.add('storage_room');
+    if (featuresJson['has_fitted_wardrobes'] == true) list.add('fitted_wardrobes');
+    if (featuresJson['is_exterior'] == true) list.add('exterior');
+    if (featuresJson['is_accessible'] == true) list.add('accessible');
+    // Garage is not in backend yet as feature, handled by description/type
     return list;
   }
   
@@ -110,38 +115,28 @@ class PropertyModel {
       bathrooms: bathrooms,
       squareMeters: squareMeters,
       imageUrl: imageUrl,
-      features: _parseFeatures({
-        // Re-construct temp map if needed, or better, store features list in model
-        // Ideally PropertyModel should store the list too if we want full parity,
-        // but for now we are extracting it in fromJson.
-        // Wait, PropertyModel definition doesn't have 'features' list field yet.
-        // I should have added it to PropertyModel class definition first?
-        // Let's assume I need to add it to the class definition too.
-      }),
+      features: features,
     );
   }
 
   
   /// Parse property type from string
   PropertyType _parsePropertyType(String typeStr) {
-    switch (typeStr.toLowerCase()) {
-      case 'apartment':
-      case 'piso': // Backend value
-        return PropertyType.apartment;
-      case 'house':
-      case 'chalet': // Backend value
-      case 'casa':
-        return PropertyType.house;
-      case 'land':
-      case 'terreno':
-      case 'solar':
-        return PropertyType.land;
-      case 'office':
-      case 'oficina': // Backend value
-      case 'local':
-        return PropertyType.office;
-      default:
-        return PropertyType.apartment;
+    try {
+      final normalized = typeStr.toLowerCase().trim();
+      return PropertyType.values.firstWhere(
+        (e) => e.backendValue == normalized,
+        orElse: () {
+          // Fallback legacy mapping if needed, or default
+          if (normalized == 'apartment') return PropertyType.piso;
+          if (normalized == 'house') return PropertyType.chalet;
+          if (normalized == 'land') return PropertyType.terreno;
+          if (normalized == 'office') return PropertyType.oficina; 
+          return PropertyType.piso; // Default fallback
+        },
+      );
+    } catch (_) {
+      return PropertyType.piso;
     }
   }
   
@@ -150,7 +145,7 @@ class PropertyModel {
     return PropertyModel(
       id: int.parse(property.id),
       title: property.title,
-      type: _propertyTypeToString(property.type),
+      type: property.type.backendValue,
       price: property.price,
       latitude: property.location.latitude,
       longitude: property.location.longitude,
@@ -164,17 +159,6 @@ class PropertyModel {
   
   /// Convert PropertyType to string
   static String _propertyTypeToString(PropertyType type) {
-    switch (type) {
-      case PropertyType.apartment:
-        return 'piso';
-      case PropertyType.house:
-        return 'chalet';
-      case PropertyType.land:
-        return 'terreno';
-      case PropertyType.office:
-        return 'oficina';
-      case PropertyType.all:
-        return 'all';
-    }
+    return type.backendValue;
   }
 }

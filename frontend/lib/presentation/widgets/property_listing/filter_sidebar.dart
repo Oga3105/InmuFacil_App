@@ -165,6 +165,13 @@ class FilterSidebar extends ConsumerWidget {
                 _buildCheckbox(context, ref, 'Garaje', searchState.selectedExtras.contains('Garaje')),
                 _buildCheckbox(context, ref, 'Terraza', searchState.selectedExtras.contains('Terraza')),
                 _buildCheckbox(context, ref, 'Jardín', searchState.selectedExtras.contains('Jardín')),
+                _buildCheckbox(context, ref, 'Ascensor', searchState.selectedExtras.contains('Ascensor')),
+                _buildCheckbox(context, ref, 'Aire Acondicionado', searchState.selectedExtras.contains('Aire Acondicionado')),
+                _buildCheckbox(context, ref, 'Calefacción', searchState.selectedExtras.contains('Calefacción')),
+                _buildCheckbox(context, ref, 'Trastero', searchState.selectedExtras.contains('Trastero')),
+                _buildCheckbox(context, ref, 'Armarios Empotrados', searchState.selectedExtras.contains('Armarios Empotrados')),
+                _buildCheckbox(context, ref, 'Exterior', searchState.selectedExtras.contains('Exterior')),
+                _buildCheckbox(context, ref, 'Acceso movilidad reducida', searchState.selectedExtras.contains('Acceso movilidad reducida')),
 
                 const SizedBox(height: 24),
                 const Divider(),

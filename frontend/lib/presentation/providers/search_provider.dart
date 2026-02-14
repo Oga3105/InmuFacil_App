@@ -36,8 +36,8 @@ class SearchState {
   final int itemsPerPage;
   final SortOption sortBy;
   
-  // Default view centered on Sevilla for MVP/Demo purposes
-  static const LatLng _spainCenter = LatLng(37.3891, -5.9845);
+  // Default view centered on Madrid (Spain Center)
+  static const LatLng _spainCenter = LatLng(40.4168, -3.7038);
   
   const SearchState({
     this.propertyType = PropertyType.all,
@@ -503,10 +503,25 @@ class SearchNotifier extends StateNotifier<SearchState> {
               } else if (extra == 'Terraza') {
                 if (!p.features.contains('terrace')) return false;
               } else if (extra == 'Garaje') {
+                // Keep textual search for Garaje for now
                 final text = '${p.title} ${p.address}'.toLowerCase(); 
                 if (!text.contains('garaje') && !text.contains('parking') && !text.contains('plaza')) return false;
               } else if (extra == 'Jardín') {
                  if (!p.features.contains('garden')) return false;
+              } else if (extra == 'Ascensor') {
+                 if (!p.features.contains('lift')) return false;
+              } else if (extra == 'Aire Acondicionado') {
+                 if (!p.features.contains('ac')) return false;
+              } else if (extra == 'Calefacción') {
+                 if (!p.features.contains('heating')) return false;
+              } else if (extra == 'Trastero') {
+                 if (!p.features.contains('storage_room')) return false;
+              } else if (extra == 'Armarios Empotrados') {
+                 if (!p.features.contains('fitted_wardrobes')) return false;
+              } else if (extra == 'Exterior') {
+                 if (!p.features.contains('exterior')) return false;
+              } else if (extra == 'Acceso movilidad reducida') {
+                 if (!p.features.contains('accessible')) return false;
               }
             }
             return true;
@@ -536,6 +551,22 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = const SearchState(isSearchActive: false); // Reset to Landing View
     initLocation();
   }
+
+  /// Reset filters but keep location context if possible, or just exact alias for reset()
+  /// Reset filters but keep location context (Soft Reset)
+/// Used by "Limpiar filtros" button in UI
+void resetFilters() {
+  state = state.copyWith(
+    propertyType: PropertyType.all,
+    priceRange: const RangeValues(0, 1000000),
+    filteredProperties: const [], // Will be reloaded
+    minBedrooms: 0,
+    selectedExtras: const [],
+    currentPage: 1,
+    // Keep location, mapCenter, isUsingFallbackLocation, lastSearchResultBbox
+  );
+  _loadProperties(); // Reload with cleared filters but same location
+}
 }
 
 /// Provider for ApiClient
@@ -569,9 +600,19 @@ final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
   final allFiltered = searchState.filteredProperties;
   
   // 1. Polygon Mode (Priority)
+  // [FIX] Intersect with Viewport to support zoom/pan updates inside zone (User Request Step 16037)
   if (mapState.currentZonePolygon.isNotEmpty) {
     if (mapState.currentZonePolygon.length < 3) return []; // Invalid polygon
-    return allFiltered.where((p) => _isPointInPolygon(p.location, mapState.currentZonePolygon)).toList();
+    
+    // First, filter by Polygon
+    var fromPolygon = allFiltered.where((p) => _isPointInPolygon(p.location, mapState.currentZonePolygon));
+    
+    // Then, if Viewport is available, intersect with it (Visual Sync)
+    if (mapState.visibleBounds != null) {
+      fromPolygon = fromPolygon.where((p) => mapState.visibleBounds!.contains(p.location));
+    }
+    
+    return fromPolygon.toList();
   }
   
   // 2. Viewport Mode

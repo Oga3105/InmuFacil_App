@@ -32,12 +32,32 @@ extension StringTranslation on String {
       
       // Home - Property Types
       'home.property_type_all': 'Todos',
-      'home.property_type_apartment': 'Piso / Apartamento',
-      'home.property_type_house': 'Casa / Chalet',
-      'home.property_type_land': 'Terreno / Parcela',
-      'home.property_type_office': 'Oficina / Local',
-      'home.property_type_garage': 'Garaje',
+      'home.property_type_apartment': 'Piso / Apartamento', // piso
+      'home.property_type_house': 'Casa / Chalet', // chalet
+      'home.property_type_atico': 'Ático', // atico
+      'home.property_type_duplex': 'Dúplex', // duplex
+      'home.property_type_local': 'Local Comercial', // local
+      'home.property_type_office': 'Oficina', // oficina
+      'home.property_type_industrial': 'Nave Industrial', // nave
+      'home.property_type_garage': 'Garaje', // garaje
+      'home.property_type_land': 'Terreno Urbano', // terreno
+      'home.property_type_rustic_land': 'Finca Rústica', // finca_rustica
+      'home.property_type_rustic_house': 'Casa de Campo', // casa_rustica
+      'home.property_type_singular_house': 'Cortijo / Masía', // casa_singular
+      'home.property_type_building': 'Edificio', // edificio
       'home.property_type_new_construction': 'Obra Nueva',
+      
+      // Home - Extras (Sales)
+      'home.extra_pool': 'Piscina',
+      'home.extra_terrace': 'Terraza',
+      'home.extra_garden': 'Jardín',
+      'home.extra_lift': 'Ascensor',
+      'home.extra_ac': 'Aire Acondicionado',
+      'home.extra_heating': 'Calefacción',
+      'home.extra_storage': 'Trastero',
+      'home.extra_wardrobes': 'Armarios Empotrados',
+      'home.extra_exterior': 'Exterior',
+      'home.extra_accessible': 'Acceso movilidad reducida',
       
       // Home - Trust Badges
       'home.guarantee_title': 'Garantía InmuFácil',

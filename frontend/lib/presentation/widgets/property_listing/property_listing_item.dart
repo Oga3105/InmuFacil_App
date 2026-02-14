@@ -11,7 +11,8 @@ class PropertyListingItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Brand Colors
-    const navyColor = Color(0xFF0F172A);
+    const brandBlue = Color(0xFF2563EB); // Corporate blue specified
+    const navyColor = Color(0xFF0F172A); // Keep dark for text contrast
     const successGreen = Color(0xFF16A34A);
 
     final currencyFormat = NumberFormat.currency(locale: 'es_ES', symbol: '€', decimalDigits: 0);
@@ -260,7 +261,7 @@ class PropertyListingItem extends StatelessWidget {
                                 icon: const Icon(Icons.chat_bubble_outline, size: 18),
                                 label: const Text('Contactar Particular'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: navyColor,
+                                  backgroundColor: brandBlue,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                   textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),

@@ -27,7 +27,7 @@ class LoginScreen extends StatelessWidget {
             const Icon(
               Icons.home_work,
               size: 80,
-              color: Colors.blue,
+              color: const Color(0xFF2563EB),
             ),
             const SizedBox(height: 24),
             const Text(
