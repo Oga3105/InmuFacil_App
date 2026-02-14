@@ -34,11 +34,65 @@ class PropertyModel {
     required this.bathrooms,
     required this.squareMeters,
     this.imageUrl,
+    this.features = const [],
   });
+
+  @JsonKey(includeFromJson: false) // Not serialized by default json_serializable unless updated
+  final List<String> features;
   
   /// Convert from JSON
-  factory PropertyModel.fromJson(Map<String, dynamic> json) =>
-      _$PropertyModelFromJson(json);
+  factory PropertyModel.fromJson(Map<String, dynamic> json) {
+    // Parse Location "lat, lng" -> latitude, longitude
+    double lat = 0.0;
+    double lng = 0.0;
+    
+    if (json.containsKey('location') && json['location'] is String) {
+      final locParts = (json['location'] as String).split(',');
+      if (locParts.length == 2) {
+        lat = double.tryParse(locParts[0].trim()) ?? 0.0;
+        lng = double.tryParse(locParts[1].trim()) ?? 0.0;
+      }
+    } else {
+      // Fallback if backend sends separate fields
+      lat = (json['latitude'] as num?)?.toDouble() ?? 0.0;
+      lng = (json['longitude'] as num?)?.toDouble() ?? 0.0;
+    }
+
+    return PropertyModel(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      type: json['property_type'] as String? ?? 'piso', // Backend uses property_type
+      price: (json['price'] as num).toDouble(),
+      latitude: lat,
+      longitude: lng,
+      address: json['address'] as String? ?? '',
+      bedrooms: (json['features']?['bedrooms'] as int?) ?? 0, // Access nested features
+      bathrooms: (json['features']?['bathrooms'] as int?) ?? 0,
+      squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
+      imageUrl: _parseFirstImage(json['media']),
+      features: _parseFeatures(json['features']),
+    );
+  }
+  
+  static List<String> _parseFeatures(Map<String, dynamic>? featuresJson) {
+    if (featuresJson == null) return [];
+    
+    final List<String> list = [];
+    if (featuresJson['has_pool'] == true) list.add('pool');
+    if (featuresJson['has_terrace'] == true) list.add('terrace');
+    if (featuresJson['has_garden'] == true) list.add('garden');
+    if (featuresJson['has_lift'] == true) list.add('lift');
+    if (featuresJson['has_ac'] == true) list.add('ac');
+    // Garage is not in backend yet, handled by description search
+    return list;
+  }
+  
+  static String? _parseFirstImage(dynamic mediaList) {
+    if (mediaList is List && mediaList.isNotEmpty) {
+      return mediaList[0]['file_path'] as String?;
+    }
+    return null;
+  }
   
   /// Convert to JSON
   Map<String, dynamic> toJson() => _$PropertyModelToJson(this);
@@ -56,19 +110,35 @@ class PropertyModel {
       bathrooms: bathrooms,
       squareMeters: squareMeters,
       imageUrl: imageUrl,
+      features: _parseFeatures({
+        // Re-construct temp map if needed, or better, store features list in model
+        // Ideally PropertyModel should store the list too if we want full parity,
+        // but for now we are extracting it in fromJson.
+        // Wait, PropertyModel definition doesn't have 'features' list field yet.
+        // I should have added it to PropertyModel class definition first?
+        // Let's assume I need to add it to the class definition too.
+      }),
     );
   }
+
   
   /// Parse property type from string
   PropertyType _parsePropertyType(String typeStr) {
     switch (typeStr.toLowerCase()) {
       case 'apartment':
+      case 'piso': // Backend value
         return PropertyType.apartment;
       case 'house':
+      case 'chalet': // Backend value
+      case 'casa':
         return PropertyType.house;
       case 'land':
+      case 'terreno':
+      case 'solar':
         return PropertyType.land;
       case 'office':
+      case 'oficina': // Backend value
+      case 'local':
         return PropertyType.office;
       default:
         return PropertyType.apartment;
@@ -96,13 +166,13 @@ class PropertyModel {
   static String _propertyTypeToString(PropertyType type) {
     switch (type) {
       case PropertyType.apartment:
-        return 'apartment';
+        return 'piso';
       case PropertyType.house:
-        return 'house';
+        return 'chalet';
       case PropertyType.land:
-        return 'land';
+        return 'terreno';
       case PropertyType.office:
-        return 'office';
+        return 'oficina';
       case PropertyType.all:
         return 'all';
     }

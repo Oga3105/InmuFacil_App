@@ -12,6 +12,7 @@ import 'package:inmufacil_frontend/domain/repositories/property_repository.dart'
 import 'package:inmufacil_frontend/data/repositories/property_repository_impl.dart';
 import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
+import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
 
 /// Search state for property filtering
 class SearchState {
@@ -24,9 +25,19 @@ class SearchState {
   final bool isLoading;
   final String? error;
   final bool isUsingFallbackLocation;
+  final List<String>? lastSearchResultBbox; // [south, north, west, east] from Nominatim
+  final Map<String, dynamic>? lastSearchResultGeoJson; // NEW: GeoJSON for real shape
+  final bool isSearchActive; // NEW: Track if search button has been pressed
+  final int minBedrooms; // NEW: Filter
+  final List<String> selectedExtras; // NEW: Filter
   
-  // Spain center coordinates for initial wide view (shows entire country)
-  static const LatLng _spainCenter = LatLng(40.4, -3.7);
+  // Pagination & Sorting
+  final int currentPage;
+  final int itemsPerPage;
+  final SortOption sortBy;
+  
+  // Default view centered on Sevilla for MVP/Demo purposes
+  static const LatLng _spainCenter = LatLng(37.3891, -5.9845);
   
   const SearchState({
     this.propertyType = PropertyType.all,
@@ -38,6 +49,14 @@ class SearchState {
     this.isLoading = false,
     this.error,
     this.isUsingFallbackLocation = false,
+    this.lastSearchResultBbox,
+    this.lastSearchResultGeoJson,
+    this.isSearchActive = false,
+    this.minBedrooms = 0,
+    this.selectedExtras = const [],
+    this.currentPage = 1,
+    this.itemsPerPage = 5,
+    this.sortBy = SortOption.relevance,
   });
   
   SearchState copyWith({
@@ -50,6 +69,14 @@ class SearchState {
     bool? isLoading,
     String? error,
     bool? isUsingFallbackLocation,
+    List<String>? lastSearchResultBbox,
+    Map<String, dynamic>? lastSearchResultGeoJson,
+    bool? isSearchActive,
+    int? minBedrooms,
+    List<String>? selectedExtras,
+    int? currentPage,
+    int? itemsPerPage,
+    SortOption? sortBy,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -61,8 +88,24 @@ class SearchState {
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
+      lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
+      lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
+      isSearchActive: isSearchActive ?? this.isSearchActive,
+      minBedrooms: minBedrooms ?? this.minBedrooms,
+      selectedExtras: selectedExtras ?? this.selectedExtras,
+      currentPage: currentPage ?? this.currentPage,
+      itemsPerPage: itemsPerPage ?? this.itemsPerPage,
+      sortBy: sortBy ?? this.sortBy,
     );
   }
+}
+
+/// Sorting options for property listing
+enum SortOption {
+  relevance,
+  priceLowToHigh,
+  priceHighToLow,
+  newest,
 }
 
 /// Search provider for managing property search state
@@ -80,7 +123,6 @@ class SearchNotifier extends StateNotifier<SearchState> {
     _debounceTimer?.cancel();
     super.dispose();
   }
-  
   
   /// Initialize user location (or fallback to Sevilla)
   Future<void> initLocation() async {
@@ -103,6 +145,73 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(propertyType: type);
     _loadProperties();
   }
+
+  /// Update min bedrooms filter
+  void updateMinBedrooms(int bedrooms) {
+    state = state.copyWith(minBedrooms: bedrooms);
+    _loadProperties();
+  }
+
+  /// Update extras filter
+  void toggleExtra(String extra) {
+    final currentExtras = List<String>.from(state.selectedExtras);
+    if (currentExtras.contains(extra)) {
+      currentExtras.remove(extra);
+    } else {
+      currentExtras.add(extra);
+    }
+    state = state.copyWith(selectedExtras: currentExtras);
+    _loadProperties();
+  }
+  
+  /// Set current page for pagination
+  void setPage(int page) {
+    state = state.copyWith(currentPage: page);
+  }
+  
+  /// Set sorting option and re-sort properties
+  void setSortBy(SortOption option) {
+    state = state.copyWith(sortBy: option, currentPage: 1); // Reset to page 1 on sort change
+    _applySorting();
+  }
+  
+  /// Get paginated slice of filtered properties
+  List<Property> getPaginatedProperties() {
+    final startIndex = (state.currentPage - 1) * state.itemsPerPage;
+    final endIndex = startIndex + state.itemsPerPage;
+    
+    if (startIndex >= state.filteredProperties.length) {
+      return [];
+    }
+    
+    return state.filteredProperties.sublist(
+      startIndex,
+      endIndex > state.filteredProperties.length ? state.filteredProperties.length : endIndex,
+    );
+  }
+  
+  /// Apply sorting to current filtered properties
+  void _applySorting() {
+    final sorted = List<Property>.from(state.filteredProperties);
+    
+    switch (state.sortBy) {
+      case SortOption.priceLowToHigh:
+        sorted.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case SortOption.priceHighToLow:
+        sorted.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case SortOption.newest:
+        // Assuming properties are already in newest-first order from API
+        // If not, would need a createdAt field
+        break;
+      case SortOption.relevance:
+        // Keep original order
+        break;
+    }
+    
+    state = state.copyWith(filteredProperties: sorted);
+  }
   
   /// Update location and geocode to coordinates
   Future<void> updateLocation(String location) async {
@@ -110,6 +219,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(
         location: '',
         mapCenter: LocationService.sevillaFallback,
+        lastSearchResultBbox: null,
       );
       return;
     }
@@ -166,7 +276,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
   }
   
   /// Execute search with current filters
+  /// This activates the "Results Mode"
   void search() {
+    state = state.copyWith(isSearchActive: true);
     _loadProperties();
   }
   
@@ -212,10 +324,10 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(isLoading: true, error: null);
       
       try {
-        // STEP 1: Primary attempt - Search only in Spain
-        // This ensures "Córdoba" or "Valencia" lead to Spanish cities by default
+        // STEP 1: Primary attempt - Search only in Spain with MULTIPLE results
+        // fetching 5 results to filter the best match (City vs Province)
         final urlSpain = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es'
+          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=5&countrycodes=es&polygon_geojson=1&addressdetails=1'
         );
         
         var response = await http.get(urlSpain, headers: {
@@ -225,13 +337,11 @@ class SearchNotifier extends StateNotifier<SearchState> {
         var data = json.decode(response.body);
         
         // STEP 2: Verification and Fallback
-        // If empty list, location is not in Spain OR user searches outside (e.g., "Paris", "Córdoba, Argentina")
         if (data is List && data.isEmpty) {
           debugPrint("📍 Not found in Spain. Searching globally...");
           
-          // Launch WORLDWIDE search (without countrycodes)
           final urlGlobal = Uri.parse(
-            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1'
+            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=5&polygon_geojson=1&addressdetails=1'
           );
           
           response = await http.get(urlGlobal, headers: {
@@ -241,38 +351,109 @@ class SearchNotifier extends StateNotifier<SearchState> {
           data = json.decode(response.body);
         }
         
-        // STEP 3: Final Processing (if we found something in step 1 or 2)
+        // STEP 3: Final Processing - INTELLIGENT SELECTION
         if (data is List && data.isNotEmpty) {
-          final lat = double.parse(data[0]['lat']);
-          final lon = double.parse(data[0]['lon']);
-          final displayName = data[0]['display_name']; // Full name for confirmation
+          // DEBUG: Print all results
+          debugPrint("📊 Nominatim returned ${data.length} results:");
+          for (var i = 0; i < data.length; i++) {
+            final result = data[i];
+            debugPrint("  [$i] ${result['display_name']}");
+            debugPrint("      addresstype: ${result['addresstype']}, type: ${result['type']}, place_rank: ${result['place_rank']}");
+          }
+          
+          // Default to the first result
+          var item = data[0];
+          
+          // Try to find a specific CITY/TOWN/MUNICIPALITY result
+          // This fixes the issue where "Sevilla" returns the Province (huge area) first
+          final preferredTypes = ['city', 'town', 'municipality', 'village'];
+          
+          // Strategy 1: Check 'addresstype' field (most reliable)
+          var bestMatch = data.firstWhere(
+            (element) => preferredTypes.contains(element['addresstype']),
+            orElse: () => null,
+          );
+          
+          if (bestMatch != null) {
+            debugPrint("✅ Strategy 1 (addresstype) found: ${bestMatch['addresstype']}");
+          }
+          
+          // Strategy 2: If no match, check 'type' field (alternative)
+          if (bestMatch == null) {
+            bestMatch = data.firstWhere(
+              (element) => preferredTypes.contains(element['type']),
+              orElse: () => null,
+            );
+            if (bestMatch != null) {
+              debugPrint("✅ Strategy 2 (type) found: ${bestMatch['type']}");
+            }
+          }
+          
+          // Strategy 3: If still no match, use place_rank (lower = more important)
+          // Cities typically have place_rank 12-16, provinces have 8-10
+          if (bestMatch == null && data.length > 1) {
+            // Sort by place_rank (descending) - higher rank = more specific location
+            final sortedByRank = List.from(data);
+            sortedByRank.sort((a, b) {
+              final rankA = a['place_rank'] ?? 0;
+              final rankB = b['place_rank'] ?? 0;
+              return rankB.compareTo(rankA); // Descending
+            });
+            bestMatch = sortedByRank.first;
+            debugPrint("✅ Strategy 3 (place_rank) found: rank ${bestMatch['place_rank']}");
+          }
+          
+          if (bestMatch != null) {
+            debugPrint("🎯 SELECTED: ${bestMatch['addresstype'] ?? bestMatch['type']} - ${bestMatch['display_name']}");
+            item = bestMatch;
+          } else {
+             debugPrint("ℹ️ Using default (first result): ${item['type']} - ${item['display_name']}");
+          }
+          
+          // ROBUST PARSING: Handle potential nulls or types safely
+          final lat = double.tryParse(item['lat'].toString()) ?? 0.0;
+          final lon = double.tryParse(item['lon'].toString()) ?? 0.0;
+          final displayName = item['display_name']?.toString() ?? sanitized;
+          
+          // Extract Bounding Box safely
+          List<String>? bbox;
+          if (item['boundingbox'] != null && item['boundingbox'] is List) {
+            bbox = (item['boundingbox'] as List).map((e) => e.toString()).toList();
+          }
+          
+          // Extract GeoJSON for "Real Shape"
+          // We pass this raw map to the MapState to handle the complex parsing
+          Map<String, dynamic>? geoJson;
+          if (item['geojson'] != null) {
+            geoJson = item['geojson'] as Map<String, dynamic>;
+          }
           
           // Update state
           state = state.copyWith(
             mapCenter: LatLng(lat, lon),
-            location: displayName.split(',')[0], // Take only city name for input
+            location: displayName.split(',')[0],
             isUsingFallbackLocation: false,
             isLoading: false,
+            lastSearchResultBbox: bbox,
+            lastSearchResultGeoJson: geoJson, // NEW: Store GeoJSON
+            isSearchActive: true, // AUTO-ACTIVATE Search when location found
           );
           
-          // Visual feedback (useful for TFM demonstration)
           debugPrint("✅ Location found: $displayName");
           
-          // Reload properties for new location
           await _loadProperties();
         } else {
-          // STEP 4: If everything fails (neither in Spain nor worldwide)
           debugPrint("❌ Location not found anywhere.");
           state = state.copyWith(
             error: 'No se encontró la ubicación: $sanitized',
             isLoading: false,
           );
         }
-      } catch (e) {
-        // SECURITY: Generic error message (don't expose exception details to user)
+      } catch (e, stackTrace) {
         debugPrint("⚠️ Error in search algorithm: $e");
+        debugPrint(stackTrace.toString());
         state = state.copyWith(
-          error: 'Error al buscar ubicación. Inténtalo de nuevo.',
+          error: 'Error al buscar: $e',
           isLoading: false,
         );
       }
@@ -302,11 +483,45 @@ class SearchNotifier extends StateNotifier<SearchState> {
         );
       },
       (properties) {
+        // Apply Client-Side Filtering for fields not supported by API yet
+        // Apply Client-Side Filtering
+        
+        // 1. Filter by Bedrooms
+        var results = properties.where((p) => p.bedrooms >= state.minBedrooms).toList();
+        
+        // 2. Filter by PropertyType
+        if (state.propertyType != PropertyType.all) {
+          results = results.where((p) => p.type == state.propertyType).toList();
+        }
+        
+        // 3. Filter by Extras
+        if (state.selectedExtras.isNotEmpty) {
+          results = results.where((p) {
+            for (final extra in state.selectedExtras) {
+              if (extra == 'Piscina') {
+                if (!p.features.contains('pool')) return false;
+              } else if (extra == 'Terraza') {
+                if (!p.features.contains('terrace')) return false;
+              } else if (extra == 'Garaje') {
+                final text = '${p.title} ${p.address}'.toLowerCase(); 
+                if (!text.contains('garaje') && !text.contains('parking') && !text.contains('plaza')) return false;
+              } else if (extra == 'Jardín') {
+                 if (!p.features.contains('garden')) return false;
+              }
+            }
+            return true;
+          }).toList();
+        }
+
         state = state.copyWith(
           isLoading: false,
           error: null,
-          filteredProperties: properties, // Can be empty list (estado cero)
+          filteredProperties: results,
+          currentPage: 1, // Reset to page 1 when filters change
         );
+        
+        // Apply current sorting
+        _applySorting();
       },
     );
   }
@@ -316,9 +531,9 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(error: null);
   }
   
-  /// Reset all filters
+  /// Reset all filters and view mode
   void reset() {
-    state = const SearchState();
+    state = const SearchState(isSearchActive: false); // Reset to Landing View
     initLocation();
   }
 }
@@ -345,3 +560,42 @@ final searchProvider = StateNotifierProvider<SearchNotifier, SearchState>((ref) 
   final locationService = ref.watch(locationServiceProvider);
   return SearchNotifier(repository, locationService);
 });
+
+/// Provider for dynamic map filtering (Polygon vs Viewport)
+final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
+  final searchState = ref.watch(searchProvider);
+  final mapState = ref.watch(mapStateProvider);
+  
+  final allFiltered = searchState.filteredProperties;
+  
+  // 1. Polygon Mode (Priority)
+  if (mapState.currentZonePolygon.isNotEmpty) {
+    if (mapState.currentZonePolygon.length < 3) return []; // Invalid polygon
+    return allFiltered.where((p) => _isPointInPolygon(p.location, mapState.currentZonePolygon)).toList();
+  }
+  
+  // 2. Viewport Mode
+  if (mapState.visibleBounds != null) {
+    return allFiltered.where((p) => mapState.visibleBounds!.contains(p.location)).toList();
+  }
+  
+  // Fallback (e.g. map not initialized yet), return all or none?
+  // If map is loading, maybe return all.
+  return allFiltered;
+});
+
+/// Ray Casting algorithm to check if point is in polygon
+bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
+  int intersectCount = 0;
+  for (int i = 0; i < polygon.length; i++) {
+    final j = (i + 1) % polygon.length;
+    final vert1 = polygon[i];
+    final vert2 = polygon[j];
+    
+    if ((vert1.latitude > point.latitude) != (vert2.latitude > point.latitude) &&
+        (point.longitude < (vert2.longitude - vert1.longitude) * (point.latitude - vert1.latitude) / (vert2.latitude - vert1.latitude) + vert1.longitude)) {
+      intersectCount++;
+    }
+  }
+  return (intersectCount % 2) == 1;
+}

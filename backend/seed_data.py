@@ -3,6 +3,9 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
+from backend.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Setup path to include backend/ so we can import 'src'
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,12 +32,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def seed_db():
     db = SessionLocal()
     try:
-        print("🌱 Iniciando Seeding de Datos...")
+        logger.info("🌱 Iniciando Seeding de Datos...")
         
         # 1. Crear Usuario Propietario (si no existe)
         owner = db.query(User).filter(User.email == "propietario@test.com").first()
         if not owner:
-            print("👤 Creando usuario propietario...")
+            logger.info("👤 Creando usuario propietario...")
             owner = User(
                 email="propietario@test.com",
                 hashed_password=get_password_hash("password123"),
@@ -47,17 +50,17 @@ def seed_db():
             db.add(owner)
             db.commit()
             db.refresh(owner)
-            print(f"✅ Usuario creado: ID {owner.id}")
+            logger.info(f"✅ Usuario creado: ID {owner.id}")
         else:
-            print(f"ℹ️ Usuario existente: ID {owner.id}")
+            logger.info(f"ℹ️ Usuario existente: ID {owner.id}")
 
         # 2. Verificar Propiedades
         count = db.query(Property).count()
         if count > 0:
-            print(f"ℹ️ La base de datos ya tiene {count} propiedades. Saltando seeding.")
+            logger.info(f"ℹ️ La base de datos ya tiene {count} propiedades. Saltando seeding.")
             return
 
-        print("🏠 Creando propiedades de prueba en Sevilla...")
+        logger.info("🏠 Creando propiedades de prueba en Sevilla...")
         
         properties_data = [
             {
@@ -164,10 +167,10 @@ def seed_db():
             db.add(env)
             
         db.commit()
-        print(f"✅ Se han insertado {len(properties_data)} propiedades exitosamente.")
+        logger.info(f"✅ Se han insertado {len(properties_data)} propiedades exitosamente.")
 
     except Exception as e:
-        print(f"❌ Error durante el seeding: {e}")
+        logger.error(f"❌ Error durante el seeding: {e}", exc_info=True)
         db.rollback()
     finally:
         db.close()
