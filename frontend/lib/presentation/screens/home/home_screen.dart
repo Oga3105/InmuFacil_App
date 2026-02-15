@@ -205,7 +205,7 @@ class _MapSection extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -749,7 +749,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF2563EB).withOpacity(0.1) : theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
                       width: isSelected ? 2 : 1,
@@ -1180,6 +1180,11 @@ class _MapNavigationBar extends StatelessWidget {
           
           TextButton(
             onPressed: () => context.push('/404-buy'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Comprar',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1192,6 +1197,11 @@ class _MapNavigationBar extends StatelessWidget {
           const SizedBox(width: 4),
           TextButton(
             onPressed: () => context.push('/404-sell'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Vender',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1204,6 +1214,11 @@ class _MapNavigationBar extends StatelessWidget {
           const SizedBox(width: 4),
           TextButton(
             onPressed: () => context.push('/404-how-it-works'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Cómo funciona',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1221,7 +1236,7 @@ class _MapNavigationBar extends StatelessWidget {
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
               elevation: 0,
             ),
