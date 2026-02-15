@@ -21,6 +21,8 @@ class PropertyModel {
   final double squareMeters;
   @JsonKey(name: 'image_url')
   final String? imageUrl;
+  @JsonKey(name: 'is_verified')
+  final bool isVerified;
   
   const PropertyModel({
     required this.id,
@@ -35,6 +37,7 @@ class PropertyModel {
     required this.squareMeters,
     this.imageUrl,
     this.floor,
+    this.isVerified = true,
     this.features = const [],
   });
   
@@ -74,6 +77,7 @@ class PropertyModel {
       bathrooms: (json['features']?['bathrooms'] as int?) ?? 0,
       squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
       imageUrl: _parseFirstImage(json['media']),
+      isVerified: json['is_verified'] as bool? ?? true,
       floor: json['features']?['floor'] as String?, // [NEW] Parse floor
       features: _parseFeatures(json['features']),
     );
@@ -121,6 +125,7 @@ class PropertyModel {
       squareMeters: squareMeters,
       imageUrl: imageUrl,
       floor: floor,
+      isVerified: isVerified,
       features: features,
     );
   }
@@ -161,6 +166,7 @@ class PropertyModel {
       squareMeters: property.squareMeters,
       imageUrl: property.imageUrl,
       floor: property.floor,
+      isVerified: property.isVerified,
     );
   }
   

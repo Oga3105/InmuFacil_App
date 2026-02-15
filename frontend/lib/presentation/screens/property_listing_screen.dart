@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/search_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../widgets/property_listing/property_listing_item.dart';
 import '../widgets/property_listing/filter_sidebar.dart';
+import '../widgets/map/property_floating_card.dart';
 import '../../domain/entities/property.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
@@ -12,7 +14,19 @@ class PropertyListingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchProvider);
-    final allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
+    final favoriteIds = ref.watch(favoritesProvider);
+    var allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
+    
+    // Apply local Favorites Filter if active
+    if (searchState.onlyFavorites) {
+      allFilteredProperties = allFilteredProperties.where((p) => favoriteIds.contains(p.id)).toList();
+    }
+
+    // Apply local Verified Filter if active
+    if (searchState.onlyVerified) {
+      allFilteredProperties = allFilteredProperties.where((p) => p.isVerified).toList();
+    }
+
     final paginatedProperties = _getPaginatedSlice(allFilteredProperties, searchState.currentPage, searchState.itemsPerPage);
     final theme = Theme.of(context); // Added
     final navyColor = theme.colorScheme.onSurface; // Changed to use theme
@@ -34,22 +48,26 @@ class PropertyListingScreen extends ConsumerWidget {
         // I'll stick to a simple AppBar that fits the context.
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: InkWell(
-            onTap: () => context.go('/'),
-            child: Row(
-              children: [
-                Image.asset('assets/images/logo_inmufacil.png', height: 32),
-                const SizedBox(width: 8),
-                Text.rich(
-                  TextSpan(
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                    children: [
-                      const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
-                    ],
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/logo_inmufacil.png', height: 32),
+                  const SizedBox(width: 8),
+                  Text.rich(
+                    TextSpan(
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      children: [
+                        const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                        const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -60,16 +78,35 @@ class PropertyListingScreen extends ConsumerWidget {
                children: [
                   TextButton(
                     onPressed: () {}, 
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
                   ),
                   TextButton(
                     onPressed: () {}, 
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
                   ),
                   Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
                   TextButton(
-                    onPressed: () {}, 
-                    child: const Text('Mis favoritos', style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold))
+                    onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
+                    style: TextButton.styleFrom(
+                      backgroundColor: searchState.onlyFavorites ? const Color(0xFF2563EB).withOpacity(0.1) : null,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: searchState.onlyFavorites ? const BorderSide(color: Color(0xFF2563EB), width: 1) : BorderSide.none,
+                      ),
+                    ),
+                    child: Text(
+                      'Mis favoritos', 
+                      style: TextStyle(
+                        color: searchState.onlyFavorites ? const Color(0xFF2563EB) : const Color(0xFF0F172A), 
+                        fontWeight: FontWeight.bold
+                      )
+                    )
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton(
@@ -78,7 +115,7 @@ class PropertyListingScreen extends ConsumerWidget {
                       backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       textStyle: const TextStyle(fontWeight: FontWeight.bold),
                     ),
@@ -121,8 +158,32 @@ class PropertyListingScreen extends ConsumerWidget {
                              const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()))
                           else if (paginatedProperties.isEmpty)
                              _buildEmptyState()
+                          else if (searchState.viewMode == PropertyViewMode.list)
+                            Column(children: paginatedProperties.map((p) => PropertyListingItem(property: p)).toList())
                           else
-                            ...paginatedProperties.map((p) => PropertyListingItem(property: p)),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 320,
+                                mainAxisExtent: 440, // Uniform height as requested (taller to fit all info)
+                                crossAxisSpacing: 24,
+                                mainAxisSpacing: 24,
+                              ),
+                              itemCount: paginatedProperties.length,
+                              itemBuilder: (context, index) {
+                                final p = paginatedProperties[index];
+                                return PropertyFloatingCard(
+                                  property: p,
+                                  onTap: () {
+                                    context.pushNamed(
+                                      'property-details', 
+                                      pathParameters: {'id': p.id},
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           
                           // Pagination
                           const SizedBox(height: 40),
@@ -201,12 +262,17 @@ class PropertyListingScreen extends ConsumerWidget {
                      borderRadius: BorderRadius.circular(8),
                      border: Border.all(color: Colors.grey.shade200),
                    ),
-                   child: Row(
-                     children: [
-                       _buildViewButton(Icons.list, 'Lista', true, () {}),
-                       _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
-                     ],
-                   ),
+                    child: Row(
+                      children: [
+                        _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
+                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
+                        }),
+                        _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
+                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
+                        }),
+                        _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
+                      ],
+                    ),
                  ),
                   const SizedBox(width: 12),
                   _buildSortingDropdown(context, searchState, ref),

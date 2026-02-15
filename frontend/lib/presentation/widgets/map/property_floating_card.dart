@@ -8,10 +8,15 @@ class PropertyFloatingCard extends ConsumerWidget {
   final Property property;
   final VoidCallback onTap;
 
+  final double? width;
+  final double? height;
+
   const PropertyFloatingCard({
     super.key,
     required this.property,
     required this.onTap,
+    this.width,
+    this.height,
   });
 
   @override
@@ -24,22 +29,17 @@ class PropertyFloatingCard extends ConsumerWidget {
     // Colors: Primary #2563EB, Success #16A34A, Text Slate-800
     
     return Container(
-      width: 280,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16), // rounded-card
         boxShadow: [
           BoxShadow( // shadow-soft
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 25,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
             offset: const Offset(0, 10),
             spreadRadius: -5,
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 8),
-            spreadRadius: -6,
           ),
         ],
         border: Border.all(color: Colors.grey.shade100, width: 1),
@@ -91,6 +91,23 @@ class PropertyFloatingCard extends ConsumerWidget {
                   ),
                 ),
               ),
+              // Verified Tag
+              if (property.isVerified)
+                Positioned(
+                  top: 12,
+                  left: 95, // Positioned after DESTACADO
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                         BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                      ],
+                    ),
+                    child: const Icon(Icons.verified, color: Color(0xFF16A34A), size: 16),
+                  ),
+                ),
               // Favorite Button
               Positioned(
                 top: 12,
@@ -120,112 +137,91 @@ class PropertyFloatingCard extends ConsumerWidget {
           ),
           
           // 2. Content Section
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Price & Title
-                Text(
-                  property.formattedPrice,
-                  style: const TextStyle(
-                    color: Color(0xFF2563EB), // primary
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Price & Title
+                  Text(
+                    property.formattedPrice,
+                    style: const TextStyle(
+                      color: Color(0xFF2563EB), // primary
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  property.title,
-                  style: const TextStyle(
-                    color: Color(0xFF1E293B), // text-slate-800
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
+                  const SizedBox(height: 2),
+                  Text(
+                    property.title,
+                    style: const TextStyle(
+                      color: Color(0xFF1E293B), // text-slate-800
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Features Divider
-                // Features Layout (3 across or 2x2)
-                Builder(
-                  builder: (context) {
-                    final List<Widget> items = [
-                      _buildFeature(Icons.bed, '${property.bedrooms} Hab'),
-                      _buildFeature(Icons.bathroom_outlined, '${property.bathrooms} Baño'),
-                      _buildFeature(Icons.square_foot, '${property.squareMeters}m²'),
-                      if (property.floor != null)
-                        _buildFeature(Icons.layers, '${property.floor}'),
-                    ];
+                  
+                  const SizedBox(height: 12),
+                  
+                  // Features Layout
+                  Builder(
+                    builder: (context) {
+                      final List<Widget> items = [
+                        _buildFeature(Icons.bed, '${property.bedrooms} Hab'),
+                        _buildFeature(Icons.bathroom_outlined, '${property.bathrooms} Baño'),
+                        _buildFeature(Icons.square_foot, '${property.squareMeters}m²'),
+                        if (property.floor != null)
+                          _buildFeature(Icons.layers, '${property.floor}'),
+                      ];
 
-                    if (items.length <= 3) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 8,
                         children: items,
                       );
-                    } else {
-                      // 2 and 2 Grid
-                      return Column(
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(child: items[0]),
-                              const SizedBox(width: 12),
-                              Expanded(child: items[1]),
-                            ],
+                    },
+                  ),
+                  
+                  const Spacer(), // Pushes action button to bottom for uniform look
+                  const SizedBox(height: 12),
+                  
+                  // Action Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: onTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF16A34A), // success
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Text(
+                            'Ver detalle',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(child: items[2]),
-                              const SizedBox(width: 12),
-                              Expanded(child: items[3]),
-                            ],
-                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.chevron_right, size: 18),
                         ],
-                      );
-                    }
-                  },
-                ),
-                
-                const SizedBox(height: 12),
-                
-                // Action Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: onTap,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF16A34A), // success
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shadowColor: const Color(0xFF16A34A).withOpacity(0.1),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          'Ver detalle',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.chevron_right, size: 18),
-                      ],
-                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],

@@ -95,6 +95,7 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
                             constraints: const BoxConstraints(maxWidth: 320), // Slightly narrower?
                             child: PropertyFloatingCard(
                               property: displayProperty,
+                              width: 280,
                                 onTap: () {
                                   // Navigate to details (Full Page)
                                   context.pushNamed(

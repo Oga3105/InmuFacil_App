@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
 import '../../../../domain/entities/property.dart';
+import '../common/premium_button.dart'; // Corrected Import
 
 class PropertyListingItem extends ConsumerWidget {
   final Property property;
@@ -237,29 +238,32 @@ class PropertyListingItem extends ConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Verified Tag
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: successGreen.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: successGreen.withOpacity(0.2)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.verified, size: 16, color: successGreen),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'VENDEDOR VERIFICADO',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: successGreen.withOpacity(0.9),
-                                    letterSpacing: 0.5,
+                          if (property.isVerified)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: successGreen.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: successGreen.withOpacity(0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.verified, size: 16, color: successGreen),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'VENDEDOR VERIFICADO',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: successGreen.withOpacity(0.9),
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                ],
+                              ),
+                            )
+                          else
+                            const SizedBox.shrink(),
 
                           Row(
                             children: [
@@ -270,18 +274,16 @@ class PropertyListingItem extends ConsumerWidget {
                                 tooltip: 'Compartir',
                               ),
                               const SizedBox(width: 8),
-                              ElevatedButton.icon(
+                              const SizedBox(width: 8),
+                              PremiumButton(
+                                label: 'Contactar Particular',
+                                icon: Icons.chat_bubble_outline,
+                                color: brandBlue,
+                                fullWidth: false,
+                                fontSize: 13,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 onPressed: () {},
-                                icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                                label: const Text('Contactar Particular'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: brandBlue,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                              )
+                              ),
                             ],
                           )
                         ],

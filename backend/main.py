@@ -341,6 +341,7 @@ async def seed_database():
                 "location": "37.3862, -5.9925",
                 "surface_area": 120.0,
                 "property_type": PropertyType.PISO,
+                "is_verified": True,
                 "features": {"bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, "has_ac": True, "floor": "Ático"}
             },
             {
@@ -351,6 +352,7 @@ async def seed_database():
 
                 "surface_area": 85.0,
                 "property_type": PropertyType.PISO,
+                "is_verified": False, # TEST: This one is NOT verified
                 "features": {"bedrooms": 2, "bathrooms": 1, "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO, "floor": "Bajo"}
             },
             {
@@ -361,6 +363,7 @@ async def seed_database():
 
                 "surface_area": 95.0,
                 "property_type": PropertyType.PISO,
+                "is_verified": False, # TEST: This one is NOT verified
                 "features": {"bedrooms": 3, "bathrooms": 2, "has_lift": True}
             },
             {

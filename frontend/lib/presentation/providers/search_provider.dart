@@ -14,6 +14,12 @@ import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
 
+/// View modes for property listing
+enum PropertyViewMode {
+  list,
+  grid,
+}
+
 /// Search state for property filtering
 class SearchState {
   final PropertyType propertyType;
@@ -30,11 +36,14 @@ class SearchState {
   final bool isSearchActive; // NEW: Track if search button has been pressed
   final int minBedrooms; // NEW: Filter
   final List<String> selectedExtras; // NEW: Filter
+  final bool onlyFavorites; // NEW: Filter for favorites
+  final bool onlyVerified; // NEW: Filter for verified
   
-  // Pagination & Sorting
+  // Pagination, Sorting & View Mode
   final int currentPage;
   final int itemsPerPage;
   final SortOption sortBy;
+  final PropertyViewMode viewMode;
   
   // Default view centered on Madrid (Spain Center)
   static const LatLng _spainCenter = LatLng(40.4168, -3.7038);
@@ -57,6 +66,9 @@ class SearchState {
     this.currentPage = 1,
     this.itemsPerPage = 5,
     this.sortBy = SortOption.relevance,
+    this.viewMode = PropertyViewMode.list,
+    this.onlyFavorites = false,
+    this.onlyVerified = false,
   });
   
   SearchState copyWith({
@@ -83,6 +95,9 @@ class SearchState {
     int? currentPage,
     int? itemsPerPage,
     SortOption? sortBy,
+    PropertyViewMode? viewMode,
+    bool? onlyFavorites,
+    bool? onlyVerified,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -110,6 +125,9 @@ class SearchState {
       currentPage: currentPage ?? this.currentPage,
       itemsPerPage: itemsPerPage ?? this.itemsPerPage,
       sortBy: sortBy ?? this.sortBy,
+      viewMode: viewMode ?? this.viewMode,
+      onlyFavorites: onlyFavorites ?? this.onlyFavorites,
+      onlyVerified: onlyVerified ?? this.onlyVerified,
     );
   }
 }
@@ -187,6 +205,31 @@ class SearchNotifier extends StateNotifier<SearchState> {
   void setSortBy(SortOption option) {
     state = state.copyWith(sortBy: option, currentPage: 1); // Reset to page 1 on sort change
     _applySorting();
+  }
+
+  /// Update view mode (list/grid)
+  void updateViewMode(PropertyViewMode mode) {
+    state = state.copyWith(
+      viewMode: mode,
+      itemsPerPage: mode == PropertyViewMode.grid ? 9 : 5,
+      currentPage: 1, // Reset to first page when view mode changes
+    );
+  }
+
+  /// Toggle favorites filter
+  void toggleOnlyFavorites() {
+    state = state.copyWith(
+      onlyFavorites: !state.onlyFavorites,
+      currentPage: 1, // Reset to first page when filter changes
+    );
+  }
+
+  /// Toggle verified filter
+  void toggleOnlyVerified() {
+    state = state.copyWith(
+      onlyVerified: !state.onlyVerified,
+      currentPage: 1, // Reset to first page when filter changes
+    );
   }
   
   /// Get paginated slice of filtered properties

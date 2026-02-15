@@ -4,12 +4,38 @@ import 'package:go_router/go_router.dart';
 import '../../providers/search_provider.dart';
 import '../../../domain/entities/property_type.dart';
 import '../../../core/utils/temp_translations.dart';
+import '../common/premium_button.dart'; // Corrected Import
 
-class FilterSidebar extends ConsumerWidget {
+class FilterSidebar extends ConsumerStatefulWidget {
   const FilterSidebar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FilterSidebar> createState() => _FilterSidebarState();
+}
+
+class _FilterSidebarState extends ConsumerState<FilterSidebar> {
+  final TextEditingController _locationController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync initial location if available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final searchState = ref.read(searchProvider);
+      if (searchState.location.isNotEmpty) {
+        _locationController.text = searchState.location;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
     const navyColor = Color(0xFF0F172A);
     const primaryBlue = Color(0xFF2563EB); // User Brand Blue
@@ -31,30 +57,72 @@ class FilterSidebar extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Filtros',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: navyColor,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Filtros',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: navyColor,
+                        ),
+                      ),
+                      // "Limpiar" removed per user request
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Location Search
+                  TextField(
+                    controller: _locationController,
+                    decoration: InputDecoration(
+                      hintText: 'Ciudad, zona...',
+                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                      prefixIcon: const Icon(Icons.location_on, size: 18, color: primaryBlue),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: const BorderSide(color: primaryBlue),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => context.push('/404'),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        foregroundColor: primaryBlue,
-                      ),
-                      child: const Text('Limpiar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 20),
+                    style: const TextStyle(fontSize: 13),
+                    onSubmitted: (value) {
+                       if (value.isNotEmpty) {
+                         ref.read(searchProvider.notifier).searchCity(value);
+                       }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: PremiumButton(
+                      label: 'Buscar propiedades',
+                      icon: Icons.search,
+                      color: primaryBlue,
+                      fontSize: 14,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Reduced padding
+                      onPressed: () {
+                         if (_locationController.text.isNotEmpty) {
+                           ref.read(searchProvider.notifier).searchCity(_locationController.text);
+                         } else {
+                           ref.read(searchProvider.notifier).search(); 
+                         }
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  const Divider(),
+                  const SizedBox(height: 20),
                 
                 // Price Range
                 _buildSectionTitle('Rango de Precio'),
@@ -108,10 +176,13 @@ class FilterSidebar extends ConsumerWidget {
                     underline: Container(),
                     icon: const Icon(Icons.arrow_drop_down),
                     isExpanded: true,
-                    items: [1, 2, 3, 4, 5].map((e) => DropdownMenuItem(
-                      value: e,
-                      child: Text('$e+ Hab.', style: const TextStyle(fontSize: 13)),
-                    )).toList(),
+                    items: [1, 2, 3, 4, 5].map((e) {
+                      final label = (e >= 3) ? '$e+ Hab.' : '$e Hab.';
+                      return DropdownMenuItem(
+                        value: e,
+                        child: Text(label, style: const TextStyle(fontSize: 13)),
+                      );
+                    }).toList(),
                     onChanged: (val) {
                       if (val != null) {
                         ref.read(searchProvider.notifier).updateMinBedrooms(val);
@@ -173,6 +244,22 @@ class FilterSidebar extends ConsumerWidget {
                 _buildCheckbox(context, ref, 'Exterior', searchState.selectedExtras.contains('Exterior')),
                 _buildCheckbox(context, ref, 'Acceso movilidad reducida', searchState.selectedExtras.contains('Acceso movilidad reducida')),
 
+                // Conditional "Limpiar Filtros" Button (Red)
+                if (searchState.propertyType != PropertyType.all ||
+                    searchState.priceRange.start > 0 ||
+                    searchState.priceRange.end < 1000000 || 
+                    searchState.minBedrooms > 0 ||
+                    searchState.selectedExtras.isNotEmpty) ...[
+                      const SizedBox(height: 24),
+                      PremiumButton(
+                        label: 'Limpiar filtros',
+                        icon: Icons.refresh,
+                        color: const Color(0xFFB91C1C), // Red
+                        fontSize: 14,
+                        onPressed: () => ref.read(searchProvider.notifier).resetFilters(),
+                      ),
+                ],
+
                 const SizedBox(height: 24),
                 const Divider(),
                 const SizedBox(height: 16),
@@ -188,8 +275,8 @@ class FilterSidebar extends ConsumerWidget {
                     ),
                     const Spacer(),
                     Switch(
-                      value: false, 
-                      onChanged: (val) => context.push('/404'),
+                      value: searchState.onlyVerified, 
+                      onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
                       activeColor: const Color(0xFF16A34A),
                     ),
                   ],

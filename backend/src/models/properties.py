@@ -23,6 +23,7 @@ class Property(Base):
     
     status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
     hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
+    is_verified = Column(Boolean, default=True) # NEW: Verificado InmuFácil
     
     # Basic dimensions (often filtered)
     surface_area = Column(Float, nullable=False)  # in square meters

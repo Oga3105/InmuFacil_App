@@ -188,6 +188,7 @@ class PropertyBase(BaseModel):
     
     property_type: PropertyType = PropertyType.PISO
     operation_type: OperationType = OperationType.VENTA
+    is_verified: bool = True
 
 
 class PropertyCreate(PropertyBase):

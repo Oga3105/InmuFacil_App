@@ -15,6 +15,7 @@ class Property {
   final double squareMeters;
   final String? imageUrl;
   final String? floor; // [NEW] Optional floor info (e.g., "Bajo", "2")
+  final bool isVerified; // [NEW] Verificado InmuFácil
   
   const Property({
     required this.id,
@@ -28,6 +29,7 @@ class Property {
     this.squareMeters = 0,
     this.imageUrl,
     this.floor,
+    this.isVerified = true,
     this.features = const [],
   });
 
