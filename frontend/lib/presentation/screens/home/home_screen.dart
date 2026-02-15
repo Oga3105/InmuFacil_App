@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
-import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
+import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; // [NEW] Hover Provider
+import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // [NEW] Card Widget
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
 // PropertyCard import removed
 import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT (Fix for Property not found)
@@ -71,7 +73,42 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
             // Left: Search Panel (Resizable)
             SizedBox(
               width: _leftPanelWidth,
-              child: _SearchPanel(),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _SearchPanel(),
+                  
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final hoveredProperty = ref.watch(hoveredPropertyProvider);
+                        final selectedProperty = ref.watch(selectedPropertyProvider);
+                        // Priority: Hover > Selected > Null
+                        final displayProperty = hoveredProperty ?? selectedProperty;
+                        
+                        if (displayProperty == null) return const SizedBox.shrink();
+
+                        return Positioned(
+                          top: 20, 
+                          right: 0, // [FIX] Align to the right edge (divider)
+                          // left: null, // Don't constrain left
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 320), // Slightly narrower?
+                            child: PropertyFloatingCard(
+                              property: displayProperty,
+                                onTap: () {
+                                  // Navigate to details (Full Page)
+                                  context.pushNamed(
+                                    'property-details', 
+                                    pathParameters: {'id': displayProperty.id},
+                                  );
+                                },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
             ),
             
             // Resizer Handle

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
-import 'dart:math'; // For Point
+import 'package:latlong2/latlong.dart' hide Path;
+import 'package:go_router/go_router.dart';
+import 'dart:math' as math;
+import 'dart:async'; // For Timer (Hover Debounce)
 // import 'package:easy_localization/easy_localization.dart'; // TEMP DISABLED
 
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; // [NEW] Hover Provider
 import 'package:inmufacil_frontend/domain/entities/property.dart';
+import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 
 /// OpenStreetMap widget with custom property markers, Drawing and Zoning
@@ -27,12 +31,16 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   // Spain (Madrid) coordinates for geolocation fallback
   static const LatLng _spainFallback = LatLng(40.4168, -3.7038);
   
-  // Track zoom level for marker adaptivity
-  double _currentZoom = 13.0; // Default matching initial logic
-
+  // State
+  // Property? _selectedProperty; // REMOVED: Managed by provider now
+  double _currentZoom = 6.0;
+  // Property? _hoveredProperty; // REMOVED: Managed by provider now
+  Timer? _hoverTimer;
+  
   @override
   void dispose() {
     _mapController.dispose();
+    _hoverTimer?.cancel();
     super.dispose();
   }
   
@@ -123,28 +131,58 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                  ref.read(mapStateProvider.notifier).completeDrawing();
                }
             },
+            // FLOATING CARD: Clear hover if mouse moves on map (not on marker)
+            onPointerHover: (event) {
+              // Only clear if we are NOT over a marker (handled by marker's MouseRegion)
+              // But Marker is a child, so this listener might trigger first or bubble up.
+              // Actually, MarkerLayer is below.
+              // Logic: If map hovered, and we are not hovering a marker?
+              // Let's rely on MouseRegion.onExit of the marker to clear hover.
+            },
             child: FlutterMap(
               mapController: _mapController,
               options: MapOptions(
-                initialCenter: searchState.mapCenter ?? _spainFallback,
-                initialZoom: 6.2,
-                minZoom: 5,
-                maxZoom: 18,
-                
-                // TRACK ZOOM & BOUNDS
+                // FLOATING CARD: Clear SELECTION on map tap (if not hitting marker)
+                // ERROR HANDLING: Clear error on tap
+                onTap: (tapPosition, point) {
+                   // Clear Selection on Map Background Tap
+                   if (ref.read(selectedPropertyProvider) != null) {
+                      ref.read(selectedPropertyProvider.notifier).state = null;
+                   }
+                   
+                   // User Interaction -> Clear Error & Text
+                   ref.read(searchProvider.notifier).clearSearchText();
+                },
+                // ERROR HANDLING: Clear error on map move (drag/pan)
                 onPositionChanged: (position, hasGesture) {
+                  // Only clear if USER initiated the move (hasGesture)
+                  // preventing clear on programmatic moves (e.g. search result flyTo)
+                  if (hasGesture) {
+                     final notifier = ref.read(searchProvider.notifier);
+                     // Check if there is something to clear to avoid redundant calls
+                     if (ref.read(searchProvider).error != null || ref.read(searchProvider).location.isNotEmpty) {
+                        notifier.clearSearchText();
+                     }
+                  }
+                  
                   if (position.zoom != null && position.zoom != _currentZoom) {
                     setState(() {
                       _currentZoom = position.zoom!;
                     });
                   }
                   
-                  // Update Visible Bounds for "Viewport Mode" Filtering
-                  // Debounce could be added here if performance is an issue
+                  // Update Visible Bounds
                   if (position.bounds != null) {
                     ref.read(mapStateProvider.notifier).setVisibleBounds(position.bounds!);
                   }
                 },
+                initialCenter: searchState.mapCenter ?? _spainFallback,
+                initialZoom: 6.2,
+                minZoom: 5,
+                maxZoom: 18,
+                
+                // TRACK ZOOM & BOUNDS
+                // REMOVED old onPositionChanged (merged above)
                 
                 // INTERACTION: Disable panning/zooming when drawing
                 interactionOptions: InteractionOptions(
@@ -212,13 +250,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
             ),
           ),
           
-          // --- UI OVERLAYS ---
-          // ... (Rest of UI overlays remain unchanged) ...
-          
           // A. Drawing Instructions Banner
           if (mapState.isDrawingMode)
              Positioned(
-              top: 70, 
               left: 0, 
               right: 0,
               child: Center(
@@ -318,20 +352,21 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
               ],
             ),
           ),
-          
-          // C. Loading & Error Overlays
+          // --- UI OVERLAYS ---
+          // 4. Loading Indicator
           if (searchState.isLoading)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-          
+             const Center(
+               child: CircularProgressIndicator(),
+             ),
+             
+          // 5. Error Banner (Top Persistence)
           if (searchState.error != null)
-             Positioned(
-              bottom: 40,
+            Positioned(
+              top: 90, // Raised to avoid bottom overlaps, below top nav
               left: 20,
-              right: 80, // Avoid overlapping with Toolbar
-              child: _AutoDismissErrorBanner(
-                errorMessage: searchState.error!,
+              right: 20,
+              child: _ErrorBanner(
+                message: searchState.error!,
                 onDismiss: () => ref.read(searchProvider.notifier).clearError(),
               ),
             ),
@@ -388,6 +423,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     // [FIX] Use parameters captured in build() or re-watch here (better to pass from build)
     // Re-watching for safety within helper
     final properties = ref.watch(filteredByMapPropertiesProvider); 
+    final hoveredProperty = ref.watch(hoveredPropertyProvider); 
+    final selectedProperty = ref.watch(selectedPropertyProvider); // [NEW] Watch global selection
     
     if (properties.isEmpty) return const SizedBox.shrink();
     
@@ -397,31 +434,72 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     final bool showPrice = _currentZoom >= 13.0;
 
     return MarkerLayer(
-      markers: properties.map((property) {
+      markers: properties.map<Marker>((property) {
+        // Determine Active State (Hovered OR Selected via Provider)
+        final bool isSelected = selectedProperty?.id == property.id;
+        final bool isHovered = hoveredProperty?.id == property.id;
+        final bool isActive = isSelected || isHovered;
+        
         return Marker(
           point: property.location,
-          width: showPrice ? 80 : 40, // Adjust width based on type
-          height: 40,
-          child: GestureDetector(
-            onTap: () => _showPropertyDetails(property),
-            child: showPrice 
-                ? _CompactPriceMarker(price: property.formattedPrice)
-                : const _GpsPinMarker(),
+          width: showPrice ? 90 : 40, 
+          height: showPrice ? 45 : 40,
+          child: MouseRegion(
+            onEnter: (_) {
+               _hoverTimer?.cancel(); 
+               // [NEW] Hovering another marker CLEARS any existing selection
+               // This prevents the "fixed" card from reappearing after leaving this marker
+               ref.read(selectedPropertyProvider.notifier).state = null;
+               
+               // Update Hover Provider to show this marker's info
+               ref.read(hoveredPropertyProvider.notifier).state = property;
+            },
+            onExit: (_) {
+               // Only clear hover
+               _hoverTimer = Timer(const Duration(milliseconds: 100), () {
+                  ref.read(hoveredPropertyProvider.notifier).state = null;
+               });
+            },
+            cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+              onTap: () {
+                ref.read(selectedPropertyProvider.notifier).state = property;
+              },
+              onDoubleTap: () {
+                // Navigate to details (Full Page) on Double Tap
+                context.pushNamed(
+                  'property-details',
+                  pathParameters: {'id': property.id},
+                );
+              },
+              child: showPrice 
+                  ? _CompactPriceMarker(
+                      price: property.formattedPrice,
+                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF2563EB), // Green if active
+                    )
+                  : _GpsPinMarker(
+                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF2563EB),
+                    ),
+            ),
           ),
+          // FLOATING CARD: Ensure tip of tail is on the coordinate
+          // Alignment.bottomCenter means the bottom center of the widget is at the coordinate
+          // Our bubble tail is at the bottom center of the widget, so it points exactly to the point.
+          alignment: Alignment.bottomCenter,
         );
       }).toList(),
     );
   }
+  
 
   /// Helper to convert screen coordinates to LatLng and add to drawing
   void _addPointFromEvent(Offset localPosition) {
     // Convert screen point to LatLng using the map camera
-    final point = _mapController.camera.pointToLatLng(Point(localPosition.dx, localPosition.dy));
+    final point = _mapController.camera.pointToLatLng(math.Point(localPosition.dx, localPosition.dy));
     ref.read(mapStateProvider.notifier).addPoint(point);
   }
 }
 
-/// Helper Widget for Uniform Toolbar Buttons
 class _MapToolButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
@@ -459,15 +537,92 @@ class _MapToolButton extends StatelessWidget {
   }
 }
 
-/// Simple GPS Pin for Low Zoom
+/// Compact Price Label for High Zoom
+class _CompactPriceMarker extends StatelessWidget {
+  final String price;
+  final Color color;
+  const _CompactPriceMarker({
+    required this.price,
+    this.color = const Color(0xFF2563EB),
+  });
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // 1. Price Bubble
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const [
+              BoxShadow(
+                blurRadius: 4, 
+                color: Colors.black26,
+                offset: Offset(0, 2)
+              )
+            ],
+          ),
+          child: Text(
+            price,
+            style: const TextStyle(
+              color: Colors.white, 
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+        // 2. Tail / Pointer
+        CustomPaint(
+          size: const Size(12, 6),
+          painter: _TrianglePainter(color: color),
+        ),
+      ],
+    );
+  }
+}
+
+class _TrianglePainter extends CustomPainter {
+  final Color color;
+  _TrianglePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final Path path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
+    
+    // Optional: Subtle shadow for the tail
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.1)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 1);
+    canvas.drawPath(path.shift(const Offset(0, 1)), shadowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class _GpsPinMarker extends StatelessWidget {
-  const _GpsPinMarker();
+  final Color color;
+  const _GpsPinMarker({this.color = const Color(0xFF2563EB)});
 
   @override
   Widget build(BuildContext context) {
-    return const Icon(
+    return Icon(
       Icons.location_on,
-      color: Color(0xFF2563EB), // Primary Blue
+      color: color, // Dynamic Color
       size: 40,
       shadows: [
         Shadow(
@@ -480,74 +635,46 @@ class _GpsPinMarker extends StatelessWidget {
   }
 }
 
-/// Compact Price Label for High Zoom
-class _CompactPriceMarker extends StatelessWidget {
-  final String price;
-  const _CompactPriceMarker({required this.price});
-  
-  @override
-  Widget build(BuildContext context) {
-    // Simplify price string "€350K" -> "350K" to save space? 
-    // Or keep formatted but use smaller font.
-    // Let's keep formatted property.formattedPrice e.g. "€350K"
-    
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2563EB), // Primary Blue
-          borderRadius: BorderRadius.circular(12), // Rounded capsule
-          boxShadow: const [
-            BoxShadow(
-              blurRadius: 2, 
-              color: Colors.black26,
-              offset: Offset(0, 1)
-            )
-          ],
-        ),
-        child: Text(
-          price,
-          style: const TextStyle(
-            color: Colors.white, 
-            fontSize: 11, // Smaller font
-            fontWeight: FontWeight.bold,
-            letterSpacing: -0.5,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ),
-    );
-  }
-}
-
-class _AutoDismissErrorBanner extends StatefulWidget {
-  final String errorMessage;
+class _ErrorBanner extends StatelessWidget {
+  final String message;
   final VoidCallback onDismiss;
-  const _AutoDismissErrorBanner({required this.errorMessage, required this.onDismiss});
-  @override
-  State<_AutoDismissErrorBanner> createState() => _AutoDismissErrorBannerState();
-}
 
-class _AutoDismissErrorBannerState extends State<_AutoDismissErrorBanner> {
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 5), () {
-      if(mounted) widget.onDismiss();
-    });
-  }
+  const _ErrorBanner({required this.message, required this.onDismiss});
+
   @override
   Widget build(BuildContext context) {
-     return Card(
-      color: Colors.red.shade50,
-      child: ListTile(
-        leading: const Icon(Icons.error, color: Colors.red),
-        title: Text(widget.errorMessage, style: const TextStyle(color: Colors.red)),
-        trailing: IconButton(
-          icon: const Icon(Icons.close, color: Colors.red),
-          onPressed: widget.onDismiss,
-        ),
+    return Container( // Removed auto-dismiss timer logic
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+        boxShadow: [
+          BoxShadow(
+             color: Colors.black.withOpacity(0.05),
+             blurRadius: 10,
+             offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade700),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.w500),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.close, color: Colors.red.shade400, size: 20),
+            onPressed: onDismiss, 
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          )
+        ],
       ),
     );
   }

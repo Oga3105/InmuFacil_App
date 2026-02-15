@@ -16,6 +16,8 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 1,
       squareMeters: 75,
+      features: const ['lift'],
+      floor: '3',
     ),
     
     // Salamanca
@@ -42,6 +44,8 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 2,
       squareMeters: 85,
+      features: const ['lift', 'terrace'],
+      floor: '1',
     ),
     
     // Retiro
@@ -108,6 +112,8 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 95,
+      features: const ['lift', 'garage'],
+      floor: '4',
     ),
     
     // Las Rozas (afueras)

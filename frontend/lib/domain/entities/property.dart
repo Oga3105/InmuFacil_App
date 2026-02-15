@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart';
+import 'package:intl/intl.dart';
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 
 /// Property entity for real estate listings
@@ -13,6 +14,7 @@ class Property {
   final int bathrooms;
   final double squareMeters;
   final String? imageUrl;
+  final String? floor; // [NEW] Optional floor info (e.g., "Bajo", "2")
   
   const Property({
     required this.id,
@@ -25,18 +27,15 @@ class Property {
     this.bathrooms = 0,
     this.squareMeters = 0,
     this.imageUrl,
+    this.floor,
     this.features = const [],
   });
 
   final List<String> features;
   
-  /// Format price as currency string
+  /// Format price as currency string (e.g., 380.000 €)
   String get formattedPrice {
-    if (price >= 1000000) {
-      return '€${(price / 1000000).toStringAsFixed(1)}M';
-    } else if (price >= 1000) {
-      return '€${(price / 1000).toStringAsFixed(0)}K';
-    }
-    return '€${price.toStringAsFixed(0)}';
+    final formatter = NumberFormat.decimalPattern('es_ES');
+    return '${formatter.format(price.toInt())} €';
   }
 }

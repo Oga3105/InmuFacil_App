@@ -34,8 +34,12 @@ class PropertyModel {
     required this.bathrooms,
     required this.squareMeters,
     this.imageUrl,
+    this.floor,
     this.features = const [],
   });
+  
+  @JsonKey(includeFromJson: false)
+  final String? floor;
 
   @JsonKey(includeFromJson: false) // Not serialized by default json_serializable unless updated
   final List<String> features;
@@ -70,6 +74,7 @@ class PropertyModel {
       bathrooms: (json['features']?['bathrooms'] as int?) ?? 0,
       squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
       imageUrl: _parseFirstImage(json['media']),
+      floor: json['features']?['floor'] as String?, // [NEW] Parse floor
       features: _parseFeatures(json['features']),
     );
   }
@@ -115,6 +120,7 @@ class PropertyModel {
       bathrooms: bathrooms,
       squareMeters: squareMeters,
       imageUrl: imageUrl,
+      floor: floor,
       features: features,
     );
   }
@@ -154,6 +160,7 @@ class PropertyModel {
       bathrooms: property.bathrooms,
       squareMeters: property.squareMeters,
       imageUrl: property.imageUrl,
+      floor: property.floor,
     );
   }
   

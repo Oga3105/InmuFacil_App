@@ -71,6 +71,7 @@ class PropertyFeatures(Base):
     bedrooms = Column(Integer, default=0)
     bathrooms = Column(Integer, default=0)
     construction_year = Column(Integer, nullable=True)
+    floor = Column(String, nullable=True) # Planta del inmueble
     
     orientation = Column(Enum(Orientation), nullable=True)
     heating_type = Column(Enum(HeatingType), nullable=True)

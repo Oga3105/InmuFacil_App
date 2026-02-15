@@ -68,9 +68,15 @@ class SearchState {
     LatLng? mapCenter,
     bool? isLoading,
     String? error,
+    bool clearError = false, // [NEW] Flag to explicitly clear error
+    
     bool? isUsingFallbackLocation,
     List<String>? lastSearchResultBbox,
+    bool clearBbox = false, // [NEW] Flag to clear bbox
+    
     Map<String, dynamic>? lastSearchResultGeoJson,
+    bool clearGeoJson = false, // [NEW] Flag to clear geojson
+    
     bool? isSearchActive,
     int? minBedrooms,
     List<String>? selectedExtras,
@@ -86,10 +92,18 @@ class SearchState {
       filteredProperties: filteredProperties ?? this.filteredProperties,
       mapCenter: mapCenter ?? this.mapCenter,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      
+      // [FIX] Error clearing logic
+      error: clearError ? null : (error ?? this.error),
+      
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
-      lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
-      lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
+      
+      // [FIX] Bbox clearing logic
+      lastSearchResultBbox: clearBbox ? null : (lastSearchResultBbox ?? this.lastSearchResultBbox),
+      
+      // [FIX] GeoJson clearing logic
+      lastSearchResultGeoJson: clearGeoJson ? null : (lastSearchResultGeoJson ?? this.lastSearchResultGeoJson),
+      
       isSearchActive: isSearchActive ?? this.isSearchActive,
       minBedrooms: minBedrooms ?? this.minBedrooms,
       selectedExtras: selectedExtras ?? this.selectedExtras,
@@ -219,7 +233,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(
         location: '',
         mapCenter: LocationService.sevillaFallback,
-        lastSearchResultBbox: null,
+        lastSearchResultBbox: null, // Clear bbox if location cleared
+        clearBbox: true,
       );
       return;
     }
@@ -227,7 +242,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(
       location: location,
       isLoading: true,
-      error: null,
+      clearError: true, // [FIX] Clear error on new location update
     );
     
     try {
@@ -241,6 +256,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = state.copyWith(
           mapCenter: coords,
           isLoading: false,
+          clearError: true, // [FIX] Clear error
         );
         await _loadProperties();
       }
@@ -278,7 +294,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// Execute search with current filters
   /// This activates the "Results Mode"
   void search() {
-    state = state.copyWith(isSearchActive: true);
+    state = state.copyWith(isSearchActive: true, clearError: true);
     _loadProperties();
   }
   
@@ -321,7 +337,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         return;
       }
       
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoading: true, clearError: true);
       
       try {
         // STEP 1: Primary attempt - Search only in Spain with MULTIPLE results
@@ -437,6 +453,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
             lastSearchResultBbox: bbox,
             lastSearchResultGeoJson: geoJson, // NEW: Store GeoJSON
             isSearchActive: true, // AUTO-ACTIVATE Search when location found
+            clearError: true, // [FIX] Clear any previous error
           );
           
           debugPrint("✅ Location found: $displayName");
@@ -462,7 +479,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   
   /// Load properties from repository with current filters
   Future<void> _loadProperties() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     final result = await _repository.getProperties(
       type: state.propertyType != PropertyType.all 
@@ -530,7 +547,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
         state = state.copyWith(
           isLoading: false,
-          error: null,
+          // error: null, // Removed: already cleared at start
           filteredProperties: results,
           currentPage: 1, // Reset to page 1 when filters change
         );
@@ -543,30 +560,34 @@ class SearchNotifier extends StateNotifier<SearchState> {
   
   /// Clear error message
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(clearError: true);
   }
   
+  /// Clear location text and error without resetting map (User Request Step 18412)
+  void clearSearchText() {
+    state = state.copyWith(location: '', clearError: true);
+  }
+
   /// Reset all filters and view mode
   void reset() {
     state = const SearchState(isSearchActive: false); // Reset to Landing View
     initLocation();
   }
 
-  /// Reset filters but keep location context if possible, or just exact alias for reset()
   /// Reset filters but keep location context (Soft Reset)
-/// Used by "Limpiar filtros" button in UI
-void resetFilters() {
-  state = state.copyWith(
-    propertyType: PropertyType.all,
-    priceRange: const RangeValues(0, 1000000),
-    filteredProperties: const [], // Will be reloaded
-    minBedrooms: 0,
-    selectedExtras: const [],
-    currentPage: 1,
-    // Keep location, mapCenter, isUsingFallbackLocation, lastSearchResultBbox
-  );
-  _loadProperties(); // Reload with cleared filters but same location
-}
+  /// Used by "Limpiar filtros" button in UI
+  void resetFilters() {
+    state = state.copyWith(
+      propertyType: PropertyType.all,
+      priceRange: const RangeValues(0, 1000000),
+      filteredProperties: const [], // Will be reloaded
+      minBedrooms: 0,
+      selectedExtras: const [],
+      currentPage: 1,
+      // Keep location, mapCenter, isUsingFallbackLocation, lastSearchResultBbox
+    );
+    _loadProperties(); // Reload with cleared filters but same location
+  }
 }
 
 /// Provider for ApiClient
