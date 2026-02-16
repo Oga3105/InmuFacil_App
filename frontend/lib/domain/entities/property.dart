@@ -16,6 +16,9 @@ class Property {
   final String? imageUrl;
   final String? floor; // [NEW] Optional floor info (e.g., "Bajo", "2")
   final bool isVerified; // [NEW] Verificado InmuFácil
+  final String description; // [NEW] Detailed description
+  final List<String> images; // [NEW] Gallery images
+  final double? rating; // [NEW] User rating
   
   const Property({
     required this.id,
@@ -31,6 +34,9 @@ class Property {
     this.floor,
     this.isVerified = true,
     this.features = const [],
+    this.description = '',
+    this.images = const [],
+    this.rating,
   });
 
   final List<String> features;

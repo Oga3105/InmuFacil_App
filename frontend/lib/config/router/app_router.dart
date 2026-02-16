@@ -7,6 +7,7 @@ import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/not_found/not_found_screen.dart';
 import '../../presentation/screens/property_listing_screen.dart';
+import '../../presentation/screens/property/property_details_screen.dart'; // [NEW]
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -47,18 +48,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => NotFoundScreen(uri: state.uri.toString()),
       ),
       
-      // Property Details (placeholder)
+      // Property Details
       GoRoute(
         path: '/property/:id',
         name: 'property-details',
         builder: (context, state) {
           final propertyId = state.pathParameters['id'];
-          return Scaffold(
-            appBar: AppBar(title: Text('Property $propertyId')),
-            body: Center(
-              child: Text('Property details for ID: $propertyId'),
-            ),
-          );
+          // Ensure we have an ID
+          if (propertyId == null) {
+            return NotFoundScreen(uri: state.uri.toString());
+          }
+          return PropertyDetailsScreen(propertyId: propertyId);
         },
       ),
     ],
