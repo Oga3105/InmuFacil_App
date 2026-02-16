@@ -35,12 +35,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   // Property? _selectedProperty; // REMOVED: Managed by provider now
   double _currentZoom = 6.0;
   // Property? _hoveredProperty; // REMOVED: Managed by provider now
-  Timer? _hoverTimer;
-  
   @override
   void dispose() {
     _mapController.dispose();
-    _hoverTimer?.cancel();
     super.dispose();
   }
   
@@ -111,6 +108,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
           ? SystemMouseCursors.precise  // Crosshair for drawing
           : SystemMouseCursors.basic,
       child: Stack(
+        fit: StackFit.expand, // [FIX] Force Map to fill parent (Positioned.fill)
         children: [
           Listener(
             // FREEHAND DRAWING LOGIC (Lasso)
@@ -145,10 +143,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 // FLOATING CARD: Clear SELECTION on map tap (if not hitting marker)
                 // ERROR HANDLING: Clear error on tap
                 onTap: (tapPosition, point) {
-                   // Clear Selection on Map Background Tap
-                   if (ref.read(selectedPropertyProvider) != null) {
-                      ref.read(selectedPropertyProvider.notifier).state = null;
-                   }
+                   // [FIX] REMOVED CLEAR SELECTION ON MAP TAP
+                   // This was causing conflict with Marker Tap (Race condition)
+                   // Selection is now only cleared by hovering other markers or explicitly closed
                    
                    // User Interaction -> Clear Error & Text
                    ref.read(searchProvider.notifier).clearSearchText();
@@ -387,7 +384,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   
   void _goToMyLocation() {
     final searchState = ref.read(searchProvider);
-    _mapController.move(searchState.mapCenter ?? _spainFallback, 6.0);
+    _mapController.move(searchState.mapCenter ?? _spainFallback, 12.0);
   }
 
   // OLD _buildMarkers removed, logic now in _buildPropertyMarkers
@@ -445,23 +442,23 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
           width: showPrice ? 90 : 40, 
           height: showPrice ? 45 : 40,
           child: MouseRegion(
+            hitTestBehavior: HitTestBehavior.opaque, // Ensure hover is caught
             onEnter: (_) {
-               _hoverTimer?.cancel(); 
                // [NEW] Hovering another marker CLEARS any existing selection
                // This prevents the "fixed" card from reappearing after leaving this marker
                ref.read(selectedPropertyProvider.notifier).state = null;
                
                // Update Hover Provider to show this marker's info
-               ref.read(hoveredPropertyProvider.notifier).state = property;
+               // print("DEBUG OnEnter Marker: ${property.id}");
+               ref.read(hoveredPropertyProvider.notifier).setHoveredProperty(property);
             },
             onExit: (_) {
                // Only clear hover
-               _hoverTimer = Timer(const Duration(milliseconds: 100), () {
-                  ref.read(hoveredPropertyProvider.notifier).state = null;
-               });
+               ref.read(hoveredPropertyProvider.notifier).startHideTimer();
             },
             cursor: SystemMouseCursors.click,
       child: GestureDetector(
+              behavior: HitTestBehavior.opaque, // Ensure tap is caught
               onTap: () {
                 ref.read(selectedPropertyProvider.notifier).state = property;
               },

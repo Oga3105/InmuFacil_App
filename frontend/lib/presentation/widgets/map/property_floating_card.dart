@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // For .tr() if needed
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
+import '../common/premium_button.dart';
 
 class PropertyFloatingCard extends ConsumerWidget {
   final Property property;
@@ -52,7 +53,7 @@ class PropertyFloatingCard extends ConsumerWidget {
           Stack(
             children: [
               Container(
-                height: 176, // h-44 (44 * 4 = 176px)
+                height: 160, // Reduced from 176 to fit 400px grid
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -137,91 +138,106 @@ class PropertyFloatingCard extends ConsumerWidget {
           ),
           
           // 2. Content Section
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Price & Title
-                  Text(
-                    property.formattedPrice,
-                    style: const TextStyle(
-                      color: Color(0xFF2563EB), // primary
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Price & Title
+                Text(
+                  property.formattedPrice,
+                  style: const TextStyle(
+                    color: Color(0xFF2563EB), // primary
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.5,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    property.title,
-                    style: const TextStyle(
-                      color: Color(0xFF1E293B), // text-slate-800
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  property.title,
+                  style: const TextStyle(
+                    color: Color(0xFF1E293B), // text-slate-800
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    height: 1.2,
                   ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Features Layout
-                  Builder(
-                    builder: (context) {
-                      final List<Widget> items = [
-                        _buildFeature(Icons.bed, '${property.bedrooms} Hab'),
-                        _buildFeature(Icons.bathroom_outlined, '${property.bathrooms} Baño'),
-                        _buildFeature(Icons.square_foot, '${property.squareMeters}m²'),
-                        if (property.floor != null)
-                          _buildFeature(Icons.layers, '${property.floor}'),
-                      ];
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Features Layout
+                Builder(
+                  builder: (context) {
+                    final List<Widget> items = [
+                      _buildFeature(Icons.bed, '${property.bedrooms} Hab'),
+                      _buildFeature(Icons.bathroom_outlined, '${property.bathrooms} Baño'),
+                      _buildFeature(Icons.square_foot, '${property.squareMeters}m²'),
+                      if (property.floor != null)
+                        _buildFeature(Icons.layers, '${property.floor}'),
+                    ];
 
-                      return Wrap(
-                        spacing: 12,
-                        runSpacing: 8,
-                        children: items,
-                      );
-                    },
-                  ),
-                  
-                  const Spacer(), // Pushes action button to bottom for uniform look
-                  const SizedBox(height: 12),
-                  
-                  // Action Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: onTap,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF16A34A), // success
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Text(
-                            'Ver detalle',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                    // Chunk items into pairs for 2-column layout
+                      List<Widget> rows = [];
+                      for (int i = 0; i < items.length; i += 2) {
+                        rows.add(
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(child: items[i]), // First item takes 50%
+                                const SizedBox(width: 8), 
+                                if (i + 1 < items.length)
+                                  Expanded(child: items[i + 1]) // Second item takes 50%
+                                else
+                                  const Spacer(), // Empty space if odd number, keeping first item at 50%
+                              ],
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.chevron_right, size: 18),
-                        ],
+                        );
+                      }
+
+                      return Column(
+                        children: rows,
+                      );
+                  },
+                ),
+                
+                const SizedBox(height: 16), // Reduced from 24
+                
+                // Action Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF16A34A), // success
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
                     ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          'Ver detalle',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.chevron_right, size: 18),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],

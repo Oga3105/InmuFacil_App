@@ -679,7 +679,22 @@ final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
     return fromPolygon.toList();
   }
   
-  // 2. Viewport Mode
+  // 2. City Boundary Mode (Search Result Polygon)
+  // [NEW] Prioritize search polygon over viewport if available
+  if (mapState.cityBoundaryPolygon.isNotEmpty && mapState.cityBoundaryPolygon.length >= 3) {
+      // First, filter by City Polygon
+      var fromCity = allFiltered.where((p) => _isPointInPolygon(p.location, mapState.cityBoundaryPolygon));
+      
+      // Then, if Viewport is available, intersect with it (Visual Sync)
+      // This ensures we don't show properties that are "technically" in the city but off-screen
+      if (mapState.visibleBounds != null) {
+        fromCity = fromCity.where((p) => mapState.visibleBounds!.contains(p.location));
+      }
+      
+      return fromCity.toList();
+  }
+  
+  // 3. Viewport Mode (Fallback)
   if (mapState.visibleBounds != null) {
     return allFiltered.where((p) => mapState.visibleBounds!.contains(p.location)).toList();
   }

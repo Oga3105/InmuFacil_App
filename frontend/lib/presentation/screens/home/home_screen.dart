@@ -13,6 +13,7 @@ import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.d
 import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT (Fix for Property not found)
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/property_listing/property_listing_item.dart';
+import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -41,7 +42,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
+  // DEBUG: Check Layout Mode
+          // print("LayoutBuilder constraints: ${constraints.maxWidth}");
           final isDesktop = constraints.maxWidth >= 768;
+          // print("isDesktop: $isDesktop");
           
           return isDesktop
               ? _DesktopLayout()
@@ -68,83 +72,104 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
         // Initialize to 50% if first build
         _leftPanelWidth ??= constraints.maxWidth * 0.5;
         
-        return Row(
+        return Stack(
+          fit: StackFit.expand, // [FIX] Ensure Stack fills the screen
           children: [
-            // Left: Search Panel (Resizable)
-            SizedBox(
-              width: _leftPanelWidth,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _SearchPanel(),
-                  
-                    Consumer(
-                      builder: (context, ref, _) {
-                        final hoveredProperty = ref.watch(hoveredPropertyProvider);
-                        final selectedProperty = ref.watch(selectedPropertyProvider);
-                        // Priority: Hover > Selected > Null
-                        final displayProperty = hoveredProperty ?? selectedProperty;
-                        
-                        if (displayProperty == null) return const SizedBox.shrink();
-
-                        return Positioned(
-                          top: 20, 
-                          right: 0, // [FIX] Align to the right edge (divider)
-                          // left: null, // Don't constrain left
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 320), // Slightly narrower?
-                            child: PropertyFloatingCard(
-                              property: displayProperty,
-                              width: 280,
-                                onTap: () {
-                                  // Navigate to details (Full Page)
-                                  context.pushNamed(
-                                    'property-details', 
-                                    pathParameters: {'id': displayProperty.id},
-                                  );
-                                },
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-            
-            // Resizer Handle
-            MouseRegion(
-              cursor: SystemMouseCursors.resizeColumn,
-              child: GestureDetector(
-                onHorizontalDragUpdate: (details) {
-                  setState(() {
-                    final newWidth = (_leftPanelWidth ?? 0) + details.delta.dx;
-                    // Constraints: Min 300, Max 70% of screen
-                    if (newWidth >= 350 && newWidth <= constraints.maxWidth * 0.7) {
-                      _leftPanelWidth = newWidth;
-                    }
-                  });
-                },
-                child: Container(
-                  width: 8,
-                  color: Colors.grey[100],
-                  child: Center(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch, // [FIX] Force children to fill vertical space
+              children: [
+                // Left: Search Panel (Resizable)
+                SizedBox(
+                  width: _leftPanelWidth,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    clipBehavior: Clip.none, 
+                    children: [
+                      _SearchPanel(),
+                    ],
+                  ),
+                ),
+                
+                // Resizer Handle
+                MouseRegion(
+                  cursor: SystemMouseCursors.resizeColumn,
+                  child: GestureDetector(
+                    onHorizontalDragUpdate: (details) {
+                      setState(() {
+                        final newWidth = (_leftPanelWidth ?? 0) + details.delta.dx;
+                        // Constraints: Min 300, Max 70% of screen
+                        if (newWidth >= 350 && newWidth <= constraints.maxWidth * 0.7) {
+                          _leftPanelWidth = newWidth;
+                        }
+                      });
+                    },
                     child: Container(
-                      width: 4,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+                      width: 8,
+                      color: Colors.grey[100],
+                      child: Center(
+                        child: Container(
+                          width: 4,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                
+                // Right: Map with overlays
+                Expanded(
+                  child: _MapSection(),
+                ),
+              ],
             ),
-            
-            // Right: Map with overlays (navigation bar + stats card)
-            Expanded(
-              child: _MapSection(),
+
+            // GLOBAL FLOATING CARD OVERLAY
+            Consumer(
+              builder: (context, ref, _) {
+                final hoveredProperty = ref.watch(hoveredPropertyProvider);
+                final selectedProperty = ref.watch(selectedPropertyProvider);
+                // Priority: Hover > Selected > Null
+                final displayProperty = hoveredProperty ?? selectedProperty;
+                
+                if (displayProperty == null) return const SizedBox.shrink();
+
+                // Position: Inside the left panel (Search Panel), aligned to its right edge
+                // User Request: "quiero que salga en la parte subrayado de naranja"
+                // Logic: Panel Width - Card Width (300) - Padding (32)
+                final leftPos = (_leftPanelWidth ?? 0) - 300 - 32.0;
+
+                return Positioned(
+                  top: 120, // Adjusted to align with "Sin intermediarios" text area
+                  left: leftPos, 
+                  child: MouseRegion(
+                    onEnter: (_) {
+                       // Keep card alive when hovering IT (stop the hide timer from map marker exit)
+                       ref.read(hoveredPropertyProvider.notifier).cancelHideTimer();
+                    },
+                    onExit: (_) {
+                       // Allow card to hide if mouse leaves it (and doesn't go back to a marker)
+                       ref.read(hoveredPropertyProvider.notifier).startHideTimer();
+                    },
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: PropertyFloatingCard(
+                        property: displayProperty,
+                        width: 300,
+                        onTap: () {
+                          context.pushNamed(
+                            'property-details', 
+                            pathParameters: {'id': displayProperty.id},
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         );
@@ -152,6 +177,8 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
     );
   }
 }
+
+
 
 /// Mobile layout - Stack with floating search
 class _MobileLayout extends StatelessWidget {
@@ -180,6 +207,7 @@ class _MapSection extends ConsumerWidget {
     final showFab = propertyCount > 0;
 
     return Stack(
+      fit: StackFit.expand, // [FIX] Ensure Map Section fills the Expanded/SizedBox parent
       children: [
         // Background: OpenStreetMap - MUST use Positioned.fill to fill entire Stack
         const Positioned.fill(
@@ -1267,24 +1295,13 @@ class _MapNavigationBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          ElevatedButton(
+          PremiumButton(
+            label: 'Publicar propiedad',
             onPressed: () => context.push('/404-publish'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Publicar propiedad',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
+            color: const Color(0xFF2563EB),
+            fontSize: 13,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            fullWidth: false,
           ),
           const SizedBox(width: 12),
           InkWell(
@@ -1523,3 +1540,6 @@ class _PremiumGlowButton extends StatelessWidget {
     );
   }
 }
+
+
+

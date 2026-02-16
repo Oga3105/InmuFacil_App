@@ -6,6 +6,7 @@ import '../providers/favorites_provider.dart';
 import '../widgets/property_listing/property_listing_item.dart';
 import '../widgets/property_listing/filter_sidebar.dart';
 import '../widgets/map/property_floating_card.dart';
+import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
@@ -109,17 +110,13 @@ class PropertyListingScreen extends ConsumerWidget {
                     )
                   ),
                   const SizedBox(width: 16),
-                  ElevatedButton(
+                  PremiumButton(
+                    label: 'Publicar Gratis',
                     onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    child: const Text('Publicar Gratis'),
+                    color: const Color(0xFF2563EB),
+                    fullWidth: false,
+                    fontSize: 14,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   ),
                ],
              ),
@@ -164,12 +161,12 @@ class PropertyListingScreen extends ConsumerWidget {
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 320,
-                                mainAxisExtent: 440, // Uniform height as requested (taller to fit all info)
-                                crossAxisSpacing: 24,
-                                mainAxisSpacing: 24,
-                              ),
+                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 320,
+                                  mainAxisExtent: 370, // Tight fit to remove bottom whitespace
+                                  crossAxisSpacing: 24,
+                                  mainAxisSpacing: 24,
+                                ),
                               itemCount: paginatedProperties.length,
                               itemBuilder: (context, index) {
                                 final p = paginatedProperties[index];
@@ -454,7 +451,7 @@ class PropertyListingScreen extends ConsumerWidget {
   Widget _buildSimpleFooter() {
      return const Column(
        children: [
-         Text('© 2024 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+         Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
        ],
      );
   }

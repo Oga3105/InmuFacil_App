@@ -211,9 +211,10 @@ class PropertyListingItem extends ConsumerWidget {
                             _buildStat(Icons.bathtub_outlined, '${property.bathrooms} Baños', navyColor),
                             const SizedBox(width: 24),
                             _buildStat(Icons.square_foot, '${property.squareMeters} m²', navyColor),
-                             // Mock Floor
-                             const SizedBox(width: 24),
-                            _buildStat(Icons.apartment, '3ª Planta', navyColor),
+                            if (property.floor != null) ...[
+                              const SizedBox(width: 24),
+                              _buildStat(Icons.apartment, '${property.floor}', navyColor),
+                            ],
                           ],
                         ),
                       ),
