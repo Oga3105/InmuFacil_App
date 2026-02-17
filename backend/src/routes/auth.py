@@ -29,6 +29,7 @@ from backend.src.schemas.base import (
     UserCreate, UserResponse, Token, VerifyEmailRequest, 
     PasswordResetRequest, PasswordResetConfirm
 )
+from backend.src.utils.security import verify_password, create_access_token, get_password_hash
 import logging
 
 logger = logging.getLogger("inmufacil.auth")

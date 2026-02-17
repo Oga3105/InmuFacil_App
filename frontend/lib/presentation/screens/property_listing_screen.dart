@@ -8,6 +8,7 @@ import '../widgets/property_listing/filter_sidebar.dart';
 import '../widgets/map/property_floating_card.dart';
 import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
+import '../providers/auth_provider.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
   const PropertyListingScreen({super.key});
@@ -36,17 +37,25 @@ class PropertyListingScreen extends ConsumerWidget {
     // Responsive helper
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
+    void handleProtectedAction(String route) {
+       final isAuthenticated = ref.read(authProvider).isAuthenticated;
+       if (isAuthenticated) {
+         context.push(route);
+       } else {
+         context.pushNamed('login');
+       }
+    }
+    
+    // Auth State for UI
+    final authState = ref.watch(authProvider);
+    final isAuthenticated = authState.isAuthenticated;
+
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        // Using a custom title to match the design's header roughly.
-        // In a real app, `AppBar` might be the Global Header.
-        // For this page, we assume the Global Header is part of the layout or this AppBar acts as it.
-        // The design shows a specific header. Let's try to mimic the "InmuFácil" header here or assume it's global.
-        // I'll stick to a simple AppBar that fits the context.
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: MouseRegion(
@@ -73,54 +82,105 @@ class PropertyListingScreen extends ConsumerWidget {
           ),
         ),
         actions: [
-           Padding(
-             padding: const EdgeInsets.only(right: 24.0),
-             child: Row(
-               children: [
-                  TextButton(
-                    onPressed: () {}, 
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+          Padding(
+            padding: const EdgeInsets.only(right: 24.0),
+            child: Row(
+              children: [
+                TextButton(
+                  onPressed: () => context.push('/404-buy'), 
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  TextButton(
-                    onPressed: () {}, 
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                  child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+                ),
+                TextButton(
+                  onPressed: () => handleProtectedAction('/404-sell'), 
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
+                  child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                ),
+                TextButton(
+                  onPressed: () => context.push('/404-how-it-works'),
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Cómo funciona', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                ),
+                Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
+                // Favorites Toggle
+                TextButton.icon(
+                  onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
+                  icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? Colors.red : Colors.grey[600], size: 20),
+                  label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : Colors.grey[700], fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: searchState.onlyFavorites ? Colors.red.withOpacity(0.05) : null,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                
+                // Publicar Propiedad
+                PremiumButton(
+                  label: 'Publicar',
+                  onPressed: () => handleProtectedAction('/404-publish'),
+                  color: const Color(0xFF2563EB),
+                  fontSize: 13,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  fullWidth: false,
+                ),
+                const SizedBox(width: 16),
+                
+                // AUTH LOGIC
+                if (isAuthenticated)
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 40),
+                    tooltip: 'Menú de usuario',
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                         value: 'profile',
+                         child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
+                      ),
+                      const PopupMenuItem(
+                        value: 'logout',
+                        child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
+                      ),
+                    ],
+                    onSelected: (value) async {
+                      if (value == 'logout') {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesión cerrada')));
+                        }
+                      } else if (value == 'profile') {
+                        context.push('/404-profile');
+                      }
+                    },
+                    child: CircleAvatar(
+                       radius: 18,
+                       backgroundColor: const Color(0xFF2563EB),
+                       child: Text(
+                         authState.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                       ),
+                    ),
+                  )
+                else
                   TextButton(
-                    onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
+                    onPressed: () => context.pushNamed('login'),
                     style: TextButton.styleFrom(
-                      backgroundColor: searchState.onlyFavorites ? const Color(0xFF2563EB).withOpacity(0.1) : null,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: searchState.onlyFavorites ? const BorderSide(color: Color(0xFF2563EB), width: 1) : BorderSide.none,
+                         borderRadius: BorderRadius.circular(12),
+                         side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
                       ),
                     ),
-                    child: Text(
-                      'Mis favoritos', 
-                      style: TextStyle(
-                        color: searchState.onlyFavorites ? const Color(0xFF2563EB) : const Color(0xFF0F172A), 
-                        fontWeight: FontWeight.bold
-                      )
-                    )
+                    child: const Text('Entrar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
-                  const SizedBox(width: 16),
-                  PremiumButton(
-                    label: 'Publicar Gratis',
-                    onPressed: () {},
-                    color: const Color(0xFF2563EB),
-                    fullWidth: false,
-                    fontSize: 14,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  ),
-               ],
-             ),
-           )
+              ],
+            ),
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),

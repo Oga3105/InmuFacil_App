@@ -14,6 +14,7 @@ import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/property_listing/property_listing_item.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
+import '../../providers/auth_provider.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -1221,12 +1222,23 @@ class _TrustBadge extends StatelessWidget {
   }
 }
 
+
+
 /// Navigation bar overlay for map section
-class _MapNavigationBar extends StatelessWidget {
+class _MapNavigationBar extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isAuthenticated = ref.watch(authProvider).isAuthenticated;
     
+    void handleProtectedAction(String route) {
+      if (isAuthenticated) {
+        context.push(route);
+      } else {
+        context.pushNamed('login'); // Better UX: Push instead of Go allows implicit back button
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1262,7 +1274,7 @@ class _MapNavigationBar extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           TextButton(
-            onPressed: () => context.push('/404-sell'),
+            onPressed: () => handleProtectedAction('/404-sell'),
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -1297,26 +1309,71 @@ class _MapNavigationBar extends StatelessWidget {
           const SizedBox(width: 12),
           PremiumButton(
             label: 'Publicar propiedad',
-            onPressed: () => context.push('/404-publish'),
+            onPressed: () => handleProtectedAction('/404-publish'),
             color: const Color(0xFF2563EB),
             fontSize: 13,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             fullWidth: false,
           ),
           const SizedBox(width: 12),
-          InkWell(
-            onTap: () => context.push('/404-profile'),
-            borderRadius: BorderRadius.circular(16),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.grey[300],
-              child: Icon(
-                Icons.person,
-                color: Colors.grey[700],
-                size: 18,
+          
+          // [AUTH STATE LOGIC]
+          if (isAuthenticated)
+            PopupMenuButton<String>(
+              offset: const Offset(0, 40),
+              tooltip: 'Menú de usuario',
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.9), // Match search panel
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                     children: [
+                       Icon(Icons.person_outline, size: 20),
+                       SizedBox(width: 8),
+                       Text('Mi Perfil'),
+                     ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                     children: [
+                       Icon(Icons.logout, color: Colors.red, size: 20),
+                       SizedBox(width: 8),
+                       Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                     ],
+                  ),
+                ),
+              ],
+              onSelected: (value) async {
+                if (value == 'logout') {
+                  await ref.read(authProvider.notifier).logout();
+                  if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Sesión cerrada correctamente')),
+                      );
+                  }
+                } else if (value == 'profile') {
+                   context.push('/404-profile');
+                }
+              },
+              child: CircleAvatar(
+                 radius: 18,
+                 backgroundColor: const Color(0xFF2563EB), // Official Blue
+                 child: const Icon(Icons.person, color: Colors.white, size: 20),
+              ),
+            )
+          else
+            InkWell(
+              onTap: () => context.pushNamed('login'),
+              borderRadius: BorderRadius.circular(20),
+              child: CircleAvatar(
+                 radius: 18,
+                 backgroundColor: Colors.grey[200], // Grey/Default
+                 child: Icon(Icons.person, color: Colors.grey[600], size: 20), // Silhouette
               ),
             ),
-          ),
         ],
       ),
     );
