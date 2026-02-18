@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/screens/auth/login_screen.dart';
+import '../../presentation/screens/auth/register_screen.dart';
 // MapScreen import removed
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/not_found/not_found_screen.dart';
@@ -22,11 +23,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const HomeScreen(),
       ),
       
-      // Authentication Routes
+      // Authentication Routes with Cross Fade Transition
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const LoginScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const RegisterScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
       ),
       
       // Map Screen removed - Integrated into Home

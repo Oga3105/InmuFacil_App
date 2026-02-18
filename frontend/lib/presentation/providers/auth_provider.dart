@@ -141,6 +141,51 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /// Register new user
+  Future<bool> register(String email, String password, String fullName) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final response = await _dio.post(
+        '/auth/register',
+        data: {
+          'email': email,
+          'password': password,
+          'full_name': fullName,
+          'user_type': 'particular', // Default for now
+        },
+      );
+
+      if (response.statusCode == 201) {
+        // Registration successful
+        state = state.copyWith(isLoading: false);
+        return true;
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Error en el registro',
+        );
+        return false;
+      }
+    } on DioException catch (e) {
+      String msg = 'Error de conexión';
+      if (e.response != null) {
+         msg = e.response?.data['detail'] ?? 'Error en el servidor';
+      }
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: msg,
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Ocurrió un error inesperado',
+      );
+      return false;
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
