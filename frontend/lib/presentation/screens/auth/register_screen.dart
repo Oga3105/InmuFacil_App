@@ -583,13 +583,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          mainAxisAlignment: MainAxisAlignment.center,
                          children: [
                            Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                           GestureDetector(
-                             onTap: () => context.go('/login'),
-                             child: Text(
-                               'Inicia sesión',
-                               style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.bold, fontSize: 12),
-                             ),
-                           ),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: InkWell(
+                                onTap: () => context.go('/login'),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  child: Text(
+                                    'Inicia sesión',
+                                    style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ),
                          ],
                        ),
                      ],
