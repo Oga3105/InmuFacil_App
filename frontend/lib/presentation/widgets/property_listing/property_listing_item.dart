@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
 import '../../../../domain/entities/property.dart';
-import '../common/premium_button.dart'; // Corrected Import
+import '../common/premium_button.dart';
+import '../common/time_badge.dart';
 
 class PropertyListingItem extends ConsumerWidget {
   final Property property;
@@ -232,6 +233,13 @@ class PropertyListingItem extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
 
+                      // Time Badge
+                      const SizedBox(height: 12),
+                      PropertyTimeBadge(
+                        createdAt: property.createdAt,
+                        updatedAt: property.updatedAt,
+                      ),
+
                       const Spacer(),
 
                       // Footer: Tags & CTA
@@ -317,3 +325,4 @@ class PropertyListingItem extends ConsumerWidget {
     );
   }
 }
+

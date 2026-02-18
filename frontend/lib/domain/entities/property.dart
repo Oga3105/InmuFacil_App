@@ -19,6 +19,8 @@ class Property {
   final String description; // [NEW] Detailed description
   final List<String> images; // [NEW] Gallery images
   final double? rating; // [NEW] User rating
+  final DateTime? createdAt; // [NEW] Listing publication date
+  final DateTime? updatedAt; // [NEW] Last modification date
   
   const Property({
     required this.id,
@@ -37,6 +39,8 @@ class Property {
     this.description = '',
     this.images = const [],
     this.rating,
+    this.createdAt,
+    this.updatedAt,
   });
 
   final List<String> features;

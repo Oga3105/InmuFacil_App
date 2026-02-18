@@ -23,6 +23,10 @@ class PropertyModel {
   final String? imageUrl;
   @JsonKey(name: 'is_verified')
   final bool isVerified;
+  @JsonKey(name: 'created_at')
+  final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
   
   const PropertyModel({
     required this.id,
@@ -39,6 +43,8 @@ class PropertyModel {
     this.floor,
     this.isVerified = true,
     this.features = const [],
+    this.createdAt,
+    this.updatedAt,
   });
   
   @JsonKey(includeFromJson: false)
@@ -78,8 +84,14 @@ class PropertyModel {
       squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
       imageUrl: _parseFirstImage(json['media']),
       isVerified: json['is_verified'] as bool? ?? true,
-      floor: json['features']?['floor'] as String?, // [NEW] Parse floor
+      floor: json['features']?['floor'] as String?,
       features: _parseFeatures(json['features']),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'] as String)
+          : null,
     );
   }
   
@@ -127,6 +139,8 @@ class PropertyModel {
       floor: floor,
       isVerified: isVerified,
       features: features,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 

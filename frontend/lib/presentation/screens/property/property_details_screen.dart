@@ -11,6 +11,7 @@ import '../../../domain/entities/property_type.dart'; // [FIX] Import added
 import '../../providers/search_provider.dart';
 import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
 import '../../widgets/common/premium_button.dart';
+import '../../widgets/common/time_badge.dart';
 
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
   final String propertyId;
@@ -264,8 +265,15 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         property.title,
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, height: 1.2),
                       ),
-                      const SizedBox(height: 16),
-                      _PropertyStatsGrid(property: property),
+                       const SizedBox(height: 16),
+                       // Time Badge
+                       PropertyTimeBadge(
+                         createdAt: property.createdAt,
+                         updatedAt: property.updatedAt,
+                         large: true,
+                       ),
+                       const SizedBox(height: 16),
+                       _PropertyStatsGrid(property: property),
                       const SizedBox(height: 24),
                       Divider(color: Colors.grey[200]),
                       const SizedBox(height: 24),
@@ -626,6 +634,13 @@ class _SummaryCard extends StatelessWidget {
                 style: const TextStyle(color: Color(0xFF64748b)),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          // Time Badge
+          PropertyTimeBadge(
+            createdAt: property.createdAt,
+            updatedAt: property.updatedAt,
+            large: true,
           ),
           const SizedBox(height: 24),
           Divider(color: Colors.grey[100]),
