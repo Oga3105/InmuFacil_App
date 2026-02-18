@@ -218,35 +218,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset(
-                          'assets/images/logo_inmufacil.png',
-                          height: 70, // Slightly smaller
-                          fit: BoxFit.contain,
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Inmu',
-                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  color: const Color(0xFF2563EB),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 32, // Adjusted size
-                                  letterSpacing: -1.0,
+                        MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () => context.go('/'),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'assets/images/logo_inmufacil.png',
+                                  height: 70,
+                                  fit: BoxFit.contain,
                                 ),
-                              ),
-                              TextSpan(
-                                text: 'Fácil',
-                                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                                  color: const Color(0xFF16A34A),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 32, // Adjusted size
-                                  letterSpacing: -1.0,
+                                const SizedBox(height: 16),
+                                Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Inmu',
+                                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                          color: const Color(0xFF2563EB),
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 32,
+                                          letterSpacing: -1.0,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: 'Fácil',
+                                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                          color: const Color(0xFF16A34A),
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 32,
+                                          letterSpacing: -1.0,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -306,16 +315,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  // Branding for Mobile (since left panel is hidden)
                                  if (!isDesktop) ...[
                                    Center(
-                                     child: Column(
-                                       children: [
-                                          Image.asset(
-                                            'assets/images/logo_inmufacil.png',
-                                            height: 50,
-                                            fit: BoxFit.contain,
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text('InmuFácil', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _tealBrandColor)),
-                                       ],
+                                     child: MouseRegion(
+                                       cursor: SystemMouseCursors.click,
+                                       child: GestureDetector(
+                                         onTap: () => context.go('/'),
+                                         child: Column(
+                                           children: [
+                                             Image.asset(
+                                               'assets/images/logo_inmufacil.png',
+                                               height: 50,
+                                               fit: BoxFit.contain,
+                                             ),
+                                             const SizedBox(height: 8),
+                                             Text('InmuFácil', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _tealBrandColor)),
+                                           ],
+                                         ),
+                                       ),
                                      ),
                                    ),
                                    const SizedBox(height: 32),
@@ -523,8 +538,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     },
                                  ),
                                  
-                                 const SizedBox(height: 32),
-                                 
+                                 const SizedBox(height: 16),
+
+                                 // Link: Continuar sin cuenta
+                                 Center(
+                                   child: TextButton(
+                                     onPressed: () => context.go('/'),
+                                     style: TextButton.styleFrom(
+                                       foregroundColor: Colors.grey[500],
+                                       padding: EdgeInsets.zero,
+                                       minimumSize: Size.zero,
+                                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                     ),
+                                     child: const Text(
+                                       'Continuar sin registrarse →',
+                                       style: TextStyle(fontSize: 12),
+                                     ),
+                                   ),
+                                 ),
+
+                                 const SizedBox(height: 16),
+
                                  // Register Link
                                  Row(
                                    mainAxisAlignment: MainAxisAlignment.center,
@@ -534,7 +568,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                        style: TextStyle(color: Colors.grey[600]),
                                      ),
                                      TextButton(
-                                       onPressed: () {},
+                                       onPressed: () => context.go('/register'),
+                                       style: TextButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                           borderRadius: BorderRadius.circular(12),
+                                         ),
+                                       ),
                                        child: Text(
                                          'Regístrate',
                                          style: TextStyle(
