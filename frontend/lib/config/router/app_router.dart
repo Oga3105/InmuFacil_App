@@ -10,6 +10,7 @@ import '../../presentation/screens/not_found/not_found_screen.dart';
 import '../../presentation/screens/property_listing_screen.dart';
 import '../../presentation/screens/property/property_details_screen.dart';
 import '../../presentation/screens/kyc/identity_verification_screen.dart';
+import '../../presentation/screens/user_profile_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -65,6 +66,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/verify-identity',
         name: 'verify-identity',
         builder: (context, state) => const IdentityVerificationScreen(),
+      ),
+
+      // User Profile
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const UserProfileScreen(),
       ),
 
       // Map Screen removed - Integrated into Home
