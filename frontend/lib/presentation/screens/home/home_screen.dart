@@ -265,11 +265,11 @@ class _MapSection extends ConsumerWidget {
         if (propertyCount == 0 && !searchState.isLoading)
           Positioned(
             bottom: 32,
-            left: 20,
-            right: 20,
+            left: 0,
+            right: 0,
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -1259,8 +1259,6 @@ class _MapNavigationBar extends ConsumerWidget {
           TextButton(
             onPressed: () => context.push('/404-buy'),
             style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1269,8 +1267,8 @@ class _MapNavigationBar extends ConsumerWidget {
               'Comprar',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[700],
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
               ),
             ),
           ),
@@ -1278,8 +1276,6 @@ class _MapNavigationBar extends ConsumerWidget {
           TextButton(
             onPressed: () => handleProtectedAction('/404-sell'),
             style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1288,8 +1284,8 @@ class _MapNavigationBar extends ConsumerWidget {
               'Vender',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[700],
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
               ),
             ),
           ),
@@ -1297,8 +1293,6 @@ class _MapNavigationBar extends ConsumerWidget {
           TextButton(
             onPressed: () => context.push('/404-how-it-works'),
             style: TextButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -1307,18 +1301,18 @@ class _MapNavigationBar extends ConsumerWidget {
               'Cómo funciona',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: Colors.grey[700],
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
               ),
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
           PremiumButton(
             label: 'Publicar propiedad',
             onPressed: () => handleProtectedAction('/404-publish'),
             color: const Color(0xFF2563EB),
-            fontSize: 12,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            fontSize: 13,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             fullWidth: false,
           ),
           const SizedBox(width: 12),
