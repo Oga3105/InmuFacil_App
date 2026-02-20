@@ -105,6 +105,11 @@
         "validation_error": "Error de validació",
         "unauthorized": "No autoritzat",
         "not_found": "No trobat",
-        "unknown_error": "Error desconegut"
+        "unknown_error": "Error desconegut",
+        "service_unavailable": "Servei no disponible",
+        "service_unavailable_detail": "El servei de dades no està disponible en aquest moment. Torna-ho a intentar d'aquí a uns minuts.",
+        "timeout": "Temps d'espera esgotat. Torna-ho a intentar.",
+        "request_cancelled": "Petició cancel·lada",
+        "connection_error": "No s'ha pogut connectar amb el servidor. Comprova la teva connexió a internet."
     }
 }

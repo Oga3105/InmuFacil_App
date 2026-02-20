@@ -105,6 +105,11 @@
         "validation_error": "Balidazio errorea",
         "unauthorized": "Baimenik gabe",
         "not_found": "Ez da aurkitu",
-        "unknown_error": "Errore ezezaguna"
+        "unknown_error": "Errore ezezaguna",
+        "service_unavailable": "Zerbitzua ez dago eskuragarri",
+        "service_unavailable_detail": "Datu-zerbitzua ez dago eskuragarri une honetan. Saiatu berriro minutu batzuen buruan.",
+        "timeout": "Itxaron-denbora agortu da. Saiatu berriro.",
+        "request_cancelled": "Eskaera bertan behera utzi da",
+        "connection_error": "Ezin izan da zerbitzarira konektatu. Egiaztatu zure internet konexioa."
     }
 }

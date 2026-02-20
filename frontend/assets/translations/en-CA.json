@@ -105,6 +105,11 @@
         "validation_error": "Validation error",
         "unauthorized": "Unauthorized",
         "not_found": "Not found",
-        "unknown_error": "Unknown error"
+        "unknown_error": "Unknown error",
+        "service_unavailable": "Service unavailable",
+        "service_unavailable_detail": "The data service is not available right now. Please try again in a few minutes.",
+        "timeout": "Request timed out. Please try again.",
+        "request_cancelled": "Request cancelled",
+        "connection_error": "Could not connect to the server. Check your internet connection."
     }
 }

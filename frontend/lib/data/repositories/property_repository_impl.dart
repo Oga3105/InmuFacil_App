@@ -116,6 +116,9 @@ class PropertyRepositoryImpl implements PropertyRepository {
           return const AuthFailure();
         } else if (statusCode == 404) {
           return const NotFoundFailure();
+        } else if (statusCode == 503) {
+          // Database / service unavailable (e.g. Docker Desktop off)
+          return const ServiceUnavailableFailure();
         } else if (statusCode != null && statusCode >= 500) {
           return const ServerFailure();
         } else {
