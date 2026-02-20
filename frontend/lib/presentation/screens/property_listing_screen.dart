@@ -122,16 +122,16 @@ class PropertyListingScreen extends ConsumerWidget {
                 
                 // Publicar Propiedad
                 PremiumButton(
-                  label: 'Publicar',
+                  label: 'Publicar propiedad',
                   onPressed: () => handleProtectedAction('/404-publish'),
                   color: const Color(0xFF2563EB),
                   fontSize: 13,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   fullWidth: false,
                 ),
                 const SizedBox(width: 16),
                 
-                // AUTH LOGIC
+                // AUTH LOGIC (Unified with HomeScreen _MapNavigationBar)
                 if (isAuthenticated)
                   PopupMenuButton<String>(
                     offset: const Offset(0, 40),
@@ -140,7 +140,7 @@ class PropertyListingScreen extends ConsumerWidget {
                     itemBuilder: (context) => [
                       const PopupMenuItem(
                          value: 'profile',
-                         child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
+                         child: Row(children: [Icon(Icons.person_outline, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
                       ),
                       const PopupMenuItem(
                         value: 'logout',
@@ -154,29 +154,24 @@ class PropertyListingScreen extends ConsumerWidget {
                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesión cerrada')));
                         }
                       } else if (value == 'profile') {
-                        context.push('/404-profile');
+                        context.push('/profile');
                       }
                     },
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                        radius: 18,
-                       backgroundColor: const Color(0xFF2563EB),
-                       child: Text(
-                         authState.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                       ),
+                       backgroundColor: Color(0xFF2563EB),
+                       child: Icon(Icons.person, color: Colors.white, size: 20),
                     ),
                   )
                 else
-                  TextButton(
-                    onPressed: () => context.pushNamed('login'),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                         borderRadius: BorderRadius.circular(12),
-                         side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-                      ),
+                  InkWell(
+                    onTap: () => context.pushNamed('login'),
+                    borderRadius: BorderRadius.circular(20),
+                    child: CircleAvatar(
+                       radius: 18,
+                       backgroundColor: Colors.grey[200],
+                       child: Icon(Icons.person, color: Colors.grey[600], size: 20),
                     ),
-                    child: const Text('Entrar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
               ],
             ),

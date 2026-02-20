@@ -1355,7 +1355,7 @@ class _MapNavigationBar extends ConsumerWidget {
                       );
                   }
                 } else if (value == 'profile') {
-                   context.push('/404-profile');
+                   context.push('/profile');
                 }
               },
               child: CircleAvatar(
