@@ -23,6 +23,7 @@ class Property(Base):
     
     status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
     hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
+    is_verified = Column(Boolean, default=True) # NEW: Verificado InmuFácil
     
     # Basic dimensions (often filtered)
     surface_area = Column(Float, nullable=False)  # in square meters
@@ -71,6 +72,7 @@ class PropertyFeatures(Base):
     bedrooms = Column(Integer, default=0)
     bathrooms = Column(Integer, default=0)
     construction_year = Column(Integer, nullable=True)
+    floor = Column(String, nullable=True) # Planta del inmueble
     
     orientation = Column(Enum(Orientation), nullable=True)
     heating_type = Column(Enum(HeatingType), nullable=True)

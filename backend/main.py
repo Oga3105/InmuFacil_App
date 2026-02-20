@@ -228,7 +228,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, favorites, signature, notary, timeline, financial, handover, services, leads
 
 from fastapi import APIRouter
 
@@ -253,6 +253,7 @@ api_v1_router.include_router(services.router) # Hito 17 - Unified Services
 api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
 api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
 api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
+api_v1_router.include_router(favorites.router, prefix="/favorites")
 api_v1_router.include_router(leads.router) # Hito 18 - Lead Magnet (404)
 
 # Include V1 Router in App
@@ -340,7 +341,8 @@ async def seed_database():
                 "location": "37.3862, -5.9925",
                 "surface_area": 120.0,
                 "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, "has_ac": True}
+                "is_verified": True,
+                "features": {"bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, "has_ac": True, "floor": "Ático"}
             },
             {
                 "title": "Apartamento histórico reformado",
@@ -350,7 +352,8 @@ async def seed_database():
 
                 "surface_area": 85.0,
                 "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 2, "bathrooms": 1, "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO}
+                "is_verified": False, # TEST: This one is NOT verified
+                "features": {"bedrooms": 2, "bathrooms": 1, "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO, "floor": "Bajo"}
             },
             {
                 "title": "Piso luminoso en Calle Betis",
@@ -360,6 +363,7 @@ async def seed_database():
 
                 "surface_area": 95.0,
                 "property_type": PropertyType.PISO,
+                "is_verified": False, # TEST: This one is NOT verified
                 "features": {"bedrooms": 3, "bathrooms": 2, "has_lift": True}
             },
             {
@@ -370,7 +374,7 @@ async def seed_database():
 
                 "surface_area": 140.0,
                 "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True}
+                "features": {"bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True, "floor": "3ª Planta"}
             },
             {
                 "title": "Loft bohemio en Alameda de Hércules",
@@ -380,7 +384,7 @@ async def seed_database():
 
                 "surface_area": 70.0,
                 "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 1, "bathrooms": 1, "has_ac": True}
+                "features": {"bedrooms": 1, "bathrooms": 1, "has_ac": True, "floor": "2ª Planta"}
             },
             {
                 "title": "Piso familiar cerca de la Feria",

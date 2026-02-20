@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/search_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../widgets/property_listing/property_listing_item.dart';
 import '../widgets/property_listing/filter_sidebar.dart';
+import '../widgets/map/property_floating_card.dart';
+import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
+import '../providers/auth_provider.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
   const PropertyListingScreen({super.key});
@@ -12,7 +16,19 @@ class PropertyListingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final searchState = ref.watch(searchProvider);
-    final allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
+    final favoriteIds = ref.watch(favoritesProvider);
+    var allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
+    
+    // Apply local Favorites Filter if active
+    if (searchState.onlyFavorites) {
+      allFilteredProperties = allFilteredProperties.where((p) => favoriteIds.contains(p.id)).toList();
+    }
+
+    // Apply local Verified Filter if active
+    if (searchState.onlyVerified) {
+      allFilteredProperties = allFilteredProperties.where((p) => p.isVerified).toList();
+    }
+
     final paginatedProperties = _getPaginatedSlice(allFilteredProperties, searchState.currentPage, searchState.itemsPerPage);
     final theme = Theme.of(context); // Added
     final navyColor = theme.colorScheme.onSurface; // Changed to use theme
@@ -21,72 +37,150 @@ class PropertyListingScreen extends ConsumerWidget {
     // Responsive helper
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
+    void handleProtectedAction(String route) {
+       final isAuthenticated = ref.read(authProvider).isAuthenticated;
+       if (isAuthenticated) {
+         context.push(route);
+       } else {
+         context.pushNamed('login');
+       }
+    }
+    
+    // Auth State for UI
+    final authState = ref.watch(authProvider);
+    final isAuthenticated = authState.isAuthenticated;
+
     return Scaffold(
       backgroundColor: bgLight,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 0,
-        // Using a custom title to match the design's header roughly.
-        // In a real app, `AppBar` might be the Global Header.
-        // For this page, we assume the Global Header is part of the layout or this AppBar acts as it.
-        // The design shows a specific header. Let's try to mimic the "InmuFácil" header here or assume it's global.
-        // I'll stick to a simple AppBar that fits the context.
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: InkWell(
-            onTap: () => context.go('/'),
-            child: Row(
-              children: [
-                Image.asset('assets/images/logo_inmufacil.png', height: 32),
-                const SizedBox(width: 8),
-                Text.rich(
-                  TextSpan(
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                    children: [
-                      const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
-                    ],
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset('assets/images/logo_inmufacil.png', height: 32),
+                  const SizedBox(width: 8),
+                  Text.rich(
+                    TextSpan(
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      children: [
+                        const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                        const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
         actions: [
-           Padding(
-             padding: const EdgeInsets.only(right: 24.0),
-             child: Row(
-               children: [
-                  TextButton(
-                    onPressed: () {}, 
-                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+          Padding(
+            padding: const EdgeInsets.only(right: 24.0),
+            child: Row(
+              children: [
+                TextButton(
+                  onPressed: () => context.push('/404-buy'), 
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  TextButton(
-                    onPressed: () {}, 
-                    child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                  child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+                ),
+                TextButton(
+                  onPressed: () => handleProtectedAction('/404-sell'), 
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
-                  TextButton(
-                    onPressed: () {}, 
-                    child: const Text('Mis favoritos', style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold))
+                  child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                ),
+                TextButton(
+                  onPressed: () => context.push('/404-how-it-works'),
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  const SizedBox(width: 16),
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                  child: const Text('Cómo funciona', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                ),
+                Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
+                // Favorites Toggle
+                TextButton.icon(
+                  onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
+                  icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? Colors.red : Colors.grey[600], size: 20),
+                  label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : Colors.grey[700], fontWeight: FontWeight.bold)),
+                  style: TextButton.styleFrom(
+                    backgroundColor: searchState.onlyFavorites ? Colors.red.withOpacity(0.05) : null,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                
+                // Publicar Propiedad
+                PremiumButton(
+                  label: 'Publicar',
+                  onPressed: () => handleProtectedAction('/404-publish'),
+                  color: const Color(0xFF2563EB),
+                  fontSize: 13,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  fullWidth: false,
+                ),
+                const SizedBox(width: 16),
+                
+                // AUTH LOGIC
+                if (isAuthenticated)
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 40),
+                    tooltip: 'Menú de usuario',
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                         value: 'profile',
+                         child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
+                      ),
+                      const PopupMenuItem(
+                        value: 'logout',
+                        child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
+                      ),
+                    ],
+                    onSelected: (value) async {
+                      if (value == 'logout') {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesión cerrada')));
+                        }
+                      } else if (value == 'profile') {
+                        context.push('/404-profile');
+                      }
+                    },
+                    child: CircleAvatar(
+                       radius: 18,
+                       backgroundColor: const Color(0xFF2563EB),
+                       child: Text(
+                         authState.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                       ),
                     ),
-                    child: const Text('Publicar Gratis'),
+                  )
+                else
+                  TextButton(
+                    onPressed: () => context.pushNamed('login'),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius.circular(12),
+                         side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                      ),
+                    ),
+                    child: const Text('Entrar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
-               ],
-             ),
-           )
+              ],
+            ),
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -121,8 +215,32 @@ class PropertyListingScreen extends ConsumerWidget {
                              const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()))
                           else if (paginatedProperties.isEmpty)
                              _buildEmptyState()
+                          else if (searchState.viewMode == PropertyViewMode.list)
+                            Column(children: paginatedProperties.map((p) => PropertyListingItem(property: p)).toList())
                           else
-                            ...paginatedProperties.map((p) => PropertyListingItem(property: p)),
+                            GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: 320,
+                                  mainAxisExtent: 370, // Tight fit to remove bottom whitespace
+                                  crossAxisSpacing: 24,
+                                  mainAxisSpacing: 24,
+                                ),
+                              itemCount: paginatedProperties.length,
+                              itemBuilder: (context, index) {
+                                final p = paginatedProperties[index];
+                                return PropertyFloatingCard(
+                                  property: p,
+                                  onTap: () {
+                                    context.pushNamed(
+                                      'property-details', 
+                                      pathParameters: {'id': p.id},
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           
                           // Pagination
                           const SizedBox(height: 40),
@@ -201,12 +319,17 @@ class PropertyListingScreen extends ConsumerWidget {
                      borderRadius: BorderRadius.circular(8),
                      border: Border.all(color: Colors.grey.shade200),
                    ),
-                   child: Row(
-                     children: [
-                       _buildViewButton(Icons.list, 'Lista', true, () {}),
-                       _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
-                     ],
-                   ),
+                    child: Row(
+                      children: [
+                        _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
+                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
+                        }),
+                        _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
+                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
+                        }),
+                        _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
+                      ],
+                    ),
                  ),
                   const SizedBox(width: 12),
                   _buildSortingDropdown(context, searchState, ref),
@@ -388,7 +511,7 @@ class PropertyListingScreen extends ConsumerWidget {
   Widget _buildSimpleFooter() {
      return const Column(
        children: [
-         Text('© 2024 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+         Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
        ],
      );
   }

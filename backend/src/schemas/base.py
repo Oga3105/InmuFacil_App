@@ -87,6 +87,7 @@ class PropertyFeaturesSchema(BaseModel):
     bedrooms: int = Field(0, ge=0)
     bathrooms: int = Field(0, ge=0)
     construction_year: Optional[int] = Field(None, ge=1800, le=2100)
+    floor: Optional[str] = None
     orientation: Optional[Orientation] = None
     heating_type: Optional[HeatingType] = None
     has_lift: bool = False
@@ -187,6 +188,7 @@ class PropertyBase(BaseModel):
     
     property_type: PropertyType = PropertyType.PISO
     operation_type: OperationType = OperationType.VENTA
+    is_verified: bool = True
 
 
 class PropertyCreate(PropertyBase):
@@ -226,6 +228,7 @@ class PropertyResponse(PropertyBase):
 
     class Config:
         from_attributes = True
+        use_enum_values = True # Important for DB stored indices vs Enum members
 
 
 # ============================================================================

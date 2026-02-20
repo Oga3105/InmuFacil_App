@@ -1,0 +1,79 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (94.0.0 available)
+  analyzer 7.6.0 (10.0.2 available)
+  analyzer_plugin 0.13.4 (0.14.2 available)
+  build 2.5.4 (4.0.4 available)
+  build_config 1.1.2 (1.2.0 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+  build_runner 2.5.4 (2.11.1 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  characters 1.4.0 (1.4.1 available)
+  custom_lint_core 0.7.5 (0.8.2 available)
+  custom_lint_visitor 1.0.0+7.7.0 (1.0.0+9.0.0 available)
+  dart_style 3.1.1 (3.1.5 available)
+  ffi 2.1.5 (2.2.0 available)
+  flutter_map 6.2.1 (8.2.2 available)
+  flutter_riverpod 2.6.1 (3.2.1 available)
+  geocoding_android 4.0.1 (5.0.0 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  go_router 13.2.5 (17.1.0 available)
+  js 0.6.7 (0.7.2 available)
+  json_annotation 4.9.0 (4.10.0 available)
+  json_serializable 6.9.5 (6.12.0 available)
+  matcher 0.12.17 (0.12.18 available)
+  material_color_utilities 0.11.1 (0.13.0 available)
+  meta 1.17.0 (1.18.1 available)
+  mgrs_dart 2.0.0 (3.0.0 available)
+  mockito 5.4.6 (5.6.3 available)
+  objective_c 9.2.5 (9.3.0 available)
+  petitparser 7.0.1 (7.0.2 available)
+  proj4dart 2.1.0 (3.0.0 available)
+  riverpod 2.6.1 (3.2.1 available)
+  riverpod_annotation 2.6.1 (4.0.2 available)
+  riverpod_generator 2.6.5 (4.0.3 available)
+  source_gen 2.0.0 (4.2.0 available)
+  source_helper 1.3.7 (1.3.10 available)
+  source_span 1.10.1 (1.10.2 available)
+  test_api 0.7.7 (0.7.9 available)
+  unicode 0.3.1 (1.1.9 available)
+Got dependencies!
+37 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing login_screen.dart...                                  
+
+  error - Undefined name 'ui' - lib\presentation\screens\auth\login_screen.dart:138:34 - undefined_identifier
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:146:29 - prefer_single_quotes
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:153:51 - deprecated_member_use
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:159:29 - prefer_single_quotes
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:164:51 - deprecated_member_use
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:169:29 - prefer_single_quotes
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:174:51 - deprecated_member_use
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:179:29 - prefer_single_quotes
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:184:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:203:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:209:47 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:256:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:266:49 - deprecated_member_use
+   info - Missing a required trailing comma - lib\presentation\screens\auth\login_screen.dart:279:9 - require_trailing_commas
+  error - Expected to find ']' - lib\presentation\screens\auth\login_screen.dart:279:9 - expected_token
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:294:52 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\presentation\screens\auth\login_screen.dart:343:34 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\presentation\screens\auth\login_screen.dart:392:38 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\screens\auth\login_screen.dart:492:69 - deprecated_member_use
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:566:35 - prefer_single_quotes
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:567:35 - prefer_single_quotes
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:573:35 - prefer_single_quotes
+   info - Unnecessary use of double quotes - lib\presentation\screens\auth\login_screen.dart:574:35 - prefer_single_quotes
+  error - Expected an identifier - lib\presentation\screens\auth\login_screen.dart:584:9 - missing_identifier
+  error - Expected to find ')' - lib\presentation\screens\auth\login_screen.dart:584:9 - expected_token
+   info - Missing a required trailing comma - lib\presentation\screens\auth\login_screen.dart:585:7 - require_trailing_commas
+  error - Expected to find ';' - lib\presentation\screens\auth\login_screen.dart:585:7 - expected_token
+warning - Dead code - lib\presentation\screens\auth\login_screen.dart:585:8 - dead_code
+  error - Expected an identifier - lib\presentation\screens\auth\login_screen.dart:585:8 - missing_identifier
+  error - Expected to find ';' - lib\presentation\screens\auth\login_screen.dart:585:8 - expected_token
+  error - Unexpected text ';' - lib\presentation\screens\auth\login_screen.dart:585:8 - unexpected_token
+  error - Expected an identifier - lib\presentation\screens\auth\login_screen.dart:586:5 - missing_identifier
+  error - Unexpected text ';' - lib\presentation\screens\auth\login_screen.dart:586:5 - unexpected_token
+   info - Unnecessary empty statement - lib\presentation\screens\auth\login_screen.dart:586:6 - empty_statements
+

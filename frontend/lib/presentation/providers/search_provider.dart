@@ -14,6 +14,12 @@ import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
 
+/// View modes for property listing
+enum PropertyViewMode {
+  list,
+  grid,
+}
+
 /// Search state for property filtering
 class SearchState {
   final PropertyType propertyType;
@@ -30,11 +36,14 @@ class SearchState {
   final bool isSearchActive; // NEW: Track if search button has been pressed
   final int minBedrooms; // NEW: Filter
   final List<String> selectedExtras; // NEW: Filter
+  final bool onlyFavorites; // NEW: Filter for favorites
+  final bool onlyVerified; // NEW: Filter for verified
   
-  // Pagination & Sorting
+  // Pagination, Sorting & View Mode
   final int currentPage;
   final int itemsPerPage;
   final SortOption sortBy;
+  final PropertyViewMode viewMode;
   
   // Default view centered on Madrid (Spain Center)
   static const LatLng _spainCenter = LatLng(40.4168, -3.7038);
@@ -57,6 +66,9 @@ class SearchState {
     this.currentPage = 1,
     this.itemsPerPage = 5,
     this.sortBy = SortOption.relevance,
+    this.viewMode = PropertyViewMode.list,
+    this.onlyFavorites = false,
+    this.onlyVerified = false,
   });
   
   SearchState copyWith({
@@ -68,15 +80,24 @@ class SearchState {
     LatLng? mapCenter,
     bool? isLoading,
     String? error,
+    bool clearError = false, // [NEW] Flag to explicitly clear error
+    
     bool? isUsingFallbackLocation,
     List<String>? lastSearchResultBbox,
+    bool clearBbox = false, // [NEW] Flag to clear bbox
+    
     Map<String, dynamic>? lastSearchResultGeoJson,
+    bool clearGeoJson = false, // [NEW] Flag to clear geojson
+    
     bool? isSearchActive,
     int? minBedrooms,
     List<String>? selectedExtras,
     int? currentPage,
     int? itemsPerPage,
     SortOption? sortBy,
+    PropertyViewMode? viewMode,
+    bool? onlyFavorites,
+    bool? onlyVerified,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -86,16 +107,27 @@ class SearchState {
       filteredProperties: filteredProperties ?? this.filteredProperties,
       mapCenter: mapCenter ?? this.mapCenter,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      
+      // [FIX] Error clearing logic
+      error: clearError ? null : (error ?? this.error),
+      
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
-      lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
-      lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
+      
+      // [FIX] Bbox clearing logic
+      lastSearchResultBbox: clearBbox ? null : (lastSearchResultBbox ?? this.lastSearchResultBbox),
+      
+      // [FIX] GeoJson clearing logic
+      lastSearchResultGeoJson: clearGeoJson ? null : (lastSearchResultGeoJson ?? this.lastSearchResultGeoJson),
+      
       isSearchActive: isSearchActive ?? this.isSearchActive,
       minBedrooms: minBedrooms ?? this.minBedrooms,
       selectedExtras: selectedExtras ?? this.selectedExtras,
       currentPage: currentPage ?? this.currentPage,
       itemsPerPage: itemsPerPage ?? this.itemsPerPage,
       sortBy: sortBy ?? this.sortBy,
+      viewMode: viewMode ?? this.viewMode,
+      onlyFavorites: onlyFavorites ?? this.onlyFavorites,
+      onlyVerified: onlyVerified ?? this.onlyVerified,
     );
   }
 }
@@ -174,6 +206,31 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(sortBy: option, currentPage: 1); // Reset to page 1 on sort change
     _applySorting();
   }
+
+  /// Update view mode (list/grid)
+  void updateViewMode(PropertyViewMode mode) {
+    state = state.copyWith(
+      viewMode: mode,
+      itemsPerPage: mode == PropertyViewMode.grid ? 9 : 5,
+      currentPage: 1, // Reset to first page when view mode changes
+    );
+  }
+
+  /// Toggle favorites filter
+  void toggleOnlyFavorites() {
+    state = state.copyWith(
+      onlyFavorites: !state.onlyFavorites,
+      currentPage: 1, // Reset to first page when filter changes
+    );
+  }
+
+  /// Toggle verified filter
+  void toggleOnlyVerified() {
+    state = state.copyWith(
+      onlyVerified: !state.onlyVerified,
+      currentPage: 1, // Reset to first page when filter changes
+    );
+  }
   
   /// Get paginated slice of filtered properties
   List<Property> getPaginatedProperties() {
@@ -219,7 +276,8 @@ class SearchNotifier extends StateNotifier<SearchState> {
       state = state.copyWith(
         location: '',
         mapCenter: LocationService.sevillaFallback,
-        lastSearchResultBbox: null,
+        lastSearchResultBbox: null, // Clear bbox if location cleared
+        clearBbox: true,
       );
       return;
     }
@@ -227,7 +285,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
     state = state.copyWith(
       location: location,
       isLoading: true,
-      error: null,
+      clearError: true, // [FIX] Clear error on new location update
     );
     
     try {
@@ -241,6 +299,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         state = state.copyWith(
           mapCenter: coords,
           isLoading: false,
+          clearError: true, // [FIX] Clear error
         );
         await _loadProperties();
       }
@@ -278,7 +337,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   /// Execute search with current filters
   /// This activates the "Results Mode"
   void search() {
-    state = state.copyWith(isSearchActive: true);
+    state = state.copyWith(isSearchActive: true, clearError: true);
     _loadProperties();
   }
   
@@ -321,7 +380,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         return;
       }
       
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoading: true, clearError: true);
       
       try {
         // STEP 1: Primary attempt - Search only in Spain with MULTIPLE results
@@ -437,6 +496,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
             lastSearchResultBbox: bbox,
             lastSearchResultGeoJson: geoJson, // NEW: Store GeoJSON
             isSearchActive: true, // AUTO-ACTIVATE Search when location found
+            clearError: true, // [FIX] Clear any previous error
           );
           
           debugPrint("✅ Location found: $displayName");
@@ -462,7 +522,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
   
   /// Load properties from repository with current filters
   Future<void> _loadProperties() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     final result = await _repository.getProperties(
       type: state.propertyType != PropertyType.all 
@@ -530,7 +590,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
 
         state = state.copyWith(
           isLoading: false,
-          error: null,
+          // error: null, // Removed: already cleared at start
           filteredProperties: results,
           currentPage: 1, // Reset to page 1 when filters change
         );
@@ -543,30 +603,34 @@ class SearchNotifier extends StateNotifier<SearchState> {
   
   /// Clear error message
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(clearError: true);
   }
   
+  /// Clear location text and error without resetting map (User Request Step 18412)
+  void clearSearchText() {
+    state = state.copyWith(location: '', clearError: true);
+  }
+
   /// Reset all filters and view mode
   void reset() {
     state = const SearchState(isSearchActive: false); // Reset to Landing View
     initLocation();
   }
 
-  /// Reset filters but keep location context if possible, or just exact alias for reset()
   /// Reset filters but keep location context (Soft Reset)
-/// Used by "Limpiar filtros" button in UI
-void resetFilters() {
-  state = state.copyWith(
-    propertyType: PropertyType.all,
-    priceRange: const RangeValues(0, 1000000),
-    filteredProperties: const [], // Will be reloaded
-    minBedrooms: 0,
-    selectedExtras: const [],
-    currentPage: 1,
-    // Keep location, mapCenter, isUsingFallbackLocation, lastSearchResultBbox
-  );
-  _loadProperties(); // Reload with cleared filters but same location
-}
+  /// Used by "Limpiar filtros" button in UI
+  void resetFilters() {
+    state = state.copyWith(
+      propertyType: PropertyType.all,
+      priceRange: const RangeValues(0, 1000000),
+      filteredProperties: const [], // Will be reloaded
+      minBedrooms: 0,
+      selectedExtras: const [],
+      currentPage: 1,
+      // Keep location, mapCenter, isUsingFallbackLocation, lastSearchResultBbox
+    );
+    _loadProperties(); // Reload with cleared filters but same location
+  }
 }
 
 /// Provider for ApiClient
@@ -615,7 +679,22 @@ final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
     return fromPolygon.toList();
   }
   
-  // 2. Viewport Mode
+  // 2. City Boundary Mode (Search Result Polygon)
+  // [NEW] Prioritize search polygon over viewport if available
+  if (mapState.cityBoundaryPolygon.isNotEmpty && mapState.cityBoundaryPolygon.length >= 3) {
+      // First, filter by City Polygon
+      var fromCity = allFiltered.where((p) => _isPointInPolygon(p.location, mapState.cityBoundaryPolygon));
+      
+      // Then, if Viewport is available, intersect with it (Visual Sync)
+      // This ensures we don't show properties that are "technically" in the city but off-screen
+      if (mapState.visibleBounds != null) {
+        fromCity = fromCity.where((p) => mapState.visibleBounds!.contains(p.location));
+      }
+      
+      return fromCity.toList();
+  }
+  
+  // 3. Viewport Mode (Fallback)
   if (mapState.visibleBounds != null) {
     return allFiltered.where((p) => mapState.visibleBounds!.contains(p.location)).toList();
   }

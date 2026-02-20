@@ -5,12 +5,16 @@ import 'package:go_router/go_router.dart';
 
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
-import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart'; // Required for mapStateProvider
+import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; // [NEW] Hover Provider
+import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // [NEW] Card Widget
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
 // PropertyCard import removed
 import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT (Fix for Property not found)
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/property_listing/property_listing_item.dart';
+import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
+import '../../providers/auth_provider.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -39,7 +43,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
+  // DEBUG: Check Layout Mode
+          // print("LayoutBuilder constraints: ${constraints.maxWidth}");
           final isDesktop = constraints.maxWidth >= 768;
+          // print("isDesktop: $isDesktop");
           
           return isDesktop
               ? _DesktopLayout()
@@ -66,47 +73,104 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
         // Initialize to 50% if first build
         _leftPanelWidth ??= constraints.maxWidth * 0.5;
         
-        return Row(
+        return Stack(
+          fit: StackFit.expand, // [FIX] Ensure Stack fills the screen
           children: [
-            // Left: Search Panel (Resizable)
-            SizedBox(
-              width: _leftPanelWidth,
-              child: _SearchPanel(),
-            ),
-            
-            // Resizer Handle
-            MouseRegion(
-              cursor: SystemMouseCursors.resizeColumn,
-              child: GestureDetector(
-                onHorizontalDragUpdate: (details) {
-                  setState(() {
-                    final newWidth = (_leftPanelWidth ?? 0) + details.delta.dx;
-                    // Constraints: Min 300, Max 70% of screen
-                    if (newWidth >= 350 && newWidth <= constraints.maxWidth * 0.7) {
-                      _leftPanelWidth = newWidth;
-                    }
-                  });
-                },
-                child: Container(
-                  width: 8,
-                  color: Colors.grey[100],
-                  child: Center(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch, // [FIX] Force children to fill vertical space
+              children: [
+                // Left: Search Panel (Resizable)
+                SizedBox(
+                  width: _leftPanelWidth,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    clipBehavior: Clip.none, 
+                    children: [
+                      _SearchPanel(),
+                    ],
+                  ),
+                ),
+                
+                // Resizer Handle
+                MouseRegion(
+                  cursor: SystemMouseCursors.resizeColumn,
+                  child: GestureDetector(
+                    onHorizontalDragUpdate: (details) {
+                      setState(() {
+                        final newWidth = (_leftPanelWidth ?? 0) + details.delta.dx;
+                        // Constraints: Min 300, Max 70% of screen
+                        if (newWidth >= 350 && newWidth <= constraints.maxWidth * 0.7) {
+                          _leftPanelWidth = newWidth;
+                        }
+                      });
+                    },
                     child: Container(
-                      width: 4,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+                      width: 8,
+                      color: Colors.grey[100],
+                      child: Center(
+                        child: Container(
+                          width: 4,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+                
+                // Right: Map with overlays
+                Expanded(
+                  child: _MapSection(),
+                ),
+              ],
             ),
-            
-            // Right: Map with overlays (navigation bar + stats card)
-            Expanded(
-              child: _MapSection(),
+
+            // GLOBAL FLOATING CARD OVERLAY
+            Consumer(
+              builder: (context, ref, _) {
+                final hoveredProperty = ref.watch(hoveredPropertyProvider);
+                final selectedProperty = ref.watch(selectedPropertyProvider);
+                // Priority: Hover > Selected > Null
+                final displayProperty = hoveredProperty ?? selectedProperty;
+                
+                if (displayProperty == null) return const SizedBox.shrink();
+
+                // Position: Inside the left panel (Search Panel), aligned to its right edge
+                // User Request: "quiero que salga en la parte subrayado de naranja"
+                // Logic: Panel Width - Card Width (300) - Padding (32)
+                final leftPos = (_leftPanelWidth ?? 0) - 300 - 32.0;
+
+                return Positioned(
+                  top: 120, // Adjusted to align with "Sin intermediarios" text area
+                  left: leftPos, 
+                  child: MouseRegion(
+                    onEnter: (_) {
+                       // Keep card alive when hovering IT (stop the hide timer from map marker exit)
+                       ref.read(hoveredPropertyProvider.notifier).cancelHideTimer();
+                    },
+                    onExit: (_) {
+                       // Allow card to hide if mouse leaves it (and doesn't go back to a marker)
+                       ref.read(hoveredPropertyProvider.notifier).startHideTimer();
+                    },
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: PropertyFloatingCard(
+                        property: displayProperty,
+                        width: 300,
+                        onTap: () {
+                          context.pushNamed(
+                            'property-details', 
+                            pathParameters: {'id': displayProperty.id},
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         );
@@ -114,6 +178,8 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
     );
   }
 }
+
+
 
 /// Mobile layout - Stack with floating search
 class _MobileLayout extends StatelessWidget {
@@ -142,6 +208,7 @@ class _MapSection extends ConsumerWidget {
     final showFab = propertyCount > 0;
 
     return Stack(
+      fit: StackFit.expand, // [FIX] Ensure Map Section fills the Expanded/SizedBox parent
       children: [
         // Background: OpenStreetMap - MUST use Positioned.fill to fill entire Stack
         const Positioned.fill(
@@ -205,7 +272,7 @@ class _MapSection extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -749,7 +816,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
                     color: isSelected ? const Color(0xFF2563EB).withOpacity(0.1) : theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
                       width: isSelected ? 2 : 1,
@@ -1155,12 +1222,23 @@ class _TrustBadge extends StatelessWidget {
   }
 }
 
+
+
 /// Navigation bar overlay for map section
-class _MapNavigationBar extends StatelessWidget {
+class _MapNavigationBar extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isAuthenticated = ref.watch(authProvider).isAuthenticated;
     
+    void handleProtectedAction(String route) {
+      if (isAuthenticated) {
+        context.push(route);
+      } else {
+        context.pushNamed('login'); // Better UX: Push instead of Go allows implicit back button
+      }
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
@@ -1180,6 +1258,11 @@ class _MapNavigationBar extends StatelessWidget {
           
           TextButton(
             onPressed: () => context.push('/404-buy'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Comprar',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1191,7 +1274,12 @@ class _MapNavigationBar extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           TextButton(
-            onPressed: () => context.push('/404-sell'),
+            onPressed: () => handleProtectedAction('/404-sell'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Vender',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1204,6 +1292,11 @@ class _MapNavigationBar extends StatelessWidget {
           const SizedBox(width: 4),
           TextButton(
             onPressed: () => context.push('/404-how-it-works'),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text(
               'Cómo funciona',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -1214,39 +1307,73 @@ class _MapNavigationBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          ElevatedButton(
-            onPressed: () => context.push('/404-publish'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-            ),
-            child: const Text(
-              'Publicar propiedad',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
+          PremiumButton(
+            label: 'Publicar propiedad',
+            onPressed: () => handleProtectedAction('/404-publish'),
+            color: const Color(0xFF2563EB),
+            fontSize: 13,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            fullWidth: false,
           ),
           const SizedBox(width: 12),
-          InkWell(
-            onTap: () => context.push('/404-profile'),
-            borderRadius: BorderRadius.circular(16),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.grey[300],
-              child: Icon(
-                Icons.person,
-                color: Colors.grey[700],
-                size: 18,
+          
+          // [AUTH STATE LOGIC]
+          if (isAuthenticated)
+            PopupMenuButton<String>(
+              offset: const Offset(0, 40),
+              tooltip: 'Menú de usuario',
+              color: theme.colorScheme.surfaceVariant.withOpacity(0.9), // Match search panel
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                     children: [
+                       Icon(Icons.person_outline, size: 20),
+                       SizedBox(width: 8),
+                       Text('Mi Perfil'),
+                     ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                     children: [
+                       Icon(Icons.logout, color: Colors.red, size: 20),
+                       SizedBox(width: 8),
+                       Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                     ],
+                  ),
+                ),
+              ],
+              onSelected: (value) async {
+                if (value == 'logout') {
+                  await ref.read(authProvider.notifier).logout();
+                  if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Sesión cerrada correctamente')),
+                      );
+                  }
+                } else if (value == 'profile') {
+                   context.push('/404-profile');
+                }
+              },
+              child: CircleAvatar(
+                 radius: 18,
+                 backgroundColor: const Color(0xFF2563EB), // Official Blue
+                 child: const Icon(Icons.person, color: Colors.white, size: 20),
+              ),
+            )
+          else
+            InkWell(
+              onTap: () => context.pushNamed('login'),
+              borderRadius: BorderRadius.circular(20),
+              child: CircleAvatar(
+                 radius: 18,
+                 backgroundColor: Colors.grey[200], // Grey/Default
+                 child: Icon(Icons.person, color: Colors.grey[600], size: 20), // Silhouette
               ),
             ),
-          ),
         ],
       ),
     );
@@ -1470,3 +1597,6 @@ class _PremiumGlowButton extends StatelessWidget {
     );
   }
 }
+
+
+

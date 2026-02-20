@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
 import '../../../../domain/entities/property.dart';
+import '../common/premium_button.dart';
+import '../common/time_badge.dart';
 
-class PropertyListingItem extends StatelessWidget {
+class PropertyListingItem extends ConsumerWidget {
   final Property property;
 
   const PropertyListingItem({super.key, required this.property});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Favorites Logic
+    final isFavorite = ref.watch(favoritesProvider).contains(property.id);
     // Brand Colors
     const brandBlue = Color(0xFF2563EB); // Corporate blue specified
     const navyColor = Color(0xFF0F172A); // Keep dark for text contrast
@@ -80,12 +86,22 @@ class PropertyListingItem extends StatelessWidget {
                       right: 16,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          color: Colors.white.withOpacity(0.9),
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.favorite_border, color: Colors.white),
-                          onPressed: () {},
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : Colors.grey.shade400,
+                          ),
+                          onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(property.id),
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.all(8),
                           iconSize: 20,
@@ -196,9 +212,10 @@ class PropertyListingItem extends StatelessWidget {
                             _buildStat(Icons.bathtub_outlined, '${property.bathrooms} Baños', navyColor),
                             const SizedBox(width: 24),
                             _buildStat(Icons.square_foot, '${property.squareMeters} m²', navyColor),
-                             // Mock Floor
-                             const SizedBox(width: 24),
-                            _buildStat(Icons.apartment, '3ª Planta', navyColor),
+                            if (property.floor != null) ...[
+                              const SizedBox(width: 24),
+                              _buildStat(Icons.apartment, '${property.floor}', navyColor),
+                            ],
                           ],
                         ),
                       ),
@@ -216,6 +233,13 @@ class PropertyListingItem extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
 
+                      // Time Badge
+                      const SizedBox(height: 12),
+                      PropertyTimeBadge(
+                        createdAt: property.createdAt,
+                        updatedAt: property.updatedAt,
+                      ),
+
                       const Spacer(),
 
                       // Footer: Tags & CTA
@@ -223,29 +247,32 @@ class PropertyListingItem extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Verified Tag
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: successGreen.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: successGreen.withOpacity(0.2)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.verified, size: 16, color: successGreen),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'VENDEDOR VERIFICADO',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: successGreen.withOpacity(0.9),
-                                    letterSpacing: 0.5,
+                          if (property.isVerified)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: successGreen.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: successGreen.withOpacity(0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.verified, size: 16, color: successGreen),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'VENDEDOR VERIFICADO',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: successGreen.withOpacity(0.9),
+                                      letterSpacing: 0.5,
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ),
+                                ],
+                              ),
+                            )
+                          else
+                            const SizedBox.shrink(),
 
                           Row(
                             children: [
@@ -256,18 +283,16 @@ class PropertyListingItem extends StatelessWidget {
                                 tooltip: 'Compartir',
                               ),
                               const SizedBox(width: 8),
-                              ElevatedButton.icon(
+                              const SizedBox(width: 8),
+                              PremiumButton(
+                                label: 'Contactar Particular',
+                                icon: Icons.chat_bubble_outline,
+                                color: brandBlue,
+                                fullWidth: false,
+                                fontSize: 13,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                 onPressed: () {},
-                                icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                                label: const Text('Contactar Particular'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: brandBlue,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                              )
+                              ),
                             ],
                           )
                         ],
@@ -300,3 +325,4 @@ class PropertyListingItem extends StatelessWidget {
     );
   }
 }
+

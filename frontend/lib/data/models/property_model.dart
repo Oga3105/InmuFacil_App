@@ -21,6 +21,12 @@ class PropertyModel {
   final double squareMeters;
   @JsonKey(name: 'image_url')
   final String? imageUrl;
+  @JsonKey(name: 'is_verified')
+  final bool isVerified;
+  @JsonKey(name: 'created_at')
+  final DateTime? createdAt;
+  @JsonKey(name: 'updated_at')
+  final DateTime? updatedAt;
   
   const PropertyModel({
     required this.id,
@@ -34,8 +40,15 @@ class PropertyModel {
     required this.bathrooms,
     required this.squareMeters,
     this.imageUrl,
+    this.floor,
+    this.isVerified = true,
     this.features = const [],
+    this.createdAt,
+    this.updatedAt,
   });
+  
+  @JsonKey(includeFromJson: false)
+  final String? floor;
 
   @JsonKey(includeFromJson: false) // Not serialized by default json_serializable unless updated
   final List<String> features;
@@ -70,7 +83,15 @@ class PropertyModel {
       bathrooms: (json['features']?['bathrooms'] as int?) ?? 0,
       squareMeters: (json['surface_area'] as num?)?.toDouble() ?? 0.0, // Backend uses surface_area
       imageUrl: _parseFirstImage(json['media']),
+      isVerified: json['is_verified'] as bool? ?? true,
+      floor: json['features']?['floor'] as String?,
       features: _parseFeatures(json['features']),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.tryParse(json['updated_at'] as String)
+          : null,
     );
   }
   
@@ -115,7 +136,11 @@ class PropertyModel {
       bathrooms: bathrooms,
       squareMeters: squareMeters,
       imageUrl: imageUrl,
+      floor: floor,
+      isVerified: isVerified,
       features: features,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
 
@@ -154,6 +179,8 @@ class PropertyModel {
       bathrooms: property.bathrooms,
       squareMeters: property.squareMeters,
       imageUrl: property.imageUrl,
+      floor: property.floor,
+      isVerified: property.isVerified,
     );
   }
   

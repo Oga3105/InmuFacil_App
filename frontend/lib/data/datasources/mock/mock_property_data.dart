@@ -4,8 +4,10 @@ import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 
 /// Mock property data for development
 class MockPropertyData {
+  static final _now = DateTime.now();
+
   static final List<Property> madridProperties = [
-    // Centro - Sol
+    // Centro - Sol: NUEVO (hace 2 horas)
     Property(
       id: '1',
       title: 'Piso céntrico en Sol',
@@ -16,9 +18,12 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 1,
       squareMeters: 75,
+      features: const ['lift'],
+      floor: '3',
+      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
-    
-    // Salamanca
+
+    // Salamanca: NUEVO (hace 10 horas) + actualizado
     Property(
       id: '2',
       title: 'Ático de lujo en Salamanca',
@@ -29,9 +34,11 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 120,
+      createdAt: DateTime.now().subtract(const Duration(hours: 10)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 1)),
     ),
-    
-    // Chamberí
+
+    // Chamberí: RECIENTE (hace 3 días)
     Property(
       id: '3',
       title: 'Piso reformado en Chamberí',
@@ -42,9 +49,12 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 2,
       squareMeters: 85,
+      features: const ['lift', 'terrace'],
+      floor: '1',
+      createdAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
-    
-    // Retiro
+
+    // Retiro: RECIENTE (hace 6 días) + actualizado
     Property(
       id: '4',
       title: 'Casa con jardín cerca del Retiro',
@@ -55,22 +65,25 @@ class MockPropertyData {
       bedrooms: 4,
       bathrooms: 3,
       squareMeters: 200,
+      createdAt: DateTime.now().subtract(const Duration(days: 6)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 1)),
     ),
-    
-    // Malasaña
+
+    // Malasaña: hace 2 semanas (naranja)
     Property(
       id: '5',
       title: 'Loft moderno en Malasaña',
-      type: PropertyType.piso, // Loft treated as Piso until specific type exists
+      type: PropertyType.piso,
       price: 380000,
       location: const LatLng(40.4267, -3.7033),
       address: 'Malasaña, Madrid',
       bedrooms: 1,
       bathrooms: 1,
       squareMeters: 60,
+      createdAt: DateTime.now().subtract(const Duration(days: 14)),
     ),
-    
-    // Chueca
+
+    // Chueca: hace 25 días (naranja) + actualizado
     Property(
       id: '6',
       title: 'Estudio en Chueca',
@@ -81,9 +94,11 @@ class MockPropertyData {
       bedrooms: 1,
       bathrooms: 1,
       squareMeters: 45,
+      createdAt: DateTime.now().subtract(const Duration(days: 25)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 3)),
     ),
-    
-    // Moncloa
+
+    // Moncloa: hace 2 meses (gris)
     Property(
       id: '7',
       title: 'Oficina en zona universitaria',
@@ -95,9 +110,10 @@ class MockPropertyData {
       bathrooms: 2,
       squareMeters: 90,
       features: const ['ac', 'heating', 'accessible', 'lift'],
+      createdAt: DateTime.now().subtract(const Duration(days: 60)),
     ),
-    
-    // Arganzuela
+
+    // Arganzuela: hace 3 meses (gris) + actualizado
     Property(
       id: '8',
       title: 'Piso familiar en Arganzuela',
@@ -108,9 +124,13 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 95,
+      features: const ['lift', 'garage'],
+      floor: '4',
+      createdAt: DateTime.now().subtract(const Duration(days: 90)),
+      updatedAt: DateTime.now().subtract(const Duration(days: 5)),
     ),
-    
-    // Las Rozas (afueras)
+
+    // Las Rozas: sin fecha (sin badge)
     Property(
       id: '9',
       title: 'Chalet independiente',
@@ -122,8 +142,8 @@ class MockPropertyData {
       bathrooms: 3,
       squareMeters: 250,
     ),
-    
-    // Pozuelo
+
+    // Pozuelo: hace 45 días (gris)
     Property(
       id: '10',
       title: 'Terreno urbanizable',
@@ -134,9 +154,10 @@ class MockPropertyData {
       bedrooms: 0,
       bathrooms: 0,
       squareMeters: 1000,
+      createdAt: DateTime.now().subtract(const Duration(days: 45)),
     ),
-    
-    // Chamartín
+
+    // Chamartín: hace 5 días (reciente) + actualizado hace 2 horas
     Property(
       id: '11',
       title: 'Piso de lujo en Chamartín',
@@ -148,9 +169,11 @@ class MockPropertyData {
       bathrooms: 2,
       squareMeters: 110,
       features: const ['ac', 'storage_room', 'fitted_wardrobes', 'lift', 'exterior'],
+      createdAt: DateTime.now().subtract(const Duration(days: 5)),
+      updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
     ),
-    
-    // Latina
+
+    // Latina: hace 18 días (naranja)
     Property(
       id: '12',
       title: 'Piso económico en La Latina',
@@ -162,9 +185,10 @@ class MockPropertyData {
       bathrooms: 1,
       squareMeters: 70,
       features: const ['fitted_wardrobes', 'heating', 'exterior'],
+      createdAt: DateTime.now().subtract(const Duration(days: 18)),
     ),
   ];
-  
+
   /// Get Madrid city center coordinates
   static const LatLng madridCenter = LatLng(40.4168, -3.7038);
 }
