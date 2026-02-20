@@ -26,6 +26,8 @@ print(f"[ENV] .env exists: {env_path.exists()}")
 import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import OperationalError
 import logging
 from datetime import datetime
 
@@ -144,6 +146,31 @@ async def log_requests(request: Request, call_next):
 
 
 # ============================================================================
+# @Watcher - Global Database Exception Handler (503 Service Unavailable)
+# ============================================================================
+
+@app.exception_handler(OperationalError)
+async def database_exception_handler(request: Request, exc: OperationalError):
+    """
+    Intercept SQLAlchemy OperationalError globally.
+    Returns 503 with a clean, user-safe message (no internal details leaked).
+    """
+    logger.critical(
+        f"[DB] ❌ BASE DE DATOS NO DISPONIBLE. "
+        f"¿Está Docker Desktop encendido y el contenedor de PostgreSQL corriendo? "
+        f"Detalle interno: {repr(exc)}"
+    )
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": "Servicio de datos no disponible temporalmente. "
+                      "Por favor, inténtalo de nuevo en unos minutos.",
+            "error_code": "DATABASE_UNAVAILABLE"
+        }
+    )
+
+
+# ============================================================================
 # Application Events
 # ============================================================================
 
@@ -172,8 +199,15 @@ async def startup_event():
         # Auto-Migration (Dev Mode)
         logger.info("[DB] Checking database schema...")
         Base.metadata.create_all(bind=engine)
-        logger.info("[DB] Schema synchronized.")
+        logger.info("[DB] ✅ Schema synchronized. PostgreSQL operativo.")
         
+    except OperationalError as e:
+        logger.critical(
+            f"[DB] ❌ NO SE PUDO CONECTAR A POSTGRESQL. "
+            f"Verifica que Docker Desktop esté encendido y el contenedor 'inmufacil-db' corriendo. "
+            f"Puerto esperado: 5435. Detalle: {repr(e)}"
+        )
+        logger.critical("[DB] 💡 SOLUCIÓN: Abre Docker Desktop → espera a que arranque → reinicia uvicorn.")
     except Exception as e:
         # Use repr() to avoid UnicodeDecodeError if the system error message contains localized non-UTF-8 characters (Windows)
         logger.critical(f"[ALERT] STARTUP WARNING: {repr(e)}")

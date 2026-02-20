@@ -105,6 +105,11 @@
         "validation_error": "Erreur de validation",
         "unauthorized": "Non autorisé",
         "not_found": "Non trouvé",
-        "unknown_error": "Erreur inconnue"
+        "unknown_error": "Erreur inconnue",
+        "service_unavailable": "Service non disponible",
+        "service_unavailable_detail": "Le service de données n'est pas disponible pour le moment. Veuillez réessayer dans quelques minutes.",
+        "timeout": "Délai d'attente dépassé. Veuillez réessayer.",
+        "request_cancelled": "Requête annulée",
+        "connection_error": "Impossible de se connecter au serveur. Vérifiez votre connexion Internet."
     }
 }

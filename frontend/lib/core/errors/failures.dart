@@ -46,6 +46,14 @@ class ValidationFailure extends Failure {
       : super(message);
 }
 
+/// Service unavailable failures (503 - e.g. database down)
+/// i18n key: errors.service_unavailable_detail
+class ServiceUnavailableFailure extends Failure {
+  const ServiceUnavailableFailure([
+    String message = 'El servicio de datos no está disponible en este momento. Inténtalo de nuevo en unos minutos.'
+  ]) : super(message);
+}
+
 /// Cache failures
 class CacheFailure extends Failure {
   const CacheFailure([String message = 'Cache error occurred']) 
