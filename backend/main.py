@@ -87,7 +87,6 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",      # Alternative local IP
     "http://localhost:8001",      # Flutter Web custom port
     "http://127.0.0.1:8001",      # Flutter Web custom port IP
-    "*"                           # Temporary for development flexibility if strict fails
 ]
 
 app.add_middleware(
@@ -170,6 +169,25 @@ async def database_exception_handler(request: Request, exc: OperationalError):
             "detail": "Servicio de datos no disponible temporalmente. "
                       "Por favor, inténtalo de nuevo en unos minutos.",
             "error_code": "DATABASE_UNAVAILABLE"
+        }
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """
+    Global catch-all for unhandled exceptions (like Bcrypt ValueError).
+    Prevents CORS issues and provides clean error reporting.
+    """
+    logger.error(f"[ERROR] Unhandled Exception: {repr(exc)}")
+    import traceback
+    logger.error(traceback.format_exc())
+    
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": "Ocurrió un error inesperado en el servidor.",
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "type": type(exc).__name__
         }
     )
 
