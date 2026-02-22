@@ -286,11 +286,14 @@ class _MapSection extends ConsumerWidget {
                   children: [
                      Icon(Icons.info_outline, size: 18, color: Colors.red), // Rojo papelera
                      const SizedBox(width: 8),
-                     Text(
-                      '0 inmuebles encontrados',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.w600,
+                     Flexible(
+                       child: Text(
+                        '0 inmuebles encontrados',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[800],
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -1250,131 +1253,138 @@ class _MapNavigationBar extends ConsumerWidget {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // Flexible spacer to prevent overflow
-          const Spacer(),
-          
-          TextButton(
-            onPressed: () => context.push('/404-buy'),
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Comprar',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          TextButton(
-            onPressed: () => handleProtectedAction('/404-sell'),
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Vender',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          TextButton(
-            onPressed: () => context.push('/404-how-it-works'),
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Text(
-              'Cómo funciona',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          PremiumButton(
-            label: 'Publicar propiedad',
-            onPressed: () => handleProtectedAction('/404-publish'),
-            color: const Color(0xFF2563EB),
-            fontSize: 13,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            fullWidth: false,
-          ),
-          const SizedBox(width: 12),
-          
-          // [AUTH STATE LOGIC]
-          if (isAuthenticated)
-            PopupMenuButton<String>(
-              offset: const Offset(0, 40),
-              tooltip: 'Menú de usuario',
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.9), // Match search panel
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'profile',
-                  child: Row(
-                     children: [
-                       Icon(Icons.person_outline, size: 20),
-                       SizedBox(width: 8),
-                       Text('Mi Perfil'),
-                     ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => context.push('/404-buy'),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Comprar',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'logout',
-                  child: Row(
-                     children: [
-                       Icon(Icons.logout, color: Colors.red, size: 20),
-                       SizedBox(width: 8),
-                       Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                     ],
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: () => handleProtectedAction('/404-sell'),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Vender',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
-                ),
-              ],
-              onSelected: (value) async {
-                if (value == 'logout') {
-                  await ref.read(authProvider.notifier).logout();
-                  if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Sesión cerrada correctamente')),
-                      );
-                  }
-                } else if (value == 'profile') {
-                   context.push('/profile');
-                }
-              },
-              child: CircleAvatar(
-                 radius: 18,
-                 backgroundColor: const Color(0xFF2563EB), // Official Blue
-                 child: const Icon(Icons.person, color: Colors.white, size: 20),
-              ),
-            )
-          else
-            InkWell(
-              onTap: () => context.pushNamed('login'),
-              borderRadius: BorderRadius.circular(20),
-              child: CircleAvatar(
-                 radius: 18,
-                 backgroundColor: Colors.grey[200], // Grey/Default
-                 child: Icon(Icons.person, color: Colors.grey[600], size: 20), // Silhouette
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: () => context.push('/404-how-it-works'),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Cómo funciona',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  PremiumButton(
+                    label: 'Publicar propiedad',
+                    onPressed: () => handleProtectedAction('/404-publish'),
+                    color: const Color(0xFF2563EB),
+                    fontSize: 13,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    fullWidth: false,
+                  ),
+                  const SizedBox(width: 12),
+                  
+                  // [AUTH STATE LOGIC]
+                  if (isAuthenticated)
+                    PopupMenuButton<String>(
+                      offset: const Offset(0, 40),
+                      tooltip: 'Menú de usuario',
+                      color: theme.colorScheme.surfaceVariant.withOpacity(0.9), // Match search panel
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'profile',
+                          child: Row(
+                             children: [
+                               Icon(Icons.person_outline, size: 20),
+                               SizedBox(width: 8),
+                               Text('Mi Perfil'),
+                             ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'logout',
+                          child: Row(
+                             children: [
+                               Icon(Icons.logout, color: Colors.red, size: 20),
+                               SizedBox(width: 8),
+                               Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                             ],
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) async {
+                        if (value == 'logout') {
+                          await ref.read(authProvider.notifier).logout();
+                          if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Sesión cerrada correctamente')),
+                              );
+                          }
+                        } else if (value == 'profile') {
+                           context.push('/profile');
+                        }
+                      },
+                      child: CircleAvatar(
+                         radius: 18,
+                         backgroundColor: const Color(0xFF2563EB), // Official Blue
+                         child: const Icon(Icons.person, color: Colors.white, size: 20),
+                      ),
+                    )
+                  else
+                    InkWell(
+                      onTap: () => context.pushNamed('login'),
+                      borderRadius: BorderRadius.circular(20),
+                      child: CircleAvatar(
+                         radius: 18,
+                         backgroundColor: Colors.grey[200], // Grey/Default
+                         child: Icon(Icons.person, color: Colors.grey[600], size: 20), // Silhouette
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+          );
+        },
       ),
     );
   }
