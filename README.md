@@ -6,6 +6,26 @@ InmuFácil es una plataforma peer-to-peer que elimina intermediarios en las tran
 
 ---
 
+## 📚 Documentación del Proyecto (Single Source of Truth)
+
+La documentación estructurada del proyecto reside exclusivamente en la carpeta `/docs`.
+Cualquier desviación de este estándar será corregida por el Agente **@Architect**.
+
+- [Guía Rápida (Localhost)](docs/GETTING_STARTED.md)
+- [Arquitectura General (Clean Architecture, Stack)](docs/ARCHITECTURE.md)
+- [Guía de Despliegue (VPS + Docker + Cloudflare)](docs/DEPLOYMENT_GUIDE.md)
+- [Referencia de API y Contratos](docs/API_REFERENCE.md)
+- [Modelos de Datos Compartidos](docs/CONTRACTS.md)
+- [Políticas de Seguridad y OWASP](docs/SECURITY.md)
+- [Gestión de Secretos (.env)](docs/SECRETS.md)
+- [Máquinas de Estado (Visitas y Ofertas)](docs/STATE_MACHINE.md)
+- [Estrategia de Testing (Pytest, Widget Tests)](docs/TESTING_STRATEGY.md)
+- [UI y Estilos (Theme Customization)](docs/THEME_CUSTOMIZATION.md)
+- [Solución de Problemas (Troubleshooting)](docs/TROUBLESHOOTING.md)
+- [Decision Records (ADR)](docs/ADR/)
+
+---
+
 ## 🎯 Visión del Proyecto
 
 **"Donde la tecnología reemplaza la confianza"**
