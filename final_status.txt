@@ -1,0 +1,29 @@
+On branch develop
+Your branch is ahead of 'origin/develop' by 2 commits.
+  (use "git push" to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Changes to be committed:
+	modified:   README.md
+	modified:   frontend/lib/config/router/app_router.dart
+	modified:   frontend/lib/core/constants/api_constants.dart
+	modified:   frontend/lib/presentation/providers/favorites_provider.dart
+	modified:   frontend/lib/presentation/screens/home/home_screen.dart
+	modified:   frontend/lib/presentation/screens/property/property_details_screen.dart
+	modified:   frontend/lib/presentation/widgets/open_street_map_widget.dart
+	modified:   frontend/pubspec.yaml
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+	both modified:   frontend/.gitignore
+	both modified:   frontend/README.md
+	both modified:   frontend/pubspec.lock
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	diff.txt
+	final_status.txt
+

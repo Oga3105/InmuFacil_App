@@ -87,11 +87,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       // Placeholder for unassigned actions (404)
       GoRoute(
         path: '/404',
-        builder: (context, state) => NotFoundScreen(uri: state.uri.toString()),
+        builder: (context, state) => NotFoundScreen(uri: state.location),
       ),
       GoRoute(
         path: '/404-:action', // Dynamic 404 for actions like 'sell', 'buy', etc.
-        builder: (context, state) => NotFoundScreen(uri: state.uri.toString()),
+        builder: (context, state) => NotFoundScreen(uri: state.location),
       ),
       
       // Property Details
@@ -102,7 +102,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final propertyId = state.pathParameters['id'];
           // Ensure we have an ID
           if (propertyId == null) {
-            return NotFoundScreen(uri: state.uri.toString());
+            return NotFoundScreen(uri: state.location);
           }
           return PropertyDetailsScreen(propertyId: propertyId);
         },
@@ -110,6 +110,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
     
     // Error handling
-    errorBuilder: (context, state) => NotFoundScreen(uri: state.uri.toString()),
+    errorBuilder: (context, state) => NotFoundScreen(uri: state.location),
   );
 });

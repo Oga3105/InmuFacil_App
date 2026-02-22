@@ -1,6 +1,6 @@
-# InmuFácil Frontend
+# InmuFácil - Frontend
 
-Platform for P2P property trading without intermediaries. Built with Flutter.
+Aplicación Multiplataforma (Mobile-First y Web) desarrollada con **Flutter** e inyección de dependencias reactiva mediante **Riverpod**.
 
 ## 📚 Documentación
 
@@ -14,21 +14,20 @@ Para mantener una fuente única de la verdad, toda la documentación reside en e
 
 ## 🌟 Key Features
 
-- **Property Search:** Advanced filtering by price, type, and location.
-- **Interactive Map:** OpenStreetMap integration with clustering and dynamic reloading.
-- **Geocoding (New):** Intelligent city search with "Local First, Global Fallback" algorithm.
-- **Internationalization:** Full support for 9 languages (ES, EN, CA, EU, GL, FR).
-- **Responsive Design:** Optimized for both Desktop and Mobile web views.
 
-## 🗺️ Geocoding Service
+Para mantener una fuente única de la verdad, toda la documentación reside en el directorio raíz `/docs`.
 
-The application uses **OpenStreetMap Nominatim API** for city search functionality.
+**Enlaces Útiles para el Frontend:**
+- [UI y Personalización (ThemeData)](../docs/THEME_CUSTOMIZATION.md)
+- [Testing de Widgets](../docs/TESTING_STRATEGY.md)
+- [Contratos DTO y API](../docs/CONTRACTS.md)
+- [Arquitectura (Layered/Clean)](../docs/ARCHITECTURE.md)
 
-### 🧠 Algorithm: "Local First, Global Fallback"
-1. **Primary Attempt:** Searches within Spain (`countrycodes=es`).
-   - Ensures inputs like "Córdoba" resolve to Córdoba, Spain.
-2. **Fallback:** If no local result found, searches globally.
-   - Enables finding "Paris", "New York", or "Córdoba, Argentina".
+## 🚀 Inicio Rápido (Localhost)
+
+```bash
+# 1. Obtener dependencias de pubspec
+flutter pub get
 
 ### 🔒 Security & Limits
 - **Rate Limiting:** Debounced requests (500ms) to comply with Nominatim's 1 req/sec policy.
@@ -68,3 +67,4 @@ A custom, secure, and internationally friendly 404 page.
 - **Map Provider:** OpenStreetMap (No API key required).
 - **Geocoding:** Nominatim (Free, rate-limited).
 - **Backend:** Expects API at localhost:8000 (configurable in .env).
+

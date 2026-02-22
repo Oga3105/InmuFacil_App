@@ -267,13 +267,13 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       ),
                        const SizedBox(height: 16),
                        // Time Badge
-                       PropertyTimeBadge(
-                         createdAt: property.createdAt,
-                         updatedAt: property.updatedAt,
-                         large: true,
-                       ),
-                       const SizedBox(height: 16),
-                       _PropertyStatsGrid(property: property),
+                        PropertyTimeBadge(
+                          createdAt: property.createdAt,
+                          updatedAt: property.updatedAt,
+                          large: true,
+                        ),
+                        const SizedBox(height: 16),
+                        _PropertyStatsGrid(property: property),
                       const SizedBox(height: 24),
                       Divider(color: Colors.grey[200]),
                       const SizedBox(height: 24),

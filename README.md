@@ -38,7 +38,21 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ---
 
-## 📊 Estado Actual del Proyecto (Status Matrix)
+## 📚 Documentación Estructurada (Single Source of Truth)
+
+Toda la documentación técnica e histórica de InmuFácil reside en el directorio `/docs`.
+
+- **[Guía Rápida (GETTING_STARTED)](docs/GETTING_STARTED.md)**: Cómo iniciar los entornos locales.
+- **[Arquitectura (ARCHITECTURE)](docs/ARCHITECTURE.md)**: Flutter & FastAPI, Satélites, Riverpod.
+- **[Guía de Despliegue (DEPLOYMENT_GUIDE)](docs/DEPLOYMENT_GUIDE.md)**: VPS, Docker, y Cloudflare.
+- **[Contratos de Datos y API](docs/API_REFERENCE.md)**: DTOs, Modelos y Endpoints.
+- **[Seguridad y Secretos](docs/SECURITY.md)**: Prevención OWASP, CORS, y Políticas `.env`.
+- **[Testing y Troubleshooting](docs/TESTING_STRATEGY.md)**: Estrategias de Pytest y resolución de errores.
+- **[Archivos de Decisión Arquitectónica (ADR)](docs/ADR/)**: Decisiones técnicas históricas irrefutables.
+
+---
+
+## � Estado Actual del Proyecto (Status Matrix)
 
 El proyecto se encuentra en un estado híbrido de desarrollo:
 *   **Backend:** Completado y Maduro (Hito 17 - Legacy/Maintenance).
@@ -282,6 +296,8 @@ Si ves errores, verifica que:
 
 ### Ejecutar la Aplicación
 
+Consulta la **[Guía de Despliegue](docs/DEPLOYMENT_GUIDE.md)** o el **[Getting Started](docs/GETTING_STARTED.md)** en la carpeta `/docs`.
+
 ```bash
 # Desarrollo
 uvicorn backend.main:app --reload
@@ -456,30 +472,6 @@ Este proyecto sigue estándares DevSecOps estrictos:
 - ✅ **PCI DSS**: Cifrado at-rest, audit logging
 - ✅ **ISO 27001**: Controles de seguridad implementados
 - ✅ **MITRE ATT&CK**: Cobertura de técnicas de ataque
-
----
-
-## 📞 Contacto y Soporte
-
-**Repositorio:** https://github.com/Oga3105/InmuFacil_App  
-**Documentación:** `/docs/vision_proyecto.md`  
-**Issues:** GitHub Issues
-
----
-
-## 📄 Licencia
-
-[Pendiente de definir]
-
----
-
-## 🙏 Agradecimientos
-
-Desarrollado con:
-- **Gemini AI** - Asistencia de desarrollo
-- **FastAPI** - Framework web moderno
-- **SQLAlchemy** - ORM robusto
-- **Cryptography** - Seguridad de grado militar
 
 ---
 
