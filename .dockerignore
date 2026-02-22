@@ -1,0 +1,34 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Dependencies
+.venv
+venv
+env
+
+# Tests and Logs
+tests
+*.log
+*.db
+.pytest_cache
+.coverage
+htmlcov
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Documentation
+docs

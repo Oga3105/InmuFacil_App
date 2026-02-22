@@ -1,0 +1,101 @@
+---
+name: ✨ Solicitud de Feature
+description: Proponer una nueva funcionalidad para InmuFácil
+title: "[FEATURE]: "
+labels: ["enhancement", "needs-review"]
+assignees:
+  - Oga3105
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponer una nueva funcionalidad. Por favor, describe tu idea en detalle.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema a Resolver
+      description: ¿Qué problema resuelve esta funcionalidad?
+      placeholder: Describe el problema o necesidad
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución Propuesta
+      description: ¿Cómo resolverías este problema?
+      placeholder: Describe tu solución ideal
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente
+      description: ¿Dónde se implementaría esta funcionalidad?
+      options:
+        - Backend (API/FastAPI)
+        - Frontend (Flutter)
+        - Base de Datos
+        - Autenticación
+        - KYC/Vault
+        - Propiedades
+        - Ofertas
+        - Visitas
+        - Servicios
+        - Documentación
+        - Otro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridad
+      description: ¿Qué tan importante es esta funcionalidad?
+      options:
+        - Crítica (necesaria para MVP)
+        - Alta (muy deseable)
+        - Media (bueno tener)
+        - Baja (mejora futura)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: ¿Qué otras soluciones has considerado?
+      placeholder: Describe alternativas
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Diseños
+      description: Si aplica, añade mockups o diseños
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: impact
+    attributes:
+      label: Impacto
+      description: ¿Qué áreas se verían afectadas?
+      options:
+        - label: Requiere cambios en la base de datos
+        - label: Requiere cambios en la API
+        - label: Requiere cambios en el frontend
+        - label: Afecta a la seguridad
+        - label: Requiere documentación
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Contexto Adicional
+      description: Cualquier otra información relevante
+    validations:
+      required: false

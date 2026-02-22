@@ -1,0 +1,161 @@
+name: "PR Summary & Code Review"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ develop, main ]
+
+jobs:
+  code-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies for analysis
+      run: |
+        pip install flake8 pylint bandit radon
+
+    - name: Run Flake8 (Style & Quality)
+      id: flake8
+      continue-on-error: true
+      run: |
+        echo "# 🔍 Flake8 Analysis Results" > flake8_report.md
+        echo "" >> flake8_report.md
+        flake8 backend/ --max-line-length=120 --statistics --count --format='%(path)s:%(row)d:%(col)d: %(code)s %(text)s' >> flake8_report.txt 2>&1 || true
+        if [ -s flake8_report.txt ]; then
+          echo "\`\`\`" >> flake8_report.md
+          cat flake8_report.txt >> flake8_report.md
+          echo "\`\`\`" >> flake8_report.md
+        else
+          echo "✅ No issues found" >> flake8_report.md
+        fi
+
+    - name: Run Pylint (Code Quality)
+      id: pylint
+      continue-on-error: true
+      run: |
+        echo "# 🎯 Pylint Analysis Results" > pylint_report.md
+        echo "" >> pylint_report.md
+        pylint backend/ --max-line-length=120 --disable=C0111,R0903 --output-format=text > pylint_report.txt 2>&1 || true
+        if [ -s pylint_report.txt ]; then
+          echo "\`\`\`" >> pylint_report.md
+          head -50 pylint_report.txt >> pylint_report.md
+          echo "\`\`\`" >> pylint_report.md
+        else
+          echo "✅ No issues found" >> pylint_report.md
+        fi
+
+    - name: Run Bandit (Security)
+      id: bandit
+      continue-on-error: true
+      run: |
+        echo "# 🛡️ Bandit Security Analysis" > bandit_report.md
+        echo "" >> bandit_report.md
+        bandit -r backend/ -f txt -o bandit_report.txt || true
+        if [ -s bandit_report.txt ]; then
+          echo "\`\`\`" >> bandit_report.md
+          cat bandit_report.txt >> bandit_report.md
+          echo "\`\`\`" >> bandit_report.md
+        else
+          echo "✅ No security issues found" >> bandit_report.md
+        fi
+
+    - name: Check for bad practices
+      id: bad-practices
+      continue-on-error: true
+      run: |
+        echo "# ⚠️ Bad Practices Detection" > practices_report.md
+        echo "" >> practices_report.md
+        
+        # Buscar print() statements (debería usar logging)
+        echo "## Print Statements (should use logging):" >> practices_report.md
+        grep -rn "print(" backend/ --include="*.py" | grep -v "# noqa" | head -20 > print_statements.txt || true
+        if [ -s print_statements.txt ]; then
+          echo "\`\`\`" >> practices_report.md
+          cat print_statements.txt >> practices_report.md
+          echo "\`\`\`" >> practices_report.md
+        else
+          echo "✅ No print() statements found" >> practices_report.md
+        fi
+        
+        # Buscar código duplicado
+        echo "" >> practices_report.md
+        echo "## Code Duplication Check:" >> practices_report.md
+        echo "Run \`radon cc backend/ -a\` to check for complex/duplicated code" >> practices_report.md
+
+    - name: Generate PR Summary
+      id: pr-summary
+      run: |
+        echo "# 📊 Pull Request Summary" > pr_summary.md
+        echo "" >> pr_summary.md
+        echo "## Changes Overview" >> pr_summary.md
+        echo "\`\`\`" >> pr_summary.md
+        git diff --stat origin/${{ github.base_ref }}...HEAD >> pr_summary.md
+        echo "\`\`\`" >> pr_summary.md
+        echo "" >> pr_summary.md
+        
+        # Contar archivos modificados
+        FILES_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+        ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$1} END {print s}')
+        DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{s+=$2} END {print s}')
+        
+        echo "- **Files Changed:** $FILES_CHANGED" >> pr_summary.md
+        echo "- **Lines Added:** $ADDITIONS" >> pr_summary.md
+        echo "- **Lines Removed:** $DELETIONS" >> pr_summary.md
+        echo "" >> pr_summary.md
+
+    - name: Post Review Comment
+      uses: actions/github-script@v8
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let comment = '';
+          
+          // PR Summary
+          if (fs.existsSync('pr_summary.md')) {
+            comment += fs.readFileSync('pr_summary.md', 'utf8') + '\n\n';
+          }
+          
+          // Code Quality Reports
+          if (fs.existsSync('flake8_report.md')) {
+            comment += fs.readFileSync('flake8_report.md', 'utf8') + '\n\n';
+          }
+          
+          if (fs.existsSync('pylint_report.md')) {
+            comment += fs.readFileSync('pylint_report.md', 'utf8') + '\n\n';
+          }
+          
+          if (fs.existsSync('bandit_report.md')) {
+            comment += fs.readFileSync('bandit_report.md', 'utf8') + '\n\n';
+          }
+          
+          if (fs.existsSync('practices_report.md')) {
+            comment += fs.readFileSync('practices_report.md', 'utf8') + '\n\n';
+          }
+          
+          comment += '---\n';
+          comment += '*🤖 This automated review was generated by GitHub Actions*\n';
+          comment += '*Please address any critical issues before merging*';
+          
+          // Post comment
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
