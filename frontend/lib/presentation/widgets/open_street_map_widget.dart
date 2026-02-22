@@ -169,8 +169,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                   }
                   
                   // Update Visible Bounds
-                  if (position.bounds != null) {
-                    ref.read(mapStateProvider.notifier).setVisibleBounds(position.bounds!);
+                  if (position.visibleBounds != null) {
+                    ref.read(mapStateProvider.notifier).setVisibleBounds(position.visibleBounds!);
                   }
                 },
                 initialCenter: searchState.mapCenter ?? _spainFallback,
@@ -199,14 +199,13 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 ),
                 
                 // 2. Polygon Layer (City Boundaries & User Zones)
-                PolygonLayer(
-                  polygons: [
+                PolygonLayer<Object>(
+                  polygons: <Polygon<Object>>[
                     // City Boundary (Blue, Transparent, Real Shape)
                     if (mapState.cityBoundaryPolygon.isNotEmpty)
                       Polygon(
                         points: mapState.cityBoundaryPolygon,
                         color: const Color(0xFF2563EB).withOpacity(0.15), 
-                        isFilled: true,
                         borderColor: const Color(0xFF2563EB),
                         borderStrokeWidth: 2,
                         label: searchState.location.isNotEmpty ? searchState.location : "Zona",
@@ -218,7 +217,6 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentZonePolygon,
                         color: Colors.green.withOpacity(0.2), 
-                        isFilled: true,
                         borderColor: Colors.green,
                         borderStrokeWidth: 2,
                       ),
@@ -228,10 +226,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentDrawingPoints, // Don't close loop while dragging
                         color: Colors.orange.withOpacity(0.1), 
-                        isFilled: true,
                         borderColor: Colors.orange,
                         borderStrokeWidth: 2,
-                        isDotted: true,
                       ),
                   ],
                 ),
@@ -491,8 +487,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
 
   /// Helper to convert screen coordinates to LatLng and add to drawing
   void _addPointFromEvent(Offset localPosition) {
-    // Convert screen point to LatLng using the map camera
-    final point = _mapController.camera.pointToLatLng(math.Point(localPosition.dx, localPosition.dy));
+    // Convert screen point to LatLng using the map camera.
+    // In flutter_map 8.2.2, the correct method is screenOffsetToLatLng.
+    final point = _mapController.camera.screenOffsetToLatLng(localPosition);
     ref.read(mapStateProvider.notifier).addPoint(point);
   }
 }
