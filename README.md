@@ -18,6 +18,20 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ---
 
+## 📚 Documentación Estructurada (Single Source of Truth)
+
+Toda la documentación técnica e histórica de InmuFácil reside en el directorio `/docs`.
+
+- **[Guía Rápida (GETTING_STARTED)](docs/GETTING_STARTED.md)**: Cómo iniciar los entornos locales.
+- **[Arquitectura (ARCHITECTURE)](docs/ARCHITECTURE.md)**: Flutter & FastAPI, Satélites, Riverpod.
+- **[Guía de Despliegue (DEPLOYMENT_GUIDE)](docs/DEPLOYMENT_GUIDE.md)**: VPS, Docker, y Cloudflare.
+- **[Contratos de Datos y API](docs/API_REFERENCE.md)**: DTOs, Modelos y Endpoints.
+- **[Seguridad y Secretos](docs/SECURITY.md)**: Prevención OWASP, CORS, y Políticas `.env`.
+- **[Testing y Troubleshooting](docs/TESTING_STRATEGY.md)**: Estrategias de Pytest y resolución de errores.
+- **[Archivos de Decisión Arquitectónica (ADR)](docs/ADR/)**: Decisiones técnicas históricas irrefutables.
+
+---
+
 ## 📊 Estado Actual del Proyecto (Status Matrix)
 
 El proyecto se encuentra en un estado híbrido de desarrollo:
@@ -58,9 +72,6 @@ El proyecto se encuentra en un estado híbrido de desarrollo:
 ### Redacción Automática de PII (Verificada 100%)
 **Protección de Información Personal Identificable:**
 - 🖼️ **DNI Image Redaction**: Redacción automática de zonas sensibles
-  - MRZ (Machine Readable Zone) - 60,000 píxeles verificados
-  - Firma del titular - 92,000 píxeles verificados
-  - Equipo Emisor - 18,000 píxeles verificados
 - ✅ **100% Opacity Verified**: 170,000+ píxeles testeados como negros (#000000)
 - 🔒 **Cifrado en Reposo**: DNI y teléfonos cifrados en base de datos
 - 🚫 **Zero-Log Policy**: Datos sensibles nunca en logs
@@ -208,59 +219,9 @@ LOG_LEVEL=INFO
 > **NUNCA** compartas o commites tu archivo `.env` a Git.
 > El archivo está protegido por `.gitignore` y pre-commit hooks.
 
-**Paso 4: Verificar configuración**
-
-Al arrancar la aplicación, verás en los logs:
-```
-✅ Master encryption key loaded and validated successfully
-🔐 VAULT: ACTIVATED
-```
-
-Si ves errores, verifica que:
-- La clave tiene exactamente 32 bytes cuando se decodifica de base64
-- El archivo `.env` está en la raíz del proyecto
-- No hay espacios extra en la clave
-
-### Rotación de Claves (Key Rotation)
-
-**Procedimiento de rotación de la clave maestra:**
-
-> [!CAUTION]
-> La rotación de claves requiere re-cifrar todos los datos sensibles en la base de datos.
-> Realiza este procedimiento solo durante ventanas de mantenimiento.
-
-**Pasos para rotación segura:**
-
-1. **Backup completo de la base de datos:**
-   ```bash
-   # Crear backup antes de rotación
-   cp inmufacil.db inmufacil.db.backup.$(date +%Y%m%d_%H%M%S)
-   ```
-
-2. **Generar nueva clave:**
-   ```bash
-   python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
-   ```
-
-3. **Ejecutar script de rotación (futuro):**
-   ```bash
-   # TODO: Implementar en próxima misión
-   python scripts/rotate_encryption_key.py --old-key OLD_KEY --new-key NEW_KEY
-   ```
-
-4. **Actualizar `.env` con nueva clave**
-
-5. **Verificar integridad:**
-   ```bash
-   # Verificar que todos los datos se descifraron correctamente
-   python scripts/verify_encryption.py
-   ```
-
-6. **Reiniciar aplicación**
-
-**Frecuencia recomendada:** Cada 90 días o inmediatamente si se sospecha compromiso.
-
 ### Ejecutar la Aplicación
+
+Consulta la **[Guía de Despliegue](docs/DEPLOYMENT_GUIDE.md)** o el **[Getting Started](docs/GETTING_STARTED.md)** en la carpeta `/docs`.
 
 ```bash
 # Desarrollo
@@ -316,104 +277,27 @@ InmuFácil incluye un completo sistema de automatización en GitHub para mejorar
 #### 📝 Issue & PR Templates
 - **Plantillas estructuradas** para Bug Reports, Feature Requests y Security Vulnerabilities
 - **PR Template** con checklist completo de revisión
-- **Discussion Templates** para ideas y preguntas
-- **Guías claras** para reportar problemas con pasos de reproducción
-
-### Documentación Completa
-
-Para más detalles sobre cómo usar y configurar estas características, consulta:
-
-📖 **[GitHub Automation Guide](.github/GITHUB_AUTOMATION.md)**
-
-### Activación Rápida
-
-1. **CodeQL**: Ve a Settings → Code security and analysis → Habilita Code scanning
-2. **Dependabot**: Ve a Settings → Code security and analysis → Habilita Dependabot alerts
-3. **Discussions**: Ve a Settings → Features → Habilita Discussions
-4. **Templates**: Se activan automáticamente al crear issues/PRs
 
 ---
 
-## 🔐 Características de Seguridad
+## 🔐 Características de Seguridad Adicionales
 
 ### 1. Escudo Anti-Agencias 🛡️
-**Protección del ecosistema P2P:**
 - Detección de 30+ dominios de agencias inmobiliarias
 - Análisis de keywords profesionales (40+ términos)
-- Validación multi-factor para prevenir falsos positivos
-- Logging de intentos bloqueados con IP tracking
 
 ### 2. KYC Seguro (Know Your Customer)
-**Validación de identidad con privacidad:**
 - MFA por email (tokens de 6 dígitos, 15 min expiration)
 - Redacción automática de DNI antes de almacenamiento
 - Cifrado AES-256-GCM de datos personales
-- Validación MIME para prevenir archivos maliciosos
 
 ### 3. Brute Force Prevention
-**Protección contra ataques:**
 - Máximo 3 intentos fallidos de upload
 - Bloqueo temporal de 15 minutos
-- Ventana deslizante de 30 minutos
-- Alertas de seguridad estructuradas
 
 ### 4. Audit Trail Completo
-**Trazabilidad sin comprometer privacidad:**
 - Logs estructurados para SIEM
-- Filtros automáticos de datos sensibles
-- Eventos de seguridad con severidad
 - Cumplimiento GDPR
-
----
-
-## 📁 Estructura del Proyecto
-
-```
-InmuFacil_Project/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── models.py            # SQLAlchemy models
-│   ├── schemas.py           # Pydantic schemas
-│   ├── database.py          # DB configuration
-│   ├── security.py          # Password hashing
-│   ├── crypto.py            # AES-256-GCM encryption
-│   ├── filters.py           # Anti-agency filter
-│   ├── security_monitor.py  # Brute force prevention
-│   └── services/
-│       ├── email_service.py # MFA tokens
-│       └── kyc_service.py   # DNI processing
-│   ├── routers/
-│   │   ├── users.py         # User & Admin routes
-│   │   ├── kyc.py           # KYC routes
-│   │   └── properties.py    # Properties routes (Core + Satellites)
-├── frontend/
-│   ├── lib/
-│   │   ├── main.dart        # Entry point
-│   │   ├── core/            # Config & Utils
-│   │   ├── data/            # Repositories & Data Sources
-│   │   ├── domain/          # Entities & Use Cases
-│   │   └── presentation/
-│   │       ├── screens/     # UI Screens (Home, NotFound, etc.)
-│   │       ├── widgets/     # Reusable Components
-│   │       └── providers/   # State Management (Riverpod)
-│   ├── assets/
-│   │   └── translations/    # i18n JSON files (9 languages)
-│   ├── web/                 # Web entrypoint
-│   └── pubspec.yaml         # Dependencies
-├── tests/
-│   ├── test_auth.py         # Authentication tests
-│   └── test_filters.py      # Filter tests
-├── docs/
-│   └── vision_proyecto.md   # Project vision
-├── .git/hooks/
-│   └── pre-commit           # Secret detection
-├── requirements.txt         # Dependencies
-├── .gitignore              # Git exclusions
-├── .agent/
-│   └── rules/
-│       └── roles_definition.md  # Agent governance & protocols
-└── README.md               # This file
-```
 
 ---
 
@@ -425,7 +309,6 @@ Este proyecto sigue estándares DevSecOps estrictos:
 2. **Tests obligatorios para nuevas features**
 3. **Pre-commit hooks activos** (detección de secretos)
 4. **Code review requerido**
-5. **Documentación actualizada**
 
 ---
 
@@ -436,30 +319,6 @@ Este proyecto sigue estándares DevSecOps estrictos:
 - ✅ **PCI DSS**: Cifrado at-rest, audit logging
 - ✅ **ISO 27001**: Controles de seguridad implementados
 - ✅ **MITRE ATT&CK**: Cobertura de técnicas de ataque
-
----
-
-## 📞 Contacto y Soporte
-
-**Repositorio:** https://github.com/Oga3105/InmuFacil_App  
-**Documentación:** `/docs/vision_proyecto.md`  
-**Issues:** GitHub Issues
-
----
-
-## 📄 Licencia
-
-[Pendiente de definir]
-
----
-
-## 🙏 Agradecimientos
-
-Desarrollado con:
-- **Gemini AI** - Asistencia de desarrollo
-- **FastAPI** - Framework web moderno
-- **SQLAlchemy** - ORM robusto
-- **Cryptography** - Seguridad de grado militar
 
 ---
 
