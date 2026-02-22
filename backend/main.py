@@ -17,12 +17,8 @@ from pathlib import Path
 # Load .env file BEFORE any other imports that use environment variables
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
-
-# Import logging after dotenv is loaded
-from backend.core.logging_config import get_logger
-env_logger = get_logger(__name__)
-env_logger.info(f"Loaded .env from: {env_path.absolute()}")
-env_logger.info(f".env exists: {env_path.exists()}")
+print(f"[ENV] Loaded .env from: {env_path.absolute()}")
+print(f"[ENV] .env exists: {env_path.exists()}")
 
 # ============================================================================
 # Application Imports
@@ -280,7 +276,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, favorites, signature, notary, timeline, financial, handover, services, leads
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads
 
 from fastapi import APIRouter
 
@@ -305,7 +301,6 @@ api_v1_router.include_router(services.router) # Hito 17 - Unified Services
 api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
 api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
 api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
-api_v1_router.include_router(favorites.router, prefix="/favorites")
 api_v1_router.include_router(leads.router) # Hito 18 - Lead Magnet (404)
 
 # Include V1 Router in App
@@ -356,153 +351,87 @@ async def seed_database():
     db = SessionLocal()
     try:
         from backend.src.models.users import User
-        from backend.src.models.properties import Property, PropertyFeatures, PropertyLegal, PropertyFinancial, PropertyEnvironment, PropertyMedia
+        from backend.src.models.properties import Property, PropertyFeatures, PropertyLegal, PropertyFinancial, PropertyEnvironment
         from backend.src.models.enums import (
             PropertyStatus, PropertyType, OperationType, UserType, 
-            ConservationState, EnergyCertification, DNIStatus, MediaType
+            ConservationState, EnergyCertification
         )
         from backend.src.utils.security import get_password_hash
         
-        # 1. Create Owner (Sevilla Test User)
-        user_email = "test_sevilla@inmufacil.com"
-        owner = db.query(User).filter(User.email == user_email).first()
-        
+        # 1. Create Owner
+        owner = db.query(User).filter(User.email == "propietario@test.com").first()
         if not owner:
             owner = User(
-                email=user_email,
+                email="propietario@test.com",
                 hashed_password=get_password_hash("password123"),
-                full_name="Inmobiliaria Hispalense (Test)",
-                dni_status=DNIStatus.VALIDADO,
-                user_type=UserType.PROFESIONAL,
+                full_name="Propietario Test",
+                user_type=UserType.PARTICULAR,
                 is_active=True,
-                email_verified=True
+                email_verified=True # Corrected from is_verified
             )
             db.add(owner)
             db.commit()
             db.refresh(owner)
-            logger.info(f"SEED: User {user_email} created")
-        else:
-            logger.info(f"SEED: User {user_email} already exists")
+            logger.info("SEED: Owner created")
             
-        # 2. Properties Data (Sevilla)
+        # 2. Check & Create Properties
+        if db.query(Property).count() > 0:
+            return {"status": "skipped", "message": "Database already has properties"}
+
         properties_data = [
             {
-                "title": "Ático con vistas a la Giralda",
-                "description": "Espectacular ático en el corazón de Sevilla con vistas directas a la Giralda. Terraza privada de 50m2.",
+                "title": "Ático de Lujo en Triana",
+                "description": "Espectacular ático con vistas al Guadalquivir. Terraza de 40m2, reformado integralmente.",
                 "price": 450000.0,
-                "location": "37.3862, -5.9925",
+                "location": "Calle Betis, Sevilla",
                 "surface_area": 120.0,
-                "property_type": PropertyType.PISO,
-                "is_verified": True,
-                "features": {"bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, "has_ac": True, "floor": "Ático"}
+                "property_type": PropertyType.PISO, # Corrected from ATICO
+                "features": {
+                    "bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, 
+                    "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO # Corrected from REFORMADO
+                }
             },
             {
-                "title": "Apartamento histórico reformado",
-                "description": "En pleno Barrio de Santa Cruz. Edificio del siglo XVIII rehabilitado. Techos altos y patio andaluz.",
-                "price": 280000.0,
-                "location": "37.3870, -5.9918",
-
-                "surface_area": 85.0,
-                "property_type": PropertyType.PISO,
-                "is_verified": False, # TEST: This one is NOT verified
-                "features": {"bedrooms": 2, "bathrooms": 1, "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO, "floor": "Bajo"}
-            },
-            {
-                "title": "Piso luminoso en Calle Betis",
-                "description": "Vistas al río Guadalquivir y la Torre del Oro. Primera línea en Triana.",
+                "title": "Piso Familiar en Nervión",
+                "description": "Gran piso cerca del estadio y centro comercial. Ideal familias. Garaje incluido.",
                 "price": 320000.0,
-                "location": "37.3845, -6.0030",
-
-                "surface_area": 95.0,
+                "location": "Avenida Eduardo Dato, Sevilla",
+                "surface_area": 145.0,
                 "property_type": PropertyType.PISO,
-                "is_verified": False, # TEST: This one is NOT verified
-                "features": {"bedrooms": 3, "bathrooms": 2, "has_lift": True}
+                "features": {
+                    "bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True,
+                    "conservation_state": ConservationState.BUEN_ESTADO
+                }
             },
             {
-                "title": "Gran piso cerca del estadio",
-                "description": "Zona Nervión. Ideal familias. Cerca de colegios y centro comercial.",
-                "price": 380000.0,
-                "location": "37.3825, -5.9750",
-
-                "surface_area": 140.0,
-                "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True, "floor": "3ª Planta"}
-            },
-            {
-                "title": "Loft bohemio en Alameda de Hércules",
-                "description": "Espacio diáfano en la zona más moderna de Sevilla. Ideal para artistas.",
+                "title": "Loft Industrial en Alameda",
+                "description": "Espacio abierto diseño moderno en pleno centro. Techos altos.",
                 "price": 210000.0,
-                "location": "37.3995, -5.9940",
-
-                "surface_area": 70.0,
-                "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 1, "bathrooms": 1, "has_ac": True, "floor": "2ª Planta"}
+                "location": "Alameda de Hércules, Sevilla",
+                "surface_area": 85.0,
+                "property_type": PropertyType.PISO, # Corrected from LOFT
+                "features": {
+                    "bedrooms": 1, "bathrooms": 1, "has_ac": True, 
+                    "conservation_state": ConservationState.BUEN_ESTADO # Corrected from REFORMADO
+                }
             },
             {
-                "title": "Piso familiar cerca de la Feria",
-                "description": "Los Remedios. Amplio y cercano al recinto ferial. Garaje incluido.",
-                "price": 295000.0,
-                "location": "37.3760, -5.9990",
-
-                "surface_area": 110.0,
-                "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 3, "bathrooms": 2, "has_lift": True}
-            },
-            {
-                "title": "Ideal inversores frente estación",
-                "description": "Santa Justa. Alta rentabilidad por alquiler. Muy bien comunicado.",
-                "price": 185000.0,
-                "location": "37.3920, -5.9760",
-
-                "surface_area": 65.0,
-                "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 2, "bathrooms": 1}
-            },
-            {
-                "title": "Bajo con patio junto a muralla",
-                "description": "Macarena. Bajo con encanto y patio privado de 20m2.",
-                "price": 150000.0,
-                "location": "37.4030, -5.9890",
-
-                "surface_area": 60.0,
-                "property_type": PropertyType.PISO,
-                "features": {"bedrooms": 2, "bathrooms": 1, "has_garden": True}
-            },
-            {
-                "title": "Chalet exclusivo junto al Parque",
-                "description": "El Porvenir. Villa independiente con piscina y jardín de 500m2. Lujo.",
+                "title": "Casa Palacio en Santa Cruz",
+                "description": "Casa histórica con patio andaluz. Oportunidad única para inversión turística.",
                 "price": 850000.0,
-                "location": "37.3710, -5.9810",
-
-                "surface_area": 350.0,
-                "property_type": PropertyType.CHALET,
-                "features": {"bedrooms": 5, "bathrooms": 4, "has_pool": True, "has_garden": True, "has_ac": True}
-            },
-            {
-                "title": "Oficina/Estudio moderno",
-                "description": "Isla de la Cartuja. Espacio profesional adaptable a vivienda (loft).",
-                "price": 190000.0,
-                "location": "37.4050, -6.0050",
-
-                "surface_area": 80.0,
-                "property_type": PropertyType.OFICINA,
-                "features": {"bedrooms": 0, "bathrooms": 1, "has_ac": True}
+                "location": "Barrio de Santa Cruz, Sevilla",
+                "surface_area": 250.0,
+                "property_type": PropertyType.CHALET, # Corrected from CASA
+                "features": {
+                    "bedrooms": 5, "bathrooms": 4, "has_garden": True, "construction_year": 1920,
+                    "conservation_state": ConservationState.A_REFORMAR
+                }
             }
         ]
 
-        inserted_count = 0
         for p_data in properties_data:
-            # Check if property exists at location to avoid duplicates
-            existing = db.query(Property).filter(Property.location == p_data["location"]).first()
-            if existing:
-                continue
-
-            features_data = p_data.pop("features")
-            location_coords = p_data.get("location") # Keep location string "lat, lng"
+            features = p_data.pop("features")
             
-            # Simple placeholder image
-            image_url = "https://placehold.co/600x400"
-
             prop = Property(
                 **p_data,
                 owner_id=owner.id,
@@ -512,26 +441,13 @@ async def seed_database():
             db.add(prop)
             db.flush()
             
-            # Create Features
-            db.add(PropertyFeatures(property_id=prop.id, **features_data))
-            
-            # Create Media
-            db.add(PropertyMedia(
-                property_id=prop.id, 
-                media_type=MediaType.IMAGE,
-                file_path=image_url,
-                is_main=True
-            ))
-            
-            # Create other satellites
-            db.add(PropertyLegal(property_id=prop.id, energy_certification=EnergyCertification.EN_TRAMITE))
+            db.add(PropertyFeatures(property_id=prop.id, **features))
+            db.add(PropertyLegal(property_id=prop.id, energy_certification=EnergyCertification.E))
             db.add(PropertyFinancial(property_id=prop.id, price_m2=p_data["price"]/p_data["surface_area"]))
             db.add(PropertyEnvironment(property_id=prop.id))
             
-            inserted_count += 1
-            
         db.commit()
-        return {"status": "success", "message": f"Seeded {inserted_count} new properties in Sevilla for {user_email}"}
+        return {"status": "success", "message": f"Seeded {len(properties_data)} properties"}
 
     except Exception as e:
         logger.error(f"SEED ERROR: {str(e)}")

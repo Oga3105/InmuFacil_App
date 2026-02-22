@@ -13,34 +13,4 @@ from .financing import MortgageProfile, MortgageSimulation, EmploymentStatus
 from .timeline import TransactionStep
 from .handover import PropertyHandover
 from .services import ServiceOrder
-from .favorites import PropertyFavorite
-
-__all__ = [
-    "Base",
-    "User",
-    "KYCVerification",
-    "Property",
-    "PropertyFeatures",
-    "PropertyLegal",
-    "PropertyFinancial",
-    "PropertyEnvironment",
-    "PropertyMedia",
-    "PropertyDocument",
-    "VisitWindow",
-    "VisitAppointment",
-    "PropertyFavorite",
-    "PropertyOffer",
-    "OfferHistory",
-    "OfferMessage",
-    "Reservation",
-    "Notary",
-    "PropertyValuation",
-    "ValuationProvider",
-    "MortgageProfile",
-    "MortgageSimulation",
-    "EmploymentStatus",
-    "TransactionStep",
-    "PropertyHandover",
-    "ServiceOrder",
-    "PropertyStatus"
-]
+from .services import ServiceOrder

@@ -1342,6 +1342,16 @@ class _MapNavigationBar extends ConsumerWidget {
                           ),
                         ),
                         const PopupMenuItem(
+                          value: 'contracts',
+                          child: Row(
+                             children: [
+                               Icon(Icons.description_outlined, size: 20),
+                               SizedBox(width: 8),
+                               Text('Mis Contratos'),
+                             ],
+                          ),
+                        ),
+                        const PopupMenuItem(
                           value: 'logout',
                           child: Row(
                              children: [
@@ -1362,6 +1372,8 @@ class _MapNavigationBar extends ConsumerWidget {
                           }
                         } else if (value == 'profile') {
                            context.push('/profile');
+                        } else if (value == 'contracts') {
+                           context.push('/contracts');
                         }
                       },
                       child: CircleAvatar(

@@ -4,25 +4,23 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import datetime
 
-# Add the project root directory to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Setup path to include backend/ so we can import 'src'
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# current_dir is .../backend
+sys.path.append(current_dir)
 
-from backend.core.logging_config import get_logger
-logger = get_logger(__name__)
-
-# Import using full package paths
-from backend.src.models.base import Base
-from backend.src.config.database import SessionLocal
-# from backend.src.config.database import get_db # not needed for script
-from backend.src.models.users import User
-from backend.src.models.properties import Property, PropertyFeatures, PropertyLegal, PropertyFinancial, PropertyEnvironment
-from backend.src.models.enums import (
+# Import directly from src since we added backend/ to sys.path
+from src.database import Base, get_db
+from src.models.users import User
+from src.models.properties import Property, PropertyFeatures, PropertyLegal, PropertyFinancial, PropertyEnvironment
+from src.models.enums import (
     PropertyStatus, PropertyType, OperationType, UserType, 
     Orientation, HeatingType, ConservationState, EnergyCertification
 )
-from backend.src.utils.security import get_password_hash
+from src.core.security import get_password_hash
 
 # Configuración de BD directa para el script
+# Ajusta esto si tu URL de BD es diferente en .env
 SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/inmufacil_db"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -31,30 +29,36 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def seed_db():
     db = SessionLocal()
     try:
-        logger.info("🌱 Iniciando Seeding de Datos...")
+        print("🌱 Iniciando Seeding de Datos...")
         
         # 1. Crear Usuario Propietario (si no existe)
-        owner_email = "propietario@test.com"
-        owner = db.query(User).filter(User.email == owner_email).first()
+        owner = db.query(User).filter(User.email == "propietario@test.com").first()
         if not owner:
-            logger.info(f"👤 Creando usuario propietario: {owner_email}")
+            print("👤 Creando usuario propietario...")
             owner = User(
-                email=owner_email,
+                email="propietario@test.com",
                 hashed_password=get_password_hash("password123"),
                 full_name="Propietario Test",
                 phone="+34600123456",
-                user_type=UserType.PARTICULAR, 
+                user_type=UserType.PROPIETARIO,
                 is_active=True,
-                email_verified=True
+                is_verified=True
             )
             db.add(owner)
             db.commit()
             db.refresh(owner)
-            logger.info(f"✅ Usuario creado: ID {owner.id}")
+            print(f"✅ Usuario creado: ID {owner.id}")
         else:
-            logger.info(f"ℹ️ Usuario existente: ID {owner.id}")
+            print(f"ℹ️ Usuario existente: ID {owner.id}")
 
-        # 2. Propiedades data
+        # 2. Verificar Propiedades
+        count = db.query(Property).count()
+        if count > 0:
+            print(f"ℹ️ La base de datos ya tiene {count} propiedades. Saltando seeding.")
+            return
+
+        print("🏠 Creando propiedades de prueba en Sevilla...")
+        
         properties_data = [
             {
                 "title": "Ático de Lujo en Triana",
@@ -65,8 +69,7 @@ def seed_db():
                 "property_type": PropertyType.ATICO,
                 "features": {
                     "bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, 
-                    "has_ac": True, "conservation_state": ConservationState.REFORMADO,
-                    "floor": "Ático"
+                    "has_ac": True, "conservation_state": ConservationState.REFORMADO
                 }
             },
             {
@@ -78,8 +81,7 @@ def seed_db():
                 "property_type": PropertyType.PISO,
                 "features": {
                     "bedrooms": 4, "bathrooms": 2, "has_lift": True, "has_heating": True,
-                    "conservation_state": ConservationState.BUEN_ESTADO,
-                    "floor": "3ª Planta"
+                    "conservation_state": ConservationState.BUEN_ESTADO
                 }
             },
             {
@@ -88,11 +90,34 @@ def seed_db():
                 "price": 210000.0,
                 "location": "Alameda de Hércules, Sevilla",
                 "surface_area": 85.0,
-                "property_type": PropertyType.PISO, 
+                "property_type": PropertyType.LOFT,
                 "features": {
                     "bedrooms": 1, "bathrooms": 1, "has_ac": True, 
-                    "conservation_state": ConservationState.REFORMADO,
-                    "floor": "Bajo"
+                    "conservation_state": ConservationState.REFORMADO
+                }
+            },
+            {
+                "title": "Casa Palacio en Santa Cruz",
+                "description": "Casa histórica con patio andaluz. Oportunidad única para inversión turística.",
+                "price": 850000.0,
+                "location": "Barrio de Santa Cruz, Sevilla",
+                "surface_area": 250.0,
+                "property_type": PropertyType.CASA,
+                "features": {
+                    "bedrooms": 5, "bathrooms": 4, "has_garden": True, "construction_year": 1920,
+                    "conservation_state": ConservationState.A_REFORMAR
+                }
+            },
+             {
+                "title": "Apartamento Económico Macarena",
+                "description": "Ideal inversión alquiler. Zona con alta demanda.",
+                "price": 115000.0,
+                "location": "Ronda de Capuchinos, Sevilla",
+                "surface_area": 60.0,
+                "property_type": PropertyType.PISO,
+                "features": {
+                    "bedrooms": 2, "bathrooms": 1, "has_lift": False,
+                    "conservation_state": ConservationState.BUEN_ESTADO
                 }
             }
         ]
@@ -100,21 +125,7 @@ def seed_db():
         for p_data in properties_data:
             features_data = p_data.pop("features")
             
-            # Find existing property
-            existing_prop = db.query(Property).filter(Property.title == p_data["title"]).first()
-            
-            if existing_prop:
-                logger.info(f"🔄 Actualizando propiedad: {p_data['title']}")
-                # Update features
-                if existing_prop.features:
-                    for k, v in features_data.items():
-                        setattr(existing_prop.features, k, v)
-                else:
-                    feat = PropertyFeatures(property_id=existing_prop.id, **features_data)
-                    db.add(feat)
-                continue
-
-            # Create new
+            # Crear Property main
             prop = Property(
                 **p_data,
                 owner_id=owner.id,
@@ -122,19 +133,41 @@ def seed_db():
                 operation_type=OperationType.VENTA
             )
             db.add(prop)
-            db.flush()
+            db.flush() # Para obtener ID
             
-            feat = PropertyFeatures(property_id=prop.id, **features_data)
+            # Crear Features
+            feat = PropertyFeatures(
+                property_id=prop.id,
+                **features_data
+            )
             db.add(feat)
-            db.add(PropertyLegal(property_id=prop.id))
-            db.add(PropertyFinancial(property_id=prop.id, price_m2=p_data["price"]/p_data["surface_area"]))
-            db.add(PropertyEnvironment(property_id=prop.id))
+            
+            # Crear Legal default
+            legal = PropertyLegal(
+                property_id=prop.id,
+                energy_certification=EnergyCertification.E,
+                nota_simple_status=None
+            )
+            db.add(legal)
+            
+            # Crear Financial default
+            fin = PropertyFinancial(
+                property_id=prop.id,
+                price_m2 = p_data["price"] / p_data["surface_area"]
+            )
+            db.add(fin)
+            
+            # Crear Environment default
+            env = PropertyEnvironment(
+                property_id=prop.id
+            )
+            db.add(env)
             
         db.commit()
-        logger.info("✅ Seeding completado exitosamente.")
+        print(f"✅ Se han insertado {len(properties_data)} propiedades exitosamente.")
 
     except Exception as e:
-        logger.error(f"❌ Error durante el seeding: {repr(e)}")
+        print(f"❌ Error durante el seeding: {e}")
         db.rollback()
     finally:
         db.close()

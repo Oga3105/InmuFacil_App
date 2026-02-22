@@ -36,64 +36,47 @@ class NotFoundScreen extends ConsumerWidget {
             ),
           ),
           
-          // Main Content
+          // Main Scrollable Content
           LayoutBuilder(
             builder: (context, constraints) {
               final isDesktop = constraints.maxWidth >= 1024;
               
-              if (isDesktop) {
-                // Desktop: Fit to screen, no scroll
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _Header(isDesktop: isDesktop, primaryColor: primaryColor),
-                      
-                      const Spacer(),
-                      
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: _TextContent(
-                              primaryColor: primaryColor,
-                              navyCustom: navyCustom,
-                            ),
-                          ),
-                          const SizedBox(width: 80),
-                          Expanded(
-                            flex: 1,
-                            child: _IsometricIllustration(primaryColor: primaryColor),
-                          ),
-                        ],
-                      ),
-                      
-                      const Spacer(),
-                      
-                      _Footer(isDesktop: isDesktop),
-                    ],
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight,
                   ),
-                );
-              } else {
-                // Mobile: Scrollable
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _Header(isDesktop: isDesktop, primaryColor: primaryColor),
-                          
-                          const SizedBox(height: 60),
-                          
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Header
+                        _Header(isDesktop: isDesktop, primaryColor: primaryColor),
+                        
+                        const SizedBox(height: 60),
+                        
+                        // Content Body
+                        if (isDesktop)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: _TextContent(
+                                  primaryColor: primaryColor,
+                                  navyCustom: navyCustom,
+                                ),
+                              ),
+                              const SizedBox(width: 80),
+                              Expanded(
+                                flex: 1,
+                                child: _IsometricIllustration(primaryColor: primaryColor),
+                              ),
+                            ],
+                          )
+                        else
                           Column(
                             children: [
                               _IsometricIllustration(primaryColor: primaryColor),
@@ -105,15 +88,15 @@ class NotFoundScreen extends ConsumerWidget {
                             ],
                           ),
                           
-                          const SizedBox(height: 60),
-                          
-                          _Footer(isDesktop: isDesktop),
-                        ],
-                      ),
+                        const SizedBox(height: 60),
+                        
+                        // Footer
+                        _Footer(isDesktop: isDesktop),
+                      ],
                     ),
                   ),
-                );
-              }
+                ),
+              );
             },
           ),
         ],
@@ -133,29 +116,14 @@ class _Header extends StatelessWidget {
     return Row(
       mainAxisAlignment: isDesktop ? MainAxisAlignment.start : MainAxisAlignment.center,
       children: [
-        Image.asset(
-          'assets/images/logo_inmufacil.png',
-          height: 60,
-          fit: BoxFit.contain,
-        ),
+        Icon(Icons.hexagon_outlined, color: primaryColor, size: 40),
         const SizedBox(width: 12),
-        Text.rich(
-          TextSpan(
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -1.0,
-            ),
-            children: [
-              const TextSpan(
-                text: 'Inmu',
-                style: TextStyle(color: Color(0xFF2563EB)), // Blue
-              ),
-              const TextSpan(
-                text: 'Fácil',
-                style: TextStyle(color: Color(0xFF16A34A)), // Green
-              ),
-            ],
+        Text(
+          'app.name'.tr(),
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -1.0,
           ),
         ),
         if (isDesktop) ...[
@@ -393,12 +361,16 @@ class _IsometricIllustration extends StatelessWidget {
             child: Transform.scale(
               scale: 0.95, // scale-95
               child: Container(
-                width: 420,
-                height: 420,
                 decoration: BoxDecoration(
                   color: primaryColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12), // rounded-xl
-                  // Border defined by _DashedBorderPainter below for dashed effect
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.3),
+                    width: 2,
+                   // Note: Flutter standard border doesn't support dashed natively without package/custom painter.
+                   // Using solid for now to keep it simple, or we could add a CustomPainter.
+                   // User asked for "exact", so let's stick to dimensions first.
+                  ),
                 ),
                 child: CustomPaint(
                    painter: _DashedBorderPainter(
