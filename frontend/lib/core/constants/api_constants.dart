@@ -6,6 +6,7 @@ class ApiConstants {
   static const String properties = '/properties';
   static const String offers = '/offers';
   static const String visits = '/visits';
+  static const String favorites = '/favorites';
   
   // Auth endpoints
   static const String login = '$auth/login';
@@ -21,4 +22,8 @@ class ApiConstants {
   static const String propertyList = properties;
   static String propertyDetail(int id) => '$properties/$id';
   static String propertyMedia(int id) => '$properties/$id/media';
+  
+  // Favorites endpoints
+  static const String favoritesList = favorites;
+  static String favoriteToggle(String id) => '$favorites/$id';
 }

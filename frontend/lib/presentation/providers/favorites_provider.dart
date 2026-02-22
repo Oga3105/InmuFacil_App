@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/api_constants.dart';
 import 'auth_provider.dart';
 import 'search_provider.dart'; // To get apiClientProvider
 
@@ -22,7 +23,7 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _loadFavoritesFromApi() async {
     try {
-      final response = await _apiClient.client.get('/api/v1/favorites/');
+      final response = await _apiClient.client.get(ApiConstants.favoritesList);
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
         state = data.map((id) => id.toString()).toSet();
@@ -38,12 +39,12 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
     if (newState.contains(propertyId)) {
       newState.remove(propertyId);
       if (_isLoggedIn) {
-         _syncToggleWithApi(propertyId);
+        _syncToggleWithApi(propertyId);
       }
     } else {
       newState.add(propertyId);
       if (_isLoggedIn) {
-         _syncToggleWithApi(propertyId);
+        _syncToggleWithApi(propertyId);
       }
     }
     state = newState;
@@ -51,8 +52,8 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
 
   Future<void> _syncToggleWithApi(String propertyId) async {
     try {
-      // Endpoint is /api/v1/favorites/{property_id}
-      await _apiClient.client.post('/api/v1/favorites/$propertyId');
+      // Endpoint is /favorites/{property_id} (api_v1 is in baseUrl)
+      await _apiClient.client.post(ApiConstants.favoriteToggle(propertyId));
     } catch (e) {
       print('Error syncing favorite: $e');
     }
