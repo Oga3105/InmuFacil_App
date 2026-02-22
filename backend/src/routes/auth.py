@@ -15,7 +15,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import Optional
-import jwt
+from jose import jwt, JWTError
 import os
 
 from backend.src.config.database import get_db
@@ -50,25 +50,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 # Helper Functions
 # ============================================================================
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """
-    Create JWT access token.
-    
-    Args:
-        data: Payload data to encode
-        expires_delta: Token expiration time
-        
-    Returns:
-        Encoded JWT token
-    """
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
 
 
 def get_user_by_email(db: Session, email: str):
@@ -89,7 +70,7 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-    except jwt.PyJWTError:
+    except JWTError:
         raise credentials_exception
     
     user = get_user_by_email(db, email=email)

@@ -30,6 +30,10 @@ Thumbs.db
 *.pem
 *.key
 secrets/
+curl_res.json
+brain/
+keys.txt
+.env
 
 *.code-workspace
 uploads/
