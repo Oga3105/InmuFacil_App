@@ -31,12 +31,20 @@ extension StringTranslation on String {
       'home.search_btn': 'Buscar Propiedades',
       
       // Home - Property Types
-      'home.property_type_all': 'Todos',
+      'home.property_type_all': 'Todos los tipos',
       'home.property_type_apartment': 'Piso / Apartamento',
+      'home.property_type_atico': 'Ático',
+      'home.property_type_duplex': 'Dúplex',
       'home.property_type_house': 'Casa / Chalet',
-      'home.property_type_land': 'Terreno / Parcela',
-      'home.property_type_office': 'Oficina / Local',
+      'home.property_type_rustic_house': 'Casa Rústica',
+      'home.property_type_singular_house': 'Casa Singular',
+      'home.property_type_local': 'Local Comercial',
+      'home.property_type_office': 'Oficina',
+      'home.property_type_industrial': 'Nave Industrial',
+      'home.property_type_building': 'Edificio',
       'home.property_type_garage': 'Garaje',
+      'home.property_type_land': 'Terreno urbanizable',
+      'home.property_type_rustic_land': 'Finca Rústica',
       'home.property_type_new_construction': 'Obra Nueva',
       
       // Home - Trust Badges

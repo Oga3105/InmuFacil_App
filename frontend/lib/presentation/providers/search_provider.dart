@@ -423,10 +423,15 @@ class SearchNotifier extends StateNotifier<SearchState> {
         );
       },
       (properties) {
-        // CLIENT-SIDE FILTERING (Bedrooms, Extras)
+        // CLIENT-SIDE FILTERING (Type, Bedrooms, Extras)
         var filteredList = properties;
         
-        // 1. Filter by Bedrooms
+        // 1. Filter by Property Type (Guarantee strict match regardless of backend)
+        if (state.propertyType != PropertyType.all) {
+          filteredList = filteredList.where((p) => p.type == state.propertyType).toList();
+        }
+        
+        // 2. Filter by Bedrooms
         if (state.minBedrooms > 0) {
           filteredList = filteredList.where((p) => p.bedrooms >= state.minBedrooms).toList();
         }

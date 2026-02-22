@@ -118,21 +118,19 @@ class PropertyModel {
   
   /// Parse property type from string
   PropertyType _parsePropertyType(String typeStr) {
-    switch (typeStr.toLowerCase()) {
-      case 'apartment':
-      case 'piso':
-        return PropertyType.apartment;
-      case 'house':
-      case 'chalet':
-        return PropertyType.house;
-      case 'land':
-      case 'terreno':
-        return PropertyType.land;
-      case 'office':
-      case 'oficina':
-        return PropertyType.office;
-      default:
-        return PropertyType.apartment;
+    final lower = typeStr.toLowerCase();
+    
+    // Check direct matching with backendValue
+    try {
+      return PropertyType.values.firstWhere((e) => e.backendValue == lower);
+    } catch (_) {
+      // Fallbacks just in case
+      if (lower == 'apartment') return PropertyType.piso;
+      if (lower == 'house') return PropertyType.chalet;
+      if (lower == 'office') return PropertyType.oficina;
+      if (lower == 'land') return PropertyType.terreno;
+      
+      return PropertyType.piso;
     }
   }
 

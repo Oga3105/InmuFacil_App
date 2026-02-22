@@ -90,7 +90,7 @@ def seed_db():
                 "price": 210000.0,
                 "location": "Alameda de Hércules, Sevilla",
                 "surface_area": 85.0,
-                "property_type": PropertyType.LOFT,
+                "property_type": PropertyType.PISO,
                 "features": {
                     "bedrooms": 1, "bathrooms": 1, "has_ac": True, 
                     "conservation_state": ConservationState.REFORMADO
@@ -102,7 +102,7 @@ def seed_db():
                 "price": 850000.0,
                 "location": "Barrio de Santa Cruz, Sevilla",
                 "surface_area": 250.0,
-                "property_type": PropertyType.CASA,
+                "property_type": PropertyType.CHALET,
                 "features": {
                     "bedrooms": 5, "bathrooms": 4, "has_garden": True, "construction_year": 1920,
                     "conservation_state": ConservationState.A_REFORMAR

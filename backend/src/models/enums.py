@@ -44,11 +44,18 @@ class ServiceStatus(str, enum.Enum):
 
 class PropertyType(str, enum.Enum):
     PISO = "piso"
+    ATICO = "atico"
+    DUPLEX = "duplex"
     CHALET = "chalet"
+    CASA_RUSTICA = "casa_rustica"
+    CASA_SINGULAR = "casa_singular"
     LOCAL = "local"
     OFICINA = "oficina"
-    TERRENO = "terreno"
+    NAVE = "nave"
     EDIFICIO = "edificio"
+    GARAJE = "garaje"
+    TERRENO = "terreno"
+    FINCA_RUSTICA = "finca_rustica"
 
 class OperationType(str, enum.Enum):
     VENTA = "venta"

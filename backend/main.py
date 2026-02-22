@@ -385,7 +385,7 @@ async def seed_database():
                 "price": 450000.0,
                 "location": "Calle Betis, Sevilla",
                 "surface_area": 120.0,
-                "property_type": PropertyType.PISO, # Corrected from ATICO
+                "property_type": PropertyType.ATICO,
                 "features": {
                     "bedrooms": 3, "bathrooms": 2, "has_terrace": True, "has_lift": True, 
                     "has_ac": True, "conservation_state": ConservationState.BUEN_ESTADO # Corrected from REFORMADO
