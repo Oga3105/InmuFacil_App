@@ -31,13 +31,21 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     // In a real app, this should trigger a fetchById(propertyId)
     final property = properties.firstWhere(
       (p) => p.id == widget.propertyId,
-      orElse: () => const Property(
+      orElse: () => Property(
         id: 'fallback', 
         title: 'Cargando Propiedad...', 
+        description: '',
         type: PropertyType.all, 
         price: 0, 
-        location: LatLng(40.4168, -3.7038), 
-        address: '...'
+        location: const LatLng(40.4168, -3.7038), 
+        address: '...',
+        bedrooms: 0,
+        bathrooms: 0,
+        squareMeters: 0,
+        images: const [],
+        isVerified: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       ),
     );
 
@@ -713,7 +721,7 @@ class _PropertyStatsGrid extends StatelessWidget {
         _StatItem(icon: Icons.bed, label: '${property.bedrooms} Hab.'),
         _StatItem(icon: Icons.bathtub_outlined, label: '${property.bathrooms} Baños'),
         _StatItem(icon: Icons.square_foot, label: '${property.squareMeters} m²'), // [FIX] Getter is 'squareMeters'
-        _StatItem(icon: Icons.layers_outlined, label: '3ª Planta'), // Mock
+        _StatItem(icon: Icons.layers_outlined, label: property.floor ?? 'Bajo'), // [FIX] Use real floor data
         _StatItem(icon: Icons.wb_sunny_outlined, label: 'Exterior'), // Mock
         _StatItem(icon: Icons.elevator_outlined, label: 'Ascensor'), // Mock
       ],

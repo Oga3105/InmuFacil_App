@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:camera/camera.dart';
 
 enum VerificationStep { documentType, documentScan, selfie, review }
 enum DocumentType { dni, nie, pasaporte }

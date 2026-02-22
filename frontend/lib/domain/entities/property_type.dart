@@ -22,3 +22,17 @@ enum PropertyType {
     }
   }
 }
+
+/// Options for sorting property results
+enum SortOption {
+  relevance,
+  priceLowToHigh,
+  priceHighToLow,
+  newest,
+}
+
+/// View modes for property listing
+enum PropertyViewMode {
+  grid,
+  list,
+}

@@ -9,6 +9,7 @@ class MockPropertyData {
     Property(
       id: '1',
       title: 'Piso céntrico en Sol',
+      description: 'Hermoso piso reformado en el corazón de Madrid.',
       type: PropertyType.apartment,
       price: 450000,
       location: const LatLng(40.4168, -3.7038),
@@ -16,12 +17,17 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 1,
       squareMeters: 75,
+      images: const ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Salamanca
     Property(
       id: '2',
       title: 'Ático de lujo en Salamanca',
+      description: 'Lujoso ático con vistas espectaculares.',
       type: PropertyType.apartment,
       price: 890000,
       location: const LatLng(40.4304, -3.6809),
@@ -29,12 +35,17 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 120,
+      images: const ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Chamberí
     Property(
       id: '3',
       title: 'Piso reformado en Chamberí',
+      description: 'Elegante piso en uno de los mejores barrios.',
       type: PropertyType.apartment,
       price: 520000,
       location: const LatLng(40.4378, -3.7036),
@@ -42,12 +53,17 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 2,
       squareMeters: 85,
+      images: const ['https://images.unsplash.com/photo-1484154218962-a197022b5858'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Retiro
     Property(
       id: '4',
       title: 'Casa con jardín cerca del Retiro',
+      description: 'Oasis urbano junto al parque más famoso.',
       type: PropertyType.house,
       price: 1200000,
       location: const LatLng(40.4153, -3.6838),
@@ -55,12 +71,17 @@ class MockPropertyData {
       bedrooms: 4,
       bathrooms: 3,
       squareMeters: 200,
+      images: const ['https://images.unsplash.com/photo-1512917774080-9991f1c4c750'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Malasaña
     Property(
       id: '5',
       title: 'Loft moderno en Malasaña',
+      description: 'Ideal para jóvenes profesionales y artistas.',
       type: PropertyType.apartment,
       price: 380000,
       location: const LatLng(40.4267, -3.7033),
@@ -68,12 +89,17 @@ class MockPropertyData {
       bedrooms: 1,
       bathrooms: 1,
       squareMeters: 60,
+      images: const ['https://images.unsplash.com/photo-1536376074432-bf12177d4f4f'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Chueca
     Property(
       id: '6',
       title: 'Estudio en Chueca',
+      description: 'Estudio acogedor en zona vibrante.',
       type: PropertyType.apartment,
       price: 280000,
       location: const LatLng(40.4226, -3.6955),
@@ -81,12 +107,17 @@ class MockPropertyData {
       bedrooms: 1,
       bathrooms: 1,
       squareMeters: 45,
+      images: const ['https://images.unsplash.com/photo-1493809842364-78817add7ffb'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Moncloa
     Property(
       id: '7',
       title: 'Oficina en zona universitaria',
+      description: 'Espacio versátil ideal para co-working.',
       type: PropertyType.office,
       price: 350000,
       location: const LatLng(40.4379, -3.7189),
@@ -94,12 +125,17 @@ class MockPropertyData {
       bedrooms: 0,
       bathrooms: 2,
       squareMeters: 90,
+      images: const ['https://images.unsplash.com/photo-1497366216548-37526070297c'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Arganzuela
     Property(
       id: '8',
       title: 'Piso familiar en Arganzuela',
+      description: 'Tranquilidad y servicios para toda la familia.',
       type: PropertyType.apartment,
       price: 420000,
       location: const LatLng(40.3978, -3.6989),
@@ -107,12 +143,17 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 95,
+      images: const ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Las Rozas (afueras)
     Property(
       id: '9',
       title: 'Chalet independiente',
+      description: 'Vivir rodeado de naturaleza a un paso de la ciudad.',
       type: PropertyType.house,
       price: 750000,
       location: const LatLng(40.4933, -3.8736),
@@ -120,12 +161,17 @@ class MockPropertyData {
       bedrooms: 5,
       bathrooms: 3,
       squareMeters: 250,
+      images: const ['https://images.unsplash.com/photo-1518780664697-55e3ad937233'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Pozuelo
     Property(
       id: '10',
       title: 'Terreno urbanizable',
+      description: 'Oportunidad de inversión en zona exclusiva.',
       type: PropertyType.land,
       price: 500000,
       location: const LatLng(40.4358, -3.8147),
@@ -133,12 +179,17 @@ class MockPropertyData {
       bedrooms: 0,
       bathrooms: 0,
       squareMeters: 1000,
+      images: const ['https://images.unsplash.com/photo-1500382017468-9049fed747ef'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Chamartín
     Property(
       id: '11',
       title: 'Piso de lujo en Chamartín',
+      description: 'Diseño vanguardista y calidades premium.',
       type: PropertyType.apartment,
       price: 680000,
       location: const LatLng(40.4652, -3.6781),
@@ -146,12 +197,17 @@ class MockPropertyData {
       bedrooms: 3,
       bathrooms: 2,
       squareMeters: 110,
+      images: const ['https://images.unsplash.com/photo-1493238792000-8113da705763'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
     
     // Latina
     Property(
       id: '12',
       title: 'Piso económico en La Latina',
+      description: 'Excelente oportunidad de inversión para alquilar.',
       type: PropertyType.apartment,
       price: 320000,
       location: const LatLng(40.4089, -3.7142),
@@ -159,6 +215,10 @@ class MockPropertyData {
       bedrooms: 2,
       bathrooms: 1,
       squareMeters: 70,
+      images: const ['https://images.unsplash.com/photo-1502672023488-70e25813eb80'],
+      isVerified: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     ),
   ];
   

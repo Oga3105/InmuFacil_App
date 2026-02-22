@@ -8,6 +8,7 @@ import '../widgets/property_listing/filter_sidebar.dart';
 import '../widgets/map/property_floating_card.dart';
 import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
+import '../../domain/entities/property_type.dart';
 import '../providers/auth_provider.dart';
 
 class PropertyListingScreen extends ConsumerWidget {

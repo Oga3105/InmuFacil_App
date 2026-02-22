@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart' hide Path;
 import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 import 'dart:async'; // For Timer (Hover Debounce)
+import 'dart:convert';
 // import 'package:easy_localization/easy_localization.dart'; // TEMP DISABLED
 
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
@@ -26,7 +27,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   final MapController _mapController = MapController();
   LatLng? _previousCenter; // Track previous center to detect changes
   bool? _previousIsFallback; // Track previous fallback state
-  Map<String, dynamic>? _previousGeoJson; // Track GeoJSON changes
+  String? _previousGeoJson; // Track GeoJSON changes
   
   // Spain (Madrid) coordinates for geolocation fallback
   static const LatLng _spainFallback = LatLng(40.4168, -3.7038);
@@ -75,7 +76,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
         _previousGeoJson = searchState.lastSearchResultGeoJson;
         
         // Pass to MapState to generate REAL SHAPE polygon
-        ref.read(mapStateProvider.notifier).setCityBoundaryFromGeoJson(searchState.lastSearchResultGeoJson!);
+        final geoJsonData = json.decode(searchState.lastSearchResultGeoJson!) as Map<String, dynamic>;
+        ref.read(mapStateProvider.notifier).setCityBoundaryFromGeoJson(geoJsonData);
         
         // Use BBOX only for Camera Fitting (if available)
         if (searchState.lastSearchResultBbox != null) {
@@ -169,9 +171,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                   }
                   
                   // Update Visible Bounds
-                  if (position.visibleBounds != null) {
-                    ref.read(mapStateProvider.notifier).setVisibleBounds(position.visibleBounds!);
-                  }
+                  final bounds = _mapController.camera.visibleBounds;
+                  ref.read(mapStateProvider.notifier).setVisibleBounds(bounds);
                 },
                 initialCenter: searchState.mapCenter ?? _spainFallback,
                 initialZoom: 6.2,
@@ -199,13 +200,14 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 ),
                 
                 // 2. Polygon Layer (City Boundaries & User Zones)
-                PolygonLayer<Object>(
-                  polygons: <Polygon<Object>>[
+                PolygonLayer(
+                  polygons: [
                     // City Boundary (Blue, Transparent, Real Shape)
                     if (mapState.cityBoundaryPolygon.isNotEmpty)
                       Polygon(
                         points: mapState.cityBoundaryPolygon,
                         color: const Color(0xFF2563EB).withOpacity(0.15), 
+                        isFilled: true,
                         borderColor: const Color(0xFF2563EB),
                         borderStrokeWidth: 2,
                         label: searchState.location.isNotEmpty ? searchState.location : "Zona",
@@ -217,6 +219,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentZonePolygon,
                         color: Colors.green.withOpacity(0.2), 
+                        isFilled: true,
                         borderColor: Colors.green,
                         borderStrokeWidth: 2,
                       ),
@@ -226,6 +229,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentDrawingPoints, // Don't close loop while dragging
                         color: Colors.orange.withOpacity(0.1), 
+                        isFilled: true,
+                        isDotted: true,
                         borderColor: Colors.orange,
                         borderStrokeWidth: 2,
                       ),
@@ -488,8 +493,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   /// Helper to convert screen coordinates to LatLng and add to drawing
   void _addPointFromEvent(Offset localPosition) {
     // Convert screen point to LatLng using the map camera.
-    // In flutter_map 8.2.2, the correct method is screenOffsetToLatLng.
-    final point = _mapController.camera.screenOffsetToLatLng(localPosition);
+    // In flutter_map 6.x+, use pointToLatLng with math.Point
+    final point = _mapController.camera.pointToLatLng(math.Point(localPosition.dx, localPosition.dy));
     ref.read(mapStateProvider.notifier).addPoint(point);
   }
 }

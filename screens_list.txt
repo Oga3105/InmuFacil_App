@@ -1,0 +1,11 @@
+
+frontend/lib/presentation/screens/auth/login_screen.dart
+frontend/lib/presentation/screens/auth/register_screen.dart
+frontend/lib/presentation/screens/home/home_screen.dart
+frontend/lib/presentation/screens/kyc/identity_verification_screen.dart
+frontend/lib/presentation/screens/kyc/widgets/document_upload_card.dart
+frontend/lib/presentation/screens/not_found/not_found_screen.dart
+frontend/lib/presentation/screens/property/property_details_screen.dart
+frontend/lib/presentation/screens/property_listing_screen.dart
+frontend/lib/presentation/screens/user_profile_screen.dart
+

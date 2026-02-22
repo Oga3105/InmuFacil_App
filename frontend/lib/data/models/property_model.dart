@@ -5,11 +5,12 @@ import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 
 part 'property_model.g.dart';
 
-/// Data model for Property with JSON serialization
-@JsonSerializable()
+/// Data model for Property with manual JSON mapping to handle nested structures
+@JsonSerializable(explicitToJson: true)
 class PropertyModel {
   final int id;
   final String title;
+  final String description;
   final String type;
   final double price;
   final double latitude;
@@ -17,14 +18,17 @@ class PropertyModel {
   final String address;
   final int bedrooms;
   final int bathrooms;
-  @JsonKey(name: 'square_meters')
+  final String? floor;
   final double squareMeters;
-  @JsonKey(name: 'image_url')
-  final String? imageUrl;
+  final List<String> images;
+  final bool isVerified;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   
   const PropertyModel({
     required this.id,
     required this.title,
+    required this.description,
     required this.type,
     required this.price,
     required this.latitude,
@@ -32,30 +36,83 @@ class PropertyModel {
     required this.address,
     required this.bedrooms,
     required this.bathrooms,
+    this.floor,
     required this.squareMeters,
-    this.imageUrl,
+    required this.images,
+    required this.isVerified,
+    required this.createdAt,
+    required this.updatedAt,
   });
   
-  /// Convert from JSON
-  factory PropertyModel.fromJson(Map<String, dynamic> json) =>
-      _$PropertyModelFromJson(json);
-  
-  /// Convert to JSON
-  Map<String, dynamic> toJson() => _$PropertyModelToJson(this);
+  /// Convert from JSON (Manual Mapping for Nested Backend Data)
+  factory PropertyModel.fromJson(Map<String, dynamic> json) {
+    // Extract nested features
+    final features = json['features'] as Map<String, dynamic>? ?? {};
+    
+    // Extract nested media (images only)
+    final mediaList = json['media'] as List? ?? [];
+    final List<String> imageUrls = mediaList
+        .where((m) => m['media_type'] == 'image')
+        .map((m) => m['file_path'] as String)
+        .toList();
+
+    // Handle Coordinate extraction if location is a single string or separate fields
+    // Based on backend/src/models/properties.py, 'location' is a String.
+    // However, PropertyModel previously used latitude/longitude fields.
+    // Mapping logic must match actual API behavior. 
+    // If backend sends latitude/longitude separately:
+    double lat = (json['latitude'] ?? 0.0).toDouble();
+    double lon = (json['longitude'] ?? 0.0).toDouble();
+
+    // Fix for Backend format: Sometimes coords are sent as "lat, lng" in 'location' 
+    // while 'latitude' and 'longitude' are null.
+    final locationStr = json['location'] as String? ?? '';
+    if (lat == 0.0 && lon == 0.0 && locationStr.contains(',')) {
+      final parts = locationStr.split(',');
+      if (parts.length == 2) {
+        lat = double.tryParse(parts[0].trim()) ?? 0.0;
+        lon = double.tryParse(parts[1].trim()) ?? 0.0;
+      }
+    }
+
+    return PropertyModel(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      description: json['description'] as String? ?? '',
+      type: json['property_type'] as String? ?? 'piso',
+      price: (json['price'] ?? 0.0).toDouble(),
+      latitude: lat,
+      longitude: lon,
+      address: json['location'] as String? ?? '',
+      bedrooms: (features['bedrooms'] ?? 0) as int,
+      bathrooms: (features['bathrooms'] ?? 0) as int,
+      floor: features['floor']?.toString(),
+      squareMeters: (json['surface_area'] ?? 0.0).toDouble(),
+      images: imageUrls,
+      isVerified: json['is_verified'] as bool? ?? true,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
   
   /// Convert to domain entity
   Property toEntity() {
     return Property(
       id: id.toString(),
       title: title,
+      description: description,
       type: _parsePropertyType(type),
       price: price,
       location: LatLng(latitude, longitude),
       address: address,
       bedrooms: bedrooms,
       bathrooms: bathrooms,
+      floor: floor,
       squareMeters: squareMeters,
-      imageUrl: imageUrl,
+      images: images,
+      isVerified: isVerified,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
     );
   }
   
@@ -63,48 +120,40 @@ class PropertyModel {
   PropertyType _parsePropertyType(String typeStr) {
     switch (typeStr.toLowerCase()) {
       case 'apartment':
+      case 'piso':
         return PropertyType.apartment;
       case 'house':
+      case 'chalet':
         return PropertyType.house;
       case 'land':
+      case 'terreno':
         return PropertyType.land;
       case 'office':
+      case 'oficina':
         return PropertyType.office;
       default:
         return PropertyType.apartment;
     }
   }
-  
-  /// Create from domain entity
-  factory PropertyModel.fromEntity(Property property) {
-    return PropertyModel(
-      id: int.parse(property.id),
-      title: property.title,
-      type: _propertyTypeToString(property.type),
-      price: property.price,
-      latitude: property.location.latitude,
-      longitude: property.location.longitude,
-      address: property.address,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      squareMeters: property.squareMeters,
-      imageUrl: property.imageUrl,
-    );
-  }
-  
-  /// Convert PropertyType to string
-  static String _propertyTypeToString(PropertyType type) {
-    switch (type) {
-      case PropertyType.apartment:
-        return 'apartment';
-      case PropertyType.house:
-        return 'house';
-      case PropertyType.land:
-        return 'land';
-      case PropertyType.office:
-        return 'office';
-      case PropertyType.all:
-        return 'all';
-    }
+
+  // toJSON manually for now to support the transition if needed for PUT/POST
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'property_type': type,
+      'price': price,
+      'latitude': latitude,
+      'longitude': longitude,
+      'location': address,
+      'features': {
+        'bedrooms': bedrooms,
+        'bathrooms': bathrooms,
+        'floor': floor,
+      },
+      'surface_area': squareMeters,
+      'is_verified': isVerified,
+    };
   }
 }
