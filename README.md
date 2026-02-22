@@ -18,29 +18,88 @@ InmuFácil permite que particulares compren y vendan propiedades directamente, s
 
 ---
 
-## 📊 Estado Actual del Proyecto (Status Matrix)
+## 📊 Estado Actual del Proyecto
 
-El proyecto se encuentra en un estado híbrido de desarrollo:
-*   **Backend:** Completado y Maduro (Hito 17 - Legacy/Maintenance).
-*   **Frontend:** Desarrollo Activo (Hito 3 - Focus).
+**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
 
-| Módulo / Hito | Estado Backend (API) | Estado Frontend (Flutter) |
-| :--- | :---: | :---: |
-| **1. Auth & Core** | ✅ Completado | ✅ Completado |
-| **2. KYC & Vault** | ✅ Completado | ✅ Completado (DNI Upload) |
-| **3. Anti-Agencias** | ✅ Completado | ✅ Completado |
-| **4. Búsqueda y Mapa** | ✅ Completado | ✅ **Completo (Hito 4)** |
-| **5. Visitas** | ✅ Completado | 🔴 Pendiente |
-| **6. Ofertas** | ✅ Completado | 🔴 Pendiente |
-| **7-9. Negociación**| ✅ Completado | 🔴 Pendiente |
-| **10. Tasación** | ✅ Completado | 🔴 Pendiente |
-| **11-17. Closing** | ✅ Completado | 🔴 Pendiente |
+**API Version:** `0.5.0` - Auth-Ready
 
----
+**Progreso:**
+- ✅ **Hito 1:** Estructura Base y Autenticación
+- ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
+  - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
+  - ✅ Misión 6: Security Breach Remediation
+  - ✅ Misión 8: API Frontend Integration (Secure CORS)
+- ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
+  - ✅ Registro con Anti-Agency Filter
+  - ✅ Login JWT (Access Token 30min)
+  - ✅ MFA por Email (6-digit OTP)
+  - ✅ Reset Password Seguro
+- ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
+  - ✅ CRUD Vendedor (Publicación y Gestión)
+  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
+  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
 
-**Hito Activo:** 🚧 **Frontend Hito 4: Búsqueda y Resultados**
-**Rama Activa:** `feature/valuation-engine` (Reutilizada para integración Frontend)
-**Último Commit:** `1ee34c4` - `feat(listing): implement property listing UI and card widget (Hito 4.2)`
+- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
+  - ✅ Ventanas de Disponibilidad (Vendedor)
+  - ✅ Algoritmo de Slots Dinámicos (Comprador)
+  - ✅ Gestión de Citas (Approve/Reject)
+- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
+  - ✅ Anti-Malware (MIME Type Validation)
+  - ✅ Bloqueo de Fuerza Bruta (Automated)
+  - ✅ Tests de Prevención IDOR
+
+- ✅ **Hito 5:** Realización de Visitas (Ejecución)
+  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
+  - ✅ Dashboard (Agenda de Vendedor/Comprador)
+  - ✅ Defensa de Roles (Solo el dueño valida la visita)
+
+- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
+  - ✅ Modelo de Ofertas Transparentes
+  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
+  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
+
+- ✅ **Hito: Búsqueda Avanzada (Extra)**
+  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
+  - ✅ Búsqueda Combinatoria (Features + Core)
+  - ✅ TDD (`tests/test_search_logic.py`)
+
+- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
+  - ✅ Protocolo de Contraofertas (Historial Auditado)
+  - ✅ Chat Encriptado (Opcional, Defense in Depth)
+  - ✅ Modelo de Cierre (Accept/Reject)
+
+- ✅ **Hito 8:** Reserva y Señal (Híbrido)
+  - ✅ Modelo de Reservas e Idempotencia
+  - ✅ Mock Payment Provider (Simulación Financiera)
+  - ✅ Bloqueo de Concurrencia (Race Conditions)
+  - ✅ Configuración de Visibilidad (Hide when Reserved)
+
+- ✅ **Hito 9:** Verificación Documental (Compliance)
+  - ✅ Subida Cifrada (AES-256) de Nota Simple
+  - ✅ Extracción OCR de Referencia Catastral
+  - ✅ Modelo `PropertyDocument` Seguro
+
+- 🎯 **Hito 10:** Tasación (Siguiente Paso)
+
+- ✅ **Frontend:** Inicialización Flutter con Clean Architecture
+  - ✅ Estructura domain/data/presentation
+  - ✅ API client con interceptores JWT
+  - ✅ Tema Material Design 3
+  - ✅ Routing con go_router
+  - ✅ **Geocoding Integrado:** Nominatim API (Local First) + Mapa Reactivo
+  - ✅ **Página 404:** Diseño Isométrico, Segura e Internacionalizada (9 idiomas)
+  - ⏳ Implementación UI pendiente (@UIBuilder)
+
+- ✅ **DevOps:** Automatización GitHub (CodeQL, Dependabot, Templates)
+  - ✅ CodeQL para análisis de seguridad Python
+  - ✅ Dependabot (Python, Flutter, GitHub Actions)
+  - ✅ Templates de issues (bug, feature, vulnerabilidad)
+  - ✅ Template de Pull Request con checklists
+  - ✅ Documentación completa en español
+
+**Rama Activa:** `develop`  
+**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
 
 ---
 

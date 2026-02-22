@@ -3,8 +3,8 @@ import 'package:latlong2/latlong.dart';
 
 /// Service for handling user location with fallback
 class LocationService {
-  /// Madrid coordinates as central fallback for Spain
-  static const LatLng sevillaFallback = LatLng(40.4168, -3.7038);
+  /// Sevilla coordinates as fallback
+  static const LatLng sevillaFallback = LatLng(37.3891, -5.9845);
   
   /// Get current user location or fallback to Sevilla
   /// 

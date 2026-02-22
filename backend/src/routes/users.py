@@ -1,4 +1,7 @@
 from typing import List, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
@@ -64,8 +67,8 @@ async def update_user_me(
     if not decrypted_phone and current_user.encrypted_phone:
          try:
             decrypted_phone = decrypt_data(current_user.encrypted_phone)
-         except:
-            pass
+         except Exception as e:
+            logger.error(f"Error decrypting phone: {e}")
 
     response_data = UserResponse(
         id=current_user.id,

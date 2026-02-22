@@ -8,7 +8,7 @@ class AppTheme {
   AppTheme._();
   
   // Primary color - InmuFácil blue
-  static const Color primaryColor = Color(0xFF2563EB);
+  static const Color primaryColor = Color(0xFF135BEC);
   
   /// Light theme configuration
   static ThemeData get lightTheme {

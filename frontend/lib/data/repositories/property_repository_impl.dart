@@ -138,6 +138,17 @@ class PropertyRepositoryImpl implements PropertyRepository {
   
   /// Convert PropertyType to API string
   String _propertyTypeToString(PropertyType type) {
-    return type.backendValue;
+    switch (type) {
+      case PropertyType.apartment:
+        return 'apartment';
+      case PropertyType.house:
+        return 'house';
+      case PropertyType.land:
+        return 'land';
+      case PropertyType.office:
+        return 'office';
+      case PropertyType.all:
+        return 'all';
+    }
   }
 }
