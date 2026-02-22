@@ -1,8 +1,0 @@
-ad2cff7 Merge pull request #46 from Oga3105/docs/standardization
-8982f75 Merge branch 'develop' into docs/standardization
-29ec21c docs: standardize documentation structure and ADRs
-d9dda54 Merge pull request #45 from Oga3105/feat/user-profile-base
-66bce69 Merge pull request #44 from Oga3105/feat/identity-verification
-2dbb37e Merge branch 'develop' into feat/identity-verification
-e850018 feat(profile): initial user profile screen
-daad567 Merge pull request #42 from Oga3105/dependabot/pub/frontend/multi-387cc5aa42
