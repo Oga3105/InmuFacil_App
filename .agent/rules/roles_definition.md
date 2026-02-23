@@ -267,3 +267,79 @@ git branch -d feature/nombre-tarea
 - [ ] Arquitectura consistente
 - [ ] Sin deuda técnica innecesaria
 - [ ] Documentación actualizada
+
+---
+
+## AGENTE ADICIONAL: @Critic
+
+**Archivo completo:** `roles/critic.md`
+**Rol:** Buscador de fallos y casos borde. Activo exclusivamente en Mesas Redondas.
+**Trigger:** Toda Mesa Redonda arquitectonica.
+**Restriccion:** No propone soluciones. Solo identifica problemas para que el especialista y @Architect los resuelvan.
+
+---
+
+## INDICE COMPLETO DE ARCHIVOS
+
+### Roles (`roles/`)
+| Archivo | Agente | Version |
+|---|---|---|
+| `architect.md` | @Architect | 1.1 |
+| `jules.md` | @Jules | 1.1 |
+| `shield.md` | @Shield | 1.1 |
+| `watcher.md` | @Watcher | 1.1 |
+| `frontend_proxy.md` | @FrontendProxy | 1.0 |
+| `ui_builder.md` | @UIBuilder | 1.0 |
+| `devops.md` | @DevOps | 1.1 |
+| `critic.md` | @Critic | 1.0 |
+
+### Protocolos (`protocols/`)
+| Archivo | Nombre | Trigger |
+|---|---|---|
+| `architectural_debate.md` | Debate Arquitectonico | Nueva feature, refactor, cambio de API |
+| `tdd.md` | TDD Red/Green/Refactor | Cualquier cambio de codigo |
+| `pre_task_sync.md` | Pre-Task Sync Ritual | Antes de crear cualquier rama |
+| `pre_commit_gate.md` | Pre-Commit Gate | Antes de todo git add + commit |
+| `pre_pr_sync.md` | Pre-PR Sync | Antes de abrir cualquier PR |
+| `cross_check.md` | Check Cruzado Continuo | Despues de cada accion significativa |
+| `docs_first.md` | Documentacion Primero | Antes de todo git push o PR |
+| `git_governance.md` | Gobernanza Git | Inicio de tarea o rama |
+| `reunion.md` | Agentes Reunios | Frase clave "Agentes, reunios" |
+
+---
+
+## ORDEN DE EJECUCION CANONICO
+
+Para toda tarea que implique codigo nuevo o modificacion:
+
+```
+1. Pre-Task Sync Ritual   (pre_task_sync.md)
+2. Debate Arquitectonico  (architectural_debate.md)   <- si aplica por complejidad
+3. TDD Red               (tdd.md)                    <- escribir test que falla
+4. Implementacion
+5. TDD Green / Refactor   (tdd.md)
+6. Pre-Commit Gate        (pre_commit_gate.md)
+7. Documentacion Primero  (docs_first.md)
+8. Pre-PR Sync            (pre_pr_sync.md)
+9. Pull Request           (git_governance.md)
+```
+
+Check Cruzado Continuo se ejecuta de forma automatica despues de cada paso significativo.
+
+---
+
+## REGLAS DE ORO (Resumen)
+
+1. Autonomia Total: crear, editar, borrar archivos y ejecutar comandos. No preguntar para acciones locales reversibles.
+2. Verificacion Cruzada: validar mentalmente compilacion Flutter y tests backend antes de responder.
+3. Self-Healing: @Watcher intercepta fallos, analiza causa raiz, propone fix, reintenta. Sin errores sin solucion.
+4. Safety First: conflictos no propios = DETENER y notificar. No resolver de forma autonoma.
+5. Commits Atomicos: un commit = un cambio logico. Sin `git add -A` sin revision. Sin `--no-verify` sin autorizacion.
+6. Secretos: nunca commitear `.env` ni credenciales. Verificar `git diff --staged` antes de `git add`.
+7. No Emojis en scripts y codigo generado.
+8. TFM: preservar todas las ramas remotas. Solo eliminar locales obsoletas.
+
+---
+
+**Ultima actualizacion:** 2026-02-23
+**Version:** 2.0

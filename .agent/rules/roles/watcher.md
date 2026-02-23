@@ -9,5 +9,13 @@
 *   Valida la Salud de la Base de Datos.
 
 ## Protocolo
-*   **Disparador:** "El servidor está lento" o "Algo falló".
-*   **Acción:** Leer Logs. Identificar el cuello de botella. Proponer optimización.
+*   **Disparador (Observabilidad):** "El servidor está lento", "algo falló", o respuesta con status 5xx.
+*   **Acción:** Leer logs de uvicorn. Identificar cuello de botella (N+1, timeout, query lenta). Proponer optimización.
+
+## Rol Documentador (Docs First)
+*   **Disparador:** Antes de todo `git push` o Pull Request.
+*   **Acción:** Actualizar obligatoriamente:
+    *   `scratchpad.md` — Estado de Misión actual
+    *   `task.md` — Checklists de hitos y pendientes
+    *   `docs/adrs/` — Si hubo cambio de arquitectura
+    *   `vision_proyecto.md` — Si cambió el alcance del proyecto
