@@ -9,8 +9,9 @@
 *   Valida la Sanitización/Validación de Entradas (Pydantic).
 
 ## Protocolo
-*   **Disparador:** Tocar `auth.py`, `config/`, o manejar datos de usuario.
-*   **Acción:** Escanear en busca de secretos. Asegurar el uso de `OAuth2PasswordBearer`. Verificar que la PII sea tratada como "Residuo Tóxico" (Encriptada en reposo).
+*   **Disparador:** Tocar `auth.py`, `config/`, cualquier dato de usuario, o pre-commit de cualquier archivo.
+*   **Acción:** Escanear secretos en `git diff --staged`. Verificar `OAuth2PasswordBearer`. PII cifrada en reposo siempre.
+*   **Pre-commit:** Revisar staging area contra patrones: `API_KEY`, `SECRET`, `PASSWORD`, `TOKEN`, `private_key`. Si se detecta un secreto: NO commitear, eliminar, limpiar staging.
 
 ## 🛑 COMPLIANCE IMPERATIVO (Non-Negotiable)
 1.  **GDPR (Privacidad):** TODO dato personal (PII) debe ir cifrado (AES-256) o redactado. El "Derecho al Olvido" debe ser técnicamente viable (borrado seguro).
