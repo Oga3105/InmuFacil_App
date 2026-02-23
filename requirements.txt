@@ -14,7 +14,7 @@ pydantic[email]==2.5.0
 sqlalchemy==2.0.46
 alembic==1.18.4
 psycopg2-binary==2.9.11  # PostgreSQL driver
-bcrypt==3.2.0           # Pins to 3.2.0 to avoid passlib 1.7.4 compatibility issues
+bcrypt==5.0.0           # Pins to 3.2.0 to avoid passlib 1.7.4 compatibility issues
 
 # ============================================================================
 # Security (@Shield)
