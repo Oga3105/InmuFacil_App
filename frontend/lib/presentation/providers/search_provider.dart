@@ -30,8 +30,8 @@ class SearchState {
     this.onlyFavorites = false,
     this.onlyVerified = false,
     this.currentPage = 1,
-    this.itemsPerPage = 12,
-    this.viewMode = PropertyViewMode.grid,
+    this.itemsPerPage = 5,
+    this.viewMode = PropertyViewMode.list,
     this.sortBy = SortOption.relevance,
     this.minBedrooms = 0,
     this.selectedExtras = const [],
@@ -200,9 +200,10 @@ class SearchNotifier extends Notifier<SearchState> {
     _loadProperties();
   }
 
-  /// Update view mode (grid/list)
+  /// Update view mode (grid/list) and adjust items per page
   void updateViewMode(PropertyViewMode mode) {
-    state = state.copyWith(viewMode: mode);
+    final itemsPerPage = mode == PropertyViewMode.list ? 5 : 9;
+    state = state.copyWith(viewMode: mode, itemsPerPage: itemsPerPage, currentPage: 1);
   }
 
   /// Update sorting criteria
@@ -454,10 +455,22 @@ class SearchNotifier extends Notifier<SearchState> {
           }).toList();
         }
 
+        // CLIENT-SIDE SORTING
+        switch (state.sortBy) {
+          case SortOption.priceLowToHigh:
+            filteredList.sort((a, b) => a.price.compareTo(b.price));
+          case SortOption.priceHighToLow:
+            filteredList.sort((a, b) => b.price.compareTo(a.price));
+          case SortOption.newest:
+            filteredList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          case SortOption.relevance:
+            break; // Keep API default order
+        }
+
         state = state.copyWith(
           isLoading: false,
           error: null,
-          filteredProperties: filteredList, // Apply filter
+          filteredProperties: filteredList,
         );
       },
     );

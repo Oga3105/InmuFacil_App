@@ -308,24 +308,27 @@ class PropertyListingScreen extends ConsumerWidget {
              if (MediaQuery.of(context).size.width > 600) // Hide on very small screens
              Row(
                children: [
-                 Container(
-                   padding: const EdgeInsets.all(4),
-                   decoration: BoxDecoration(
-                     color: theme.colorScheme.surface,
-                     borderRadius: BorderRadius.circular(8),
-                     border: Border.all(color: Colors.grey.shade200),
+                 SizedBox(
+                   height: 42,
+                   child: Container(
+                     padding: const EdgeInsets.all(4),
+                     decoration: BoxDecoration(
+                       color: theme.colorScheme.surface,
+                       borderRadius: BorderRadius.circular(8),
+                       border: Border.all(color: Colors.grey.shade200),
+                     ),
+                      child: Row(
+                        children: [
+                          _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
+                             ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
+                          }),
+                          _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
+                             ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
+                          }),
+                          _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
+                        ],
+                      ),
                    ),
-                    child: Row(
-                      children: [
-                        _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
-                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
-                        }),
-                        _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
-                           ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
-                        }),
-                        _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
-                      ],
-                    ),
                  ),
                   const SizedBox(width: 12),
                   _buildSortingDropdown(context, searchState, ref),
@@ -464,8 +467,10 @@ class PropertyListingScreen extends ConsumerWidget {
       SortOption.newest: 'Más recientes',
     };
     
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+    return SizedBox(
+      height: 42,
+      child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
@@ -487,6 +492,7 @@ class PropertyListingScreen extends ConsumerWidget {
             ref.read(searchProvider.notifier).setSortBy(value);
           }
         },
+      ),
       ),
     );
   }
