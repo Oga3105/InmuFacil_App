@@ -8,22 +8,6 @@ part 'property_model.g.dart';
 /// Data model for Property with manual JSON mapping to handle nested structures
 @JsonSerializable(explicitToJson: true)
 class PropertyModel {
-  final int id;
-  final String title;
-  final String description;
-  final String type;
-  final double price;
-  final double latitude;
-  final double longitude;
-  final String address;
-  final int bedrooms;
-  final int bathrooms;
-  final String? floor;
-  final double squareMeters;
-  final List<String> images;
-  final bool isVerified;
-  final DateTime createdAt;
-  final DateTime updatedAt;
   
   const PropertyModel({
     required this.id,
@@ -94,6 +78,22 @@ class PropertyModel {
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
+  final int id;
+  final String title;
+  final String description;
+  final String type;
+  final double price;
+  final double latitude;
+  final double longitude;
+  final String address;
+  final int bedrooms;
+  final int bathrooms;
+  final String? floor;
+  final double squareMeters;
+  final List<String> images;
+  final bool isVerified;
+  final DateTime createdAt;
+  final DateTime updatedAt;
   
   /// Convert to domain entity
   Property toEntity() {

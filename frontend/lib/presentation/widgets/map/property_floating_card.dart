@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
-import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // For .tr() if needed
+// For .tr() if needed
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
-import '../common/premium_button.dart';
 
 class PropertyFloatingCard extends ConsumerWidget {
-  final Property property;
-  final VoidCallback onTap;
-
-  final double? width;
-  final double? height;
 
   const PropertyFloatingCard({
     super.key,
@@ -19,6 +13,11 @@ class PropertyFloatingCard extends ConsumerWidget {
     this.width,
     this.height,
   });
+  final Property property;
+  final VoidCallback onTap;
+
+  final double? width;
+  final double? height;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,7 +77,7 @@ class PropertyFloatingCard extends ConsumerWidget {
                     color: const Color(0xFF2563EB), // primary
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: const [
-                       BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))
+                       BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
                     ],
                   ),
                   child: const Text(
@@ -103,7 +102,7 @@ class PropertyFloatingCard extends ConsumerWidget {
                       color: Colors.white,
                       shape: BoxShape.circle,
                       boxShadow: [
-                         BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                         BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                       ],
                     ),
                     child: const Icon(Icons.verified, color: Color(0xFF16A34A), size: 16),
@@ -123,7 +122,7 @@ class PropertyFloatingCard extends ConsumerWidget {
                       color: Colors.white.withOpacity(0.95),
                       shape: BoxShape.circle,
                       boxShadow: const [
-                        BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))
+                        BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
                       ],
                     ),
                     child: Icon(
@@ -221,9 +220,9 @@ class PropertyFloatingCard extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         Text(
                           'Ver detalle',
                           style: TextStyle(

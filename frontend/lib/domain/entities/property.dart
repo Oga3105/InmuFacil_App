@@ -2,22 +2,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 
 /// Property entity for real estate listings
-class Property {
-  final String id;
-  final String title;
-  final String description; // Added
-  final PropertyType type;
-  final double price;
-  final LatLng location;
-  final String address;
-  final int bedrooms;
-  final int bathrooms;
-  final String? floor; // Added
-  final double squareMeters;
-  final List<String> images; // Added - Replaces single imageUrl
-  final bool isVerified; // Added
-  final DateTime createdAt; // Added
-  final DateTime updatedAt; // Added
+class Property { // Added
   
   const Property({
     required this.id,
@@ -36,6 +21,21 @@ class Property {
     required this.createdAt,
     required this.updatedAt,
   });
+  final String id;
+  final String title;
+  final String description; // Added
+  final PropertyType type;
+  final double price;
+  final LatLng location;
+  final String address;
+  final int bedrooms;
+  final int bathrooms;
+  final String? floor; // Added
+  final double squareMeters;
+  final List<String> images; // Added - Replaces single imageUrl
+  final bool isVerified; // Added
+  final DateTime createdAt; // Added
+  final DateTime updatedAt;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;

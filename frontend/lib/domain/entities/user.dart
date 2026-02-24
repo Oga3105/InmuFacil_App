@@ -1,11 +1,4 @@
 class User {
-  final String id;
-  final String email;
-  final String? name;
-  final String? userType;
-  final String? dniStatus;
-  final bool? isActive;
-  final String? phone;
 
   User({
     required this.id,
@@ -28,4 +21,11 @@ class User {
       phone: json['phone'],
     );
   }
+  final String id;
+  final String email;
+  final String? name;
+  final String? userType;
+  final String? dniStatus;
+  final bool? isActive;
+  final String? phone;
 }

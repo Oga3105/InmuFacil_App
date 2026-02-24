@@ -9,10 +9,10 @@ void main() async {
 
   // 2. Carga segura de variables de entorno
   try {
-    await dotenv.load(fileName: ".env");
-    debugPrint("✅ Environment loaded successfully.");
+    await dotenv.load(fileName: '.env');
+    debugPrint('✅ Environment loaded successfully.');
   } catch (e) {
-    debugPrint("⚠️ WARNING: Could not load .env file. Using defaults. Error: $e");
+    debugPrint('⚠️ WARNING: Could not load .env file. Using defaults. Error: $e');
     // No relanzamos el error para permitir que la app arranque aunque sea sin config
   }
 

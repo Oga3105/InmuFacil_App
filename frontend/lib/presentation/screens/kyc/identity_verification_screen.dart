@@ -15,16 +15,16 @@ class IdentityVerificationScreen extends ConsumerWidget {
 
     // PageController is not strictly needed if we just switch content based on index,
     // but PageView gives nice transitions. We use logic to switch page.
-    final PageController _pageController =
+    final PageController pageController =
         PageController(initialPage: state.currentStepIndex);
 
     // Sync PageController if state changes externally (e.g. back button logic)
     // In a real build() we shouldn't trigger side effects, but for simple wizard steps it's often easier
     // to build the view based on state directly. Let's use an AnimatedSwitcher or direct PageView.
     // To keep it simple and robust:
-    if (_pageController.hasClients &&
-        _pageController.page?.round() != state.currentStepIndex) {
-      _pageController.animateToPage(
+    if (pageController.hasClients &&
+        pageController.page?.round() != state.currentStepIndex) {
+      pageController.animateToPage(
         state.currentStepIndex,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -35,7 +35,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text(
-          "Verifica tu Identidad",
+          'Verifica tu Identidad',
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -63,7 +63,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    "Transferencia Segura (TLS) y Privacidad RGPD. Tus datos no son visibles públicamente.",
+                    'Transferencia Segura (TLS) y Privacidad RGPD. Tus datos no son visibles públicamente.',
                     style: TextStyle(color: Colors.blue[900], fontSize: 12),
                   ),
                 ),
@@ -80,7 +80,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
 
           Expanded(
             child: PageView(
-              controller: _pageController,
+              controller: pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe
               children: [
                 _buildStep1DocumentType(notifier),
@@ -102,23 +102,23 @@ class IdentityVerificationScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Selecciona tu documento",
+            'Selecciona tu documento',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            "Necesitamos validar tu identidad legal para activar tu cuenta.",
+            'Necesitamos validar tu identidad legal para activar tu cuenta.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 32),
-          _buildOptionCard("D.N.I Espa\u00f1ol", Icons.credit_card,
-              () => notifier.setDocumentType(DocumentType.dni)),
+          _buildOptionCard('D.N.I Espa\u00f1ol', Icons.credit_card,
+              () => notifier.setDocumentType(DocumentType.dni),),
           const SizedBox(height: 16),
-          _buildOptionCard("N.I.E / Residencia", Icons.badge_outlined,
-              () => notifier.setDocumentType(DocumentType.nie)),
+          _buildOptionCard('N.I.E / Residencia', Icons.badge_outlined,
+              () => notifier.setDocumentType(DocumentType.nie),),
           const SizedBox(height: 16),
-          _buildOptionCard("Pasaporte", Icons.menu_book,
-              () => notifier.setDocumentType(DocumentType.pasaporte)),
+          _buildOptionCard('Pasaporte', Icons.menu_book,
+              () => notifier.setDocumentType(DocumentType.pasaporte),),
         ],
       ),
     );
@@ -150,7 +150,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
   }
 
   Widget _buildStep2Scan(BuildContext context, VerificationState state,
-      VerificationNotifier notifier) {
+      VerificationNotifier notifier,) {
     bool canProceed = state.frontImage != null && state.backImage != null;
 
     return SingleChildScrollView(
@@ -159,24 +159,24 @@ class IdentityVerificationScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Escanea tu documento",
+            'Escanea tu documento',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            "Aseg\u00farate de que la imagen sea clara y legible.",
+            'Aseg\u00farate de que la imagen sea clara y legible.',
             style: TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 24),
           DocumentUploadCard(
-            title: "Frente del Documento",
+            title: 'Frente del Documento',
             onTap: notifier.pickFrontImage,
             imageFile: state.frontImage,
             status: state.frontStatus,
           ),
           const SizedBox(height: 16),
           DocumentUploadCard(
-            title: "Reverso del Documento",
+            title: 'Reverso del Documento',
             onTap: notifier.pickBackImage,
             imageFile: state.backImage,
             status: state.backStatus,
@@ -185,7 +185,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
           SizedBox(
             width: double.infinity,
             child: PremiumButton(
-              label: "Continuar",
+              label: 'Continuar',
               color: canProceed ? Colors.blue : Colors.grey,
               onPressed: canProceed ? notifier.nextStep : () {},
             ),
@@ -196,7 +196,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
   }
 
   Widget _buildStep3Selfie(BuildContext context, VerificationState state,
-      VerificationNotifier notifier) {
+      VerificationNotifier notifier,) {
     bool canProceed = state.selfieImage != null;
 
     return Padding(
@@ -205,12 +205,12 @@ class IdentityVerificationScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Text(
-            "Prueba de Vida",
+            'Prueba de Vida',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           const Text(
-            "Toma una selfie para asegurar que eres t\u00fa.",
+            'Toma una selfie para asegurar que eres t\u00fa.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey),
           ),
@@ -227,7 +227,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
                     color: state.selfieImage != null
                         ? Colors.green
                         : Colors.blue[200]!,
-                    width: 4),
+                    width: 4,),
                 image: state.selfieImage != null
                     ? DecorationImage(
                         image: FileImage(state.selfieImage!),
@@ -244,13 +244,13 @@ class IdentityVerificationScreen extends ConsumerWidget {
           TextButton.icon(
             onPressed: notifier.pickSelfie,
             icon: const Icon(Icons.camera_alt),
-            label: const Text("Abrir C\u00e1mara Frontal"),
+            label: const Text('Abrir C\u00e1mara Frontal'),
           ),
           const Spacer(),
           SizedBox(
             width: double.infinity,
             child: PremiumButton(
-              label: "Revisar y Enviar",
+              label: 'Revisar y Enviar',
               color: canProceed ? Colors.blue : Colors.grey,
               onPressed: canProceed ? notifier.nextStep : () {},
             ),
@@ -261,7 +261,7 @@ class IdentityVerificationScreen extends ConsumerWidget {
   }
 
   Widget _buildStep4Review(BuildContext context, VerificationState state,
-      VerificationNotifier notifier) {
+      VerificationNotifier notifier,) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -269,12 +269,12 @@ class IdentityVerificationScreen extends ConsumerWidget {
           const Icon(Icons.shield_outlined, size: 64, color: Colors.blue),
           const SizedBox(height: 24),
           const Text(
-            "Listo para verificar",
+            'Listo para verificar',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           const Text(
-            "Tus documentos se enviar\u00e1n de forma segura a nuestros servidores para su validaci\u00f3n manual.",
+            'Tus documentos se enviar\u00e1n de forma segura a nuestros servidores para su validaci\u00f3n manual.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey),
           ),
@@ -285,13 +285,13 @@ class IdentityVerificationScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: PremiumButton(
-                label: "Enviar Verificación",
+                label: 'Enviar Verificación',
                 color: Colors.blue,
                 onPressed: () async {
                    bool success = await notifier.submitVerification();
                    if (success) {
                      ScaffoldMessenger.of(context).showSnackBar(
-                       const SnackBar(content: Text("Documentos enviados correctamente")),
+                       const SnackBar(content: Text('Documentos enviados correctamente')),
                      );
                      context.pop(); // GoRouter pop
                    }

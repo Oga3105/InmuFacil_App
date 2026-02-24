@@ -10,9 +10,8 @@ import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; 
 import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // [NEW] Card Widget
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
 // PropertyCard import removed
-import 'package:inmufacil_frontend/domain/entities/property.dart'; // NEW IMPORT (Fix for Property not found)
+// NEW IMPORT (Fix for Property not found)
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
-import 'package:inmufacil_frontend/presentation/widgets/property_listing/property_listing_item.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
 
@@ -122,7 +121,7 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
                 ),
                 
                 // Right: Map with overlays
-                Expanded(
+                const Expanded(
                   child: _MapSection(),
                 ),
               ],
@@ -185,14 +184,14 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
 class _MobileLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _MapSection(isMobile: true);
+    return const _MapSection(isMobile: true);
   }
 }
 
 /// Map section with overlays (navigation bar, stats card, search form)
 class _MapSection extends ConsumerWidget {
-  final bool isMobile;
   const _MapSection({this.isMobile = false});
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -250,7 +249,7 @@ class _MapSection extends ConsumerWidget {
              child: Card(
                child: ListTile(
                  leading: const Icon(Icons.search),
-                 title: const Text("Buscar propiedades..."),
+                 title: const Text('Buscar propiedades...'),
                  onTap: () {
                    // Mobile might need a bottom sheet or separate screen for filters
                  },
@@ -284,7 +283,7 @@ class _MapSection extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                     Icon(Icons.info_outline, size: 18, color: Colors.red), // Rojo papelera
+                     const Icon(Icons.info_outline, size: 18, color: Colors.red), // Rojo papelera
                      const SizedBox(width: 8),
                      Flexible(
                        child: Text(
@@ -355,9 +354,9 @@ class _SearchPanel extends ConsumerWidget {
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
-                                children: [
-                                  const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                                  const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                                children: const [
+                                  TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                                  TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                                 ],
                               ),
                             ),
@@ -367,8 +366,8 @@ class _SearchPanel extends ConsumerWidget {
                         Text.rich(
                           TextSpan(
                             children: [
-                              TextSpan(text: "home.tagline_part1".tr(), style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                              TextSpan(text: "home.tagline_part2".tr(), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 14, fontWeight: FontWeight.bold)),
+                              TextSpan(text: 'home.tagline_part1'.tr(), style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                              TextSpan(text: 'home.tagline_part2'.tr(), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -386,10 +385,10 @@ class _SearchPanel extends ConsumerWidget {
                               color: Colors.black, // Default text color
                               letterSpacing: -1.0, // tracking-tight
                             ),
-                            children: [
-                              const TextSpan(text: "Sin intermediarios.\n"),
+                            children: const [
+                              TextSpan(text: 'Sin intermediarios.\n'),
                               TextSpan(
-                                text: "0% comisiones.",
+                                text: '0% comisiones.',
                                 style: TextStyle(color: Color(0xFF2563EB)), // text-primary #2563EB specified
                               ),
                             ],
@@ -400,7 +399,7 @@ class _SearchPanel extends ConsumerWidget {
                         
                         // Subtitle: "Compra y vende sin comisiones."
                         Text(
-                          "Compra y vende sin comisiones.",
+                          'Compra y vende sin comisiones.',
                           style: theme.textTheme.titleLarge?.copyWith( // ~ text-lg
                             fontWeight: FontWeight.bold, // font-bold
                             color: Colors.grey[800], // text-slate-800
@@ -413,9 +412,9 @@ class _SearchPanel extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildBenefitItem(context, "De la búsqueda a la notaría en pasos seguros."),
+                            _buildBenefitItem(context, 'De la búsqueda a la notaría en pasos seguros.'),
                             const SizedBox(height: 12), // space-y-3
-                            _buildBenefitItem(context, "Elimina la incertidumbre."),
+                            _buildBenefitItem(context, 'Elimina la incertidumbre.'),
                           ],
                         ),
                         
@@ -439,8 +438,8 @@ class _SearchPanel extends ConsumerWidget {
                                  icon: Icons.shield,
                                  iconColor: const Color(0xFF16A34A), // text-green-600
                                  bgColor: const Color(0xFFDCFCE7),   // bg-green-100
-                                 label: "GARANTÍA INMUFÁCIL",
-                                 title: "Tu venta tranquila",
+                                 label: 'GARANTÍA INMUFÁCIL',
+                                 title: 'Tu venta tranquila',
                                ),
                                
                                // Badge 2: Blue Lock
@@ -449,8 +448,8 @@ class _SearchPanel extends ConsumerWidget {
                                  icon: Icons.lock,
                                  iconColor: const Color(0xFF2563EB), // #2563EB Specified
                                  bgColor: const Color(0xFFDBEAFE),   // bg-blue-100
-                                 label: "P2P VERIFICADO",
-                                 title: "Tu compra segura",
+                                 label: 'P2P VERIFICADO',
+                                 title: 'Tu compra segura',
                                ),
                              ],
                            ),
@@ -476,9 +475,9 @@ class _SearchPanel extends ConsumerWidget {
   Widget _buildBenefitItem(BuildContext context, String text) {
     return Row(
       children: [
-        Icon(
+        const Icon(
           Icons.check_circle,
-          color: const Color(0xFF2563EB), // Azul corporativo #2563EB specified
+          color: Color(0xFF2563EB), // Azul corporativo #2563EB specified
           size: 20,
         ),
         const SizedBox(width: 12), // gap-3
@@ -627,13 +626,13 @@ class _PropertyResultsView extends ConsumerWidget {
 
 /// Feature item with icon and text (with glow effect)
 class _FeatureItem extends StatelessWidget {
-  final IconData icon;
-  final String text;
   
   const _FeatureItem({
     required this.icon,
     required this.text,
   });
+  final IconData icon;
+  final String text;
   
   @override
   Widget build(BuildContext context) {
@@ -653,7 +652,7 @@ class _FeatureItem extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(
+          child: const Icon(
             Icons.check_circle,
             color: primaryColor,
             size: 24,
@@ -702,7 +701,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withOpacity(0.2),
@@ -851,7 +850,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
             children: [
               'Terraza', 'Ascensor', 'Garaje', 'Piscina', 'Jardín',
               'Aire Acondicionado', 'Calefacción', 'Trastero', 
-              'Armarios Empotrados', 'Exterior', 'Acceso movilidad reducida'
+              'Armarios Empotrados', 'Exterior', 'Acceso movilidad reducida',
             ].map((extra) {
               final isSelected = searchState.selectedExtras.contains(extra);
               return FilterChip(
@@ -1034,7 +1033,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
         SizedBox(
           height: 56, // Fixed height for symmetry
           child: DropdownButtonFormField<PropertyType>(
-            value: searchState.propertyType,
+            initialValue: searchState.propertyType,
             decoration: InputDecoration(
               filled: true,
               fillColor: Theme.of(context).colorScheme.surface,
@@ -1144,15 +1143,15 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
 
 /// Trust badge widget
 class _TrustBadge extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
   
   const _TrustBadge({
     required this.icon,
     required this.title,
     required this.subtitle,
   });
+  final IconData icon;
+  final String title;
+  final String subtitle;
   
   @override
   Widget build(BuildContext context) {
@@ -1328,7 +1327,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     PopupMenuButton<String>(
                       offset: const Offset(0, 40),
                       tooltip: 'Menú de usuario',
-                      color: theme.colorScheme.surfaceVariant.withOpacity(0.9), // Match search panel
+                      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.9), // Match search panel
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       itemBuilder: (context) => [
                         const PopupMenuItem(
@@ -1376,10 +1375,10 @@ class _MapNavigationBar extends ConsumerWidget {
                            context.push('/contracts');
                         }
                       },
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                          radius: 18,
-                         backgroundColor: const Color(0xFF2563EB), // Official Blue
-                         child: const Icon(Icons.person, color: Colors.white, size: 20),
+                         backgroundColor: Color(0xFF2563EB), // Official Blue
+                         child: Icon(Icons.person, color: Colors.white, size: 20),
                       ),
                     )
                   else
@@ -1534,7 +1533,7 @@ class _StatsCard extends ConsumerWidget {
                    child: Row(
                      mainAxisSize: MainAxisSize.min,
                      children: [
-                       Icon(Icons.refresh, size: 14, color: Colors.red),
+                       const Icon(Icons.refresh, size: 14, color: Colors.red),
                        const SizedBox(width: 4),
                        Text(
                          'Limpiar filtros',
@@ -1558,11 +1557,6 @@ class _StatsCard extends ConsumerWidget {
 
 /// Premium button with colored glow shadow (Visual Design V7)
 class _PremiumGlowButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final Color color;
-  final IconData? icon;
-  final bool fullWidth;
 
   const _PremiumGlowButton({
     required this.label,
@@ -1571,6 +1565,11 @@ class _PremiumGlowButton extends StatelessWidget {
     this.icon,
     this.fullWidth = true,
   });
+  final String label;
+  final VoidCallback onPressed;
+  final Color color;
+  final IconData? icon;
+  final bool fullWidth;
 
   @override
   Widget build(BuildContext context) {

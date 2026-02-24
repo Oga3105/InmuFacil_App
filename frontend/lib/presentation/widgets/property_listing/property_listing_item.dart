@@ -8,9 +8,9 @@ import '../common/premium_button.dart';
 import '../common/time_badge.dart';
 
 class PropertyListingItem extends ConsumerWidget {
-  final Property property;
 
   const PropertyListingItem({super.key, required this.property});
+  final Property property;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -294,7 +294,7 @@ class PropertyListingItem extends ConsumerWidget {
                                 onPressed: () {},
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ],

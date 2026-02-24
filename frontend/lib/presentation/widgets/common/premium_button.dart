@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 
 class PremiumButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onPressed;
-  final Color color;
-  final IconData? icon;
-  final bool fullWidth;
-  final EdgeInsetsGeometry? padding;
-  final double? fontSize;
 
   const PremiumButton({
     super.key,
@@ -19,6 +12,13 @@ class PremiumButton extends StatelessWidget {
     this.padding,
     this.fontSize,
   });
+  final String label;
+  final VoidCallback onPressed;
+  final Color color;
+  final IconData? icon;
+  final bool fullWidth;
+  final EdgeInsetsGeometry? padding;
+  final double? fontSize;
 
   @override
   Widget build(BuildContext context) {

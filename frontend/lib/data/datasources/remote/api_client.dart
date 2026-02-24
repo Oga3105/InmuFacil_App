@@ -5,10 +5,6 @@ import '../../../core/config/env_config.dart';
 /// Dio HTTP client with JWT authentication interceptor
 /// Managed by @Shield for security compliance
 class ApiClient {
-  late final Dio _dio;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  
-  static const String _tokenKey = 'jwt_token';
 
   ApiClient() {
     _dio = Dio(
@@ -25,6 +21,10 @@ class ApiClient {
 
     _setupInterceptors();
   }
+  late final Dio _dio;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  
+  static const String _tokenKey = 'jwt_token';
 
   void _setupInterceptors() {
     // JWT Authentication Interceptor

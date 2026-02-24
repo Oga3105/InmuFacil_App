@@ -3,8 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart' hide Path;
 import 'package:go_router/go_router.dart';
-import 'dart:math' as math;
-import 'dart:async'; // For Timer (Hover Debounce)
+// For Timer (Hover Debounce)
 import 'dart:convert';
 // import 'package:easy_localization/easy_localization.dart'; // TEMP DISABLED
 
@@ -12,8 +11,7 @@ import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; // [NEW] Hover Provider
 import 'package:inmufacil_frontend/domain/entities/property.dart';
-import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
-import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
+// TEMP REPLACEMENT
 
 /// OpenStreetMap widget with custom property markers, Drawing and Zoning
 class OpenStreetMapWidget extends ConsumerStatefulWidget {
@@ -164,9 +162,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                      }
                   }
                   
-                  if (position.zoom != null && position.zoom != _currentZoom) {
+                  if (position.zoom != _currentZoom) {
                     setState(() {
-                      _currentZoom = position.zoom!;
+                      _currentZoom = position.zoom;
                     });
                   }
                   
@@ -207,10 +205,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                       Polygon(
                         points: mapState.cityBoundaryPolygon,
                         color: const Color(0xFF2563EB).withOpacity(0.15), 
-                        isFilled: true,
                         borderColor: const Color(0xFF2563EB),
                         borderStrokeWidth: 2,
-                        label: searchState.location.isNotEmpty ? searchState.location : "Zona",
+                        label: searchState.location.isNotEmpty ? searchState.location : 'Zona',
                         labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                       ),
                       
@@ -219,7 +216,6 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentZonePolygon,
                         color: Colors.green.withOpacity(0.2), 
-                        isFilled: true,
                         borderColor: Colors.green,
                         borderStrokeWidth: 2,
                       ),
@@ -229,8 +225,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                        Polygon(
                         points: mapState.currentDrawingPoints, // Don't close loop while dragging
                         color: Colors.orange.withOpacity(0.1), 
-                        isFilled: true,
-                        isDotted: true,
+                        pattern: const StrokePattern.dotted(),
                         borderColor: Colors.orange,
                         borderStrokeWidth: 2,
                       ),
@@ -265,7 +260,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                         const Icon(Icons.mode_edit_outline, color: Colors.orange, size: 20),
                         const SizedBox(width: 12),
                         const Text(
-                          "Dibuja tu zona punto a punto",
+                          'Dibuja tu zona punto a punto',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 16),
@@ -277,7 +272,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                              visualDensity: VisualDensity.compact,
                            ),
                            icon: const Icon(Icons.check, size: 16),
-                           label: const Text("TERMINAR"),
+                           label: const Text('TERMINAR'),
                         ),
                       ],
                     ),
@@ -447,7 +442,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
             onEnter: (_) {
                // [NEW] Hovering another marker CLEARS any existing selection
                // This prevents the "fixed" card from reappearing after leaving this marker
-               ref.read(selectedPropertyProvider.notifier).state = null;
+               ref.read(selectedPropertyProvider.notifier).select(null);
                
                // Update Hover Provider to show this marker's info
                // print("DEBUG OnEnter Marker: ${property.id}");
@@ -461,7 +456,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
       child: GestureDetector(
               behavior: HitTestBehavior.opaque, // Ensure tap is caught
               onTap: () {
-                ref.read(selectedPropertyProvider.notifier).state = property;
+                ref.read(selectedPropertyProvider.notifier).select(property);
               },
               onDoubleTap: () {
                 // Navigate to details (Full Page) on Double Tap
@@ -494,17 +489,12 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   void _addPointFromEvent(Offset localPosition) {
     // Convert screen point to LatLng using the map camera.
     // In flutter_map 6.x+, use pointToLatLng with math.Point
-    final point = _mapController.camera.pointToLatLng(math.Point(localPosition.dx, localPosition.dy));
+    final point = _mapController.camera.screenOffsetToLatLng(localPosition);
     ref.read(mapStateProvider.notifier).addPoint(point);
   }
 }
 
 class _MapToolButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onPressed;
-  final String tooltip;
-  final bool isActive;
-  final Color? color;
 
   const _MapToolButton({
     required this.icon,
@@ -513,6 +503,11 @@ class _MapToolButton extends StatelessWidget {
     this.isActive = false,
     this.color,
   });
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String tooltip;
+  final bool isActive;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -538,12 +533,12 @@ class _MapToolButton extends StatelessWidget {
 
 /// Compact Price Label for High Zoom
 class _CompactPriceMarker extends StatelessWidget {
-  final String price;
-  final Color color;
   const _CompactPriceMarker({
     required this.price,
     this.color = const Color(0xFF2563EB),
   });
+  final String price;
+  final Color color;
   
   @override
   Widget build(BuildContext context) {
@@ -560,8 +555,8 @@ class _CompactPriceMarker extends StatelessWidget {
               BoxShadow(
                 blurRadius: 4, 
                 color: Colors.black26,
-                offset: Offset(0, 2)
-              )
+                offset: Offset(0, 2),
+              ),
             ],
           ),
           child: Text(
@@ -585,8 +580,8 @@ class _CompactPriceMarker extends StatelessWidget {
 }
 
 class _TrianglePainter extends CustomPainter {
-  final Color color;
   _TrianglePainter({required this.color});
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -614,8 +609,8 @@ class _TrianglePainter extends CustomPainter {
 }
 
 class _GpsPinMarker extends StatelessWidget {
-  final Color color;
   const _GpsPinMarker({this.color = const Color(0xFF2563EB)});
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -623,7 +618,7 @@ class _GpsPinMarker extends StatelessWidget {
       Icons.location_on,
       color: color, // Dynamic Color
       size: 40,
-      shadows: [
+      shadows: const [
         Shadow(
           blurRadius: 4,
           color: Colors.black26,
@@ -635,10 +630,10 @@ class _GpsPinMarker extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  final String message;
-  final VoidCallback onDismiss;
 
   const _ErrorBanner({required this.message, required this.onDismiss});
+  final String message;
+  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -653,7 +648,7 @@ class _ErrorBanner extends StatelessWidget {
              color: Colors.black.withOpacity(0.05),
              blurRadius: 10,
              offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -672,7 +667,7 @@ class _ErrorBanner extends StatelessWidget {
             onPressed: onDismiss, 
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-          )
+          ),
         ],
       ),
     );

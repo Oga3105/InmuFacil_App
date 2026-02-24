@@ -4,12 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_map/flutter_map.dart'; // Required for LatLngBounds
 
 /// State for Map interactions (Drawing, Zoning)
-class MapState {
-  final bool isDrawingMode;
-  final List<LatLng> currentDrawingPoints; // Points being drawn right now
-  final List<LatLng> currentZonePolygon;   // Completed polygon (Search Filter)
-  final List<LatLng> cityBoundaryPolygon;  // Visual boundary from Nominatim (e.g. Madrid)
-  final LatLngBounds? visibleBounds;       // Current Map Viewport
+class MapState {       // Current Map Viewport
   
   const MapState({
     this.isDrawingMode = false,
@@ -18,6 +13,11 @@ class MapState {
     this.cityBoundaryPolygon = const [],
     this.visibleBounds,
   });
+  final bool isDrawingMode;
+  final List<LatLng> currentDrawingPoints; // Points being drawn right now
+  final List<LatLng> currentZonePolygon;   // Completed polygon (Search Filter)
+  final List<LatLng> cityBoundaryPolygon;  // Visual boundary from Nominatim (e.g. Madrid)
+  final LatLngBounds? visibleBounds;
   
   MapState copyWith({
     bool? isDrawingMode,
@@ -36,8 +36,9 @@ class MapState {
   }
 }
 
-class MapStateNotifier extends StateNotifier<MapState> {
-  MapStateNotifier() : super(const MapState());
+class MapStateNotifier extends Notifier<MapState> {
+  @override
+  MapState build() => const MapState();
   
   /// Set visible bounds (Viewport)
   void setVisibleBounds(LatLngBounds bounds) {
@@ -142,7 +143,7 @@ class MapStateNotifier extends StateNotifier<MapState> {
       final type = geoJson['type'];
       final coordinates = geoJson['coordinates'];
       
-      debugPrint("🗺️ GeoJSON Type: $type");
+      debugPrint('🗺️ GeoJSON Type: $type');
       
       List<LatLng> polygonPoints = [];
       
@@ -151,7 +152,7 @@ class MapStateNotifier extends StateNotifier<MapState> {
         // We take the first ring (exterior boundary)
         final outerRing = coordinates[0] as List;
         polygonPoints = _parseRing(outerRing);
-        debugPrint("✅ Parsed Polygon with ${polygonPoints.length} points");
+        debugPrint('✅ Parsed Polygon with ${polygonPoints.length} points');
       } else if (type == 'MultiPolygon') {
         // MultiPolygon coordinates: [ [ [ [lon, lat], ... ] ] ]
         // CRITICAL FIX: Take the LARGEST polygon, not the first
@@ -173,23 +174,23 @@ class MapStateNotifier extends StateNotifier<MapState> {
         
         if (largestOuterRing != null) {
           polygonPoints = _parseRing(largestOuterRing);
-          debugPrint("✅ Parsed MultiPolygon (LARGEST of ${allPolygons.length} polygons) with ${polygonPoints.length} points");
+          debugPrint('✅ Parsed MultiPolygon (LARGEST of ${allPolygons.length} polygons) with ${polygonPoints.length} points');
         }
       } else {
-        debugPrint("⚠️ Unknown GeoJSON type: $type");
+        debugPrint('⚠️ Unknown GeoJSON type: $type');
       }
       
       if (polygonPoints.isNotEmpty) {
-        debugPrint("🎯 Setting cityBoundaryPolygon with ${polygonPoints.length} points");
-        debugPrint("   First point: ${polygonPoints.first}");
-        debugPrint("   Last point: ${polygonPoints.last}");
+        debugPrint('🎯 Setting cityBoundaryPolygon with ${polygonPoints.length} points');
+        debugPrint('   First point: ${polygonPoints.first}');
+        debugPrint('   Last point: ${polygonPoints.last}');
         state = state.copyWith(cityBoundaryPolygon: polygonPoints);
       } else {
-        debugPrint("❌ No polygon points extracted from GeoJSON");
+        debugPrint('❌ No polygon points extracted from GeoJSON');
       }
     } catch (e) {
       // Fallback or ignore
-      debugPrint("❌ Error parsing GeoJSON: $e");
+      debugPrint('❌ Error parsing GeoJSON: $e');
     }
   }
   
@@ -200,12 +201,10 @@ class MapStateNotifier extends StateNotifier<MapState> {
       // GeoJSON is [lon, lat], LatLng is (lat, lon)
       return LatLng(
         double.parse(p[1].toString()), 
-        double.parse(p[0].toString())
+        double.parse(p[0].toString()),
       );
     }).toList();
   }
 }
 
-final mapStateProvider = StateNotifierProvider<MapStateNotifier, MapState>((ref) {
-  return MapStateNotifier();
-});
+final mapStateProvider = NotifierProvider<MapStateNotifier, MapState>(MapStateNotifier.new);
