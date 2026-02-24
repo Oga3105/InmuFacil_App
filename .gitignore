@@ -35,6 +35,9 @@ brain/
 keys.txt
 .env
 
+# Logs
+*.log
+
 *.code-workspace
 uploads/
 
