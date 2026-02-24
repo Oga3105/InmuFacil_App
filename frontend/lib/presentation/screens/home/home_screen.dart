@@ -1341,6 +1341,16 @@ class _MapNavigationBar extends ConsumerWidget {
                           ),
                         ),
                         const PopupMenuItem(
+                          value: 'my-properties',
+                          child: Row(
+                             children: [
+                               Icon(Icons.home_work_outlined, size: 20),
+                               SizedBox(width: 8),
+                               Text('Mis Propiedades'),
+                             ],
+                          ),
+                        ),
+                        const PopupMenuItem(
                           value: 'contracts',
                           child: Row(
                              children: [
@@ -1371,6 +1381,8 @@ class _MapNavigationBar extends ConsumerWidget {
                           }
                         } else if (value == 'profile') {
                            context.push('/profile');
+                        } else if (value == 'my-properties') {
+                           context.push('/profile?tab=1');
                         } else if (value == 'contracts') {
                            context.push('/contracts');
                         }

@@ -144,6 +144,14 @@ class PropertyListingScreen extends ConsumerWidget {
                          child: Row(children: [Icon(Icons.person_outline, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
                       ),
                       const PopupMenuItem(
+                         value: 'my-properties',
+                         child: Row(children: [Icon(Icons.home_work_outlined, size: 20), SizedBox(width: 8), Text('Mis Propiedades')]),
+                      ),
+                      const PopupMenuItem(
+                         value: 'contracts',
+                         child: Row(children: [Icon(Icons.description_outlined, size: 20), SizedBox(width: 8), Text('Mis Contratos')]),
+                      ),
+                      const PopupMenuItem(
                         value: 'logout',
                         child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
                       ),
@@ -156,6 +164,10 @@ class PropertyListingScreen extends ConsumerWidget {
                         }
                       } else if (value == 'profile') {
                         context.push('/profile');
+                      } else if (value == 'my-properties') {
+                        context.push('/profile?tab=1');
+                      } else if (value == 'contracts') {
+                        context.push('/contracts');
                       }
                     },
                     child: const CircleAvatar(

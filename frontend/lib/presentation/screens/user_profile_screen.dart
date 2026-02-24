@@ -7,7 +7,9 @@ import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_ca
 import '../../domain/entities/user.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
-  const UserProfileScreen({super.key});
+  const UserProfileScreen({super.key, this.initialTabIndex = 0});
+
+  final int initialTabIndex;
 
   @override
   ConsumerState<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -31,7 +33,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, initialIndex: widget.initialTabIndex, vsync: this);
   }
 
   @override
@@ -179,39 +181,70 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           const SizedBox(width: 8),
           
           // [UPDATED] Profile Menu with Logout
-          PopupMenuButton<String>(
-            offset: const Offset(0, 40),
-            tooltip: 'Menú de usuario',
-            color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(
-                   children: [
-                     Icon(Icons.logout, color: Colors.red, size: 20),
-                     SizedBox(width: 8),
-                     Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                   ],
+          AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) {
+              return PopupMenuButton<String>(
+                offset: const Offset(0, 40),
+                tooltip: 'Menú de usuario',
+                color: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                itemBuilder: (context) => [
+                  if (_tabController.index == 0)
+                    const PopupMenuItem(
+                      value: 'my-properties',
+                      child: Row(
+                         children: [
+                           Icon(Icons.home_work_outlined, size: 20),
+                           SizedBox(width: 8),
+                           Text('Mis Propiedades'),
+                         ],
+                      ),
+                    )
+                  else
+                    const PopupMenuItem(
+                      value: 'my-profile',
+                      child: Row(
+                         children: [
+                           Icon(Icons.person_outline, size: 20),
+                           SizedBox(width: 8),
+                           Text('Mi Perfil'),
+                         ],
+                      ),
+                    ),
+                  const PopupMenuItem(
+                    value: 'logout',
+                    child: Row(
+                       children: [
+                         Icon(Icons.logout, color: Colors.red, size: 20),
+                         SizedBox(width: 8),
+                         Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                       ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) async {
+                  if (value == 'logout') {
+                    await ref.read(authProvider.notifier).logout();
+                    if (context.mounted) {
+                        context.go('/'); // Redirect to Home
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Sesión cerrada correctamente')),
+                        );
+                    }
+                  } else if (value == 'my-properties') {
+                    _tabController.animateTo(1);
+                  } else if (value == 'my-profile') {
+                    _tabController.animateTo(0);
+                  }
+                },
+                child: const CircleAvatar(
+                   radius: 16,
+                   backgroundColor: Color(0xFF2563EB), // Official Blue
+                   child: Icon(Icons.person, color: Colors.white, size: 20),
                 ),
-              ),
-            ],
-            onSelected: (value) async {
-              if (value == 'logout') {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) {
-                    context.go('/'); // Redirect to Home
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Sesión cerrada correctamente')),
-                    );
-                }
-              }
+              );
             },
-            child: const CircleAvatar(
-               radius: 16,
-               backgroundColor: Color(0xFF2563EB), // Official Blue
-               child: Icon(Icons.person, color: Colors.white, size: 20),
-            ),
           ),
           const SizedBox(width: 24),
         ],

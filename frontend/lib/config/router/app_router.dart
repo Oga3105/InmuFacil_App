@@ -71,7 +71,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile',
         name: 'profile',
-        builder: (context, state) => const UserProfileScreen(),
+        builder: (context, state) {
+          final tabParam = state.uri.queryParameters['tab'];
+          final initialTab = int.tryParse(tabParam ?? '') ?? 0;
+          return UserProfileScreen(initialTabIndex: initialTab);
+        },
       ),
 
       // Search Results
