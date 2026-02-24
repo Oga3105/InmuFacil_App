@@ -21,6 +21,7 @@ import os
 from backend.src.config.database import get_db
 from backend.src.models import User, UserType, DNIStatus
 from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
+from backend.src.utils.security import verify_password, get_password_hash, create_access_token
 from backend.src.services.email_service import (
     generate_verification_token, get_token_expiration, 
     send_verification_email, verify_token
