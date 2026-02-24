@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -8,9 +7,9 @@ import 'package:inmufacil_frontend/presentation/providers/not_found_provider.dar
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 
 class NotFoundScreen extends ConsumerWidget {
-  final String? uri;
 
   const NotFoundScreen({super.key, this.uri});
+  final String? uri;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -123,10 +122,10 @@ class NotFoundScreen extends ConsumerWidget {
 }
 
 class _Header extends StatelessWidget {
-  final bool isDesktop;
-  final Color primaryColor;
 
   const _Header({required this.isDesktop, required this.primaryColor});
+  final bool isDesktop;
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -139,19 +138,19 @@ class _Header extends StatelessWidget {
           fit: BoxFit.contain,
         ),
         const SizedBox(width: 12),
-        Text.rich(
+        const Text.rich(
           TextSpan(
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w900,
               letterSpacing: -1.0,
             ),
             children: [
-              const TextSpan(
+              TextSpan(
                 text: 'Inmu',
                 style: TextStyle(color: Color(0xFF2563EB)), // Blue
               ),
-              const TextSpan(
+              TextSpan(
                 text: 'Fácil',
                 style: TextStyle(color: Color(0xFF16A34A)), // Green
               ),
@@ -189,10 +188,10 @@ class _Header extends StatelessWidget {
 
 class _TextContent extends ConsumerStatefulWidget {
 
+  const _TextContent({required this.primaryColor, required this.navyCustom});
+
   final Color primaryColor;
   final Color navyCustom;
-
-  const _TextContent({required this.primaryColor, required this.navyCustom});
 
   @override
   ConsumerState<_TextContent> createState() => _TextContentState();
@@ -298,7 +297,7 @@ class _TextContentState extends ConsumerState<_TextContent> {
         // Form
         Text(
           'not_found.notify_me_label'.tr(),
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         const SizedBox(height: 12),
         Row(
@@ -340,17 +339,17 @@ class _TextContentState extends ConsumerState<_TextContent> {
                   ),
                 ),
                 child: isLoading 
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20, 
                         height: 20, 
                         child: CircularProgressIndicator(
                           strokeWidth: 2, 
-                          color: Colors.white
-                        )
+                          color: Colors.white,
+                        ),
                       )
                     : Text(
                         'not_found.notify_button'.tr(), 
-                        style: TextStyle(fontWeight: FontWeight.bold)
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
               ),
             ),
@@ -359,11 +358,11 @@ class _TextContentState extends ConsumerState<_TextContent> {
         const SizedBox(height: 12),
         Row(
           children: [
-            Icon(Icons.security, size: 14, color: Colors.grey),
+            const Icon(Icons.security, size: 14, color: Colors.grey),
             const SizedBox(width: 4),
             Text(
               'not_found.security_text'.tr(),
-              style: TextStyle(fontSize: 11, color: Colors.grey),
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
         ),
@@ -373,9 +372,9 @@ class _TextContentState extends ConsumerState<_TextContent> {
 }
 
 class _IsometricIllustration extends StatelessWidget {
-  final Color primaryColor;
 
   const _IsometricIllustration({required this.primaryColor});
+  final Color primaryColor;
 
   @override
   Widget build(BuildContext context) {
@@ -600,7 +599,7 @@ class _IsometricIllustration extends StatelessWidget {
                        left: 0, 
                        right: 0,
                        child: Center(
-                         child: Container(
+                         child: SizedBox(
                            width: 192, // w-48
                            child: Row(
                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -610,7 +609,7 @@ class _IsometricIllustration extends StatelessWidget {
                                  child: Container(
                                    margin: const EdgeInsets.symmetric(horizontal: 8),
                                    height: 1, 
-                                   color: primaryColor.withOpacity(0.3)
+                                   color: primaryColor.withOpacity(0.3),
                                  ),
                                ),
                                Text('SECURE_LAYER_V2', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 10, fontFamily: 'monospace')),
@@ -618,7 +617,7 @@ class _IsometricIllustration extends StatelessWidget {
                                  child: Container(
                                    margin: const EdgeInsets.symmetric(horizontal: 8),
                                    height: 1, 
-                                   color: primaryColor.withOpacity(0.3)
+                                   color: primaryColor.withOpacity(0.3),
                                  ),
                                ),
                                Text(']', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold, fontSize: 10, fontFamily: 'monospace')),
@@ -666,19 +665,17 @@ class _IsometricIllustration extends StatelessWidget {
 
 // Helper for dashed borders since Flutter doesn't have them built-in natively
 class _DashedBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final double radius;
-  final double dashGap;
-  final double dashLength;
 
   _DashedBorderPainter({
     required this.color,
     this.strokeWidth = 2,
     this.radius = 0,
-    this.dashGap = 4,
-    this.dashLength = 4,
   });
+  final Color color;
+  final double strokeWidth;
+  final double radius;
+  final double dashGap = 4;
+  final double dashLength = 8;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -689,7 +686,7 @@ class _DashedBorderPainter extends CustomPainter {
 
     final RRect rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.width, size.height), 
-      Radius.circular(radius)
+      Radius.circular(radius),
     );
     
     final Path path = Path()..addRRect(rrect);
@@ -715,9 +712,9 @@ class _DashedBorderPainter extends CustomPainter {
 }
 
 class _Footer extends StatelessWidget {
-  final bool isDesktop;
 
   const _Footer({required this.isDesktop});
+  final bool isDesktop;
 
   @override
   Widget build(BuildContext context) {
@@ -741,7 +738,7 @@ class _Footer extends StatelessWidget {
               if (!isDesktop) const SizedBox(height: 16),
               Text(
                 '© ${DateTime.now().year} ${'not_found.copyright_text'.tr()}',
-                style: TextStyle(color: Colors.grey, fontSize: 12),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],
           ),
@@ -752,10 +749,10 @@ class _Footer extends StatelessWidget {
 }
 
 class _FooterItem extends StatelessWidget {
-  final IconData icon;
-  final String text;
 
   const _FooterItem({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -763,17 +760,17 @@ class _FooterItem extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.grey),
         const SizedBox(width: 8),
-        Text(text, style: TextStyle(color: Colors.grey, fontSize: 12)),
+        Text(text, style: const TextStyle(color: Colors.grey, fontSize: 12)),
       ],
     );
   }
 }
 
 class BlueprintGridPainter extends CustomPainter {
-  final Color color;
-  final double spacing;
 
   BlueprintGridPainter({required this.color, this.spacing = 30.0});
+  final Color color;
+  final double spacing;
 
   @override
   void paint(Canvas canvas, Size size) {

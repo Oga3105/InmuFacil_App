@@ -1,24 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/api_constants.dart';
 import 'auth_provider.dart';
 import 'search_provider.dart'; // To get apiClientProvider
 
 /// Provider to manage the set of favorite property IDs.
-final favoritesProvider = StateNotifierProvider<FavoritesNotifier, Set<String>>((ref) {
-  final authState = ref.watch(authProvider);
-  final apiClient = ref.watch(apiClientProvider);
-  return FavoritesNotifier(ref, authState.user != null, apiClient);
-});
+final favoritesProvider = NotifierProvider<FavoritesNotifier, Set<String>>(FavoritesNotifier.new);
 
-class FavoritesNotifier extends StateNotifier<Set<String>> {
-  final Ref _ref;
-  final bool _isLoggedIn;
-  final _apiClient; // Using dynamic or exact type if known
+class FavoritesNotifier extends Notifier<Set<String>> {
+  late bool _isLoggedIn;
+  late dynamic _apiClient; // Using dynamic or exact type if known
 
-  FavoritesNotifier(this._ref, this._isLoggedIn, this._apiClient) : super({}) {
+  @override
+  Set<String> build() {
+    final authState = ref.watch(authProvider);
+    _apiClient = ref.watch(apiClientProvider);
+    _isLoggedIn = authState.user != null;
     if (_isLoggedIn) {
-      _loadFavoritesFromApi();
+      Future.microtask(_loadFavoritesFromApi);
     }
+    return {};
   }
 
   Future<void> _loadFavoritesFromApi() async {
@@ -30,7 +31,7 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
       }
     } catch (e) {
       // Handle error silently or log it
-      print('Error loading favorites: $e');
+      debugPrint('Error loading favorites: $e');
     }
   }
 
@@ -55,7 +56,7 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
       // Endpoint is /favorites/{property_id} (api_v1 is in baseUrl)
       await _apiClient.client.post(ApiConstants.favoriteToggle(propertyId));
     } catch (e) {
-      print('Error syncing favorite: $e');
+      debugPrint('Error syncing favorite: $e');
     }
   }
 }

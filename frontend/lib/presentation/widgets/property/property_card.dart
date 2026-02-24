@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../../domain/entities/property.dart';
 
 class PropertyCard extends StatelessWidget {
-  final Property property;
-  final VoidCallback onTap;
 
   const PropertyCard({
     super.key,
     required this.property,
     required this.onTap,
   });
+  final Property property;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

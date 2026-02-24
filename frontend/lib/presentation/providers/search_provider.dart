@@ -12,33 +12,10 @@ import 'package:inmufacil_frontend/domain/repositories/property_repository.dart'
 import 'package:inmufacil_frontend/data/repositories/property_repository_impl.dart';
 import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
 
 /// Search state for property filtering
 class SearchState {
-  final PropertyType propertyType;
-  final String location;
-  final RangeValues priceRange;
-  final double currentMaxPriceLimit;
-  final List<Property> filteredProperties;
-  final LatLng? mapCenter;
-  final bool isLoading;
-  final String? error;
-  final bool isUsingFallbackLocation;
-  final bool onlyFavorites; // Added
-  final bool onlyVerified; // Added
-  final int currentPage; // Added
-  final int itemsPerPage; // Added
-  final PropertyViewMode viewMode; // Added
-  final SortOption sortBy; // Added
-  final int minBedrooms; // Added missing field
-  final List<String> selectedExtras; // Added missing field
-  final String? lastSearchResultGeoJson; // Restored
-  final List<String>? lastSearchResultBbox; // Restored
-  
-  // Spain center coordinates for initial wide view (shows entire country)
-  static const LatLng _spainCenter = LatLng(40.4, -3.7);
   
   const SearchState({
     this.propertyType = PropertyType.all,
@@ -61,6 +38,28 @@ class SearchState {
     this.lastSearchResultGeoJson,
     this.lastSearchResultBbox,
   });
+  final PropertyType propertyType;
+  final String location;
+  final RangeValues priceRange;
+  final double currentMaxPriceLimit;
+  final List<Property> filteredProperties;
+  final LatLng? mapCenter;
+  final bool isLoading;
+  final String? error;
+  final bool isUsingFallbackLocation;
+  final bool onlyFavorites; // Added
+  final bool onlyVerified; // Added
+  final int currentPage; // Added
+  final int itemsPerPage; // Added
+  final PropertyViewMode viewMode; // Added
+  final SortOption sortBy; // Added
+  final int minBedrooms; // Added missing field
+  final List<String> selectedExtras; // Added missing field
+  final String? lastSearchResultGeoJson; // Restored
+  final List<String>? lastSearchResultBbox; // Restored
+  
+  // Spain center coordinates for initial wide view (shows entire country)
+  static const LatLng _spainCenter = LatLng(40.4, -3.7);
   
   SearchState copyWith({
     PropertyType? propertyType,
@@ -108,19 +107,17 @@ class SearchState {
 }
 
 /// Search provider for managing property search state
-class SearchNotifier extends StateNotifier<SearchState> {
-  final PropertyRepository _repository;
-  final LocationService _locationService;
-  
-  SearchNotifier(this._repository, this._locationService) 
-      : super(const SearchState());
-      
+class SearchNotifier extends Notifier<SearchState> {
+  late PropertyRepository _repository;
+  late LocationService _locationService;
   Timer? _debounceTimer;
 
   @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
+  SearchState build() {
+    _repository = ref.watch(propertyRepositoryProvider);
+    _locationService = ref.watch(locationServiceProvider);
+    ref.onDispose(() => _debounceTimer?.cancel());
+    return const SearchState();
   }
   
   
@@ -322,28 +319,28 @@ class SearchNotifier extends StateNotifier<SearchState> {
         // STEP 1: Primary attempt - Search only in Spain
         // This ensures "Córdoba" or "Valencia" lead to Spanish cities by default
         final urlSpain = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1&addressdetails=1'
+          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1&addressdetails=1',
         );
         
         var response = await http.get(urlSpain, headers: {
-          'User-Agent': 'com.inmufacil.app/1.0'
-        });
+          'User-Agent': 'com.inmufacil.app/1.0',
+        },);
         
         var data = json.decode(response.body);
         
         // STEP 2: Verification and Fallback
         // If empty list, location is not in Spain OR user searches outside (e.g., "Paris", "Córdoba, Argentina")
         if (data is List && data.isEmpty) {
-          debugPrint("📍 Not found in Spain. Searching globally...");
+          debugPrint('📍 Not found in Spain. Searching globally...');
           
           // Launch WORLDWIDE search (without countrycodes)
           final urlGlobal = Uri.parse(
-            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1&addressdetails=1'
+            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1&addressdetails=1',
           );
           
           response = await http.get(urlGlobal, headers: {
-            'User-Agent': 'com.inmufacil.app/1.0'
-          });
+            'User-Agent': 'com.inmufacil.app/1.0',
+          },);
           
           data = json.decode(response.body);
         }
@@ -377,13 +374,13 @@ class SearchNotifier extends StateNotifier<SearchState> {
           );
           
           // Visual feedback (useful for TFM demonstration)
-          debugPrint("✅ Location found: $displayName");
+          debugPrint('✅ Location found: $displayName');
           
           // Reload properties for new location
           await _loadProperties();
         } else {
           // STEP 4: If everything fails (neither in Spain nor worldwide)
-          debugPrint("❌ Location not found anywhere.");
+          debugPrint('❌ Location not found anywhere.');
           state = state.copyWith(
             error: 'No se encontró la ubicación: $sanitized',
             isLoading: false,
@@ -391,7 +388,7 @@ class SearchNotifier extends StateNotifier<SearchState> {
         }
       } catch (e) {
         // SECURITY: Generic error message (don't expose exception details to user)
-        debugPrint("⚠️ Error in search algorithm: $e");
+        debugPrint('⚠️ Error in search algorithm: $e');
         state = state.copyWith(
           error: 'Error al buscar ubicación. Inténtalo de nuevo.',
           isLoading: false,
@@ -495,11 +492,7 @@ final propertyRepositoryProvider = Provider<PropertyRepository>((ref) {
 });
 
 /// Provider for search state
-final searchProvider = StateNotifierProvider<SearchNotifier, SearchState>((ref) {
-  final repository = ref.watch(propertyRepositoryProvider);
-  final locationService = ref.watch(locationServiceProvider);
-  return SearchNotifier(repository, locationService);
-});
+final searchProvider = NotifierProvider<SearchNotifier, SearchState>(SearchNotifier.new);
 
 /// Provider that exposes only the filtered properties from the search state
 /// Used by Home screen and Map widgets for reactivity

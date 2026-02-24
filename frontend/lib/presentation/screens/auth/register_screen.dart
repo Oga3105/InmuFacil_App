@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -246,7 +245,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 16),
-                        Text.rich(
+                        const Text.rich(
                           TextSpan(
                             children: [
                               TextSpan(
@@ -255,7 +254,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   fontFamily: 'Outfit',
                                   fontSize: 32,
                                   fontWeight: FontWeight.w900,
-                                  color: const Color(0xFF2563EB),
+                                  color: Color(0xFF2563EB),
                                   letterSpacing: -1.0,
                                 ),
                               ),
@@ -265,7 +264,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   fontFamily: 'Outfit',
                                   fontSize: 32,
                                   fontWeight: FontWeight.w900,
-                                  color: const Color(0xFF16A34A),
+                                  color: Color(0xFF16A34A),
                                   letterSpacing: -1.0,
                                 ),
                               ),
@@ -280,7 +279,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 
                 // Headline
                 const Text(
-                  "Seguridad Garantizada entre Particulares",
+                  'Seguridad Garantizada entre Particulares',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -296,7 +295,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildFeatureItem(Icons.verified_user_outlined, "P2P VERIFICADO"),
+                    _buildFeatureItem(Icons.verified_user_outlined, 'P2P VERIFICADO'),
                     Column(
                       children: [
                         Container(
@@ -309,7 +308,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          "SIN COMISIONES",
+                          'SIN COMISIONES',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -326,7 +325,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 
                 // Footer (only copyright, no links)
                 Text(
-                  "© 2026 INMUFÁCIL SECURE-TECH",
+                  '© 2026 INMUFÁCIL SECURE-TECH',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.4),
                     fontSize: 10,
@@ -408,9 +407,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 20),
 
                        // Name Field
-                       Text(
+                       const Text(
                          'Nombre completo',
-                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -422,9 +421,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 14),
 
                        // Email Field
-                       Text(
+                       const Text(
                          'Correo electrónico',
-                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -441,9 +440,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 14),
 
                        // Password Field
-                       Text(
+                       const Text(
                          'Contraseña',
-                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
                        ),
                        const SizedBox(height: 6),
                         TextFormField(
@@ -459,9 +458,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   Tooltip(
                                     message: 'Generar contraseña segura',
                                     child: IconButton(
-                                      icon: Icon(
+                                      icon: const Icon(
                                         Icons.casino_outlined,
-                                        color: const Color(0xFF2563EB),
+                                        color: Color(0xFF2563EB),
                                         size: 18,
                                       ),
                                       onPressed: _generateSecurePassword,
@@ -486,9 +485,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 14),
 
                        // Confirm Password Field
-                       Text(
+                       const Text(
                          'Confirmar contraseña',
-                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -539,7 +538,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                      text: 'Política de Privacidad',
                                      style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.w600),
                                    ),
-                                 ]
+                                 ],
                                ),
                              ),
                            ),

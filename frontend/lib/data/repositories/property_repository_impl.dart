@@ -11,9 +11,9 @@ import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 
 /// Implementation of PropertyRepository using API
 class PropertyRepositoryImpl implements PropertyRepository {
-  final ApiClient _apiClient;
   
   PropertyRepositoryImpl(this._apiClient);
+  final ApiClient _apiClient;
   
   @override
   Future<Either<Failure, List<Property>>> getProperties({
@@ -69,7 +69,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
         // No properties found - return empty list (estado cero)
         return const Right([]);
       } else {
-        return Left(ServerFailure('Error al cargar propiedades'));
+        return const Left(ServerFailure('Error al cargar propiedades'));
       }
     } on DioException catch (e) {
       return Left(_handleDioError(e));
@@ -93,7 +93,7 @@ class PropertyRepositoryImpl implements PropertyRepository {
       } else if (response.statusCode == 404) {
         return const Left(NotFoundFailure('Propiedad no encontrada'));
       } else {
-        return Left(ServerFailure('Error al cargar propiedad'));
+        return const Left(ServerFailure('Error al cargar propiedad'));
       }
     } on DioException catch (e) {
       return Left(_handleDioError(e));

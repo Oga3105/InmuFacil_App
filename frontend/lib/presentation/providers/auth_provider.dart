@@ -7,15 +7,15 @@ import '../../domain/entities/user.dart';
 const String kApiBaseUrl = 'http://localhost:8000/api/v1';
 
 class AuthState {
-  final User? user;
-  final bool isLoading;
-  final String? errorMessage;
 
   AuthState({
     this.user, 
     this.isLoading = false,
     this.errorMessage,
   });
+  final User? user;
+  final bool isLoading;
+  final String? errorMessage;
 
   bool get isAuthenticated => user != null;
   
@@ -32,16 +32,18 @@ class AuthState {
   }
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
+class AuthNotifier extends Notifier<AuthState> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final Dio _dio = Dio(BaseOptions(
     baseUrl: kApiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
-  ));
+  ),);
 
-  AuthNotifier() : super(AuthState()) {
-    checkAuthStatus();
+  @override
+  AuthState build() {
+    Future.microtask(checkAuthStatus);
+    return AuthState();
   }
 
   /// Check if user is already logged in (has valid token)
@@ -195,6 +197,4 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 }
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier();
-});
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);

@@ -14,9 +14,9 @@ import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
-  final String propertyId;
 
   const PropertyDetailsScreen({super.key, required this.propertyId});
+  final String propertyId;
 
   @override
   ConsumerState<PropertyDetailsScreen> createState() => _PropertyDetailsScreenState();
@@ -85,12 +85,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                 children: [
                   Image.asset('assets/images/logo_inmufacil.png', height: 32),
                   const SizedBox(width: 8),
-                  Text.rich(
+                  const Text.rich(
                     TextSpan(
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                       children: [
-                        const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                        const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                        TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                        TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                       ],
                     ),
                   ),
@@ -109,7 +109,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
                   // Removed Buttons as requested (Clean Look)
                   /*
@@ -148,7 +148,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                   ),
                ],
              ),
-           )
+           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -179,7 +179,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               child: Center(
                 child: _NavigationArrow(
                   icon: Icons.chevron_left, 
-                  label: "Anterior",
+                  label: 'Anterior',
                   onTap: () => context.pushNamed('property-details', pathParameters: {'id': prevPropertyId}),
                 ),
               ),
@@ -192,7 +192,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               child: Center(
                 child: _NavigationArrow(
                   icon: Icons.chevron_right, 
-                  label: "Siguiente",
+                  label: 'Siguiente',
                   onTap: () => context.pushNamed('property-details', pathParameters: {'id': nextPropertyId}),
                 ),
               ),
@@ -353,12 +353,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 // --- WIDGET COMPONENTS ---
 
 class _HeroImageSection extends StatelessWidget {
+
+  const _HeroImageSection({required this.property, this.isMobile = false, required this.isFavorite, required this.onToggleFavorite});
   final Property property; // [FIX] Receive full property to check fields
   final bool isMobile;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
-
-  const _HeroImageSection({required this.property, this.isMobile = false, required this.isFavorite, required this.onToggleFavorite});
 
   @override
   Widget build(BuildContext context) {
@@ -426,7 +426,7 @@ class _HeroImageSection extends StatelessWidget {
                     color: index == 0 ? Colors.white : Colors.white38,
                     shape: BoxShape.circle,
                   ),
-                )),
+                ),),
               ),
             ),
           ),
@@ -437,10 +437,10 @@ class _HeroImageSection extends StatelessWidget {
 }
 
 class _CircleButton extends StatelessWidget {
+  const _CircleButton({required this.icon, required this.color, required this.onPressed});
   final IconData icon;
   final Color color;
   final VoidCallback onPressed;
-  const _CircleButton({required this.icon, required this.color, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -461,20 +461,20 @@ class _CircleButton extends StatelessWidget {
 }
 
 class _DescriptionSection extends StatelessWidget {
-  final Property property;
   const _DescriptionSection({required this.property});
+  final Property property;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Sobre esta propiedad", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+        const Text('Sobre esta propiedad', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
         const SizedBox(height: 12),
         Text(
           property.description.isNotEmpty 
               ? property.description 
-              : "No hay descipción disponible para esta propiedad.", // [FIX] Fallback text
+              : 'No hay descipción disponible para esta propiedad.', // [FIX] Fallback text
           style: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569)),
         ),
         const SizedBox(height: 8),
@@ -488,7 +488,7 @@ class _DescriptionSection extends StatelessWidget {
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Leer más", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Leer más', style: TextStyle(fontWeight: FontWeight.bold)),
               Icon(Icons.keyboard_arrow_down, size: 16),
             ],
           ),
@@ -499,8 +499,8 @@ class _DescriptionSection extends StatelessWidget {
 }
 
 class _LocationSection extends StatelessWidget {
-  final LatLng location;
   const _LocationSection({this.location = const LatLng(40.4168, -3.7038)});
+  final LatLng location;
 
   @override
   Widget build(BuildContext context) {
@@ -510,7 +510,7 @@ class _LocationSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text("Ubicación aproximada", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+            const Text('Ubicación aproximada', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -518,11 +518,11 @@ class _LocationSection extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(color: Colors.blue[100]!),
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Icon(Icons.shield_outlined, size: 14, color: Color(0xFF135bec)),
                   SizedBox(width: 4),
-                  Text("UBICACIÓN PROTEGIDA", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF135bec))),
+                  Text('UBICACIÓN PROTEGIDA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF135bec))),
                 ],
               ),
             ),
@@ -544,7 +544,7 @@ class _LocationSection extends StatelessWidget {
                   options: MapOptions(
                     initialCenter: location, // Use actual location
                     initialZoom: 15,
-                    interactionOptions: InteractionOptions(flags: InteractiveFlag.none), // Static
+                    interactionOptions: const InteractionOptions(flags: InteractiveFlag.none), // Static
                   ),
                   children: [
                     TileLayer(
@@ -577,7 +577,7 @@ class _LocationSection extends StatelessWidget {
                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                     ),
                     child: const Text(
-                      "Por seguridad y privacidad, no mostramos la ubicación exacta hasta que la visita sea confirmada.",
+                      'Por seguridad y privacidad, no mostramos la ubicación exacta hasta que la visita sea confirmada.',
                       style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Color(0xFF64748b)),
                       textAlign: TextAlign.center,
                     ),
@@ -593,8 +593,8 @@ class _LocationSection extends StatelessWidget {
 }
 
 class _SummaryCard extends StatelessWidget {
-  final Property property;
   const _SummaryCard({required this.property});
+  final Property property;
 
   @override
   Widget build(BuildContext context) {
@@ -617,7 +617,7 @@ class _SummaryCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                '${property.formattedPrice}', // Fixed getter name
+                property.formattedPrice, // Fixed getter name
                 style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
               ),
               const SizedBox(width: 8),
@@ -638,7 +638,7 @@ class _SummaryCard extends StatelessWidget {
               const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
               const SizedBox(width: 4),
               Text(
-                property.address.isNotEmpty ? property.address : "Dirección no disponible", // [FIX] Fallback for address
+                property.address.isNotEmpty ? property.address : 'Dirección no disponible', // [FIX] Fallback for address
                 style: const TextStyle(color: Color(0xFF64748b)),
               ),
             ],
@@ -675,7 +675,7 @@ class _SummaryCard extends StatelessWidget {
                       children: [
                         Icon(Icons.chat_bubble_outline, size: 20, color: Color(0xFF0f172a)),
                         SizedBox(width: 8),
-                        Text("Chat Directo", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                        Text('Chat Directo', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
                       ],
                     ),
                   ),
@@ -686,7 +686,7 @@ class _SummaryCard extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.calendar_month, color: Colors.white), // White Icon
-                    label: const Text("Solicitar Visita", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // White Text
+                    label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // White Text
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2563EB), // Brand Blue like Publicar Gratis
                       elevation: 8, // Shadow effect
@@ -705,8 +705,8 @@ class _SummaryCard extends StatelessWidget {
 }
 
 class _PropertyStatsGrid extends StatelessWidget {
-  final Property property;
   const _PropertyStatsGrid({required this.property});
+  final Property property;
 
   @override
   Widget build(BuildContext context) {
@@ -722,19 +722,19 @@ class _PropertyStatsGrid extends StatelessWidget {
         _StatItem(icon: Icons.bathtub_outlined, label: '${property.bathrooms} Baños'),
         _StatItem(icon: Icons.square_foot, label: '${property.squareMeters} m²'), // [FIX] Getter is 'squareMeters'
         _StatItem(icon: Icons.layers_outlined, label: property.floor ?? 'Bajo'), // [FIX] Use real floor data
-        _StatItem(icon: Icons.wb_sunny_outlined, label: 'Exterior'), // Mock
-        _StatItem(icon: Icons.elevator_outlined, label: 'Ascensor'), // Mock
+        const _StatItem(icon: Icons.wb_sunny_outlined, label: 'Exterior'), // Mock
+        const _StatItem(icon: Icons.elevator_outlined, label: 'Ascensor'), // Mock
       ],
     );
   }
 }
 
 class _NavigationArrow extends StatefulWidget {
+
+  const _NavigationArrow({required this.icon, required this.label, required this.onTap});
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-
-  const _NavigationArrow({required this.icon, required this.label, required this.onTap});
 
   @override
   State<_NavigationArrow> createState() => _NavigationArrowState();
@@ -765,18 +765,18 @@ class _NavigationArrowState extends State<_NavigationArrow> {
                BoxShadow(
                  color: _isHovered ? const Color(0xFF135bec).withOpacity(0.4) : Colors.black.withOpacity(0.1), 
                  blurRadius: 12, 
-                 offset: const Offset(0, 4)
+                 offset: const Offset(0, 4),
                ),
             ],
             border: Border.all(
               color: _isHovered ? const Color(0xFF135bec) : Colors.grey.shade200, 
-              width: 1
+              width: 1,
             ),
           ),
           child: Icon(
             widget.icon, 
             color: _isHovered ? Colors.white : const Color(0xFF0f172a), 
-            size: isSmall ? 24 : 32
+            size: isSmall ? 24 : 32,
           ),
         ),
       ),
@@ -785,9 +785,9 @@ class _NavigationArrowState extends State<_NavigationArrow> {
 }
 
 class _StatItem extends StatelessWidget {
+  const _StatItem({required this.icon, required this.label});
   final IconData icon;
   final String label;
-  const _StatItem({required this.icon, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -827,7 +827,7 @@ class _OwnerCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 const Text("Ricardo M. Blanco", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                 const Text('Ricardo M. Blanco', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
                  const SizedBox(height: 2),
                  Container(
                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -841,7 +841,7 @@ class _OwnerCard extends StatelessWidget {
                      children: [
                        Icon(Icons.verified, size: 10, color: Colors.green[600]),
                        const SizedBox(width: 4),
-                       Text("IDENTIDAD VERIFICADA", style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green[600], letterSpacing: 0.5)),
+                       Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green[600], letterSpacing: 0.5)),
                      ],
                    ),
                  ),
@@ -867,12 +867,12 @@ class _MortgageCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-            Column(
+            const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("TU HIPOTECA IDEAL", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF135bec), letterSpacing: 1)),
-                const SizedBox(height: 4),
-                const Text("Desde 2.140€ / mes", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                Text('TU HIPOTECA IDEAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF135bec), letterSpacing: 1)),
+                SizedBox(height: 4),
+                Text('Desde 2.140€ / mes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
               ],
             ),
             IconButton(

@@ -1,22 +1,12 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:camera/camera.dart';
 
 enum VerificationStep { documentType, documentScan, selfie, review }
 enum DocumentType { dni, nie, pasaporte }
 enum UploadStatus { idle, picking, success, error }
 
 class VerificationState {
-  final int currentStepIndex;
-  final DocumentType? selectedDocumentType;
-  final File? frontImage;
-  final File? backImage;
-  final File? selfieImage;
-  final bool isLoading;
-  final UploadStatus frontStatus;
-  final UploadStatus backStatus;
-  final UploadStatus selfieStatus;
 
   VerificationState({
     this.currentStepIndex = 0,
@@ -29,6 +19,15 @@ class VerificationState {
     this.backStatus = UploadStatus.idle,
     this.selfieStatus = UploadStatus.idle,
   });
+  final int currentStepIndex;
+  final DocumentType? selectedDocumentType;
+  final File? frontImage;
+  final File? backImage;
+  final File? selfieImage;
+  final bool isLoading;
+  final UploadStatus frontStatus;
+  final UploadStatus backStatus;
+  final UploadStatus selfieStatus;
 
   VerificationState copyWith({
     int? currentStepIndex,
@@ -55,8 +54,9 @@ class VerificationState {
   }
 }
 
-class VerificationNotifier extends StateNotifier<VerificationState> {
-  VerificationNotifier() : super(VerificationState());
+class VerificationNotifier extends Notifier<VerificationState> {
+  @override
+  VerificationState build() => VerificationState();
 
   final ImagePicker _picker = ImagePicker();
 
@@ -110,7 +110,7 @@ class VerificationNotifier extends StateNotifier<VerificationState> {
       );
       if (image != null) {
         state = state.copyWith(
-            backImage: File(image.path), backStatus: UploadStatus.success);
+            backImage: File(image.path), backStatus: UploadStatus.success,);
       } else {
         state = state.copyWith(backStatus: UploadStatus.idle);
       }
@@ -131,7 +131,7 @@ class VerificationNotifier extends StateNotifier<VerificationState> {
       );
       if (image != null) {
         state = state.copyWith(
-            selfieImage: File(image.path), selfieStatus: UploadStatus.success);
+            selfieImage: File(image.path), selfieStatus: UploadStatus.success,);
       } else {
         state = state.copyWith(selfieStatus: UploadStatus.idle);
       }
@@ -148,14 +148,6 @@ class VerificationNotifier extends StateNotifier<VerificationState> {
     return true; // Mock success
   }
 
-  // Security: Clean up memory/temp files if needed on dispose (Riverpod handles this mostly, but good practice)
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }
 
-final verificationProvider =
-    StateNotifierProvider<VerificationNotifier, VerificationState>((ref) {
-  return VerificationNotifier();
-});
+final verificationProvider = NotifierProvider<VerificationNotifier, VerificationState>(VerificationNotifier.new);

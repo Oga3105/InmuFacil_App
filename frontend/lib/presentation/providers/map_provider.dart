@@ -4,16 +4,16 @@ import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 
 /// Provider to manage the state of properties displayed on the map
-final mapPropertiesProvider = StateNotifierProvider<MapPropertiesNotifier, AsyncValue<List<Property>>>((ref) {
-  final repository = ref.watch(propertyRepositoryProvider);
-  return MapPropertiesNotifier(repository);
-});
+final mapPropertiesProvider = NotifierProvider<MapPropertiesNotifier, AsyncValue<List<Property>>>(MapPropertiesNotifier.new);
 
-class MapPropertiesNotifier extends StateNotifier<AsyncValue<List<Property>>> {
-  final dynamic _repository; // Using dynamic because strict type might fail if Provider not exported yet
+class MapPropertiesNotifier extends Notifier<AsyncValue<List<Property>>> {
+  late dynamic _repository; // Using dynamic because strict type might fail if Provider not exported yet
 
-  MapPropertiesNotifier(this._repository) : super(const AsyncValue.loading()) {
-    loadProperties();
+  @override
+  AsyncValue<List<Property>> build() {
+    _repository = ref.watch(propertyRepositoryProvider);
+    Future.microtask(loadProperties);
+    return const AsyncValue.loading();
   }
 
   Future<void> loadProperties() async {

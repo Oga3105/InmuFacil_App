@@ -144,7 +144,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         children: [
                           // Top Text (Behind/Above Card)
                           Text(
-                            "Sin intermediarios.\n0% comisiones.",
+                            'Sin intermediarios.\n0% comisiones.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Outfit', // Assuming generic sans if not avail, but aiming for style
@@ -157,7 +157,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 32),
                           Text(
-                            "Compra y vende sin comisiones.",
+                            'Compra y vende sin comisiones.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 32,
@@ -167,7 +167,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 300), // Space for the card
                           Text(
-                            "De la búsqueda a la notaría\nen pasos seguros.",
+                            'De la búsqueda a la notaría\nen pasos seguros.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 24,
@@ -177,7 +177,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            "Elimina la incertidumbre.",
+                            'Elimina la incertidumbre.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 24,
@@ -356,9 +356,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  const SizedBox(height: 40),
     
                                  // Email Field
-                                 Text(
+                                 const Text(
                                    'CORREO ELECTRÓNICO',
-                                   style: const TextStyle(
+                                   style: TextStyle(
                                      fontSize: 11,
                                      fontWeight: FontWeight.bold,
                                      letterSpacing: 1.2,
@@ -405,9 +405,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  Row(
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                    children: [
-                                     Text(
+                                     const Text(
                                        'CONTRASEÑA',
-                                       style: const TextStyle(
+                                       style: TextStyle(
                                          fontSize: 11,
                                          fontWeight: FontWeight.bold,
                                          letterSpacing: 1.2,
@@ -603,15 +603,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                            icon: Icons.shield,
                            iconColor: const Color(0xFF16A34A),
                            bgColor: const Color(0xFFDCFCE7),
-                           label: "GARANTÍA INMUFÁCIL",
-                           title: "Tu venta tranquila",
+                           label: 'GARANTÍA INMUFÁCIL',
+                           title: 'Tu venta tranquila',
                          ),
                          _buildTrustBadgeSimple(
                            icon: Icons.lock,
                            iconColor: const Color(0xFF2563EB),
                            bgColor: const Color(0xFFDBEAFE),
-                           label: "P2P VERIFICADO",
-                           title: "Tu compra segura",
+                           label: 'P2P VERIFICADO',
+                           title: 'Tu compra segura',
                          ),
                       ],
                     ),

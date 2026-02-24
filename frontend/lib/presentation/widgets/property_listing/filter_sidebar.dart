@@ -57,10 +57,10 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Filtros',
                         style: TextStyle(
                           fontSize: 16,
@@ -197,7 +197,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 _buildSectionTitle('Tipo de inmueble'),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<PropertyType>(
-                  value: searchState.propertyType,
+                  initialValue: searchState.propertyType,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.white,
@@ -277,7 +277,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     Switch(
                       value: searchState.onlyVerified, 
                       onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
-                      activeColor: const Color(0xFF16A34A),
+                      activeThumbColor: const Color(0xFF16A34A),
                     ),
                   ],
                 ),
@@ -316,7 +316,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () => context.push('/404'),
-                  child: Row(
+                  child: const Row(
                     children: [
                       Text(
                         'Saber más',
@@ -326,11 +326,11 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                           color: primaryBlue,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4),
                        Icon(Icons.arrow_forward, size: 14, color: primaryBlue),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -385,7 +385,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade200
+            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade200,
           ),
         ),
         child: Text(

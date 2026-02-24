@@ -4,10 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:inmufacil_frontend/presentation/providers/verification_provider.dart';
 
 class DocumentUploadCard extends StatelessWidget {
-  final String title;
-  final VoidCallback onTap;
-  final File? imageFile;
-  final UploadStatus status;
 
   const DocumentUploadCard({
     super.key,
@@ -16,6 +12,10 @@ class DocumentUploadCard extends StatelessWidget {
     this.imageFile,
     required this.status,
   });
+  final String title;
+  final VoidCallback onTap;
+  final File? imageFile;
+  final UploadStatus status;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class DocumentUploadCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   if (status == UploadStatus.picking || status == UploadStatus.idle)
                   Text(
-                    "Toca para escanear",
+                    'Toca para escanear',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,

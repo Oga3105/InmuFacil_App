@@ -31,8 +31,10 @@ class LocationService {
       
       // Get position with timeout
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 5),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 5),
+        ),
       );
       
       return LocationResult.success(
@@ -57,8 +59,6 @@ class LocationService {
 
 /// Result of location request
 class LocationResult {
-  final LatLng location;
-  final bool isFallback;
   
   const LocationResult._(this.location, this.isFallback);
   
@@ -71,4 +71,6 @@ class LocationResult {
   factory LocationResult.fallback(LatLng location) {
     return LocationResult._(location, true);
   }
+  final LatLng location;
+  final bool isFallback;
 }

@@ -7,11 +7,6 @@ import 'package:flutter/material.dart';
 /// Usage:
 ///   PropertyTimeBadge(createdAt: property.createdAt, updatedAt: property.updatedAt)
 class PropertyTimeBadge extends StatelessWidget {
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  /// If true, uses slightly larger font (for detail screens).
-  final bool large;
 
   const PropertyTimeBadge({
     super.key,
@@ -19,6 +14,11 @@ class PropertyTimeBadge extends StatelessWidget {
     this.updatedAt,
     this.large = false,
   });
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  /// If true, uses slightly larger font (for detail screens).
+  final bool large;
 
   @override
   Widget build(BuildContext context) {
@@ -93,36 +93,36 @@ class PropertyTimeBadge extends StatelessWidget {
 
   _BadgeStyle _getBadgeStyle(Duration diff) {
     if (diff.inHours < 24) {
-      return _BadgeStyle(
+      return const _BadgeStyle(
         prefix: 'NUEVO:',
-        bgColor: const Color(0xFFEFF6FF),
-        borderColor: const Color(0xFFBFDBFE),
-        iconColor: const Color(0xFF2563EB),
-        textColor: const Color(0xFF1D4ED8),
+        bgColor: Color(0xFFEFF6FF),
+        borderColor: Color(0xFFBFDBFE),
+        iconColor: Color(0xFF2563EB),
+        textColor: Color(0xFF1D4ED8),
       );
     } else if (diff.inDays < 8) {
-      return _BadgeStyle(
+      return const _BadgeStyle(
         prefix: 'RECIENTE:',
-        bgColor: const Color(0xFFF0FDF4),
-        borderColor: const Color(0xFFBBF7D0),
-        iconColor: const Color(0xFF16A34A),
-        textColor: const Color(0xFF15803D),
+        bgColor: Color(0xFFF0FDF4),
+        borderColor: Color(0xFFBBF7D0),
+        iconColor: Color(0xFF16A34A),
+        textColor: Color(0xFF15803D),
       );
     } else if (diff.inDays < 31) {
-      return _BadgeStyle(
+      return const _BadgeStyle(
         prefix: null,
-        bgColor: const Color(0xFFFFF7ED),
-        borderColor: const Color(0xFFFED7AA),
-        iconColor: const Color(0xFFEA580C),
-        textColor: const Color(0xFFC2410C),
+        bgColor: Color(0xFFFFF7ED),
+        borderColor: Color(0xFFFED7AA),
+        iconColor: Color(0xFFEA580C),
+        textColor: Color(0xFFC2410C),
       );
     } else {
-      return _BadgeStyle(
+      return const _BadgeStyle(
         prefix: null,
-        bgColor: const Color(0xFFF9FAFB),
-        borderColor: const Color(0xFFE5E7EB),
-        iconColor: const Color(0xFF9CA3AF),
-        textColor: const Color(0xFF6B7280),
+        bgColor: Color(0xFFF9FAFB),
+        borderColor: Color(0xFFE5E7EB),
+        iconColor: Color(0xFF9CA3AF),
+        textColor: Color(0xFF6B7280),
       );
     }
   }
@@ -151,11 +151,6 @@ class PropertyTimeBadge extends StatelessWidget {
 }
 
 class _BadgeStyle {
-  final String? prefix;
-  final Color bgColor;
-  final Color borderColor;
-  final Color iconColor;
-  final Color textColor;
 
   const _BadgeStyle({
     required this.prefix,
@@ -164,4 +159,9 @@ class _BadgeStyle {
     required this.iconColor,
     required this.textColor,
   });
+  final String? prefix;
+  final Color bgColor;
+  final Color borderColor;
+  final Color iconColor;
+  final Color textColor;
 }

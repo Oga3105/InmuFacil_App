@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
-import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // Using the updated card
 import '../../domain/entities/user.dart';
 
@@ -439,7 +438,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                              content: Row(children: [Icon(Icons.info_outline, color: Colors.white), SizedBox(width: 8), Text('Guardado localmente — sincronización próximamente')]),
                              backgroundColor: Color(0xFF2563EB),
                              behavior: SnackBarBehavior.floating,
-                           )
+                           ),
                          );
                        }
                     } else {
@@ -458,7 +457,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                      : Text(
                         _isEditing ? 'Guardar Datos' : 'Editar Perfil',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                 ),
               ],
@@ -513,7 +512,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                        style: OutlinedButton.styleFrom(
                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), 
                        ),
-                       child: const Text('Cambiar Contraseña', style: TextStyle(color: Colors.black87))
+                       child: const Text('Cambiar Contraseña', style: TextStyle(color: Colors.black87)),
                      ),
                   ],
                 ),
@@ -550,7 +549,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                                // TODO: Account suspension via backend when endpoint is ready
                                if (context.mounted) {
                                  ScaffoldMessenger.of(context).showSnackBar(
-                                   const SnackBar(content: Text('Función de suspensión próximamente disponible'))
+                                   const SnackBar(content: Text('Función de suspensión próximamente disponible')),
                                  );
                                }
                            },
@@ -619,7 +618,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           const Text('¿Vendes tu casa?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
           const SizedBox(height: 8),
           const Text('Publicala gratis ahora y llega a miles de compradores verificados en nuestra red P2P segura.', 
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4)),
+            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
@@ -670,7 +669,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                  const Text('Más recientes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                  const Icon(Icons.expand_more, size: 16),
                ],
-             )
+             ),
            ],
          ),
          const SizedBox(height: 24),
@@ -756,11 +755,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
            const SizedBox(height: 8),
            const Text('"Empieza hoy mismo tu proceso de venta directa sin intermediarios."', 
              textAlign: TextAlign.center,
-             style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
+             style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic),),
            const SizedBox(height: 16),
            TextButton(
              onPressed: (){}, 
-             child: const Text('Ver mis borradores', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+             child: const Text('Ver mis borradores', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
            ),
          ],
        ),

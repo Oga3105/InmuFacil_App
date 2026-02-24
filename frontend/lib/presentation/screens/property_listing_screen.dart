@@ -68,12 +68,12 @@ class PropertyListingScreen extends ConsumerWidget {
                 children: [
                   Image.asset('assets/images/logo_inmufacil.png', height: 32),
                   const SizedBox(width: 8),
-                  Text.rich(
+                  const Text.rich(
                     TextSpan(
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                       children: [
-                        const TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                        const TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                        TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                        TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                       ],
                     ),
                   ),
@@ -92,21 +92,21 @@ class PropertyListingScreen extends ConsumerWidget {
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
+                  child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                 ),
                 TextButton(
                   onPressed: () => handleProtectedAction('/404-sell'), 
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                  child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
                 ),
                 TextButton(
                   onPressed: () => context.push('/404-how-it-works'),
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cómo funciona', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
+                  child: const Text('Cómo funciona', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
                 ),
                 Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
                 // Favorites Toggle
@@ -217,7 +217,7 @@ class PropertyListingScreen extends ConsumerWidget {
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: 320,
                                   mainAxisExtent: 370, // Tight fit to remove bottom whitespace
                                   crossAxisSpacing: 24,
@@ -282,7 +282,7 @@ class PropertyListingScreen extends ConsumerWidget {
                        Text('Búsqueda', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
                        Icon(Icons.chevron_right, size: 14, color: Colors.grey.shade400),
                        Text(searchState.location.isNotEmpty ? searchState.location : 'Todo', 
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600),),
                      ],
                    ),
                    const SizedBox(height: 8),
@@ -330,7 +330,7 @@ class PropertyListingScreen extends ConsumerWidget {
                   const SizedBox(width: 12),
                   _buildSortingDropdown(context, searchState, ref),
                ],
-             )
+             ),
           ],
         ),
       ],
@@ -353,8 +353,8 @@ class PropertyListingScreen extends ConsumerWidget {
             Icon(icon, size: 18, color: isActive ? primaryBlue : Colors.grey.shade400),
             if (isActive) ...[
               const SizedBox(width: 8),
-              Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryBlue)),
-            ]
+              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryBlue)),
+            ],
           ],
         ),
       ),
@@ -447,8 +447,8 @@ class PropertyListingScreen extends ConsumerWidget {
             text!, 
             style: TextStyle(
               fontWeight: FontWeight.bold, 
-              color: isActive ? Colors.white : Colors.grey.shade600
-            )
+              color: isActive ? Colors.white : Colors.grey.shade600,
+            ),
           ),
     );
   }

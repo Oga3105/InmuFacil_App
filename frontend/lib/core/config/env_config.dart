@@ -11,7 +11,7 @@ class EnvConfig {
       return dotenv.env['API_BASE_URL'] ?? 'http://localhost:8000/api/v1';
     } catch (e) {
       // Fail-safe: Return default if dotenv is not initialized (common on web)
-      debugPrint("⚠️ EnvConfig Warning: dotenv not initialized. Using default localhost.");
+      debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. Using default localhost.');
       return 'http://localhost:8000/api/v1';
     }
   }
@@ -21,7 +21,7 @@ class EnvConfig {
     try {
       return int.tryParse(dotenv.env['API_TIMEOUT'] ?? '') ?? 30000;
     } catch (e) {
-      debugPrint("⚠️ EnvConfig Warning: dotenv not initialized. Using default timeout.");
+      debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. Using default timeout.');
       return 30000;
     }
   }
@@ -31,7 +31,7 @@ class EnvConfig {
     try {
       return dotenv.env['ENABLE_LOGGING'] == 'true';
     } catch (e) {
-      debugPrint("⚠️ EnvConfig Warning: dotenv not initialized. Logging disabled.");
+      debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. Logging disabled.');
       return false;
     }
   }
@@ -41,7 +41,7 @@ class EnvConfig {
     try {
       return dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
     } catch (e) {
-      debugPrint("⚠️ EnvConfig Warning: dotenv not initialized. No Maps API key.");
+      debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. No Maps API key.');
       return '';
     }
   }
