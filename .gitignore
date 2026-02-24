@@ -41,5 +41,8 @@ keys.txt
 *.code-workspace
 uploads/
 
+# AI tools (local config)
+.claude/
+
 # Stitch Design Files (temporary)
 frontend/design_inbox/
