@@ -27,8 +27,8 @@ from backend.src.services.email_service import (
     send_verification_email, verify_token
 )
 from backend.src.schemas.base import (
-    UserCreate, UserResponse, Token, VerifyEmailRequest, 
-    PasswordResetRequest, PasswordResetConfirm
+    UserCreate, UserResponse, Token, VerifyEmailRequest,
+    PasswordResetRequest, PasswordResetConfirm, ChangePassword
 )
 import logging
 
@@ -360,3 +360,31 @@ async def reset_password(
     
     logger.info(f"[AUTH] Password reset successful for: {user.email}")
     return {"message": "Password reset successfully"}
+
+
+# ============================================================================
+# Change Password (Authenticated)
+# ============================================================================
+
+@router.post(
+    "/change-password",
+    summary="Change Password (Authenticated)",
+    description="Change the current user's password by providing the current and new password.",
+    tags=["Auth"]
+)
+async def change_password(
+    payload: ChangePassword,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if not verify_password(payload.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Contraseña actual incorrecta"
+        )
+
+    current_user.hashed_password = get_password_hash(payload.new_password)
+    db.commit()
+
+    logger.info(f"[AUTH] Password changed for: {current_user.email}")
+    return {"message": "Contraseña actualizada"}
