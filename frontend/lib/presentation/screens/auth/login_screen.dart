@@ -16,6 +16,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   bool _isPasswordVisible = false;
 
   // Colors for the new design
@@ -26,6 +27,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -368,6 +370,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  const SizedBox(height: 8),
                                  TextFormField(
                                    controller: _emailController,
+                                   textInputAction: TextInputAction.next,
+                                   onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                                    decoration: InputDecoration(
                                      hintText: 'ejemplo@correo.com',
                                      hintStyle: TextStyle(color: Colors.grey[400]),
@@ -435,7 +439,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  const SizedBox(height: 8),
                                  TextFormField(
                                    controller: _passwordController,
+                                   focusNode: _passwordFocusNode,
                                    obscureText: !_isPasswordVisible,
+                                   textInputAction: TextInputAction.done,
+                                   onFieldSubmitted: (_) => _handleLogin(),
                                    decoration: InputDecoration(
                                      hintText: '••••••••',
                                      hintStyle: TextStyle(color: Colors.grey[400]),

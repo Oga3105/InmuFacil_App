@@ -17,6 +17,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  // FocusNodes para navegar entre campos con Enter / Tab
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
   
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -32,6 +37,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
     super.dispose();
   }
 
@@ -414,6 +422,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 6),
                        TextFormField(
                          controller: _fullNameController,
+                         textInputAction: TextInputAction.next,
+                         onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocusNode),
                          style: const TextStyle(fontSize: 13),
                          decoration: _buildInputDecoration('Ej: Juan Pérez'),
                          validator: (value) => (value == null || value.length < 3) ? 'Mínimo 3 caracteres' : null,
@@ -428,6 +438,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 6),
                        TextFormField(
                          controller: _emailController,
+                         focusNode: _emailFocusNode,
+                         textInputAction: TextInputAction.next,
+                         onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                           style: const TextStyle(fontSize: 13),
                          decoration: _buildInputDecoration('nombre@ejemplo.com'),
                          validator: (value) {
@@ -447,7 +460,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 6),
                         TextFormField(
                           controller: _passwordController,
+                          focusNode: _passwordFocusNode,
                           obscureText: !_isPasswordVisible,
+                          textInputAction: TextInputAction.next,
+                          onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                           style: const TextStyle(fontSize: 13),
                           decoration: _buildInputDecoration('Mínimo 8 caracteres').copyWith(
                             suffixIcon: SizedBox(
@@ -492,7 +508,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 6),
                        TextFormField(
                          controller: _confirmPasswordController,
+                         focusNode: _confirmPasswordFocusNode,
                          obscureText: !_isConfirmPasswordVisible,
+                         textInputAction: TextInputAction.done,
+                         onFieldSubmitted: (_) => _handleRegister(),
                           style: const TextStyle(fontSize: 13),
                          decoration: _buildInputDecoration('Repite tu contraseña').copyWith(
                            suffixIcon: IconButton(
