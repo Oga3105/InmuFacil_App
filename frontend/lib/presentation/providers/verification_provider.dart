@@ -1,6 +1,10 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+
+const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
 
 enum VerificationStep { documentType, documentScan, selfie, review }
 enum DocumentType { dni, nie, pasaporte }
@@ -18,6 +22,11 @@ class VerificationState {
     this.frontStatus = UploadStatus.idle,
     this.backStatus = UploadStatus.idle,
     this.selfieStatus = UploadStatus.idle,
+    this.kycStatus,
+    this.rejectionReason,
+    this.uploadDate,
+    this.errorMessage,
+    this.submissionSuccess = false,
   });
   final int currentStepIndex;
   final DocumentType? selectedDocumentType;
@@ -28,6 +37,12 @@ class VerificationState {
   final UploadStatus frontStatus;
   final UploadStatus backStatus;
   final UploadStatus selfieStatus;
+  // KYC status from backend
+  final String? kycStatus;
+  final String? rejectionReason;
+  final DateTime? uploadDate;
+  final String? errorMessage;
+  final bool submissionSuccess;
 
   VerificationState copyWith({
     int? currentStepIndex,
@@ -39,6 +54,11 @@ class VerificationState {
     UploadStatus? frontStatus,
     UploadStatus? backStatus,
     UploadStatus? selfieStatus,
+    String? kycStatus,
+    String? rejectionReason,
+    DateTime? uploadDate,
+    String? errorMessage,
+    bool? submissionSuccess,
   }) {
     return VerificationState(
       currentStepIndex: currentStepIndex ?? this.currentStepIndex,
@@ -50,15 +70,41 @@ class VerificationState {
       frontStatus: frontStatus ?? this.frontStatus,
       backStatus: backStatus ?? this.backStatus,
       selfieStatus: selfieStatus ?? this.selfieStatus,
+      kycStatus: kycStatus ?? this.kycStatus,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
+      uploadDate: uploadDate ?? this.uploadDate,
+      errorMessage: errorMessage,
+      submissionSuccess: submissionSuccess ?? this.submissionSuccess,
     );
   }
 }
 
 class VerificationNotifier extends Notifier<VerificationState> {
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  late final Dio _dio;
+
   @override
-  VerificationState build() => VerificationState();
+  VerificationState build() {
+    _dio = Dio(BaseOptions(
+      baseUrl: _kApiBaseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
+    ));
+    return VerificationState();
+  }
+
+  Future<void> _ensureAuth() async {
+    final token = await _storage.read(key: 'auth_token');
+    if (token != null) {
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+  }
 
   final ImagePicker _picker = ImagePicker();
+
+  void selectDocumentType(DocumentType type) {
+    state = state.copyWith(selectedDocumentType: type);
+  }
 
   void setDocumentType(DocumentType type) {
     state = state.copyWith(selectedDocumentType: type);
@@ -110,7 +156,7 @@ class VerificationNotifier extends Notifier<VerificationState> {
       );
       if (image != null) {
         state = state.copyWith(
-            backImage: File(image.path), backStatus: UploadStatus.success,);
+            backImage: File(image.path), backStatus: UploadStatus.success);
       } else {
         state = state.copyWith(backStatus: UploadStatus.idle);
       }
@@ -131,7 +177,7 @@ class VerificationNotifier extends Notifier<VerificationState> {
       );
       if (image != null) {
         state = state.copyWith(
-            selfieImage: File(image.path), selfieStatus: UploadStatus.success,);
+            selfieImage: File(image.path), selfieStatus: UploadStatus.success);
       } else {
         state = state.copyWith(selfieStatus: UploadStatus.idle);
       }
@@ -141,13 +187,94 @@ class VerificationNotifier extends Notifier<VerificationState> {
   }
 
   Future<bool> submitVerification() async {
-    state = state.copyWith(isLoading: true);
-    // TODO: Implement actual API call
-    await Future.delayed(const Duration(seconds: 2));
-    state = state.copyWith(isLoading: false);
-    return true; // Mock success
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      await _ensureAuth();
+
+      final docType = state.selectedDocumentType?.name ?? 'dni';
+      final formData = FormData.fromMap({
+        'document_type': docType,
+      });
+
+      if (state.frontImage != null) {
+        formData.files.add(MapEntry(
+          'front',
+          await MultipartFile.fromFile(state.frontImage!.path, filename: 'front.jpg'),
+        ));
+      }
+      if (state.backImage != null) {
+        formData.files.add(MapEntry(
+          'back',
+          await MultipartFile.fromFile(state.backImage!.path, filename: 'back.jpg'),
+        ));
+      }
+      if (state.selfieImage != null) {
+        formData.files.add(MapEntry(
+          'selfie',
+          await MultipartFile.fromFile(state.selfieImage!.path, filename: 'selfie.jpg'),
+        ));
+      }
+
+      await _dio.post('/kyc/upload', data: formData);
+
+      state = state.copyWith(
+        isLoading: false,
+        submissionSuccess: true,
+        kycStatus: 'pending',
+      );
+      return true;
+    } on DioException catch (e) {
+      final msg = e.response?.data?['detail'] ?? 'Error al enviar documentos';
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: msg is String ? msg : 'Error al enviar documentos',
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Error inesperado al enviar verificación',
+      );
+      return false;
+    }
   }
 
+  Future<void> fetchKycStatus() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      await _ensureAuth();
+      final response = await _dio.get('/kyc/status');
+      final data = response.data;
+
+      state = state.copyWith(
+        isLoading: false,
+        kycStatus: data['status'],
+        rejectionReason: data['rejection_reason'],
+        uploadDate: data['upload_date'] != null
+            ? DateTime.tryParse(data['upload_date'])
+            : null,
+      );
+    } on DioException catch (e) {
+      final msg = e.response?.data?['detail'] ?? 'Error al consultar estado';
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: msg is String ? msg : 'Error al consultar estado',
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Error inesperado',
+      );
+    }
+  }
+
+  void reset() {
+    state = VerificationState();
+  }
 }
 
-final verificationProvider = NotifierProvider<VerificationNotifier, VerificationState>(VerificationNotifier.new);
+final verificationProvider =
+    NotifierProvider<VerificationNotifier, VerificationState>(
+        VerificationNotifier.new);
