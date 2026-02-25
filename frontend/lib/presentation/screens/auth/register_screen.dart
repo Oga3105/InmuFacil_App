@@ -475,7 +475,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                     message: 'Generar contraseña segura',
                                     child: IconButton(
                                       icon: const Icon(
-                                        Icons.casino_outlined,
+                                        Icons.auto_fix_high,
                                         color: Color(0xFF2563EB),
                                         size: 18,
                                       ),

@@ -911,7 +911,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                             Tooltip(
                               message: 'profile.generate_password'.tr(),
                               child: IconButton(
-                                icon: const Icon(Icons.casino_outlined, color: Color(0xFF2563EB), size: 18),
+                                icon: const Icon(Icons.auto_fix_high, color: Color(0xFF2563EB), size: 18),
                                 onPressed: _generateSecurePassword,
                                 splashRadius: 18,
                               ),
