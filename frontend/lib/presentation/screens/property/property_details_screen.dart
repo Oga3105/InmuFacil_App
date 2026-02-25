@@ -10,6 +10,7 @@ import '../../../domain/entities/property_type.dart'; // [FIX] Import added
 // import '../../providers/property_provider.dart'; // TODO: Implement specific provider
 import '../../providers/search_provider.dart';
 import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 
@@ -111,32 +112,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     ),
                     child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
-                  // Removed Buttons as requested (Clean Look)
-                  /*
-                  TextButton(
-                    onPressed: () {}, 
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
-                  ),
-                  */
-                  
-                  // Removed 'Vender' and 'Mis favoritos' as requested
-                  /*
-                  TextButton(
-                    onPressed: () {}, 
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold))
-                  ),
-                  Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
-                  TextButton(
-                    onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
-                    ...
-                  ),
-                  */
                   const SizedBox(width: 16),
                   PremiumButton(
                     label: 'Publicar Gratis',
@@ -145,6 +120,94 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     fullWidth: false,
                     fontSize: 14,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  ),
+                  const SizedBox(width: 12),
+                  // [AUTH STATE LOGIC] User icon - same as HomeScreen
+                  Builder(
+                    builder: (context) {
+                      final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+                      if (isAuthenticated) {
+                        return PopupMenuButton<String>(
+                          offset: const Offset(0, 40),
+                          tooltip: 'Menú de usuario',
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'profile',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person_outline, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Mi Perfil'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'my-properties',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.home_work_outlined, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Mis Propiedades'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'contracts',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.description_outlined, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Mis Contratos'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'logout',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.logout, color: Colors.red, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) async {
+                            if (value == 'logout') {
+                              await ref.read(authProvider.notifier).logout();
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Sesión cerrada correctamente')),
+                                );
+                                context.go('/');
+                              }
+                            } else if (value == 'profile') {
+                              context.push('/profile');
+                            } else if (value == 'my-properties') {
+                              context.push('/profile?tab=1');
+                            } else if (value == 'contracts') {
+                              context.push('/contracts');
+                            }
+                          },
+                          child: const CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Color(0xFF2563EB),
+                            child: Icon(Icons.person, color: Colors.white, size: 20),
+                          ),
+                        );
+                      } else {
+                        return InkWell(
+                          onTap: () => context.pushNamed('login'),
+                          borderRadius: BorderRadius.circular(20),
+                          child: CircleAvatar(
+                            radius: 18,
+                            backgroundColor: Colors.grey[200],
+                            child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+                          ),
+                        );
+                      }
+                    },
                   ),
                ],
              ),

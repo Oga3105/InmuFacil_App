@@ -188,6 +188,41 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Update profile (name, phone)
+  Future<Map<String, dynamic>> updateProfile({String? fullName, String? phone}) async {
+    try {
+      final body = <String, dynamic>{};
+      if (fullName != null) body['full_name'] = fullName;
+      if (phone != null) body['phone'] = phone;
+
+      final response = await _dio.put('/users/me', data: body);
+      final updatedUser = User.fromJson(response.data);
+      state = state.copyWith(user: updatedUser);
+      return {'success': true};
+    } on DioException catch (e) {
+      final msg = e.response?.data['detail'] ?? 'Error al actualizar perfil';
+      return {'success': false, 'error': msg is String ? msg : 'Error al actualizar perfil'};
+    } catch (e) {
+      return {'success': false, 'error': 'Error inesperado'};
+    }
+  }
+
+  /// Change password (authenticated)
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    try {
+      await _dio.post('/auth/change-password', data: {
+        'current_password': currentPassword,
+        'new_password': newPassword,
+      });
+      return {'success': true};
+    } on DioException catch (e) {
+      final msg = e.response?.data['detail'] ?? 'Error al cambiar contraseña';
+      return {'success': false, 'error': msg is String ? msg : 'Error al cambiar contraseña'};
+    } catch (e) {
+      return {'success': false, 'error': 'Error inesperado'};
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');

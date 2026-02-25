@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
@@ -19,13 +21,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   late TabController _tabController;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _locationController = TextEditingController();
   
   // [NEW] Password Change State
   bool _isChangingPassword = false;
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  
+  // [NEW] Password visibility state (matching register screen)
+  bool _isCurrentPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   
   // [NEW] Editing State
   bool _isEditing = false;
@@ -41,7 +47,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     _tabController.dispose();
     _nameController.dispose();
     _phoneController.dispose();
-    _locationController.dispose();
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
@@ -65,7 +70,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
        
        final phone = user.phone ?? '';
        if (_phoneController.text != phone) _phoneController.text = phone;
-       // address/location not yet in User entity — controller keeps its own state
     }
 
     final isVerified = user.dniStatus == 'verified';
@@ -313,8 +317,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     children: [
                       const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
                       const SizedBox(width: 4),
-                      // Mock Date for now as User entity might need createdAt parsing
-                      Text('Miembro desde 2024', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                      Text('Miembro desde ${user.createdAt?.year.toString() ?? '—'}', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -425,9 +428,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           const SizedBox(height: 24),
           Row(
             children: [
-              Expanded(child: _buildTextField('Ubicación', _locationController, !_isEditing)),
-              const SizedBox(width: 24),
               Expanded(child: _buildTextField('Correo Electrónico (No editable)', TextEditingController(text: user.email), true)),
+              const SizedBox(width: 24),
+              const Expanded(child: SizedBox.shrink()),
             ],
           ),
           
@@ -447,7 +450,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                            // Revert changes
                            _nameController.text = user.name ?? '';
                            _phoneController.text = user.phone ?? '';
-                           // ... revert location
                          });
                        }, 
                        style: OutlinedButton.styleFrom(
@@ -462,20 +464,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 ElevatedButton(
                   onPressed: () async {
                     if (_isEditing) {
-                       // TODO: updateProfile will be implemented when backend endpoint is ready
-                       // For now, just exit edit mode and show a coming-soon notice
+                       final result = await ref.read(authProvider.notifier).updateProfile(
+                         fullName: _nameController.text.trim(),
+                         phone: _phoneController.text.trim(),
+                       );
                        setState(() { _isEditing = false; });
                        if (context.mounted) {
+                         final success = result['success'] == true;
                          ScaffoldMessenger.of(context).showSnackBar(
-                           const SnackBar(
-                             content: Row(children: [Icon(Icons.info_outline, color: Colors.white), SizedBox(width: 8), Text('Guardado localmente — sincronización próximamente')]),
-                             backgroundColor: Color(0xFF2563EB),
+                           SnackBar(
+                             content: Text(success ? 'Datos guardados correctamente' : (result['error'] ?? 'Error')),
+                             backgroundColor: success ? Colors.green : Colors.red,
                              behavior: SnackBarBehavior.floating,
                            ),
                          );
                        }
                     } else {
-                       // Enable Edit Mode
                        setState(() {
                          _isEditing = true;
                        });
@@ -799,23 +803,163 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     );
   }
 
+  /// Genera una contraseña segura de 16 caracteres usando CSPRNG (Random.secure).
+  /// Garantiza al menos 1 mayúscula, 1 minúscula, 1 dígito y 1 símbolo especial.
+  void _generateSecurePassword() {
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const digits = '0123456789';
+    const symbols = '!@#\$%^&*';
+    const allChars = uppercase + lowercase + digits + symbols;
+
+    final rng = Random.secure();
+    final List<String> chars = [
+      uppercase[rng.nextInt(uppercase.length)],
+      lowercase[rng.nextInt(lowercase.length)],
+      digits[rng.nextInt(digits.length)],
+      symbols[rng.nextInt(symbols.length)],
+    ];
+    for (int i = 0; i < 12; i++) {
+      chars.add(allChars[rng.nextInt(allChars.length)]);
+    }
+    chars.shuffle(rng);
+    final password = chars.join();
+
+    setState(() {
+      _newPasswordController.text = password;
+      _confirmPasswordController.text = password;
+      _isNewPasswordVisible = true;
+      _isConfirmPasswordVisible = true;
+    });
+  }
+
+  /// Maps backend error detail to a user-friendly, translated message.
+  String _mapPasswordError(String? backendError) {
+    if (backendError == null) return 'profile.password_change_error'.tr();
+    if (backendError.contains('incorrecta') || backendError.contains('incorrect')) {
+      return 'profile.password_current_incorrect'.tr();
+    }
+    if (backendError.contains('credentials') || backendError.contains('validate') || backendError.contains('Unauthorized')) {
+      return 'profile.password_session_expired'.tr();
+    }
+    return 'profile.password_change_error'.tr();
+  }
+
   Widget _buildChangePasswordForm() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Cambiar Contraseña', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0F172A))),
+        Text('profile.change_password'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0F172A))),
         const SizedBox(height: 16),
         
-        // Current Password
-        _buildTextField('Contraseña Actual', _currentPasswordController, false, isPassword: true),
+        // Current Password (with visibility toggle)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('profile.current_password'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _currentPasswordController,
+              obscureText: !_isCurrentPasswordVisible,
+              style: const TextStyle(color: Colors.black87),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                suffixIcon: IconButton(
+                  icon: Icon(_isCurrentPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.grey[400], size: 18),
+                  onPressed: () => setState(() => _isCurrentPasswordVisible = !_isCurrentPasswordVisible),
+                  splashRadius: 18,
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         
-        // New Password
+        // New Password + Confirm Password (matching register screen style)
         Row(
           children: [
-            Expanded(child: _buildTextField('Nueva Contraseña', _newPasswordController, false, isPassword: true)),
+            // New Password with auto-generate + visibility
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('profile.new_password'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _newPasswordController,
+                    obscureText: !_isNewPasswordVisible,
+                    style: const TextStyle(color: Colors.black87),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Mínimo 8 caracteres',
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      suffixIcon: SizedBox(
+                        width: 80,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Tooltip(
+                              message: 'profile.generate_password'.tr(),
+                              child: IconButton(
+                                icon: const Icon(Icons.casino_outlined, color: Color(0xFF2563EB), size: 18),
+                                onPressed: _generateSecurePassword,
+                                splashRadius: 18,
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(_isNewPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.grey[400], size: 18),
+                              onPressed: () => setState(() => _isNewPasswordVisible = !_isNewPasswordVisible),
+                              splashRadius: 18,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(width: 16),
-            Expanded(child: _buildTextField('Confirmar Nueva Contraseña', _confirmPasswordController, false, isPassword: true)),
+            // Confirm Password with visibility toggle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('profile.confirm_password'.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF334155))),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_isConfirmPasswordVisible,
+                    style: const TextStyle(color: Colors.black87),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      hintText: 'Repite tu contraseña',
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide(color: Colors.grey.shade200)),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      suffixIcon: IconButton(
+                        icon: Icon(_isConfirmPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.grey[400], size: 18),
+                        onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
+                        splashRadius: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         
@@ -828,6 +972,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
               onPressed: () {
                 setState(() {
                   _isChangingPassword = false;
+                  _isCurrentPasswordVisible = false;
+                  _isNewPasswordVisible = false;
+                  _isConfirmPasswordVisible = false;
                   _currentPasswordController.clear();
                   _newPasswordController.clear();
                   _confirmPasswordController.clear();
@@ -838,31 +985,71 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 side: const BorderSide(color: Colors.red),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
+              child: Text('common.cancel'.tr(), style: const TextStyle(color: Colors.red)),
             ),
             const SizedBox(width: 16),
             ElevatedButton(
-              onPressed: () {
-                // Mock Validation
+              onPressed: () async {
+                // Validation: passwords must match
                 if (_newPasswordController.text != _confirmPasswordController.text) {
-                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Las contraseñas no coinciden'), backgroundColor: Colors.red));
+                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                     content: Text('profile.password_mismatch'.tr()),
+                     backgroundColor: Colors.red,
+                     behavior: SnackBarBehavior.floating,
+                   ));
                    return;
                 }
-                // Mock Success
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Contraseña actualizada correctamente'), backgroundColor: Colors.green));
-                setState(() {
-                  _isChangingPassword = false;
-                  _currentPasswordController.clear();
-                  _newPasswordController.clear();
-                  _confirmPasswordController.clear();
-                });
+                // Validation: current password required
+                if (_currentPasswordController.text.isEmpty) {
+                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                     content: Text('profile.password_current_required'.tr()),
+                     backgroundColor: Colors.red,
+                     behavior: SnackBarBehavior.floating,
+                   ));
+                   return;
+                }
+                // Validation: min length 8
+                if (_newPasswordController.text.length < 8) {
+                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                     content: Text('profile.password_min_length'.tr()),
+                     backgroundColor: Colors.red,
+                     behavior: SnackBarBehavior.floating,
+                   ));
+                   return;
+                }
+                final result = await ref.read(authProvider.notifier).changePassword(
+                  _currentPasswordController.text,
+                  _newPasswordController.text,
+                );
+                if (!context.mounted) return;
+                final success = result['success'] == true;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success 
+                      ? 'profile.password_change_success'.tr() 
+                      : _mapPasswordError(result['error'] as String?)),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+                if (success) {
+                  setState(() {
+                    _isChangingPassword = false;
+                    _isCurrentPasswordVisible = false;
+                    _isNewPasswordVisible = false;
+                    _isConfirmPasswordVisible = false;
+                    _currentPasswordController.clear();
+                    _newPasswordController.clear();
+                    _confirmPasswordController.clear();
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('Actualizar Contraseña', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              child: Text('profile.update_password'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

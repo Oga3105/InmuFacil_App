@@ -79,6 +79,21 @@ extension StringTranslation on String {
       'common.filter': 'Filtrar',
       'common.sort': 'Ordenar',
       
+      // Profile - Change Password
+      'profile.change_password': 'Cambiar Contraseña',
+      'profile.current_password': 'Contraseña Actual',
+      'profile.new_password': 'Nueva Contraseña',
+      'profile.confirm_password': 'Confirmar Nueva Contraseña',
+      'profile.update_password': 'Actualizar Contraseña',
+      'profile.generate_password': 'Generar contraseña segura',
+      'profile.password_mismatch': 'Las contraseñas no coinciden',
+      'profile.password_min_length': 'La nueva contraseña debe tener al menos 8 caracteres',
+      'profile.password_current_required': 'Introduce tu contraseña actual',
+      'profile.password_current_incorrect': 'La contraseña actual es incorrecta. Verifica e inténtalo de nuevo.',
+      'profile.password_session_expired': 'Tu sesión ha expirado. Inicia sesión de nuevo para cambiar tu contraseña.',
+      'profile.password_change_error': 'Error al cambiar la contraseña. Inténtalo más tarde.',
+      'profile.password_change_success': 'Contraseña actualizada correctamente',
+      
       // Not Found Screen
       'not_found.building_future_part1': 'Estamos construyendo el ',
       'not_found.building_future_part2': 'futuro entre particulares.',
