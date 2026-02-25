@@ -4,6 +4,7 @@ class DNIStatus(str, enum.Enum):
     """DNI validation status enumeration"""
     PENDIENTE = "pendiente"
     VALIDADO = "validado"
+    RECHAZADO = "rechazado"
 
 class UserType(str, enum.Enum):
     """User type enumeration"""

@@ -11,7 +11,7 @@ from backend.src.schemas.base import KYCStatusUpdate
 # Aseguramos que la tabla exista (aunque ya la creamos via docker exec, esto es fail-safe)
 # Base.metadata.create_all(bind=engine)
 
-router = APIRouter(prefix="/kyc", tags=["KYC"])
+router = APIRouter(tags=["KYC"])
 
 # --- ENDPOINTS DE USUARIO (Subida y Estado) ---
 

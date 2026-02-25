@@ -73,7 +73,13 @@ class KYCVerification(Base):
     __tablename__ = "kyc_verifications"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     filename = Column(String, nullable=False)
     dni_encrypted = Column(String, nullable=False)
     status = Column(String, default="pending")
+    file_type = Column(String, default="front")  # front / back / selfie
+    document_type = Column(String, default="dni")  # dni / nie / pasaporte
+    rejection_reason = Column(String, nullable=True)
     upload_date = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User")
