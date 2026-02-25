@@ -79,6 +79,13 @@ class KYCUploadResponse(BaseModel):
     message: str
 
 
+class KYCStatusResponse(BaseModel):
+    status: str
+    rejection_reason: Optional[str] = None
+    upload_date: Optional[datetime] = None
+    document_type: Optional[str] = None
+
+
 # ============================================================================
 # Property Satellite Schemas (Nested)
 # ============================================================================
