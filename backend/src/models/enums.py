@@ -2,6 +2,7 @@ import enum
 
 class DNIStatus(str, enum.Enum):
     """DNI validation status enumeration"""
+    SIN_VERIFICAR = "sin_verificar"  # Has not started KYC
     PENDIENTE = "pendiente"
     VALIDADO = "validado"
     RECHAZADO = "rechazado"

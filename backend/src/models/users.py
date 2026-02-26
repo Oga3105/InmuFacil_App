@@ -16,9 +16,9 @@ class User(Base):
     is_active = Column(Boolean, default=True)  # Soft delete support
     full_name = Column(String, nullable=False)
     dni_status = Column(
-        Enum(DNIStatus), 
-        default=DNIStatus.PENDIENTE, 
-        nullable=False
+        Enum(DNIStatus),
+        default=DNIStatus.SIN_VERIFICAR,
+        nullable=True,
     )
     user_type = Column(
         Enum(UserType), 
