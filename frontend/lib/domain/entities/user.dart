@@ -10,6 +10,7 @@ class User {
     this.phone,
     this.createdAt,
     this.rejectionReason,
+    this.profilePhotoUrl,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -23,6 +24,7 @@ class User {
       phone: json['phone'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       rejectionReason: json['rejection_reason'],
+      profilePhotoUrl: json['profile_photo_url'],
     );
   }
   final String id;
@@ -34,4 +36,32 @@ class User {
   final String? phone;
   final DateTime? createdAt;
   final String? rejectionReason;
+  final String? profilePhotoUrl;
+
+  User copyWith({
+    String? id,
+    String? email,
+    String? name,
+    String? userType,
+    String? dniStatus,
+    bool? isActive,
+    String? phone,
+    DateTime? createdAt,
+    String? rejectionReason,
+    String? profilePhotoUrl,
+    bool clearProfilePhoto = false,
+  }) {
+    return User(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      userType: userType ?? this.userType,
+      dniStatus: dniStatus ?? this.dniStatus,
+      isActive: isActive ?? this.isActive,
+      phone: phone ?? this.phone,
+      createdAt: createdAt ?? this.createdAt,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
+      profilePhotoUrl: clearProfilePhoto ? null : (profilePhotoUrl ?? this.profilePhotoUrl),
+    );
+  }
 }

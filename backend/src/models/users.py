@@ -45,6 +45,9 @@ class User(Base):
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
 
+    # Profile Photo
+    profile_photo_url = Column(String, nullable=True)
+
     # Provider Fields (Hito 17 - Service Marketplace)
     provider_category = Column(String, nullable=True) # e.g. "NOTARY", "VALUER"
     service_zone = Column(String, nullable=True) # e.g. "Madrid", "Barcelona"

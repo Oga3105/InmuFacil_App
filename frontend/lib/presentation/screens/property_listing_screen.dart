@@ -170,21 +170,13 @@ class PropertyListingScreen extends ConsumerWidget {
                         context.push('/contracts');
                       }
                     },
-                    child: const CircleAvatar(
-                       radius: 18,
-                       backgroundColor: Color(0xFF2563EB),
-                       child: Icon(Icons.person, color: Colors.white, size: 20),
-                    ),
+                    child: _buildUserAvatar(ref, authenticated: true),
                   )
                 else
                   InkWell(
                     onTap: () => context.pushNamed('login'),
                     borderRadius: BorderRadius.circular(20),
-                    child: CircleAvatar(
-                       radius: 18,
-                       backgroundColor: Colors.grey[200],
-                       child: Icon(Icons.person, color: Colors.grey[600], size: 20),
-                    ),
+                    child: _buildUserAvatar(ref, authenticated: false),
                   ),
               ],
             ),
@@ -528,5 +520,36 @@ class PropertyListingScreen extends ConsumerWidget {
          Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
        ],
      );
+  }
+
+  Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {
+    if (!authenticated) {
+      return CircleAvatar(
+        radius: 18,
+        backgroundColor: Colors.grey[200],
+        child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+      );
+    }
+    final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
+    if (photoUrl != null) {
+      return ClipOval(
+        child: Image.network(
+          '$photoUrl?v=${DateTime.now().millisecondsSinceEpoch}',
+          width: 36,
+          height: 36,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const CircleAvatar(
+            radius: 18,
+            backgroundColor: Color(0xFF2563EB),
+            child: Icon(Icons.person, color: Colors.white, size: 20),
+          ),
+        ),
+      );
+    }
+    return const CircleAvatar(
+      radius: 18,
+      backgroundColor: Color(0xFF2563EB),
+      child: Icon(Icons.person, color: Colors.white, size: 20),
+    );
   }
 }

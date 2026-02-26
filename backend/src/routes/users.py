@@ -1,16 +1,44 @@
 from typing import List, Optional
 import logging
+import os
+import shutil
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
 from backend.src.models import User
 from backend.src.schemas.base import UserCreate, UserResponse, UserUpdate
 from backend.src.utils.security import get_current_active_user, get_password_hash, encrypt_data, decrypt_data, get_current_admin_user
-# Usamos encrypt_data de security.py, no filters.py
 
 router = APIRouter(tags=["Users"])
+
+# Usar CWD garantiza el path correcto independientemente de cómo se invoca uvicorn
+UPLOADS_DIR = Path(os.getcwd()) / "uploads" / "avatars"
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+MAX_FILE_SIZE_MB = 5
+
+
+
+def _build_user_response(user: User, decrypted_phone: Optional[str] = None) -> UserResponse:
+    """Helper to build a UserResponse from a User model, avoiding repetition."""
+    return UserResponse(
+        id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        user_type=user.user_type,
+        dni_status=user.dni_status.value if user.dni_status else "pendiente",
+        is_active=user.is_active,
+        created_at=user.created_at,
+        updated_at=user.updated_at,
+        rejection_reason=user.rejection_reason,
+        phone=decrypted_phone,
+        profile_photo_url=user.profile_photo_url,
+    )
+
 
 # --- ENDPOINTS DE PERFIL (Usuario Logueado) ---
 
@@ -20,7 +48,6 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
     Ver mi propio perfil.
     Decrypts phone number for the owner.
     """
-    # Decrypt phone if exists
     decrypted_phone = None
     if current_user.encrypted_phone:
         try:
@@ -28,20 +55,8 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
         except Exception:
             decrypted_phone = None
 
-    # Construct response manually to include decrypted phone
-    response_data = UserResponse(
-        id=current_user.id,
-        email=current_user.email,
-        full_name=current_user.full_name,
-        user_type=current_user.user_type,
-        dni_status=current_user.dni_status.value if current_user.dni_status else "pendiente",
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at,
-        rejection_reason=current_user.rejection_reason,
-        phone=decrypted_phone
-    )
-    return response_data
+    return _build_user_response(current_user, decrypted_phone)
+
 
 @router.put("/me", response_model=UserResponse)
 async def update_user_me(
@@ -50,39 +65,113 @@ async def update_user_me(
     current_user: User = Depends(get_current_active_user)
 ):
     """Actualizar mis datos (Nombre, Teléfono). Email prohibido."""
-    
-    # Actualizar campos permitidos
     if user_update.full_name:
         current_user.full_name = user_update.full_name
-    
-    # Campo 'phone' en schema -> 'encrypted_phone' en modelo
+
     if user_update.phone:
         current_user.encrypted_phone = encrypt_data(user_update.phone)
 
     db.commit()
     db.refresh(current_user)
-    
-    # Return updated data with decrypted phone
+
     decrypted_phone = user_update.phone if user_update.phone else None
     if not decrypted_phone and current_user.encrypted_phone:
-         try:
+        try:
             decrypted_phone = decrypt_data(current_user.encrypted_phone)
-         except Exception as e:
+        except Exception as e:
             logger.error(f"Error decrypting phone: {e}")
 
-    response_data = UserResponse(
-        id=current_user.id,
-        email=current_user.email,
-        full_name=current_user.full_name,
-        user_type=current_user.user_type,
-        dni_status=current_user.dni_status.value if current_user.dni_status else "pendiente",
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at,
-        rejection_reason=current_user.rejection_reason,
-        phone=decrypted_phone
-    )
-    return response_data
+    return _build_user_response(current_user, decrypted_phone)
+
+
+@router.post("/me/photo", response_model=UserResponse)
+async def upload_profile_photo(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Subir o reemplazar la foto de perfil del usuario autenticado.
+    Acepta: JPEG, PNG, WebP. Tamaño máximo: 5 MB.
+    """
+    # Validar tipo MIME
+    if file.content_type not in ALLOWED_CONTENT_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail=f"Tipo de archivo no permitido. Solo se aceptan: {', '.join(ALLOWED_CONTENT_TYPES)}",
+        )
+
+    # Leer contenido y validar tamaño
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"La imagen supera el tamaño máximo de {MAX_FILE_SIZE_MB} MB.",
+        )
+
+    # Determinar extensión y ruta destino
+    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+    ext = ext_map[file.content_type]
+    dest_path = UPLOADS_DIR / f"{current_user.id}.{ext}"
+
+    # Eliminar fotos previas con otra extensión
+    for old_ext in ext_map.values():
+        old_file = UPLOADS_DIR / f"{current_user.id}.{old_ext}"
+        if old_file.exists() and old_file != dest_path:
+            old_file.unlink()
+
+    # Guardar archivo
+    with open(dest_path, "wb") as f:
+        f.write(contents)
+
+    # Construir URL pública
+    photo_url = f"http://localhost:8000/uploads/avatars/{current_user.id}.{ext}"
+
+    # Actualizar DB
+    current_user.profile_photo_url = photo_url
+    db.commit()
+    db.refresh(current_user)
+
+    logger.info(f"[PHOTO] User {current_user.id} uploaded profile photo: {photo_url}")
+
+    # Decryptar teléfono si existe
+    decrypted_phone = None
+    if current_user.encrypted_phone:
+        try:
+            decrypted_phone = decrypt_data(current_user.encrypted_phone)
+        except Exception:
+            pass
+
+    return _build_user_response(current_user, decrypted_phone)
+
+
+@router.delete("/me/photo", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_profile_photo(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Eliminar la foto de perfil del usuario autenticado.
+    Borra el archivo del disco y limpia la URL en base de datos.
+    """
+    if current_user.profile_photo_url is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="El usuario no tiene foto de perfil.",
+        )
+
+    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+    for ext in ext_map.values():
+        file_path = UPLOADS_DIR / f"{current_user.id}.{ext}"
+        if file_path.exists():
+            file_path.unlink()
+
+    current_user.profile_photo_url = None
+    db.commit()
+
+    logger.info(f"[PHOTO] User {current_user.id} deleted profile photo")
+    return None
+
 
 # --- ENDPOINTS DE ADMINISTRACIÓN (Solo Admins) ---
 
@@ -95,7 +184,6 @@ async def read_users(
 ):
     """Listar todos los usuarios (Solo Admin)"""
     users = db.query(User).offset(skip).limit(limit).all()
-    # Map to schema, phone is hidden/None for admin list
     return [
         UserResponse(
             id=u.id,
@@ -107,7 +195,8 @@ async def read_users(
             created_at=u.created_at,
             updated_at=u.updated_at,
             rejection_reason=u.rejection_reason,
-            phone=None 
+            phone=None,
+            profile_photo_url=u.profile_photo_url,
         ) for u in users
     ]
 
@@ -123,7 +212,7 @@ async def delete_user(
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
     if user_to_delete.email == "admin@inmufacil.com":
-         raise HTTPException(
+        raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot delete the super admin"
         )

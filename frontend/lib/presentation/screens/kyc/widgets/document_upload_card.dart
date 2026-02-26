@@ -3,6 +3,91 @@ import 'package:flutter/material.dart';
 
 import 'package:inmufacil_frontend/presentation/providers/verification_provider.dart';
 
+/// Dashed border painter for upload containers
+class DashedBorderPainter extends CustomPainter {
+  DashedBorderPainter({
+    this.color = const Color(0xFFCBD5E1),
+    this.strokeWidth = 1.5,
+    this.dashWidth = 6.0,
+    this.dashSpace = 4.0,
+    this.radius = 12.0,
+  });
+
+  final Color color;
+  final double strokeWidth;
+  final double dashWidth;
+  final double dashSpace;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Radius.circular(radius),
+      ));
+
+    // Draw dashed path
+    final metrics = path.computeMetrics();
+    for (final metric in metrics) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final end = distance + dashWidth;
+        canvas.drawPath(
+          metric.extractPath(distance, end.clamp(0, metric.length)),
+          paint,
+        );
+        distance = end + dashSpace;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// L-shape corner mark painter
+class CornerMarkPainter extends CustomPainter {
+  CornerMarkPainter({this.color = const Color(0xFF3B82F6), this.length = 20, this.strokeWidth = 2.5});
+
+  final Color color;
+  final double length;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    // Top-left
+    canvas.drawLine(Offset(0, length), const Offset(0, 0), paint);
+    canvas.drawLine(const Offset(0, 0), Offset(length, 0), paint);
+
+    // Top-right
+    canvas.drawLine(Offset(size.width - length, 0), Offset(size.width, 0), paint);
+    canvas.drawLine(Offset(size.width, 0), Offset(size.width, length), paint);
+
+    // Bottom-left
+    canvas.drawLine(Offset(0, size.height - length), Offset(0, size.height), paint);
+    canvas.drawLine(Offset(0, size.height), Offset(length, size.height), paint);
+
+    // Bottom-right
+    canvas.drawLine(Offset(size.width - length, size.height), Offset(size.width, size.height), paint);
+    canvas.drawLine(Offset(size.width, size.height - length), Offset(size.width, size.height), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 class DocumentUploadCard extends StatelessWidget {
 
   const DocumentUploadCard({
@@ -11,94 +96,99 @@ class DocumentUploadCard extends StatelessWidget {
     required this.onTap,
     this.imageFile,
     required this.status,
+    this.compact = false,
   });
   final String title;
   final VoidCallback onTap;
   final File? imageFile;
   final UploadStatus status;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    bool hasImage = imageFile != null;
+    final hasImage = imageFile != null;
+    final height = compact ? 140.0 : 180.0;
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: 180,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[50], // Very light grey background
-          border: Border.all(
-            color: hasImage ? Colors.green : Colors.grey[300]!,
-            width: hasImage ? 2 : 1,
-            style: hasImage ? BorderStyle.solid : BorderStyle.solid, 
-            // Ideally use DottedBorder here if package available, sticking to standard for now to avoid dep hell
-          ),
-          borderRadius: BorderRadius.circular(12),
+      child: CustomPaint(
+        painter: hasImage ? null : DashedBorderPainter(
+          color: const Color(0xFFCBD5E1),
+          radius: 12,
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            if (hasImage)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10), // Inner radius
-                child: Image.file(
-                  imageFile!,
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            
-            // Overlay for content if not image, or overlay icon if success
-            if (!hasImage)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                   Icon(
-                    Icons.camera_alt_outlined,
-                    size: 48,
-                    color: Colors.blue[700],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: Colors.blue[900],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+        child: CustomPaint(
+          painter: hasImage ? null : CornerMarkPainter(),
+          child: Container(
+            height: height,
+            decoration: BoxDecoration(
+              color: hasImage ? null : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: hasImage
+                  ? Border.all(color: Colors.green.shade400, width: 2)
+                  : null,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (hasImage)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.file(
+                      imageFile!,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  if (status == UploadStatus.picking || status == UploadStatus.idle)
-                  Text(
-                    'Toca para escanear',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+
+                if (!hasImage)
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.camera_alt_outlined,
+                        size: compact ? 36 : 48,
+                        color: const Color(0xFF3B82F6),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: const Color(0xFF1E293B),
+                          fontWeight: FontWeight.w600,
+                          fontSize: compact ? 13 : 15,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Toca para escanear',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                if (status == UploadStatus.picking)
+                  const CircularProgressIndicator(),
+
+                if (hasImage)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
                     ),
                   ),
-                ],
-              ),
-
-             // Status Indicators
-             if (status == UploadStatus.picking)
-               const CircularProgressIndicator(),
-
-             if (hasImage)
-               Positioned(
-                 top: 8,
-                 right: 8,
-                 child: Container(
-                   padding: const EdgeInsets.all(4),
-                   decoration: const BoxDecoration(
-                     color: Colors.white,
-                     shape: BoxShape.circle,
-                   ),
-                   child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
-                 ),
-               ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

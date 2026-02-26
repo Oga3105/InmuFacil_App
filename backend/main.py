@@ -24,9 +24,11 @@ print(f"[ENV] .env exists: {env_path.exists()}")
 # Application Imports
 # ============================================================================
 import os
+from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import OperationalError
 import logging
 from datetime import datetime
@@ -305,6 +307,14 @@ api_v1_router.include_router(leads.router) # Hito 18 - Lead Magnet (404)
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
+
+# Static files for user uploads
+# Use CWD (always InmuFacil_Project/ when run with `uvicorn backend.main:app`)
+import os as _os
+_uploads_dir = Path(_os.getcwd()) / "uploads"
+_uploads_dir.mkdir(parents=True, exist_ok=True)
+(Path(_os.getcwd()) / "uploads" / "avatars").mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
 
 
 # ============================================================================

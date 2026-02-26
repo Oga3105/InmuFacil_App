@@ -1387,11 +1387,32 @@ class _MapNavigationBar extends ConsumerWidget {
                            context.push('/contracts');
                         }
                       },
-                      child: const CircleAvatar(
-                         radius: 18,
-                         backgroundColor: Color(0xFF2563EB), // Official Blue
-                         child: Icon(Icons.person, color: Colors.white, size: 20),
-                      ),
+                      child: Builder(builder: (context) {
+                        final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
+                        final ts = DateTime.now().millisecondsSinceEpoch;
+                        return SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: ClipOval(
+                            child: photoUrl != null
+                                ? Image.network(
+                                    '$photoUrl?v=$ts',
+                                    width: 36,
+                                    height: 36,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: const Color(0xFF2563EB),
+                                      child: const Icon(Icons.person, color: Colors.white, size: 20),
+                                    ),
+                                  )
+                                : Container(
+                                    color: const Color(0xFF2563EB),
+                                    child: const Icon(Icons.person, color: Colors.white, size: 20),
+                                  ),
+                          ),
+                        );
+                      }),
+
                     )
                   else
                     InkWell(

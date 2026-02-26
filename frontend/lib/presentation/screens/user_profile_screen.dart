@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:image_picker/image_picker.dart';
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +36,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   
   // [NEW] Editing State
   bool _isEditing = false;
+
+  // [NEW] Photo upload state
+  bool _isUploadingPhoto = false;
 
   @override
   void initState() {
@@ -175,11 +179,41 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
         actions: [
-          TextButton.icon(
-             onPressed: () => context.go('/'),
-             icon: const Icon(Icons.home_outlined, size: 20, color: Colors.black54),
-             label: const Text('Inicio', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-          ),
+          MouseRegion(
+             cursor: SystemMouseCursors.click,
+             child: GestureDetector(
+               onTap: () => context.go('/'),
+               child: Container(
+                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                 decoration: BoxDecoration(
+                   color: const Color(0xFF2563EB),
+                   borderRadius: BorderRadius.circular(12),
+                   boxShadow: [
+                     BoxShadow(
+                       color: const Color(0xFF2563EB).withOpacity(0.25),
+                       blurRadius: 8,
+                       offset: const Offset(0, 2),
+                     ),
+                   ],
+                 ),
+                 child: const Row(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                     SizedBox(width: 6),
+                     Text(
+                       'Inicio',
+                       style: TextStyle(
+                         color: Colors.white,
+                         fontWeight: FontWeight.w600,
+                         fontSize: 13,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+             ),
+           ),
           const SizedBox(width: 16),
           IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.grey), onPressed: () {}),
           const SizedBox(width: 8),
@@ -242,10 +276,32 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     _tabController.animateTo(0);
                   }
                 },
-                child: const CircleAvatar(
-                   radius: 16,
-                   backgroundColor: Color(0xFF2563EB), // Official Blue
-                   child: Icon(Icons.person, color: Colors.white, size: 20),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
+                    final ts = DateTime.now().millisecondsSinceEpoch;
+                    return SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: ClipOval(
+                        child: photoUrl != null
+                            ? Image.network(
+                                '$photoUrl?v=$ts',
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: const Color(0xFF2563EB),
+                                  child: const Icon(Icons.person, color: Colors.white, size: 20),
+                                ),
+                              )
+                            : Container(
+                                color: const Color(0xFF2563EB),
+                                child: const Icon(Icons.person, color: Colors.white, size: 20),
+                              ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -253,6 +309,75 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           const SizedBox(width: 24),
         ],
       );
+  }
+
+  /// Opens the browser file picker and uploads the selected image as profile photo.
+  Future<void> _pickAndUploadPhoto() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (image == null) return;
+
+    setState(() => _isUploadingPhoto = true);
+
+    final result = await ref.read(authProvider.notifier).uploadProfilePhoto(image);
+
+    if (mounted) {
+      setState(() => _isUploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['success'] == true
+              ? '✅ Foto de perfil actualizada'
+              : '❌ ${result['error'] ?? 'Error al subir la foto'}'),
+          backgroundColor: result['success'] == true
+              ? const Color(0xFF16A34A)
+              : Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteProfilePhoto() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar foto de perfil'),
+        content: const Text('¿Estás seguro de que quieres eliminar tu foto de perfil?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    setState(() => _isUploadingPhoto = true);
+    final result = await ref.read(authProvider.notifier).deleteProfilePhoto();
+    if (mounted) {
+      setState(() => _isUploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['success'] == true
+              ? 'Foto de perfil eliminada'
+              : result['error'] ?? 'Error al eliminar la foto'),
+          backgroundColor: result['success'] == true
+              ? const Color(0xFF16A34A)
+              : Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   // Header matching the image
@@ -274,24 +399,70 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
                  ],
               ),
-              child: const Center(
-                child: Icon(Icons.person, size: 40, color: Colors.white),
+              child: ClipOval(
+                child: user.profilePhotoUrl != null
+                    ? Image.network(
+                        '${user.profilePhotoUrl}?v=${DateTime.now().millisecondsSinceEpoch}',
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 40, color: Colors.white),
+                      )
+                    : const Icon(Icons.person, size: 40, color: Colors.white),
               ),
             ),
-            if (_isEditing)
+            // Camera button — always visible
             Positioned(
               bottom: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2563EB),
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2)),
+              child: GestureDetector(
+                onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: _isUploadingPhoto
+                      ? const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
               ),
             ),
+            // Delete photo button — only visible when user has a photo
+            if (user.profilePhotoUrl != null)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: _isUploadingPhoto ? null : _deleteProfilePhoto,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade600,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(Icons.close, color: Colors.white, size: 12),
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(width: 24),
