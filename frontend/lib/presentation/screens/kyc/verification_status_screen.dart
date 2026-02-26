@@ -1,0 +1,515 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../providers/verification_provider.dart';
+import '../../widgets/common/premium_button.dart';
+
+class VerificationStatusScreen extends ConsumerStatefulWidget {
+  const VerificationStatusScreen({super.key});
+
+  @override
+  ConsumerState<VerificationStatusScreen> createState() =>
+      _VerificationStatusScreenState();
+}
+
+class _VerificationStatusScreenState
+    extends ConsumerState<VerificationStatusScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+        () => ref.read(verificationProvider.notifier).fetchKycStatus());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(verificationProvider);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text(
+          'Estado de Verificación',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => context.go('/profile'),
+        ),
+      ),
+      body: state.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : state.errorMessage != null
+              ? _buildError(state)
+              : SingleChildScrollView(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 520),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 24),
+                        child: _buildStatusCard(state),
+                      ),
+                    ),
+                  ),
+                ),
+    );
+  }
+
+  Widget _buildError(VerificationState state) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
+            const SizedBox(height: 16),
+            Text(
+              state.errorMessage!,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red.shade700, fontSize: 15),
+            ),
+            const SizedBox(height: 24),
+            TextButton(
+              onPressed: () =>
+                  ref.read(verificationProvider.notifier).fetchKycStatus(),
+              child: const Text('Reintentar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusCard(VerificationState state) {
+    final status = state.kycStatus?.toLowerCase() ?? 'pendiente';
+
+    switch (status) {
+      case 'validado':
+        return _buildApprovedCard();
+      case 'rechazado':
+        return _buildRejectedCard(state);
+      default:
+        return _buildPendingCard(state);
+    }
+  }
+
+  // ── PENDING ──────────────────────────────────────────────────────────
+
+  Widget _buildPendingCard(VerificationState state) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          children: [
+            // Orange badge
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.orange.shade200),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.schedule, size: 18, color: Colors.orange.shade700),
+                  const SizedBox(width: 8),
+                  Text(
+                    'VERIFICACIÓN EN CURSO',
+                    style: TextStyle(
+                      color: Colors.orange.shade700,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // Clock icon
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.access_time_filled,
+                  size: 40, color: Colors.orange.shade400),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              'Estamos revisando tus documentos',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'El proceso de verificación puede tardar hasta 24 horas.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            ),
+
+            const SizedBox(height: 28),
+
+            // 3-step progress
+            _buildProgressSteps(),
+
+            if (state.uploadDate != null) ...[
+              const SizedBox(height: 20),
+              Text(
+                'Enviado el ${_formatDate(state.uploadDate!)}',
+                style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+              ),
+            ],
+
+            const SizedBox(height: 28),
+
+            PremiumButton(
+              label: 'Volver al Inicio',
+              icon: Icons.home_outlined,
+              color: const Color(0xFF64748B),
+              onPressed: () => context.go('/'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressSteps() {
+    return Row(
+      children: [
+        _buildStep('Enviado', Icons.check_circle, true),
+        _buildStepConnector(true),
+        _buildStep('Validando', Icons.pending, false),
+        _buildStepConnector(false),
+        _buildStep('Listo', Icons.verified, false),
+      ],
+    );
+  }
+
+  Widget _buildStep(String label, IconData icon, bool completed) {
+    final color = completed ? Colors.green : Colors.grey.shade400;
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: completed ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepConnector(bool completed) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(bottom: 18),
+        color: completed ? Colors.green : Colors.grey.shade300,
+      ),
+    );
+  }
+
+  // ── APPROVED ─────────────────────────────────────────────────────────
+
+  Widget _buildApprovedCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Green top bar
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            color: const Color(0xFF16A34A),
+            child: const Center(
+              child: Text(
+                'IDENTIDAD VERIFICADA',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              children: [
+                // Green shield icon
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(Icons.shield,
+                          size: 48, color: Colors.green.shade400),
+                      const Positioned(
+                        bottom: 20,
+                        right: 18,
+                        child: Icon(Icons.check_circle,
+                            size: 24, color: Color(0xFF16A34A)),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'ESTADO: VERIFICADO',
+                    style: TextStyle(
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  'Tu identidad ha sido verificada correctamente.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF475569),
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                PremiumButton(
+                  label: 'Publicar Inmueble',
+                  icon: Icons.add_home_outlined,
+                  color: const Color(0xFF16A34A),
+                  onPressed: () => context.go('/404-publish'),
+                ),
+
+                const SizedBox(height: 12),
+
+                TextButton(
+                  onPressed: () => context.go('/profile'),
+                  child: const Text(
+                    'Volver al perfil',
+                    style: TextStyle(
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── REJECTED ─────────────────────────────────────────────────────────
+
+  Widget _buildRejectedCard(VerificationState state) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          // Red header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            color: const Color(0xFFDC2626),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  'VERIFICACIÓN FALLIDA',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              children: [
+                // Error icon
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.gpp_bad,
+                      size: 44, color: Colors.red.shade400),
+                ),
+
+                const SizedBox(height: 20),
+
+                const Text(
+                  'No pudimos verificar tu identidad',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Rejection reason box
+                if (state.rejectionReason != null)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Motivo del rechazo:',
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          state.rejectionReason!,
+                          style: TextStyle(
+                            color: Colors.red.shade800,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 24),
+
+                Text(
+                  'Puedes volver a enviar tus documentos corrigiendo los errores indicados.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                ),
+
+                const SizedBox(height: 24),
+
+                PremiumButton(
+                  label: 'Reintentar Verificación',
+                  icon: Icons.refresh,
+                  color: const Color(0xFF2563EB),
+                  onPressed: () {
+                    ref.read(verificationProvider.notifier).reset();
+                    context.go('/verify-identity');
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                TextButton(
+                  onPressed: () => context.go('/profile'),
+                  child: const Text(
+                    'Volver al perfil',
+                    style: TextStyle(
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+  }
+}
