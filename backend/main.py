@@ -85,6 +85,13 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:8080",      # Alternative local IP
     "http://localhost:8001",      # Flutter Web custom port
     "http://127.0.0.1:8001",      # Flutter Web custom port IP
+    "http://localhost:5000",      # Flutter Web fallback
+    "http://localhost:5500",      # VS Code Live Server
+    "http://127.0.0.1:5500",
+    "http://localhost:4200",      # Angular/Flutter Web dev
+    "http://localhost:9000",      # Flutter Web alt
+    "http://localhost:1",         # Flutter Web auto-assigned
+    "http://127.0.0.1:1",
 ]
 
 app.add_middleware(

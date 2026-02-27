@@ -49,6 +49,25 @@ def _run_gemini_verification(
             user_id, result.approved, result.confidence, result.reason,
         )
 
+        # Quota exceeded → leave as pending, no rejection
+        if result.reason == "__QUOTA_EXCEEDED__":
+            logger.warning("Gemini quota exceeded for user %s; leaving status as pendiente", user_id)
+            records = (
+                db.query(KYCVerification)
+                .filter(KYCVerification.user_id == user_id)
+                .filter(KYCVerification.status == "pending")
+                .all()
+            )
+            for rec in records:
+                rec.status = "pendiente"
+                rec.rejection_reason = None
+            user = db.query(User).filter(User.id == user_id).first()
+            if user:
+                user.dni_status = "SIN_VERIFICAR"
+                user.rejection_reason = None
+            db.commit()
+            return
+
         new_status = "validado" if result.approved else "rechazado"
         new_dni_status = "VALIDADO" if result.approved else "RECHAZADO"
 

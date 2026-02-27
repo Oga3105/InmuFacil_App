@@ -346,6 +346,13 @@ class VerificationNotifier extends Notifier<VerificationState> {
             : null,
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: '__session_expired__',
+        );
+        return;
+      }
       final msg = e.response?.data?['detail'] ?? 'Error al consultar estado';
       state = state.copyWith(
         isLoading: false,

@@ -158,25 +158,64 @@ class _VerificationStatusScreenState
   }
 
   Widget _buildError(VerificationState state) {
+    final isSessionExpired = state.errorMessage == '__session_expired__';
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red.shade400),
+            Icon(
+              isSessionExpired ? Icons.lock_clock : Icons.error_outline,
+              size: 48,
+              color: isSessionExpired
+                  ? Colors.orange.shade400
+                  : Colors.red.shade400,
+            ),
             const SizedBox(height: 16),
             Text(
-              state.errorMessage!,
+              isSessionExpired
+                  ? 'Tu sesión ha expirado'
+                  : state.errorMessage!,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.red.shade700, fontSize: 15),
+              style: TextStyle(
+                color: isSessionExpired
+                    ? Colors.orange.shade700
+                    : Colors.red.shade700,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
             ),
+            if (isSessionExpired) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Inicia sesión de nuevo para continuar.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              ),
+            ],
             const SizedBox(height: 24),
-            TextButton(
-              onPressed: () =>
-                  ref.read(verificationProvider.notifier).fetchKycStatus(),
-              child: const Text('Reintentar'),
-            ),
+            if (isSessionExpired)
+              ElevatedButton.icon(
+                onPressed: () => context.go('/login'),
+                icon: const Icon(Icons.login),
+                label: const Text('Iniciar sesión'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              )
+            else
+              TextButton(
+                onPressed: () =>
+                    ref.read(verificationProvider.notifier).fetchKycStatus(),
+                child: const Text('Reintentar'),
+              ),
           ],
         ),
       ),
@@ -558,7 +597,15 @@ class _VerificationStatusScreenState
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          state.rejectionReason!,
+                          () {
+                            final r = state.rejectionReason!;
+                            final isApiError = r.startsWith('Error al contactar') ||
+                                r.contains('429') ||
+                                r.contains('RESOURCE');
+                            return isApiError
+                                ? 'El servicio de verificación no está disponible en este momento. Inténtalo de nuevo más tarde.'
+                                : r;
+                          }(),
                           style: TextStyle(
                             color: Colors.red.shade800,
                             fontSize: 14,

@@ -79,7 +79,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
        if (_phoneController.text != phone) _phoneController.text = phone;
     }
 
-    final isVerified = user.dniStatus == 'validado';
+    final isVerified = user.dniStatus?.toLowerCase() == 'validado';
 
     // Layout
     // Header -> Tabs -> Content
@@ -497,13 +497,29 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   ),
                   const SizedBox(width: 16),
                   if (isVerified)
-                     Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.check_circle, size: 16, color: Colors.green),
-                        const SizedBox(width: 4),
-                        Text('Verificado', style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green.shade400, width: 1.5),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified, size: 15, color: Colors.green.shade600),
+                          const SizedBox(width: 5),
+                          Text(
+                            'VERIFICADO',
+                            style: TextStyle(
+                              color: Colors.green.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
@@ -1301,7 +1317,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     final String buttonLabel;
     final String destination;
 
-    if (dniStatus == 'pendiente') {
+    if (dniStatus?.toLowerCase() == 'pendiente') {
       bgColor = Colors.orange.shade50;
       borderColor = Colors.orange.shade200;
       iconColor = Colors.orange.shade700;
@@ -1309,7 +1325,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
       message = 'Tu verificación está en curso. Te notificaremos cuando esté lista.';
       buttonLabel = 'Ver Estado';
       destination = '/verification-status';
-    } else if (dniStatus == 'rechazado') {
+    } else if (dniStatus?.toLowerCase() == 'rechazado') {
       bgColor = Colors.red.shade50;
       borderColor = Colors.red.shade200;
       iconColor = Colors.red.shade700;
