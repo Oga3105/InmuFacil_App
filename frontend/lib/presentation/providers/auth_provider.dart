@@ -83,6 +83,14 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Refresh the current user profile from the API (e.g. after KYC submission).
+  Future<void> refreshUser() async {
+    try {
+      final user = await _fetchUserProfile();
+      state = state.copyWith(user: user);
+    } catch (_) {}
+  }
+
   /// Login with Email and Password
   Future<bool> login(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);

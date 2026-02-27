@@ -40,6 +40,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   // [NEW] Photo upload state
   bool _isUploadingPhoto = false;
 
+  // Properties tab sort state
+  String _propertiesSortBy = 'newest';
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +79,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
        if (_phoneController.text != phone) _phoneController.text = phone;
     }
 
-    final isVerified = user.dniStatus == 'verified';
+    final isVerified = user.dniStatus == 'validado';
 
     // Layout
     // Header -> Tabs -> Content
@@ -226,6 +229,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 offset: const Offset(0, 40),
                 tooltip: 'Menú de usuario',
                 color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 itemBuilder: (context) => [
                   if (_tabController.index == 0)
@@ -527,7 +531,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
          // Verification Banner if needed (Preserved)
-         if (!isVerified) _buildVerificationBanner(),
+         if (!isVerified) _buildVerificationBanner(user.dniStatus),
          
          if (isDesktop)
            Row(
@@ -658,7 +662,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isEditing ? const Color(0xFF16A34A) : const Color(0xFF0F172A), 
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: ref.watch(authProvider).isLoading && _isEditing 
@@ -850,7 +854,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   Widget _buildPropertiesTab() {
     // Mock Data logic...
     final allProperties = ref.watch(filteredByMapPropertiesProvider);
-    final myProperties = allProperties.take(2).toList(); 
+    var myProperties = allProperties.take(2).toList();
+
+    // Apply sort
+    myProperties = List.from(myProperties);
+    switch (_propertiesSortBy) {
+      case 'price_asc':
+        myProperties.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+        break;
+      case 'price_desc':
+        myProperties.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+        break;
+      case 'newest':
+      default:
+        // Keep original order (newest first assumed)
+        break;
+    }
 
     if (myProperties.isEmpty) {
       return _buildEmptyStateCard(small: false);
@@ -870,14 +889,35 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                  Text('Gestiona tus anuncios publicados y su estado.', style: TextStyle(color: Colors.grey, fontSize: 13)),
                ],
              ),
-             // Sort Dropdown mockup
-             Row(
-               children: [
-                 Text('Ordenar por: ', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-                 const Text('Más recientes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                 const Icon(Icons.expand_more, size: 16),
-               ],
-             ),
+             // Sort Dropdown
+            SizedBox(
+              height: 40,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: DropdownButton<String>(
+                  value: _propertiesSortBy,
+                  underline: const SizedBox.shrink(),
+                  icon: Icon(Icons.expand_more, color: Colors.grey.shade400, size: 18),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A)),
+                  items: const [
+                    DropdownMenuItem(value: 'newest', child: Text('Más recientes')),
+                    DropdownMenuItem(value: 'price_asc', child: Text('Precio: menor a mayor')),
+                    DropdownMenuItem(value: 'price_desc', child: Text('Precio: mayor a menor')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _propertiesSortBy = value);
+                  },
+                ),
+              ),
+            ),
            ],
          ),
          const SizedBox(height: 24),
@@ -1152,7 +1192,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 });
               },
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 side: const BorderSide(color: Colors.red),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -1252,25 +1292,67 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     );
   }
 
-  Widget _buildVerificationBanner() {
+  Widget _buildVerificationBanner(String? dniStatus) {
+    final Color bgColor;
+    final Color borderColor;
+    final Color iconColor;
+    final IconData icon;
+    final String message;
+    final String buttonLabel;
+    final String destination;
+
+    if (dniStatus == 'pendiente') {
+      bgColor = Colors.orange.shade50;
+      borderColor = Colors.orange.shade200;
+      iconColor = Colors.orange.shade700;
+      icon = Icons.hourglass_top;
+      message = 'Tu verificación está en curso. Te notificaremos cuando esté lista.';
+      buttonLabel = 'Ver Estado';
+      destination = '/verification-status';
+    } else if (dniStatus == 'rechazado') {
+      bgColor = Colors.red.shade50;
+      borderColor = Colors.red.shade200;
+      iconColor = Colors.red.shade700;
+      icon = Icons.cancel_outlined;
+      message = 'Tu verificación fue rechazada. Puedes volver a intentarlo.';
+      buttonLabel = 'Reintentar';
+      destination = '/verify-identity';
+    } else {
+      bgColor = Colors.blue.shade50;
+      borderColor = Colors.blue.shade100;
+      iconColor = const Color(0xFF2563EB);
+      icon = Icons.shield;
+      message = 'Verifica tu identidad para mayor seguridad y destacar tus anuncios.';
+      buttonLabel = 'Verificar Ahora';
+      destination = '/verify-identity';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          const Icon(Icons.shield, color: Color(0xFF2563EB)),
+          Icon(icon, color: iconColor),
           const SizedBox(width: 16),
-          const Expanded(
-            child: Text('Verifica tu identidad para mayor seguridad y destacar tus anuncios.', style: TextStyle(color: Color(0xFF1E293B))),
+          Expanded(
+            child: Text(message, style: const TextStyle(color: Color(0xFF1E293B))),
           ),
-          TextButton(
-            onPressed: () => context.push('/verify-identity'),
-            child: const Text('Verificar Ahora', style: TextStyle(fontWeight: FontWeight.bold)),
+          OutlinedButton(
+            onPressed: () => context.push(destination),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: iconColor,
+              side: BorderSide(color: borderColor, width: 1.5),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: Text(buttonLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
