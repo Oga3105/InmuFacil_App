@@ -1,22 +1,94 @@
+import logging
 import os
 import shutil
 from typing import List, Optional
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, status
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
-from backend.src.config.database import get_db
+
+from backend.src.config.database import SessionLocal, get_db
 from backend.src.models import KYCVerification, User
 from backend.src.models.enums import DNIStatus
 from backend.src.utils.security import encrypt_data, get_current_active_user, get_current_admin_user
 from backend.src.schemas.base import KYCStatusUpdate, KYCStatusResponse
+from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
 
+logger = logging.getLogger(__name__)
 router = APIRouter(tags=["KYC"])
 
 UPLOAD_DIR = "uploads"
 
-# --- ENDPOINTS DE USUARIO (Subida y Estado) ---
+
+# ---------------------------------------------------------------------------
+# Background task: AI verification
+# ---------------------------------------------------------------------------
+
+def _run_gemini_verification(
+    user_id: int,
+    front_path: Optional[str],
+    back_path: Optional[str],
+    selfie_path: Optional[str],
+    document_type: str,
+) -> None:
+    """
+    Runs in the background after the upload endpoint returns.
+    Opens its own DB session (the request session is already closed).
+    Calls Gemini, then updates KYCVerification records and User.dni_status.
+    """
+    db: Session = SessionLocal()
+    try:
+        result = verify_identity_with_gemini(
+            front_path=front_path,
+            back_path=back_path,
+            selfie_path=selfie_path,
+            document_type=document_type,
+        )
+
+        logger.info(
+            "Gemini KYC result for user %s: approved=%s confidence=%.2f reason=%s",
+            user_id, result.approved, result.confidence, result.reason,
+        )
+
+        new_status = "validado" if result.approved else "rechazado"
+        new_dni_status = "VALIDADO" if result.approved else "RECHAZADO"
+
+        # Update all KYCVerification records for this submission
+        records = (
+            db.query(KYCVerification)
+            .filter(KYCVerification.user_id == user_id)
+            .order_by(KYCVerification.id.desc())
+            # Only update the latest batch (status is still 'pending')
+            .filter(KYCVerification.status == "pending")
+            .all()
+        )
+        for rec in records:
+            rec.status = new_status
+            if not result.approved:
+                rec.rejection_reason = result.reason
+
+        # Update the user
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.dni_status = new_dni_status
+            if not result.approved:
+                user.rejection_reason = result.reason
+
+        db.commit()
+
+    except Exception as e:
+        logger.error("Gemini verification background task failed for user %s: %s", user_id, e)
+        db.rollback()
+    finally:
+        db.close()
+
+
+# ---------------------------------------------------------------------------
+# User endpoints
+# ---------------------------------------------------------------------------
 
 @router.post("/upload")
 async def upload_kyc_document(
+    background_tasks: BackgroundTasks,
     front: UploadFile = File(None),
     back: UploadFile = File(None),
     selfie: UploadFile = File(None),
@@ -24,7 +96,7 @@ async def upload_kyc_document(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Subir documentos KYC (frente, reverso, selfie) para verificación"""
+    """Subir documentos KYC (frente, reverso, selfie). La IA verifica automáticamente."""
     files = {"front": front, "back": back, "selfie": selfie}
     uploaded = {k: v for k, v in files.items() if v is not None}
 
@@ -33,6 +105,7 @@ async def upload_kyc_document(
 
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     records_created = []
+    saved_paths: dict[str, str] = {}
 
     for file_type_key, upload_file in uploaded.items():
         safe_filename = f"user_{current_user.id}_{file_type_key}_{upload_file.filename}"
@@ -42,7 +115,10 @@ async def upload_kyc_document(
             with open(file_location, "wb") as buffer:
                 shutil.copyfileobj(upload_file.file, buffer)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error guardando imagen ({file_type_key}): {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error guardando imagen ({file_type_key}): {str(e)}",
+            )
 
         encrypted_blob = encrypt_data(f"FILE:{safe_filename}")
 
@@ -56,15 +132,26 @@ async def upload_kyc_document(
         )
         db.add(db_record)
         records_created.append(file_type_key)
+        saved_paths[file_type_key] = file_location
 
-    # Update user status to pending
+    # Immediately mark as pending so the banner updates in the UI
     current_user.dni_status = DNIStatus.PENDIENTE
     db.commit()
+
+    # Kick off AI verification asynchronously (non-blocking)
+    background_tasks.add_task(
+        _run_gemini_verification,
+        user_id=current_user.id,
+        front_path=saved_paths.get("front"),
+        back_path=saved_paths.get("back"),
+        selfie_path=saved_paths.get("selfie"),
+        document_type=document_type,
+    )
 
     return {
         "status": "pending",
         "files_uploaded": records_created,
-        "msg": "Documentos subidos. Esperando revisión.",
+        "msg": "Documentos subidos. Verificación automática en curso.",
     }
 
 
@@ -73,7 +160,7 @@ async def get_my_kyc_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
-    """Ver el estado de mi última verificación"""
+    """Ver el estado de mi última verificación KYC"""
     record = (
         db.query(KYCVerification)
         .filter(KYCVerification.user_id == current_user.id)
@@ -92,7 +179,9 @@ async def get_my_kyc_status(
     )
 
 
-# --- ENDPOINTS DE ADMIN (Revisión) ---
+# ---------------------------------------------------------------------------
+# Admin endpoints
+# ---------------------------------------------------------------------------
 
 @router.get("/pending")
 async def list_pending_kyc(
@@ -100,7 +189,11 @@ async def list_pending_kyc(
     current_user: User = Depends(get_current_admin_user),
 ):
     """(Admin) Listar verificaciones pendientes"""
-    records = db.query(KYCVerification).filter(KYCVerification.status == "pending").all()
+    records = (
+        db.query(KYCVerification)
+        .filter(KYCVerification.status == "pending")
+        .all()
+    )
     return records
 
 
@@ -111,7 +204,7 @@ async def review_kyc(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_admin_user),
 ):
-    """(Admin) Aprobar o Rechazar un DNI"""
+    """(Admin) Aprobar o Rechazar manualmente un DNI (anula la decisión de IA)"""
     record = db.query(KYCVerification).filter(KYCVerification.id == verification_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Solicitud no encontrada")
@@ -119,17 +212,15 @@ async def review_kyc(
     record.status = status_update.status
     record.rejection_reason = status_update.rejection_reason
 
-    # Sync user status
     if record.user_id:
         user = db.query(User).filter(User.id == record.user_id).first()
         if user:
             if status_update.status == "validado":
-                user.dni_status = DNIStatus.VALIDADO
+                user.dni_status = "VALIDADO"
                 user.rejection_reason = None
             elif status_update.status == "rechazado":
-                user.dni_status = DNIStatus.RECHAZADO
+                user.dni_status = "RECHAZADO"
                 user.rejection_reason = status_update.rejection_reason
 
     db.commit()
-
     return {"id": verification_id, "new_status": record.status}
