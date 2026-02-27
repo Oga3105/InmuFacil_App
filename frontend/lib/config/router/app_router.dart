@@ -6,6 +6,7 @@ import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/auth/register_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/kyc/identity_verification_screen.dart';
+import '../../presentation/screens/kyc/verification_status_screen.dart';
 import '../../presentation/screens/not_found/not_found_screen.dart';
 import '../../presentation/screens/property/property_details_screen.dart';
 import '../../presentation/screens/user_profile_screen.dart';
@@ -65,6 +66,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/verify-identity',
         name: 'verify-identity',
         builder: (context, state) => const IdentityVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/verification-status',
+        name: 'verification-status',
+        builder: (context, state) => const VerificationStatusScreen(),
       ),
 
       // User Profile

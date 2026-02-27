@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
@@ -18,6 +20,12 @@ class VerificationState {
     this.frontImage,
     this.backImage,
     this.selfieImage,
+    this.frontBytes,
+    this.backBytes,
+    this.selfieBytes,
+    this.frontXFile,
+    this.backXFile,
+    this.selfieXFile,
     this.isLoading = false,
     this.frontStatus = UploadStatus.idle,
     this.backStatus = UploadStatus.idle,
@@ -30,19 +38,31 @@ class VerificationState {
   });
   final int currentStepIndex;
   final DocumentType? selectedDocumentType;
+  // Native (mobile/desktop)
   final File? frontImage;
   final File? backImage;
   final File? selfieImage;
+  // Web preview bytes
+  final Uint8List? frontBytes;
+  final Uint8List? backBytes;
+  final Uint8List? selfieBytes;
+  // XFile kept for multipart upload on all platforms
+  final XFile? frontXFile;
+  final XFile? backXFile;
+  final XFile? selfieXFile;
   final bool isLoading;
   final UploadStatus frontStatus;
   final UploadStatus backStatus;
   final UploadStatus selfieStatus;
-  // KYC status from backend
   final String? kycStatus;
   final String? rejectionReason;
   final DateTime? uploadDate;
   final String? errorMessage;
   final bool submissionSuccess;
+
+  bool get hasFront => frontBytes != null || frontImage != null;
+  bool get hasBack => backBytes != null || backImage != null;
+  bool get hasSelfie => selfieBytes != null || selfieImage != null;
 
   VerificationState copyWith({
     int? currentStepIndex,
@@ -50,6 +70,12 @@ class VerificationState {
     File? frontImage,
     File? backImage,
     File? selfieImage,
+    Uint8List? frontBytes,
+    Uint8List? backBytes,
+    Uint8List? selfieBytes,
+    XFile? frontXFile,
+    XFile? backXFile,
+    XFile? selfieXFile,
     bool? isLoading,
     UploadStatus? frontStatus,
     UploadStatus? backStatus,
@@ -66,6 +92,12 @@ class VerificationState {
       frontImage: frontImage ?? this.frontImage,
       backImage: backImage ?? this.backImage,
       selfieImage: selfieImage ?? this.selfieImage,
+      frontBytes: frontBytes ?? this.frontBytes,
+      backBytes: backBytes ?? this.backBytes,
+      selfieBytes: selfieBytes ?? this.selfieBytes,
+      frontXFile: frontXFile ?? this.frontXFile,
+      backXFile: backXFile ?? this.backXFile,
+      selfieXFile: selfieXFile ?? this.selfieXFile,
       isLoading: isLoading ?? this.isLoading,
       frontStatus: frontStatus ?? this.frontStatus,
       backStatus: backStatus ?? this.backStatus,
@@ -127,16 +159,26 @@ class VerificationNotifier extends Notifier<VerificationState> {
     state = state.copyWith(frontStatus: UploadStatus.picking);
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: ImageSource.gallery,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
       if (image != null) {
-        state = state.copyWith(
-          frontImage: File(image.path),
-          frontStatus: UploadStatus.success,
-        );
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          state = state.copyWith(
+            frontBytes: bytes,
+            frontXFile: image,
+            frontStatus: UploadStatus.success,
+          );
+        } else {
+          state = state.copyWith(
+            frontImage: File(image.path),
+            frontXFile: image,
+            frontStatus: UploadStatus.success,
+          );
+        }
       } else {
         state = state.copyWith(frontStatus: UploadStatus.idle);
       }
@@ -149,14 +191,26 @@ class VerificationNotifier extends Notifier<VerificationState> {
     state = state.copyWith(backStatus: UploadStatus.picking);
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
+        source: ImageSource.gallery,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
       if (image != null) {
-        state = state.copyWith(
-            backImage: File(image.path), backStatus: UploadStatus.success);
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          state = state.copyWith(
+            backBytes: bytes,
+            backXFile: image,
+            backStatus: UploadStatus.success,
+          );
+        } else {
+          state = state.copyWith(
+            backImage: File(image.path),
+            backXFile: image,
+            backStatus: UploadStatus.success,
+          );
+        }
       } else {
         state = state.copyWith(backStatus: UploadStatus.idle);
       }
@@ -169,15 +223,26 @@ class VerificationNotifier extends Notifier<VerificationState> {
     state = state.copyWith(selfieStatus: UploadStatus.picking);
     try {
       final XFile? image = await _picker.pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.front,
+        source: ImageSource.gallery,
         maxWidth: 1080,
         maxHeight: 1080,
         imageQuality: 80,
       );
       if (image != null) {
-        state = state.copyWith(
-            selfieImage: File(image.path), selfieStatus: UploadStatus.success);
+        if (kIsWeb) {
+          final bytes = await image.readAsBytes();
+          state = state.copyWith(
+            selfieBytes: bytes,
+            selfieXFile: image,
+            selfieStatus: UploadStatus.success,
+          );
+        } else {
+          state = state.copyWith(
+            selfieImage: File(image.path),
+            selfieXFile: image,
+            selfieStatus: UploadStatus.success,
+          );
+        }
       } else {
         state = state.copyWith(selfieStatus: UploadStatus.idle);
       }
@@ -197,23 +262,47 @@ class VerificationNotifier extends Notifier<VerificationState> {
         'document_type': docType,
       });
 
-      if (state.frontImage != null) {
-        formData.files.add(MapEntry(
-          'front',
-          await MultipartFile.fromFile(state.frontImage!.path, filename: 'front.jpg'),
-        ));
-      }
-      if (state.backImage != null) {
-        formData.files.add(MapEntry(
-          'back',
-          await MultipartFile.fromFile(state.backImage!.path, filename: 'back.jpg'),
-        ));
-      }
-      if (state.selfieImage != null) {
-        formData.files.add(MapEntry(
-          'selfie',
-          await MultipartFile.fromFile(state.selfieImage!.path, filename: 'selfie.jpg'),
-        ));
+      if (kIsWeb) {
+        if (state.frontXFile != null) {
+          final bytes = await state.frontXFile!.readAsBytes();
+          formData.files.add(MapEntry(
+            'front',
+            MultipartFile.fromBytes(bytes, filename: 'front.jpg'),
+          ));
+        }
+        if (state.backXFile != null) {
+          final bytes = await state.backXFile!.readAsBytes();
+          formData.files.add(MapEntry(
+            'back',
+            MultipartFile.fromBytes(bytes, filename: 'back.jpg'),
+          ));
+        }
+        if (state.selfieXFile != null) {
+          final bytes = await state.selfieXFile!.readAsBytes();
+          formData.files.add(MapEntry(
+            'selfie',
+            MultipartFile.fromBytes(bytes, filename: 'selfie.jpg'),
+          ));
+        }
+      } else {
+        if (state.frontImage != null) {
+          formData.files.add(MapEntry(
+            'front',
+            await MultipartFile.fromFile(state.frontImage!.path, filename: 'front.jpg'),
+          ));
+        }
+        if (state.backImage != null) {
+          formData.files.add(MapEntry(
+            'back',
+            await MultipartFile.fromFile(state.backImage!.path, filename: 'back.jpg'),
+          ));
+        }
+        if (state.selfieImage != null) {
+          formData.files.add(MapEntry(
+            'selfie',
+            await MultipartFile.fromFile(state.selfieImage!.path, filename: 'selfie.jpg'),
+          ));
+        }
       }
 
       await _dio.post('/kyc/upload', data: formData);
@@ -257,6 +346,13 @@ class VerificationNotifier extends Notifier<VerificationState> {
             : null,
       );
     } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: '__session_expired__',
+        );
+        return;
+      }
       final msg = e.response?.data?['detail'] ?? 'Error al consultar estado';
       state = state.copyWith(
         isLoading: false,
@@ -268,6 +364,14 @@ class VerificationNotifier extends Notifier<VerificationState> {
         errorMessage: 'Error inesperado',
       );
     }
+  }
+
+  /// Called when the camera dialog captures a photo directly as bytes.
+  void setSelfieFromBytes(Uint8List bytes) {
+    state = state.copyWith(
+      selfieBytes: bytes,
+      selfieStatus: UploadStatus.success,
+    );
   }
 
   void reset() {

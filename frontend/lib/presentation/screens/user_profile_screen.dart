@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:image_picker/image_picker.dart';
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +36,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   
   // [NEW] Editing State
   bool _isEditing = false;
+
+  // [NEW] Photo upload state
+  bool _isUploadingPhoto = false;
+
+  // Properties tab sort state
+  String _propertiesSortBy = 'newest';
 
   @override
   void initState() {
@@ -72,7 +79,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
        if (_phoneController.text != phone) _phoneController.text = phone;
     }
 
-    final isVerified = user.dniStatus == 'verified';
+    final isVerified = user.dniStatus?.toLowerCase() == 'validado';
 
     // Layout
     // Header -> Tabs -> Content
@@ -175,11 +182,41 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
         actions: [
-          TextButton.icon(
-             onPressed: () => context.go('/'),
-             icon: const Icon(Icons.home_outlined, size: 20, color: Colors.black54),
-             label: const Text('Inicio', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-          ),
+          MouseRegion(
+             cursor: SystemMouseCursors.click,
+             child: GestureDetector(
+               onTap: () => context.go('/'),
+               child: Container(
+                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                 decoration: BoxDecoration(
+                   color: const Color(0xFF2563EB),
+                   borderRadius: BorderRadius.circular(12),
+                   boxShadow: [
+                     BoxShadow(
+                       color: const Color(0xFF2563EB).withOpacity(0.25),
+                       blurRadius: 8,
+                       offset: const Offset(0, 2),
+                     ),
+                   ],
+                 ),
+                 child: const Row(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                     SizedBox(width: 6),
+                     Text(
+                       'Inicio',
+                       style: TextStyle(
+                         color: Colors.white,
+                         fontWeight: FontWeight.w600,
+                         fontSize: 13,
+                       ),
+                     ),
+                   ],
+                 ),
+               ),
+             ),
+           ),
           const SizedBox(width: 16),
           IconButton(icon: const Icon(Icons.notifications_outlined, color: Colors.grey), onPressed: () {}),
           const SizedBox(width: 8),
@@ -192,6 +229,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 offset: const Offset(0, 40),
                 tooltip: 'Menú de usuario',
                 color: Colors.white,
+                borderRadius: BorderRadius.circular(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 itemBuilder: (context) => [
                   if (_tabController.index == 0)
@@ -242,10 +280,32 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     _tabController.animateTo(0);
                   }
                 },
-                child: const CircleAvatar(
-                   radius: 16,
-                   backgroundColor: Color(0xFF2563EB), // Official Blue
-                   child: Icon(Icons.person, color: Colors.white, size: 20),
+                child: Consumer(
+                  builder: (context, ref, _) {
+                    final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
+                    final ts = DateTime.now().millisecondsSinceEpoch;
+                    return SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: ClipOval(
+                        child: photoUrl != null
+                            ? Image.network(
+                                '$photoUrl?v=$ts',
+                                width: 32,
+                                height: 32,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Container(
+                                  color: const Color(0xFF2563EB),
+                                  child: const Icon(Icons.person, color: Colors.white, size: 20),
+                                ),
+                              )
+                            : Container(
+                                color: const Color(0xFF2563EB),
+                                child: const Icon(Icons.person, color: Colors.white, size: 20),
+                              ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -253,6 +313,75 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           const SizedBox(width: 24),
         ],
       );
+  }
+
+  /// Opens the browser file picker and uploads the selected image as profile photo.
+  Future<void> _pickAndUploadPhoto() async {
+    final picker = ImagePicker();
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (image == null) return;
+
+    setState(() => _isUploadingPhoto = true);
+
+    final result = await ref.read(authProvider.notifier).uploadProfilePhoto(image);
+
+    if (mounted) {
+      setState(() => _isUploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['success'] == true
+              ? '✅ Foto de perfil actualizada'
+              : '❌ ${result['error'] ?? 'Error al subir la foto'}'),
+          backgroundColor: result['success'] == true
+              ? const Color(0xFF16A34A)
+              : Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteProfilePhoto() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar foto de perfil'),
+        content: const Text('¿Estás seguro de que quieres eliminar tu foto de perfil?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+
+    setState(() => _isUploadingPhoto = true);
+    final result = await ref.read(authProvider.notifier).deleteProfilePhoto();
+    if (mounted) {
+      setState(() => _isUploadingPhoto = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['success'] == true
+              ? 'Foto de perfil eliminada'
+              : result['error'] ?? 'Error al eliminar la foto'),
+          backgroundColor: result['success'] == true
+              ? const Color(0xFF16A34A)
+              : Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   // Header matching the image
@@ -274,24 +403,70 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4)),
                  ],
               ),
-              child: const Center(
-                child: Icon(Icons.person, size: 40, color: Colors.white),
+              child: ClipOval(
+                child: user.profilePhotoUrl != null
+                    ? Image.network(
+                        '${user.profilePhotoUrl}?v=${DateTime.now().millisecondsSinceEpoch}',
+                        width: 88,
+                        height: 88,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.person, size: 40, color: Colors.white),
+                      )
+                    : const Icon(Icons.person, size: 40, color: Colors.white),
               ),
             ),
-            if (_isEditing)
+            // Camera button — always visible
             Positioned(
               bottom: 0,
               right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF2563EB),
-                  shape: BoxShape.circle,
-                  border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 2)),
+              child: GestureDetector(
+                onTap: _isUploadingPhoto ? null : _pickAndUploadPhoto,
+                child: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2563EB),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withOpacity(0.3),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: _isUploadingPhoto
+                      ? const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
               ),
             ),
+            // Delete photo button — only visible when user has a photo
+            if (user.profilePhotoUrl != null)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: _isUploadingPhoto ? null : _deleteProfilePhoto,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade600,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(Icons.close, color: Colors.white, size: 12),
+                  ),
+                ),
+              ),
           ],
         ),
         const SizedBox(width: 24),
@@ -322,13 +497,29 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   ),
                   const SizedBox(width: 16),
                   if (isVerified)
-                     Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.check_circle, size: 16, color: Colors.green),
-                        const SizedBox(width: 4),
-                        Text('Verificado', style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
-                      ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green.shade400, width: 1.5),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.verified, size: 15, color: Colors.green.shade600),
+                          const SizedBox(width: 5),
+                          Text(
+                            'VERIFICADO',
+                            style: TextStyle(
+                              color: Colors.green.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
@@ -356,7 +547,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
          // Verification Banner if needed (Preserved)
-         if (!isVerified) _buildVerificationBanner(),
+         if (!isVerified) _buildVerificationBanner(user.dniStatus),
          
          if (isDesktop)
            Row(
@@ -487,7 +678,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isEditing ? const Color(0xFF16A34A) : const Color(0xFF0F172A), 
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: ref.watch(authProvider).isLoading && _isEditing 
@@ -679,7 +870,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   Widget _buildPropertiesTab() {
     // Mock Data logic...
     final allProperties = ref.watch(filteredByMapPropertiesProvider);
-    final myProperties = allProperties.take(2).toList(); 
+    var myProperties = allProperties.take(2).toList();
+
+    // Apply sort
+    myProperties = List.from(myProperties);
+    switch (_propertiesSortBy) {
+      case 'price_asc':
+        myProperties.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
+        break;
+      case 'price_desc':
+        myProperties.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
+        break;
+      case 'newest':
+      default:
+        // Keep original order (newest first assumed)
+        break;
+    }
 
     if (myProperties.isEmpty) {
       return _buildEmptyStateCard(small: false);
@@ -699,14 +905,35 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                  Text('Gestiona tus anuncios publicados y su estado.', style: TextStyle(color: Colors.grey, fontSize: 13)),
                ],
              ),
-             // Sort Dropdown mockup
-             Row(
-               children: [
-                 Text('Ordenar por: ', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-                 const Text('Más recientes', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                 const Icon(Icons.expand_more, size: 16),
-               ],
-             ),
+             // Sort Dropdown
+            SizedBox(
+              height: 40,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: DropdownButton<String>(
+                  value: _propertiesSortBy,
+                  underline: const SizedBox.shrink(),
+                  icon: Icon(Icons.expand_more, color: Colors.grey.shade400, size: 18),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF0F172A)),
+                  items: const [
+                    DropdownMenuItem(value: 'newest', child: Text('Más recientes')),
+                    DropdownMenuItem(value: 'price_asc', child: Text('Precio: menor a mayor')),
+                    DropdownMenuItem(value: 'price_desc', child: Text('Precio: mayor a menor')),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _propertiesSortBy = value);
+                  },
+                ),
+              ),
+            ),
            ],
          ),
          const SizedBox(height: 24),
@@ -981,7 +1208,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 });
               },
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 side: const BorderSide(color: Colors.red),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
@@ -1081,25 +1308,67 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     );
   }
 
-  Widget _buildVerificationBanner() {
+  Widget _buildVerificationBanner(String? dniStatus) {
+    final Color bgColor;
+    final Color borderColor;
+    final Color iconColor;
+    final IconData icon;
+    final String message;
+    final String buttonLabel;
+    final String destination;
+
+    if (dniStatus?.toLowerCase() == 'pendiente') {
+      bgColor = Colors.orange.shade50;
+      borderColor = Colors.orange.shade200;
+      iconColor = Colors.orange.shade700;
+      icon = Icons.hourglass_top;
+      message = 'Tu verificación está en curso. Te notificaremos cuando esté lista.';
+      buttonLabel = 'Ver Estado';
+      destination = '/verification-status';
+    } else if (dniStatus?.toLowerCase() == 'rechazado') {
+      bgColor = Colors.red.shade50;
+      borderColor = Colors.red.shade200;
+      iconColor = Colors.red.shade700;
+      icon = Icons.cancel_outlined;
+      message = 'Tu verificación fue rechazada. Puedes volver a intentarlo.';
+      buttonLabel = 'Reintentar';
+      destination = '/verify-identity';
+    } else {
+      bgColor = Colors.blue.shade50;
+      borderColor = Colors.blue.shade100;
+      iconColor = const Color(0xFF2563EB);
+      icon = Icons.shield;
+      message = 'Verifica tu identidad para mayor seguridad y destacar tus anuncios.';
+      buttonLabel = 'Verificar Ahora';
+      destination = '/verify-identity';
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          const Icon(Icons.shield, color: Color(0xFF2563EB)),
+          Icon(icon, color: iconColor),
           const SizedBox(width: 16),
-          const Expanded(
-            child: Text('Verifica tu identidad para mayor seguridad y destacar tus anuncios.', style: TextStyle(color: Color(0xFF1E293B))),
+          Expanded(
+            child: Text(message, style: const TextStyle(color: Color(0xFF1E293B))),
           ),
-          TextButton(
-            onPressed: () => context.push('/verify-identity'),
-            child: const Text('Verificar Ahora', style: TextStyle(fontWeight: FontWeight.bold)),
+          OutlinedButton(
+            onPressed: () => context.push(destination),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: iconColor,
+              side: BorderSide(color: borderColor, width: 1.5),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            ),
+            child: Text(buttonLabel,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),

@@ -1,306 +1,915 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
-import '../../widgets/common/premium_button.dart';
+import '../../widgets/common/app_bar_back_button.dart';
+import 'widgets/camera_capture_dialog.dart';
 import 'widgets/document_upload_card.dart';
 
-class IdentityVerificationScreen extends ConsumerWidget {
+class IdentityVerificationScreen extends ConsumerStatefulWidget {
   const IdentityVerificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<IdentityVerificationScreen> createState() =>
+      _IdentityVerificationScreenState();
+}
+
+class _IdentityVerificationScreenState
+    extends ConsumerState<IdentityVerificationScreen> {
+
+  /// Opens the camera dialog and stores the captured bytes as the selfie.
+  Future<void> _openCamera(VerificationNotifier notifier) async {
+    final bytes =
+        await CameraCaptureDialog.show(context, preferFront: true);
+    if (bytes == null || !mounted) return;
+    notifier.setSelfieFromBytes(bytes);
+  }
+
+  /// Returns true if the user has started filling anything
+  bool _hasProgress(VerificationState state) {
+    return state.selectedDocumentType != null ||
+        state.hasFront ||
+        state.hasBack ||
+        state.hasSelfie;
+  }
+
+  Future<bool> _confirmDiscard() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('¿Cancelar verificación?'),
+        content: const Text(
+          'Si sales ahora, los documentos subidos no se guardarán y tendrás que empezar de nuevo.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Seguir aquí'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Sí, cancelar'),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  Future<void> _tryNavigateAway(String destination) async {
+    final state = ref.read(verificationProvider);
+    if (_hasProgress(state)) {
+      final confirmed = await _confirmDiscard();
+      if (!confirmed) return;
+      ref.read(verificationProvider.notifier).reset();
+    }
+    if (mounted) context.go(destination);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(verificationProvider);
     final notifier = ref.read(verificationProvider.notifier);
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
 
-    // PageController is not strictly needed if we just switch content based on index,
-    // but PageView gives nice transitions. We use logic to switch page.
-    final PageController pageController =
-        PageController(initialPage: state.currentStepIndex);
-
-    // Sync PageController if state changes externally (e.g. back button logic)
-    // In a real build() we shouldn't trigger side effects, but for simple wizard steps it's often easier
-    // to build the view based on state directly. Let's use an AnimatedSwitcher or direct PageView.
-    // To keep it simple and robust:
-    if (pageController.hasClients &&
-        pageController.page?.round() != state.currentStepIndex) {
-      pageController.animateToPage(
-        state.currentStepIndex,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'Verifica tu Identidad',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (_hasProgress(state)) {
+          final confirmed = await _confirmDiscard();
+          if (confirmed) {
+            notifier.reset();
+            if (mounted) context.pop();
+          }
+        } else {
+          context.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: _buildAppBar(context, user),
+        body: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1100),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Card principal horizontal
+                    _buildMainCard(context, state, notifier),
+                    const SizedBox(height: 16),
+                    // RGPD footer
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        'Cumplimos estrictamente con el RGPD. Tus documentos y datos biométricos se cifran '
+                        'bajo el estándar AES-256 y se utilizan exclusivamente para la verificación legal '
+                        'de identidad en transacciones P2P.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _footerLink('Términos de Servicio'),
+                        const SizedBox(width: 16),
+                        _footerLink('Privacidad'),
+                        const SizedBox(width: 16),
+                        _footerLink('Ayuda'),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () {
-            if (state.currentStepIndex > 0) {
-              notifier.prevStep();
-            } else {
-              Navigator.of(context).pop();
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // AppBar (mismo estilo que UserProfileScreen)
+  // ──────────────────────────────────────────────
+  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic user) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: AppBarBackButton(
+          onPressed: () async {
+            final state = ref.read(verificationProvider);
+            if (_hasProgress(state)) {
+              final confirmed = await _confirmDiscard();
+              if (!confirmed) return;
+              ref.read(verificationProvider.notifier).reset();
             }
+            if (mounted) context.pop();
           },
         ),
       ),
-      body: Column(
-        children: [
-          // Trust Badge Header
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            color: Colors.blue[50],
-            child: Row(
+      title: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => _tryNavigateAway('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                        text: 'Inmu',
+                        style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(
+                        text: 'Fácil',
+                        style: TextStyle(color: Color(0xFF16A34A))),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Verificar Identidad',
+                  style: TextStyle(
+                    color: Color(0xFF2563EB),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: Colors.grey.shade200, height: 1),
+      ),
+      actions: [
+        // Botón Inicio
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => _tryNavigateAway('/'),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Avatar / icono de usuario
+        _buildUserAvatar(context, user),
+        const SizedBox(width: 16),
+      ],
+    );
+  }
+
+  Widget _buildUserAvatar(BuildContext context, dynamic user) {
+    final photoUrl = user?.profilePhotoUrl;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => _tryNavigateAway('/profile'),
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFEFF6FF),
+              border: Border.all(color: const Color(0xFF2563EB), width: 2),
+              image: photoUrl != null
+                  ? DecorationImage(
+                      image: NetworkImage(photoUrl),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: photoUrl == null
+                ? const Icon(Icons.person, size: 20, color: Color(0xFF2563EB))
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Card principal (layout horizontal)
+  // ──────────────────────────────────────────────
+  Widget _buildMainCard(
+      BuildContext context, VerificationState state, VerificationNotifier notifier) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header row ──
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 Icon(Icons.lock_outline, color: Colors.blue[800], size: 20),
-                const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Transferencia Segura (TLS) y Privacidad RGPD. Tus datos no son visibles públicamente.',
-                    style: TextStyle(color: Colors.blue[900], fontSize: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Verifica tu Identidad',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Confirmación de seguridad para transacciones P2P seguras.',
+                        style: TextStyle(
+                            color: Colors.grey.shade500, fontSize: 13),
+                      ),
+                    ],
+                  ),
+                ),
+                // Security badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFBFDBFE)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.verified_user_outlined,
+                          size: 16, color: Colors.blue.shade700),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('verified_user',
+                              style: TextStyle(
+                                  color: Colors.blue.shade700,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700)),
+                          Text('AES-256 Encrypted',
+                              style: TextStyle(
+                                  color: Colors.blue.shade400,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-          
-          // Progress Indicator
-          LinearProgressIndicator(
-            value: (state.currentStepIndex + 1) / 4,
-            backgroundColor: Colors.grey[200],
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
-          ),
 
-          Expanded(
-            child: PageView(
-              controller: pageController,
-              physics: const NeverScrollableScrollPhysics(), // Disable swipe
+            const SizedBox(height: 20),
+
+            // ── Progress bar ──
+            _buildProgressBar(state),
+
+            const SizedBox(height: 24),
+
+            // ── 3 columnas horizontales ──
+            LayoutBuilder(builder: (context, constraints) {
+              final step1Done = state.selectedDocumentType != null;
+              final step2Done = state.hasFront && state.hasBack;
+              final isWide = constraints.maxWidth > 500;
+              if (isWide) {
+                return IntrinsicHeight(
+                  child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Col 1+2: Doc type + scan
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildSectionLabel('1', 'Tipo de documento'),
+                          const SizedBox(height: 12),
+                          _buildDocumentTypeSelector(state, notifier),
+                          const SizedBox(height: 24),
+                          _buildSectionLabel('2', 'Escaneo de Documento',
+                              locked: !step1Done),
+                          const SizedBox(height: 12),
+                          _lockedWrapper(
+                            locked: !step1Done,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: DocumentUploadCard(
+                                    title: 'Parte Frontal',
+                                    onTap: notifier.pickFrontImage,
+                                    imageFile:
+                                        kIsWeb ? null : state.frontImage,
+                                    imageBytes:
+                                        kIsWeb ? state.frontBytes : null,
+                                    status: state.frontStatus,
+                                    compact: true,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: DocumentUploadCard(
+                                    title: 'Parte Trasera',
+                                    onTap: notifier.pickBackImage,
+                                    imageFile:
+                                        kIsWeb ? null : state.backImage,
+                                    imageBytes:
+                                        kIsWeb ? state.backBytes : null,
+                                    status: state.backStatus,
+                                    compact: true,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    // Col 3: Selfie
+                    Expanded(
+                      flex: 1,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          _buildSectionLabel('3', 'Prueba de vida',
+                              locked: !step2Done),
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: _lockedWrapper(
+                              locked: !step2Done,
+                              child: _buildSelfieSection(state, notifier),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ));
+              } else {
+                // Mobile: vertical stack
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionLabel('1', 'Tipo de documento'),
+                    const SizedBox(height: 12),
+                    _buildDocumentTypeSelector(state, notifier),
+                    const SizedBox(height: 24),
+                    _buildSectionLabel('2', 'Escaneo de Documento',
+                        locked: !step1Done),
+                    const SizedBox(height: 12),
+                    _lockedWrapper(
+                      locked: !step1Done,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: DocumentUploadCard(
+                              title: 'Parte Frontal',
+                              onTap: notifier.pickFrontImage,
+                              imageFile: kIsWeb ? null : state.frontImage,
+                              imageBytes: kIsWeb ? state.frontBytes : null,
+                              status: state.frontStatus,
+                              compact: true,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DocumentUploadCard(
+                              title: 'Parte Trasera',
+                              onTap: notifier.pickBackImage,
+                              imageFile: kIsWeb ? null : state.backImage,
+                              imageBytes: kIsWeb ? state.backBytes : null,
+                              status: state.backStatus,
+                              compact: true,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionLabel('3', 'Prueba de vida',
+                        locked: !step2Done),
+                    const SizedBox(height: 12),
+                    _lockedWrapper(
+                      locked: !step2Done,
+                      child: _buildSelfieSection(state, notifier),
+                    ),
+                  ],
+                );
+              }
+            }),
+
+            const SizedBox(height: 28),
+
+            // ── Error ──
+            if (state.errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.red.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.error_outline,
+                          color: Colors.red.shade700, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          state.errorMessage!,
+                          style: TextStyle(
+                              color: Colors.red.shade700, fontSize: 13),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // ── Footer: SSL + botones ──
+            Row(
               children: [
-                _buildStep1DocumentType(notifier),
-                _buildStep2Scan(context, state, notifier),
-                _buildStep3Selfie(context, state, notifier),
-                _buildStep4Review(context, state, notifier),
+                // SSL badge
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline,
+                        size: 14, color: Colors.grey.shade500),
+                    const SizedBox(width: 4),
+                    Text(
+                      'SSL SECURE',
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                // Botón Cancelar — mismo estilo que en Seguridad y Privacidad
+                OutlinedButton(
+                  onPressed: () async {
+                    final state = ref.read(verificationProvider);
+                    if (_hasProgress(state)) {
+                      final confirmed = await _confirmDiscard();
+                      if (!confirmed) return;
+                      ref.read(verificationProvider.notifier).reset();
+                    }
+                    if (mounted) context.pop();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    side: const BorderSide(color: Colors.red),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Cancelar',
+                      style: TextStyle(color: Colors.red)),
+                ),
+                const SizedBox(width: 12),
+                // Botón Enviar — mismo estilo que en Seguridad y Privacidad
+                if (state.isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2)),
+                  )
+                else
+                  ElevatedButton.icon(
+                    onPressed: _canSubmit(state)
+                        ? () => _submit(notifier)
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _canSubmit(state)
+                          ? const Color(0xFF0F172A)
+                          : Colors.grey.shade300,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.arrow_forward, size: 18),
+                    label: const Text(
+                      'Enviar Verificación',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep1DocumentType(VerificationNotifier notifier) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Selecciona tu documento',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Necesitamos validar tu identidad legal para activar tu cuenta.',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 32),
-          _buildOptionCard('D.N.I Espa\u00f1ol', Icons.credit_card,
-              () => notifier.setDocumentType(DocumentType.dni),),
-          const SizedBox(height: 16),
-          _buildOptionCard('N.I.E / Residencia', Icons.badge_outlined,
-              () => notifier.setDocumentType(DocumentType.nie),),
-          const SizedBox(height: 16),
-          _buildOptionCard('Pasaporte', Icons.menu_book,
-              () => notifier.setDocumentType(DocumentType.pasaporte),),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOptionCard(String text, IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.blue[600], size: 28),
-            const SizedBox(width: 16),
-            Text(
-              text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-            const Spacer(),
-            Icon(Icons.chevron_right, color: Colors.grey[400]),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildStep2Scan(BuildContext context, VerificationState state,
-      VerificationNotifier notifier,) {
-    bool canProceed = state.frontImage != null && state.backImage != null;
+  // ──────────────────────────────────────────────
+  // Progress bar
+  // ──────────────────────────────────────────────
+  Widget _buildProgressBar(VerificationState state) {
+    // Count completed steps: docType, front, back, selfie
+    int completed = 0;
+    if (state.selectedDocumentType != null) completed++;
+    if (state.hasFront) completed++;
+    if (state.hasBack) completed++;
+    if (state.hasSelfie) completed++;
+    final progress = completed / 4.0;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Escanea tu documento',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Aseg\u00farate de que la imagen sea clara y legible.',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 24),
-          DocumentUploadCard(
-            title: 'Frente del Documento',
-            onTap: notifier.pickFrontImage,
-            imageFile: state.frontImage,
-            status: state.frontStatus,
-          ),
-          const SizedBox(height: 16),
-          DocumentUploadCard(
-            title: 'Reverso del Documento',
-            onTap: notifier.pickBackImage,
-            imageFile: state.backImage,
-            status: state.backStatus,
-          ),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: PremiumButton(
-              label: 'Continuar',
-              color: canProceed ? Colors.blue : Colors.grey,
-              onPressed: canProceed ? notifier.nextStep : () {},
-            ),
-          ),
-        ],
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(4),
+      child: LinearProgressIndicator(
+        value: progress,
+        minHeight: 4,
+        backgroundColor: const Color(0xFFE2E8F0),
+        valueColor:
+            const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
       ),
     );
   }
 
-  Widget _buildStep3Selfie(BuildContext context, VerificationState state,
-      VerificationNotifier notifier,) {
-    bool canProceed = state.selfieImage != null;
+  // ──────────────────────────────────────────────
+  // Section label (with optional locked state)
+  // ──────────────────────────────────────────────
+  Widget _buildSectionLabel(String number, String text,
+      {bool locked = false}) {
+    return Row(
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: locked ? Colors.grey.shade300 : const Color(0xFF2563EB),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: locked
+                ? Icon(Icons.lock_outline, size: 13, color: Colors.grey.shade500)
+                : Text(
+                    number,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: locked ? Colors.grey.shade400 : const Color(0xFF1E293B),
+          ),
+        ),
+      ],
+    );
+  }
 
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
+  // ──────────────────────────────────────────────
+  // Locked section overlay
+  // ──────────────────────────────────────────────
+  Widget _lockedWrapper({required bool locked, required Widget child}) {
+    if (!locked) return child;
+    return IgnorePointer(child: child);
+  }
+
+  // ──────────────────────────────────────────────
+  // Document type chips
+  // ──────────────────────────────────────────────
+  Widget _buildDocumentTypeSelector(
+      VerificationState state, VerificationNotifier notifier) {
+    return Row(
+      children: [
+        _buildDocTypeChip('DNI', Icons.credit_card, DocumentType.dni,
+            state.selectedDocumentType, notifier),
+        const SizedBox(width: 8),
+        _buildDocTypeChip('NIE', Icons.badge_outlined, DocumentType.nie,
+            state.selectedDocumentType, notifier),
+        const SizedBox(width: 8),
+        _buildDocTypeChip('Pasap.', Icons.menu_book, DocumentType.pasaporte,
+            state.selectedDocumentType, notifier),
+      ],
+    );
+  }
+
+  Widget _buildDocTypeChip(String label, IconData icon, DocumentType type,
+      DocumentType? selected, VerificationNotifier notifier) {
+    final isSelected = selected == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => notifier.selectDocumentType(type),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFFEFF6FF)
+                : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFF2563EB)
+                  : const Color(0xFFE2E8F0),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF94A3B8),
+                  size: 18),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? const Color(0xFF2563EB)
+                      : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ──────────────────────────────────────────────
+  // Selfie section
+  // ──────────────────────────────────────────────
+  Widget _buildSelfieSection(
+      VerificationState state, VerificationNotifier notifier) {
+    final hasSelfie = state.hasSelfie;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         children: [
-          const Text(
-            'Prueba de Vida',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Toma una selfie para asegurar que eres t\u00fa.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 48),
+          // Face circle
           GestureDetector(
             onTap: notifier.pickSelfie,
             child: Container(
-              width: 200,
-              height: 200,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey[100],
+                color: Colors.white,
                 border: Border.all(
-                    color: state.selfieImage != null
-                        ? Colors.green
-                        : Colors.blue[200]!,
-                    width: 4,),
-                image: state.selfieImage != null
+                  color: hasSelfie
+                      ? Colors.green
+                      : const Color(0xFFCBD5E1),
+                  width: hasSelfie ? 3 : 2,
+                ),
+                image: hasSelfie
                     ? DecorationImage(
-                        image: FileImage(state.selfieImage!),
+                        image: kIsWeb && state.selfieBytes != null
+                            ? MemoryImage(state.selfieBytes!)
+                            : (!kIsWeb && state.selfieImage != null
+                                ? FileImage(state.selfieImage!)
+                                : const AssetImage('assets/images/logo_inmufacil.png'))
+                                    as ImageProvider,
                         fit: BoxFit.cover,
                       )
                     : null,
               ),
-              child: state.selfieImage == null
-                  ? Icon(Icons.face, size: 80, color: Colors.blue[300])
+              child: !hasSelfie
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.face,
+                            size: 36, color: Colors.blue.shade200),
+                        const SizedBox(height: 2),
+                        Text(
+                          'face',
+                          style: TextStyle(
+                              color: Colors.blue.shade200,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    )
                   : null,
             ),
           ),
-          const SizedBox(height: 16),
-          TextButton.icon(
-            onPressed: notifier.pickSelfie,
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Abrir C\u00e1mara Frontal'),
-          ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: PremiumButton(
-              label: 'Revisar y Enviar',
-              color: canProceed ? Colors.blue : Colors.grey,
-              onPressed: canProceed ? notifier.nextStep : () {},
+          const SizedBox(height: 10),
+          Text(
+            'Centra tu rostro',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1E293B),
             ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            'Iluminación uniforme, sin accesorios',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+          ),
+          const SizedBox(height: 12),
+          if (state.selfieStatus == UploadStatus.picking)
+            const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2))
+          else
+            OutlinedButton.icon(
+              onPressed: () => _openCamera(notifier),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: hasSelfie
+                    ? Colors.green
+                    : const Color(0xFF2563EB),
+                side: BorderSide(
+                    color: hasSelfie
+                        ? Colors.green
+                        : const Color(0xFF2563EB)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 8),
+              ),
+              icon: Icon(
+                  hasSelfie ? Icons.check_circle_outline : Icons.camera_alt,
+                  size: 16),
+              label: Text(
+                hasSelfie ? 'Repetir foto' : 'Iniciar Cámara',
+                style: const TextStyle(
+                    fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildStep4Review(BuildContext context, VerificationState state,
-      VerificationNotifier notifier,) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        children: [
-          const Icon(Icons.shield_outlined, size: 64, color: Colors.blue),
-          const SizedBox(height: 24),
-          const Text(
-            'Listo para verificar',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Tus documentos se enviar\u00e1n de forma segura a nuestros servidores para su validaci\u00f3n manual.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
-          const Spacer(),
-          if (state.isLoading)
-            const CircularProgressIndicator()
-          else
-            SizedBox(
-              width: double.infinity,
-              child: PremiumButton(
-                label: 'Enviar Verificación',
-                color: Colors.blue,
-                onPressed: () async {
-                   bool success = await notifier.submitVerification();
-                   if (success) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                       const SnackBar(content: Text('Documentos enviados correctamente')),
-                     );
-                     context.pop(); // GoRouter pop
-                   }
-                },
-              ),
-            ),
-          const SizedBox(height: 16),
-        ],
+  // ──────────────────────────────────────────────
+  // Footer link
+  // ──────────────────────────────────────────────
+  Widget _footerLink(String text) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Color(0xFF2563EB),
+          fontSize: 12,
+          decoration: TextDecoration.underline,
+          decorationColor: Color(0xFF2563EB),
+        ),
       ),
     );
+  }
+
+  // ──────────────────────────────────────────────
+  // Helpers
+  // ──────────────────────────────────────────────
+  bool _canSubmit(VerificationState state) {
+    return state.selectedDocumentType != null &&
+        state.hasFront &&
+        state.hasBack &&
+        state.hasSelfie;
+  }
+
+  Future<void> _submit(VerificationNotifier notifier) async {
+    final success = await notifier.submitVerification();
+    if (success && mounted) {
+      // Refresh auth state so the profile banner reflects the new KYC status
+      await ref.read(authProvider.notifier).refreshUser();
+      if (mounted) context.go('/verification-status');
+    }
   }
 }

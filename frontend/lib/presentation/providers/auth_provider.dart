@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../domain/entities/user.dart';
 
 // Configuration - Move to Env in production
@@ -80,6 +81,14 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       throw Exception('Failed to load user profile: $e');
     }
+  }
+
+  /// Refresh the current user profile from the API (e.g. after KYC submission).
+  Future<void> refreshUser() async {
+    try {
+      final user = await _fetchUserProfile();
+      state = state.copyWith(user: user);
+    } catch (_) {}
   }
 
   /// Login with Email and Password
@@ -218,6 +227,54 @@ class AuthNotifier extends Notifier<AuthState> {
     } on DioException catch (e) {
       final msg = e.response?.data['detail'] ?? 'Error al cambiar contraseña';
       return {'success': false, 'error': msg is String ? msg : 'Error al cambiar contraseña'};
+    } catch (e) {
+      return {'success': false, 'error': 'Error inesperado'};
+    }
+  }
+
+  /// Upload or replace profile photo
+  Future<Map<String, dynamic>> uploadProfilePhoto(XFile imageFile) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      // Detect MIME from extension (more reliable on web than XFile.mimeType)
+      final ext = imageFile.name.split('.').last.toLowerCase();
+      const extToMime = {
+        'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+        'png': 'image/png', 'webp': 'image/webp', 'gif': 'image/gif',
+      };
+      final mimeType = extToMime[ext] ?? imageFile.mimeType ?? 'image/jpeg';
+      final parts = mimeType.split('/');
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: imageFile.name,
+          contentType: DioMediaType(parts[0], parts.length > 1 ? parts[1] : 'jpeg'),
+        ),
+      });
+
+      final response = await _dio.post('/users/me/photo', data: formData);
+      final updatedUser = User.fromJson(response.data);
+      state = state.copyWith(user: updatedUser);
+      return {'success': true, 'url': updatedUser.profilePhotoUrl};
+    } on DioException catch (e) {
+      final msg = e.response?.data['detail'] ?? 'Error al subir la foto';
+      return {'success': false, 'error': msg is String ? msg : 'Error al subir la foto'};
+    } catch (e) {
+      return {'success': false, 'error': 'Error inesperado'};
+    }
+  }
+
+  Future<Map<String, dynamic>> deleteProfilePhoto() async {
+    try {
+      await _dio.delete('/users/me/photo');
+      final updatedUser = state.user?.copyWith(clearProfilePhoto: true);
+      if (updatedUser != null) {
+        state = state.copyWith(user: updatedUser);
+      }
+      return {'success': true};
+    } on DioException catch (e) {
+      final msg = e.response?.data['detail'] ?? 'Error al eliminar la foto';
+      return {'success': false, 'error': msg is String ? msg : 'Error al eliminar la foto'};
     } catch (e) {
       return {'success': false, 'error': 'Error inesperado'};
     }

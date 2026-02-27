@@ -47,6 +47,7 @@ class UserResponse(UserBase):
     updated_at: Optional[datetime] = None
     rejection_reason: Optional[str] = None
     phone: Optional[str] = None
+    profile_photo_url: Optional[str] = None
 
     class Config:
         from_attributes = True

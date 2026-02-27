@@ -16,9 +16,9 @@ class User(Base):
     is_active = Column(Boolean, default=True)  # Soft delete support
     full_name = Column(String, nullable=False)
     dni_status = Column(
-        Enum(DNIStatus), 
-        default=DNIStatus.PENDIENTE, 
-        nullable=False
+        Enum(DNIStatus),
+        default=DNIStatus.SIN_VERIFICAR,
+        nullable=True,
     )
     user_type = Column(
         Enum(UserType), 
@@ -44,6 +44,9 @@ class User(Base):
     
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
+
+    # Profile Photo
+    profile_photo_url = Column(String, nullable=True)
 
     # Provider Fields (Hito 17 - Service Marketplace)
     provider_category = Column(String, nullable=True) # e.g. "NOTARY", "VALUER"
