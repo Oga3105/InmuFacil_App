@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:inmufacil_frontend/presentation/providers/verification_provider.dart';
@@ -32,7 +34,6 @@ class DashedBorderPainter extends CustomPainter {
         Radius.circular(radius),
       ));
 
-    // Draw dashed path
     final metrics = path.computeMetrics();
     for (final metric in metrics) {
       double distance = 0;
@@ -67,19 +68,12 @@ class CornerMarkPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    // Top-left
     canvas.drawLine(Offset(0, length), const Offset(0, 0), paint);
     canvas.drawLine(const Offset(0, 0), Offset(length, 0), paint);
-
-    // Top-right
     canvas.drawLine(Offset(size.width - length, 0), Offset(size.width, 0), paint);
     canvas.drawLine(Offset(size.width, 0), Offset(size.width, length), paint);
-
-    // Bottom-left
     canvas.drawLine(Offset(0, size.height - length), Offset(0, size.height), paint);
     canvas.drawLine(Offset(0, size.height), Offset(length, size.height), paint);
-
-    // Bottom-right
     canvas.drawLine(Offset(size.width - length, size.height), Offset(size.width, size.height), paint);
     canvas.drawLine(Offset(size.width, size.height - length), Offset(size.width, size.height), paint);
   }
@@ -95,53 +89,53 @@ class DocumentUploadCard extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.imageFile,
+    this.imageBytes,
     required this.status,
     this.compact = false,
   });
   final String title;
   final VoidCallback onTap;
+  /// Native platforms: File reference
   final File? imageFile;
+  /// Web: raw bytes for preview
+  final Uint8List? imageBytes;
   final UploadStatus status;
   final bool compact;
 
+  bool get _hasImage => imageBytes != null || imageFile != null;
+
   @override
   Widget build(BuildContext context) {
-    final hasImage = imageFile != null;
-    final height = compact ? 140.0 : 180.0;
+    final height = compact ? 200.0 : 220.0;
 
     return GestureDetector(
       onTap: onTap,
       child: CustomPaint(
-        painter: hasImage ? null : DashedBorderPainter(
+        painter: _hasImage ? null : DashedBorderPainter(
           color: const Color(0xFFCBD5E1),
           radius: 12,
         ),
         child: CustomPaint(
-          painter: hasImage ? null : CornerMarkPainter(),
+          painter: _hasImage ? null : CornerMarkPainter(),
           child: Container(
             height: height,
             decoration: BoxDecoration(
-              color: hasImage ? null : const Color(0xFFF8FAFC),
+              color: _hasImage ? null : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(12),
-              border: hasImage
+              border: _hasImage
                   ? Border.all(color: Colors.green.shade400, width: 2)
                   : null,
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                if (hasImage)
+                if (_hasImage)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      imageFile!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                    child: _buildImage(),
                   ),
 
-                if (!hasImage)
+                if (!_hasImage)
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -173,7 +167,7 @@ class DocumentUploadCard extends StatelessWidget {
                 if (status == UploadStatus.picking)
                   const CircularProgressIndicator(),
 
-                if (hasImage)
+                if (_hasImage)
                   Positioned(
                     top: 8,
                     right: 8,
@@ -192,5 +186,25 @@ class DocumentUploadCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImage() {
+    if (kIsWeb && imageBytes != null) {
+      return Image.memory(
+        imageBytes!,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
+    if (!kIsWeb && imageFile != null) {
+      return Image.file(
+        imageFile!,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
+    return const SizedBox.shrink();
   }
 }

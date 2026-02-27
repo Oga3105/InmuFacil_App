@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
+import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/premium_button.dart';
 
 class VerificationStatusScreen extends ConsumerStatefulWidget {
@@ -25,20 +27,11 @@ class _VerificationStatusScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(verificationProvider);
 
+    final user = ref.watch(authProvider).user;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text(
-          'Estado de Verificación',
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => context.go('/profile'),
-        ),
-      ),
+      appBar: _buildAppBar(context, user),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.errorMessage != null
@@ -55,6 +48,112 @@ class _VerificationStatusScreenState
                     ),
                   ),
                 ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic user) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: AppBarBackButton(
+          onPressed: () => context.go('/profile'),
+        ),
+      ),
+      title: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                        text: 'Inmu',
+                        style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(
+                        text: 'Fácil',
+                        style: TextStyle(color: Color(0xFF16A34A))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: Colors.grey.shade200, height: 1),
+      ),
+      actions: [
+        // Botón Inicio
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        // Avatar
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: () => context.go('/profile'),
+              child: user?.profilePhotoUrl != null
+                  ? CircleAvatar(
+                      radius: 18,
+                      backgroundImage: NetworkImage(user!.profilePhotoUrl!),
+                    )
+                  : const CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Color(0xFFE2E8F0),
+                      child: Icon(Icons.person, size: 20, color: Color(0xFF64748B)),
+                    ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
