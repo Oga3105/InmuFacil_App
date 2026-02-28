@@ -14,6 +14,7 @@ import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.d
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/offers_provider.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -1232,6 +1233,10 @@ class _MapNavigationBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+    final receivedOffers = ref.watch(receivedOffersProvider).asData?.value;
+    final sentOffers = ref.watch(sentOffersProvider).asData?.value;
+    final hasOffers = isAuthenticated &&
+        ((receivedOffers?.isNotEmpty ?? false) || (sentOffers?.isNotEmpty ?? false));
     
     void handleProtectedAction(String route) {
       if (isAuthenticated) {
@@ -1350,16 +1355,17 @@ class _MapNavigationBar extends ConsumerWidget {
                              ],
                           ),
                         ),
-                        const PopupMenuItem(
-                          value: 'contracts',
-                          child: Row(
-                             children: [
-                               Icon(Icons.description_outlined, size: 20),
-                               SizedBox(width: 8),
-                               Text('Mis Contratos'),
-                             ],
+                        if (hasOffers)
+                          PopupMenuItem(
+                            value: 'offers',
+                            child: Row(
+                              children: const [
+                                Icon(Icons.local_offer_outlined, size: 20),
+                                SizedBox(width: 8),
+                                Text('Ver Ofertas'),
+                              ],
+                            ),
                           ),
-                        ),
                         const PopupMenuItem(
                           value: 'logout',
                           child: Row(
@@ -1383,8 +1389,8 @@ class _MapNavigationBar extends ConsumerWidget {
                            context.push('/profile');
                         } else if (value == 'my-properties') {
                            context.push('/profile?tab=1');
-                        } else if (value == 'contracts') {
-                           context.push('/contracts');
+                        } else if (value == 'offers') {
+                           context.push('/profile?tab=1');
                         }
                       },
                       child: Builder(builder: (context) {
