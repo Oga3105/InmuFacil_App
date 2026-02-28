@@ -21,6 +21,7 @@ class Property { // Added
     required this.createdAt,
     required this.updatedAt,
     this.status,
+    this.ownerId,
   });
   final String id;
   final String title;
@@ -39,6 +40,8 @@ class Property { // Added
   final DateTime updatedAt;
   // 'published' | 'draft' | 'unpublished' | 'reserved' | 'sold'
   final String? status;
+  /// The backend user ID of the seller who listed this property.
+  final String? ownerId;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;

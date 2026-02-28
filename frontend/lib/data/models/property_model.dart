@@ -26,6 +26,7 @@ class PropertyModel {
     required this.isVerified,
     required this.createdAt,
     required this.updatedAt,
+    this.ownerId,
   });
   
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
@@ -76,6 +77,7 @@ class PropertyModel {
       isVerified: json['is_verified'] as bool? ?? true,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+      ownerId: json['seller_id']?.toString(),
     );
   }
   final int id;
@@ -94,6 +96,7 @@ class PropertyModel {
   final bool isVerified;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? ownerId;
   
   /// Convert to domain entity
   Property toEntity() {
@@ -113,6 +116,7 @@ class PropertyModel {
       isVerified: isVerified,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      ownerId: ownerId,
     );
   }
   
