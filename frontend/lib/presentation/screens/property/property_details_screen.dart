@@ -369,9 +369,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.chat_bubble_outline),
-                    label: const Text('Chat'),
+                    onPressed: () => context.push('/property/${property.id}/visit'),
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    label: const Text('Solicitar Visita'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF0f172a),
                       side: const BorderSide(color: Color(0xFF0f172a), width: 2),
@@ -383,14 +383,15 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.calendar_today),
-                    label: const Text('Visitar'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF135bec),
+                  child: FilledButton.icon(
+                    onPressed: () => context.push(
+                      '/property/${property.id}/offer?price=${property.price}',
+                    ),
+                    icon: const Icon(Icons.gavel_rounded),
+                    label: const Text('Hacer Oferta'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
-                      elevation: 4,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -746,43 +747,63 @@ class _SummaryCard extends StatelessWidget {
           _OwnerCard(),
           const SizedBox(height: 24),
           // Actions
-          Row(
-             children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.chat_bubble_outline, size: 20, color: Color(0xFF0f172a)),
-                        SizedBox(width: 8),
-                        Text('Chat Directo', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 1,
-                  child: ElevatedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.calendar_month, color: Colors.white), // White Icon
-                    label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)), // White Text
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB), // Brand Blue like Publicar Gratis
-                      elevation: 8, // Shadow effect
-                      shadowColor: const Color(0xFF2563EB).withOpacity(0.4),
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          context.push('/property/${property.id}/visit'),
+                      icon: const Icon(Icons.calendar_month_outlined, size: 20),
+                      label: const Text('Solicitar Visita',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF0f172a),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        side: const BorderSide(
+                            color: Color(0xFF0f172a), width: 2),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: () => context.push(
+                        '/property/${property.id}/offer?price=${property.price}',
+                      ),
+                      icon: const Icon(Icons.gavel_rounded, size: 20),
+                      label: const Text('Hacer Oferta',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: () =>
+                    context.push('/property/${property.id}/offers'),
+                icon: const Icon(Icons.list_alt_outlined, size: 20),
+                label: const Text('Gestionar Ofertas',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF2563EB),
+                  side: const BorderSide(color: Color(0xFF2563EB)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-             ],
+              ),
+            ],
           ),
         ],
       ),
