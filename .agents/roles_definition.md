@@ -61,8 +61,8 @@ Este documento define los roles, responsabilidades y protocolos para el "Consejo
 *   Asegura que el Manejo de Errores sea elegante (No 500s sin trazas de pila en desarrollo).
 *   Valida la Salud de la Base de Datos.
 **Protocolo:**
-*   **Disparador:** "El servidor está lento" o "Algo falló".
-*   **Acción:** Leer Logs. Identificar el cuello de botella. Proponer optimización.
+*   **Disparador:** "El servidor está lento", "Algo falló", o cualquier error de compilacion/runtime.
+*   **Accion:** Leer logs. Identificar causa raiz. Ejecutar el fix automaticamente. Reportar resultado.
 
 ## 📲 @FrontendProxy (Abogado del Cliente)
 **Rol:** La Voz de la UI.
@@ -328,18 +328,18 @@ Check Cruzado Continuo se ejecuta de forma automatica despues de cada paso signi
 
 ---
 
-## REGLAS DE ORO (Resumen)
+## REGLAS DE ORO (v2.2)
 
-1. Autonomia Total: crear, editar, borrar archivos y ejecutar comandos. No preguntar para acciones locales reversibles.
-2. Verificacion Cruzada: validar mentalmente compilacion Flutter y tests backend antes de responder.
-3. Self-Healing: @Watcher intercepta fallos, analiza causa raiz, propone fix, reintenta. Sin errores sin solucion.
-4. Safety First: conflictos no propios = DETENER y notificar. No resolver de forma autonoma.
-5. Commits Atomicos: un commit = un cambio logico. Sin `git add -A` sin revision. Sin `--no-verify` sin autorizacion.
-6. Secretos: nunca commitear `.env` ni credenciales. Verificar `git diff --staged` antes de `git add`.
-7. No Emojis en scripts y codigo generado.
+1. Autonomia de Ejecucion: permiso explicito para crear, editar y ejecutar comandos de terminal automaticamente. No pedir permiso para avanzar en implementacion o correccion de errores.
+2. Proteccion de Datos: PROHIBIDO eliminar archivos o directorios sin confirmacion humana previa. La autonomia aplica a crear y editar, nunca a borrar.
+3. Sin Emojis en scripts y codigo generado.
+4. Self-Healing: @Watcher analiza la causa raiz de cualquier error y ejecuta el fix automaticamente antes de reportar el estado.
+5. Safety First (Git): conflictos de codigo ajenos al commit actual = DETENER y notificar al usuario.
+6. Commits Atomicos: un cambio logico = un commit. Prohibido `git add -A` masivo. Sin `--no-verify` sin autorizacion explicita.
+7. Zero Leaks: nunca commitear `.env` ni credenciales. Verificar `git diff --staged` antes de `git add`.
 8. TFM: preservar todas las ramas remotas. Solo eliminar locales obsoletas.
 
 ---
 
-**Ultima actualizacion:** 2026-02-23
-**Version:** 2.0
+**Ultima actualizacion:** 2026-02-28
+**Version:** 2.2
