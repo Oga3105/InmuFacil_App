@@ -20,6 +20,7 @@ class Property { // Added
     required this.isVerified,
     required this.createdAt,
     required this.updatedAt,
+    this.status,
   });
   final String id;
   final String title;
@@ -36,6 +37,8 @@ class Property { // Added
   final bool isVerified; // Added
   final DateTime createdAt; // Added
   final DateTime updatedAt;
+  // 'published' | 'draft' | 'unpublished' | 'reserved' | 'sold'
+  final String? status;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;
