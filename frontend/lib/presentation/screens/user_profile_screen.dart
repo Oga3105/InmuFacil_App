@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
-import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
@@ -966,27 +965,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             if (myProperties.isEmpty)
               _buildEmptyStateCard(small: false)
             else
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 350,
-                  mainAxisExtent: 440,
-                  crossAxisSpacing: 24,
-                  mainAxisSpacing: 24,
-                ),
-                itemCount: myProperties.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == myProperties.length) {
-                    return _buildAddPropertyPlaceholder();
-                  }
-                  final p = myProperties[index];
-                  return _buildOwnerPropertyCard(p);
-                },
+              Column(
+                children: [
+                  ...myProperties.map((p) => _buildPropertyListRow(p)),
+                  const SizedBox(height: 8),
+                  _buildAddPropertyBanner(),
+                ],
               ),
           ],
         );
@@ -1010,112 +998,226 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     );
   }
 
-  Widget _buildOwnerPropertyCard(Property p) {
-    return Column(
-      children: [
-        Expanded(
-          child: PropertyFloatingCard(
-            property: p,
-            onTap: () => context.push('/property/${p.id}/edit'),
-            width: double.infinity,
-            ownerMode: true,
-          ),
-        ),
-        const SizedBox(height: 6),
-        _buildStatusActions(p),
-      ],
-    );
-  }
+  // ---- Property list row (nueva vista lista) ----
 
-  Widget _buildStatusActions(Property p) {
+  Widget _buildPropertyListRow(Property p) {
     final status = p.status ?? 'published';
-    final notifier = ref.read(myPropertiesProvider.notifier);
+    final imageUrl = (p.images.isNotEmpty) ? p.images.first : null;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (status == 'draft') ...[
-          _actionBtn('Publicar', const Color(0xFF16A34A), () async {
-            await notifier.updateStatus(p.id, 'published');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Eliminar', Colors.red.shade600, () async {
-            await notifier.deleteProperty(p.id);
-          }),
-        ] else if (status == 'published') ...[
-          _actionBtn('Ofertas', const Color(0xFFF59E0B), () {
-            context.push('/property/${p.id}/offers');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Retirar', Colors.grey.shade600, () async {
-            await notifier.updateStatus(p.id, 'unpublished');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Editar', const Color(0xFF2563EB), () {
-            context.push('/property/${p.id}/edit');
-          }),
-        ] else if (status == 'unpublished') ...[
-          _actionBtn('Ofertas', const Color(0xFFF59E0B), () {
-            context.push('/property/${p.id}/offers');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Publicar', const Color(0xFF16A34A), () async {
-            await notifier.updateStatus(p.id, 'published');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Editar', const Color(0xFF2563EB), () {
-            context.push('/property/${p.id}/edit');
-          }),
-          const SizedBox(width: 8),
-          _actionBtn('Eliminar', Colors.red.shade600, () async {
-            await notifier.deleteProperty(p.id);
-          }),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
-      ],
-    );
-  }
-
-  Widget _actionBtn(String label, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: color.withOpacity(0.4)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: imageUrl != null
+                  ? Image.network(
+                      imageUrl,
+                      width: 80,
+                      height: 70,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _thumbPlaceholder(),
+                    )
+                  : _thumbPlaceholder(),
+            ),
+            const SizedBox(width: 14),
+            // Title + status + location
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          p.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: Color(0xFF1E293B),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      _StatusPill(status: status),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined,
+                          size: 13, color: Color(0xFF94A3B8)),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          p.address.isNotEmpty ? p.address : p.location.toString(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Price + views
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '${_formatPrice(p.price)}\u20AC',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF2563EB),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.visibility_outlined,
+                        size: 13, color: Color(0xFF94A3B8)),
+                    SizedBox(width: 3),
+                    Text(
+                      '— vistas',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF94A3B8),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            // Gestionar button
+            _GestionarMenu(
+              property: p,
+              onView: () => context.push('/property/${p.id}'),
+              onEdit: () => context.push('/property/${p.id}/edit'),
+              onDeactivate: () async {
+                final target = status == 'published' ? 'unpublished' : 'published';
+                await ref.read(myPropertiesProvider.notifier).updateStatus(p.id, target);
+              },
+              onDelete: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    title: const Text('Eliminar propiedad'),
+                    content: const Text('Esta accion no se puede deshacer. La propiedad sera eliminada permanentemente.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: const Text('Eliminar'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref.read(myPropertiesProvider.notifier).deleteProperty(p.id);
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildAddPropertyPlaceholder() {
+  Widget _thumbPlaceholder() => Container(
+        width: 80,
+        height: 70,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(Icons.home_outlined, color: Colors.grey.shade400, size: 28),
+      );
+
+  String _formatPrice(double price) {
+    final s = price.toStringAsFixed(0);
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+
+  Widget _buildAddPropertyBanner() {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFCBD5E1), style: BorderStyle.solid, width: 2), // Dashed borders need custom painter usually, solid is fine for MVP or use CustomPaint
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: InkWell(
-        onTap: () => context.push('/property/create'), // Publicar
-        borderRadius: BorderRadius.circular(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(color: Colors.grey.shade200, shape: BoxShape.circle),
-              child: const Icon(Icons.add_home_outlined, size: 32, color: Color(0xFF94A3B8)),
-            ),
-            const SizedBox(height: 16),
-            const Text('¿Tienes otra propiedad?', style: TextStyle(color: Colors.grey, fontSize: 14)),
-            const SizedBox(height: 8),
-            const Text('Publicar otro anuncio', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-          ],
+        onTap: () => context.push('/property/create'),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            children: [
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Icon(Icons.home_work_outlined, size: 36, color: Colors.grey.shade400),
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2563EB),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.add, size: 12, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '\u00BFTienes otra propiedad?',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+              const SizedBox(height: 4),
+              const Text(
+                'Publicar otro anuncio ahora',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF2563EB),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1505,6 +1607,182 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Status Pill
+// ---------------------------------------------------------------------------
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    final cfg = _cfg(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: (cfg['color'] as Color).withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        cfg['label'] as String,
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          color: cfg['color'] as Color,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
+  }
+
+  Map<String, dynamic> _cfg(String s) {
+    switch (s) {
+      case 'published':
+        return {'label': 'ACTIVO', 'color': const Color(0xFF16A34A)};
+      case 'draft':
+        return {'label': 'BORRADOR', 'color': const Color(0xFFF59E0B)};
+      case 'unpublished':
+        return {'label': 'EN REVISION', 'color': const Color(0xFF6366F1)};
+      default:
+        return {'label': 'ACTIVO', 'color': const Color(0xFF16A34A)};
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Gestionar Menu
+// ---------------------------------------------------------------------------
+
+class _GestionarMenu extends StatelessWidget {
+  const _GestionarMenu({
+    required this.property,
+    required this.onView,
+    required this.onEdit,
+    required this.onDeactivate,
+    required this.onDelete,
+  });
+
+  final Property property;
+  final VoidCallback onView;
+  final VoidCallback onEdit;
+  final VoidCallback onDeactivate;
+  final VoidCallback onDelete;
+
+  bool get _isActive => (property.status ?? 'published') == 'published';
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      onSelected: (value) {
+        switch (value) {
+          case 'view':
+            onView();
+            break;
+          case 'edit':
+            onEdit();
+            break;
+          case 'deactivate':
+            onDeactivate();
+            break;
+          case 'delete':
+            onDelete();
+            break;
+        }
+      },
+      offset: const Offset(0, 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
+      elevation: 8,
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: 'view',
+          child: Row(
+            children: const [
+              Icon(Icons.open_in_new_rounded,
+                  size: 18, color: Color(0xFF475569)),
+              SizedBox(width: 12),
+              Text('Ver Propiedad',
+                  style: TextStyle(
+                      fontSize: 13, color: Color(0xFF1E293B))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'edit',
+          child: Row(
+            children: const [
+              Icon(Icons.edit_outlined,
+                  size: 18, color: Color(0xFF475569)),
+              SizedBox(width: 12),
+              Text('Editar',
+                  style: TextStyle(
+                      fontSize: 13, color: Color(0xFF1E293B))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'deactivate',
+          child: Row(
+            children: [
+              Icon(
+                _isActive
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                size: 18,
+                color: const Color(0xFF475569),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                _isActive ? 'Desactivar' : 'Activar',
+                style: const TextStyle(
+                    fontSize: 13, color: Color(0xFF1E293B)),
+              ),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(height: 1),
+        PopupMenuItem(
+          value: 'delete',
+          child: Row(
+            children: const [
+              Icon(Icons.delete_outline_rounded,
+                  size: 18, color: Color(0xFFDC2626)),
+              SizedBox(width: 12),
+              Text('Eliminar',
+                  style: TextStyle(
+                      fontSize: 13, color: Color(0xFFDC2626))),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.settings, size: 16, color: Colors.white),
+            SizedBox(width: 6),
+            Text(
+              'Gestionar',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
