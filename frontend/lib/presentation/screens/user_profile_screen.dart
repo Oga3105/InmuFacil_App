@@ -6,9 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
-import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // Using the updated card
+import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
+import '../widgets/common/app_bar_back_button.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   const UserProfileScreen({super.key, this.initialTabIndex = 0});
@@ -155,6 +156,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
+          ),
+        ),
         title: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
