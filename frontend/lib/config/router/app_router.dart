@@ -9,8 +9,14 @@ import '../../presentation/screens/kyc/identity_verification_screen.dart';
 import '../../presentation/screens/kyc/verification_status_screen.dart';
 import '../../presentation/screens/not_found/not_found_screen.dart';
 import '../../presentation/screens/property/property_details_screen.dart';
+import '../../presentation/screens/property/create_edit_property_screen.dart';
 import '../../presentation/screens/user_profile_screen.dart';
 import '../../presentation/screens/property_listing_screen.dart';
+import '../../presentation/screens/chat/chat_list_screen.dart';
+import '../../presentation/screens/chat/chat_detail_screen.dart';
+import '../../presentation/screens/visits/schedule_visit_screen.dart';
+import '../../presentation/screens/offers/make_offer_screen.dart';
+import '../../presentation/screens/offers/offer_management_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -101,6 +107,64 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => NotFoundScreen(uri: state.uri.toString()),
       ),
       
+      // Chat Routes
+      GoRoute(
+        path: '/chat',
+        name: 'chat-list',
+        builder: (context, state) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:offerId',
+        name: 'chat-detail',
+        builder: (context, state) {
+          final offerId = state.pathParameters['offerId']!;
+          return ChatDetailScreen(offerId: offerId);
+        },
+      ),
+
+      // Property Create (MUST be before /property/:id to avoid capture)
+      GoRoute(
+        path: '/property/create',
+        name: 'property-create',
+        builder: (context, state) => const CreateEditPropertyScreen(),
+      ),
+      // Property Edit
+      GoRoute(
+        path: '/property/:id/edit',
+        name: 'property-edit',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id'];
+          if (propertyId == null) return NotFoundScreen(uri: state.uri.toString());
+          return CreateEditPropertyScreen(editPropertyId: propertyId);
+        },
+      ),
+      // Property sub-routes (MUST be before /property/:id)
+      GoRoute(
+        path: '/property/:id/visit',
+        name: 'schedule-visit',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          return ScheduleVisitScreen(propertyId: propertyId);
+        },
+      ),
+      GoRoute(
+        path: '/property/:id/offer',
+        name: 'make-offer',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          final askingPrice =
+              double.tryParse(state.uri.queryParameters['price'] ?? '0') ?? 0;
+          return MakeOfferScreen(propertyId: propertyId, askingPrice: askingPrice);
+        },
+      ),
+      GoRoute(
+        path: '/property/:id/offers',
+        name: 'offer-management',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          return OfferManagementScreen(propertyId: propertyId);
+        },
+      ),
       // Property Details
       GoRoute(
         path: '/property/:id',
