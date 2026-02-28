@@ -5,8 +5,9 @@ import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
-import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
 import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // Using the updated card
+import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
@@ -40,8 +41,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   // [NEW] Photo upload state
   bool _isUploadingPhoto = false;
 
-  // Properties tab sort state
+  // Properties tab sort and filter state
   String _propertiesSortBy = 'newest';
+  String _propertiesStatusFilter = 'all';
 
   @override
   void initState() {
@@ -851,7 +853,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: () {},
+              onPressed: () => context.push('/property/create'),
               icon: const Icon(Icons.add_circle_outline, color: Color(0xFF2563EB), size: 18),
               label: const Text('Publicar Nueva Propiedad', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
@@ -868,104 +870,204 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   
   // Tab 2: Grid of Properties
   Widget _buildPropertiesTab() {
-    // Mock Data logic...
-    final allProperties = ref.watch(filteredByMapPropertiesProvider);
-    var myProperties = allProperties.take(2).toList();
+    final myPropertiesAsync = ref.watch(myPropertiesProvider);
 
-    // Apply sort
-    myProperties = List.from(myProperties);
-    switch (_propertiesSortBy) {
-      case 'price_asc':
-        myProperties.sort((a, b) => (a.price ?? 0).compareTo(b.price ?? 0));
-        break;
-      case 'price_desc':
-        myProperties.sort((a, b) => (b.price ?? 0).compareTo(a.price ?? 0));
-        break;
-      case 'newest':
-      default:
-        // Keep original order (newest first assumed)
-        break;
-    }
+    return myPropertiesAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, _) => Center(child: Text('Error al cargar propiedades: $err')),
+      data: (allProperties) {
+        // Apply status filter
+        var myProperties = _propertiesStatusFilter == 'all'
+            ? allProperties
+            : allProperties.where((p) => p.status == _propertiesStatusFilter).toList();
 
-    if (myProperties.isEmpty) {
-      return _buildEmptyStateCard(small: false);
-    }
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-         Row(
-           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-           children: [
-             const Column(
-               crossAxisAlignment: CrossAxisAlignment.start,
-               children: [
-                 Text('Tus Propiedades', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                 SizedBox(height: 4),
-                 Text('Gestiona tus anuncios publicados y su estado.', style: TextStyle(color: Colors.grey, fontSize: 13)),
-               ],
-             ),
-             // Sort Dropdown
-            SizedBox(
-              height: 40,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: DropdownButton<String>(
-                  value: _propertiesSortBy,
-                  underline: const SizedBox.shrink(),
-                  icon: Icon(Icons.expand_more, color: Colors.grey.shade400, size: 18),
-                  style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF0F172A)),
-                  items: const [
-                    DropdownMenuItem(value: 'newest', child: Text('Más recientes')),
-                    DropdownMenuItem(value: 'price_asc', child: Text('Precio: menor a mayor')),
-                    DropdownMenuItem(value: 'price_desc', child: Text('Precio: mayor a menor')),
+        // Apply sort
+        myProperties = List.from(myProperties);
+        switch (_propertiesSortBy) {
+          case 'price_asc':
+            myProperties.sort((a, b) => a.price.compareTo(b.price));
+            break;
+          case 'price_desc':
+            myProperties.sort((a, b) => b.price.compareTo(a.price));
+            break;
+          case 'newest':
+          default:
+            break;
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Tus Propiedades', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                    SizedBox(height: 4),
+                    Text('Gestiona tus anuncios y su estado.', style: TextStyle(color: Colors.grey, fontSize: 13)),
                   ],
-                  onChanged: (value) {
-                    if (value != null) setState(() => _propertiesSortBy = value);
-                  },
                 ),
+                SizedBox(
+                  height: 40,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: DropdownButton<String>(
+                      value: _propertiesSortBy,
+                      underline: const SizedBox.shrink(),
+                      icon: Icon(Icons.expand_more, color: Colors.grey.shade400, size: 18),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF0F172A)),
+                      items: const [
+                        DropdownMenuItem(value: 'newest', child: Text('Más recientes')),
+                        DropdownMenuItem(value: 'price_asc', child: Text('Precio: menor a mayor')),
+                        DropdownMenuItem(value: 'price_desc', child: Text('Precio: mayor a menor')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) setState(() => _propertiesSortBy = value);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Status filter chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('all', 'Todas'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('published', 'Publicadas'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('draft', 'Borradores'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('unpublished', 'No publicadas'),
+                ],
               ),
             ),
-           ],
-         ),
-         const SizedBox(height: 24),
-         
-         // GRID
-         GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 350,
-              mainAxisExtent: 380, // Height of card
-              crossAxisSpacing: 24,
-              mainAxisSpacing: 24,
-            ),
-            itemCount: myProperties.length + 1, // +1 for "Add New" placeholder
-            itemBuilder: (context, index) {
-              
-              // Last Item: "Add New" Placeholder
-              if (index == myProperties.length) {
-                return _buildAddPropertyPlaceholder();
-              }
-              
-              final p = myProperties[index];
-              
-              return PropertyFloatingCard(
-                property: p,
-                onTap: () {},
-                width: double.infinity,
-              );
-            },
-         ),
+            const SizedBox(height: 24),
+            if (myProperties.isEmpty)
+              _buildEmptyStateCard(small: false)
+            else
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 350,
+                  mainAxisExtent: 440,
+                  crossAxisSpacing: 24,
+                  mainAxisSpacing: 24,
+                ),
+                itemCount: myProperties.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == myProperties.length) {
+                    return _buildAddPropertyPlaceholder();
+                  }
+                  final p = myProperties[index];
+                  return _buildOwnerPropertyCard(p);
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterChip(String value, String label) {
+    final isSelected = _propertiesStatusFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => setState(() => _propertiesStatusFilter = value),
+      selectedColor: const Color(0xFF2563EB).withOpacity(0.15),
+      checkmarkColor: const Color(0xFF2563EB),
+      labelStyle: TextStyle(
+        color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade700,
+        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        fontSize: 12,
+      ),
+    );
+  }
+
+  Widget _buildOwnerPropertyCard(Property p) {
+    return Column(
+      children: [
+        Expanded(
+          child: PropertyFloatingCard(
+            property: p,
+            onTap: () => context.push('/property/${p.id}/edit'),
+            width: double.infinity,
+            ownerMode: true,
+          ),
+        ),
+        const SizedBox(height: 6),
+        _buildStatusActions(p),
       ],
+    );
+  }
+
+  Widget _buildStatusActions(Property p) {
+    final status = p.status ?? 'published';
+    final notifier = ref.read(myPropertiesProvider.notifier);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (status == 'draft') ...[
+          _actionBtn('Publicar', const Color(0xFF16A34A), () async {
+            await notifier.updateStatus(p.id, 'published');
+          }),
+          const SizedBox(width: 8),
+          _actionBtn('Eliminar', Colors.red.shade600, () async {
+            await notifier.deleteProperty(p.id);
+          }),
+        ] else if (status == 'published') ...[
+          _actionBtn('Retirar', Colors.grey.shade600, () async {
+            await notifier.updateStatus(p.id, 'unpublished');
+          }),
+          const SizedBox(width: 8),
+          _actionBtn('Editar', const Color(0xFF2563EB), () {
+            context.push('/property/${p.id}/edit');
+          }),
+        ] else if (status == 'unpublished') ...[
+          _actionBtn('Publicar', const Color(0xFF16A34A), () async {
+            await notifier.updateStatus(p.id, 'published');
+          }),
+          const SizedBox(width: 8),
+          _actionBtn('Editar', const Color(0xFF2563EB), () {
+            context.push('/property/${p.id}/edit');
+          }),
+          const SizedBox(width: 8),
+          _actionBtn('Eliminar', Colors.red.shade600, () async {
+            await notifier.deleteProperty(p.id);
+          }),
+        ],
+      ],
+    );
+  }
+
+  Widget _actionBtn(String label, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+        ),
+      ),
     );
   }
 
@@ -977,7 +1079,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
         border: Border.all(color: const Color(0xFFCBD5E1), style: BorderStyle.solid, width: 2), // Dashed borders need custom painter usually, solid is fine for MVP or use CustomPaint
       ),
       child: InkWell(
-        onTap: () {}, // Publicar
+        onTap: () => context.push('/property/create'), // Publicar
         borderRadius: BorderRadius.circular(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1021,8 +1123,18 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
              textAlign: TextAlign.center,
              style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic),),
            const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: () => context.push('/property/create'),
+            icon: const Icon(Icons.add_home_outlined, size: 18),
+            label: const Text('Publicar propiedad'),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 8),
            TextButton(
-             onPressed: (){}, 
+             onPressed: (){},
              child: const Text('Ver mis borradores', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
            ),
          ],

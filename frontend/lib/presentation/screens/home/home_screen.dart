@@ -1314,7 +1314,7 @@ class _MapNavigationBar extends ConsumerWidget {
                   const SizedBox(width: 12),
                   PremiumButton(
                     label: 'Publicar propiedad',
-                    onPressed: () => handleProtectedAction('/404-publish'),
+                    onPressed: () => handleProtectedAction('/property/create'),
                     color: const Color(0xFF2563EB),
                     fontSize: 13,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

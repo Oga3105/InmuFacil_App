@@ -34,6 +34,60 @@
 
   <title>inmufacil_frontend</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /*
+     * Fix: Flutter Web sets cursor:text on flt-glass-pane for text fields.
+     * The system I-beam cursor can be white on Windows, making it invisible
+     * on light backgrounds. We override it via JS (MutationObserver) below.
+     */
+  </style>
+
+  <script>
+    // Dark I-beam cursor SVG (dark fill + white outline = visible on any bg)
+    // Hotspot: 8,10 (center of the vertical bar)
+    (function () {
+      var svgCursor =
+        "data:image/svg+xml," +
+        "%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='24'%3E" +
+        "%3Cline x1='10' y1='0' x2='10' y2='24' stroke='white' stroke-width='5'/%3E" +
+        "%3Cline x1='4'  y1='1' x2='16' y2='1'  stroke='white' stroke-width='4'/%3E" +
+        "%3Cline x1='4'  y1='23' x2='16' y2='23' stroke='white' stroke-width='4'/%3E" +
+        "%3Cline x1='10' y1='0' x2='10' y2='24' stroke='%231E293B' stroke-width='2'/%3E" +
+        "%3Cline x1='5'  y1='1' x2='15' y2='1'  stroke='%231E293B' stroke-width='2'/%3E" +
+        "%3Cline x1='5'  y1='23' x2='15' y2='23' stroke='%231E293B' stroke-width='2'/%3E" +
+        "%3C/svg%3E";
+
+      var textCursorValue = 'url("' + svgCursor + '") 10 12, text';
+
+      function patchCursor(el) {
+        if (el && el.style && el.style.cursor === 'text') {
+          el.style.cursor = textCursorValue;
+        }
+      }
+
+      window.addEventListener('load', function () {
+        var interval = setInterval(function () {
+          var pane = document.querySelector('flt-glass-pane');
+          if (!pane) return;
+          clearInterval(interval);
+
+          var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+              if (m.type === 'attributes' && m.attributeName === 'style') {
+                patchCursor(m.target);
+              }
+            });
+          });
+
+          observer.observe(pane, {
+            attributes: true,
+            attributeFilter: ['style']
+          });
+        }, 100);
+      });
+    })();
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
