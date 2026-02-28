@@ -78,7 +78,7 @@ class PropertyModel {
       isVerified: json['is_verified'] as bool? ?? true,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
-      ownerId: json['seller_id']?.toString(),
+      ownerId: (json['seller_id'] ?? json['owner_id'])?.toString(),
       allowVisits: json['allow_visits'] as bool? ?? true,
     );
   }
