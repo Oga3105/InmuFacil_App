@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Back button for AppBars — same hover style as the property navigation arrows.
-/// White circle by default; animates to brand blue (#135BEC) on hover/press.
+/// Back button for AppBars.
+/// Default: transparent background, blue arrow.
+/// Hover/Press: blue circle (#135BEC) + white arrow.
 class AppBarBackButton extends StatefulWidget {
   const AppBarBackButton({
     super.key,
@@ -18,9 +19,11 @@ class AppBarBackButton extends StatefulWidget {
 
 class _AppBarBackButtonState extends State<AppBarBackButton> {
   bool _hovered = false;
+  bool _pressed = false;
 
   static const _blue = Color(0xFF135BEC);
-  static const _dark = Color(0xFF0F172A);
+
+  bool get _active => _hovered || _pressed;
 
   @override
   Widget build(BuildContext context) {
@@ -32,30 +35,29 @@ class _AppBarBackButtonState extends State<AppBarBackButton> {
         onExit: (_) => setState(() => _hovered = false),
         child: GestureDetector(
           onTap: widget.onPressed,
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 180),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _hovered ? _blue : Colors.white.withValues(alpha: 0.95),
+              color: _active ? _blue : Colors.transparent,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: _hovered
-                      ? _blue.withValues(alpha: 0.35)
-                      : Colors.black.withValues(alpha: 0.10),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-              border: Border.all(
-                color: _hovered ? _blue : Colors.grey.shade200,
-                width: 1,
-              ),
+              boxShadow: _active
+                  ? [
+                      BoxShadow(
+                        color: _blue.withValues(alpha: 0.30),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : [],
             ),
             child: Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 18,
-              color: _hovered ? Colors.white : _dark,
+              color: _active ? Colors.white : _blue,
             ),
           ),
         ),

@@ -126,6 +126,7 @@ class _CreateEditPropertyScreenState
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
+      automaticallyImplyLeading: false,
       // -- Leading: Cancel (x) ------------------------------------------------------
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
