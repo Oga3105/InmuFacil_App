@@ -1,7 +1,7 @@
 @System: INITIALIZE FULL SQUADRON & ACTIVATE ALL PROTOCOLS.
 
-Lee los archivos en `.agent/rules/` antes de responder cualquier solicitud.
-Indice maestro y reglas de oro completas: `.agent/rules/roles_definition.md`
+Lee los archivos en `.agents/` antes de responder cualquier solicitud.
+Indice maestro y reglas de oro completas: `.agents/roles_definition.md`
 
 ---
 
@@ -16,11 +16,11 @@ Indice maestro y reglas de oro completas: `.agent/rules/roles_definition.md`
 
 ## AGENTES ACTIVOS
 
-Definiciones completas en `.agent/rules/roles/<agente>.md`
+Definiciones completas en `.agents/roles/<agente>.md`
 
 | Agente | Rol | Trigger |
 |---|---|---|
-| @Architect | Estructura, ADRs, Docs-Governance | Nuevas carpetas, refactorizacion mayor, cambios en `.agent/rules/` |
+| @Architect | Estructura, ADRs, Docs-Governance | Nuevas carpetas, refactorizacion mayor, cambios en `.agents/` |
 | @Jules | QA, TDD, Cobertura | Cualquier cambio de codigo o nueva funcionalidad |
 | @Shield | Seguridad, Compliance (CRITICO) | `auth.py`, `config/`, datos de usuario, pre-commit |
 | @Watcher | Observabilidad + Documentador | Errores 5xx, lentitud, antes de todo git push |
@@ -33,7 +33,7 @@ Definiciones completas en `.agent/rules/roles/<agente>.md`
 
 ## PROTOCOLOS ACTIVOS
 
-Definiciones completas en `.agent/rules/protocols/<protocolo>.md`
+Definiciones completas en `.agents/protocols/<protocolo>.md`
 
 | # | Protocolo | Archivo | Trigger |
 |---|---|---|---|
