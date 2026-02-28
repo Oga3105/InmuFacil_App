@@ -12,12 +12,14 @@ class PropertyFloatingCard extends ConsumerWidget {
     required this.onTap,
     this.width,
     this.height,
+    this.ownerMode = false,
   });
   final Property property;
   final VoidCallback onTap;
 
   final double? width;
   final double? height;
+  final bool ownerMode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -107,6 +109,13 @@ class PropertyFloatingCard extends ConsumerWidget {
                     ),
                     child: const Icon(Icons.verified, color: Color(0xFF16A34A), size: 16),
                   ),
+                ),
+              // Status badge (owner mode only)
+              if (ownerMode && property.status != null)
+                Positioned(
+                  bottom: 10,
+                  left: 10,
+                  child: _buildStatusBadge(property.status!),
                 ),
               // Favorite Button
               Positioned(
@@ -238,6 +247,53 @@ class PropertyFloatingCard extends ConsumerWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    late Color bg;
+    late Color fg;
+    late IconData icon;
+    late String label;
+
+    switch (status) {
+      case 'published':
+        bg = const Color(0xFFDCFCE7);
+        fg = const Color(0xFF16A34A);
+        icon = Icons.check_circle_outline;
+        label = 'Publicado';
+        break;
+      case 'draft':
+        bg = const Color(0xFFFEF9C3);
+        fg = const Color(0xFFCA8A04);
+        icon = Icons.edit_note;
+        label = 'Borrador';
+        break;
+      default: // unpublished
+        bg = const Color(0xFFF1F5F9);
+        fg = const Color(0xFF64748B);
+        icon = Icons.visibility_off_outlined;
+        label = 'No publicado';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: fg),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.bold),
           ),
         ],
       ),
