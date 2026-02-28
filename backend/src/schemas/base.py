@@ -7,11 +7,11 @@ Prevents sensitive data exposure in API responses.
 """
 
 from pydantic import BaseModel, EmailStr, Field, validator
-from typing import Optional, List
+from typing import Literal, Optional, List
 from datetime import datetime
 from backend.src.models import (
-    PropertyType, OperationType, Orientation, HeatingType, 
-    ConservationState, EnergyCertification, ITEStatus, 
+    PropertyType, OperationType, Orientation, HeatingType,
+    ConservationState, EnergyCertification, ITEStatus,
     NotaSimpleStatus, CrimeRate, MediaType
 )
 
@@ -183,44 +183,96 @@ class PropertyBase(BaseModel):
     title: str = Field(..., min_length=5, max_length=200)
     description: Optional[str] = None
     price: float = Field(..., gt=0)
-    location: str = Field(..., min_length=3, max_length=200)
+    location: Optional[str] = Field(None, max_length=200)
     surface_area: float = Field(..., gt=0)
-    
+
+    # Structured address
+    street: Optional[str] = None
+    street_number: Optional[str] = None
+    floor: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    postal_code: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    hide_exact_location: bool = False
+
     property_type: PropertyType = PropertyType.PISO
     operation_type: OperationType = OperationType.VENTA
 
 
 class PropertyCreate(PropertyBase):
     """
-    Schema for property creation. 
+    Schema for property creation.
     Includes optional nested data for advanced intelligence.
+    status defaults to published; pass 'draft' to save without full validation.
     """
+    status: Optional[str] = Field(None, pattern="^(draft|published|unpublished|reserved|sold)$")
     features: Optional[PropertyFeaturesSchema] = None
     legal: Optional[PropertyLegalSchema] = None
     financial: Optional[PropertyFinancialSchema] = None
-    # Environment usually populated by system, but allowed for manual override if needed
-    
+
     class Config:
         use_enum_values = True
+
+
+class PropertyDraftCreate(BaseModel):
+    """
+    Schema for saving a draft — all fields optional.
+    Only property_type is expected; everything else may be empty.
+    """
+    status: str = Field("draft", pattern="^(draft|published|unpublished)$")
+    property_type: Optional[str] = None
+    operation_type: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = Field(None, ge=0)
+    surface_area: Optional[float] = Field(None, ge=0)
+    location: Optional[str] = None
+    street: Optional[str] = None
+    street_number: Optional[str] = None
+    floor: Optional[str] = None
+    city: Optional[str] = None
+    province: Optional[str] = None
+    postal_code: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    hide_exact_location: bool = False
+    features: Optional[PropertyFeaturesSchema] = None
+
+    class Config:
+        use_enum_values = True
+
+
+class StatusUpdate(BaseModel):
+    """Schema for PATCH /{id}/status endpoint."""
+    status: Literal["draft", "published", "unpublished"]
 
 
 class PropertyResponse(PropertyBase):
     """
     Schema for property details in responses.
+    Overrides required fields as Optional to support draft records with empty data.
     """
+    # Drafts may have empty required fields — make them optional in responses
+    title: Optional[str] = None
+    price: Optional[float] = None
+    surface_area: Optional[float] = None
+
     id: int
     owner_id: int
+    status: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     features: Optional[PropertyFeaturesSchema] = None
     legal: Optional[PropertyLegalSchema] = None
     financial: Optional[PropertyFinancialSchema] = None
     environment: Optional[PropertyEnvironmentSchema] = None
-    
+
     # Media list
     media: List[PropertyMediaResponse] = []
-    
+
     # Computed fields
     gross_yield: Optional[float] = None
     price_m2: Optional[float] = None

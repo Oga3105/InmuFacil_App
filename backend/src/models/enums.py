@@ -76,7 +76,9 @@ class Orientation(str, enum.Enum):
     SUROESTE = "suroeste"
 
 class PropertyStatus(str, enum.Enum):
+    DRAFT = "draft"
     PUBLISHED = "published"
+    UNPUBLISHED = "unpublished"
     RESERVED = "reserved" # Hito 8
     SOLD = "sold"
 
