@@ -573,6 +573,10 @@ class _SlotsPanel extends StatelessWidget {
                             : isAvailable
                                 ? const Color(0xFF1E293B)
                                 : Colors.grey.shade400,
+                        decoration: isAvailable
+                            ? null
+                            : TextDecoration.lineThrough,
+                        decorationColor: Colors.grey.shade400,
                       ),
                     ),
                   ),

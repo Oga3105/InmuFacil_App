@@ -1711,7 +1711,7 @@ class _GestionarMenu extends StatelessWidget {
           value: 'view',
           child: Row(
             children: const [
-              Icon(Icons.open_in_new_rounded,
+              Icon(Icons.house_outlined,
                   size: 18, color: Color(0xFF475569)),
               SizedBox(width: 12),
               Text('Ver Propiedad',
@@ -1724,7 +1724,7 @@ class _GestionarMenu extends StatelessWidget {
           value: 'offers',
           child: Row(
             children: const [
-              Icon(Icons.local_offer_outlined,
+              Icon(Icons.payments_outlined,
                   size: 18, color: Color(0xFF475569)),
               SizedBox(width: 12),
               Text('Ver Ofertas',

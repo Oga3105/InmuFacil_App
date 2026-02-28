@@ -111,6 +111,7 @@ class PropertyFormState {
     this.hasWardrobes = false,
     this.hasExterior = false,
     this.hasAccessibility = false,
+    this.allowVisits = true,
     // Meta
     this.status = PropertyFormStatus.idle,
     this.errorMessage,
@@ -156,6 +157,7 @@ class PropertyFormState {
   final bool hasWardrobes;
   final bool hasExterior;
   final bool hasAccessibility;
+  final bool allowVisits;
   // Meta
   final PropertyFormStatus status;
   final String? errorMessage;
@@ -207,6 +209,7 @@ class PropertyFormState {
     bool? hasWardrobes,
     bool? hasExterior,
     bool? hasAccessibility,
+    bool? allowVisits,
     PropertyFormStatus? status,
     String? errorMessage,
     bool clearErrorMessage = false,
@@ -254,6 +257,7 @@ class PropertyFormState {
       hasWardrobes: hasWardrobes ?? this.hasWardrobes,
       hasExterior: hasExterior ?? this.hasExterior,
       hasAccessibility: hasAccessibility ?? this.hasAccessibility,
+      allowVisits: allowVisits ?? this.allowVisits,
       status: status ?? this.status,
       errorMessage:
           clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
@@ -573,6 +577,15 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
     }
   }
 
+  void toggleAllowVisits() {
+    state = state.copyWith(allowVisits: !state.allowVisits);
+  }
+
+  /// Patch only allow_visits for a specific property (used from details screen).
+  Future<void> patchAllowVisits(String propertyId, {required bool value}) async {
+    await _dio.patch('/properties/$propertyId', data: {'allow_visits': value});
+  }
+
   // ---------------------------------------------------------------------------
   // Load for edit
   // ---------------------------------------------------------------------------
@@ -662,6 +675,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         hasWardrobes: (features['has_wardrobes'] as bool?) ?? false,
         hasExterior: (features['has_exterior'] as bool?) ?? false,
         hasAccessibility: (features['has_accessibility'] as bool?) ?? false,
+        allowVisits: (data['allow_visits'] as bool?) ?? true,
       );
     } on DioException catch (e) {
       final msg = e.response?.data?['detail'] ?? 'Error al cargar la propiedad';
@@ -898,6 +912,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'hide_exact_location': state.hideExactLocation,
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
+      'allow_visits': state.allowVisits,
       'features': {
         'bedrooms': state.bedrooms,
         'bathrooms': state.bathrooms,

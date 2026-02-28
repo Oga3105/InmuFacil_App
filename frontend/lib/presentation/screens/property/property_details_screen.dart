@@ -11,6 +11,7 @@ import '../../../domain/entities/property_type.dart'; // [FIX] Import added
 import '../../providers/search_provider.dart';
 import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
 import '../../providers/auth_provider.dart';
+import '../../providers/property_form_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -866,6 +867,8 @@ class _ActionBar extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
+            const SizedBox(height: 8),
+            _OwnerVisitsToggle(property: property, ref: ref),
           ],
         ],
       );
@@ -936,9 +939,53 @@ class _ActionBar extends StatelessWidget {
                 ),
               ),
             ),
+            _OwnerVisitsToggle(property: property, ref: ref),
           ],
         ],
       ),
+    );
+  }
+}
+
+class _OwnerVisitsToggle extends StatefulWidget {
+  const _OwnerVisitsToggle({required this.property, required this.ref});
+  final Property property;
+  final WidgetRef ref;
+
+  @override
+  State<_OwnerVisitsToggle> createState() => _OwnerVisitsToggleState();
+}
+
+class _OwnerVisitsToggleState extends State<_OwnerVisitsToggle> {
+  late bool _allowVisits;
+
+  @override
+  void initState() {
+    super.initState();
+    _allowVisits = widget.property.allowVisits;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      title: const Text('Permitir visitas', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+      subtitle: Text(
+        _allowVisits ? 'Los interesados pueden solicitar visita' : 'Visitas desactivadas',
+        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+      ),
+      value: _allowVisits,
+      onChanged: (v) async {
+        setState(() => _allowVisits = v);
+        try {
+          await widget.ref.read(propertyFormProvider.notifier).patchAllowVisits(
+            widget.property.id,
+            value: v,
+          );
+        } catch (_) {
+          setState(() => _allowVisits = !v);
+        }
+      },
     );
   }
 }

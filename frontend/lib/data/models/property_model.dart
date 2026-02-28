@@ -27,8 +27,9 @@ class PropertyModel {
     required this.createdAt,
     required this.updatedAt,
     this.ownerId,
+    this.allowVisits = true,
   });
-  
+
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
     // Extract nested features
@@ -78,6 +79,7 @@ class PropertyModel {
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
       ownerId: json['seller_id']?.toString(),
+      allowVisits: json['allow_visits'] as bool? ?? true,
     );
   }
   final int id;
@@ -97,7 +99,8 @@ class PropertyModel {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? ownerId;
-  
+  final bool allowVisits;
+
   /// Convert to domain entity
   Property toEntity() {
     return Property(
@@ -117,6 +120,7 @@ class PropertyModel {
       createdAt: createdAt,
       updatedAt: updatedAt,
       ownerId: ownerId,
+      allowVisits: allowVisits,
     );
   }
   
