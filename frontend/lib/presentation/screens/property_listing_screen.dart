@@ -10,6 +10,7 @@ import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/common/app_bar_back_button.dart';
 
 class PropertyListingScreen extends ConsumerWidget {
   const PropertyListingScreen({super.key});
@@ -56,6 +57,19 @@ class PropertyListingScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
+          ),
+        ),
         titleSpacing: 0,
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
