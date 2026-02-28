@@ -1115,6 +1115,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
             _GestionarMenu(
               property: p,
               onView: () => context.push('/property/${p.id}'),
+              onOffers: () => context.push('/property/${p.id}/offers'),
               onEdit: () => context.push('/property/${p.id}/edit'),
               onDeactivate: () async {
                 final target = status == 'published' ? 'unpublished' : 'published';
@@ -1664,6 +1665,7 @@ class _GestionarMenu extends StatelessWidget {
   const _GestionarMenu({
     required this.property,
     required this.onView,
+    required this.onOffers,
     required this.onEdit,
     required this.onDeactivate,
     required this.onDelete,
@@ -1671,6 +1673,7 @@ class _GestionarMenu extends StatelessWidget {
 
   final Property property;
   final VoidCallback onView;
+  final VoidCallback onOffers;
   final VoidCallback onEdit;
   final VoidCallback onDeactivate;
   final VoidCallback onDelete;
@@ -1684,6 +1687,9 @@ class _GestionarMenu extends StatelessWidget {
         switch (value) {
           case 'view':
             onView();
+            break;
+          case 'offers':
+            onOffers();
             break;
           case 'edit':
             onEdit();
@@ -1709,6 +1715,19 @@ class _GestionarMenu extends StatelessWidget {
                   size: 18, color: Color(0xFF475569)),
               SizedBox(width: 12),
               Text('Ver Propiedad',
+                  style: TextStyle(
+                      fontSize: 13, color: Color(0xFF1E293B))),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'offers',
+          child: Row(
+            children: const [
+              Icon(Icons.local_offer_outlined,
+                  size: 18, color: Color(0xFF475569)),
+              SizedBox(width: 12),
+              Text('Ver Ofertas',
                   style: TextStyle(
                       fontSize: 13, color: Color(0xFF1E293B))),
             ],
