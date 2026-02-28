@@ -92,7 +92,12 @@ class PropertyFeatures(Base):
     has_terrace = Column(Boolean, default=False)
     has_pool = Column(Boolean, default=False)
     has_garden = Column(Boolean, default=False)
-    
+    has_garage = Column(Boolean, default=False)
+    has_storage = Column(Boolean, default=False)
+    has_wardrobes = Column(Boolean, default=False)
+    has_exterior = Column(Boolean, default=False)
+    has_accessibility = Column(Boolean, default=False)
+
     conservation_state = Column(Enum(ConservationState), default=ConservationState.BUEN_ESTADO)
 
 

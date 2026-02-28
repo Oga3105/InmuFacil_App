@@ -103,8 +103,13 @@ class PropertyFeaturesSchema(BaseModel):
     has_terrace: bool = False
     has_pool: bool = False
     has_garden: bool = False
+    has_garage: bool = False
+    has_storage: bool = False
+    has_wardrobes: bool = False
+    has_exterior: bool = False
+    has_accessibility: bool = False
     conservation_state: ConservationState = ConservationState.BUEN_ESTADO
-    
+
     class Config:
         use_enum_values = True
 

@@ -626,7 +626,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         _mediaIdCounter++;
         return PropertyMediaItem(
           localId: 'remote_$_mediaIdCounter',
-          remoteUrl: m['url'] as String?,
+          remoteUrl: (m['file_path'] ?? m['url']) as String?,
           remoteMediaId: m['id'] as int?,
         );
       }).toList();
@@ -894,11 +894,11 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'province': state.provinceText.isEmpty ? null : state.provinceText,
       'postal_code': state.postalCodeText.isEmpty ? null : state.postalCodeText,
       'price': price,
+      'surface_area': surface,
       'hide_exact_location': state.hideExactLocation,
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
       'features': {
-        'surface': surface,
         'bedrooms': state.bedrooms,
         'bathrooms': state.bathrooms,
         'has_lift': state.hasLift,
