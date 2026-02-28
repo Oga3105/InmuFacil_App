@@ -1043,6 +1043,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
             await notifier.deleteProperty(p.id);
           }),
         ] else if (status == 'published') ...[
+          _actionBtn('Ofertas', const Color(0xFFF59E0B), () {
+            context.push('/property/${p.id}/offers');
+          }),
+          const SizedBox(width: 8),
           _actionBtn('Retirar', Colors.grey.shade600, () async {
             await notifier.updateStatus(p.id, 'unpublished');
           }),
@@ -1051,6 +1055,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
             context.push('/property/${p.id}/edit');
           }),
         ] else if (status == 'unpublished') ...[
+          _actionBtn('Ofertas', const Color(0xFFF59E0B), () {
+            context.push('/property/${p.id}/offers');
+          }),
+          const SizedBox(width: 8),
           _actionBtn('Publicar', const Color(0xFF16A34A), () async {
             await notifier.updateStatus(p.id, 'published');
           }),
