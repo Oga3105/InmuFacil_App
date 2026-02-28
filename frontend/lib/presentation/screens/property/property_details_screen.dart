@@ -750,8 +750,8 @@ class _ActionBar extends StatelessWidget {
       );
       return false;
     }
-    final dniStatus = auth.user?.dniStatus ?? '';
-    final isVerified = dniStatus == 'approved';
+    final dniStatus = (auth.user?.dniStatus ?? '').toUpperCase();
+    final isVerified = dniStatus == 'VALIDADO';
     if (!isVerified) {
       _dialog(
         title: 'Verificación requerida',
