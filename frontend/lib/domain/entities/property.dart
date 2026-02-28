@@ -22,6 +22,7 @@ class Property { // Added
     required this.updatedAt,
     this.status,
     this.ownerId,
+    this.allowVisits = true,
   });
   final String id;
   final String title;
@@ -42,6 +43,8 @@ class Property { // Added
   final String? status;
   /// The backend user ID of the seller who listed this property.
   final String? ownerId;
+  /// Whether the owner has enabled visit scheduling for this property.
+  final bool allowVisits;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;

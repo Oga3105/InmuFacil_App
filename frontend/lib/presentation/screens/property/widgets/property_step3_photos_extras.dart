@@ -28,6 +28,26 @@ class PropertyStep3PhotosExtras extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
+          // ── Visitas card ───────────────────────────────────────────────────
+          _SectionCard(
+            icon: Icons.calendar_month_outlined,
+            title: 'property_wizard.visits_card'.tr(),
+            child: SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'property_wizard.allow_visits_label'.tr(),
+                style: const TextStyle(fontSize: 14),
+              ),
+              subtitle: Text(
+                'property_wizard.allow_visits_hint'.tr(),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+              value: s.allowVisits,
+              onChanged: (_) => notifier.toggleAllowVisits(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // ── Fotos card (SECOND) ───────────────────────────────────────────
           _SectionCard(
             icon: Icons.photo_library_outlined,
