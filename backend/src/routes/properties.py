@@ -14,7 +14,7 @@ from backend.src.models import (
     Reservation, PropertyStatus, PropertyType, OperationType, # Hito 8 + Search
     PropertyDocument, DocumentType, PropertyValuation # Hito 9 + Valuation
 )
-from backend.src.schemas.base import PropertyCreate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
+from backend.src.schemas.base import PropertyCreate, PropertyDraftCreate, StatusUpdate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
 from backend.src.schemas.valuation import ValuationRequest, ValuationResponse
 from backend.src.services.valuation_service import ValuationService
 from backend.src.utils.security import get_current_active_user
@@ -191,6 +191,13 @@ async def create_property(
     """
     # 1. Create Core Property
     core_data = property_data.model_dump(exclude={'features', 'legal', 'financial'})
+    # Auto-compute location string from structured fields if not provided
+    if not core_data.get('location') and core_data.get('street'):
+        parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
+                              core_data.get('city'), core_data.get('postal_code')] if p]
+        core_data['location'] = ', '.join(parts) or 'Sin dirección'
+    if not core_data.get('location'):
+        core_data['location'] = 'Sin dirección'
     new_property = Property(
         **core_data,
         owner_id=current_user.id
@@ -225,7 +232,7 @@ async def list_my_properties(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    List MY properties (Seller Panel).
+    List ALL my properties (Seller Panel) — includes drafts and unpublished.
     """
     return db.query(Property).options(
         joinedload(Property.features),
@@ -233,6 +240,56 @@ async def list_my_properties(
         joinedload(Property.financial),
         joinedload(Property.media)
     ).filter(Property.owner_id == current_user.id).all()
+
+
+@router.post("/draft", response_model=PropertyResponse, status_code=status.HTTP_201_CREATED)
+async def create_draft_property(
+    draft_data: PropertyDraftCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Save a partial listing as draft. All fields optional except status.
+    """
+    core_data = draft_data.model_dump(exclude={'features'}, exclude_none=True)
+    # Auto-compute location string from structured fields if not provided
+    if not core_data.get('location') and core_data.get('street'):
+        parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
+                              core_data.get('city'), core_data.get('postal_code')] if p]
+        core_data['location'] = ', '.join(parts)
+    # Ensure required DB fields have fallback values
+    core_data.setdefault('title', '')
+    core_data.setdefault('price', 0.0)
+    core_data.setdefault('surface_area', 0.0)
+    core_data.setdefault('location', '')
+    core_data.setdefault('property_type', 'piso')
+    core_data.setdefault('operation_type', 'venta')
+    new_property = Property(**core_data, owner_id=current_user.id)
+    db.add(new_property)
+    db.flush()
+    if draft_data.features:
+        features = PropertyFeatures(**draft_data.features.model_dump(), property_id=new_property.id)
+        db.add(features)
+    db.commit()
+    db.refresh(new_property)
+    return new_property
+
+
+@router.patch("/{property_id}/status", response_model=PropertyResponse)
+async def update_property_status(
+    property_id: int,
+    body: StatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Change status of a property: draft -> published -> unpublished.
+    """
+    prop = verify_property_ownership(db, property_id, current_user.id)
+    prop.status = body.status
+    db.commit()
+    db.refresh(prop)
+    return prop
 
 
 @router.put("/{property_id}", response_model=PropertyResponse)
@@ -249,6 +306,11 @@ async def update_property(
     
     # Update Core
     core_data = property_update.model_dump(exclude={'features', 'legal', 'financial'}, exclude_unset=True)
+    # Auto-compute location string from structured fields if not provided
+    if not core_data.get('location') and core_data.get('street'):
+        parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
+                              core_data.get('city'), core_data.get('postal_code')] if p]
+        core_data['location'] = ', '.join(parts) or 'Sin dirección'
     for key, value in core_data.items():
         setattr(property, key, value)
         

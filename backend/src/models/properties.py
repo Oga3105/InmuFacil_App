@@ -19,8 +19,19 @@ class Property(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     price = Column(Float, nullable=False)
-    location = Column(String, nullable=False)
-    
+    location = Column(String, nullable=True)
+
+    # Structured address fields
+    street         = Column(String, nullable=True)
+    street_number  = Column(String, nullable=True)
+    floor          = Column(String, nullable=True)
+    city           = Column(String, nullable=True)
+    province       = Column(String, nullable=True)
+    postal_code    = Column(String, nullable=True)
+    latitude       = Column(Float, nullable=True)
+    longitude      = Column(Float, nullable=True)
+    hide_exact_location = Column(Boolean, default=False)
+
     status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
     hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
     
