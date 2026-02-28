@@ -265,28 +265,27 @@ class _IdentityVerificationScreenState
         child: InkWell(
           onTap: () => _tryNavigateAway('/profile'),
           customBorder: const CircleBorder(),
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFEFF6FF),
-              border: Border.all(color: const Color(0xFF2563EB), width: 2),
-              image: photoUrl != null
-                  ? DecorationImage(
-                      image: NetworkImage(photoUrl),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: photoUrl == null
-                ? const Icon(Icons.person, size: 20, color: Color(0xFF2563EB))
-                : null,
-          ),
+          child: photoUrl != null
+              ? ClipOval(
+                  child: Image.network(
+                    '$photoUrl?v=${DateTime.now().millisecondsSinceEpoch}',
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _defaultAvatar(),
+                  ),
+                )
+              : _defaultAvatar(),
         ),
       ),
     );
   }
+
+  Widget _defaultAvatar() => const CircleAvatar(
+        radius: 18,
+        backgroundColor: Color(0xFF2563EB),
+        child: Icon(Icons.person, color: Colors.white, size: 20),
+      );
 
   // ──────────────────────────────────────────────
   // Card principal (layout horizontal)

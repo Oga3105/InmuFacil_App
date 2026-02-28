@@ -18,13 +18,12 @@ class MakeOfferScreen extends ConsumerStatefulWidget {
   final double askingPrice;
 
   @override
-  ConsumerState<MakeOfferScreen> createState() =>
-      _MakeOfferScreenState();
+  ConsumerState<MakeOfferScreen> createState() => _MakeOfferScreenState();
 }
 
 class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
   final _amountController = TextEditingController();
-  final _conditionsController = TextEditingController();
+  final _messageController = TextEditingController();
   String _paymentTerm = 'cash';
   DateTime? _closingDate;
   bool _agreed = false;
@@ -32,15 +31,33 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
   @override
   void dispose() {
     _amountController.dispose();
-    _conditionsController.dispose();
+    _messageController.dispose();
     super.dispose();
   }
 
   double get _offerAmount =>
-      double.tryParse(_amountController.text.replaceAll('.', '').replaceAll(',', '.')) ?? 0;
+      double.tryParse(_amountController.text) ?? 0;
+
+  double get _diffPct {
+    if (widget.askingPrice <= 0 || _offerAmount <= 0) return 0;
+    return ((_offerAmount - widget.askingPrice) / widget.askingPrice) * 100;
+  }
 
   bool get _isLowOffer =>
-      widget.askingPrice > 0 && _offerAmount > 0 && _offerAmount < widget.askingPrice * 0.9;
+      widget.askingPrice > 0 && _offerAmount > 0 && _offerAmount < widget.askingPrice * 0.97;
+
+  String _formatPrice(double v) {
+    if (v <= 0) return '0';
+    final s = v.toStringAsFixed(0);
+    final result = StringBuffer();
+    int count = 0;
+    for (int i = s.length - 1; i >= 0; i--) {
+      if (count > 0 && count % 3 == 0) result.write('.');
+      result.write(s[i]);
+      count++;
+    }
+    return result.toString().split('').reversed.join();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,422 +85,717 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
     });
 
     final properties = ref.watch(searchProvider).filteredProperties;
-    final property = properties
-        .where((p) => p.id == widget.propertyId)
-        .firstOrNull;
+    final property = properties.where((p) => p.id == widget.propertyId).firstOrNull;
+
+    final isLoading = formState.status == OfferSubmitStatus.loading;
+    final canSubmit = _agreed && _offerAmount > 0 && !isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
-          child: AppBarBackButton(
-            onPressed: () => context.pop(),
-          ),
+          child: AppBarBackButton(onPressed: () => context.pop()),
         ),
-        title: const Text(
-          'Hacer una Oferta',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
+        actions: const [SizedBox(width: 48)], // balance leading
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Property summary card
-            if (property != null)
-              Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.grey.shade200),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
+            // ── Title header ───────────────────────────────────────────────
+            const Padding(
+              padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
+              child: Column(
+                children: [
+                  Text(
+                    'Hacer una Oferta Formal',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Envía una propuesta vinculante al vendedor',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // ── Property card ─────────────────────────────────────────
+                  if (property != null) _PropertyCard(property: property),
+                  if (property != null) const SizedBox(height: 20),
+
+                  // ── Offer amount card ─────────────────────────────────────
+                  _OfferAmountCard(
+                    controller: _amountController,
+                    isLowOffer: _isLowOffer,
+                    diffPct: _diffPct,
+                    onChanged: () => setState(() {}),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Payment + Date (side by side) ─────────────────────────
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: property.images.isNotEmpty
-                            ? Image.network(
-                                property.images.first,
-                                width: 64,
-                                height: 64,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    _placeholder64(),
-                              )
-                            : _placeholder64(),
-                      ),
-                      const SizedBox(width: 12),
+                      // Forma de Pago
                       Expanded(
+                        flex: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              property.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 15,
-                                color: Color(0xFF1E293B),
+                            const Text(
+                              'Forma de Pago',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF475569),
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              property.address,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF64748B),
-                              ),
-                              overflow: TextOverflow.ellipsis,
+                            const SizedBox(height: 8),
+                            _PaymentOption(
+                              label: 'Al contado',
+                              sublabel: 'Fondos propios disponibles',
+                              value: 'cash',
+                              groupValue: _paymentTerm,
+                              onChanged: (v) => setState(() => _paymentTerm = v),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Precio de salida: ${property.formattedPrice}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: Color(0xFF1E293B),
+                            const SizedBox(height: 8),
+                            _PaymentOption(
+                              label: 'Necesito Hipoteca',
+                              sublabel: 'Pendiente de aprobación bancaria',
+                              value: 'mortgage',
+                              groupValue: _paymentTerm,
+                              onChanged: (v) => setState(() => _paymentTerm = v),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Fecha escritura
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Fecha deseada de escritura',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF475569),
                               ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now().add(const Duration(days: 30)),
+                                    firstDate: DateTime.now(),
+                                    lastDate: DateTime.now().add(const Duration(days: 730)),
+                                  );
+                                  if (picked != null) setState(() => _closingDate = picked);
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.calendar_month_outlined,
+                                          size: 16, color: Colors.grey.shade500),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _closingDate != null
+                                              ? '${_closingDate!.day.toString().padLeft(2, '0')}/'
+                                                '${_closingDate!.month.toString().padLeft(2, '0')}/'
+                                                '${_closingDate!.year}'
+                                              : 'dd/mm/aaaa',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: _closingDate != null
+                                                ? const Color(0xFF1E293B)
+                                                : Colors.grey.shade400,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'La fecha final será acordada de mutuo acuerdo ante notario.',
+                              style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-                ),
-              ),
-            const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-            // Offer amount
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Tu oferta',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
+                  // ── Message to seller ─────────────────────────────────────
+                  const Text(
+                    'Mensaje al vendedor (opcional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF475569),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _messageController,
+                    maxLines: 4,
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                    decoration: InputDecoration(
+                      hintText: 'Añade algún detalle que quieras comentar al propietario...',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.all(14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(color: Color(0xFF2563EB)),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── Agreement checkbox ────────────────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: _agreed ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                        width: _agreed ? 1.5 : 1,
+                      ),
+                    ),
+                    child: CheckboxListTile(
+                      value: _agreed,
+                      onChanged: (v) => setState(() => _agreed = v ?? false),
+                      activeColor: const Color(0xFF2563EB),
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      title: const Text(
+                        'Entiendo que esta oferta es un compromiso serio de compra y estoy dispuesto a formalizarla mediante contrato de arras.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Total + Submit (dark block) ───────────────────────────
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                    child: Row(
                       children: [
-                        const Text(
-                          '\u20AC',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w400,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'OFERTA TOTAL',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF94A3B8),
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${_formatPrice(_offerAmount)} €',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: TextField(
-                            controller: _amountController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            onChanged: (_) => setState(() {}),
-                            style: const TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFF1E293B),
-                            ),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: '0',
-                              hintStyle: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900,
-                                color: Color(0xFFCBD5E1),
-                              ),
+                        const SizedBox(width: 16),
+                        FilledButton.icon(
+                          onPressed: canSubmit
+                              ? () {
+                                  ref.read(makeOfferProvider.notifier).submit(
+                                    propertyId: widget.propertyId,
+                                    amount: _offerAmount,
+                                    conditions: _messageController.text.trim(),
+                                    paymentTerm: _paymentTerm,
+                                    closingDate: _closingDate,
+                                  );
+                                }
+                              : null,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            disabledBackgroundColor: const Color(0xFF2563EB).withValues(alpha: 0.5),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: isLoading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Icon(Icons.chevron_right_rounded, size: 20),
+                          iconAlignment: IconAlignment.end,
+                          label: const Text(
+                            'Enviar Oferta Formal',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    if (_isLowOffer) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF3C7),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.warning_amber_rounded,
-                                size: 16,
-                                color: Color(0xFFF59E0B)),
-                            SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                'Las ofertas muy bajas tienen menos probabilidades de ser aceptadas',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFFB45309),
-                                ),
-                              ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ── Security badge ────────────────────────────────────────
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shield_outlined, size: 14, color: Color(0xFF16A34A)),
+                          SizedBox(width: 6),
+                          Text(
+                            'OFERTA PROTEGIDA POR INMUFÁCIL SECURE TECH',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF475569),
+                              letterSpacing: 0.5,
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Legal disclaimer ──────────────────────────────────────
+                  Text(
+                    'Al enviar esta oferta, la plataforma notificará instantáneamente al vendedor. Sus datos personales están protegidos por el RGPD y sólo se compartirán tras la aceptación de la oferta para los trámites legales correspondientes.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
+                  ),
+                  const SizedBox(height: 32),
+
+                  // ── Footer ────────────────────────────────────────────────
+                  const _Footer(),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Property Card ─────────────────────────────────────────────────────────────
+
+class _PropertyCard extends StatelessWidget {
+  const _PropertyCard({required this.property});
+  final dynamic property;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: property.images.isNotEmpty
+                ? Image.network(property.images.first,
+                    width: 64, height: 64, fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _placeholder())
+                : _placeholder(),
+          ),
+          const SizedBox(width: 12),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  property.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFF1E293B)),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 12, color: Colors.grey.shade500),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        property.address,
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: 'Precio de salida:  ',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                      ),
+                      TextSpan(
+                        text: property.formattedPrice,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
                         ),
                       ),
                     ],
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Payment terms
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Forma de pago',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
-                      ),
-                    ),
-                    RadioListTile<String>(
-                      title: const Text('Al contado / Transferencia'),
-                      value: 'cash',
-                      groupValue: _paymentTerm,
-                      onChanged: (v) =>
-                          setState(() => _paymentTerm = v!),
-                      activeColor: const Color(0xFF2563EB),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    RadioListTile<String>(
-                      title: const Text('Necesito hipoteca'),
-                      value: 'mortgage',
-                      groupValue: _paymentTerm,
-                      onChanged: (v) =>
-                          setState(() => _paymentTerm = v!),
-                      activeColor: const Color(0xFF2563EB),
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Closing date
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade200),
-              ),
-              child: ListTile(
-                leading: const Icon(
-                  Icons.calendar_today_outlined,
-                  color: Color(0xFF2563EB),
-                ),
-                title: const Text('Fecha deseada de escritura'),
-                subtitle: Text(
-                  _closingDate != null
-                      ? '${_closingDate!.day}/${_closingDate!.month}/${_closingDate!.year}'
-                      : 'Seleccionar fecha',
-                  style: TextStyle(
-                    color: _closingDate != null
-                        ? const Color(0xFF1E293B)
-                        : Colors.grey.shade400,
                   ),
                 ),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now()
-                        .add(const Duration(days: 30)),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now()
-                        .add(const Duration(days: 730)),
-                  );
-                  if (picked != null) {
-                    setState(() => _closingDate = picked);
-                  }
-                },
-              ),
+              ],
             ),
-            const SizedBox(height: 16),
-
-            // Message to seller
-            TextField(
-              controller: _conditionsController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: 'Mensaje para el vendedor (opcional)',
-                labelStyle:
-                    const TextStyle(color: Color(0xFF64748B)),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      BorderSide(color: Colors.grey.shade300),
+          ),
+          const SizedBox(width: 12),
+          // Status + ID
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide:
-                      BorderSide(color: Colors.grey.shade300),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Agreement checkbox
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(
-                  color: _agreed
-                      ? const Color(0xFF2563EB)
-                      : Colors.grey.shade200,
-                ),
-              ),
-              child: CheckboxListTile(
-                value: _agreed,
-                onChanged: (v) =>
-                    setState(() => _agreed = v ?? false),
-                activeColor: const Color(0xFF2563EB),
-                title: const Text(
-                  'Entiendo que esta oferta es un compromiso serio de compra',
+                child: const Text(
+                  'DISPONIBLE',
                   style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF1E293B),
-                  ),
-                ),
-                controlAffinity: ListTileControlAffinity.leading,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            const SizedBox(height: 100),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(
-              top: BorderSide(color: Colors.grey.shade200)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (_offerAmount > 0)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'Oferta Total: \u20AC${_offerAmount.toStringAsFixed(0)}',
-                  style: const TextStyle(
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                    color: Color(0xFF1E293B),
+                    color: Color(0xFF16A34A),
+                    letterSpacing: 0.5,
                   ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'ID: ${property.id.substring(0, property.id.length.clamp(0, 8)).toUpperCase()}',
+                style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _placeholder() => Container(
+        width: 64, height: 64,
+        color: Colors.grey.shade100,
+        child: const Icon(Icons.home_outlined, color: Color(0xFF94A3B8)),
+      );
+}
+
+// ─── Offer Amount Card ─────────────────────────────────────────────────────────
+
+class _OfferAmountCard extends StatelessWidget {
+  const _OfferAmountCard({
+    required this.controller,
+    required this.isLowOffer,
+    required this.diffPct,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final bool isLowOffer;
+  final double diffPct;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      child: Column(
+        children: [
+          const Text(
+            'TU PROPUESTA ECONÓMICA',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF94A3B8),
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Text(
+                '€',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w300,
+                  color: Color(0xFF94A3B8),
+                ),
+              ),
+              const SizedBox(width: 12),
+              IntrinsicWidth(
+                child: TextField(
+                  controller: controller,
+                  onChanged: (_) => onChanged(),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   textAlign: TextAlign.center,
-                ),
-              ),
-            FilledButton(
-              onPressed: (_agreed &&
-                      _offerAmount > 0 &&
-                      formState.status !=
-                          OfferSubmitStatus.loading)
-                  ? () {
-                      ref.read(makeOfferProvider.notifier).submit(
-                        propertyId: widget.propertyId,
-                        amount: _offerAmount,
-                        conditions: _conditionsController.text.trim(),
-                        paymentTerm: _paymentTerm,
-                        closingDate: _closingDate,
-                      );
-                    }
-                  : null,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: formState.status == OfferSubmitStatus.loading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Enviar Oferta Formal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: const TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF2563EB),
+                  ),
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: '0',
+                    hintStyle: TextStyle(
+                      fontSize: 42,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFFCBD5E1),
                     ),
+                    isCollapsed: true,
+                    constraints: BoxConstraints(minWidth: 80),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (isLowOffer) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.warning_amber_rounded,
+                      size: 15, color: Color(0xFFF59E0B)),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Tu oferta es un ${diffPct.abs().toStringAsFixed(0)}% inferior al precio de salida',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF92400E),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Payment Option ────────────────────────────────────────────────────────────
+
+class _PaymentOption extends StatelessWidget {
+  const _PaymentOption({
+    required this.label,
+    required this.sublabel,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String sublabel;
+  final String value;
+  final String groupValue;
+  final ValueChanged<String> onChanged;
+
+  bool get _selected => value == groupValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: _selected ? const Color(0xFFEFF6FF) : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: _selected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+            width: _selected ? 1.5 : 1,
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 18,
+              height: 18,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: _selected ? const Color(0xFF2563EB) : Colors.grey.shade400,
+                  width: _selected ? 5 : 1.5,
+                ),
+                color: _selected ? const Color(0xFF2563EB) : Colors.white,
+              ),
+              child: _selected
+                  ? const Center(
+                      child: Icon(Icons.circle, size: 6, color: Colors.white),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _selected ? const Color(0xFF1E40AF) : const Color(0xFF1E293B),
+                    )),
+                Text(sublabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: _selected ? const Color(0xFF3B82F6) : Colors.grey.shade500,
+                    )),
+              ],
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _placeholder64() {
-    return Container(
-      width: 64,
-      height: 64,
-      color: Colors.grey.shade200,
-      child: const Icon(Icons.home_outlined, color: Color(0xFF64748B)),
+// ─── Footer ────────────────────────────────────────────────────────────────────
+
+class _Footer extends StatelessWidget {
+  const _Footer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Divider(),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.home_work_outlined, size: 18, color: Colors.grey.shade400),
+            const SizedBox(width: 6),
+            Text('InmuFácil',
+                style: TextStyle(
+                  fontSize: 14, fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade500,
+                )),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 24,
+          children: [
+            _FooterLink('Aviso Legal'),
+            _FooterLink('Privacidad'),
+            _FooterLink('Seguridad'),
+            _FooterLink('Ayuda'),
+          ],
+        ),
+      ],
     );
   }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink(this.label);
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Text(
+        label,
+        style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+      );
 }

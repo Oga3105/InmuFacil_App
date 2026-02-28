@@ -351,55 +351,10 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
             ],
           ),
         ),
-        // Fixed Bottom Bar
+        // Mobile fixed bottom action bar
         Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Colors.grey[200]!)),
-              boxShadow: [
-                 BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5)),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => context.push('/property/${property.id}/visit'),
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    label: const Text('Solicitar Visita'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0f172a),
-                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton.icon(
-                    onPressed: () => context.push(
-                      '/property/${property.id}/offer?price=${property.price}',
-                    ),
-                    icon: const Icon(Icons.gavel_rounded),
-                    label: const Text('Hacer Oferta'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          bottom: 0, left: 0, right: 0,
+          child: _ActionBar(property: property, ref: ref, context: context),
         ),
       ],
     );
@@ -679,12 +634,12 @@ class _LocationSection extends StatelessWidget {
   }
 }
 
-class _SummaryCard extends StatelessWidget {
+class _SummaryCard extends ConsumerWidget {
   const _SummaryCard({required this.property});
   final Property property;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -692,7 +647,7 @@ class _SummaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey[100]!),
         boxShadow: [
-          BoxShadow(color: Colors.blue.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 10)),
+          BoxShadow(color: Colors.blue.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
         ],
       ),
       child: Column(
@@ -704,7 +659,7 @@ class _SummaryCard extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                property.formattedPrice, // Fixed getter name
+                property.formattedPrice,
                 style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
               ),
               const SizedBox(width: 8),
@@ -725,13 +680,12 @@ class _SummaryCard extends StatelessWidget {
               const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
               const SizedBox(width: 4),
               Text(
-                property.address.isNotEmpty ? property.address : 'Dirección no disponible', // [FIX] Fallback for address
+                property.address.isNotEmpty ? property.address : 'Dirección no disponible',
                 style: const TextStyle(color: Color(0xFF64748b)),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          // Time Badge
           PropertyTimeBadge(
             createdAt: property.createdAt,
             updatedAt: property.updatedAt,
@@ -740,71 +694,235 @@ class _SummaryCard extends StatelessWidget {
           const SizedBox(height: 24),
           Divider(color: Colors.grey[100]),
           const SizedBox(height: 16),
-          // Stats
           _PropertyStatsGrid(property: property),
           const SizedBox(height: 16),
-          // Owner
           _OwnerCard(),
           const SizedBox(height: 24),
-          // Actions
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Action buttons
+          _ActionBar(property: property, ref: ref, context: context, vertical: true),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Shared action-bar (desktop vertical + mobile horizontal) ──────────────────
+
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({
+    required this.property,
+    required this.ref,
+    required this.context,
+    this.vertical = false,
+  });
+  final Property property;
+  final WidgetRef ref;
+  final BuildContext context;
+  final bool vertical;
+
+  // ── guard: returns true if the action can proceed ──
+  bool _canAct(String action) {
+    final auth = ref.read(authProvider);
+    final isLoggedIn = auth.isAuthenticated;
+    if (!isLoggedIn) {
+      _dialog(
+        title: 'Cuenta requerida',
+        message: action == 'visit'
+            ? 'Debes estar registrado para solicitar una visita a esta propiedad.'
+            : 'Debes estar registrado para hacer una oferta por esta propiedad.',
+        icon: Icons.person_outline,
+        cta: 'Iniciar sesión',
+        onCta: () { Navigator.of(context).pop(); context.pushNamed('login'); },
+      );
+      return false;
+    }
+    final dniStatus = auth.user?.dniStatus ?? '';
+    final isVerified = dniStatus == 'approved';
+    if (!isVerified) {
+      _dialog(
+        title: 'Verificación requerida',
+        message: action == 'visit'
+            ? 'Solo los usuarios con identidad verificada pueden solicitar visitas. Completa tu verificación KYC para continuar.'
+            : 'Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
+        icon: Icons.verified_user_outlined,
+        cta: 'Verificar identidad',
+        onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
+      );
+      return false;
+    }
+    return true;
+  }
+
+  void _dialog({
+    required String title,
+    required String message,
+    required IconData icon,
+    required String cta,
+    required VoidCallback onCta,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+        ),
+        title: Text(title, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+        content: Text(message, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          FilledButton(
+            onPressed: onCta,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: Text(cta),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context2) {
+    final auth = ref.watch(authProvider);
+    final currentUserId = auth.user?.id;
+    final isOwner = property.ownerId != null &&
+        currentUserId != null &&
+        property.ownerId == currentUserId;
+
+    if (vertical) {
+      // Desktop: vertical stack
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () =>
-                          context.push('/property/${property.id}/visit'),
-                      icon: const Icon(Icons.calendar_month_outlined, size: 20),
-                      label: const Text('Solicitar Visita',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF0f172a),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(
-                            color: Color(0xFF0f172a), width: 2),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                  icon: const Icon(Icons.calendar_month_outlined, size: 20),
+                  label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0f172a),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Color(0xFF0f172a), width: 2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: () => context.push(
-                        '/property/${property.id}/offer?price=${property.price}',
-                      ),
-                      icon: const Icon(Icons.gavel_rounded, size: 20),
-                      label: const Text('Hacer Oferta',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 10),
-              OutlinedButton.icon(
-                onPressed: () =>
-                    context.push('/property/${property.id}/offers'),
-                icon: const Icon(Icons.list_alt_outlined, size: 20),
-                label: const Text('Gestionar Ofertas',
-                    style: TextStyle(fontWeight: FontWeight.w600)),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                  icon: const Icon(Icons.gavel_rounded, size: 20),
+                  label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ),
             ],
           ),
+          if (isOwner) ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => context.push('/property/${property.id}/offers'),
+              icon: const Icon(Icons.list_alt_outlined, size: 20),
+              label: const Text('Gestionar Ofertas', style: TextStyle(fontWeight: FontWeight.w600)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF2563EB),
+                side: const BorderSide(color: Color(0xFF2563EB)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
+    // Mobile: horizontal row in a styled bar
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                  icon: const Icon(Icons.calendar_month_outlined),
+                  label: const Text('Solicitar Visita'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF0f172a),
+                    side: const BorderSide(color: Color(0xFF0f172a), width: 2),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: FilledButton.icon(
+                  onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                  icon: const Icon(Icons.gavel_rounded),
+                  label: const Text('Hacer Oferta'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (isOwner) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => context.push('/property/${property.id}/offers'),
+                icon: const Icon(Icons.list_alt_outlined),
+                label: const Text('Gestionar Ofertas'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF2563EB),
+                  side: const BorderSide(color: Color(0xFF2563EB)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -989,7 +1107,7 @@ class _MortgageCard extends StatelessWidget {
               style: IconButton.styleFrom(
                  backgroundColor: Colors.white,
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                 side: BorderSide(color: const Color(0xFF135bec).withOpacity(0.1)),
+                 side: BorderSide(color: const Color(0xFF135bec).withValues(alpha: 0.1)),
               ),
             ),
         ],
