@@ -13,6 +13,7 @@ import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
+import '../../widgets/common/app_bar_back_button.dart';
 
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
 
@@ -74,6 +75,19 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
+          ),
+        ),
         titleSpacing: 0,
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
