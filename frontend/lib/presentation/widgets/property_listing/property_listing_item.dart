@@ -6,6 +6,7 @@ import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dar
 import '../../../../domain/entities/property.dart';
 import '../common/premium_button.dart';
 import '../common/time_badge.dart';
+import '../../providers/auth_provider.dart';
 
 class PropertyListingItem extends ConsumerWidget {
 
@@ -291,7 +292,7 @@ class PropertyListingItem extends ConsumerWidget {
                                 fullWidth: false,
                                 fontSize: 13,
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                onPressed: () {},
+                                onPressed: () => _handleContactAction(context, ref),
                               ),
                             ],
                           ),
@@ -323,6 +324,83 @@ class PropertyListingItem extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  void _showRequirementsDialog(BuildContext context, {
+    required String title,
+    required String message,
+    required IconData icon,
+    required String cta,
+    required VoidCallback onCta,
+  }) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(
+            color: Color(0xFFEFF6FF),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Color(0xFF2563EB), size: 28),
+        ),
+        title: Text(title, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+        content: Text(message, textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          FilledButton(
+            onPressed: onCta,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(cta),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleContactAction(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authProvider);
+    final isLoggedIn = auth.isAuthenticated;
+    if (!isLoggedIn) {
+      _showRequirementsDialog(
+        context,
+        title: 'Cuenta requerida',
+        message: 'Debes estar registrado para contactar con el propietario de esta propiedad.',
+        icon: Icons.person_outline,
+        cta: 'Iniciar sesión',
+        onCta: () { Navigator.of(context).pop(); context.pushNamed('login'); },
+      );
+      return;
+    }
+    final dniStatus = (auth.user?.dniStatus ?? '').toUpperCase();
+    final isVerified = dniStatus == 'VALIDADO';
+    if (!isVerified) {
+      _showRequirementsDialog(
+        context,
+        title: 'Verificación requerida',
+        message: 'Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.',
+        icon: Icons.verified_user_outlined,
+        cta: 'Verificar identidad',
+        onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
+      );
+      return;
+    }
+    // Proceed with contact action (e.g. open chat)
+    // context.push('/chat/${property.ownerId}');
   }
 }
 

@@ -359,7 +359,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       const SizedBox(height: 32),
                       _LocationSection(location: property.location), // Passing location
                       const SizedBox(height: 32),
-                      _OwnerCard(),
+                      _OwnerCard(property: property),
                    ],
                  ),
                ),
@@ -711,7 +711,7 @@ class _SummaryCard extends ConsumerWidget {
           const SizedBox(height: 16),
           _PropertyStatsGrid(property: property),
           const SizedBox(height: 16),
-          _OwnerCard(),
+          _OwnerCard(property: property),
           const SizedBox(height: 24),
           // Action buttons
           _ActionBar(property: property, ref: ref, context: context, vertical: true),
@@ -795,6 +795,9 @@ class _ActionBar extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Cancelar',
                 style: TextStyle(color: Color(0xFF64748B))),
           ),
@@ -802,7 +805,7 @@ class _ActionBar extends StatelessWidget {
             onPressed: onCta,
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(cta),
           ),
@@ -1093,8 +1096,15 @@ class _StatItem extends StatelessWidget {
 }
 
 class _OwnerCard extends StatelessWidget {
+  const _OwnerCard({required this.property});
+  final Property property;
+
   @override
   Widget build(BuildContext context) {
+    final name = property.ownerName ?? 'Propietario';
+    final isVerified = property.ownerIsVerified;
+    final photoUrl = property.ownerPhotoUrl;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1104,33 +1114,60 @@ class _OwnerCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage('https://lh3.googleusercontent.com/aida-public/AB6AXuAsgtm795Zdl3axDwufNv7j752Z91W8tEevRe5uo-RTW8WGYApLQWnknr0MGudgquMmPf6kfbaec9fL_KBcWCWITk8joJ4qMyBq3Xefkr2AoK6mwMxxmlQLiMySavKF1OFx00ZpBTdPO8FvB2151EwRrhb1YGh3DSOGq67NqXRobtlnO27igPDZFqOs1cyXo6i9nqQwChdq-juC6b0a4CQuiS4oEgR9lC8zF-sy_o5HmFw2VjnOEXC-xdYDUWH_3un4hlBI40ZckfQt'),
+          Builder(
+            builder: (context) {
+              final ts = DateTime.now().millisecondsSinceEpoch;
+              return SizedBox(
+                width: 40,
+                height: 40,
+                child: ClipOval(
+                  child: photoUrl != null
+                      ? Image.network(
+                          '$photoUrl?v=$ts',
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFF2563EB),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.person, color: Colors.white, size: 20),
+                          ),
+                        )
+                      : Container(
+                          color: const Color(0xFF2563EB),
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.person, color: Colors.white, size: 20),
+                        ),
+                ),
+              );
+            },
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                 const Text('Ricardo M. Blanco', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
-                 const SizedBox(height: 2),
-                 Container(
-                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                   decoration: BoxDecoration(
-                     color: Colors.green[50], 
-                     borderRadius: BorderRadius.circular(4),
-                     border: Border.all(color: Colors.green[100]!),
-                   ),
-                   child: Row(
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                       Icon(Icons.verified, size: 10, color: Colors.green[600]),
-                       const SizedBox(width: 4),
-                       Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green[600], letterSpacing: 0.5)),
-                     ],
-                   ),
-                 ),
+                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                const SizedBox(height: 2),
+                if (isVerified)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.green[100]!),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified, size: 10, color: Colors.green[600]),
+                        const SizedBox(width: 4),
+                        Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green[600], letterSpacing: 0.5)),
+                      ],
+                    ),
+                  )
+                else
+                  Text('Identidad pendiente de verificar', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
               ],
             ),
           ),
