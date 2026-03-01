@@ -1,76 +1,172 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
+import '../../../config/router/app_router.dart';
+import '../../widgets/common/app_bar_back_button.dart';
 
-/// Displays the lifecycle of a purchase transaction for the buyer.
-class TransactionTimelineScreen extends StatelessWidget {
+/// Transaction timeline screen — shows the lifecycle of a purchase offer.
+class TransactionTimelineScreen extends ConsumerWidget {
   const TransactionTimelineScreen({super.key, required this.offer});
 
   final OfferData offer;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final steps = _buildSteps(offer.status);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            onPressed: () {
-              if (context.canPop()) context.pop();
-            },
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
-        ),
-      ),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: _buildAppBar(context, ref),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _PropertyHeader(offer: offer),
-                  const SizedBox(height: 28),
-                  const Text(
-                    'Estado de la operacion',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
+                  // ── Header cards ──────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    child: _HeaderCards(offer: offer),
+                  ),
+                  // ── Title ─────────────────────────────────────────────────
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(20, 28, 20, 4),
+                    child: Text(
+                      'Estado de la Transaccion',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  _TimelineWidget(steps: steps),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'Sigue el progreso de tu venta en tiempo real',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                  // ── Timeline ──────────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+                    child: _TimelineWidget(steps: steps),
+                  ),
+                  // ── Help footer ───────────────────────────────────────────
+                  const _HelpFooter(),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
           ),
-          _Footer(),
+          // ── Bottom brand bar ──────────────────────────────────────────────
+          const _BrandBar(),
         ],
       ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).user;
+    return AppBar(
+      automaticallyImplyLeading: false,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: AppBarBackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
+        ),
+      ),
+      title: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                        text: 'Inmu',
+                        style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(
+                        text: 'Facil',
+                        style: TextStyle(color: Color(0xFF16A34A))),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      backgroundColor: Colors.white,
+      elevation: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: Colors.grey.shade200, height: 1),
+      ),
+      actions: [
+        GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  'Inicio',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Padding(
+          padding: const EdgeInsets.only(right: 20),
+          child: _UserAvatar(user: user),
+        ),
+      ],
     );
   }
 
   List<_TimelineStep> _buildSteps(String status) {
     final s = status.toLowerCase();
 
-    _StepState propuestaState = _StepState.done;
-
-    _StepState solvenciaState = _StepState.done;
-
-    _StepState arrasState;
+    final _StepState arrasState;
     if (s == 'accepted') {
       arrasState = _StepState.active;
     } else if (s == 'signing_pending' || s == 'completed') {
@@ -80,174 +176,224 @@ class TransactionTimelineScreen extends StatelessWidget {
     }
 
     final bool arrasDone = arrasState == _StepState.done;
-    final _StepState hipotecaState = arrasDone ? _StepState.active : _StepState.locked;
-    const _StepState notariaState = _StepState.locked;
+    final _StepState hipotecaState =
+        arrasDone ? _StepState.active : _StepState.locked;
 
     return [
       _TimelineStep(
-        title: 'Propuesta enviada',
-        subtitle: 'La oferta ha sido registrada en el sistema.',
-        state: propuestaState,
+        title: 'Oferta Aceptada',
+        subtitle: 'Completado',
+        state: _StepState.done,
       ),
       _TimelineStep(
-        title: 'Verificacion de solvencia',
-        subtitle: 'Tu identidad y solvencia han sido validadas.',
-        state: solvenciaState,
+        title: 'Verificacion de Solvencia',
+        subtitle: 'Validado por InmuFacil Secure-Tech',
+        state: _StepState.done,
       ),
       _TimelineStep(
         title: 'Contrato de Arras',
-        subtitle: 'Firma del contrato de arras con el vendedor.',
+        subtitle: 'Faltan las firmas del contrato',
+        description:
+            'Ambas partes deben revisar y firmar digitalmente el documento de '
+            'reserva para proceder con el bloqueo oficial del inmueble.',
         state: arrasState,
       ),
       _TimelineStep(
-        title: 'Gestion hipotecaria',
-        subtitle: 'Tramitacion de financiacion con entidades bancarias.',
+        title: 'Gestion Hipotecaria',
+        subtitle: 'Pendiente de firma de arras',
         state: hipotecaState,
       ),
       _TimelineStep(
         title: 'Firma en Notaria',
-        subtitle: 'Escritura publica y entrega de llaves.',
-        state: notariaState,
+        subtitle: 'Paso final de la transaccion',
+        state: _StepState.locked,
       ),
     ];
   }
 }
 
-// ── Property header card ──────────────────────────────────────────────────────
+// ── User avatar widget ────────────────────────────────────────────────────────
 
-class _PropertyHeader extends StatelessWidget {
-  const _PropertyHeader({required this.offer});
+class _UserAvatar extends StatelessWidget {
+  const _UserAvatar({required this.user});
+
+  final dynamic user;
+
+  @override
+  Widget build(BuildContext context) {
+    final photoUrl = user?.profilePhotoUrl as String?;
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: ClipOval(
+        child: photoUrl != null && photoUrl.isNotEmpty
+            ? Image.network(
+                photoUrl,
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: const Color(0xFF2563EB),
+                  child: const Icon(Icons.person, color: Colors.white, size: 20),
+                ),
+              )
+            : Container(
+                color: const Color(0xFF2563EB),
+                child: const Icon(Icons.person, color: Colors.white, size: 20),
+              ),
+      ),
+    );
+  }
+}
+
+// ── Header cards (property + counterparty) ───────────────────────────────────
+
+class _HeaderCards extends StatelessWidget {
+  const _HeaderCards({required this.offer});
 
   final OfferData offer;
 
   @override
   Widget build(BuildContext context) {
-    final counterparty = offer.sellerName ?? 'Vendedor';
     final title = offer.propertyTitle ?? 'Propiedad';
     final price = offer.propertyPrice;
+    final counterparty = offer.sellerName ?? offer.buyerName ?? 'Contraparte';
+    final counterPhotoUrl = offer.buyerPhotoUrl;
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFF),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: const Color(0xFFEFF6FF),
-                child: const Icon(Icons.person_outline, color: Color(0xFF2563EB)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Vendedor',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                    ),
-                    Text(
-                      counterparty,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Property card
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEEF6EE),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.home_outlined,
+                      color: Color(0xFF16A34A), size: 24),
                 ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (price != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatPrice(price),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF2563EB),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        // Counterparty card
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'COMPRADOR',
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.6,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    counterparty,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: const Color(0xFFDBEAFE),
+                    backgroundImage: (counterPhotoUrl != null &&
+                            counterPhotoUrl.isNotEmpty)
+                        ? NetworkImage(counterPhotoUrl)
+                        : null,
+                    child: (counterPhotoUrl == null || counterPhotoUrl.isEmpty)
+                        ? Text(
+                            counterparty.isNotEmpty
+                                ? counterparty[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              color: Color(0xFF2563EB),
+                              fontWeight: FontWeight.w800,
+                              fontSize: 13,
+                            ),
+                          )
+                        : null,
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          if (price != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Oferta: ${_formatPrice(offer.amount)}',
-              style: const TextStyle(fontSize: 14, color: Color(0xFF2563EB), fontWeight: FontWeight.w600),
-            ),
-          ],
-          const SizedBox(height: 8),
-          _StatusBadge(status: offer.status),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   String _formatPrice(double value) {
-    final formatted = value.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]}.',
-    );
-    return '$formatted EUR';
+    final s = value.toStringAsFixed(0);
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+      buf.write(s[i]);
+    }
+    return '${buf.toString()}\u20AC';
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-
-  final String status;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = _label(status);
-    final color = _color(status);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
-  }
-
-  String _label(String s) {
-    switch (s.toLowerCase()) {
-      case 'pending': return 'Pendiente';
-      case 'accepted': return 'Aceptada';
-      case 'countered': return 'Contraoferta';
-      case 'signing_pending': return 'En firma';
-      case 'completed': return 'Completada';
-      case 'rejected': return 'Rechazada';
-      default: return s;
-    }
-  }
-
-  Color _color(String s) {
-    switch (s.toLowerCase()) {
-      case 'accepted': return const Color(0xFF16A34A);
-      case 'countered': return const Color(0xFFD97706);
-      case 'signing_pending': return const Color(0xFF2563EB);
-      case 'completed': return const Color(0xFF16A34A);
-      case 'rejected': return Colors.red;
-      default: return const Color(0xFF64748B);
-    }
-  }
-}
-
-// ── Timeline widget ────────────────────────────────────────────────────────────
+// ── Timeline ─────────────────────────────────────────────────────────────────
 
 enum _StepState { done, active, locked }
 
@@ -256,11 +402,13 @@ class _TimelineStep {
     required this.title,
     required this.subtitle,
     required this.state,
+    this.description,
   });
 
   final String title;
   final String subtitle;
   final _StepState state;
+  final String? description;
 }
 
 class _TimelineWidget extends StatelessWidget {
@@ -272,9 +420,10 @@ class _TimelineWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: List.generate(steps.length, (i) {
-        final step = steps[i];
-        final isLast = i == steps.length - 1;
-        return _StepRow(step: step, isLast: isLast);
+        return _StepRow(
+          step: steps[i],
+          isLast: i == steps.length - 1,
+        );
       }),
     );
   }
@@ -288,70 +437,66 @@ class _StepRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color dotColor;
-    final IconData dotIcon;
     switch (step.state) {
       case _StepState.done:
-        dotColor = const Color(0xFF16A34A);
-        dotIcon = Icons.check_rounded;
-        break;
+        return _DoneRow(step: step, isLast: isLast);
       case _StepState.active:
-        dotColor = const Color(0xFF2563EB);
-        dotIcon = Icons.radio_button_checked_rounded;
-        break;
+        return _ActiveRow(step: step, isLast: isLast);
       case _StepState.locked:
-        dotColor = const Color(0xFFCBD5E1);
-        dotIcon = Icons.lock_outline_rounded;
-        break;
+        return _LockedRow(step: step, isLast: isLast);
     }
+  }
+}
 
-    final bool dimmed = step.state == _StepState.locked;
+// Done step: green checkmark + title + subtitle
+class _DoneRow extends StatelessWidget {
+  const _DoneRow({required this.step, required this.isLast});
 
+  final _TimelineStep step;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 36,
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: dotColor.withValues(alpha: dimmed ? 0.25 : 1.0),
-                  child: Icon(dotIcon, size: 16, color: dimmed ? dotColor : Colors.white),
-                ),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 2,
-                      color: dimmed ? const Color(0xFFE2E8F0) : const Color(0xFF16A34A).withValues(alpha: 0.4),
-                    ),
-                  ),
-              ],
+          _DotColumn(
+            isLast: isLast,
+            dot: Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: Color(0xFF16A34A),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_rounded,
+                  size: 18, color: Colors.white),
             ),
+            lineColor: const Color(0xFF16A34A),
           ),
           const SizedBox(width: 14),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 24, top: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 2),
                   Text(
                     step.title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: dimmed ? const Color(0xFF94A3B8) : const Color(0xFF0F172A),
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     step.subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: dimmed ? const Color(0xFFCBD5E1) : const Color(0xFF64748B),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Color(0xFF94A3B8),
                     ),
                   ),
                 ],
@@ -364,29 +509,323 @@ class _StepRow extends StatelessWidget {
   }
 }
 
-// ── Footer ─────────────────────────────────────────────────────────────────────
+// Active step: blue dot + expanded card with CTA
+class _ActiveRow extends StatelessWidget {
+  const _ActiveRow({required this.step, required this.isLast});
 
-class _Footer extends StatelessWidget {
+  final _TimelineStep step;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _DotColumn(
+            isLast: isLast,
+            dot: Container(
+              width: 32,
+              height: 32,
+              decoration: const BoxDecoration(
+                color: Color(0xFF2563EB),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.edit_document,
+                  size: 18, color: Colors.white),
+            ),
+            lineColor: const Color(0xFFE2E8F0),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF2563EB), width: 1.5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            step.title,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(6),
+                            border:
+                                Border.all(color: const Color(0xFFBFDBFE)),
+                          ),
+                          child: const Text(
+                            'EN CURSO',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF2563EB),
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      step.subtitle,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF2563EB),
+                      ),
+                    ),
+                    if (step.description != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        step.description!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF475569),
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(Icons.edit_outlined, size: 16),
+                        label: const Text(
+                          'Ir a Firmar Ahora',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Locked step: lock icon + gray text
+class _LockedRow extends StatelessWidget {
+  const _LockedRow({required this.step, required this.isLast});
+
+  final _TimelineStep step;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _DotColumn(
+            isLast: isLast,
+            dot: Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFCBD5E1), width: 2),
+              ),
+              child: const Icon(Icons.lock_outline_rounded,
+                  size: 16, color: Color(0xFFCBD5E1)),
+            ),
+            lineColor: const Color(0xFFE2E8F0),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 24, top: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    step.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF94A3B8),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    step.subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: Color(0xFFCBD5E1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Shared dot+line column
+class _DotColumn extends StatelessWidget {
+  const _DotColumn({
+    required this.dot,
+    required this.isLast,
+    required this.lineColor,
+  });
+
+  final Widget dot;
+  final bool isLast;
+  final Color lineColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      child: Column(
+        children: [
+          dot,
+          if (!isLast)
+            Expanded(
+              child: Container(width: 2, color: lineColor),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Help footer ───────────────────────────────────────────────────────────────
+
+class _HelpFooter extends StatelessWidget {
+  const _HelpFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          const Text(
+            '¿Necesitas ayuda con este paso?',
+            style: TextStyle(
+              fontSize: 13,
+              color: Color(0xFF64748B),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.chat_bubble_outline,
+                  size: 15, color: Color(0xFF2563EB)),
+              const SizedBox(width: 6),
+              GestureDetector(
+                onTap: () {},
+                child: const Text(
+                  'Hablar con un asesor legal',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF2563EB),
+                    decoration: TextDecoration.underline,
+                    decorationColor: Color(0xFF2563EB),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Brand bar ─────────────────────────────────────────────────────────────────
+
+class _BrandBar extends StatelessWidget {
+  const _BrandBar();
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.support_agent_outlined, size: 20, color: Color(0xFF2563EB)),
-          const SizedBox(width: 10),
+          const Icon(Icons.verified_user_outlined,
+              size: 14, color: Color(0xFF64748B)),
+          const SizedBox(width: 6),
           const Expanded(
             child: Text(
-              'Necesitas ayuda? Hablar con un asesor legal',
-              style: TextStyle(fontSize: 13, color: Color(0xFF2563EB), fontWeight: FontWeight.w500),
+              'InmuFacil Secure-Tech \u00B7 \u00A9 2023 InmuFacil S.L. Sistema de transacciones seguras bajo protocolo AES-256',
+              style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Icon(Icons.chevron_right, color: Color(0xFF2563EB)),
+          const SizedBox(width: 12),
+          Row(
+            children: [
+              _FooterLink('Ayuda'),
+              const SizedBox(width: 10),
+              _FooterLink('Legal'),
+              const SizedBox(width: 10),
+              _FooterLink('Seguridad'),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class _FooterLink extends StatelessWidget {
+  const _FooterLink(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {},
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11,
+          color: Color(0xFF64748B),
+          decoration: TextDecoration.underline,
+        ),
       ),
     );
   }
