@@ -18,6 +18,7 @@ class OfferData {
     this.closingDate,
     this.createdAt,
     this.buyerName,
+    this.sellerName,
     this.propertyTitle,
     this.propertyPrice,
     this.propertyImageUrl,
@@ -33,6 +34,7 @@ class OfferData {
   final DateTime? closingDate;
   final DateTime? createdAt;
   final String? buyerName;
+  final String? sellerName;
   final String? propertyTitle;
   final double? propertyPrice;
   final String? propertyImageUrl;
@@ -181,6 +183,8 @@ OfferData _mapOffer(dynamic item) {
   final imageUrl = mediaList.isNotEmpty
       ? (mediaList.first as Map<String, dynamic>)['file_path'] as String?
       : null;
+  final buyerFullName = buyer['full_name'] as String?;
+  final sellerName = property['seller_name'] as String?;
   return OfferData(
     id: (map['id'] ?? '').toString(),
     propertyId: (property['id'] ?? map['property_id'] ?? '').toString(),
@@ -191,8 +195,8 @@ OfferData _mapOffer(dynamic item) {
     paymentTerm: map['payment_term'] as String?,
     closingDate: DateTime.tryParse(map['closing_date'] as String? ?? ''),
     createdAt: DateTime.tryParse(map['created_at'] as String? ?? ''),
-    buyerName:
-        '${buyer['first_name'] ?? ''} ${buyer['last_name'] ?? ''}'.trim(),
+    buyerName: buyerFullName?.trim(),
+    sellerName: sellerName?.trim(),
     propertyTitle: property['title'] as String?,
     propertyPrice: ((property['price'] ?? 0) as num).toDouble(),
     propertyImageUrl: imageUrl,

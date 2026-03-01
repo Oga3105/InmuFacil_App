@@ -3,6 +3,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../domain/entities/user.dart';
+import 'my_properties_provider.dart';
+import 'offers_provider.dart';
 
 // Configuration - Move to Env in production
 const String kApiBaseUrl = 'http://localhost:8000/api/v1';
@@ -121,6 +123,10 @@ class AuthNotifier extends Notifier<AuthState> {
           isLoading: false,
           user: user,
         );
+        // Invalidate user-scoped providers so they reload with the new user's data
+        ref.invalidate(myPropertiesProvider);
+        ref.invalidate(sentOffersProvider);
+        ref.invalidate(receivedOffersProvider);
         return true;
       } else {
         state = state.copyWith(
@@ -284,6 +290,10 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
     _dio.options.headers.remove('Authorization');
+    // Invalidate user-scoped providers so stale data is not shown on next login
+    ref.invalidate(myPropertiesProvider);
+    ref.invalidate(sentOffersProvider);
+    ref.invalidate(receivedOffersProvider);
     // Start fresh state (user is null by default)
     state = AuthState(isLoading: false);
   }
