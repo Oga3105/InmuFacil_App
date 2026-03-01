@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
+import 'package:inmufacil_frontend/presentation/screens/offers/transaction_timeline_screen.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
@@ -922,6 +924,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     Text('Gestiona tus anuncios y su estado.', style: TextStyle(color: Colors.grey, fontSize: 13)),
                   ],
                 ),
+
                 SizedBox(
                   height: 40,
                   child: Container(
@@ -976,10 +979,169 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   _buildAddPropertyBanner(),
                 ],
               ),
+            const SizedBox(height: 32),
+            _buildSentOffersSection(),
           ],
         );
       },
     );
+  }
+
+  Widget _buildSentOffersSection() {
+    final sentOffersAsync = ref.watch(sentOffersProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Mis Ofertas',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Seguimiento de las ofertas que has enviado.',
+          style: TextStyle(color: Colors.grey, fontSize: 13),
+        ),
+        const SizedBox(height: 16),
+        sentOffersAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Text('Error al cargar ofertas: $err', style: const TextStyle(color: Colors.red)),
+          data: (offers) {
+            if (offers.isEmpty) {
+              return Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Todavia no has enviado ninguna oferta.',
+                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: offers.map((offer) => _buildOfferRow(offer)).toList(),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOfferRow(OfferData offer) {
+    final statusLabel = _offerStatusLabel(offer.status);
+    final statusColor = _offerStatusColor(offer.status);
+    final title = offer.propertyTitle ?? 'Propiedad';
+    final amount = offer.amount.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$amount EUR',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF2563EB),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          OutlinedButton(
+            onPressed: () => context.pushNamed(
+              'offer-timeline',
+              pathParameters: {'offerId': offer.id},
+              extra: offer,
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF2563EB),
+              side: const BorderSide(color: Color(0xFF2563EB)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            child: const Text('Ver Seguimiento'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _offerStatusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'Pendiente';
+      case 'accepted': return 'Aceptada';
+      case 'countered': return 'Contraoferta';
+      case 'signing_pending': return 'En firma';
+      case 'completed': return 'Completada';
+      case 'rejected': return 'Rechazada';
+      default: return status;
+    }
+  }
+
+  Color _offerStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'accepted': return const Color(0xFF16A34A);
+      case 'countered': return const Color(0xFFD97706);
+      case 'signing_pending': return const Color(0xFF2563EB);
+      case 'completed': return const Color(0xFF16A34A);
+      case 'rejected': return Colors.red;
+      default: return const Color(0xFF64748B);
+    }
   }
 
   Widget _buildFilterChip(String value, String label) {
