@@ -31,6 +31,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _locationInitialized = false;
 
   @override
+  void dispose() {
+    // Clear search error when leaving the screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(searchProvider.notifier).clearError();
+      }
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Initialize location after first build
     if (!_locationInitialized) {
@@ -161,6 +172,7 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
                         property: displayProperty,
                         width: 300,
                         onTap: () {
+                          ref.read(searchProvider.notifier).clearError();
                           context.pushNamed(
                             'property-details', 
                             pathParameters: {'id': displayProperty.id},
@@ -232,7 +244,10 @@ class _MapSection extends ConsumerWidget {
             child: Center(
               child: _PremiumGlowButton(
                 label: 'Ver $propertyCount Inmuebles',
-                onPressed: () => context.pushNamed('search'),
+                onPressed: () {
+                  ref.read(searchProvider.notifier).clearError();
+                  context.pushNamed('search');
+                },
                 color: const Color(0xFF2563EB),
                 icon: Icons.list,
                 fullWidth: false,
@@ -1239,6 +1254,7 @@ class _MapNavigationBar extends ConsumerWidget {
         ((receivedOffers?.isNotEmpty ?? false) || (sentOffers?.isNotEmpty ?? false));
     
     void handleProtectedAction(String route) {
+      ref.read(searchProvider.notifier).clearError();
       if (isAuthenticated) {
         context.push(route);
       } else {
@@ -1267,7 +1283,10 @@ class _MapNavigationBar extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: () => context.push('/404-buy'),
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      context.push('/404-buy');
+                    },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1301,7 +1320,10 @@ class _MapNavigationBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   TextButton(
-                    onPressed: () => context.push('/404-how-it-works'),
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      context.push('/404-how-it-works');
+                    },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1386,10 +1408,13 @@ class _MapNavigationBar extends ConsumerWidget {
                               );
                           }
                         } else if (value == 'profile') {
+                           ref.read(searchProvider.notifier).clearError();
                            context.push('/profile');
                         } else if (value == 'my-properties') {
+                           ref.read(searchProvider.notifier).clearError();
                            context.push('/profile?tab=1');
                         } else if (value == 'offers') {
+                           ref.read(searchProvider.notifier).clearError();
                            context.push('/profile?tab=1');
                         }
                       },
@@ -1422,7 +1447,10 @@ class _MapNavigationBar extends ConsumerWidget {
                     )
                   else
                     InkWell(
-                      onTap: () => context.pushNamed('login'),
+                      onTap: () {
+                        ref.read(searchProvider.notifier).clearError();
+                        context.pushNamed('login');
+                      },
                       borderRadius: BorderRadius.circular(20),
                       child: CircleAvatar(
                          radius: 18,

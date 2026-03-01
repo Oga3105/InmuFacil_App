@@ -70,6 +70,7 @@ class SearchState {
     LatLng? mapCenter,
     bool? isLoading,
     String? error,
+    bool clearError = false,
     bool? isUsingFallbackLocation,
     bool? onlyFavorites,
     bool? onlyVerified,
@@ -90,7 +91,7 @@ class SearchState {
       filteredProperties: filteredProperties ?? this.filteredProperties,
       mapCenter: mapCenter ?? this.mapCenter,
       isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
+      error: clearError ? null : (error ?? this.error),
       isUsingFallbackLocation: isUsingFallbackLocation ?? this.isUsingFallbackLocation,
       onlyFavorites: onlyFavorites ?? this.onlyFavorites,
       onlyVerified: onlyVerified ?? this.onlyVerified,
@@ -156,7 +157,7 @@ class SearchNotifier extends Notifier<SearchState> {
     state = state.copyWith(
       location: location,
       isLoading: true,
-      error: null,
+      clearError: true,
     );
     
     try {
@@ -214,7 +215,7 @@ class SearchNotifier extends Notifier<SearchState> {
 
   /// Clear location text and search state
   void clearSearchText() {
-    state = state.copyWith(location: '', error: null);
+    state = state.copyWith(location: '', clearError: true);
   }
 
   /// Reset only search criteria filters (preserves location and map bounds)
@@ -314,7 +315,7 @@ class SearchNotifier extends Notifier<SearchState> {
         return;
       }
       
-      state = state.copyWith(isLoading: true, error: null);
+      state = state.copyWith(isLoading: true, clearError: true);
       
       try {
         // STEP 1: Primary attempt - Search only in Spain
@@ -400,7 +401,7 @@ class SearchNotifier extends Notifier<SearchState> {
   
   /// Load properties from repository with current filters
   Future<void> _loadProperties() async {
-    state = state.copyWith(isLoading: true, error: null);
+    state = state.copyWith(isLoading: true, clearError: true);
     
     final result = await _repository.getProperties(
       type: state.propertyType != PropertyType.all 
@@ -469,7 +470,7 @@ class SearchNotifier extends Notifier<SearchState> {
 
         state = state.copyWith(
           isLoading: false,
-          error: null,
+          clearError: true,
           filteredProperties: filteredList,
         );
       },
@@ -478,7 +479,7 @@ class SearchNotifier extends Notifier<SearchState> {
   
   /// Clear error message
   void clearError() {
-    state = state.copyWith(error: null);
+    state = state.copyWith(clearError: true);
   }
   
   /// Reset all filters

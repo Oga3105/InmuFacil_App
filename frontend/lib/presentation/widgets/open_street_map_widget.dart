@@ -148,7 +148,10 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                    // Selection is now only cleared by hovering other markers or explicitly closed
                    
                    // User Interaction -> Clear Error & Text
-                   ref.read(searchProvider.notifier).clearSearchText();
+                   final notifier = ref.read(searchProvider.notifier);
+                   if (ref.read(searchProvider).error != null || ref.read(searchProvider).location.isNotEmpty) {
+                      notifier.clearSearchText();
+                   }
                 },
                 // ERROR HANDLING: Clear error on map move (drag/pan)
                 onPositionChanged: (position, hasGesture) {
