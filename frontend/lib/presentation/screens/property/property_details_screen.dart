@@ -60,6 +60,14 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final prevPropertyId = currentIndex > 0 ? properties[currentIndex - 1].id : null;
     final nextPropertyId = (currentIndex != -1 && currentIndex < properties.length - 1) ? properties[currentIndex + 1].id : null;
 
+    // Owner check — owners should not see visitor navigation arrows
+    final currentUserId = ref.watch(authProvider).user?.id;
+    final isOwner = property.ownerId != null &&
+        currentUserId != null &&
+        property.ownerId == currentUserId;
+    final effectivePrevId = isOwner ? null : prevPropertyId;
+    final effectiveNextId = isOwner ? null : nextPropertyId;
+
     // Favorite Logic
     final favoriteIds = ref.watch(favoritesProvider);
     final isFavorite = favoriteIds.contains(property.id);
@@ -242,28 +250,28 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
           // Navigation Arrows (Overlay)
           // Desktop: Centered vertically on screen edges
           // Mobile: Maybe unobtrusive or bottom near image? User said "a los lados"
-          if (prevPropertyId != null)
+          if (effectivePrevId != null)
             Positioned(
               left: 16,
               top: 0, bottom: 0,
               child: Center(
                 child: _NavigationArrow(
-                  icon: Icons.chevron_left, 
+                  icon: Icons.chevron_left,
                   label: 'Anterior',
-                  onTap: () => context.pushNamed('property-details', pathParameters: {'id': prevPropertyId}),
+                  onTap: () => context.pushNamed('property-details', pathParameters: {'id': effectivePrevId}),
                 ),
               ),
             ),
-            
-          if (nextPropertyId != null)
+
+          if (effectiveNextId != null)
             Positioned(
               right: 16,
               top: 0, bottom: 0,
               child: Center(
                 child: _NavigationArrow(
-                  icon: Icons.chevron_right, 
+                  icon: Icons.chevron_right,
                   label: 'Siguiente',
-                  onTap: () => context.pushNamed('property-details', pathParameters: {'id': nextPropertyId}),
+                  onTap: () => context.pushNamed('property-details', pathParameters: {'id': effectiveNextId}),
                 ),
               ),
             ),
@@ -827,36 +835,38 @@ class _ActionBar extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
-                  icon: const Icon(Icons.calendar_month_outlined, size: 20),
-                  label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF0f172a),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Color(0xFF0f172a), width: 2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          if (!isOwner) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                    icon: const Icon(Icons.calendar_month_outlined, size: 20),
+                    label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0f172a),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
-                  icon: const Icon(Icons.gavel_rounded, size: 20),
-                  label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                    icon: const Icon(Icons.gavel_rounded, size: 20),
+                    label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
           if (isOwner) ...[
             const SizedBox(height: 10),
             OutlinedButton.icon(
@@ -894,38 +904,40 @@ class _ActionBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
-                  icon: const Icon(Icons.calendar_month_outlined),
-                  label: const Text('Solicitar Visita'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF0f172a),
-                    side: const BorderSide(color: Color(0xFF0f172a), width: 2),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          if (!isOwner) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    label: const Text('Solicitar Visita'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF0f172a),
+                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: FilledButton.icon(
-                  onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
-                  icon: const Icon(Icons.gavel_rounded),
-                  label: const Text('Hacer Oferta'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                    icon: const Icon(Icons.gavel_rounded),
+                    label: const Text('Hacer Oferta'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
           if (isOwner) ...[
             const SizedBox(height: 8),
             SizedBox(
