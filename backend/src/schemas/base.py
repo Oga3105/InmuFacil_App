@@ -6,7 +6,7 @@ Request/Response schemas with security best practices.
 Prevents sensitive data exposure in API responses.
 """
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator, model_validator
 from typing import Literal, Optional, List
 from datetime import datetime
 from backend.src.models import (
@@ -281,6 +281,26 @@ class PropertyResponse(PropertyBase):
     # Computed fields
     gross_yield: Optional[float] = None
     price_m2: Optional[float] = None
+
+    # Owner info (populated from the ORM relationship)
+    owner_name: Optional[str] = None
+    owner_is_verified: Optional[bool] = None
+    owner_photo_url: Optional[str] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def populate_owner_info(cls, values):
+        if not hasattr(values, '__dict__'):
+            return values
+        owner = getattr(values, 'owner', None)
+        if owner is not None:
+            # Inject into the object's __dict__ so Pydantic picks them up
+            values.__dict__.setdefault('owner_name', getattr(owner, 'full_name', None))
+            dni = getattr(owner, 'dni_status', None)
+            dni_str = (dni.value if hasattr(dni, 'value') else str(dni) if dni else '').lower()
+            values.__dict__.setdefault('owner_is_verified', dni_str == 'validado')
+            values.__dict__.setdefault('owner_photo_url', getattr(owner, 'profile_photo_url', None))
+        return values
 
     class Config:
         from_attributes = True

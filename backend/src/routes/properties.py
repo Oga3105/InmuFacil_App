@@ -95,7 +95,8 @@ async def list_properties(
         joinedload(Property.legal),
         joinedload(Property.financial),
         joinedload(Property.environment),
-        joinedload(Property.media)
+        joinedload(Property.media),
+        joinedload(Property.owner)
     )
     
     # 2. Logic: Visibility (Hito 8)
@@ -168,7 +169,8 @@ async def get_property(
         joinedload(Property.legal),
         joinedload(Property.financial),
         joinedload(Property.environment),
-        joinedload(Property.media)
+        joinedload(Property.media),
+        joinedload(Property.owner)
     ).filter(Property.id == property_id).first()
     
     if not property:
@@ -238,7 +240,8 @@ async def list_my_properties(
         joinedload(Property.features),
         joinedload(Property.legal),
         joinedload(Property.financial),
-        joinedload(Property.media)
+        joinedload(Property.media),
+        joinedload(Property.owner)
     ).filter(Property.owner_id == current_user.id).all()
 
 
