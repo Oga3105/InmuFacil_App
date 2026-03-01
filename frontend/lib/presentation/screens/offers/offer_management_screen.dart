@@ -534,6 +534,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
         ? _formatDate(offer.createdAt!)
         : '';
     final isPending = offer.status == 'pending';
+    final photoUrl = offer.buyerPhotoUrl;
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -562,14 +563,19 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                 CircleAvatar(
                   radius: 24,
                   backgroundColor: const Color(0xFFDBEAFE),
-                  child: Text(
-                    buyerInitial,
-                    style: const TextStyle(
-                      color: Color(0xFF2563EB),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 18,
-                    ),
-                  ),
+                  backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                      ? NetworkImage(photoUrl)
+                      : null,
+                  child: (photoUrl == null || photoUrl.isEmpty)
+                      ? Text(
+                          buyerInitial,
+                          style: const TextStyle(
+                            color: Color(0xFF2563EB),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        )
+                      : null,
                 ),
                 const SizedBox(width: 12),
                 // Buyer name + date + badge
@@ -596,7 +602,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                         ),
                       ],
                       const SizedBox(height: 6),
-                      _BuyerBadge(paymentTerm: offer.paymentTerm),
+                      if (offer.buyerIsVerified) const _BuyerVerifiedBadge(),
                     ],
                   ),
                 ),
@@ -632,7 +638,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'MONTO OFRECIDO',
+                        'CANTIDAD OFRECIDA',
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
@@ -948,17 +954,20 @@ class _ActionButtonsColumn extends StatelessWidget {
                     TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         SizedBox(
           width: 132,
-          child: TextButton(
+          child: OutlinedButton(
             onPressed: onReject,
-            style: TextButton.styleFrom(
+            style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFF94A3B8),
-              padding: const EdgeInsets.symmetric(vertical: 6),
+              side: const BorderSide(color: Color(0xFFCBD5E1)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 10),
             ),
             child: const Text('Rechazar',
-                style: TextStyle(fontSize: 12)),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
           ),
         ),
       ],
@@ -970,46 +979,29 @@ class _ActionButtonsColumn extends StatelessWidget {
 // Buyer Badge
 // ---------------------------------------------------------------------------
 
-class _BuyerBadge extends StatelessWidget {
-  const _BuyerBadge({this.paymentTerm});
-
-  final String? paymentTerm;
+class _BuyerVerifiedBadge extends StatelessWidget {
+  const _BuyerVerifiedBadge();
 
   @override
   Widget build(BuildContext context) {
-    final isCash = paymentTerm == 'cash';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isCash
-            ? const Color(0xFFF0FDF4)
-            : const Color(0xFFEFF6FF),
+        color: const Color(0xFFF0FDF4),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isCash
-              ? const Color(0xFF86EFAC)
-              : const Color(0xFFBFDBFE),
-        ),
+        border: Border.all(color: const Color(0xFF86EFAC)),
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isCash ? Icons.verified_outlined : Icons.business_center_outlined,
-            size: 12,
-            color: isCash
-                ? const Color(0xFF16A34A)
-                : const Color(0xFF2563EB),
-          ),
-          const SizedBox(width: 4),
+          Icon(Icons.verified_outlined, size: 12, color: Color(0xFF16A34A)),
+          SizedBox(width: 4),
           Text(
-            isCash ? 'SOLVENCIA VERIFICADA' : 'COMPRADOR PROFESIONAL',
+            'VERIFICADO',
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w800,
-              color: isCash
-                  ? const Color(0xFF16A34A)
-                  : const Color(0xFF2563EB),
+              color: Color(0xFF16A34A),
               letterSpacing: 0.4,
             ),
           ),
@@ -1239,7 +1231,7 @@ class _TrustFooter extends StatelessWidget {
                 ),
                 SizedBox(height: 2),
                 Text(
-                  'InmuFacil asegura la solvencia y la identidad de cada comprador.',
+                  'InmuFacil asegura la identidad de cada comprador.',
                   style: TextStyle(
                     fontSize: 11,
                     color: Color(0xFF64748B),
