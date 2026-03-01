@@ -49,7 +49,7 @@ final sentOffersProvider =
 
 class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
   final _storage = const FlutterSecureStorage();
-  late final Dio _dio;
+  late Dio _dio;
 
   @override
   Future<List<OfferData>> build() async {
@@ -82,7 +82,7 @@ final receivedOffersProvider =
 
 class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
   final _storage = const FlutterSecureStorage();
-  late final Dio _dio;
+  late Dio _dio;
 
   @override
   Future<List<OfferData>> build() async {

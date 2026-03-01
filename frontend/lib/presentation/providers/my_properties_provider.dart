@@ -15,7 +15,7 @@ final myPropertiesProvider =
 
 class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
   final _storage = const FlutterSecureStorage();
-  late final Dio _dio;
+  late Dio _dio;
 
   @override
   Future<List<Property>> build() async {

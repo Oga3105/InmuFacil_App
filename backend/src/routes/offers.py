@@ -183,9 +183,9 @@ async def list_received_offers(
     """
     Seller sees offers for their properties.
     """
-    offers = _offers_query(db).join(Property).filter(
-        Property.owner_id == current_user.id
-    ).all()
+    # Use subquery to avoid conflicting JOIN with joinedload on the same table
+    owned_ids = db.query(Property.id).filter(Property.owner_id == current_user.id).subquery()
+    offers = _offers_query(db).filter(PropertyOffer.property_id.in_(owned_ids)).all()
     return [_serialize_offer(o) for o in offers]
 
 
