@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
-import 'package:inmufacil_frontend/presentation/screens/offers/transaction_timeline_screen.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
@@ -68,10 +67,32 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
-    
+
     // Fallback
     if (user == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    // Watch offers to determine if "Mis Ofertas" tab should appear
+    final sentOffers = ref.watch(sentOffersProvider).asData?.value ?? <OfferData>[];
+    final receivedOffers = ref.watch(receivedOffersProvider).asData?.value ?? <OfferData>[];
+    final hasOffers = sentOffers.isNotEmpty || receivedOffers.isNotEmpty;
+    final newTabCount = hasOffers ? 3 : 2;
+
+    if (_tabController.length != newTabCount) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            final prevIndex = _tabController.index;
+            _tabController.dispose();
+            _tabController = TabController(
+              length: newTabCount,
+              initialIndex: prevIndex.clamp(0, newTabCount - 1),
+              vsync: this,
+            );
+          });
+        }
+      });
     }
 
     // Init/Sync Controllers only if NOT editing
@@ -120,9 +141,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                           indicatorWeight: 3,
                           dividerColor: Colors.transparent,
                           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                          tabs: const [
-                             Tab(child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')])),
-                             Tab(child: Row(children: [Icon(Icons.home_work, size: 20), SizedBox(width: 8), Text('Mis Propiedades')])),
+                          tabs: [
+                             const Tab(child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')])),
+                             const Tab(child: Row(children: [Icon(Icons.home_work, size: 20), SizedBox(width: 8), Text('Mis Propiedades')])),
+                             if (hasOffers)
+                               const Tab(child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')])),
                           ],
                         ),
                       ),
@@ -141,9 +164,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   child: AnimatedBuilder(
                     animation: _tabController,
                     builder: (context, _) {
-                      return _tabController.index == 0 
-                        ? _buildProfileTab(user, isVerified)
-                        : _buildPropertiesTab();
+                      if (_tabController.index == 0) return _buildProfileTab(user, isVerified);
+                      if (_tabController.index == 1) return _buildPropertiesTab();
+                      return _buildOffersTab(sentOffers, receivedOffers);
                     },
                   ),
                 ),
@@ -979,16 +1002,24 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                   _buildAddPropertyBanner(),
                 ],
               ),
-            const SizedBox(height: 32),
-            _buildSentOffersSection(),
           ],
         );
       },
     );
   }
 
-  Widget _buildSentOffersSection() {
-    final sentOffersAsync = ref.watch(sentOffersProvider);
+  Widget _buildOffersTab(List<OfferData> sentOffers, List<OfferData> receivedOffers) {
+    final allOffers = <({OfferData offer, String direction})>[
+      ...sentOffers.map((o) => (offer: o, direction: 'Enviada')),
+      ...receivedOffers.map((o) => (offer: o, direction: 'Recibida')),
+    ];
+
+    // Sort by createdAt descending (newest first)
+    allOffers.sort((a, b) {
+      final aDate = a.offer.createdAt ?? DateTime(0);
+      final bDate = b.offer.createdAt ?? DateTime(0);
+      return bDate.compareTo(aDate);
+    });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -999,40 +1030,34 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
         ),
         const SizedBox(height: 4),
         const Text(
-          'Seguimiento de las ofertas que has enviado.',
+          'Ofertas enviadas y recibidas.',
           style: TextStyle(color: Colors.grey, fontSize: 13),
         ),
         const SizedBox(height: 16),
-        sentOffersAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Text('Error al cargar ofertas: $err', style: const TextStyle(color: Colors.red)),
-          data: (offers) {
-            if (offers.isEmpty) {
-              return Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFF),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Todavia no has enviado ninguna oferta.',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-                  ),
-                ),
-              );
-            }
-            return Column(
-              children: offers.map((offer) => _buildOfferRow(offer)).toList(),
-            );
-          },
-        ),
+        if (allOffers.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const Center(
+              child: Text(
+                'No hay ofertas todavia.',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              ),
+            ),
+          )
+        else
+          Column(
+            children: allOffers.map((e) => _buildOfferRow(e.offer, direction: e.direction)).toList(),
+          ),
       ],
     );
   }
 
-  Widget _buildOfferRow(OfferData offer) {
+  Widget _buildOfferRow(OfferData offer, {String? direction}) {
     final statusLabel = _offerStatusLabel(offer.status);
     final statusColor = _offerStatusColor(offer.status);
     final title = offer.propertyTitle ?? 'Propiedad';
@@ -1040,6 +1065,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
       (m) => '${m[1]}.',
     );
+    final directionColor = direction == 'Enviada' ? const Color(0xFF2563EB) : const Color(0xFF16A34A);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -1062,15 +1088,35 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    if (direction != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: directionColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          direction,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: directionColor),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
