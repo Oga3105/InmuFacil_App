@@ -44,7 +44,10 @@ class PropertyWizardBottomBar extends ConsumerWidget {
               onPressed: isSubmitting ? null : () => notifier.prevStep(),
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 14),
               label: Text('property_wizard.back'.tr()),
-              style: TextButton.styleFrom(foregroundColor: Colors.grey.shade700),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade700,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             )
           else
             const SizedBox.shrink(),
@@ -63,7 +66,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
             style: FilledButton.styleFrom(
               backgroundColor: _blue,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: isSubmitting
                 ? const SizedBox(

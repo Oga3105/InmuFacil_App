@@ -1255,11 +1255,15 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
           ),
           const SizedBox(height: 8),
            TextButton(
              onPressed: (){},
+             style: TextButton.styleFrom(
+               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+             ),
              child: const Text('Ver mis borradores', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
            ),
          ],

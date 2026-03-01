@@ -141,6 +141,9 @@ extension StringTranslation on String {
       'property_wizard.session_expired_title': 'Tu sesión ha expirado',
       'property_wizard.session_expired_message': 'Por favor, inicia sesión de nuevo para continuar.',
       'property_wizard.login': 'Iniciar sesión',
+      'property_wizard.visits_card': 'Visitas',
+      'property_wizard.allow_visits_label': 'Aceptar solicitudes de visita',
+      'property_wizard.allow_visits_hint': 'Recibirás notificaciones cuando un comprador quiera visitar tu propiedad.',
       // Amenities
       'amenity.pool': 'Piscina',
       'amenity.garage': 'Garaje',

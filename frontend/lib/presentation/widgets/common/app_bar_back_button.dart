@@ -103,21 +103,23 @@ class _AppBarCloseButtonState extends State<AppBarCloseButton> {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _hovered ? _red : Colors.white.withValues(alpha: 0.95),
+              color: _hovered ? _red : Colors.transparent,
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: _hovered
-                      ? _red.withValues(alpha: 0.35)
-                      : Colors.black.withValues(alpha: 0.10),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-              border: Border.all(
-                color: _hovered ? _red : Colors.grey.shade200,
-                width: 1,
-              ),
+              boxShadow: _hovered
+                  ? [
+                      BoxShadow(
+                        color: _red.withValues(alpha: 0.35),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : [],
+              border: _hovered
+                  ? Border.all(
+                      color: _red,
+                      width: 1,
+                    )
+                  : null,
             ),
             child: Icon(
               Icons.close_rounded,

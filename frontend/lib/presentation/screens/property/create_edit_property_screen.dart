@@ -45,12 +45,21 @@ class _CreateEditPropertyScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text('property_wizard.keep_editing'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style:
-                FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             child: Text('property_wizard.cancel_exit'.tr()),
           ),
         ],
@@ -146,8 +155,7 @@ class _CreateEditPropertyScreenState
               const SizedBox(width: 8),
               const Text.rich(
                 TextSpan(
-                  style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
@@ -179,21 +187,37 @@ class _AvatarButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user;
-    final initials =
-        user?.name?.isNotEmpty == true ? user!.name![0].toUpperCase() : '?';
+    final photoUrl = user?.profilePhotoUrl;
+    
     return GestureDetector(
       onTap: () => context.go('/profile'),
-      child: CircleAvatar(
-        radius: 18,
-        backgroundColor: const Color(0xFF2563EB),
-        backgroundImage: user?.profilePhotoUrl != null
-            ? NetworkImage(user!.profilePhotoUrl!)
-            : null,
-        child: user?.profilePhotoUrl == null
-            ? Text(initials,
-                style:
-                    const TextStyle(color: Colors.white, fontSize: 14))
-            : null,
+      child: Builder(
+        builder: (context) {
+          final ts = DateTime.now().millisecondsSinceEpoch;
+          return SizedBox(
+            width: 36,
+            height: 36,
+            child: ClipOval(
+              child: photoUrl != null
+                  ? Image.network(
+                      '$photoUrl?v=$ts',
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: const Color(0xFF2563EB),
+                        alignment: Alignment.center,
+                        child: const Icon(Icons.person, color: Colors.white, size: 18),
+                      ),
+                    )
+                  : Container(
+                      color: const Color(0xFF2563EB),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.person, color: Colors.white, size: 18),
+                    ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -211,9 +235,8 @@ class _SaveDraftButton extends ConsumerWidget {
         formState.status == PropertyFormStatus.uploadingImages;
 
     return OutlinedButton(
-      onPressed: (isSaving || isSubmitting)
-          ? null
-          : () => notifier.saveDraft(context),
+      onPressed:
+          (isSaving || isSubmitting) ? null : () => notifier.saveDraft(context),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFFCA8A04),
         side: const BorderSide(color: Color(0xFFCA8A04)),
@@ -249,8 +272,7 @@ class _SessionExpiredScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.lock_outline,
-                size: 64, color: Color(0xFF2563EB)),
+            const Icon(Icons.lock_outline, size: 64, color: Color(0xFF2563EB)),
             const SizedBox(height: 16),
             Text('property_wizard.session_expired_title'.tr(),
                 style:
