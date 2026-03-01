@@ -144,7 +144,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                           tabs: [
                              const Tab(child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')])),
                              const Tab(child: Row(children: [Icon(Icons.home_work, size: 20), SizedBox(width: 8), Text('Mis Propiedades')])),
-                             if (hasOffers)
+                             if (_tabController.length == 3)
                                const Tab(child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')])),
                           ],
                         ),
