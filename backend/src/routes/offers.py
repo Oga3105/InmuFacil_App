@@ -36,6 +36,8 @@ class PropertySnippet(BaseModel):
 class BuyerSnippet(BaseModel):
     id: int
     full_name: Optional[str] = None
+    photo_url: Optional[str] = None
+    is_verified: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 class OfferResponse(BaseModel):
@@ -75,9 +77,12 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         )
     buyer_snippet = None
     if buyer:
+        from backend.src.models.enums import DNIStatus
         buyer_snippet = BuyerSnippet(
             id=buyer.id,
             full_name=buyer.full_name,
+            photo_url=buyer.profile_photo_url,
+            is_verified=buyer.dni_status == DNIStatus.VALIDADO,
         )
     return OfferResponse(
         id=offer.id,

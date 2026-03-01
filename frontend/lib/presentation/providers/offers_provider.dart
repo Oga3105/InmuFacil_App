@@ -18,6 +18,8 @@ class OfferData {
     this.closingDate,
     this.createdAt,
     this.buyerName,
+    this.buyerPhotoUrl,
+    this.buyerIsVerified = false,
     this.sellerName,
     this.propertyTitle,
     this.propertyPrice,
@@ -34,6 +36,8 @@ class OfferData {
   final DateTime? closingDate;
   final DateTime? createdAt;
   final String? buyerName;
+  final String? buyerPhotoUrl;
+  final bool buyerIsVerified;
   final String? sellerName;
   final String? propertyTitle;
   final double? propertyPrice;
@@ -185,6 +189,8 @@ OfferData _mapOffer(dynamic item) {
       : null;
   final buyerFullName = buyer['full_name'] as String?;
   final sellerName = property['seller_name'] as String?;
+  final buyerPhotoUrl = buyer['photo_url'] as String?;
+  final buyerIsVerified = buyer['is_verified'] as bool? ?? false;
   return OfferData(
     id: (map['id'] ?? '').toString(),
     propertyId: (property['id'] ?? map['property_id'] ?? '').toString(),
@@ -196,6 +202,8 @@ OfferData _mapOffer(dynamic item) {
     closingDate: DateTime.tryParse(map['closing_date'] as String? ?? ''),
     createdAt: DateTime.tryParse(map['created_at'] as String? ?? ''),
     buyerName: buyerFullName?.trim(),
+    buyerPhotoUrl: buyerPhotoUrl,
+    buyerIsVerified: buyerIsVerified,
     sellerName: sellerName?.trim(),
     propertyTitle: property['title'] as String?,
     propertyPrice: ((property['price'] ?? 0) as num).toDouble(),
