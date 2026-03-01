@@ -96,7 +96,10 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
       createdAt: DateTime.tryParse(data['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(data['updated_at'] as String? ?? '') ?? DateTime.now(),
       status: data['status'] as String?,
-      ownerId: data['seller_id']?.toString() ?? data['owner_id']?.toString(),
+      ownerId: (data['seller_id'] ?? data['owner_id'])?.toString(),
+      ownerName: data['owner_name'] as String?,
+      ownerIsVerified: data['owner_is_verified'] as bool? ?? false,
+      ownerPhotoUrl: data['owner_photo_url'] as String?,
     );
   }
 }

@@ -23,6 +23,9 @@ class Property { // Added
     this.status,
     this.ownerId,
     this.allowVisits = true,
+    this.ownerName,
+    this.ownerIsVerified = false,
+    this.ownerPhotoUrl,
   });
   final String id;
   final String title;
@@ -45,6 +48,9 @@ class Property { // Added
   final String? ownerId;
   /// Whether the owner has enabled visit scheduling for this property.
   final bool allowVisits;
+  final String? ownerName;
+  final bool ownerIsVerified;
+  final String? ownerPhotoUrl;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;

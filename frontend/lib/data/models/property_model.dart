@@ -28,6 +28,9 @@ class PropertyModel {
     required this.updatedAt,
     this.ownerId,
     this.allowVisits = true,
+    this.ownerName,
+    this.ownerIsVerified = false,
+    this.ownerPhotoUrl,
   });
 
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
@@ -80,6 +83,9 @@ class PropertyModel {
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
       ownerId: (json['seller_id'] ?? json['owner_id'])?.toString(),
       allowVisits: json['allow_visits'] as bool? ?? true,
+      ownerName: json['owner_name'] as String?,
+      ownerIsVerified: json['owner_is_verified'] as bool? ?? false,
+      ownerPhotoUrl: json['owner_photo_url'] as String?,
     );
   }
   final int id;
@@ -100,6 +106,9 @@ class PropertyModel {
   final DateTime updatedAt;
   final String? ownerId;
   final bool allowVisits;
+  final String? ownerName;
+  final bool ownerIsVerified;
+  final String? ownerPhotoUrl;
 
   /// Convert to domain entity
   Property toEntity() {
@@ -121,6 +130,9 @@ class PropertyModel {
       updatedAt: updatedAt,
       ownerId: ownerId,
       allowVisits: allowVisits,
+      ownerName: ownerName,
+      ownerIsVerified: ownerIsVerified,
+      ownerPhotoUrl: ownerPhotoUrl,
     );
   }
   
