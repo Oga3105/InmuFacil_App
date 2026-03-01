@@ -6,8 +6,8 @@ Handles the lifecycle of Property Offers (Manifestación de Interés).
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, condecimal
+from sqlalchemy.orm import Session, joinedload
+from pydantic import BaseModel, condecimal, ConfigDict
 
 from backend.src.config.database import get_db
 from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
@@ -26,21 +26,72 @@ class OfferCreate(BaseModel):
     conditions: Optional[str] = None
     valid_days: int = 7
 
+class PropertySnippet(BaseModel):
+    id: int
+    title: str
+    price: float
+    seller_name: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
+class BuyerSnippet(BaseModel):
+    id: int
+    full_name: Optional[str] = None
+    model_config = ConfigDict(from_attributes=True)
+
 class OfferResponse(BaseModel):
     id: int
     property_id: int
     buyer_id: int
     amount: float
-    conditions: Optional[str]
+    conditions: Optional[str] = None
     status: str
-    valid_until: Optional[datetime]
+    valid_until: Optional[datetime] = None
     created_at: datetime
-    
-    class Config:
-        from_attributes = True
+    property: Optional[PropertySnippet] = None
+    buyer: Optional[BuyerSnippet] = None
+    model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
     amount: float
+
+def _offers_query(db: Session):
+    """Return a query for PropertyOffer with eager-loaded property (+ owner) and buyer."""
+    return db.query(PropertyOffer).options(
+        joinedload(PropertyOffer.property).joinedload(Property.owner),
+        joinedload(PropertyOffer.buyer),
+    )
+
+
+def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
+    prop = offer.property
+    buyer = offer.buyer
+    prop_snippet = None
+    if prop:
+        prop_snippet = PropertySnippet(
+            id=prop.id,
+            title=prop.title,
+            price=float(prop.price),
+            seller_name=prop.owner.full_name if prop.owner else None,
+        )
+    buyer_snippet = None
+    if buyer:
+        buyer_snippet = BuyerSnippet(
+            id=buyer.id,
+            full_name=buyer.full_name,
+        )
+    return OfferResponse(
+        id=offer.id,
+        property_id=offer.property_id,
+        buyer_id=offer.buyer_id,
+        amount=float(offer.amount),
+        conditions=offer.conditions,
+        status=offer.status.value if hasattr(offer.status, 'value') else str(offer.status),
+        valid_until=offer.valid_until,
+        created_at=offer.created_at,
+        property=prop_snippet,
+        buyer=buyer_snippet,
+    )
+
 
 class ChatMessageCreate(BaseModel):
     message: str
@@ -105,8 +156,9 @@ async def create_offer(
     
     db.add(offer)
     db.commit()
-    db.refresh(offer)
-    return offer
+    # Re-fetch with eager loads so the response includes nested property and buyer
+    created = _offers_query(db).filter(PropertyOffer.id == offer.id).first()
+    return _serialize_offer(created)
 
 
 @router.get("/me/sent", response_model=List[OfferResponse])
@@ -117,9 +169,10 @@ async def list_sent_offers(
     """
     Buyer sees offers they made.
     """
-    return db.query(PropertyOffer).filter(
+    offers = _offers_query(db).filter(
         PropertyOffer.buyer_id == current_user.id
     ).all()
+    return [_serialize_offer(o) for o in offers]
 
 
 @router.get("/me/received", response_model=List[OfferResponse])
@@ -130,10 +183,10 @@ async def list_received_offers(
     """
     Seller sees offers for their properties.
     """
-    # Join Offer -> Property -> Owner
-    return db.query(PropertyOffer).join(Property).filter(
+    offers = _offers_query(db).join(Property).filter(
         Property.owner_id == current_user.id
     ).all()
+    return [_serialize_offer(o) for o in offers]
 
 
 @router.post("/{offer_id}/counter", response_model=OfferResponse)
