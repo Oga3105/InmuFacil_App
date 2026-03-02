@@ -7,48 +7,32 @@ Implements OWASP best practices for password security.
 Token Consumption Tracking: ~500 tokens for security implementation
 """
 
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 
-# Bcrypt password hashing context
-# Bcrypt is recommended by OWASP for password hashing
-# Automatically handles salting and multiple rounds
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_BCRYPT_ROUNDS = 12
 
 
 def hash_password(password: str) -> str:
     """
-    Hash a plain text password using Bcrypt.
-    
-    Args:
-        password: Plain text password to hash
-        
-    Returns:
-        Hashed password string
-        
+    Hash a plain text password using bcrypt 5.x.
+
     Security Notes:
-    - Uses Bcrypt algorithm (OWASP recommended)
+    - Uses bcrypt algorithm (OWASP recommended)
     - Automatically generates unique salt per password
     - Computationally expensive to prevent brute force attacks
     """
-    return pwd_context.hash(password)
+    return _bcrypt.hashpw(password.encode("utf-8"), _bcrypt.gensalt(_BCRYPT_ROUNDS)).decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verify a plain text password against a hashed password.
-    
-    Args:
-        plain_password: Plain text password to verify
-        hashed_password: Hashed password to compare against
-        
-    Returns:
-        True if password matches, False otherwise
-        
+    Verify a plain text password against a bcrypt hash.
+
     Security Notes:
     - Constant-time comparison to prevent timing attacks
     - Never logs or stores the plain password
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    return _bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
