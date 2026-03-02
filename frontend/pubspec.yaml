@@ -15,7 +15,7 @@ dependencies:
   riverpod_annotation: ^4.0.2
    
   # Networking
-  dio: ^5.2.1
+  dio: ^5.9.2
    
   # Routing
   go_router: ^13.0.0
