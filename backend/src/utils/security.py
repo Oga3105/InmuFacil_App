@@ -5,7 +5,7 @@ Password hashing, verification, centralized authentication dependencies,
 and AES-256 data encryption.
 """
 
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -23,8 +23,8 @@ from backend.src.schemas.base import TokenData
 # Configuration
 # ============================================================================
 
-# Bcrypt password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Bcrypt work factor
+_BCRYPT_ROUNDS = 12
 
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
@@ -49,12 +49,12 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 # ============================================================================
 
 def hash_password(password: str) -> str:
-    """Hash a plain text password using Bcrypt."""
-    return pwd_context.hash(password)
+    """Hash a plain text password using bcrypt."""
+    return _bcrypt.hashpw(password.encode("utf-8"), _bcrypt.gensalt(_BCRYPT_ROUNDS)).decode("utf-8")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain text password against a hashed password."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a plain text password against a bcrypt hash."""
+    return _bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 def get_password_hash(password: str) -> str:
     """Alias for hash_password."""
