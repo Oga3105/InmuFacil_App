@@ -201,6 +201,7 @@ class PropertyBase(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     hide_exact_location: bool = False
+    allow_visits: bool = True
 
     property_type: PropertyType = PropertyType.PISO
     operation_type: OperationType = OperationType.VENTA

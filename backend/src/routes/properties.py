@@ -295,6 +295,21 @@ async def update_property_status(
     return prop
 
 
+@router.patch("/{property_id}/allow-visits", response_model=PropertyResponse)
+async def toggle_allow_visits(
+    property_id: int,
+    body: dict,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Toggle allow_visits flag for a property owned by the current user."""
+    prop = verify_property_ownership(db, property_id, current_user.id)
+    prop.allow_visits = bool(body.get("allow_visits", prop.allow_visits))
+    db.commit()
+    db.refresh(prop)
+    return prop
+
+
 @router.put("/{property_id}", response_model=PropertyResponse)
 async def update_property(
     property_id: int,

@@ -34,6 +34,7 @@ class Property(Base):
 
     status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
     hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
+    allow_visits = Column(Boolean, default=True, nullable=False)
     
     # Basic dimensions (often filtered)
     surface_area = Column(Float, nullable=False)  # in square meters
