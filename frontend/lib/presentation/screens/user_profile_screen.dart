@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
@@ -48,7 +49,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, initialIndex: widget.initialTabIndex, vsync: this);
+    _tabController = TabController(length: 3, initialIndex: widget.initialTabIndex, vsync: this);
   }
 
   @override
@@ -121,6 +122,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                           tabs: [
                              const Tab(child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')])),
                              const Tab(child: Row(children: [Icon(Icons.home_work, size: 20), SizedBox(width: 8), Text('Mis Propiedades')])),
+                             const Tab(child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')])),
                           ],
                         ),
                       ),
@@ -140,7 +142,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     animation: _tabController,
                     builder: (context, _) {
                       if (_tabController.index == 0) return _buildProfileTab(user, isVerified);
-                      return _buildPropertiesTab();
+                      if (_tabController.index == 1) return _buildPropertiesTab();
+                      return _buildOffersTab();
                     },
                   ),
                 ),
@@ -1614,6 +1617,194 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
         ],
       ),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Mis Ofertas Tab
+  // ---------------------------------------------------------------------------
+
+  Widget _buildOffersTab() {
+    final sentOffers = ref.watch(sentOffersProvider).asData?.value ?? <OfferData>[];
+    final receivedOffers = ref.watch(receivedOffersProvider).asData?.value ?? <OfferData>[];
+
+    final allOffers = <({OfferData offer, String direction})>[
+      ...sentOffers.map((o) => (offer: o, direction: 'Enviada')),
+      ...receivedOffers.map((o) => (offer: o, direction: 'Recibida')),
+    ];
+
+    allOffers.sort((a, b) {
+      final aDate = a.offer.createdAt ?? DateTime(0);
+      final bDate = b.offer.createdAt ?? DateTime(0);
+      return bDate.compareTo(aDate);
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Mis Ofertas',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Ofertas enviadas y recibidas.',
+          style: TextStyle(color: Colors.grey, fontSize: 13),
+        ),
+        const SizedBox(height: 16),
+        if (allOffers.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFF),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: const Center(
+              child: Text(
+                'No hay ofertas todavia.',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+              ),
+            ),
+          )
+        else
+          Column(
+            children: allOffers.map((e) => _buildOfferRow(e.offer, direction: e.direction)).toList(),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildOfferRow(OfferData offer, {String? direction}) {
+    final statusLabel = _offerStatusLabel(offer.status);
+    final statusColor = _offerStatusColor(offer.status);
+    final title = offer.propertyTitle ?? 'Propiedad';
+    final amount = offer.amount.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]}.',
+    );
+    final directionColor = direction == 'Enviada' ? const Color(0xFF2563EB) : const Color(0xFF16A34A);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ),
+                    if (direction != null) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: directionColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          direction,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: directionColor),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '$amount EUR',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF2563EB),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          OutlinedButton(
+            onPressed: () => context.pushNamed(
+              'offer-timeline',
+              pathParameters: {'offerId': offer.id},
+              extra: offer,
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFF2563EB),
+              side: const BorderSide(color: Color(0xFF2563EB)),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+            child: const Text('Ver Seguimiento'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _offerStatusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'Pendiente';
+      case 'accepted': return 'Aceptada';
+      case 'countered': return 'Contraoferta';
+      case 'signing_pending': return 'En firma';
+      case 'completed': return 'Completada';
+      case 'rejected': return 'Rechazada';
+      default: return status;
+    }
+  }
+
+  Color _offerStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'accepted': return const Color(0xFF16A34A);
+      case 'countered': return const Color(0xFFD97706);
+      case 'signing_pending': return const Color(0xFF2563EB);
+      case 'completed': return const Color(0xFF16A34A);
+      case 'rejected': return Colors.red;
+      default: return const Color(0xFF64748B);
+    }
   }
 }
 
