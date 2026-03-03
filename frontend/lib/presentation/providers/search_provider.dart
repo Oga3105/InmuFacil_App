@@ -149,7 +149,7 @@ class SearchNotifier extends Notifier<SearchState> {
     if (location.isEmpty) {
       state = state.copyWith(
         location: '',
-        mapCenter: LocationService.sevillaFallback,
+        mapCenter: LocationService.spainFallback,
       );
       return;
     }

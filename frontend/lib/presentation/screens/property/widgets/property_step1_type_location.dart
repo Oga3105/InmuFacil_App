@@ -8,6 +8,7 @@ import 'package:latlong2/latlong.dart';
 import '../../../../core/utils/temp_translations.dart';
 import '../../../../domain/entities/property_type.dart';
 import '../../../providers/property_form_provider.dart';
+import '../../../providers/search_provider.dart'; // for locationServiceProvider
 
 class PropertyStep1TypeLocation extends ConsumerStatefulWidget {
   const PropertyStep1TypeLocation({super.key});
@@ -38,6 +39,7 @@ class _PropertyStep1TypeLocationState
   final _postalCodeFocus   = FocusNode();
 
   Timer? _debounce;
+  bool _locating = false;
 
   static const _defaultCenter = LatLng(40.4168, -3.7038);
 
@@ -505,32 +507,87 @@ class _PropertyStep1TypeLocationState
     PropertyFormNotifier notifier,
     LatLng center,
   ) {
-    return FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: center,
-        initialZoom: s.selectedLocation != null ? 15 : 12,
-        onTap: (_, latLng) => notifier.setLocation(latLng),
-      ),
+    return Stack(
       children: [
-        TileLayer(
-          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-          userAgentPackageName: 'com.inmufacil.frontend',
-        ),
-        if (s.selectedLocation != null)
-          MarkerLayer(markers: [
-            Marker(
-              point: s.selectedLocation!,
-              width: 40,
-              height: 40,
-              child: const Icon(Icons.location_pin,
-                  color: Color(0xFF2563EB), size: 40),
+        FlutterMap(
+          mapController: _mapController,
+          options: MapOptions(
+            initialCenter: center,
+            initialZoom: s.selectedLocation != null ? 15 : 12,
+            onTap: (_, latLng) => notifier.setLocation(latLng),
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.inmufacil.frontend',
             ),
-          ]),
+            if (s.selectedLocation != null)
+              MarkerLayer(markers: [
+                Marker(
+                  point: s.selectedLocation!,
+                  width: 40,
+                  height: 40,
+                  child: const Icon(Icons.location_pin,
+                      color: Color(0xFF2563EB), size: 40),
+                ),
+              ]),
+          ],
+        ),
+        // ── Mi ubicación button ────────────────────────────────────────
+        Positioned(
+          right: 12,
+          bottom: 12,
+          child: SizedBox(
+            width: 40,
+            height: 40,
+            child: FloatingActionButton(
+              heroTag: 'step1_my_location',
+              onPressed: _locating ? null : _goToMyLocation,
+              tooltip: 'Mi ubicación',
+              elevation: 2,
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: _locating
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF2563EB),
+                      ),
+                    )
+                  : const Icon(Icons.my_location, size: 20),
+            ),
+          ),
+        ),
       ],
     );
   }
-}
+
+  Future<void> _goToMyLocation() async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    try {
+      final locationService = ref.read(locationServiceProvider);
+      final result = await locationService.getCurrentLocation();
+      if (!mounted) return;
+      _mapController.move(result.location, 15.0);
+      // Also update the pin to the detected location
+      ref.read(propertyFormProvider.notifier).setLocation(result.location);
+      if (result.isFallback) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+} // end _PropertyStep1TypeLocationState
 
 // ─── Section card ─────────────────────────────────────────────────────────────
 

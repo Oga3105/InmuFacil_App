@@ -100,7 +100,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/search',
         name: 'search',
-        builder: (context, state) => const PropertyListingScreen(),
+        builder: (context, state) {
+          final highlightId = state.uri.queryParameters['highlight'];
+          return PropertyListingScreen(highlightId: highlightId);
+        },
       ),
       
       // Placeholder for unassigned actions (404)

@@ -128,12 +128,24 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
              padding: const EdgeInsets.only(right: 24.0),
              child: Row(
                children: [
-                  TextButton(
-                    onPressed: () {}, 
+                  TextButton.icon(
+                    onPressed: () {
+                      // Calculate which page this property is on based on the
+                      // current filtered list and items-per-page setting.
+                      final allFiltered = ref.read(searchProvider).filteredProperties;
+                      final ipp = ref.read(searchProvider).itemsPerPage;
+                      final idx = allFiltered.indexWhere((p) => p.id == widget.propertyId);
+                      if (idx >= 0) {
+                        final page = (idx ~/ ipp) + 1;
+                        ref.read(searchProvider.notifier).setPage(page);
+                      }
+                      context.go('/search?highlight=${widget.propertyId}');
+                    },
+                    icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF2563EB)),
+                    label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                   ),
                   const SizedBox(width: 16),
                   PremiumButton(
@@ -343,7 +355,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                    children: [
                       // Title & Price (Mobile Order)
                       Text(
-                        property.formattedPrice, // Fixed getter name
+                        property.formattedPriceFull, // Full price with thousands separator
                         style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
                       ),
                       const SizedBox(height: 8),
@@ -866,7 +878,7 @@ class _SummaryCard extends ConsumerWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                property.formattedPrice,
+                property.formattedPriceFull,
                 style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
               ),
               const SizedBox(width: 8),

@@ -1285,7 +1285,12 @@ class _MapNavigationBar extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
-                      context.push('/404-buy');
+                      // If no properties loaded yet, reset to show all Spain
+                      final props = ref.read(searchProvider).filteredProperties;
+                      if (props.isEmpty) {
+                        ref.read(searchProvider.notifier).reset();
+                      }
+                      context.go('/search');
                     },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -1303,7 +1308,58 @@ class _MapNavigationBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 4),
                   TextButton(
-                    onPressed: () => handleProtectedAction('/404-sell'),
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      if (isAuthenticated) {
+                        context.push('/property/create');
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            icon: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEFF6FF),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
+                            ),
+                            title: const Text(
+                              'Cuenta requerida',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                            ),
+                            actionsAlignment: MainAxisAlignment.center,
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  context.pushNamed('login');
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2563EB),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: const Text('Iniciar sesión'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -1382,7 +1438,7 @@ class _MapNavigationBar extends ConsumerWidget {
                             value: 'offers',
                             child: Row(
                               children: const [
-                                Icon(Icons.local_offer_outlined, size: 20),
+                                Icon(Icons.handshake_outlined, size: 20),
                                 SizedBox(width: 8),
                                 Text('Ver Ofertas'),
                               ],
@@ -1415,7 +1471,7 @@ class _MapNavigationBar extends ConsumerWidget {
                            context.push('/profile?tab=1');
                         } else if (value == 'offers') {
                            ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile?tab=1');
+                           context.push('/profile?tab=2');
                         }
                       },
                       child: Builder(builder: (context) {

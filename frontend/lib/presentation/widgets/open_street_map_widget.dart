@@ -343,7 +343,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 _MapToolButton(
                   icon: Icons.my_location,
                   tooltip: 'Mi ubicación',
-                  onPressed: () => _goToMyLocation(),
+                  isLoading: _locating,
+                  onPressed: _goToMyLocation,
                 ),
               ],
             ),
@@ -381,9 +382,27 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     _mapController.move(_mapController.camera.center, _mapController.camera.zoom - 1);
   }
   
-  void _goToMyLocation() {
-    final searchState = ref.read(searchProvider);
-    _mapController.move(searchState.mapCenter ?? _spainFallback, 12.0);
+  bool _locating = false;
+
+  Future<void> _goToMyLocation() async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    try {
+      final locationService = ref.read(locationServiceProvider);
+      final result = await locationService.getCurrentLocation();
+      if (!mounted) return;
+      _mapController.move(result.location, 14.0);
+      if (result.isFallback) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _locating = false);
+    }
   }
 
   // OLD _buildMarkers removed, logic now in _buildPropertyMarkers
@@ -504,31 +523,42 @@ class _MapToolButton extends StatelessWidget {
     required this.onPressed,
     required this.tooltip,
     this.isActive = false,
+    this.isLoading = false,
     this.color,
   });
   final IconData icon;
   final VoidCallback onPressed;
   final String tooltip;
   final bool isActive;
+  final bool isLoading;
   final Color? color;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final baseColor = color ?? theme.colorScheme.primary;
-    
+
     return SizedBox(
       width: 40,
       height: 40,
       child: FloatingActionButton(
-        heroTag: 'map_tool_${icon.codePoint}', // Unique tag
-        onPressed: onPressed,
+        heroTag: 'map_tool_${icon.codePoint}',
+        onPressed: isLoading ? null : onPressed,
         tooltip: tooltip,
         elevation: 2,
         backgroundColor: isActive ? baseColor : Colors.white,
         foregroundColor: isActive ? Colors.white : (color ?? Colors.black87),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Icon(icon, size: 20),
+        child: isLoading
+            ? SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: isActive ? Colors.white : baseColor,
+                ),
+              )
+            : Icon(icon, size: 20),
       ),
     );
   }

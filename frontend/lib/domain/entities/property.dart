@@ -55,7 +55,7 @@ class Property { // Added
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;
   
-  /// Format price as currency string
+  /// Format price as currency string (abbreviated, for compact displays)
   String get formattedPrice {
     if (price >= 1000000) {
       return '€${(price / 1000000).toStringAsFixed(1)}M';
@@ -63,5 +63,19 @@ class Property { // Added
       return '€${(price / 1000).toStringAsFixed(0)}K';
     }
     return '€${price.toStringAsFixed(0)}';
+  }
+
+  /// Format price as full currency string with thousands separators (e.g. €320.000)
+  String get formattedPriceFull {
+    final int rounded = price.round();
+    // Format with dot as thousands separator (Spanish locale style)
+    final String digits = rounded.toString();
+    final StringBuffer buf = StringBuffer();
+    final int len = digits.length;
+    for (int i = 0; i < len; i++) {
+      if (i > 0 && (len - i) % 3 == 0) buf.write('.');
+      buf.write(digits[i]);
+    }
+    return '${buf.toString()} €';
   }
 }
