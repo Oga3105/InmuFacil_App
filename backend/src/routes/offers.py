@@ -302,7 +302,7 @@ async def withdraw_offer(
     if offer.buyer_id != current_user.id:
         raise HTTPException(status_code=403, detail="Only the buyer can withdraw their offer")
 
-    withdrawable_statuses = {OfferStatus.PENDING, OfferStatus.COUNTERED, OfferStatus.ACCEPTED, OfferStatus.SIGNING_PENDING}
+    withdrawable_statuses = {OfferStatus.PENDING, OfferStatus.COUNTER_OFFER, OfferStatus.ACCEPTED, OfferStatus.SIGNING_PENDING}
     if offer.status not in withdrawable_statuses:
         raise HTTPException(status_code=400, detail="Offer cannot be withdrawn at this stage")
 
