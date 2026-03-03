@@ -16,6 +16,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final steps = _buildSteps(offer.status);
+    final currentUser = ref.watch(authProvider).user;
+    final isBuyer = currentUser?.id == offer.buyerId;
+    final s = offer.status.toLowerCase();
+    // Buyer can withdraw while arras not yet signed
+    final canWithdraw = isBuyer &&
+        (s == 'pending' || s == 'counter_offer' || s == 'accepted' || s == 'signing_pending');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -60,6 +66,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
                   child: _TimelineWidget(steps: steps),
                 ),
+                // ── Withdraw offer (buyer only, before arras signed) ─────────
+                if (canWithdraw)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    child: _WithdrawOfferButton(offer: offer),
+                  ),
                 // ── Help footer ─────────────────────────────────────────────
                 const _HelpFooter(),
                 const SizedBox(height: 8),
@@ -198,12 +210,13 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
     return [
       _TimelineStep(
-        title: 'Oferta Aceptada',
+        // Title adapts: "Oferta Enviada" while pending, "Oferta Aceptada" once done
+        title: stage == 0 ? 'Oferta Enviada' : 'Oferta Aceptada',
         subtitle: stage > 0
-            ? 'Completado'
+            ? 'Vendedor acepto la oferta'
             : stage == 0
                 ? (s == 'counter_offer'
-                    ? 'Contraoferta recibida'
+                    ? 'El vendedor ha realizado una contraoferta'
                     : 'Pendiente de respuesta del vendedor')
                 : 'Oferta rechazada',
         state: stage < 0 ? _StepState.locked : stepState(0),
@@ -808,6 +821,87 @@ class _HelpFooter extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Withdraw offer button ─────────────────────────────────────────────────────
+
+class _WithdrawOfferButton extends ConsumerStatefulWidget {
+  const _WithdrawOfferButton({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_WithdrawOfferButton> createState() => _WithdrawOfferButtonState();
+}
+
+class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
+  bool _loading = false;
+
+  Future<void> _confirmAndWithdraw() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Retirar oferta'),
+        content: const Text(
+          '¿Seguro que quieres retirar tu oferta? Esta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Retirar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    setState(() => _loading = true);
+    try {
+      await ref.read(sentOffersProvider.notifier).withdraw(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Oferta retirada correctamente')),
+        );
+        if (context.canPop()) context.pop();
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al retirar la oferta. Inténtalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: _loading ? null : _confirmAndWithdraw,
+      icon: _loading
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
+            )
+          : const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+      label: const Text(
+        'Retirar Oferta',
+        style: TextStyle(fontWeight: FontWeight.w700, color: Colors.red),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red,
+        side: const BorderSide(color: Colors.red),
+        minimumSize: const Size(double.infinity, 48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

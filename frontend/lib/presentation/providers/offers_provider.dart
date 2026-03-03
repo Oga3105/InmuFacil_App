@@ -74,6 +74,12 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(_fetch);
   }
+
+  /// Buyer withdraws their offer (sets status to rejected on backend).
+  Future<void> withdraw(String offerId) async {
+    await _dio.post('/offers/$offerId/withdraw');
+    await refresh();
+  }
 }
 
 // --- Received Offers Provider ---

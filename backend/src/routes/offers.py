@@ -285,6 +285,40 @@ async def accept_offer(
     return offer
 
 
+@router.post("/{offer_id}/withdraw", status_code=status.HTTP_200_OK)
+async def withdraw_offer(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Buyer withdraws (cancels) their offer before the arras contract is signed.
+    Allowed while status is PENDING, ACCEPTED, or SIGNING_PENDING.
+    """
+    offer = db.query(PropertyOffer).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+
+    if offer.buyer_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the buyer can withdraw their offer")
+
+    withdrawable_statuses = {OfferStatus.PENDING, OfferStatus.COUNTERED, OfferStatus.ACCEPTED, OfferStatus.SIGNING_PENDING}
+    if offer.status not in withdrawable_statuses:
+        raise HTTPException(status_code=400, detail="Offer cannot be withdrawn at this stage")
+
+    offer.status = OfferStatus.REJECTED
+    history = OfferHistory(
+        offer_id=offer.id,
+        actor_id=current_user.id,
+        action="WITHDRAW",
+        amount=offer.amount,
+    )
+    db.add(history)
+    db.commit()
+    db.refresh(offer)
+    return {"message": "Offer withdrawn successfully", "offer_id": offer.id, "status": offer.status}
+
+
 @router.post("/{offer_id}/chat/enable", status_code=status.HTTP_200_OK)
 async def enable_chat(
     offer_id: int,
