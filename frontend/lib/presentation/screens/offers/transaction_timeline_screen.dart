@@ -457,54 +457,52 @@ class _DoneRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DotColumn(
-            isLast: isLast,
-            dot: Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
-                color: Color(0xFF16A34A),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.check_rounded,
-                  size: 18, color: Colors.white),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _DotColumn(
+          isLast: isLast,
+          dot: Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              color: Color(0xFF16A34A),
+              shape: BoxShape.circle,
             ),
-            lineColor: const Color(0xFF16A34A),
+            child: const Icon(Icons.check_rounded,
+                size: 18, color: Colors.white),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : 24, top: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    step.title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
-                    ),
+          lineColor: const Color(0xFF16A34A),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 24, top: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    step.subtitle,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontStyle: FontStyle.italic,
-                      color: Color(0xFF94A3B8),
-                    ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  step.subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                    color: Color(0xFF94A3B8),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -518,9 +516,8 @@ class _ActiveRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DotColumn(
             isLast: isLast,
@@ -627,8 +624,7 @@ class _ActiveRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 
@@ -641,20 +637,19 @@ class _LockedRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _DotColumn(
-            isLast: isLast,
-            dot: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFCBD5E1), width: 2),
-              ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _DotColumn(
+          isLast: isLast,
+          dot: Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFCBD5E1), width: 2),
+            ),
               child: const Icon(Icons.lock_outline_rounded,
                   size: 16, color: Color(0xFFCBD5E1)),
             ),
@@ -689,8 +684,7 @@ class _LockedRow extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
 
@@ -711,12 +705,11 @@ class _DotColumn extends StatelessWidget {
     return SizedBox(
       width: 32,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           dot,
           if (!isLast)
-            Expanded(
-              child: Container(width: 2, color: lineColor),
-            ),
+            Container(width: 2, height: 32, color: lineColor),
         ],
       ),
     );
