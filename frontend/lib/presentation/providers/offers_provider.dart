@@ -59,9 +59,8 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
   Future<List<OfferData>> build() async {
     _dio = Dio(BaseOptions(baseUrl: _kOffersApiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
+    if (token == null) return [];
+    _dio.options.headers['Authorization'] = 'Bearer $token';
     return _fetch();
   }
 
@@ -92,9 +91,8 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
   Future<List<OfferData>> build() async {
     _dio = Dio(BaseOptions(baseUrl: _kOffersApiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
+    if (token == null) return [];
+    _dio.options.headers['Authorization'] = 'Bearer $token';
     return _fetch();
   }
 

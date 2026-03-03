@@ -157,6 +157,20 @@ async def log_requests(request: Request, call_next):
 # @Watcher - Global Database Exception Handler (503 Service Unavailable)
 # ============================================================================
 
+def _cors_headers_for(request: Request) -> dict:
+    """
+    Return CORS headers for the request origin if it is in ALLOWED_ORIGINS.
+    Exception handlers bypass CORSMiddleware, so they must add headers manually.
+    """
+    origin = request.headers.get("origin", "")
+    if origin in ALLOWED_ORIGINS:
+        return {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+        }
+    return {}
+
+
 @app.exception_handler(OperationalError)
 async def database_exception_handler(request: Request, exc: OperationalError):
     """
@@ -164,36 +178,38 @@ async def database_exception_handler(request: Request, exc: OperationalError):
     Returns 503 with a clean, user-safe message (no internal details leaked).
     """
     logger.critical(
-        f"[DB] ❌ BASE DE DATOS NO DISPONIBLE. "
-        f"¿Está Docker Desktop encendido y el contenedor de PostgreSQL corriendo? "
+        f"[DB] BASE DE DATOS NO DISPONIBLE. "
+        f"Docker Desktop encendido y contenedor PostgreSQL corriendo? "
         f"Detalle interno: {repr(exc)}"
     )
     return JSONResponse(
         status_code=503,
+        headers=_cors_headers_for(request),
         content={
             "detail": "Servicio de datos no disponible temporalmente. "
                       "Por favor, inténtalo de nuevo en unos minutos.",
             "error_code": "DATABASE_UNAVAILABLE"
-        }
+        },
     )
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
     Global catch-all for unhandled exceptions (like Bcrypt ValueError).
-    Prevents CORS issues and provides clean error reporting.
+    Adds CORS headers manually because exception handlers bypass CORSMiddleware.
     """
     logger.error(f"[ERROR] Unhandled Exception: {repr(exc)}")
     import traceback
     logger.error(traceback.format_exc())
-    
+
     return JSONResponse(
         status_code=500,
+        headers=_cors_headers_for(request),
         content={
             "detail": "Ocurrió un error inesperado en el servidor.",
             "error_code": "INTERNAL_SERVER_ERROR",
             "type": type(exc).__name__
-        }
+        },
     )
 
 
