@@ -168,6 +168,21 @@ extension StringTranslation on String {
       'not_found.direct_architecture': 'Arquitectura Directa',
       'not_found.copyright_text': 'InmuFácil. Todos los derechos reservados.',
       'not_found.notify_me_success': '¡Gracias! Te avisaremos cuando estemos listos.',
+
+      // Chat
+      'chat.title': 'Mensajes',
+      'chat.no_conversations': 'Aun no tienes conversaciones',
+      'chat.no_conversations_hint':
+          'Los chats aparecen cuando se acepta\nun intercambio de mensajes en una oferta.',
+      'chat.error_loading': 'Error al cargar mensajes',
+      'chat.retry': 'Reintentar',
+      'chat.active_offer': 'Oferta activa',
+      'chat.start_conversation': 'Inicia la conversacion',
+      'chat.message_hint': 'Escribe un mensaje...',
+      'chat.online': 'En linea',
+      'chat.view_property': 'Ver inmueble',
+      'chat.today': 'Hoy',
+      'chat.yesterday': 'Ayer',
     };
     
     return translations[this] ?? this;
