@@ -170,14 +170,41 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       automaticallyImplyLeading: false,
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 8),
-        child: AppBarBackButton(
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
+      titleSpacing: 0,
       title: Row(
         children: [
+          // ── LEFT: back button + brand logo ──────────────────────────────
+          AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(width: 2),
+          // InmuFácil wordmark
+          RichText(
+            text: const TextSpan(
+              children: [
+                TextSpan(
+                  text: 'Inmu',
+                  style: TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+                TextSpan(
+                  text: 'Fácil',
+                  style: TextStyle(
+                    color: Color(0xFF2563EB),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const Spacer(),
+
+          // ── RIGHT: peer avatar + name + online + view property ───────────
           CircleAvatar(
             radius: 18,
             backgroundColor: const Color(0xFF2563EB),
@@ -190,7 +217,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -200,10 +227,11 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 style: const TextStyle(
                   color: Color(0xFF1E293B),
                   fontWeight: FontWeight.w700,
-                  fontSize: 15,
+                  fontSize: 14,
                 ),
               ),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     width: 7,
@@ -225,14 +253,11 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               ),
             ],
           ),
-        ],
-      ),
-      actions: [
-        if (conv != null && conv.propertyId.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: TextButton.icon(
-              onPressed: () => context.push('/property/${conv!.propertyId}'),
+          if (conv != null && conv.propertyId.isNotEmpty) ...[
+            const SizedBox(width: 10),
+            TextButton.icon(
+              onPressed: () =>
+                  context.push('/property/${conv!.propertyId}'),
               icon: const Icon(
                 Icons.home_outlined,
                 size: 16,
@@ -246,9 +271,15 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 6),
+              ),
             ),
-          ),
-      ],
+          ],
+          const SizedBox(width: 8),
+        ],
+      ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(color: const Color(0xFFE2E8F0), height: 1),
