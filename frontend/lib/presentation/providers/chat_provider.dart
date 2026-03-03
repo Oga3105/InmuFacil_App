@@ -32,12 +32,16 @@ class ChatMessage {
     required this.senderId,
     required this.message,
     required this.timestamp,
+    this.isOptimistic = false,
   });
 
   final String id;
   final String senderId;
   final String message;
   final DateTime timestamp;
+
+  /// True while the message is being sent (optimistic update, not yet confirmed).
+  final bool isOptimistic;
 }
 
 // --- Chat List Provider ---
@@ -118,41 +122,68 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
   }
 }
 
-// --- Chat Detail Provider (read messages) ---
+// --- Chat Detail Provider (AsyncNotifier with optimistic send) ---
 
-final chatDetailProvider = FutureProvider.autoDispose
-    .family<List<ChatMessage>, String>((ref, offerId) async {
-  const storage = FlutterSecureStorage();
-  final token = await storage.read(key: 'auth_token');
-  final dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
-  if (token != null) {
-    dio.options.headers['Authorization'] = 'Bearer $token';
+final chatDetailProvider = AsyncNotifierProvider.autoDispose
+    .family<ChatDetailNotifier, List<ChatMessage>, String>(
+  ChatDetailNotifier.new,
+);
+
+class ChatDetailNotifier
+    extends AutoDisposeFamilyAsyncNotifier<List<ChatMessage>, String> {
+  late final Dio _dio;
+  String? _currentUserId;
+
+  /// The authenticated user's ID — available once [build] completes.
+  String? get currentUserId => _currentUserId;
+
+  @override
+  Future<List<ChatMessage>> build(String arg) async {
+    _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'auth_token');
+    if (token != null) {
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+    _currentUserId = await storage.read(key: 'user_id');
+    return _fetchMessages(arg);
   }
-  final resp = await dio.get('/offers/$offerId/chat');
-  final List<dynamic> data = resp.data is List ? resp.data as List : [];
-  return data.map((item) {
-    final map = item as Map<String, dynamic>;
-    return ChatMessage(
-      id: (map['id'] ?? '').toString(),
-      senderId: (map['sender_id'] ?? '').toString(),
-      message: map['message'] as String? ?? '',
-      timestamp:
-          DateTime.tryParse(map['created_at'] as String? ?? '') ??
-              DateTime.now(),
+
+  Future<List<ChatMessage>> _fetchMessages(String offerId) async {
+    final resp = await _dio.get('/offers/$offerId/chat');
+    final List<dynamic> data = resp.data is List ? resp.data as List : [];
+    return data.map((item) {
+      final map = item as Map<String, dynamic>;
+      return ChatMessage(
+        id: (map['id'] ?? '').toString(),
+        senderId: (map['sender_id'] ?? '').toString(),
+        message: map['message'] as String? ?? '',
+        timestamp:
+            DateTime.tryParse(map['created_at'] as String? ?? '') ??
+                DateTime.now(),
+      );
+    }).toList();
+  }
+
+  /// Sends [text] with an optimistic UI update.
+  /// On success replaces the optimistic item with the server-confirmed message.
+  /// On failure reverts to previous state.
+  Future<void> sendMessage(String text) async {
+    final prev = state.asData?.value ?? [];
+    final optimistic = ChatMessage(
+      id: 'temp_${DateTime.now().millisecondsSinceEpoch}',
+      senderId: _currentUserId ?? '',
+      message: text,
+      timestamp: DateTime.now(),
+      isOptimistic: true,
     );
-  }).toList();
-});
-
-// --- Send Message (used directly in screen via ref.read) ---
-
-Future<void> sendChatMessage(
-    WidgetRef ref, String offerId, String text) async {
-  const storage = FlutterSecureStorage();
-  final token = await storage.read(key: 'auth_token');
-  final dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
-  if (token != null) {
-    dio.options.headers['Authorization'] = 'Bearer $token';
+    state = AsyncData([...prev, optimistic]);
+    try {
+      await _dio.post('/offers/$arg/chat', data: {'message': text});
+      state = AsyncData(await _fetchMessages(arg));
+    } catch (e) {
+      state = AsyncData(prev);
+      rethrow;
+    }
   }
-  await dio.post('/offers/$offerId/chat', data: {'message': text});
-  ref.invalidate(chatDetailProvider(offerId));
 }
