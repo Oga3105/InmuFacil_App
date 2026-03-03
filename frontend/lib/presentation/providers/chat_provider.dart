@@ -109,7 +109,7 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
             DateTime.tryParse(map['updated_at'] as String? ?? '') ??
                 DateTime.now(),
         unreadCount: (map['unread_count'] as int?) ?? 0,
-      ));
+      ),);
     }
 
     conversations.sort((a, b) => b.lastDate.compareTo(a.lastDate));
@@ -124,13 +124,16 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
 
 // --- Chat Detail Provider (AsyncNotifier with optimistic send) ---
 
+// Riverpod 3.x: factory receives the arg and injects it via constructor.
 final chatDetailProvider = AsyncNotifierProvider.autoDispose
     .family<ChatDetailNotifier, List<ChatMessage>, String>(
-  ChatDetailNotifier.new,
+  (offerId) => ChatDetailNotifier(offerId),
 );
 
-class ChatDetailNotifier
-    extends AutoDisposeFamilyAsyncNotifier<List<ChatMessage>, String> {
+class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
+  ChatDetailNotifier(this._offerId);
+
+  final String _offerId;
   late final Dio _dio;
   String? _currentUserId;
 
@@ -138,7 +141,7 @@ class ChatDetailNotifier
   String? get currentUserId => _currentUserId;
 
   @override
-  Future<List<ChatMessage>> build(String arg) async {
+  Future<List<ChatMessage>> build() async {
     _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
@@ -146,7 +149,7 @@ class ChatDetailNotifier
       _dio.options.headers['Authorization'] = 'Bearer $token';
     }
     _currentUserId = await storage.read(key: 'user_id');
-    return _fetchMessages(arg);
+    return _fetchMessages(_offerId);
   }
 
   Future<List<ChatMessage>> _fetchMessages(String offerId) async {
@@ -179,8 +182,8 @@ class ChatDetailNotifier
     );
     state = AsyncData([...prev, optimistic]);
     try {
-      await _dio.post('/offers/$arg/chat', data: {'message': text});
-      state = AsyncData(await _fetchMessages(arg));
+      await _dio.post('/offers/$_offerId/chat', data: {'message': text});
+      state = AsyncData(await _fetchMessages(_offerId));
     } catch (e) {
       state = AsyncData(prev);
       rethrow;
