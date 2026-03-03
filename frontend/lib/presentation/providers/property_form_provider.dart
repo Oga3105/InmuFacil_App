@@ -583,7 +583,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   /// Patch only allow_visits for a specific property (used from details screen).
   Future<void> patchAllowVisits(String propertyId, {required bool value}) async {
-    await _dio.patch('/properties/$propertyId', data: {'allow_visits': value});
+    await _dio.patch('/properties/$propertyId/allow-visits', data: {'allow_visits': value});
   }
 
   // ---------------------------------------------------------------------------

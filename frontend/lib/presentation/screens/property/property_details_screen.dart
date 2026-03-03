@@ -417,86 +417,270 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
 // --- WIDGET COMPONENTS ---
 
-class _HeroImageSection extends StatelessWidget {
+class _HeroImageSection extends StatefulWidget {
 
   const _HeroImageSection({required this.property, this.isMobile = false, required this.isFavorite, required this.onToggleFavorite});
-  final Property property; // [FIX] Receive full property to check fields
+  final Property property;
   final bool isMobile;
   final bool isFavorite;
   final VoidCallback onToggleFavorite;
 
   @override
+  State<_HeroImageSection> createState() => _HeroImageSectionState();
+}
+
+class _HeroImageSectionState extends State<_HeroImageSection> {
+  late final PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  List<String> get _imageList {
+    if (widget.property.images.isNotEmpty) return widget.property.images;
+    if (widget.property.imageUrl != null) return [widget.property.imageUrl!];
+    return [];
+  }
+
+  void _goTo(int index) {
+    final images = _imageList;
+    if (images.isEmpty) return;
+    final target = index.clamp(0, images.length - 1);
+    _pageController.animateToPage(target, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+  }
+
+  void _openFullscreen(BuildContext context, int index) {
+    Navigator.of(context).push(MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (_) => _FullscreenGallery(images: _imageList, initialIndex: index),
+    ));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Determine image list (add fallback if empty)
-    final imageList = property.images.isNotEmpty 
-        ? property.images 
-        : (property.imageUrl != null ? [property.imageUrl!] : []);
+    final images = _imageList;
+    final height = widget.isMobile ? 300.0 : 500.0;
+    final hasMultiple = images.length > 1;
 
-    final showDocs = imageList.length > 1;
-
-    return Stack(
-      children: [
-        Container(
-          height: isMobile ? 300 : 500,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: isMobile ? BorderRadius.zero : BorderRadius.circular(16),
-            color: Colors.grey[200], 
-            image: imageList.isNotEmpty ? DecorationImage(
-              image: NetworkImage(imageList.first), // Todo: Carousel implementation
-              fit: BoxFit.cover,
-            ) : null,
-            boxShadow: isMobile ? [] : [
-               BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 10)),
-            ],
-          ),
-          child: imageList.isEmpty ? const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 48)) : null,
-        ),
-        // Overlays
-        Positioned(
-          top: 16,
-          right: 16,
-          child: Row(
-            children: [
-               _CircleButton(icon: Icons.share_outlined, color: const Color(0xFF0f172a), onPressed: () {}),
-               const SizedBox(width: 8),
-               _CircleButton(
-                  icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.red : Colors.grey.shade400, // [FIX] Match Home Card Style
-                  onPressed: onToggleFavorite,
-              ),
-            ],
-          ),
-        ),
-        // Dots (Only if multiple images)
-        if (showDocs)
-        Positioned(
-          bottom: 24,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white24),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(imageList.length > 5 ? 5 : imageList.length, (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: 6, height: 6,
-                  decoration: BoxDecoration(
-                    color: index == 0 ? Colors.white : Colors.white38,
-                    shape: BoxShape.circle,
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: [
+          // Main image area
+          ClipRRect(
+            borderRadius: widget.isMobile ? BorderRadius.zero : BorderRadius.circular(16),
+            child: images.isEmpty
+                ? Container(
+                    color: Colors.grey[200],
+                    child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 48)),
+                  )
+                : GestureDetector(
+                    onTap: () => _openFullscreen(context, _currentIndex),
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: images.length,
+                      onPageChanged: (i) => setState(() => _currentIndex = i),
+                      itemBuilder: (_, i) => Image.network(
+                        images[i],
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, __, ___) => Container(
+                          color: Colors.grey[200],
+                          child: const Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 48)),
+                        ),
+                      ),
+                    ),
                   ),
-                ),),
+          ),
+          // Left arrow
+          if (hasMultiple && _currentIndex > 0)
+            Positioned(
+              left: 8,
+              top: 0, bottom: 0,
+              child: Center(
+                child: _NavArrow(icon: Icons.chevron_left, onPressed: () => _goTo(_currentIndex - 1)),
+              ),
+            ),
+          // Right arrow
+          if (hasMultiple && _currentIndex < images.length - 1)
+            Positioned(
+              right: 8,
+              top: 0, bottom: 0,
+              child: Center(
+                child: _NavArrow(icon: Icons.chevron_right, onPressed: () => _goTo(_currentIndex + 1)),
+              ),
+            ),
+          // Top-right action buttons
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Row(
+              children: [
+                _CircleButton(icon: Icons.share_outlined, color: const Color(0xFF0f172a), onPressed: () {}),
+                const SizedBox(width: 8),
+                _CircleButton(
+                  icon: widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: widget.isFavorite ? Colors.red : Colors.grey.shade400,
+                  onPressed: widget.onToggleFavorite,
+                ),
+              ],
+            ),
+          ),
+          // Fullscreen hint icon (bottom-left)
+          if (images.isNotEmpty)
+            Positioned(
+              bottom: hasMultiple ? 44 : 12,
+              left: 12,
+              child: GestureDetector(
+                onTap: () => _openFullscreen(context, _currentIndex),
+                child: Container(
+                  width: 32, height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.black45,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.fullscreen, color: Colors.white, size: 20),
+                ),
+              ),
+            ),
+          // Dots indicator
+          if (hasMultiple)
+            Positioned(
+              bottom: 12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(
+                      images.length > 7 ? 7 : images.length,
+                      (i) {
+                        final dotIndex = images.length > 7 ? (i * (images.length - 1) ~/ 6) : i;
+                        final active = dotIndex == _currentIndex || (i == 6 && _currentIndex >= dotIndex);
+                        return Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 3),
+                          width: active ? 8 : 6,
+                          height: active ? 8 : 6,
+                          decoration: BoxDecoration(
+                            color: active ? Colors.white : Colors.white38,
+                            shape: BoxShape.circle,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavArrow extends StatelessWidget {
+  const _NavArrow({required this.icon, required this.onPressed});
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        width: 36, height: 36,
+        decoration: BoxDecoration(
+          color: Colors.black45,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 24),
+      ),
+    );
+  }
+}
+
+class _FullscreenGallery extends StatefulWidget {
+  const _FullscreenGallery({required this.images, required this.initialIndex});
+  final List<String> images;
+  final int initialIndex;
+
+  @override
+  State<_FullscreenGallery> createState() => _FullscreenGalleryState();
+}
+
+class _FullscreenGalleryState extends State<_FullscreenGallery> {
+  late final PageController _ctrl;
+  late int _current;
+
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.initialIndex;
+    _ctrl = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text('${_current + 1} / ${widget.images.length}', style: const TextStyle(color: Colors.white)),
+      ),
+      body: Stack(
+        children: [
+          PageView.builder(
+            controller: _ctrl,
+            itemCount: widget.images.length,
+            onPageChanged: (i) => setState(() => _current = i),
+            itemBuilder: (_, i) => InteractiveViewer(
+              child: Center(
+                child: Image.network(
+                  widget.images[i],
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(Icons.broken_image, color: Colors.white54, size: 64),
+                ),
               ),
             ),
           ),
-        ),
-      ],
+          if (_current > 0)
+            Positioned(
+              left: 8, top: 0, bottom: 0,
+              child: Center(child: _NavArrow(icon: Icons.chevron_left, onPressed: () {
+                _ctrl.animateToPage(_current - 1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+              })),
+            ),
+          if (_current < widget.images.length - 1)
+            Positioned(
+              right: 8, top: 0, bottom: 0,
+              child: Center(child: _NavArrow(icon: Icons.chevron_right, onPressed: () {
+                _ctrl.animateToPage(_current + 1, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+              })),
+            ),
+        ],
+      ),
     );
   }
 }

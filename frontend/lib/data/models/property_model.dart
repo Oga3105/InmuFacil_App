@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:inmufacil_frontend/core/config/env_config.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 
@@ -38,11 +39,16 @@ class PropertyModel {
     // Extract nested features
     final features = json['features'] as Map<String, dynamic>? ?? {};
     
-    // Extract nested media (images only)
+    // Extract nested media (images only) and build full URLs
     final mediaList = json['media'] as List? ?? [];
+    final String _staticBase = EnvConfig.apiBaseUrl.replaceAll(RegExp(r'/api/v\d+/?$'), '');
     final List<String> imageUrls = mediaList
         .where((m) => m['media_type'] == 'image')
-        .map((m) => m['file_path'] as String)
+        .map((m) {
+          final path = (m['file_path'] as String? ?? '');
+          if (path.startsWith('http')) return path;
+          return '$_staticBase/${path.startsWith('/') ? path.substring(1) : path}';
+        })
         .toList();
 
     // Handle Coordinate extraction if location is a single string or separate fields
