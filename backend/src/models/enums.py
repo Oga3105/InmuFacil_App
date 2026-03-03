@@ -146,7 +146,8 @@ class VisitStatus(str, enum.Enum):
 class OfferStatus(str, enum.Enum):
     PENDING = "pending"       # Offer sent, waiting for seller
     ACCEPTED = "accepted"     # Seller accepted
-    REJECTED = "rejected"     # Seller rejected
+    REJECTED = "rejected"     # Seller rejected the offer
+    WITHDRAWN = "withdrawn"   # Buyer withdrew their own offer
     COUNTER_OFFER = "counter_offer" # Seller made a counter-offer
     SIGNING_PENDING = "signing_pending" # Hito 13: Waiting for signature
     SIGNED = "signed"         # Hito 13: Signed by both parties

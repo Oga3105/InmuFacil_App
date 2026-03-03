@@ -19,7 +19,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     final currentUser = ref.watch(authProvider).user;
     final isBuyer = currentUser?.id == offer.buyerId;
     final s = offer.status.toLowerCase();
-    // Buyer can withdraw while arras not yet signed
+    // Buyer can withdraw while arras not yet signed (and not already closed)
     final canWithdraw = isBuyer &&
         (s == 'pending' || s == 'counter_offer' || s == 'accepted' || s == 'signing_pending');
 
@@ -197,7 +197,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         stage = 3;
       case 'completed':
         stage = 4;
-      default: // rejected, cancelled
+      default: // rejected, withdrawn, cancelled
         stage = -1;
     }
 
@@ -218,7 +218,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? (s == 'counter_offer'
                     ? 'El vendedor ha realizado una contraoferta'
                     : 'Pendiente de respuesta del vendedor')
-                : 'Oferta rechazada',
+                : (s == 'withdrawn' ? 'Oferta retirada por el comprador' : 'Oferta rechazada por el vendedor'),
         state: stage < 0 ? _StepState.locked : stepState(0),
         // No CTA: buyer can only wait for seller to accept
       ),

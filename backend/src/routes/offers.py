@@ -306,7 +306,7 @@ async def withdraw_offer(
     if offer.status not in withdrawable_statuses:
         raise HTTPException(status_code=400, detail="Offer cannot be withdrawn at this stage")
 
-    offer.status = OfferStatus.REJECTED
+    offer.status = OfferStatus.WITHDRAWN
     history = OfferHistory(
         offer_id=offer.id,
         actor_id=current_user.id,

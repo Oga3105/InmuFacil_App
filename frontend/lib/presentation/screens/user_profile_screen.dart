@@ -242,6 +242,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
           AnimatedBuilder(
             animation: _tabController,
             builder: (context, _) {
+              final activeTab = _tabController.index;
               return PopupMenuButton<String>(
                 offset: const Offset(0, 40),
                 tooltip: 'Menú de usuario',
@@ -249,52 +250,41 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                 borderRadius: BorderRadius.circular(50),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 itemBuilder: (context) => [
-                  if (_tabController.index == 0)
+                  if (activeTab != 0)
                     const PopupMenuItem(
-                      value: 'my-properties',
-                      child: Row(
-                         children: [
-                           Icon(Icons.home_work_outlined, size: 20),
-                           SizedBox(width: 8),
-                           Text('Mis Propiedades'),
-                         ],
-                      ),
-                    )
-                  else
+                      value: 'tab-0',
+                      child: Row(children: [Icon(Icons.person_outline, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
+                    ),
+                  if (activeTab != 1)
                     const PopupMenuItem(
-                      value: 'my-profile',
-                      child: Row(
-                         children: [
-                           Icon(Icons.person_outline, size: 20),
-                           SizedBox(width: 8),
-                           Text('Mi Perfil'),
-                         ],
-                      ),
+                      value: 'tab-1',
+                      child: Row(children: [Icon(Icons.home_work_outlined, size: 20), SizedBox(width: 8), Text('Mis Propiedades')]),
+                    ),
+                  if (activeTab != 2)
+                    const PopupMenuItem(
+                      value: 'tab-2',
+                      child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')]),
                     ),
                   const PopupMenuItem(
                     value: 'logout',
-                    child: Row(
-                       children: [
-                         Icon(Icons.logout, color: Colors.red, size: 20),
-                         SizedBox(width: 8),
-                         Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                       ],
-                    ),
+                    child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
                   ),
                 ],
                 onSelected: (value) async {
                   if (value == 'logout') {
                     await ref.read(authProvider.notifier).logout();
                     if (context.mounted) {
-                        context.go('/'); // Redirect to Home
+                        context.go('/');
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Sesión cerrada correctamente')),
                         );
                     }
-                  } else if (value == 'my-properties') {
-                    _tabController.animateTo(1);
-                  } else if (value == 'my-profile') {
+                  } else if (value == 'tab-0') {
                     _tabController.animateTo(0);
+                  } else if (value == 'tab-1') {
+                    _tabController.animateTo(1);
+                  } else if (value == 'tab-2') {
+                    _tabController.animateTo(2);
                   }
                 },
                 child: Consumer(
@@ -302,14 +292,14 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
                     final ts = DateTime.now().millisecondsSinceEpoch;
                     return SizedBox(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       child: ClipOval(
                         child: photoUrl != null
                             ? Image.network(
                                 '$photoUrl?v=$ts',
-                                width: 32,
-                                height: 32,
+                                width: 36,
+                                height: 36,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => Container(
                                   color: const Color(0xFF2563EB),
@@ -1788,10 +1778,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     switch (status.toLowerCase()) {
       case 'pending': return 'Pendiente';
       case 'accepted': return 'Aceptada';
+      case 'counter_offer':
       case 'countered': return 'Contraoferta';
       case 'signing_pending': return 'En firma';
+      case 'signed': return 'Firmada';
       case 'completed': return 'Completada';
       case 'rejected': return 'Rechazada';
+      case 'withdrawn': return 'Retirada';
       default: return status;
     }
   }
@@ -1799,10 +1792,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   Color _offerStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'accepted': return const Color(0xFF16A34A);
+      case 'counter_offer':
       case 'countered': return const Color(0xFFD97706);
       case 'signing_pending': return const Color(0xFF2563EB);
+      case 'signed': return const Color(0xFF2563EB);
       case 'completed': return const Color(0xFF16A34A);
       case 'rejected': return Colors.red;
+      case 'withdrawn': return const Color(0xFF94A3B8);
       default: return const Color(0xFF64748B);
     }
   }
@@ -1919,7 +1915,7 @@ class _GestionarMenu extends StatelessWidget {
           value: 'offers',
           child: Row(
             children: const [
-              Icon(Icons.payments_outlined,
+              Icon(Icons.handshake_outlined,
                   size: 18, color: Color(0xFF475569)),
               SizedBox(width: 12),
               Text('Ver Ofertas',
