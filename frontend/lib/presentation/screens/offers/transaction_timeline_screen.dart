@@ -206,9 +206,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     ? 'Contraoferta recibida'
                     : 'Pendiente de respuesta del vendedor')
                 : 'Oferta rechazada',
-        state: stage < 0
-            ? _StepState.locked
-            : stepState(0),
+        state: stage < 0 ? _StepState.locked : stepState(0),
+        // No CTA: buyer can only wait for seller to accept
       ),
       _TimelineStep(
         title: 'Verificacion de Solvencia',
@@ -218,6 +217,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
         state: stepState(1),
+        // No CTA: automatic process handled by InmuFacil
       ),
       _TimelineStep(
         title: 'Contrato de Arras',
@@ -231,6 +231,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
               'reserva para proceder con el bloqueo oficial del inmueble.'
             : null,
         state: stepState(2),
+        ctaLabel: stage == 2 ? 'Ir a Firmar Ahora' : null,
+        ctaIcon: stage == 2 ? Icons.edit_outlined : null,
       ),
       _TimelineStep(
         title: 'Gestion Hipotecaria',
@@ -240,6 +242,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Tramitando financiacion hipotecaria'
                 : 'Pendiente de firma de arras',
         state: stepState(3),
+        ctaLabel: stage == 3 ? 'Ver documentacion hipotecaria' : null,
+        ctaIcon: stage == 3 ? Icons.description_outlined : null,
       ),
       _TimelineStep(
         title: 'Firma en Notaria',
@@ -443,12 +447,17 @@ class _TimelineStep {
     required this.subtitle,
     required this.state,
     this.description,
+    this.ctaLabel,
+    this.ctaIcon,
   });
 
   final String title;
   final String subtitle;
   final _StepState state;
   final String? description;
+  /// Optional call-to-action shown in the active card. Null = no button.
+  final String? ctaLabel;
+  final IconData? ctaIcon;
 }
 
 class _TimelineWidget extends StatelessWidget {
@@ -640,24 +649,26 @@ class _ActiveRow extends StatelessWidget {
                         ),
                       ),
                     ],
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.edit_outlined, size: 16),
-                        label: const Text(
-                          'Ir a Firmar Ahora',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
+                    if (step.ctaLabel != null) ...[
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: () {},
+                          icon: Icon(step.ctaIcon ?? Icons.arrow_forward, size: 16),
+                          label: Text(
+                            step.ctaLabel!,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF2563EB),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
