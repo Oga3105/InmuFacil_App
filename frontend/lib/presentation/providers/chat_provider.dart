@@ -59,9 +59,8 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
   Future<List<ChatConversation>> build() async {
     _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
-    }
+    if (token == null) return [];
+    _dio.options.headers['Authorization'] = 'Bearer $token';
     return _fetchConversations();
   }
 
