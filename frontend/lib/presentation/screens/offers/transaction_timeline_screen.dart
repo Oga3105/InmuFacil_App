@@ -210,8 +210,11 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
     return [
       _TimelineStep(
-        // Title adapts: "Oferta Enviada" while pending, "Oferta Aceptada" once done
-        title: stage == 0 ? 'Oferta Enviada' : 'Oferta Aceptada',
+        title: stage == 0
+            ? 'Oferta Enviada'
+            : stage > 0
+                ? 'Oferta Aceptada'
+                : (s == 'withdrawn' ? 'Oferta Retirada' : 'Oferta Rechazada'),
         subtitle: stage > 0
             ? 'Vendedor acepto la oferta'
             : stage == 0
