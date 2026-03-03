@@ -875,7 +875,7 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Oferta retirada correctamente')),
         );
-        if (context.canPop()) context.pop();
+        context.go('/profile?tab=2');
       }
     } catch (_) {
       if (mounted) {
