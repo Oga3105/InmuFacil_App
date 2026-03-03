@@ -12,15 +12,55 @@ import '../../domain/entities/property_type.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common/app_bar_back_button.dart';
 
-class PropertyListingScreen extends ConsumerWidget {
-  const PropertyListingScreen({super.key});
+class PropertyListingScreen extends ConsumerStatefulWidget {
+  const PropertyListingScreen({super.key, this.highlightId});
+
+  /// If set, the listing will auto-scroll to the item with this property id
+  /// and briefly highlight it. Set when navigating back from property details.
+  final String? highlightId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PropertyListingScreen> createState() => _PropertyListingScreenState();
+}
+
+class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
+  /// Maps property id -> GlobalKey so we can scroll to the highlighted item
+  final Map<String, GlobalKey> _itemKeys = {};
+  bool _didScroll = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.highlightId != null) {
+      // After the first frame, try to scroll to the highlighted property
+      WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToHighlight());
+    }
+  }
+
+  void _scrollToHighlight() {
+    if (_didScroll) return;
+    final key = _itemKeys[widget.highlightId];
+    if (key?.currentContext != null) {
+      _didScroll = true;
+      Scrollable.ensureVisible(
+        key!.currentContext!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        alignment: 0.1,
+      );
+    }
+  }
+
+  GlobalKey _keyFor(String propertyId) {
+    return _itemKeys.putIfAbsent(propertyId, () => GlobalKey());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
     final favoriteIds = ref.watch(favoritesProvider);
-    var allFilteredProperties = ref.watch(filteredByMapPropertiesProvider);
-    
+    var allFilteredProperties = searchState.filteredProperties;
+
     // Apply local Favorites Filter if active
     if (searchState.onlyFavorites) {
       allFilteredProperties = allFilteredProperties.where((p) => favoriteIds.contains(p.id)).toList();
@@ -32,22 +72,22 @@ class PropertyListingScreen extends ConsumerWidget {
     }
 
     final paginatedProperties = _getPaginatedSlice(allFilteredProperties, searchState.currentPage, searchState.itemsPerPage);
-    final theme = Theme.of(context); // Added
-    final navyColor = theme.colorScheme.onSurface; // Changed to use theme
+    final theme = Theme.of(context);
+    final navyColor = theme.colorScheme.onSurface;
     const bgLight = Color(0xFFF8FAFC);
 
     // Responsive helper
     final isDesktop = MediaQuery.of(context).size.width >= 1024;
 
     void handleProtectedAction(String route) {
-       final isAuthenticated = ref.read(authProvider).isAuthenticated;
-       if (isAuthenticated) {
-         context.push(route);
-       } else {
-         context.pushNamed('login');
-       }
+      final isAuthenticated = ref.read(authProvider).isAuthenticated;
+      if (isAuthenticated) {
+        context.push(route);
+      } else {
+        context.pushNamed('login');
+      }
     }
-    
+
     // Auth State for UI
     final authState = ref.watch(authProvider);
     final isAuthenticated = authState.isAuthenticated;
@@ -102,14 +142,57 @@ class PropertyListingScreen extends ConsumerWidget {
             child: Row(
               children: [
                 TextButton(
-                  onPressed: () => context.push('/404-buy'), 
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Comprar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-                ),
-                TextButton(
-                  onPressed: () => handleProtectedAction('/404-sell'), 
+                  onPressed: () {
+                    if (isAuthenticated) {
+                      context.push('/property/create');
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          icon: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEFF6FF),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
+                          ),
+                          title: const Text(
+                            'Cuenta requerida',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                          ),
+                          content: const Text(
+                            'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                          ),
+                          actionsAlignment: MainAxisAlignment.center,
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                context.pushNamed('login');
+                              },
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                              child: const Text('Iniciar sesión'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                  },
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
@@ -161,10 +244,10 @@ class PropertyListingScreen extends ConsumerWidget {
                          value: 'my-properties',
                          child: Row(children: [Icon(Icons.home_work_outlined, size: 20), SizedBox(width: 8), Text('Mis Propiedades')]),
                       ),
-                      const PopupMenuItem(
-                         value: 'contracts',
-                         child: Row(children: [Icon(Icons.description_outlined, size: 20), SizedBox(width: 8), Text('Mis Contratos')]),
-                      ),
+                       const PopupMenuItem(
+                         value: 'offers',
+                         child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')]),
+                       ),
                       const PopupMenuItem(
                         value: 'logout',
                         child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
@@ -180,8 +263,8 @@ class PropertyListingScreen extends ConsumerWidget {
                         context.push('/profile');
                       } else if (value == 'my-properties') {
                         context.push('/profile?tab=1');
-                      } else if (value == 'contracts') {
-                        context.push('/contracts');
+                      } else if (value == 'offers') {
+                        context.push('/profile?tab=2');
                       }
                     },
                     child: _buildUserAvatar(ref, authenticated: true),
@@ -230,28 +313,73 @@ class PropertyListingScreen extends ConsumerWidget {
                           else if (paginatedProperties.isEmpty)
                              _buildEmptyState()
                           else if (searchState.viewMode == PropertyViewMode.list)
-                            Column(children: paginatedProperties.map((p) => PropertyListingItem(property: p)).toList())
+                            Column(
+                              children: paginatedProperties.map((p) {
+                                final isHighlighted = widget.highlightId == p.id;
+                                return KeyedSubtree(
+                                  key: _keyFor(p.id),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 600),
+                                    margin: isHighlighted
+                                        ? const EdgeInsets.symmetric(vertical: 4)
+                                        : EdgeInsets.zero,
+                                    decoration: isHighlighted
+                                        ? BoxDecoration(
+                                            borderRadius: BorderRadius.circular(16),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: const Color(0xFF2563EB).withOpacity(0.25),
+                                                blurRadius: 16,
+                                                spreadRadius: 2,
+                                              ),
+                                            ],
+                                          )
+                                        : null,
+                                    child: PropertyListingItem(property: p),
+                                  ),
+                                );
+                              }).toList(),
+                            )
                           else
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: 320,
-                                  mainAxisExtent: 370, // Tight fit to remove bottom whitespace
+                                  mainAxisExtent: 370,
                                   crossAxisSpacing: 24,
                                   mainAxisSpacing: 24,
                                 ),
                               itemCount: paginatedProperties.length,
                               itemBuilder: (context, index) {
                                 final p = paginatedProperties[index];
-                                return PropertyFloatingCard(
-                                  property: p,
-                                  onTap: () {
-                                    context.pushNamed(
-                                      'property-details', 
-                                      pathParameters: {'id': p.id},
-                                    );
-                                  },
+                                final isHighlighted = widget.highlightId == p.id;
+                                return KeyedSubtree(
+                                  key: _keyFor(p.id),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 600),
+                                    decoration: isHighlighted
+                                        ? BoxDecoration(
+                                            borderRadius: BorderRadius.circular(16),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: const Color(0xFF2563EB).withOpacity(0.25),
+                                                blurRadius: 16,
+                                                spreadRadius: 2,
+                                              ),
+                                            ],
+                                          )
+                                        : null,
+                                    child: PropertyFloatingCard(
+                                      property: p,
+                                      onTap: () {
+                                        context.pushNamed(
+                                          'property-details',
+                                          pathParameters: {'id': p.id},
+                                        );
+                                      },
+                                    ),
+                                  ),
                                 );
                               },
                             ),

@@ -165,47 +165,88 @@ class TransactionTimelineScreen extends ConsumerWidget {
   List<_TimelineStep> _buildSteps(String status) {
     final s = status.toLowerCase();
 
-    final _StepState arrasState;
-    if (s == 'accepted') {
-      arrasState = _StepState.active;
-    } else if (s == 'signing_pending' || s == 'completed') {
-      arrasState = _StepState.done;
-    } else {
-      arrasState = _StepState.locked;
+    // Map offer status to pipeline stage index:
+    // 0 = pending (offer not yet accepted)
+    // 1 = accepted (offer accepted, solvency check in progress)
+    // 2 = signing_pending (arras contract pending signatures)
+    // 3 = signed (arras signed, mortgage management)
+    // 4 = completed (notary signed, transaction finished)
+    // -1 = rejected / cancelled
+    final int stage;
+    switch (s) {
+      case 'pending':
+      case 'counter_offer':
+        stage = 0;
+      case 'accepted':
+        stage = 1;
+      case 'signing_pending':
+        stage = 2;
+      case 'signed':
+        stage = 3;
+      case 'completed':
+        stage = 4;
+      default: // rejected, cancelled
+        stage = -1;
     }
 
-    final bool arrasDone = arrasState == _StepState.done;
-    final _StepState hipotecaState =
-        arrasDone ? _StepState.active : _StepState.locked;
+    _StepState stepState(int stepIndex) {
+      if (stage < 0) return _StepState.locked;
+      if (stepIndex < stage) return _StepState.done;
+      if (stepIndex == stage) return _StepState.active;
+      return _StepState.locked;
+    }
 
     return [
       _TimelineStep(
         title: 'Oferta Aceptada',
-        subtitle: 'Completado',
-        state: _StepState.done,
+        subtitle: stage > 0
+            ? 'Completado'
+            : stage == 0
+                ? (s == 'counter_offer'
+                    ? 'Contraoferta recibida'
+                    : 'Pendiente de respuesta del vendedor')
+                : 'Oferta rechazada',
+        state: stage < 0
+            ? _StepState.locked
+            : stepState(0),
       ),
       _TimelineStep(
         title: 'Verificacion de Solvencia',
-        subtitle: 'Validado por InmuFacil Secure-Tech',
-        state: _StepState.done,
+        subtitle: stage > 1
+            ? 'Validado por InmuFacil Secure-Tech'
+            : stage == 1
+                ? 'Verificando solvencia del comprador'
+                : 'Pendiente de aceptacion de oferta',
+        state: stepState(1),
       ),
       _TimelineStep(
         title: 'Contrato de Arras',
-        subtitle: 'Faltan las firmas del contrato',
-        description:
-            'Ambas partes deben revisar y firmar digitalmente el documento de '
-            'reserva para proceder con el bloqueo oficial del inmueble.',
-        state: arrasState,
+        subtitle: stage > 2
+            ? 'Firmado por ambas partes'
+            : stage == 2
+                ? 'Faltan las firmas del contrato'
+                : 'Pendiente de verificacion de solvencia',
+        description: stage == 2
+            ? 'Ambas partes deben revisar y firmar digitalmente el documento de '
+              'reserva para proceder con el bloqueo oficial del inmueble.'
+            : null,
+        state: stepState(2),
       ),
       _TimelineStep(
         title: 'Gestion Hipotecaria',
-        subtitle: 'Pendiente de firma de arras',
-        state: hipotecaState,
+        subtitle: stage > 3
+            ? 'Tramitacion completada'
+            : stage == 3
+                ? 'Tramitando financiacion hipotecaria'
+                : 'Pendiente de firma de arras',
+        state: stepState(3),
       ),
       _TimelineStep(
         title: 'Firma en Notaria',
-        subtitle: 'Paso final de la transaccion',
-        state: _StepState.locked,
+        subtitle: stage == 4
+            ? 'Transaccion completada'
+            : 'Paso final de la transaccion',
+        state: stepState(4),
       ),
     ];
   }
