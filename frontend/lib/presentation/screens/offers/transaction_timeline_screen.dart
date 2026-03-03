@@ -23,51 +23,50 @@ class TransactionTimelineScreen extends ConsumerWidget {
       body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // ── Header cards ──────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                    child: _HeaderCards(offer: offer),
-                  ),
-                  // ── Title ─────────────────────────────────────────────────
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(20, 28, 20, 4),
-                    child: Text(
-                      'Estado de la Transaccion',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF0F172A),
-                      ),
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // ── Header cards ────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  child: _HeaderCards(offer: offer),
+                ),
+                // ── Title ───────────────────────────────────────────────────
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 28, 20, 4),
+                  child: Text(
+                    'Estado de la Transaccion',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Sigue el progreso de tu venta en tiempo real',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                      ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'Sigue el progreso de tu venta en tiempo real',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
                     ),
                   ),
-                  // ── Timeline ──────────────────────────────────────────────
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
-                    child: _TimelineWidget(steps: steps),
-                  ),
-                  // ── Help footer ───────────────────────────────────────────
-                  const _HelpFooter(),
-                  const SizedBox(height: 8),
-                ],
-              ),
+                ),
+                // ── Timeline ────────────────────────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+                  child: _TimelineWidget(steps: steps),
+                ),
+                // ── Help footer ─────────────────────────────────────────────
+                const _HelpFooter(),
+                const SizedBox(height: 8),
+              ],
             ),
           ),
-          // ── Bottom brand bar ──────────────────────────────────────────────
+          // ── Bottom brand bar ────────────────────────────────────────────
           const _BrandBar(),
         ],
       ),
@@ -261,7 +260,7 @@ class _HeaderCards extends StatelessWidget {
     final counterPhotoUrl = offer.buyerPhotoUrl;
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Property card
         Expanded(
