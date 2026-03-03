@@ -179,9 +179,8 @@ class _PhotoGridState extends State<_PhotoGrid> {
               onLeave: (_) => setState(() => _hoverIndex = null),
               builder: (context, candidateData, rejectedData) {
                 final isHovered = _hoverIndex == i && candidateData.isNotEmpty;
-                return LongPressDraggable<int>(
+                return Draggable<int>(
                   data: i,
-                  delay: const Duration(milliseconds: 300),
                   onDragStarted: () => setState(() => _draggingIndex = i),
                   onDragEnd: (_) => setState(() {
                     _draggingIndex = null;
@@ -211,21 +210,26 @@ class _PhotoGridState extends State<_PhotoGrid> {
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                   ),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    width: _tileSize,
-                    height: _tileSize,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: isHovered
-                          ? Border.all(
-                              color: const Color(0xFF2563EB), width: 2)
-                          : null,
-                    ),
-                    child: _MediaTile(
-                      item: widget.items[i],
-                      onRemove: () => widget.onRemove(widget.items[i]),
-                      showRemove: _draggingIndex == null,
+                  child: MouseRegion(
+                    cursor: _draggingIndex != null
+                        ? SystemMouseCursors.grabbing
+                        : SystemMouseCursors.grab,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 150),
+                      width: _tileSize,
+                      height: _tileSize,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: isHovered
+                            ? Border.all(
+                                color: const Color(0xFF2563EB), width: 2)
+                            : null,
+                      ),
+                      child: _MediaTile(
+                        item: widget.items[i],
+                        onRemove: () => widget.onRemove(widget.items[i]),
+                        showRemove: _draggingIndex == null,
+                      ),
                     ),
                   ),
                 );
