@@ -22,6 +22,10 @@ import '../../presentation/providers/offers_provider.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // Reflect context.push() calls in the browser URL bar.
+  // Without this, only context.go() updates the URL (GoRouter 17.x default).
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
