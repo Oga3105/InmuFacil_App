@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_map/flutter_map.dart' show LatLngBounds;
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -276,127 +277,178 @@ class SearchNotifier extends Notifier<SearchState> {
     _loadProperties();
   }
   
-  /// Search for a city using Nominatim geocoding API
+  /// Search for a city using Nominatim geocoding API (with 500ms debounce).
+  /// Use for real-time text-field input only.
+  /// For explicit button presses use [searchCityNow].
+  Future<void> searchCity(String query) async {
+    final sanitized = query.trim();
+    if (sanitized.isEmpty) return;
+
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      await _doSearchCity(sanitized);
+    });
+  }
+
+  /// Search for a city immediately (no debounce).
+  /// Use for explicit button presses on Home and Search pages.
+  Future<void> searchCityNow(String query) async {
+    final sanitized = query.trim();
+    if (sanitized.isEmpty) return;
+
+    // Cancel any pending debounced search to avoid a later overwrite.
+    _debounceTimer?.cancel();
+    await _doSearchCity(sanitized);
+  }
+
+  /// Core geocoding logic shared by [searchCity] and [searchCityNow].
+  ///
   /// Strategy: "Local First, Global Fallback"
   /// 1. Try Spain-only search first (prioritizes local results)
   /// 2. If no results, automatically search worldwide
-  /// 
+  ///
   /// Security: Input sanitized, length-limited, character-validated
-  Future<void> searchCity(String query) async {
-    // SECURITY: Trim whitespace
-    final sanitized = query.trim();
-    
-    // SECURITY: Check empty
-    if (sanitized.isEmpty) return;
-    
-    // SECURITY: Rate limiting (Debouncing)
-    // Cancel any pending search to prevent API abuse (Nominatim policy: max 1 req/sec)
-    _debounceTimer?.cancel();
-    
-    // Wait 500ms before executing search
-    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      // SECURITY: Length validation (Nominatim recommends max 200 chars)
-      if (sanitized.length > 200) {
-        state = state.copyWith(
-          error: 'Búsqueda demasiado larga (máx. 200 caracteres)',
-          isLoading: false,
+  Future<void> _doSearchCity(String sanitized) async {
+    // SECURITY: Length validation (Nominatim recommends max 200 chars)
+    if (sanitized.length > 200) {
+      state = state.copyWith(
+        error: 'Búsqueda demasiado larga (máx. 200 caracteres)',
+        isLoading: false,
+      );
+      return;
+    }
+
+    // SECURITY: Character whitelist - Allow letters, numbers, spaces, common punctuation
+    final validPattern = RegExp(r"^[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ0-9\s,.\-\']+$");
+    if (!validPattern.hasMatch(sanitized)) {
+      state = state.copyWith(
+        error: 'Caracteres no válidos en la búsqueda',
+        isLoading: false,
+      );
+      return;
+    }
+
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      // STEP 1: Primary attempt - Search only in Spain
+      final urlSpain = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1&addressdetails=1',
+      );
+
+      var response = await http.get(urlSpain, headers: {
+        'User-Agent': 'com.inmufacil.app/1.0',
+      });
+
+      var data = json.decode(response.body);
+
+      // STEP 2: Verification and Fallback
+      if (data is List && data.isEmpty) {
+        debugPrint('Not found in Spain. Searching globally...');
+
+        final urlGlobal = Uri.parse(
+          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1&addressdetails=1',
         );
-        return;
-      }
-      
-      // SECURITY: Character whitelist - Allow letters, numbers, spaces, common punctuation
-      // Prevents injection attempts and ensures valid city names
-      final validPattern = RegExp(r"^[a-zA-ZáéíóúñÁÉÍÓÚÑüÜ0-9\s,.\-\']+$");
-      if (!validPattern.hasMatch(sanitized)) {
-        state = state.copyWith(
-          error: 'Caracteres no válidos en la búsqueda',
-          isLoading: false,
-        );
-        return;
-      }
-      
-      state = state.copyWith(isLoading: true, clearError: true);
-      
-      try {
-        // STEP 1: Primary attempt - Search only in Spain
-        // This ensures "Córdoba" or "Valencia" lead to Spanish cities by default
-        final urlSpain = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&countrycodes=es&polygon_geojson=1&addressdetails=1',
-        );
-        
-        var response = await http.get(urlSpain, headers: {
+
+        response = await http.get(urlGlobal, headers: {
           'User-Agent': 'com.inmufacil.app/1.0',
-        },);
-        
-        var data = json.decode(response.body);
-        
-        // STEP 2: Verification and Fallback
-        // If empty list, location is not in Spain OR user searches outside (e.g., "Paris", "Córdoba, Argentina")
-        if (data is List && data.isEmpty) {
-          debugPrint('📍 Not found in Spain. Searching globally...');
-          
-          // Launch WORLDWIDE search (without countrycodes)
-          final urlGlobal = Uri.parse(
-            'https://nominatim.openstreetmap.org/search?q=$sanitized&format=json&limit=1&polygon_geojson=1&addressdetails=1',
-          );
-          
-          response = await http.get(urlGlobal, headers: {
-            'User-Agent': 'com.inmufacil.app/1.0',
-          },);
-          
-          data = json.decode(response.body);
+        });
+
+        data = json.decode(response.body);
+      }
+
+      // STEP 3: Final Processing
+      if (data is List && data.isNotEmpty) {
+        final lat = double.parse(data[0]['lat']);
+        final lon = double.parse(data[0]['lon']);
+        final displayName = data[0]['display_name'] as String;
+
+        // Extract Bounding Box safely
+        List<String>? bbox;
+        if (data[0]['boundingbox'] != null && data[0]['boundingbox'] is List) {
+          bbox = (data[0]['boundingbox'] as List).map((e) => e.toString()).toList();
         }
-        
-        // STEP 3: Final Processing (if we found something in step 1 or 2)
-        if (data is List && data.isNotEmpty) {
-          final lat = double.parse(data[0]['lat']);
-          final lon = double.parse(data[0]['lon']);
-          final displayName = data[0]['display_name']; // Full name for confirmation
-          
-          // Extract Bounding Box safely
-          List<String>? bbox;
-          if (data[0]['boundingbox'] != null && data[0]['boundingbox'] is List) {
-            bbox = (data[0]['boundingbox'] as List).map((e) => e.toString()).toList();
-          }
-          
-          // Extract GeoJSON for "Real Shape"
-          String? geoJsonStr;
-          if (data[0]['geojson'] != null) {
-            geoJsonStr = json.encode(data[0]['geojson']);
-          }
-          
-          // Update state
-          state = state.copyWith(
-            mapCenter: LatLng(lat, lon),
-            location: displayName.split(',')[0], // Take only city name for input
-            isUsingFallbackLocation: false,
-            isLoading: false,
-            lastSearchResultBbox: bbox,
-            lastSearchResultGeoJson: geoJsonStr, // NEW: Store GeoJSON as String
-          );
-          
-          // Visual feedback (useful for TFM demonstration)
-          debugPrint('✅ Location found: $displayName');
-          
-          // Reload properties for new location
-          await _loadProperties();
-        } else {
-          // STEP 4: If everything fails (neither in Spain nor worldwide)
-          debugPrint('❌ Location not found anywhere.');
-          state = state.copyWith(
-            error: 'No se encontró la ubicación: $sanitized',
-            isLoading: false,
-          );
+
+        // Extract GeoJSON for "Real Shape"
+        String? geoJsonStr;
+        if (data[0]['geojson'] != null) {
+          geoJsonStr = json.encode(data[0]['geojson']);
         }
-      } catch (e) {
-        // SECURITY: Generic error message (don't expose exception details to user)
-        debugPrint('⚠️ Error in search algorithm: $e');
+
+        // Update search state
         state = state.copyWith(
-          error: 'Error al buscar ubicación. Inténtalo de nuevo.',
+          mapCenter: LatLng(lat, lon),
+          location: displayName.split(',')[0],
+          isUsingFallbackLocation: false,
+          isLoading: false,
+          lastSearchResultBbox: bbox,
+          lastSearchResultGeoJson: geoJsonStr,
+        );
+
+        // Sync mapState directly so Home map reflects the new location even
+        // when OpenStreetMapWidget is in the background (onPositionChanged
+        // does not fire for programmatic moves on off-screen widgets).
+        _syncMapState(bbox, geoJsonStr);
+
+        debugPrint('Location found: $displayName');
+
+        // Reload properties for new location
+        await _loadProperties();
+      } else {
+        debugPrint('Location not found anywhere.');
+        state = state.copyWith(
+          error: 'No se encontró la ubicación: $sanitized',
           isLoading: false,
         );
       }
-    });
+    } catch (e) {
+      // SECURITY: Generic error message (don't expose exception details to user)
+      debugPrint('Error in search algorithm: $e');
+      state = state.copyWith(
+        error: 'Error al buscar ubicación. Inténtalo de nuevo.',
+        isLoading: false,
+      );
+    }
+  }
+
+  /// Synchronise [mapStateProvider] with the geocoding result.
+  ///
+  /// This is necessary when the search is triggered from the Search page
+  /// (PropertyListingScreen) while the Home map widget is in the navigation
+  /// background. In that scenario, [OpenStreetMapWidget.onPositionChanged]
+  /// does not fire for programmatic moves, so [mapState.visibleBounds] and
+  /// [mapState.cityBoundaryPolygon] would remain stale (pointing to the
+  /// previous city). As a result, [filteredByMapPropertiesProvider] would
+  /// filter out all properties for the new location when the user returns
+  /// to the Home map.
+  void _syncMapState(List<String>? bbox, String? geoJsonStr) {
+    final mapNotifier = ref.read(mapStateProvider.notifier);
+
+    // Update city boundary polygon from GeoJSON (real shape) or bbox fallback
+    if (geoJsonStr != null) {
+      try {
+        final geoJsonData = json.decode(geoJsonStr) as Map<String, dynamic>;
+        mapNotifier.setCityBoundaryFromGeoJson(geoJsonData);
+      } catch (_) {
+        if (bbox != null) mapNotifier.setCityBoundary(bbox);
+      }
+    } else if (bbox != null) {
+      mapNotifier.setCityBoundary(bbox);
+    }
+
+    // Update visible bounds from bbox so filteredByMapPropertiesProvider
+    // immediately reflects the new search area.
+    if (bbox != null && bbox.length == 4) {
+      try {
+        final south = double.parse(bbox[0]);
+        final north = double.parse(bbox[1]);
+        final west = double.parse(bbox[2]);
+        final east = double.parse(bbox[3]);
+        mapNotifier.setVisibleBounds(
+          LatLngBounds(LatLng(south, west), LatLng(north, east)),
+        );
+      } catch (_) {}
+    }
   }
   
   /// Load properties from repository with current filters

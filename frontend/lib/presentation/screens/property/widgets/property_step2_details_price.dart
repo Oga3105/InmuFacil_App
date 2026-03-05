@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/formatters/currency_input_formatter.dart';
+
 import '../../../../core/utils/temp_translations.dart';
 import '../../../providers/property_form_provider.dart';
 
@@ -118,12 +120,8 @@ class _PropertyStep2DetailsPriceState
                           controller: _priceCtrl,
                           focusNode: _priceFocus,
                           cursorColor: cursorColor,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9.]'))
-                          ],
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [CurrencyInputFormatter()],
                           decoration: _inputDec('0', suffixSymbol: '€'),
                           onChanged: notifier.setPrice,
                         ),

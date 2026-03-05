@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/formatters/currency_input_formatter.dart';
+
 import '../../domain/entities/property_type.dart';
 
 const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
@@ -815,7 +817,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         'operation_type': 'venta',
         if (state.titleText.isNotEmpty) 'title': state.titleText,
         if (state.descriptionText.isNotEmpty) 'description': state.descriptionText,
-        if (state.priceText.isNotEmpty) 'price': double.tryParse(state.priceText) ?? 0,
+        if (state.priceText.isNotEmpty) 'price': CurrencyInputFormatter.parse(state.priceText) ?? 0,
         if (state.surfaceText.isNotEmpty) 'surface_area': double.tryParse(state.surfaceText) ?? 0,
         if (state.addressText.isNotEmpty) 'location': _buildLocationString(),
         if (state.streetText.isNotEmpty) 'street': state.streetText,
@@ -892,7 +894,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
   }
 
   Map<String, dynamic> _buildRequestBody() {
-    final price = double.tryParse(state.priceText) ?? 0;
+    final price = CurrencyInputFormatter.parse(state.priceText) ?? 0;
     final surface = double.tryParse(state.surfaceText) ?? 0;
 
     return {
@@ -955,7 +957,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         state = state.copyWith(clearStep1Error: true);
         return true;
       case 1:
-        final price = double.tryParse(state.priceText) ?? 0;
+        final price = CurrencyInputFormatter.parse(state.priceText) ?? 0;
         final surface = double.tryParse(state.surfaceText) ?? 0;
         if (price <= 0) {
           state = state.copyWith(step2Error: 'Introduce un precio válido');

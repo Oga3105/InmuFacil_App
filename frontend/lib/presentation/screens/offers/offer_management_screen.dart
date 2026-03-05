@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/my_properties_provider.dart';
@@ -44,21 +44,6 @@ class OfferManagementScreen extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                OutlinedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.filter_list, size: 14),
-                  label: const Text('Filtrar',
-                      style: TextStyle(fontSize: 12)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF64748B),
-                    side: BorderSide(color: Colors.grey.shade300),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 6),
@@ -178,8 +163,8 @@ class OfferManagementScreen extends ConsumerWidget {
         padding: const EdgeInsets.only(left: 8),
         child: AppBarBackButton(
           onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
+            if (context.canPop()) {
+              context.pop();
             } else {
               context.go('/profile');
             }
@@ -197,8 +182,7 @@ class OfferManagementScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               const Text.rich(
                 TextSpan(
-                  style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
@@ -214,35 +198,125 @@ class OfferManagementScreen extends ConsumerWidget {
         ),
       ),
       actions: [
+        GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  'Inicio',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+          onPressed: () {},
+        ),
+        const SizedBox(width: 8),
         Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: Builder(builder: (context) {
-            final photoUrl = user?.profilePhotoUrl;
-            final ts = DateTime.now().millisecondsSinceEpoch;
-            return SizedBox(
-              width: 36,
-              height: 36,
-              child: ClipOval(
-                child: photoUrl != null && photoUrl.isNotEmpty
-                    ? Image.network(
-                        '$photoUrl?v=$ts',
-                        width: 36,
-                        height: 36,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+          padding: const EdgeInsets.only(right: 20),
+          child: PopupMenuButton<String>(
+            offset: const Offset(0, 40),
+            tooltip: 'Menú de usuario',
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'profile',
+                child: Row(children: [
+                  Icon(Icons.person_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mi Perfil'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'my-properties',
+                child: Row(children: [
+                  Icon(Icons.home_work_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Propiedades'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'offers',
+                child: Row(children: [
+                  Icon(Icons.handshake_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Ofertas'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(children: [
+                  Icon(Icons.logout, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                ]),
+              ),
+            ],
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) context.go('/');
+              } else if (value == 'profile') {
+                context.push('/profile');
+              } else if (value == 'my-properties') {
+                context.push('/profile?tab=1');
+              } else if (value == 'offers') {
+                context.push('/profile?tab=2');
+              }
+            },
+            child: Builder(builder: (ctx) {
+              final photoUrl = user?.profilePhotoUrl;
+              final ts = DateTime.now().millisecondsSinceEpoch;
+              return SizedBox(
+                width: 36,
+                height: 36,
+                child: ClipOval(
+                  child: photoUrl != null && photoUrl.isNotEmpty
+                      ? Image.network(
+                          '$photoUrl?v=$ts',
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFF2563EB),
+                            child: const Icon(Icons.person,
+                                color: Colors.white, size: 20),
+                          ),
+                        )
+                      : Container(
                           color: const Color(0xFF2563EB),
                           child: const Icon(Icons.person,
                               color: Colors.white, size: 20),
                         ),
-                      )
-                    : Container(
-                        color: const Color(0xFF2563EB),
-                        child: const Icon(Icons.person,
-                            color: Colors.white, size: 20),
-                      ),
-              ),
-            );
-          }),
+                ),
+              );
+            }),
+          ),
         ),
       ],
     );
@@ -372,15 +446,9 @@ class _PropertyHeaderCard extends StatelessWidget {
     );
   }
 
-  String _formatPrice(double? price) {
-    if (price == null) return '—';
-    final s = price.toStringAsFixed(0);
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return '${buf.toString()}\u20AC';
+  String _formatPrice(int? price) {
+    if (price == null) return '\u2014';
+    return '${CurrencyInputFormatter.format(price)}\u20AC';
   }
 
   String _statusLabel(String? status) {
@@ -720,49 +788,52 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               offer.conditions!.isNotEmpty) ...[
             Divider(
                 height: 1, thickness: 1, color: Colors.grey.shade100),
-            Padding(
+             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-              child: GestureDetector(
-                onTap: () => setState(
-                    () => _messageExpanded = !_messageExpanded),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _messageExpanded
-                          ? offer.conditions!
-                          : _truncate(offer.conditions!, 120),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF475569),
-                        fontStyle: FontStyle.italic,
-                        height: 1.5,
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () => setState(
+                      () => _messageExpanded = !_messageExpanded),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _messageExpanded
+                            ? offer.conditions!
+                            : _truncate(offer.conditions!, 120),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF475569),
+                          fontStyle: FontStyle.italic,
+                          height: 1.5,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Text(
-                          _messageExpanded
-                              ? 'Ocultar mensaje'
-                              : 'Leer mensaje completo',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF2563EB),
-                            fontWeight: FontWeight.w600,
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Text(
+                            _messageExpanded
+                                ? 'Ocultar mensaje'
+                                : 'Leer mensaje completo',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF2563EB),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          _messageExpanded
-                              ? Icons.keyboard_arrow_up
-                              : Icons.keyboard_arrow_down,
-                          size: 14,
-                          color: const Color(0xFF2563EB),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 4),
+                          Icon(
+                            _messageExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            size: 14,
+                            color: const Color(0xFF2563EB),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -781,15 +852,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
     return '${dt.day} ${months[dt.month - 1]}, ${dt.year}';
   }
 
-  String _formatAmount(double amount) {
-    final s = amount.toStringAsFixed(0);
-    final buffer = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buffer.write('.');
-      buffer.write(s[i]);
-    }
-    return buffer.toString();
-  }
+  String _formatAmount(int amount) => CurrencyInputFormatter.format(amount);
 
   String _truncate(String text, int maxLen) {
     if (text.length <= maxLen) return text;
@@ -862,14 +925,33 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        title: const Text('Contraofertar'),
+        title: const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: 'Contra',
+                style: TextStyle(
+                  color: Color(0xFF2563EB),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              TextSpan(
+                text: 'ofertar',
+                style: TextStyle(
+                  color: Color(0xFF16A34A),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
         content: TextField(
           controller: _counterController,
           keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          inputFormatters: [CurrencyInputFormatter()],
           decoration: InputDecoration(
             labelText: 'Tu contraoferta',
-            prefixText: '\u20AC ',
+            suffixText: ' €',
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8)),
           ),
@@ -878,19 +960,26 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Cancelar'),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFFF59E0B)),
+              backgroundColor: const Color(0xFFF59E0B),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Enviar'),
           ),
         ],
       ),
     );
     if (submitted == true && mounted) {
-      final amount = double.tryParse(_counterController.text);
+      final amount = CurrencyInputFormatter.parse(_counterController.text);
       if (amount != null && amount > 0) {
         await ref
             .read(receivedOffersProvider.notifier)
@@ -1159,29 +1248,60 @@ class _StatusBadge extends StatelessWidget {
 
   Map<String, dynamic> _config(String s) {
     switch (s) {
+      case 'pending':
+        return {
+          'bg': const Color(0xFFEFF6FF),
+          'fg': const Color(0xFF2563EB),
+          'label': 'PENDIENTE',
+        };
       case 'accepted':
         return {
           'bg': const Color(0xFFDCFCE7),
           'fg': const Color(0xFF16A34A),
           'label': 'ACEPTADA',
         };
-      case 'rejected':
-        return {
-          'bg': const Color(0xFFF1F5F9),
-          'fg': const Color(0xFF64748B),
-          'label': 'RECHAZADA',
-        };
+      case 'counter_offer':
       case 'countered':
         return {
           'bg': const Color(0xFFFEF9C3),
           'fg': const Color(0xFFCA8A04),
           'label': 'CONTRAOFERTA ENVIADA',
         };
+      case 'signing_pending':
+        return {
+          'bg': const Color(0xFFEDE9FE),
+          'fg': const Color(0xFF7C3AED),
+          'label': 'EN FIRMA',
+        };
+      case 'signed':
+        return {
+          'bg': const Color(0xFFEDE9FE),
+          'fg': const Color(0xFF6D28D9),
+          'label': 'FIRMADA',
+        };
+      case 'completed':
+        return {
+          'bg': const Color(0xFFDCFCE7),
+          'fg': const Color(0xFF15803D),
+          'label': 'COMPLETADA',
+        };
+      case 'rejected':
+        return {
+          'bg': const Color(0xFFFEF2F2),
+          'fg': const Color(0xFFDC2626),
+          'label': 'RECHAZADA',
+        };
+      case 'withdrawn':
+        return {
+          'bg': const Color(0xFFFFF7ED),
+          'fg': const Color(0xFFF59E0B),
+          'label': 'RETIRADA',
+        };
       default:
         return {
-          'bg': const Color(0xFFEFF6FF),
-          'fg': const Color(0xFF2563EB),
-          'label': 'PENDIENTE',
+          'bg': const Color(0xFFF1F5F9),
+          'fg': const Color(0xFF64748B),
+          'label': s.toUpperCase(),
         };
     }
   }

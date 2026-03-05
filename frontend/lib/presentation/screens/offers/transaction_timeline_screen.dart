@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../../config/router/app_router.dart';
@@ -15,13 +16,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final steps = _buildSteps(offer.status);
     final currentUser = ref.watch(authProvider).user;
     final isBuyer = currentUser?.id == offer.buyerId;
     final s = offer.status.toLowerCase();
-    // Buyer can withdraw while arras not yet signed (and not already closed)
+    // Buyer can withdraw while arras not yet signed (not counter_offer — buyer has dedicated actions there)
     final canWithdraw = isBuyer &&
-        (s == 'pending' || s == 'counter_offer' || s == 'accepted' || s == 'signing_pending');
+        (s == 'pending' || s == 'accepted' || s == 'signing_pending');
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -61,17 +61,19 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // ── Timeline ────────────────────────────────────────────────
+                // ── Timeline (botones de acción embebidos en la tarjeta activa) ─
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
-                  child: _TimelineWidget(steps: steps),
+                  child: _TimelineWidget(steps: _buildSteps(
+                    offer.status,
+                    buyerActions: isBuyer && s == 'counter_offer'
+                        ? _BuyerCounterOfferActions(offer: offer)
+                        : null,
+                    withdrawAction: canWithdraw
+                        ? _WithdrawOfferButton(offer: offer)
+                        : null,
+                  )),
                 ),
-                // ── Withdraw offer (buyer only, before arras signed) ─────────
-                if (canWithdraw)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                    child: _WithdrawOfferButton(offer: offer),
-                  ),
                 // ── Help footer ─────────────────────────────────────────────
                 const _HelpFooter(),
                 const SizedBox(height: 8),
@@ -166,15 +168,76 @@ class TransactionTimelineScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 12),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+          onPressed: () {},
+        ),
+        const SizedBox(width: 8),
         Padding(
           padding: const EdgeInsets.only(right: 20),
-          child: _UserAvatar(user: user),
+          child: PopupMenuButton<String>(
+            offset: const Offset(0, 40),
+            tooltip: 'Menú de usuario',
+            color: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'profile',
+                child: Row(children: [
+                  Icon(Icons.person_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mi Perfil'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'my-properties',
+                child: Row(children: [
+                  Icon(Icons.home_work_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Propiedades'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'offers',
+                child: Row(children: [
+                  Icon(Icons.handshake_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Ofertas'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(children: [
+                  Icon(Icons.logout, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
+                ]),
+              ),
+            ],
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) context.go('/');
+              } else if (value == 'profile') {
+                context.push('/profile');
+              } else if (value == 'my-properties') {
+                context.push('/profile?tab=1');
+              } else if (value == 'offers') {
+                context.push('/profile?tab=2');
+              }
+            },
+            child: _UserAvatar(user: user),
+          ),
         ),
       ],
     );
   }
 
-  List<_TimelineStep> _buildSteps(String status) {
+  List<_TimelineStep> _buildSteps(
+    String status, {
+    Widget? buyerActions,
+    Widget? withdrawAction,
+  }) {
     final s = status.toLowerCase();
 
     // Map offer status to pipeline stage index:
@@ -208,6 +271,18 @@ class TransactionTimelineScreen extends ConsumerWidget {
       return _StepState.locked;
     }
 
+    // Combina los botones de acción para el paso 0 si aplica
+    Widget? step0Actions;
+    if (buyerActions != null || withdrawAction != null) {
+      step0Actions = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (buyerActions != null) buyerActions,
+          if (withdrawAction != null) ...[const SizedBox(height: 8), withdrawAction],
+        ],
+      );
+    }
+
     return [
       _TimelineStep(
         title: stage == 0
@@ -223,7 +298,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     : 'Pendiente de respuesta del vendedor')
                 : (s == 'withdrawn' ? 'Oferta retirada por el comprador' : 'Oferta rechazada por el vendedor'),
         state: stage < 0 ? _StepState.locked : stepState(0),
-        // No CTA: buyer can only wait for seller to accept
+        actionsWidget: step0Actions,
       ),
       _TimelineStep(
         title: 'Verificacion de Solvencia',
@@ -442,15 +517,8 @@ class _HeaderCards extends StatelessWidget {
     );
   }
 
-  String _formatPrice(double value) {
-    final s = value.toStringAsFixed(0);
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return '${buf.toString()}\u20AC';
-  }
+  String _formatPrice(int value) =>
+      '${CurrencyInputFormatter.format(value)}\u20AC';
 }
 
 // ── Timeline ─────────────────────────────────────────────────────────────────
@@ -465,6 +533,7 @@ class _TimelineStep {
     this.description,
     this.ctaLabel,
     this.ctaIcon,
+    this.actionsWidget,
   });
 
   final String title;
@@ -474,6 +543,8 @@ class _TimelineStep {
   /// Optional call-to-action shown in the active card. Null = no button.
   final String? ctaLabel;
   final IconData? ctaIcon;
+  /// Optional widget (e.g. action buttons) rendered at the bottom of the active card.
+  final Widget? actionsWidget;
 }
 
 class _TimelineWidget extends StatelessWidget {
@@ -684,6 +755,10 @@ class _ActiveRow extends StatelessWidget {
                           ),
                         ),
                       ),
+                    ],
+                    if (step.actionsWidget != null) ...[
+                      const SizedBox(height: 16),
+                      step.actionsWidget!,
                     ],
                   ],
                 ),
@@ -912,6 +987,286 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
         minimumSize: const Size(double.infinity, 48),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
+    );
+  }
+}
+
+// ── Buyer counter-offer action panel ─────────────────────────────────────────
+
+class _BuyerCounterOfferActions extends ConsumerStatefulWidget {
+  const _BuyerCounterOfferActions({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_BuyerCounterOfferActions> createState() =>
+      _BuyerCounterOfferActionsState();
+}
+
+class _BuyerCounterOfferActionsState
+    extends ConsumerState<_BuyerCounterOfferActions> {
+  bool _loading = false;
+
+  Future<void> _accept() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Aceptar contraoferta'),
+        content: Text(
+          '\u00BFAceptas la contraoferta de ${CurrencyInputFormatter.format(widget.offer.amount)} \u20AC?',
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Aceptar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref.read(sentOffersProvider.notifier).accept(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Oferta aceptada')),
+        );
+        context.go('/');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al aceptar la oferta. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _counterBack() async {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: 'Hacer ',
+                style: TextStyle(
+                  color: Color(0xFF2563EB),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              TextSpan(
+                text: 'nueva oferta',
+                style: TextStyle(
+                  color: Color(0xFF16A34A),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
+            decoration: const InputDecoration(
+              labelText: 'Nuevo importe',
+              suffixText: ' €',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Introduce un importe';
+              final parsed = CurrencyInputFormatter.parse(v);
+              if (parsed == null || parsed <= 0) return 'Importe no valido';
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFEA580C),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
+            },
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final newAmount = CurrencyInputFormatter.parse(controller.text);
+    if (newAmount == null) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(sentOffersProvider.notifier)
+          .counterBack(widget.offer.id, newAmount);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tu nueva oferta ha sido enviada')),
+        );
+        context.go('/profile?tab=2');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al enviar la oferta. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _reject() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Rechazar contraoferta'),
+        content: const Text(
+          '\u00BFRechazas la contraoferta? Esta accion no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Rechazar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref.read(sentOffersProvider.notifier).reject(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Contraoferta rechazada')),
+        );
+        context.go('/profile?tab=2');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al rechazar la oferta. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: _loading ? null : _accept,
+            icon: const Icon(Icons.check_circle_outline, size: 14),
+            label: const Text(
+              'Aceptar',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+            ),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _loading ? null : _counterBack,
+            icon: const Icon(Icons.edit_outlined,
+                size: 14, color: Color(0xFFEA580C)),
+            label: const Text(
+              'Nueva Oferta',
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  color: Color(0xFFEA580C)),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFEA580C),
+              side: const BorderSide(color: Color(0xFFEA580C)),
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _loading ? null : _reject,
+            icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
+            label: const Text(
+              'Rechazar',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
+            ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+              minimumSize: const Size(0, 36),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

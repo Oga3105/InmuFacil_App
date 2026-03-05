@@ -948,7 +948,9 @@ class _ActionBar extends StatelessWidget {
         title: 'Cuenta requerida',
         message: action == 'visit'
             ? 'Debes estar registrado para solicitar una visita a esta propiedad.'
-            : 'Debes estar registrado para hacer una oferta por esta propiedad.',
+            : action == 'contact'
+                ? 'Debes estar registrado para contactar con el propietario de esta propiedad.'
+                : 'Debes estar registrado para hacer una oferta por esta propiedad.',
         icon: Icons.person_outline,
         cta: 'Iniciar sesión',
         onCta: () { Navigator.of(context).pop(); context.pushNamed('login'); },
@@ -962,7 +964,9 @@ class _ActionBar extends StatelessWidget {
         title: 'Verificación requerida',
         message: action == 'visit'
             ? 'Solo los usuarios con identidad verificada pueden solicitar visitas. Completa tu verificación KYC para continuar.'
-            : 'Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
+            : action == 'contact'
+                ? 'Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.'
+                : 'Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
         icon: Icons.verified_user_outlined,
         cta: 'Verificar identidad',
         onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
@@ -1062,6 +1066,20 @@ class _ActionBar extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () {
+                if (_canAct('contact')) context.push('/profile?tab=3');
+              },
+              icon: const Icon(Icons.chat_bubble_outline, size: 20),
+              label: const Text('Contactar Particular', style: TextStyle(fontWeight: FontWeight.bold)),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF2563EB),
+                side: const BorderSide(color: Color(0xFF2563EB)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
           ],
           if (isOwner) ...[
             const SizedBox(height: 10),
@@ -1132,6 +1150,23 @@ class _ActionBar extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  if (_canAct('contact')) context.push('/profile?tab=3');
+                },
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Contactar Particular'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF2563EB),
+                  side: const BorderSide(color: Color(0xFF2563EB)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
             ),
           ],
           if (isOwner) ...[

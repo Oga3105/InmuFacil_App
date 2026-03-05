@@ -5,8 +5,10 @@ import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/chat_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
+import 'package:inmufacil_frontend/presentation/screens/chat/chat_list_screen.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
@@ -49,7 +51,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, initialIndex: widget.initialTabIndex, vsync: this);
+    _tabController = TabController(length: 4, initialIndex: widget.initialTabIndex, vsync: this);
   }
 
   @override
@@ -123,6 +125,38 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                              const Tab(child: Row(children: [Icon(Icons.person, size: 20), SizedBox(width: 8), Text('Mi Perfil')])),
                              const Tab(child: Row(children: [Icon(Icons.home_work, size: 20), SizedBox(width: 8), Text('Mis Propiedades')])),
                              const Tab(child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')])),
+                             Tab(
+                               child: Row(
+                                 children: [
+                                   const Icon(Icons.chat_bubble_outline, size: 20),
+                                   const SizedBox(width: 8),
+                                   const Text('Mensajes'),
+                                   const SizedBox(width: 6),
+                                   Consumer(
+                                     builder: (ctx, r, _) {
+                                       final total = r.watch(chatListProvider).asData?.value
+                                           .fold(0, (sum, c) => sum + c.unreadCount) ?? 0;
+                                       if (total == 0) return const SizedBox.shrink();
+                                       return Container(
+                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                         decoration: BoxDecoration(
+                                           color: const Color(0xFFEF4444),
+                                           borderRadius: BorderRadius.circular(10),
+                                         ),
+                                         child: Text(
+                                           '$total',
+                                           style: const TextStyle(
+                                             color: Colors.white,
+                                             fontSize: 11,
+                                             fontWeight: FontWeight.bold,
+                                           ),
+                                         ),
+                                       );
+                                     },
+                                   ),
+                                 ],
+                               ),
+                             ),
                           ],
                         ),
                       ),
@@ -143,7 +177,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
                     builder: (context, _) {
                       if (_tabController.index == 0) return _buildProfileTab(user, isVerified);
                       if (_tabController.index == 1) return _buildPropertiesTab();
-                      return _buildOffersTab();
+                      if (_tabController.index == 2) return _buildOffersTab();
+                      return _buildMessagesTab();
                     },
                   ),
                 ),
@@ -1798,9 +1833,18 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
       case 'signed': return const Color(0xFF2563EB);
       case 'completed': return const Color(0xFF16A34A);
       case 'rejected': return Colors.red;
-      case 'withdrawn': return const Color(0xFF94A3B8);
+      case 'withdrawn': return const Color(0xFFF59E0B);
       default: return const Color(0xFF64748B);
     }
+  }
+
+  // ── Mensajes tab ────────────────────────────────────────────────────────────
+
+  Widget _buildMessagesTab() {
+    return const SizedBox(
+      height: 700,
+      child: ChatListScreen(embeddedInProfile: true),
+    );
   }
 }
 
@@ -1996,4 +2040,5 @@ class _GestionarMenu extends StatelessWidget {
       ),
     );
   }
+
 }

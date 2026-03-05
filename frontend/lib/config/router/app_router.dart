@@ -162,7 +162,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final propertyId = state.pathParameters['id']!;
           final askingPrice =
-              double.tryParse(state.uri.queryParameters['price'] ?? '0') ?? 0;
+              int.tryParse(state.uri.queryParameters['price'] ?? '0') ?? 0;
           return MakeOfferScreen(propertyId: propertyId, askingPrice: askingPrice);
         },
       ),

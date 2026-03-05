@@ -1445,6 +1445,16 @@ class _MapNavigationBar extends ConsumerWidget {
                             ),
                           ),
                         const PopupMenuItem(
+                          value: 'messages',
+                          child: Row(
+                            children: [
+                              Icon(Icons.chat_bubble_outline, size: 20),
+                              SizedBox(width: 8),
+                              Text('Mensajes'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
                           value: 'logout',
                           child: Row(
                              children: [
@@ -1472,6 +1482,9 @@ class _MapNavigationBar extends ConsumerWidget {
                         } else if (value == 'offers') {
                            ref.read(searchProvider.notifier).clearError();
                            context.push('/profile?tab=2');
+                        } else if (value == 'messages') {
+                           ref.read(searchProvider.notifier).clearError();
+                           context.push('/profile?tab=3');
                         }
                       },
                       child: Builder(builder: (context) {

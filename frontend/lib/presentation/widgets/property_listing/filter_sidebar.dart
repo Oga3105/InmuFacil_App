@@ -96,9 +96,9 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     ),
                     style: const TextStyle(fontSize: 13),
                     onSubmitted: (value) {
-                       if (value.isNotEmpty) {
-                         ref.read(searchProvider.notifier).searchCity(value);
-                       }
+                      if (value.isNotEmpty) {
+                        ref.read(searchProvider.notifier).searchCityNow(value);
+                      }
                     },
                   ),
                   const SizedBox(height: 12),
@@ -109,13 +109,13 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                       icon: Icons.search,
                       color: primaryBlue,
                       fontSize: 14,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Reduced padding
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       onPressed: () {
-                         if (_locationController.text.isNotEmpty) {
-                           ref.read(searchProvider.notifier).searchCity(_locationController.text);
-                         } else {
-                           ref.read(searchProvider.notifier).search(); 
-                         }
+                        if (_locationController.text.isNotEmpty) {
+                          ref.read(searchProvider.notifier).searchCityNow(_locationController.text);
+                        } else {
+                          ref.read(searchProvider.notifier).search();
+                        }
                       },
                     ),
                   ),

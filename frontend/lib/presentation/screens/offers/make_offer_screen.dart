@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -15,7 +15,7 @@ class MakeOfferScreen extends ConsumerStatefulWidget {
   });
 
   final String propertyId;
-  final double askingPrice;
+  final int askingPrice;
 
   @override
   ConsumerState<MakeOfferScreen> createState() => _MakeOfferScreenState();
@@ -35,8 +35,8 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
     super.dispose();
   }
 
-  double get _offerAmount =>
-      double.tryParse(_amountController.text) ?? 0;
+  int get _offerAmount =>
+      CurrencyInputFormatter.parse(_amountController.text) ?? 0;
 
   double get _diffPct {
     if (widget.askingPrice <= 0 || _offerAmount <= 0) return 0;
@@ -44,20 +44,9 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
   }
 
   bool get _isLowOffer =>
-      widget.askingPrice > 0 && _offerAmount > 0 && _offerAmount < widget.askingPrice * 0.97;
-
-  String _formatPrice(double v) {
-    if (v <= 0) return '0';
-    final s = v.toStringAsFixed(0);
-    final result = StringBuffer();
-    int count = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0) result.write('.');
-      result.write(s[i]);
-      count++;
-    }
-    return result.toString().split('').reversed.join();
-  }
+      widget.askingPrice > 0 &&
+      _offerAmount > 0 &&
+      _offerAmount < widget.askingPrice * 0.97;
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +338,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${_formatPrice(_offerAmount)} €',
+                                '${CurrencyInputFormatter.format(_offerAmount)} €',
                                 style: const TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
@@ -618,7 +607,7 @@ class _OfferAmountCard extends StatelessWidget {
                   controller: controller,
                   onChanged: (_) => onChanged(),
                   keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  inputFormatters: [CurrencyInputFormatter()],
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 42,
