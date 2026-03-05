@@ -380,12 +380,14 @@ async def enable_chat(
     if not offer:
         raise HTTPException(status_code=404, detail="Offer not found")
         
-    if offer.property.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only owner can enable chat")
-        
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+    if not (is_owner or is_buyer):
+        raise HTTPException(status_code=403, detail="Not an offer participant")
+
     offer.is_chat_enabled = True
     db.commit()
-    return {"status": "chat_enabled"}
+    return {"status": "chat_enabled", "offer_id": offer_id}
 
 
 @router.post("/{offer_id}/chat", response_model=ChatMessageResponse)

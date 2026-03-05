@@ -689,6 +689,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
             ),
           ),
 
+          // ---- Chat button row ----
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: _ChatButton(offerId: offer.id),
+          ),
+
           Divider(
               height: 1, thickness: 1, color: Colors.grey.shade100),
 
@@ -1442,6 +1448,60 @@ class _FooterLink extends StatelessWidget {
           fontSize: 11,
           color: Color(0xFF64748B),
           decoration: TextDecoration.underline,
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _ChatButton — habilita chat y navega a la sala privada
+// ---------------------------------------------------------------------------
+
+class _ChatButton extends ConsumerStatefulWidget {
+  const _ChatButton({required this.offerId});
+  final String offerId;
+
+  @override
+  ConsumerState<_ChatButton> createState() => _ChatButtonState();
+}
+
+class _ChatButtonState extends ConsumerState<_ChatButton> {
+  bool _loading = false;
+
+  Future<void> _onPressed() async {
+    setState(() => _loading = true);
+    try {
+      await ref.read(receivedOffersProvider.notifier).enableChat(widget.offerId);
+    } catch (_) {
+      // already enabled
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+    if (mounted) context.push('/chat/${widget.offerId}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: _loading ? null : _onPressed,
+        icon: _loading
+            ? const SizedBox(
+                width: 16, height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.chat_bubble_outline, size: 18),
+        label: const Text(
+          'Abrir Chat con el Comprador',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF2563EB),
+          side: const BorderSide(color: Color(0xFF2563EB)),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       ),
     );

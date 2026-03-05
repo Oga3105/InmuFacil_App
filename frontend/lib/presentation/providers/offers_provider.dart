@@ -24,6 +24,7 @@ class OfferData {
     this.propertyTitle,
     this.propertyPrice,
     this.propertyImageUrl,
+    this.isChatEnabled = false,
   });
 
   final String id;
@@ -42,6 +43,7 @@ class OfferData {
   final String? propertyTitle;
   final int? propertyPrice;
   final String? propertyImageUrl;
+  final bool isChatEnabled;
 }
 
 // --- Sent Offers Provider ---
@@ -98,6 +100,11 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
     await _dio.post('/offers/$offerId/reject');
     await refresh();
   }
+
+  /// Enable chat for an offer (both buyer and seller can call this).
+  Future<void> enableChat(String offerId) async {
+    await _dio.post('/offers/$offerId/chat/enable');
+  }
 }
 
 // --- Received Offers Provider ---
@@ -139,6 +146,11 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
   Future<void> counter(String offerId, int newAmount) async {
     await _dio.post('/offers/$offerId/counter', data: {'amount': newAmount});
     await refresh();
+  }
+
+  /// Enable chat for an offer.
+  Future<void> enableChat(String offerId) async {
+    await _dio.post('/offers/$offerId/chat/enable');
   }
 }
 
@@ -230,5 +242,6 @@ OfferData _mapOffer(dynamic item) {
     propertyTitle: property['title'] as String?,
     propertyPrice: ((property['price'] ?? 0) as num).round(),
     propertyImageUrl: imageUrl,
+    isChatEnabled: map['is_chat_enabled'] as bool? ?? false,
   );
 }

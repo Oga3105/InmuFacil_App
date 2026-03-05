@@ -1788,7 +1788,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
               ],
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
+          _ProfileChatButton(offer: offer),
+          const SizedBox(width: 8),
           OutlinedButton(
             onPressed: () => context.pushNamed(
               'offer-timeline',
@@ -1802,7 +1804,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
-            child: const Text('Ver Seguimiento'),
+            child: const Text('Seguimiento'),
           ),
         ],
       ),
@@ -1844,6 +1846,67 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> with Sing
     return const SizedBox(
       height: 700,
       child: ChatListScreen(embeddedInProfile: true),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _ProfileChatButton — comprador abre chat con vendedor desde sus ofertas
+// ---------------------------------------------------------------------------
+
+class _ProfileChatButton extends ConsumerStatefulWidget {
+  const _ProfileChatButton({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_ProfileChatButton> createState() => _ProfileChatButtonState();
+}
+
+class _ProfileChatButtonState extends ConsumerState<_ProfileChatButton> {
+  bool _loading = false;
+
+  static const _activeStatuses = {
+    'pending', 'counter_offer', 'countered', 'accepted',
+    'signing_pending', 'signed',
+  };
+
+  bool get _isActive =>
+      _activeStatuses.contains(widget.offer.status.toLowerCase());
+
+  Future<void> _onPressed() async {
+    if (!_isActive) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(sentOffersProvider.notifier)
+          .enableChat(widget.offer.id);
+    } catch (_) {
+      // already enabled
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+    if (mounted) context.push('/chat/${widget.offer.id}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isActive) return const SizedBox.shrink();
+    return OutlinedButton.icon(
+      onPressed: _loading ? null : _onPressed,
+      icon: _loading
+          ? const SizedBox(
+              width: 14, height: 14,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.chat_bubble_outline, size: 16),
+      label: const Text('Chat'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF2563EB),
+        side: const BorderSide(color: Color(0xFF2563EB)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }

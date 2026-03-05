@@ -11,6 +11,7 @@ import '../../../domain/entities/property_type.dart'; // [FIX] Import added
 import '../../providers/search_provider.dart';
 import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
 import '../../providers/auth_provider.dart';
+import '../../providers/offers_provider.dart';
 import '../../providers/property_form_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
@@ -1067,19 +1068,7 @@ class _ActionBar extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            OutlinedButton.icon(
-              onPressed: () {
-                if (_canAct('contact')) context.push('/profile?tab=3');
-              },
-              icon: const Icon(Icons.chat_bubble_outline, size: 20),
-              label: const Text('Contactar Particular', style: TextStyle(fontWeight: FontWeight.bold)),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF2563EB),
-                side: const BorderSide(color: Color(0xFF2563EB)),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
+            _ContactarButton(propertyId: property.id),
           ],
           if (isOwner) ...[
             const SizedBox(height: 10),
@@ -1154,19 +1143,7 @@ class _ActionBar extends StatelessWidget {
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  if (_canAct('contact')) context.push('/profile?tab=3');
-                },
-                icon: const Icon(Icons.chat_bubble_outline),
-                label: const Text('Contactar Particular'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
+              child: _ContactarButton(propertyId: property.id),
             ),
           ],
           if (isOwner) ...[
@@ -1452,6 +1429,104 @@ class _MortgageCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _ContactarButton — navega directo al chat de la oferta activa
+// ---------------------------------------------------------------------------
+
+class _ContactarButton extends ConsumerStatefulWidget {
+  const _ContactarButton({required this.propertyId});
+  final String propertyId;
+
+  @override
+  ConsumerState<_ContactarButton> createState() => _ContactarButtonState();
+}
+
+class _ContactarButtonState extends ConsumerState<_ContactarButton> {
+  bool _loading = false;
+
+  static const _activeStatuses = {
+    'pending', 'counter_offer', 'countered', 'accepted',
+    'signing_pending', 'signed',
+  };
+
+  Future<void> _onPressed() async {
+    final authState = ref.read(authProvider);
+    if (authState.user == null) {
+      context.pushNamed('login');
+      return;
+    }
+
+    final sentOffers = ref.read(sentOffersProvider).asData?.value ?? [];
+    final activeOffer = sentOffers.where((o) =>
+      o.propertyId == widget.propertyId &&
+      _activeStatuses.contains(o.status.toLowerCase()),
+    ).firstOrNull;
+
+    if (activeOffer == null) {
+      if (!mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          title: const Text('Haz una oferta primero'),
+          content: const Text(
+            'El chat privado con el vendedor se abre al hacer una oferta. '
+            'Ambas partes pueden chatear desde ese momento.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/property/${widget.propertyId}/offer');
+              },
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2563EB)),
+              child: const Text('Hacer Oferta'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    setState(() => _loading = true);
+    try {
+      await ref.read(sentOffersProvider.notifier).enableChat(activeOffer.id);
+    } catch (_) {
+      // ignore — chat might already be enabled
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+    if (mounted) context.push('/chat/${activeOffer.id}');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: _loading ? null : _onPressed,
+      icon: _loading
+          ? const SizedBox(
+              width: 18, height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.chat_bubble_outline, size: 20),
+      label: Text(
+        'Contactar Particular',
+        style: const TextStyle(fontWeight: FontWeight.bold),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF2563EB),
+        side: const BorderSide(color: Color(0xFF2563EB)),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
