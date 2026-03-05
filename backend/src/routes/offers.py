@@ -7,7 +7,7 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
-from pydantic import BaseModel, condecimal, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 
 from backend.src.config.database import get_db
 from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
@@ -22,14 +22,14 @@ router = APIRouter(prefix="/offers", tags=["Offers"])
 
 class OfferCreate(BaseModel):
     property_id: int
-    amount: float # In production use Decimal
+    amount: int = Field(..., gt=0, description="Offer amount in EUR, integers only — no decimals")
     conditions: Optional[str] = None
     valid_days: int = 7
 
 class PropertySnippet(BaseModel):
     id: int
     title: str
-    price: float
+    price: int
     seller_name: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
@@ -44,7 +44,7 @@ class OfferResponse(BaseModel):
     id: int
     property_id: int
     buyer_id: int
-    amount: float
+    amount: int
     conditions: Optional[str] = None
     status: str
     valid_until: Optional[datetime] = None
@@ -54,7 +54,7 @@ class OfferResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
-    amount: float
+    amount: int = Field(..., gt=0, description="Counter-offer amount in EUR, integers only — no decimals")
 
 def _offers_query(db: Session):
     """Return a query for PropertyOffer with eager-loaded property (+ owner) and buyer."""
@@ -72,7 +72,7 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         prop_snippet = PropertySnippet(
             id=prop.id,
             title=prop.title,
-            price=float(prop.price),
+            price=int(prop.price),
             seller_name=prop.owner.full_name if prop.owner else None,
         )
     buyer_snippet = None
@@ -88,7 +88,7 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         id=offer.id,
         property_id=offer.property_id,
         buyer_id=offer.buyer_id,
-        amount=float(offer.amount),
+        amount=int(offer.amount),
         conditions=offer.conditions,
         status=offer.status.value if hasattr(offer.status, 'value') else str(offer.status),
         valid_until=offer.valid_until,
@@ -104,9 +104,12 @@ class ChatMessageCreate(BaseModel):
 class ChatMessageResponse(BaseModel):
     id: int
     sender_id: int
-    message: str # Decrypted
+    message: str  # Decrypted
+    message_type: str = "text"
+    metadata: Optional[dict] = None
+    is_read: bool = False
     timestamp: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -208,23 +211,30 @@ async def counter_offer(
     offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
     if not offer:
         raise HTTPException(status_code=404, detail="Offer not found")
-        
-    # Verify Owner
-    if offer.property.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Only owner can counter")
-        
-    if offer.status not in [OfferStatus.PENDING, OfferStatus.COUNTERED]:
+
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+
+    if offer.status == OfferStatus.PENDING:
+        if not is_owner:
+            raise HTTPException(status_code=403, detail="Only the seller can counter a pending offer")
+        new_status = OfferStatus.COUNTER_OFFER
+        history_action = "COUNTER"
+    elif offer.status == OfferStatus.COUNTER_OFFER:
+        if not is_buyer:
+            raise HTTPException(status_code=403, detail="Only the buyer can counter a seller counter-offer")
+        new_status = OfferStatus.PENDING
+        history_action = "BUYER_COUNTER"
+    else:
         raise HTTPException(status_code=400, detail="Cannot counter a closed offer")
 
-    # Update Logic
-    offer.status = OfferStatus.COUNTERED
+    offer.status = new_status
     offer.amount = counter_data.amount
-    
-    # Log History
+
     history = OfferHistory(
         offer_id=offer.id,
         actor_id=current_user.id,
-        action="COUNTER",
+        action=history_action,
         amount=counter_data.amount
     )
     db.add(history)
@@ -252,12 +262,12 @@ async def accept_offer(
     
     # Logic: 
     # If Status is PENDING, only Owner can accept.
-    # If Status is COUNTERED (by Owner), Buyer can accept.
-    
+    # If Status is COUNTER_OFFER (by Owner), Buyer can accept.
+
     if offer.status == OfferStatus.PENDING:
         if not is_owner:
              raise HTTPException(status_code=403, detail="Only owner can accept a pending offer")
-    elif offer.status == OfferStatus.COUNTERED:
+    elif offer.status == OfferStatus.COUNTER_OFFER:
          if not is_buyer:
               raise HTTPException(status_code=403, detail="Only buyer can accept a counter-offer")
     else:
@@ -319,6 +329,44 @@ async def withdraw_offer(
     return {"message": "Offer withdrawn successfully", "offer_id": offer.id, "status": offer.status}
 
 
+@router.post("/{offer_id}/reject", status_code=status.HTTP_200_OK)
+async def reject_offer(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Seller rejects a pending offer, or buyer rejects a counter-offer.
+    Sets status to REJECTED and terminates the negotiation.
+    """
+    offer = db.query(PropertyOffer).join(Property).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+
+    is_owner = offer.property.owner_id == current_user.id
+    is_buyer = offer.buyer_id == current_user.id
+
+    if offer.status == OfferStatus.PENDING:
+        if not is_owner:
+            raise HTTPException(status_code=403, detail="Only seller can reject a pending offer")
+    elif offer.status == OfferStatus.COUNTER_OFFER:
+        if not is_buyer:
+            raise HTTPException(status_code=403, detail="Only buyer can reject a counter-offer")
+    else:
+        raise HTTPException(status_code=400, detail="Cannot reject offer in this state")
+
+    offer.status = OfferStatus.REJECTED
+    history = OfferHistory(
+        offer_id=offer.id,
+        actor_id=current_user.id,
+        action="REJECT",
+        amount=offer.amount,
+    )
+    db.add(history)
+    db.commit()
+    return {"message": "Offer rejected", "offer_id": offer.id}
+
+
 @router.post("/{offer_id}/chat/enable", status_code=status.HTTP_200_OK)
 async def enable_chat(
     offer_id: int,
@@ -368,23 +416,57 @@ async def send_chat_message(
              pass # Owner override? No, strict to plan: Enable first.
         raise HTTPException(status_code=403, detail="Chat is disabled by seller")
 
+    # Phone verification gate (@Shield)
+    if not current_user.is_phone_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Telefono no verificado. Verifica tu numero en el perfil antes de enviar mensajes.",
+        )
+
+    # Censorship filter — strip phone/email patterns before encryption (@Shield GDPR)
+    from backend.src.services.chat_service import CensorshipFilter, manager as _ws_manager
+    sanitized_text = CensorshipFilter.sanitize(msg_data.message)
+
     # Encrypt
-    encrypted_text = encrypt_data(msg_data.message)
-    
+    encrypted_text = encrypt_data(sanitized_text)
+
     msg = OfferMessage(
         offer_id=offer.id,
         sender_id=current_user.id,
-        message_encrypted=encrypted_text
+        message_encrypted=encrypted_text,
+        message_type="text",
+        is_read=False,
     )
     db.add(msg)
     db.commit()
     db.refresh(msg)
-    
+
+    # Broadcast to WebSocket subscribers in this offer room
+    import asyncio
+    ws_payload = {
+        "event": "message",
+        "data": {
+            "id": msg.id,
+            "sender_id": msg.sender_id,
+            "message": sanitized_text,
+            "message_type": "text",
+            "metadata": None,
+            "is_read": False,
+            "created_at": msg.timestamp.isoformat() if msg.timestamp else None,
+        },
+    }
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.ensure_future(_ws_manager.broadcast(offer.id, ws_payload))
+    except Exception:
+        pass  # WebSocket broadcast is best-effort; REST response is authoritative
+
     # Return decrypted for response (it's the sender, they know what they sent)
     return ChatMessageResponse(
         id=msg.id,
         sender_id=msg.sender_id,
-        message=msg_data.message,
+        message=sanitized_text,
         timestamp=msg.timestamp
     )
 
@@ -422,7 +504,10 @@ async def get_chat_history(
             id=m.id,
             sender_id=m.sender_id,
             message=plaintext,
-            timestamp=m.timestamp
+            message_type=m.message_type if hasattr(m, 'message_type') else "text",
+            metadata=m.metadata if hasattr(m, 'metadata') else None,
+            is_read=m.is_read if hasattr(m, 'is_read') else False,
+            timestamp=m.timestamp,
         ))
         
     return response

@@ -5,13 +5,75 @@ import 'package:go_router/go_router.dart';
 import '../../../core/utils/temp_translations.dart';
 import '../../providers/chat_provider.dart';
 
+// ── Palette (Navy Blue & Gold) ────────────────────────────────────────────────
+const _kNavy      = Color(0xFF1E3A5F);
+const _kNavyLight = Color(0xFFEEF3FA);
+const _kGold      = Color(0xFFB8860B);
+const _kGoldLight = Color(0xFFFFF8E1);
+const _kSilver    = Color(0xFF607D8B);
+const _kBronze    = Color(0xFF8D6E63);
+
 class ChatListScreen extends ConsumerWidget {
-  const ChatListScreen({super.key});
+  const ChatListScreen({super.key, this.embeddedInProfile = false});
+
+  /// When true the widget renders without a Scaffold (for embedding in tabs).
+  final bool embeddedInProfile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final chatAsync = ref.watch(chatListProvider);
 
+    final body = LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 800;
+        return isWide
+            ? _WideLayout(chatAsync: chatAsync, ref: ref)
+            : _NarrowLayout(chatAsync: chatAsync, ref: ref);
+      },
+    );
+
+    if (embeddedInProfile) return body;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: body,
+    );
+  }
+}
+
+// ── Wide layout (desktop two-pane) ────────────────────────────────────────────
+
+class _WideLayout extends StatelessWidget {
+  const _WideLayout({required this.chatAsync, required this.ref});
+
+  final AsyncValue<List<ChatConversation>> chatAsync;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 380,
+          child: _InboxPane(chatAsync: chatAsync, ref: ref),
+        ),
+        const VerticalDivider(width: 1, color: Color(0xFFE2E8F0)),
+        const Expanded(child: _EmptyDetailPane()),
+      ],
+    );
+  }
+}
+
+// ── Narrow layout (mobile full-screen list) ───────────────────────────────────
+
+class _NarrowLayout extends StatelessWidget {
+  const _NarrowLayout({required this.chatAsync, required this.ref});
+
+  final AsyncValue<List<ChatConversation>> chatAsync;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -30,36 +92,125 @@ class ChatListScreen extends ConsumerWidget {
           child: Container(color: const Color(0xFFE2E8F0), height: 1),
         ),
       ),
-      body: chatAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => _ErrorState(
-          onRetry: () => ref.read(chatListProvider.notifier).refresh(),
-        ),
-        data: (conversations) {
-          if (conversations.isEmpty) return const _EmptyState();
-          return RefreshIndicator(
-            onRefresh: () => ref.read(chatListProvider.notifier).refresh(),
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: conversations.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1, color: Color(0xFFF1F5F9)),
-              itemBuilder: (context, index) {
-                final conv = conversations[index];
-                return _ConversationTile(
-                  conversation: conv,
-                  onTap: () => context.push('/chat/${conv.offerId}'),
-                );
-              },
-            ),
-          );
-        },
-      ),
+      body: _InboxPane(chatAsync: chatAsync, ref: ref),
     );
   }
 }
 
-// ─── Conversation tile ────────────────────────────────────────────────────────
+// ── Inbox pane ────────────────────────────────────────────────────────────────
+
+class _InboxPane extends StatelessWidget {
+  const _InboxPane({required this.chatAsync, required this.ref});
+
+  final AsyncValue<List<ChatConversation>> chatAsync;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Header (web pane only)
+        Container(
+          color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Mensajes',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: _kNavy,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Search bar
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'Buscar conversaciones...',
+                  hintStyle: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 13,
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF94A3B8),
+                    size: 20,
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xFFF1F5F9),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+
+        // List
+        Expanded(
+          child: chatAsync.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator(color: _kNavy)),
+            error: (err, _) => _ErrorState(
+              onRetry: () => ref.read(chatListProvider.notifier).refresh(),
+            ),
+            data: (conversations) {
+              if (conversations.isEmpty) return const _EmptyListState();
+              return RefreshIndicator(
+                color: _kNavy,
+                onRefresh: () => ref.read(chatListProvider.notifier).refresh(),
+                child: ListView.separated(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  itemCount: conversations.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                  itemBuilder: (context, index) {
+                    final conv = conversations[index];
+                    return _ConversationTile(
+                      conversation: conv,
+                      onTap: () => context.push('/chat/${conv.offerId}'),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+
+        // Bottom security badge
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          color: Colors.white,
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock_outline, size: 13, color: Color(0xFF16A34A)),
+              SizedBox(width: 6),
+              Text(
+                'CHAT ENCRIPTADO END-TO-END',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF16A34A),
+                  letterSpacing: 0.8,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Conversation tile ─────────────────────────────────────────────────────────
 
 class _ConversationTile extends StatelessWidget {
   const _ConversationTile({
@@ -77,33 +228,53 @@ class _ConversationTile extends StatelessWidget {
         ? conversation.otherUserName[0].toUpperCase()
         : '?';
 
-    // Title: "Juan Garcia - Atico con vistas"
-    final title = conversation.propertyTitle.isNotEmpty
-        ? '${conversation.otherUserName} - ${conversation.propertyTitle}'
-        : conversation.otherUserName;
-
     return Material(
       color: Colors.white,
       child: InkWell(
         onTap: onTap,
-        splashColor: const Color(0xFF2563EB).withOpacity(0.05),
+        splashColor: _kNavy.withValues(alpha: 0.05),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: const Color(0xFF2563EB),
-                child: Text(
-                  initial,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
+              // Avatar with online dot
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: _kNavy,
+                    backgroundImage:
+                        (conversation.otherUserPhotoUrl?.isNotEmpty ?? false)
+                            ? NetworkImage(conversation.otherUserPhotoUrl!)
+                            : null,
+                    child:
+                        (conversation.otherUserPhotoUrl?.isNotEmpty ?? false)
+                            ? null
+                            : Text(
+                                initial,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                ),
+                              ),
                   ),
-                ),
+                  if (hasUnread)
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF16A34A),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 12),
 
@@ -112,25 +283,52 @@ class _ConversationTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title row + time/badge trailing
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: Text(
-                            title,
-                            style: TextStyle(
-                              fontWeight:
-                                  hasUnread ? FontWeight.w700 : FontWeight.w600,
-                              fontSize: 14,
-                              color: const Color(0xFF1E293B),
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Name + trust badge
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      conversation.otherUserName,
+                                      style: TextStyle(
+                                        fontWeight: hasUnread
+                                            ? FontWeight.w700
+                                            : FontWeight.w600,
+                                        fontSize: 14,
+                                        color: const Color(0xFF1E293B),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  if (conversation.trustBadge !=
+                                      TrustBadge.none) ...[
+                                    const SizedBox(width: 6),
+                                    _TrustBadgeChip(
+                                        badge: conversation.trustBadge),
+                                  ],
+                                ],
+                              ),
+                              // Property title
+                              Text(
+                                conversation.propertyTitle,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFF94A3B8),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Time + unread badge column
+                        // Time + unread badge
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
@@ -140,7 +338,7 @@ class _ConversationTile extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 color: hasUnread
-                                    ? const Color(0xFF2563EB)
+                                    ? _kNavy
                                     : const Color(0xFF94A3B8),
                                 fontWeight: hasUnread
                                     ? FontWeight.w600
@@ -156,8 +354,6 @@ class _ConversationTile extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 3),
-
-                    // Last message preview
                     if (conversation.lastMessage.isNotEmpty)
                       Text(
                         conversation.lastMessage,
@@ -166,8 +362,9 @@ class _ConversationTile extends StatelessWidget {
                           color: hasUnread
                               ? const Color(0xFF334155)
                               : const Color(0xFF94A3B8),
-                          fontWeight:
-                              hasUnread ? FontWeight.w500 : FontWeight.normal,
+                          fontWeight: hasUnread
+                              ? FontWeight.w500
+                              : FontWeight.normal,
                         ),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -189,9 +386,9 @@ class _ConversationTile extends StatelessWidget {
       return '${date.hour.toString().padLeft(2, '0')}:'
           '${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays == 1) {
-      return 'chat.yesterday'.tr();
+      return 'AYER';
     } else if (diff.inDays < 7) {
-      const days = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+      const days = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
       return days[date.weekday - 1];
     } else {
       return '${date.day}/${date.month}';
@@ -199,7 +396,51 @@ class _ConversationTile extends StatelessWidget {
   }
 }
 
-// ─── Unread badge ─────────────────────────────────────────────────────────────
+// ── Trust badge chip ──────────────────────────────────────────────────────────
+
+class _TrustBadgeChip extends StatelessWidget {
+  const _TrustBadgeChip({required this.badge});
+
+  final TrustBadge badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color, bg) = switch (badge) {
+      TrustBadge.gold   => ('ORO', _kGold, _kGoldLight),
+      TrustBadge.silver => ('PLATA', _kSilver, const Color(0xFFECEFF1)),
+      TrustBadge.bronze => ('BRONCE', _kBronze, const Color(0xFFFBEFEB)),
+      TrustBadge.none   => ('', Colors.transparent, Colors.transparent),
+    };
+    if (badge == TrustBadge.none) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.verified_outlined, size: 9, color: color),
+          const SizedBox(width: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w800,
+              color: color,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Unread badge ──────────────────────────────────────────────────────────────
 
 class _UnreadBadge extends StatelessWidget {
   const _UnreadBadge({required this.count});
@@ -211,7 +452,7 @@ class _UnreadBadge extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
       decoration: BoxDecoration(
-        color: const Color(0xFF2563EB),
+        color: _kNavy,
         borderRadius: BorderRadius.circular(9),
       ),
       child: Text(
@@ -227,47 +468,47 @@ class _UnreadBadge extends StatelessWidget {
   }
 }
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
+// ── Empty list state (no chat-enabled conversations yet) ──────────────────────
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+class _EmptyListState extends StatelessWidget {
+  const _EmptyListState();
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 80,
-              height: 80,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(40),
+                color: _kNavyLight,
+                borderRadius: BorderRadius.circular(36),
               ),
               child: const Icon(
                 Icons.chat_bubble_outline_rounded,
-                size: 40,
-                color: Color(0xFF2563EB),
+                size: 36,
+                color: _kNavy,
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              'chat.no_conversations'.tr(),
-              style: const TextStyle(
+            const Text(
+              'Sin conversaciones activas',
+              style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: Color(0xFF1E293B),
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            Text(
-              'chat.no_conversations_hint'.tr(),
+            const Text(
+              'Cuando el vendedor active el chat en una oferta, aparecera aqui.',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 color: Color(0xFF94A3B8),
                 height: 1.5,
@@ -280,7 +521,122 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ─── Error state ──────────────────────────────────────────────────────────────
+// ── Empty detail pane (right side on wide layout) ────────────────────────────
+
+class _EmptyDetailPane extends StatelessWidget {
+  const _EmptyDetailPane();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFFF8FAFC),
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 380),
+          padding: const EdgeInsets.all(40),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: _kNavyLight,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: const Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  size: 32,
+                  color: _kNavy,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Tus Conversaciones Seguras',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1E293B),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'Selecciona un chat para ver los mensajes. Todas las comunicaciones en InmuFacil estan protegidas por encriptacion avanzada para tu seguridad.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF64748B),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _FeatureChip(
+                    icon: Icons.shield_outlined,
+                    label: 'PROTECCION P2P',
+                    color: _kNavy,
+                  ),
+                  _FeatureChip(
+                    icon: Icons.gavel_outlined,
+                    label: 'VALIDEZ LEGAL',
+                    color: _kNavy,
+                  ),
+                  _FeatureChip(
+                    icon: Icons.verified_user_outlined,
+                    label: 'KYC VERIFICADO',
+                    color: _kNavy,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureChip extends StatelessWidget {
+  const _FeatureChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 22),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            color: color,
+            letterSpacing: 0.4,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Error state ───────────────────────────────────────────────────────────────
 
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.onRetry});

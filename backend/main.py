@@ -301,7 +301,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat
 
 from fastapi import APIRouter
 
@@ -326,7 +326,8 @@ api_v1_router.include_router(services.router) # Hito 17 - Unified Services
 api_v1_router.include_router(signature.router) # Prefix defined in router (/contracts)
 api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
 api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
-api_v1_router.include_router(leads.router) # Hito 18 - Lead Magnet (404)
+api_v1_router.include_router(leads.router)  # Hito 18 - Lead Magnet (404)
+api_v1_router.include_router(chat.router)   # Hito Chat - Real-time messaging
 
 # Include V1 Router in App
 app.include_router(api_v1_router)

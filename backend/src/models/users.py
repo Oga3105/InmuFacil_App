@@ -42,6 +42,9 @@ class User(Base):
     dni_verified = Column(Boolean, default=False, nullable=False)
     rejection_reason = Column(String, nullable=True)  # Feedback for rejected KYC
     
+    # Phone Verification (Firebase SMS — Hito Chat)
+    is_phone_verified = Column(Boolean, default=False, nullable=False)
+
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
 

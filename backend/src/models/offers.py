@@ -98,15 +98,22 @@ class OfferHistory(Base):
 class OfferMessage(Base):
     """
     Encrypted chat messages between Buyer and Seller for a specific offer.
+    message_type: 'text' | 'action' (offer proposal, visit request, etc.)
+    metadata: JSON payload for action messages, e.g. {action_type, amount, date}
+    is_read: False until the recipient opens the conversation.
     """
     __tablename__ = "offer_messages"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     offer_id = Column(Integer, ForeignKey("offers.id"), nullable=False)
-    
+
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    message_encrypted = Column(String, nullable=False) # Fernet encrypted content
-    
+    message_encrypted = Column(String, nullable=False)  # Fernet encrypted content
+
+    message_type = Column(String, default="text", nullable=False)  # 'text' | 'action'
+    metadata = Column(JSON, nullable=True)  # {action_type, amount, date, ...}
+    is_read = Column(Boolean, default=False, nullable=False)
+
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
 

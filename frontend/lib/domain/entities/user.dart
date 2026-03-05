@@ -8,6 +8,7 @@ class User {
     this.dniStatus,
     this.isActive,
     this.phone,
+    this.isPhoneVerified,
     this.createdAt,
     this.rejectionReason,
     this.profilePhotoUrl,
@@ -17,16 +18,18 @@ class User {
     return User(
       id: json['id'].toString(),
       email: json['email'],
-      name: json['full_name'], // Backend sends full_name
+      name: json['full_name'],
       userType: json['user_type'],
       dniStatus: json['dni_status'],
       isActive: json['is_active'],
       phone: json['phone'],
+      isPhoneVerified: json['is_phone_verified'] as bool?,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       rejectionReason: json['rejection_reason'],
       profilePhotoUrl: json['profile_photo_url'],
     );
   }
+
   final String id;
   final String email;
   final String? name;
@@ -34,6 +37,7 @@ class User {
   final String? dniStatus;
   final bool? isActive;
   final String? phone;
+  final bool? isPhoneVerified;
   final DateTime? createdAt;
   final String? rejectionReason;
   final String? profilePhotoUrl;
@@ -46,6 +50,7 @@ class User {
     String? dniStatus,
     bool? isActive,
     String? phone,
+    bool? isPhoneVerified,
     DateTime? createdAt,
     String? rejectionReason,
     String? profilePhotoUrl,
@@ -59,6 +64,7 @@ class User {
       dniStatus: dniStatus ?? this.dniStatus,
       isActive: isActive ?? this.isActive,
       phone: phone ?? this.phone,
+      isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
       createdAt: createdAt ?? this.createdAt,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       profilePhotoUrl: clearProfilePhoto ? null : (profilePhotoUrl ?? this.profilePhotoUrl),

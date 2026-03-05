@@ -29,7 +29,7 @@ class OfferData {
   final String id;
   final String propertyId;
   final String buyerId;
-  final double amount;
+  final int amount;
   final String status;
   final String? conditions;
   final String? paymentTerm;
@@ -40,7 +40,7 @@ class OfferData {
   final bool buyerIsVerified;
   final String? sellerName;
   final String? propertyTitle;
-  final double? propertyPrice;
+  final int? propertyPrice;
   final String? propertyImageUrl;
 }
 
@@ -75,9 +75,27 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
     state = await AsyncValue.guard(_fetch);
   }
 
-  /// Buyer withdraws their offer (sets status to rejected on backend).
+  /// Buyer withdraws their offer.
   Future<void> withdraw(String offerId) async {
     await _dio.post('/offers/$offerId/withdraw');
+    await refresh();
+  }
+
+  /// Buyer accepts the seller's counter-offer.
+  Future<void> accept(String offerId) async {
+    await _dio.post('/offers/$offerId/accept');
+    await refresh();
+  }
+
+  /// Buyer sends a counter back to the seller (resets to PENDING with new amount).
+  Future<void> counterBack(String offerId, int newAmount) async {
+    await _dio.post('/offers/$offerId/counter', data: {'amount': newAmount});
+    await refresh();
+  }
+
+  /// Buyer rejects the seller's counter-offer (terminates negotiation).
+  Future<void> reject(String offerId) async {
+    await _dio.post('/offers/$offerId/reject');
     await refresh();
   }
 }
@@ -118,7 +136,7 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
     await refresh();
   }
 
-  Future<void> counter(String offerId, double newAmount) async {
+  Future<void> counter(String offerId, int newAmount) async {
     await _dio.post('/offers/$offerId/counter', data: {'amount': newAmount});
     await refresh();
   }
@@ -146,7 +164,7 @@ class MakeOfferNotifier extends Notifier<OfferFormState> {
 
   Future<void> submit({
     required String propertyId,
-    required double amount,
+    required int amount,
     String? conditions,
     String? paymentTerm,
     DateTime? closingDate,
@@ -199,7 +217,7 @@ OfferData _mapOffer(dynamic item) {
     id: (map['id'] ?? '').toString(),
     propertyId: (property['id'] ?? map['property_id'] ?? '').toString(),
     buyerId: (buyer['id'] ?? map['buyer_id'] ?? '').toString(),
-    amount: ((map['amount'] ?? 0) as num).toDouble(),
+    amount: ((map['amount'] ?? 0) as num).round(),
     status: map['status'] as String? ?? 'pending',
     conditions: map['conditions'] as String?,
     paymentTerm: map['payment_term'] as String?,
@@ -210,7 +228,7 @@ OfferData _mapOffer(dynamic item) {
     buyerIsVerified: buyerIsVerified,
     sellerName: sellerName?.trim(),
     propertyTitle: property['title'] as String?,
-    propertyPrice: ((property['price'] ?? 0) as num).toDouble(),
+    propertyPrice: ((property['price'] ?? 0) as num).round(),
     propertyImageUrl: imageUrl,
   );
 }
