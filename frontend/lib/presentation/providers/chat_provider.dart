@@ -195,6 +195,21 @@ final chatDetailProvider = AsyncNotifierProvider.autoDispose
   (offerId) => ChatDetailNotifier(offerId),
 );
 
+/// Tracks WebSocket connection state per offerId.
+class _WsConnectedNotifier extends Notifier<Map<String, bool>> {
+  @override
+  Map<String, bool> build() => {};
+  void setConnected(String offerId, bool value) {
+    state = {...state, offerId: value};
+  }
+  bool isConnected(String offerId) => state[offerId] ?? false;
+}
+
+final chatWsConnectedProvider =
+    NotifierProvider<_WsConnectedNotifier, Map<String, bool>>(
+  _WsConnectedNotifier.new,
+);
+
 class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   ChatDetailNotifier(this._offerId);
 
@@ -203,8 +218,10 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   String? _currentUserId;
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _wsSub;
+  bool _wsConnected = false;
 
   String? get currentUserId => _currentUserId;
+  bool get wsConnected => _wsConnected;
 
   @override
   Future<List<ChatMessage>> build() async {
@@ -261,10 +278,20 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
       _channel = WebSocketChannel.connect(
         Uri.parse('$_kWsBaseUrl/chat/ws/$_offerId'),
       );
+      _wsConnected = true;
+      try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, true); } catch (_) {}
       _wsSub = _channel!.stream.listen(
         _onWsMessage,
-        onError: (_) => _scheduleReconnect(),
-        onDone: () => _scheduleReconnect(),
+        onError: (_) {
+          _wsConnected = false;
+          try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, false); } catch (_) {}
+          _scheduleReconnect();
+        },
+        onDone: () {
+          _wsConnected = false;
+          try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, false); } catch (_) {}
+          _scheduleReconnect();
+        },
         cancelOnError: false,
       );
     } catch (_) {

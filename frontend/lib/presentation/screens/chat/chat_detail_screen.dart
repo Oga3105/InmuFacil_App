@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/services/firebase_phone_service.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/utils/temp_translations.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 
@@ -48,43 +47,11 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     });
   }
 
-  // ── Phone verification gate ───────────────────────────────────────────────
-
-  Future<bool> _ensurePhoneVerified() async {
-    final user = ref.read(authProvider).user;
-    if (user == null) return false;
-    final isVerified = user.isPhoneVerified ?? false;
-    if (isVerified) return true;
-
-    // Not verified — start Firebase flow
-    if (!mounted) return false;
-    final phone = user.phone ?? '';
-    if (phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Agrega un numero de telefono en tu perfil para verificar tu identidad.',
-          ),
-        ),
-      );
-      return false;
-    }
-    final ok = await FirebasePhoneService.instance.verifyPhoneAndNotifyBackend(
-      context: context,
-      phoneNumber: phone,
-    );
-    return ok;
-  }
-
   // ── Send text ─────────────────────────────────────────────────────────────
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
-
-    final verified = await _ensurePhoneVerified();
-    if (!verified) return;
-
     _controller.clear();
     setState(() => _sending = true);
     try {
@@ -106,27 +73,21 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   // ── Send action ───────────────────────────────────────────────────────────
 
   Future<void> _sendVisitRequest() async {
-    final verified = await _ensurePhoneVerified();
-    if (!verified || !mounted) return;
-
-    final dateStr = await _showDatePickerDialog();
-    if (dateStr == null) return;
+    final result = await _showDateTimePickerDialog();
+    if (result == null || !mounted) return;
 
     await ref
         .read(chatDetailProvider(widget.offerId).notifier)
         .sendAction(
           actionType: 'visit_request',
-          metadata: {'date': dateStr},
+          metadata: {'date': result},
         );
     _scrollToBottom();
   }
 
   Future<void> _sendOfferProposal() async {
-    final verified = await _ensurePhoneVerified();
-    if (!verified || !mounted) return;
-
     final amount = await _showAmountDialog();
-    if (amount == null) return;
+    if (amount == null || !mounted) return;
 
     await ref
         .read(chatDetailProvider(widget.offerId).notifier)
@@ -138,16 +99,34 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   }
 
   Future<void> _requestDocuments() async {
-    // Sensitive action — Firebase reauth required
-    final user = ref.read(authProvider).user;
-    final phone = user?.phone ?? '';
-    if (!mounted) return;
-    final reauthed = await FirebasePhoneService.instance
-        .reauthenticateForSensitiveAction(
+    final confirmed = await showDialog<bool>(
       context: context,
-      phoneNumber: phone.isEmpty ? '+34000000000' : phone,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: const Text('Solicitar documentos'),
+        content: const Text(
+          'Se enviara una solicitud de documentacion al otro participante.',
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Solicitar'),
+          ),
+        ],
+      ),
     );
-    if (!reauthed || !mounted) return;
+    if (confirmed != true || !mounted) return;
 
     await ref
         .read(chatDetailProvider(widget.offerId).notifier)
@@ -158,12 +137,13 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     _scrollToBottom();
   }
 
-  Future<String?> _showDatePickerDialog() async {
+  Future<String?> _showDateTimePickerDialog() async {
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
+      locale: const Locale('es', 'ES'),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: _kNavy),
@@ -171,33 +151,75 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         child: child!,
       ),
     );
-    if (picked == null) return null;
-    return '${picked.day}/${picked.month}/${picked.year}';
+    if (picked == null || !mounted) return null;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 11, minute: 0),
+      helpText: 'Hora preferente de visita',
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(primary: _kNavy),
+        ),
+        child: child!,
+      ),
+    );
+    if (!mounted) return null;
+
+    final hour = pickedTime?.hour ?? 11;
+    final minute = pickedTime?.minute ?? 0;
+    return '${picked.day}/${picked.month}/${picked.year} ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
-  Future<double?> _showAmountDialog() async {
+  Future<int?> _showAmountDialog() async {
     final controller = TextEditingController();
     final formKey = GlobalKey<FormState>();
-    return showDialog<double>(
+    return showDialog<int>(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Propuesta de oferta',
-          style: TextStyle(fontWeight: FontWeight.w700),
+        title: RichText(
+          text: const TextSpan(
+            children: [
+              TextSpan(
+                text: 'Propuesta de ',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+              TextSpan(
+                text: 'oferta',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color(0xFF16A34A),
+                ),
+              ),
+            ],
+          ),
         ),
         content: Form(
           key: formKey,
           child: TextFormField(
             controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
+            textAlign: TextAlign.right,
             decoration: const InputDecoration(
-              labelText: 'Importe (\u20AC)',
+              hintText: '0',
+              suffixText: '\u20AC',
+              suffixStyle: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+                color: Color(0xFF1E293B),
+              ),
               border: OutlineInputBorder(),
             ),
             validator: (v) {
               if (v == null || v.isEmpty) return 'Introduce un importe';
-              final parsed = double.tryParse(v.replaceAll(',', '.'));
+              final parsed = CurrencyInputFormatter.parse(v);
               if (parsed == null || parsed <= 0) return 'Importe no valido';
               return null;
             },
@@ -205,20 +227,24 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Cancelar'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: _kNavy,
+              backgroundColor: const Color(0xFF16A34A),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(
                   ctx,
-                  double.parse(controller.text.replaceAll(',', '.')),
+                  CurrencyInputFormatter.parse(controller.text) ?? 0,
                 );
               }
             },
@@ -328,6 +354,10 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             onVisit: _sendVisitRequest,
             onOffer: _sendOfferProposal,
             onDocs: _requestDocuments,
+            hasExistingOfferProposal: messagesAsync.asData?.value
+                .any((m) => m.isAction &&
+                    m.metadata?['action_type'] == 'offer_proposal') ??
+                false,
           ),
           // Input bar
           _InputBar(
@@ -341,6 +371,8 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   }
 
   AppBar _buildAppBar(BuildContext context, ChatConversation? conv) {
+    final isConnected = ref.watch(chatWsConnectedProvider
+        .select((map) => map[widget.offerId] ?? false));
     final initial = (conv?.otherUserName.isNotEmpty ?? false)
         ? conv!.otherUserName[0].toUpperCase()
         : '?';
@@ -355,14 +387,22 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
           AppBarBackButton(
             onPressed: () => Navigator.of(context).pop(),
           ),
-          const SizedBox(width: 4),
+          // InmuFacil logo
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Image.asset(
+              'assets/images/logo_inmufacil.png',
+              height: 22,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+          // Avatar
           CircleAvatar(
             radius: 18,
             backgroundColor: Colors.white.withValues(alpha: 0.2),
-            backgroundImage:
-                (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
-                    ? NetworkImage(conv!.otherUserPhotoUrl!)
-                    : null,
+            backgroundImage: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
+                ? NetworkImage(conv!.otherUserPhotoUrl!)
+                : null,
             child: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
                 ? null
                 : Text(
@@ -394,15 +434,17 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4ADE80),
+                      decoration: BoxDecoration(
+                        color: isConnected
+                            ? const Color(0xFF4ADE80)
+                            : const Color(0xFF94A3B8),
                         shape: BoxShape.circle,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Text(
-                      'En linea ahora',
-                      style: TextStyle(
+                    Text(
+                      isConnected ? 'En linea ahora' : 'Conectando...',
+                      style: const TextStyle(
                         color: Color(0xFFB0C4DE),
                         fontSize: 11,
                       ),
@@ -412,27 +454,22 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               ],
             ),
           ),
-          if (conv != null && conv.propertyId.isNotEmpty)
-            TextButton.icon(
-              onPressed: () => context.push('/property/${conv.propertyId}'),
-              icon: const Icon(
-                Icons.home_outlined,
-                size: 16,
+          // Inicio button
+          TextButton.icon(
+            onPressed: () => context.go('/'),
+            icon: const Icon(Icons.home_outlined, size: 16, color: Color(0xFFFFD700)),
+            label: const Text(
+              'Inicio',
+              style: TextStyle(
                 color: Color(0xFFFFD700),
-              ),
-              label: const Text(
-                'Ver propiedad',
-                style: TextStyle(
-                  color: Color(0xFFFFD700),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            ),
+          ),
           const SizedBox(width: 8),
         ],
       ),
@@ -937,11 +974,13 @@ class _QuickActionBar extends StatelessWidget {
     required this.onVisit,
     required this.onOffer,
     required this.onDocs,
+    required this.hasExistingOfferProposal,
   });
 
   final VoidCallback onVisit;
   final VoidCallback onOffer;
   final VoidCallback onDocs;
+  final bool hasExistingOfferProposal;
 
   @override
   Widget build(BuildContext context) {
@@ -960,15 +999,16 @@ class _QuickActionBar extends StatelessWidget {
             onTap: onVisit,
           ),
           const SizedBox(width: 8),
+          if (!hasExistingOfferProposal)
+            _QuickActionButton(
+              icon: Icons.monetization_on_outlined,
+              label: 'Oferta',
+              color: _kGold,
+              onTap: onOffer,
+            ),
+          if (!hasExistingOfferProposal) const SizedBox(width: 8),
           _QuickActionButton(
-            icon: Icons.monetization_on_outlined,
-            label: 'Oferta',
-            color: _kGold,
-            onTap: onOffer,
-          ),
-          const SizedBox(width: 8),
-          _QuickActionButton(
-            icon: Icons.lock_outline,
+            icon: Icons.folder_outlined,
             label: 'Documentos',
             color: const Color(0xFF7C3AED),
             onTap: onDocs,
@@ -1073,14 +1113,6 @@ class _InputBar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.attach_file_rounded,
-              color: Color(0xFF94A3B8),
-              size: 24,
-            ),
-          ),
           Expanded(
             child: TextField(
               controller: controller,

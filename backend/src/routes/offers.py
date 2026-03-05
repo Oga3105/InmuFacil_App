@@ -418,13 +418,6 @@ async def send_chat_message(
              pass # Owner override? No, strict to plan: Enable first.
         raise HTTPException(status_code=403, detail="Chat is disabled by seller")
 
-    # Phone verification gate (@Shield)
-    if not current_user.is_phone_verified:
-        raise HTTPException(
-            status_code=403,
-            detail="Telefono no verificado. Verifica tu numero en el perfil antes de enviar mensajes.",
-        )
-
     # Censorship filter — strip phone/email patterns before encryption (@Shield GDPR)
     from backend.src.services.chat_service import CensorshipFilter, manager as _ws_manager
     sanitized_text = CensorshipFilter.sanitize(msg_data.message)

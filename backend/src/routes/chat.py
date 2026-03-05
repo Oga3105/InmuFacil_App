@@ -149,7 +149,6 @@ async def send_action_message(
     """
     offer = _get_offer_or_404(offer_id, db)
     _assert_participant(offer, current_user)
-    _assert_phone_verified(current_user)
 
     placeholder = f"[ACTION:{body.action_type}]"
     encrypted = encrypt_data(placeholder)
