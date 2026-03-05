@@ -111,7 +111,7 @@ class OfferMessage(Base):
     message_encrypted = Column(String, nullable=False)  # Fernet encrypted content
 
     message_type = Column(String, default="text", nullable=False)  # 'text' | 'action'
-    metadata = Column(JSON, nullable=True)  # {action_type, amount, date, ...}
+    action_data = Column(JSON, nullable=True)  # {action_type, amount, date, ...}
     is_read = Column(Boolean, default=False, nullable=False)
 
     timestamp = Column(DateTime(timezone=True), server_default=func.now())

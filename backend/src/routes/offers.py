@@ -505,7 +505,7 @@ async def get_chat_history(
             sender_id=m.sender_id,
             message=plaintext,
             message_type=m.message_type if hasattr(m, 'message_type') else "text",
-            metadata=m.metadata if hasattr(m, 'metadata') else None,
+            metadata=m.action_data if hasattr(m, 'action_data') else None,
             is_read=m.is_read if hasattr(m, 'is_read') else False,
             timestamp=m.timestamp,
         ))

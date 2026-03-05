@@ -89,7 +89,7 @@ def _serialize_message(msg: OfferMessage, sender_name: Optional[str] = None) -> 
         "sender_name": sender_name,
         "message": plaintext,
         "message_type": msg.message_type,
-        "metadata": msg.metadata,
+        "metadata": msg.action_data,
         "is_read": msg.is_read,
         "created_at": msg.timestamp.isoformat() if msg.timestamp else None,
     }
@@ -159,7 +159,7 @@ async def send_action_message(
         sender_id=current_user.id,
         message_encrypted=encrypted,
         message_type="action",
-        metadata={"action_type": body.action_type, **body.metadata},
+        action_data={"action_type": body.action_type, **body.metadata},
         is_read=False,
     )
     db.add(msg)
