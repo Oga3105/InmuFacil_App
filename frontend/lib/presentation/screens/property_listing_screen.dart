@@ -11,6 +11,7 @@ import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common/app_bar_back_button.dart';
+import '../widgets/common/user_avatar_menu.dart';
 
 class PropertyListingScreen extends ConsumerStatefulWidget {
   const PropertyListingScreen({super.key, this.highlightId});
@@ -238,44 +239,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                 
                 // AUTH LOGIC (Unified with HomeScreen _MapNavigationBar)
                 if (isAuthenticated)
-                  PopupMenuButton<String>(
-                    offset: const Offset(0, 40),
-                    tooltip: 'Menú de usuario',
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                         value: 'profile',
-                         child: Row(children: [Icon(Icons.person_outline, size: 20), SizedBox(width: 8), Text('Mi Perfil')]),
-                      ),
-                      const PopupMenuItem(
-                         value: 'my-properties',
-                         child: Row(children: [Icon(Icons.home_work_outlined, size: 20), SizedBox(width: 8), Text('Mis Propiedades')]),
-                      ),
-                       const PopupMenuItem(
-                         value: 'offers',
-                         child: Row(children: [Icon(Icons.handshake_outlined, size: 20), SizedBox(width: 8), Text('Mis Ofertas')]),
-                       ),
-                      const PopupMenuItem(
-                        value: 'logout',
-                        child: Row(children: [Icon(Icons.logout, color: Colors.red, size: 20), SizedBox(width: 8), Text('Cerrar Sesión', style: TextStyle(color: Colors.red))]),
-                      ),
-                    ],
-                    onSelected: (value) async {
-                      if (value == 'logout') {
-                        await ref.read(authProvider.notifier).logout();
-                        if (context.mounted) {
-                           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sesión cerrada')));
-                        }
-                      } else if (value == 'profile') {
-                        context.push('/profile');
-                      } else if (value == 'my-properties') {
-                        context.push('/profile?tab=1');
-                      } else if (value == 'offers') {
-                        context.push('/profile?tab=2');
-                      }
-                    },
-                    child: _buildUserAvatar(ref, authenticated: true),
-                  )
+                  const UserAvatarMenu()
                 else
                   InkWell(
                     onTap: () => context.pushNamed('login'),

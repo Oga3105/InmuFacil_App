@@ -248,6 +248,49 @@ async def submit_solvency(
     )
 
 
+@router.post("/offer/{offer_id}/accept", status_code=status.HTTP_200_OK)
+async def seller_accept_solvency(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Seller accepts the buyer solvency passport to allow the timeline to advance.
+    Only the property owner (seller) may call this endpoint.
+    """
+    offer = (
+        db.query(PropertyOffer)
+        .join(Property)
+        .filter(PropertyOffer.id == offer_id)
+        .first()
+    )
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+
+    if offer.property.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Solo el vendedor puede aceptar la solvencia")
+
+    buyer_passport = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == offer.buyer_id
+    ).first()
+    if not buyer_passport:
+        raise HTTPException(
+            status_code=404,
+            detail="El comprador no ha completado su Pasaporte de Solvencia todavia.",
+        )
+
+    from backend.src.models.offers import PropertyOffer as _Offer
+    offer.seller_solvency_accepted = True
+    offer.seller_solvency_accepted_at = datetime.now(timezone.utc)
+    db.commit()
+
+    return {
+        "status": "accepted",
+        "offer_id": offer_id,
+        "accepted_at": offer.seller_solvency_accepted_at.isoformat(),
+    }
+
+
 @router.get("/offer/{offer_id}/buyer", response_model=AnonymisedPassport)
 async def get_buyer_passport_for_offer(
     offer_id: int,

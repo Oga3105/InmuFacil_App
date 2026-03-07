@@ -6,6 +6,7 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
 class TransactionTimelineScreen extends ConsumerWidget {
@@ -64,6 +65,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
                   child: _TimelineWidget(steps: _buildSteps(
+                    context,
                     offer.status,
                     confirmedVisitDate: offer.confirmedVisitDate,
                     requestedVisitDate: offer.requestedVisitDate,
@@ -177,65 +179,14 @@ class TransactionTimelineScreen extends ConsumerWidget {
         const SizedBox(width: 8),
         Padding(
           padding: const EdgeInsets.only(right: 20),
-          child: PopupMenuButton<String>(
-            offset: const Offset(0, 40),
-            tooltip: 'Menú de usuario',
-            color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(children: [
-                  Icon(Icons.person_outline, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mi Perfil'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'my-properties',
-                child: Row(children: [
-                  Icon(Icons.home_work_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Propiedades'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'offers',
-                child: Row(children: [
-                  Icon(Icons.handshake_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Ofertas'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(children: [
-                  Icon(Icons.logout, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                ]),
-              ),
-            ],
-            onSelected: (value) async {
-              if (value == 'logout') {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/');
-              } else if (value == 'profile') {
-                context.push('/profile');
-              } else if (value == 'my-properties') {
-                context.push('/profile?tab=1');
-              } else if (value == 'offers') {
-                context.push('/profile?tab=2');
-              }
-            },
-            child: _UserAvatar(user: user),
-          ),
+          child: const UserAvatarMenu(),
         ),
       ],
     );
   }
 
   List<_TimelineStep> _buildSteps(
+    BuildContext context,
     String status, {
     String? confirmedVisitDate,
     String? requestedVisitDate,
@@ -329,24 +280,59 @@ class TransactionTimelineScreen extends ConsumerWidget {
         state: stepState(2),
         ctaLabel: stage == 2 ? 'Ir a Firmar Ahora' : null,
         ctaIcon: stage == 2 ? Icons.edit_outlined : null,
+        ctaCallback: stage == 2
+            ? () => context.push('/offers/${offer.id}/arras', extra: offer)
+            : null,
       ),
       _TimelineStep(
-        title: 'Gestion Hipotecaria',
+        title: 'Tasacion y Gestion Hipotecaria',
         subtitle: stage > 3
-            ? 'Tramitacion completada'
+            ? 'Tasacion completada y financiacion tramitada'
             : stage == 3
-                ? 'Tramitando financiacion hipotecaria'
+                ? 'Tramitando tasacion y financiacion hipotecaria'
                 : 'Pendiente de firma de arras',
         state: stepState(3),
-        ctaLabel: stage == 3 ? 'Ver documentacion hipotecaria' : null,
-        ctaIcon: stage == 3 ? Icons.description_outlined : null,
+        ctaLabel: stage == 3 ? 'Gestionar tasacion' : null,
+        ctaIcon: stage == 3 ? Icons.home_work_outlined : null,
+        ctaCallback: stage == 3
+            ? () => context.push('/offers/${offer.id}/tasacion', extra: offer)
+            : null,
       ),
       _TimelineStep(
         title: 'Firma en Notaria',
-        subtitle: stage == 4
-            ? 'Transaccion completada'
+        subtitle: stage >= 4
+            ? 'Escrituras firmadas en notaria'
             : 'Paso final de la transaccion',
         state: stepState(4),
+        ctaLabel: stage == 4 ? 'Preparar cita en notaria' : null,
+        ctaIcon: stage == 4 ? Icons.gavel_outlined : null,
+        ctaCallback: stage == 4
+            ? () => context.push('/offers/${offer.id}/notaria', extra: offer)
+            : null,
+      ),
+      _TimelineStep(
+        title: 'Post-Venta y Suministros',
+        subtitle: stage >= 4
+            ? 'Gestiona el cambio de titularidad de los suministros'
+            : 'Pendiente de firma en notaria',
+        state: stage >= 4 ? _StepState.active : _StepState.locked,
+        ctaLabel: stage >= 4 ? 'Gestionar suministros' : null,
+        ctaIcon: stage >= 4 ? Icons.receipt_long_outlined : null,
+        ctaCallback: stage >= 4
+            ? () => context.push('/offers/${offer.id}/post-venta', extra: offer)
+            : null,
+      ),
+      _TimelineStep(
+        title: 'Entrega de Llaves',
+        subtitle: stage >= 4
+            ? 'Confirma la entrega para cerrar la transaccion'
+            : 'Pendiente de firma en notaria',
+        state: stage >= 4 ? _StepState.active : _StepState.locked,
+        ctaLabel: stage >= 4 ? 'Confirmar entrega' : null,
+        ctaIcon: stage >= 4 ? Icons.vpn_key_outlined : null,
+        ctaCallback: stage >= 4
+            ? () => context.push('/offers/${offer.id}/entrega-llaves', extra: offer)
+            : null,
       ),
     ];
 
@@ -571,6 +557,7 @@ class _TimelineStep {
     this.ctaLabel,
     this.ctaIcon,
     this.ctaRoute,
+    this.ctaCallback,
     this.actionsWidget,
   });
 
@@ -581,8 +568,10 @@ class _TimelineStep {
   /// Optional call-to-action shown in the active card. Null = no button.
   final String? ctaLabel;
   final IconData? ctaIcon;
-  /// GoRouter path to navigate on CTA tap. If null, button is a no-op.
+  /// GoRouter path to navigate on CTA tap (uses context.go). Ignored if ctaCallback is set.
   final String? ctaRoute;
+  /// Direct callback for navigation — use when extra data must be passed (context.push with extra:).
+  final VoidCallback? ctaCallback;
   /// Optional widget (e.g. action buttons) rendered at the bottom of the active card.
   final Widget? actionsWidget;
 }
@@ -674,10 +663,11 @@ class _DoneRow extends StatelessWidget {
                     color: Color(0xFF94A3B8),
                   ),
                 ),
-                if (step.ctaLabel != null && step.ctaRoute != null) ...[
+                if (step.ctaLabel != null &&
+                    (step.ctaCallback != null || step.ctaRoute != null)) ...[
                   const SizedBox(height: 8),
                   GestureDetector(
-                    onTap: () => context.go(step.ctaRoute!),
+                    onTap: step.ctaCallback ?? () => context.go(step.ctaRoute!),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -804,9 +794,10 @@ class _ActiveRow extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
-                          onPressed: step.ctaRoute != null
-                              ? () => context.go(step.ctaRoute!)
-                              : null,
+                          onPressed: step.ctaCallback ??
+                              (step.ctaRoute != null
+                                  ? () => context.go(step.ctaRoute!)
+                                  : null),
                           icon: Icon(step.ctaIcon ?? Icons.arrow_forward, size: 16),
                           label: Text(
                             step.ctaLabel!,

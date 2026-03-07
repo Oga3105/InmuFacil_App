@@ -6,7 +6,9 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/my_properties_provider.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../providers/solvency_provider.dart' as solvency_prov;
 
 enum _OfferSort {
   newest,
@@ -319,86 +321,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
         const SizedBox(width: 8),
         Padding(
           padding: const EdgeInsets.only(right: 20),
-          child: PopupMenuButton<String>(
-            offset: const Offset(0, 40),
-            tooltip: 'Menú de usuario',
-            color: Colors.white,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(children: [
-                  Icon(Icons.person_outline, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mi Perfil'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'my-properties',
-                child: Row(children: [
-                  Icon(Icons.home_work_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Propiedades'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'offers',
-                child: Row(children: [
-                  Icon(Icons.handshake_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Ofertas'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(children: [
-                  Icon(Icons.logout, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                ]),
-              ),
-            ],
-            onSelected: (value) async {
-              if (value == 'logout') {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/');
-              } else if (value == 'profile') {
-                context.push('/profile');
-              } else if (value == 'my-properties') {
-                context.push('/profile?tab=1');
-              } else if (value == 'offers') {
-                context.push('/profile?tab=2');
-              }
-            },
-            child: Builder(builder: (ctx) {
-              final photoUrl = user?.profilePhotoUrl;
-              final ts = DateTime.now().millisecondsSinceEpoch;
-              return SizedBox(
-                width: 36,
-                height: 36,
-                child: ClipOval(
-                  child: photoUrl != null && photoUrl.isNotEmpty
-                      ? Image.network(
-                          '$photoUrl?v=$ts',
-                          width: 36,
-                          height: 36,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFF2563EB),
-                            child: const Icon(Icons.person,
-                                color: Colors.white, size: 20),
-                          ),
-                        )
-                      : Container(
-                          color: const Color(0xFF2563EB),
-                          child: const Icon(Icons.person,
-                              color: Colors.white, size: 20),
-                        ),
-                ),
-              );
-            }),
-          ),
+          child: const UserAvatarMenu(),
         ),
       ],
     );
@@ -928,6 +851,10 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
             ),
           ] else
             const SizedBox(height: 4),
+
+          // ---- Solvency acceptance section for accepted offers ----
+          if (offer.status == 'accepted')
+            _SolvencyAcceptanceSection(offer: offer),
         ],
       ),
     );
@@ -1393,6 +1320,137 @@ class _StatusBadge extends StatelessWidget {
           'label': s.toUpperCase(),
         };
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Solvency Acceptance Section — shown inside _OfferCard when status == 'accepted'
+// ---------------------------------------------------------------------------
+
+class _SolvencyAcceptanceSection extends ConsumerWidget {
+  const _SolvencyAcceptanceSection({required this.offer});
+
+  final OfferData offer;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final passportAsync = ref.watch(solvency_prov.buyerPassportProvider(offer.id));
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF86EFAC)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.verified_user_outlined, color: Color(0xFF16A34A), size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Solvencia del comprador',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF166534)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          passportAsync.when(
+            loading: () => const Center(
+                child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))),
+            error: (_, __) => const Text(
+              'El comprador aun no tiene pasaporte de solvencia.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
+            data: (passport) {
+              if (passport == null) {
+                return const Text(
+                  'El comprador aun no ha completado el pasaporte de solvencia.',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                );
+              }
+              final level = passport.solvencyLevel ?? 'bronze';
+              final levelLabel = level == 'gold'
+                  ? 'Oro'
+                  : level == 'silver'
+                      ? 'Plata'
+                      : 'Bronce';
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SolvencyRow(label: 'Nivel de confianza', value: levelLabel),
+                  _SolvencyRow(
+                      label: 'Conoce gastos adicionales',
+                      value: passport.knowsExtraCosts ? 'Si' : 'No'),
+                  _SolvencyRow(
+                      label: 'Ahorros iniciales',
+                      value: passport.hasInitialSavings ? 'Si' : 'No'),
+                  _SolvencyRow(
+                      label: 'Preaprobacion hipotecaria',
+                      value: passport.hasPreApproval ? 'Si' : 'No'),
+                  _SolvencyRow(
+                      label: 'Metodo de pago',
+                      value: passport.paymentMethod ?? '-'),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => context.push(
+                '/offers/${offer.id}/timeline',
+                extra: offer,
+              ),
+              icon: const Icon(Icons.play_circle_outline, size: 16),
+              label: const Text('Aceptar y ver timeline'),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF16A34A),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SolvencyRow extends StatelessWidget {
+  const _SolvencyRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF166534))),
+        ],
+      ),
+    );
   }
 }
 

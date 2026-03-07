@@ -15,6 +15,7 @@ import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP R
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -1379,7 +1380,7 @@ class _MapNavigationBar extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
-                      context.push('/404-how-it-works');
+                      context.push('/info/how-it-works');
                     },
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -1408,114 +1409,7 @@ class _MapNavigationBar extends ConsumerWidget {
                   
                   // [AUTH STATE LOGIC]
                   if (isAuthenticated)
-                    PopupMenuButton<String>(
-                      offset: const Offset(0, 40),
-                      tooltip: 'Menú de usuario',
-                      color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.9), // Match search panel
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'profile',
-                          child: Row(
-                             children: [
-                               Icon(Icons.person_outline, size: 20),
-                               SizedBox(width: 8),
-                               Text('Mi Perfil'),
-                             ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'my-properties',
-                          child: Row(
-                             children: [
-                               Icon(Icons.home_work_outlined, size: 20),
-                               SizedBox(width: 8),
-                               Text('Mis Propiedades'),
-                             ],
-                          ),
-                        ),
-                        if (hasOffers)
-                          PopupMenuItem(
-                            value: 'offers',
-                            child: Row(
-                              children: const [
-                                Icon(Icons.handshake_outlined, size: 20),
-                                SizedBox(width: 8),
-                                Text('Ver Ofertas'),
-                              ],
-                            ),
-                          ),
-                        const PopupMenuItem(
-                          value: 'messages',
-                          child: Row(
-                            children: [
-                              Icon(Icons.chat_bubble_outline, size: 20),
-                              SizedBox(width: 8),
-                              Text('Mensajes'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'logout',
-                          child: Row(
-                             children: [
-                               Icon(Icons.logout, color: Colors.red, size: 20),
-                               SizedBox(width: 8),
-                               Text('Cerrar Sesión', style: TextStyle(color: Colors.red)),
-                             ],
-                          ),
-                        ),
-                      ],
-                      onSelected: (value) async {
-                        if (value == 'logout') {
-                          await ref.read(authProvider.notifier).logout();
-                          if (context.mounted) {
-                              context.go('/');
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Sesión cerrada correctamente')),
-                              );
-                          }
-                        } else if (value == 'profile') {
-                           ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile');
-                        } else if (value == 'my-properties') {
-                           ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile?tab=1');
-                        } else if (value == 'offers') {
-                           ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile?tab=2');
-                        } else if (value == 'messages') {
-                           ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile?tab=4');
-                        }
-                      },
-                      child: Builder(builder: (context) {
-                        final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
-                        final ts = DateTime.now().millisecondsSinceEpoch;
-                        return SizedBox(
-                          width: 36,
-                          height: 36,
-                          child: ClipOval(
-                            child: photoUrl != null
-                                ? Image.network(
-                                    '$photoUrl?v=$ts',
-                                    width: 36,
-                                    height: 36,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      color: const Color(0xFF2563EB),
-                                      child: const Icon(Icons.person, color: Colors.white, size: 20),
-                                    ),
-                                  )
-                                : Container(
-                                    color: const Color(0xFF2563EB),
-                                    child: const Icon(Icons.person, color: Colors.white, size: 20),
-                                  ),
-                          ),
-                        );
-                      }),
-
-                    )
+                    const UserAvatarMenu()
                   else
                     InkWell(
                       onTap: () {

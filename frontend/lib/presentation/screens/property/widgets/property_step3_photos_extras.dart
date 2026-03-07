@@ -28,6 +28,14 @@ class PropertyStep3PhotosExtras extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
 
+          // ── CEE card ──────────────────────────────────────────────────────
+          _SectionCard(
+            icon: Icons.energy_savings_leaf_outlined,
+            title: 'Certificado de Eficiencia Energetica',
+            child: _CeeSelectorWidget(s: s, notifier: notifier),
+          ),
+          const SizedBox(height: 16),
+
           // ── Visitas card ───────────────────────────────────────────────────
           _SectionCard(
             icon: Icons.calendar_month_outlined,
@@ -489,6 +497,124 @@ class _AmenitiesGrid extends StatelessWidget {
           ),
         );
       }).toList(),
+    );
+  }
+}
+
+// ─── CEE selector ─────────────────────────────────────────────────────────────
+
+class _CeeSelectorWidget extends StatelessWidget {
+  const _CeeSelectorWidget({required this.s, required this.notifier});
+  final PropertyFormState s;
+  final PropertyFormNotifier notifier;
+
+  static const _ratings = [
+    ('A', Color(0xFF1A7741)),
+    ('B', Color(0xFF1DAF54)),
+    ('C', Color(0xFF7EC325)),
+    ('D', Color(0xFFF5C518)),
+    ('E', Color(0xFFE8821A)),
+    ('F', Color(0xFFD95B1A)),
+    ('G', Color(0xFFCC1B1B)),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = s.energyCertification;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Indica la calificacion energetica de la propiedad.',
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ..._ratings.map((entry) {
+              final (label, color) = entry;
+              final isSelected = selected == label;
+              return GestureDetector(
+                onTap: () => notifier.setEnergyCertification(
+                    isSelected ? null : label),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: isSelected ? color : color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected ? color : color.withValues(alpha: 0.4),
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isSelected ? Colors.white : color,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
+            // EN_TRAMITE chip
+            GestureDetector(
+              onTap: () => notifier.setEnergyCertification(
+                  selected == 'EN_TRAMITE' ? null : 'EN_TRAMITE'),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: selected == 'EN_TRAMITE'
+                      ? Colors.grey.shade600
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: selected == 'EN_TRAMITE'
+                        ? Colors.grey.shade600
+                        : Colors.grey.shade300,
+                    width: selected == 'EN_TRAMITE' ? 2 : 1,
+                  ),
+                ),
+                child: Text(
+                  'En tramite',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: selected == 'EN_TRAMITE'
+                        ? Colors.white
+                        : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (selected != null) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.check_circle_outline,
+                  size: 14, color: Color(0xFF16A34A)),
+              const SizedBox(width: 6),
+              Text(
+                selected == 'EN_TRAMITE'
+                    ? 'Certificado en tramite seleccionado'
+                    : 'Calificacion $selected seleccionada',
+                style: const TextStyle(
+                    fontSize: 12, color: Color(0xFF16A34A)),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }

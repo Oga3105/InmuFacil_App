@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview
 
 from fastapi import APIRouter
 
@@ -340,6 +340,7 @@ api_v1_router.include_router(leads.router)  # Hito 18 - Lead Magnet (404)
 api_v1_router.include_router(chat.router)     # Hito Chat - Real-time messaging
 api_v1_router.include_router(solvency.router) # Pasaporte de Solvencia Consciente
 api_v1_router.include_router(favorites.router, prefix="/favorites", tags=["Favorites"]) # Property favorites
+api_v1_router.include_router(arras_interview.router) # Arras Penitenciales Interview
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
