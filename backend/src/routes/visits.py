@@ -7,6 +7,7 @@ Allows Sellers to define availability windows and Buyers to book smart slots.
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 
@@ -210,6 +211,104 @@ async def get_visit_agenda(
         query = query.filter(VisitAppointment.status == status_filter)
         
     return query.order_by(VisitAppointment.start_time.asc()).all()
+
+
+# ============================================================================
+# Chat-based Visit Endpoint
+# ============================================================================
+
+class ChatVisitResponse(BaseModel):
+    offer_id: int
+    property_id: int
+    property_title: str
+    status: str   # 'requested' | 'approved'
+    date: Optional[str]
+    role: str     # 'buyer' | 'seller'
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/chat", response_model=List[ChatVisitResponse])
+async def get_chat_visits(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Returns visit appointments derived from chat action messages (visit_request /
+    visit_accepted) for the current user.  Works regardless of whether the
+    OfferResponse serializer has computed visit_status.
+    """
+    from backend.src.models import PropertyOffer, OfferMessage
+
+    # Collect all offer IDs where this user is buyer or seller
+    buyer_offers = (
+        db.query(PropertyOffer)
+        .filter(PropertyOffer.buyer_id == current_user.id)
+        .all()
+    )
+    owned_prop_ids = (
+        db.query(Property.id)
+        .filter(Property.owner_id == current_user.id)
+        .subquery()
+    )
+    seller_offers = (
+        db.query(PropertyOffer)
+        .filter(PropertyOffer.property_id.in_(owned_prop_ids))
+        .all()
+    )
+
+    offer_map: dict = {o.id: o for o in buyer_offers + seller_offers}
+    if not offer_map:
+        return []
+
+    # Find all visit-related action messages for those offers
+    visit_msgs = (
+        db.query(OfferMessage)
+        .filter(
+            OfferMessage.offer_id.in_(offer_map.keys()),
+            OfferMessage.message_type == "action",
+        )
+        .order_by(OfferMessage.timestamp.asc())
+        .all()
+    )
+
+    # Track the latest visit state per offer (later messages override earlier)
+    offer_visits: dict = {}
+    for msg in visit_msgs:
+        ad = msg.action_data or {}
+        act = ad.get("action_type", "")
+        if act not in ("visit_request", "visit_accepted", "visit_rejected", "visit_cancelled"):
+            continue
+        if msg.offer_id not in offer_visits:
+            offer_visits[msg.offer_id] = {"status": None, "date": None}
+        if act == "visit_request":
+            offer_visits[msg.offer_id]["status"] = "requested"
+            offer_visits[msg.offer_id]["date"] = ad.get("date")
+        elif act == "visit_accepted":
+            offer_visits[msg.offer_id]["status"] = "approved"
+            offer_visits[msg.offer_id]["date"] = ad.get("date")
+        elif act in ("visit_rejected", "visit_cancelled"):
+            offer_visits[msg.offer_id]["status"] = "rejected"
+            offer_visits[msg.offer_id]["date"] = None
+
+    results = []
+    for offer_id, visit_data in offer_visits.items():
+        if visit_data["status"] not in ("requested", "approved"):
+            continue
+        offer = offer_map[offer_id]
+        prop = db.query(Property).filter(Property.id == offer.property_id).first()
+        results.append(
+            ChatVisitResponse(
+                offer_id=offer_id,
+                property_id=offer.property_id,
+                property_title=prop.title if prop else "Propiedad",
+                status=visit_data["status"],
+                date=visit_data["date"],
+                role="buyer" if offer.buyer_id == current_user.id else "seller",
+            )
+        )
+    return results
 
 
 # ============================================================================
