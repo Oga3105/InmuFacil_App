@@ -13,6 +13,7 @@ import 'package:inmufacil_frontend/presentation/providers/visits_provider.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
+import '../widgets/common/user_avatar_menu.dart';
 import '../widgets/visits/visit_cancel_dialog.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
@@ -361,98 +362,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           animation: _tabController,
           builder: (context, _) {
             final activeTab = _tabController.index;
-            return PopupMenuButton<String>(
-              offset: const Offset(0, 40),
-              tooltip: 'Menú de usuario',
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(50),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              itemBuilder: (context) => [
-                if (activeTab != 0)
-                  const PopupMenuItem(
-                    value: 'tab-0',
-                    child: Row(children: [
-                      Icon(Icons.person_outline, size: 20),
-                      SizedBox(width: 8),
-                      Text('Mi Perfil')
-                    ]),
-                  ),
-                if (activeTab != 1)
-                  const PopupMenuItem(
-                    value: 'tab-1',
-                    child: Row(children: [
-                      Icon(Icons.home_work_outlined, size: 20),
-                      SizedBox(width: 8),
-                      Text('Mis Propiedades')
-                    ]),
-                  ),
-                if (activeTab != 2)
-                  const PopupMenuItem(
-                    value: 'tab-2',
-                    child: Row(children: [
-                      Icon(Icons.handshake_outlined, size: 20),
-                      SizedBox(width: 8),
-                      Text('Mis Ofertas')
-                    ]),
-                  ),
-                const PopupMenuItem(
-                  value: 'logout',
-                  child: Row(children: [
-                    Icon(Icons.logout, color: Colors.red, size: 20),
-                    SizedBox(width: 8),
-                    Text('Cerrar Sesión', style: TextStyle(color: Colors.red))
-                  ]),
-                ),
-              ],
-              onSelected: (value) async {
-                if (value == 'logout') {
-                  await ref.read(authProvider.notifier).logout();
-                  if (context.mounted) {
-                    context.go('/');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Sesión cerrada correctamente')),
-                    );
-                  }
-                } else if (value == 'tab-0') {
-                  _tabController.animateTo(0);
-                } else if (value == 'tab-1') {
-                  _tabController.animateTo(1);
-                } else if (value == 'tab-2') {
-                  _tabController.animateTo(2);
+            return UserAvatarMenu(
+              onTabSelected: (index) {
+                if (index != activeTab) {
+                  _tabController.animateTo(index);
                 }
               },
-              child: Consumer(
-                builder: (context, ref, _) {
-                  final photoUrl =
-                      ref.watch(authProvider).user?.profilePhotoUrl;
-                  final ts = DateTime.now().millisecondsSinceEpoch;
-                  return SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: ClipOval(
-                      child: photoUrl != null
-                          ? Image.network(
-                              '$photoUrl?v=$ts',
-                              width: 36,
-                              height: 36,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
-                                color: const Color(0xFF2563EB),
-                                child: const Icon(Icons.person,
-                                    color: Colors.white, size: 20),
-                              ),
-                            )
-                          : Container(
-                              color: const Color(0xFF2563EB),
-                              child: const Icon(Icons.person,
-                                  color: Colors.white, size: 20),
-                            ),
-                    ),
-                  );
-                },
-              ),
             );
           },
         ),
@@ -745,6 +660,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 child: Column(
                   children: [
                     _buildSolvencyCard(),
+                    const SizedBox(height: 10),
+                    _buildTrustDashboardButton(),
                     const SizedBox(height: 24),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
@@ -762,6 +679,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               _buildSecurityCard(user),
               const SizedBox(height: 24),
               _buildSolvencyCard(),
+              const SizedBox(height: 10),
+              _buildTrustDashboardButton(),
               const SizedBox(height: 24),
               _buildPromoCard(),
               const SizedBox(height: 24),
@@ -1191,6 +1110,23 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTrustDashboardButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => context.push('/trust-dashboard'),
+        icon: const Icon(Icons.workspace_premium_outlined, size: 16),
+        label: const Text('Ver nivel de confianza'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF1E3A5F),
+          side: const BorderSide(color: Color(0xFFCBD5E1)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
     );
   }
 
