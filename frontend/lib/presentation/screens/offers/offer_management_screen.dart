@@ -8,18 +8,58 @@ import '../../providers/offers_provider.dart';
 import '../../providers/my_properties_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 
-class OfferManagementScreen extends ConsumerWidget {
+enum _OfferSort {
+  newest,
+  oldest,
+  priceAsc,
+  priceDesc,
+}
+
+class OfferManagementScreen extends ConsumerStatefulWidget {
   const OfferManagementScreen({super.key, required this.propertyId});
 
   final String propertyId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<OfferManagementScreen> createState() =>
+      _OfferManagementScreenState();
+}
+
+class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
+  _OfferSort _sortBy = _OfferSort.newest;
+
+  static const _sortLabels = {
+    _OfferSort.newest: 'Más recientes',
+    _OfferSort.oldest: 'Más antiguas',
+    _OfferSort.priceAsc: 'Precio: menor a mayor',
+    _OfferSort.priceDesc: 'Precio: mayor a menor',
+  };
+
+  List<OfferData> _sorted(List<OfferData> offers) {
+    final list = List<OfferData>.from(offers);
+    switch (_sortBy) {
+      case _OfferSort.newest:
+        list.sort((a, b) =>
+            (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+      case _OfferSort.oldest:
+        list.sort((a, b) =>
+            (a.createdAt ?? DateTime(0)).compareTo(b.createdAt ?? DateTime(0)));
+      case _OfferSort.priceAsc:
+        list.sort((a, b) => a.amount.compareTo(b.amount));
+      case _OfferSort.priceDesc:
+        list.sort((a, b) => b.amount.compareTo(a.amount));
+    }
+    return list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final offersAsync = ref.watch(receivedOffersProvider);
     final propertiesAsync = ref.watch(myPropertiesProvider);
 
     final property = propertiesAsync.whenOrNull(
-      data: (list) => list.where((p) => p.id == propertyId).firstOrNull,
+      data: (list) =>
+          list.where((p) => p.id == widget.propertyId).firstOrNull,
     );
 
     return Scaffold(
@@ -28,9 +68,10 @@ class OfferManagementScreen extends ConsumerWidget {
       body: ListView(
         children: [
           // Property header card
-          _PropertyHeaderCard(property: property, propertyId: propertyId),
+          _PropertyHeaderCard(
+              property: property, propertyId: widget.propertyId),
 
-          // Section title + filter row
+          // Section title + sort row
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Row(
@@ -44,27 +85,68 @@ class OfferManagementScreen extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.sort, size: 14, color: Color(0xFF64748B)),
-                      SizedBox(width: 4),
-                      Text('Mas recientes',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF64748B))),
-                      SizedBox(width: 4),
-                      Icon(Icons.expand_more,
-                          size: 14, color: Color(0xFF64748B)),
-                    ],
+                PopupMenuButton<_OfferSort>(
+                  onSelected: (v) => setState(() => _sortBy = v),
+                  offset: const Offset(0, 36),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  itemBuilder: (_) => _OfferSort.values
+                      .map(
+                        (s) => PopupMenuItem(
+                          value: s,
+                          child: Row(
+                            children: [
+                              Icon(
+                                s == _sortBy
+                                    ? Icons.check
+                                    : Icons.check,
+                                size: 16,
+                                color: s == _sortBy
+                                    ? const Color(0xFF1E3A5F)
+                                    : Colors.transparent,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _sortLabels[s]!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: s == _sortBy
+                                      ? FontWeight.w700
+                                      : FontWeight.normal,
+                                  color: s == _sortBy
+                                      ? const Color(0xFF1E3A5F)
+                                      : const Color(0xFF334155),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.sort,
+                            size: 14, color: Color(0xFF64748B)),
+                        const SizedBox(width: 4),
+                        Text(
+                          _sortLabels[_sortBy]!,
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF64748B)),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.expand_more,
+                            size: 14, color: Color(0xFF64748B)),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -101,9 +183,9 @@ class OfferManagementScreen extends ConsumerWidget {
               ),
             ),
             data: (allOffers) {
-              final offers = allOffers
-                  .where((o) => o.propertyId == propertyId)
-                  .toList();
+              final offers = _sorted(allOffers
+                  .where((o) => o.propertyId == widget.propertyId)
+                  .toList());
               if (offers.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 64),
@@ -689,11 +771,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
             ),
           ),
 
-          // ---- Chat button row ----
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: _ChatButton(offerId: offer.id),
-          ),
+          // ---- Chat button row (hidden for terminal states) ----
+          if (offer.status != 'withdrawn' && offer.status != 'rejected')
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: _ChatButton(offerId: offer.id),
+            ),
 
           Divider(
               height: 1, thickness: 1, color: Colors.grey.shade100),

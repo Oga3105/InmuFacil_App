@@ -141,7 +141,7 @@ class SearchNotifier extends Notifier<SearchState> {
   
   /// Update property type filter
   void updatePropertyType(PropertyType type) {
-    state = state.copyWith(propertyType: type);
+    state = state.copyWith(propertyType: type, currentPage: 1);
     _loadProperties();
   }
   
@@ -192,7 +192,7 @@ class SearchNotifier extends Notifier<SearchState> {
 
   /// Toggle verified properties filter
   void toggleOnlyVerified() {
-    state = state.copyWith(onlyVerified: !state.onlyVerified);
+    state = state.copyWith(onlyVerified: !state.onlyVerified, currentPage: 1);
     _loadProperties();
   }
 
@@ -233,7 +233,7 @@ class SearchNotifier extends Notifier<SearchState> {
 
   /// Update minimum bedrooms filter
   void updateMinBedrooms(int value) {
-    state = state.copyWith(minBedrooms: value);
+    state = state.copyWith(minBedrooms: value, currentPage: 1);
     _loadProperties();
   }
 
@@ -245,13 +245,13 @@ class SearchNotifier extends Notifier<SearchState> {
     } else {
       extras.add(extra);
     }
-    state = state.copyWith(selectedExtras: extras);
+    state = state.copyWith(selectedExtras: extras, currentPage: 1);
     _loadProperties();
   }
-  
+
   /// Update price range filter
   void updatePriceRange(RangeValues range) {
-    state = state.copyWith(priceRange: range);
+    state = state.copyWith(priceRange: range, currentPage: 1);
     _loadProperties();
   }
   
@@ -274,6 +274,7 @@ class SearchNotifier extends Notifier<SearchState> {
   
   /// Execute search with current filters
   void search() {
+    state = state.copyWith(currentPage: 1);
     _loadProperties();
   }
   
@@ -383,6 +384,7 @@ class SearchNotifier extends Notifier<SearchState> {
           isLoading: false,
           lastSearchResultBbox: bbox,
           lastSearchResultGeoJson: geoJsonStr,
+          currentPage: 1,
         );
 
         // Sync mapState directly so Home map reflects the new location even
@@ -534,9 +536,11 @@ class SearchNotifier extends Notifier<SearchState> {
     state = state.copyWith(clearError: true);
   }
   
-  /// Reset all filters
+  /// Reset all filters and clear geographic map bounds so filteredByMapPropertiesProvider
+  /// returns all loaded properties (no location filter active).
   void reset() {
     state = const SearchState();
+    ref.read(mapStateProvider.notifier).clearBounds();
     initLocation();
   }
 }

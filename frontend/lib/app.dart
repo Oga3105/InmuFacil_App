@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
@@ -21,12 +22,21 @@ class InmuFacilApp extends ConsumerWidget {
       // App metadata
       title: 'InmuFácil',
       debugShowCheckedModeBanner: false,
-      
+
+      // Locale — Spanish by default so date/time pickers render in Spanish
+      locale: const Locale('es', 'ES'),
+      supportedLocales: const [Locale('es', 'ES'), Locale('en', 'US')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
       // Theme
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      
+
       // Routing
       routerConfig: router,
     );

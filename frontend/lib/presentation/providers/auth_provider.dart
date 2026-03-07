@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../domain/entities/user.dart';
 import 'my_properties_provider.dart';
 import 'offers_provider.dart';
+import 'chat_provider.dart';
 
 // Configuration - Move to Env in production
 const String kApiBaseUrl = 'http://localhost:8000/api/v1';
@@ -127,6 +128,7 @@ class AuthNotifier extends Notifier<AuthState> {
         ref.invalidate(myPropertiesProvider);
         ref.invalidate(sentOffersProvider);
         ref.invalidate(receivedOffersProvider);
+        ref.invalidate(chatListProvider);
         return true;
       } else {
         state = state.copyWith(
@@ -294,6 +296,7 @@ class AuthNotifier extends Notifier<AuthState> {
     ref.invalidate(myPropertiesProvider);
     ref.invalidate(sentOffersProvider);
     ref.invalidate(receivedOffersProvider);
+    ref.invalidate(chatListProvider);
     // Start fresh state (user is null by default)
     state = AuthState(isLoading: false);
   }

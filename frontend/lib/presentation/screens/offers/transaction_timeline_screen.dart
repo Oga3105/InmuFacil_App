@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
-import '../../../config/router/app_router.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
@@ -66,6 +65,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
                   child: _TimelineWidget(steps: _buildSteps(
                     offer.status,
+                    confirmedVisitDate: offer.confirmedVisitDate,
+                    requestedVisitDate: offer.requestedVisitDate,
+                    visitStatus: offer.visitStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: offer)
                         : null,
@@ -235,6 +237,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
   List<_TimelineStep> _buildSteps(
     String status, {
+    String? confirmedVisitDate,
+    String? requestedVisitDate,
+    String? visitStatus,
     Widget? buyerActions,
     Widget? withdrawAction,
   }) {
@@ -283,7 +288,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
       );
     }
 
-    return [
+    final steps = <_TimelineStep>[
       _TimelineStep(
         title: stage == 0
             ? 'Oferta Enviada'
@@ -344,6 +349,38 @@ class TransactionTimelineScreen extends ConsumerWidget {
         state: stepState(4),
       ),
     ];
+
+    // Insert visit step after "Oferta" when there is any visit activity
+    final isVisitConfirmed =
+        visitStatus == 'approved' || visitStatus == 'completed';
+    final isVisitPending =
+        visitStatus == 'requested';
+    final hasVisit = (confirmedVisitDate != null && confirmedVisitDate.isNotEmpty) ||
+        (requestedVisitDate != null && requestedVisitDate.isNotEmpty);
+
+    if (hasVisit) {
+      final visitDate = isVisitConfirmed
+          ? confirmedVisitDate
+          : requestedVisitDate ?? confirmedVisitDate;
+
+      steps.insert(
+        1,
+        _TimelineStep(
+          title: isVisitConfirmed ? 'Visita Confirmada' : 'Visita Solicitada',
+          subtitle: isVisitConfirmed
+              ? 'Cita acordada: $visitDate'
+              : isVisitPending
+                  ? 'Propuesta: $visitDate — pendiente de confirmacion'
+                  : 'Ultima actividad: $visitDate',
+          state: isVisitConfirmed ? _StepState.done : _StepState.active,
+          ctaLabel: 'Ver agenda de visitas',
+          ctaIcon: Icons.calendar_month_outlined,
+          ctaRoute: '/profile?tab=3',
+        ),
+      );
+    }
+
+    return steps;
   }
 }
 
@@ -533,6 +570,7 @@ class _TimelineStep {
     this.description,
     this.ctaLabel,
     this.ctaIcon,
+    this.ctaRoute,
     this.actionsWidget,
   });
 
@@ -543,6 +581,8 @@ class _TimelineStep {
   /// Optional call-to-action shown in the active card. Null = no button.
   final String? ctaLabel;
   final IconData? ctaIcon;
+  /// GoRouter path to navigate on CTA tap. If null, button is a no-op.
+  final String? ctaRoute;
   /// Optional widget (e.g. action buttons) rendered at the bottom of the active card.
   final Widget? actionsWidget;
 }
@@ -634,6 +674,29 @@ class _DoneRow extends StatelessWidget {
                     color: Color(0xFF94A3B8),
                   ),
                 ),
+                if (step.ctaLabel != null && step.ctaRoute != null) ...[
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () => context.go(step.ctaRoute!),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(step.ctaIcon ?? Icons.arrow_forward,
+                            size: 14, color: const Color(0xFF2563EB)),
+                        const SizedBox(width: 4),
+                        Text(
+                          step.ctaLabel!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF2563EB),
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -741,7 +804,9 @@ class _ActiveRow extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
-                          onPressed: () {},
+                          onPressed: step.ctaRoute != null
+                              ? () => context.go(step.ctaRoute!)
+                              : null,
                           icon: Icon(step.ctaIcon ?? Icons.arrow_forward, size: 16),
                           label: Text(
                             step.ctaLabel!,

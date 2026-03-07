@@ -109,6 +109,18 @@ class MapStateNotifier extends Notifier<MapState> {
       isDrawingMode: false,
     );
   }
+
+  /// Clear geographic filters (bounds + city boundary) so no location filter is active.
+  /// Used when resetting the search to show all available properties.
+  void clearBounds() {
+    state = MapState(
+      isDrawingMode: state.isDrawingMode,
+      currentDrawingPoints: state.currentDrawingPoints,
+      currentZonePolygon: state.currentZonePolygon,
+      cityBoundaryPolygon: const [],
+      visibleBounds: null,
+    );
+  }
   
   /// Set city boundary (from Nominatim BoundingBox)
   /// Nominatim returns [south, north, west, east]

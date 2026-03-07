@@ -59,7 +59,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchProvider);
     final favoriteIds = ref.watch(favoritesProvider);
-    var allFilteredProperties = searchState.filteredProperties;
+    // When the user has searched an explicit location, apply the same geographic
+    // filter as the home map (so "0 on map" also means "0 on listing").
+    // When there is no active location (e.g. after reset to show all available),
+    // bypass the geographic filter and show everything the backend loaded.
+    final geoFiltered = ref.watch(filteredByMapPropertiesProvider);
+    var allFilteredProperties = searchState.location.isNotEmpty
+        ? geoFiltered
+        : searchState.filteredProperties;
 
     // Apply local Favorites Filter if active
     if (searchState.onlyFavorites) {
@@ -603,42 +610,71 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   }
   
   Widget _buildSortingDropdown(BuildContext context, SearchState searchState, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final navyColor = theme.colorScheme.onSurface;
-    
     final sortOptions = {
-      SortOption.relevance: 'Relevancia',
-      SortOption.priceLowToHigh: 'Precio: Menor a Mayor',
-      SortOption.priceHighToLow: 'Precio: Mayor a Menor',
       SortOption.newest: 'Más recientes',
+      SortOption.relevance: 'Relevancia',
+      SortOption.priceLowToHigh: 'Precio: menor a mayor',
+      SortOption.priceHighToLow: 'Precio: mayor a menor',
     };
-    
-    return SizedBox(
-      height: 42,
+
+    final currentLabel = sortOptions[searchState.sortBy] ?? 'Ordenar';
+
+    return PopupMenuButton<SortOption>(
+      onSelected: (value) => ref.read(searchProvider.notifier).setSortBy(value),
+      offset: const Offset(0, 42),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      itemBuilder: (_) => sortOptions.entries
+          .map(
+            (e) => PopupMenuItem<SortOption>(
+              value: e.key,
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check,
+                    size: 15,
+                    color: e.key == searchState.sortBy
+                        ? const Color(0xFF1E3A5F)
+                        : Colors.transparent,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    e.value,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: e.key == searchState.sortBy
+                          ? FontWeight.w700
+                          : FontWeight.normal,
+                      color: e.key == searchState.sortBy
+                          ? const Color(0xFF1E3A5F)
+                          : const Color(0xFF334155),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+          .toList(),
       child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: DropdownButton<SortOption>(
-        value: searchState.sortBy,
-        underline: const SizedBox.shrink(),
-        icon: Icon(Icons.expand_more, color: Colors.grey.shade400),
-        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
-        items: sortOptions.entries.map((entry) {
-          return DropdownMenuItem(
-            value: entry.key,
-            child: Text('Ordenar: ${entry.value}'),
-          );
-        }).toList(),
-        onChanged: (value) {
-          if (value != null) {
-            ref.read(searchProvider.notifier).setSortBy(value);
-          }
-        },
-      ),
+        height: 42,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.sort, size: 14, color: Color(0xFF64748B)),
+            const SizedBox(width: 4),
+            Text(
+              currentLabel,
+              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
+            const SizedBox(width: 4),
+            const Icon(Icons.expand_more, size: 14, color: Color(0xFF64748B)),
+          ],
+        ),
       ),
     );
   }

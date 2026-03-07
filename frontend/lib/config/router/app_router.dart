@@ -18,6 +18,8 @@ import '../../presentation/screens/visits/schedule_visit_screen.dart';
 import '../../presentation/screens/offers/make_offer_screen.dart';
 import '../../presentation/screens/offers/offer_management_screen.dart';
 import '../../presentation/screens/offers/transaction_timeline_screen.dart';
+import '../../presentation/screens/solvency/solvency_wizard_screen.dart';
+import '../../presentation/screens/solvency/solvency_passport_screen.dart';
 import '../../presentation/providers/offers_provider.dart';
 
 /// GoRouter configuration provider
@@ -196,6 +198,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final offer = state.extra as OfferData;
           return TransactionTimelineScreen(offer: offer);
         },
+      ),
+
+      // Solvency Passport
+      GoRoute(
+        path: '/solvency/wizard',
+        name: 'solvency-wizard',
+        builder: (context, state) => const SolvencyWizardScreen(),
+      ),
+      GoRoute(
+        path: '/solvency/passport',
+        name: 'solvency-passport',
+        builder: (context, state) => const SolvencyPassportScreen(),
       ),
 
       // Contracts (Hito 12 Placeholder)

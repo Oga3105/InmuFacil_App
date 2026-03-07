@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'chat_provider.dart';
+
 const String _kOffersApiBaseUrl = 'http://localhost:8000/api/v1';
 
 // --- Entity ---
@@ -25,6 +27,9 @@ class OfferData {
     this.propertyPrice,
     this.propertyImageUrl,
     this.isChatEnabled = false,
+    this.confirmedVisitDate,
+    this.requestedVisitDate,
+    this.visitStatus,
   });
 
   final String id;
@@ -44,6 +49,15 @@ class OfferData {
   final int? propertyPrice;
   final String? propertyImageUrl;
   final bool isChatEnabled;
+
+  /// Date string of the confirmed visit (from visit_accepted chat action), if any.
+  final String? confirmedVisitDate;
+
+  /// Date string of the requested visit (from visit_request chat action), if any.
+  final String? requestedVisitDate;
+
+  /// Status of the latest visit action (requested, approved, rejected, cancelled).
+  final String? visitStatus;
 }
 
 // --- Sent Offers Provider ---
@@ -104,6 +118,8 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
   /// Enable chat for an offer (both buyer and seller can call this).
   Future<void> enableChat(String offerId) async {
     await _dio.post('/offers/$offerId/chat/enable');
+    // Refresh chat list so the conversation appears in the inbox
+    ref.invalidate(chatListProvider);
   }
 }
 
@@ -151,6 +167,8 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
   /// Enable chat for an offer.
   Future<void> enableChat(String offerId) async {
     await _dio.post('/offers/$offerId/chat/enable');
+    // Refresh chat list so the conversation appears in the inbox
+    ref.invalidate(chatListProvider);
   }
 }
 
@@ -225,7 +243,7 @@ OfferData _mapOffer(dynamic item) {
   final sellerName = property['seller_name'] as String?;
   final buyerPhotoUrl = buyer['photo_url'] as String?;
   final buyerIsVerified = buyer['is_verified'] as bool? ?? false;
-  return OfferData(
+  final offer = OfferData(
     id: (map['id'] ?? '').toString(),
     propertyId: (property['id'] ?? map['property_id'] ?? '').toString(),
     buyerId: (buyer['id'] ?? map['buyer_id'] ?? '').toString(),
@@ -243,5 +261,10 @@ OfferData _mapOffer(dynamic item) {
     propertyPrice: ((property['price'] ?? 0) as num).round(),
     propertyImageUrl: imageUrl,
     isChatEnabled: map['is_chat_enabled'] as bool? ?? false,
+    confirmedVisitDate: map['confirmed_visit_date'] as String?,
+    requestedVisitDate: map['requested_visit_date'] as String?,
+    visitStatus: map['visit_status'] as String?,
   );
+
+  return offer;
 }

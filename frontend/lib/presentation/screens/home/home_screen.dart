@@ -1285,9 +1285,10 @@ class _MapNavigationBar extends ConsumerWidget {
                   TextButton(
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
-                      // If no properties loaded yet, reset to show all Spain
-                      final props = ref.read(searchProvider).filteredProperties;
-                      if (props.isEmpty) {
+                      // If nothing is visible on the map, reset bounds so the
+                      // listing shows all available properties instead of 0.
+                      final visible = ref.read(filteredByMapPropertiesProvider);
+                      if (visible.isEmpty) {
                         ref.read(searchProvider.notifier).reset();
                       }
                       context.go('/search');
@@ -1469,6 +1470,7 @@ class _MapNavigationBar extends ConsumerWidget {
                         if (value == 'logout') {
                           await ref.read(authProvider.notifier).logout();
                           if (context.mounted) {
+                              context.go('/');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text('Sesión cerrada correctamente')),
                               );
@@ -1484,7 +1486,7 @@ class _MapNavigationBar extends ConsumerWidget {
                            context.push('/profile?tab=2');
                         } else if (value == 'messages') {
                            ref.read(searchProvider.notifier).clearError();
-                           context.push('/profile?tab=3');
+                           context.push('/profile?tab=4');
                         }
                       },
                       child: Builder(builder: (context) {

@@ -174,7 +174,7 @@ class _CreateEditPropertyScreenState
       actions: [
         _SaveDraftButton(),
         const SizedBox(width: 12),
-        _AvatarButton(),
+        _AvatarButton(onTap: () => _confirmCancel(context)),
         const SizedBox(width: 12),
       ],
     );
@@ -184,13 +184,17 @@ class _CreateEditPropertyScreenState
 // ─── Avatar ──────────────────────────────────────────────────────────────────
 
 class _AvatarButton extends ConsumerWidget {
+  const _AvatarButton({required this.onTap});
+
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authProvider).user;
     final photoUrl = user?.profilePhotoUrl;
     
     return GestureDetector(
-      onTap: () => context.go('/profile'),
+      onTap: onTap,
       child: Builder(
         builder: (context) {
           final ts = DateTime.now().millisecondsSinceEpoch;

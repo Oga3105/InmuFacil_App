@@ -36,6 +36,16 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
 
   @override
   Widget build(BuildContext context) {
+    // Keep the text field in sync when a geocoding result updates state.location
+    // (e.g. after a successful search the provider normalises the location name).
+    ref.listen<SearchState>(searchProvider, (prev, next) {
+      if (prev?.location != next.location && next.location.isNotEmpty) {
+        if (_locationController.text != next.location) {
+          _locationController.text = next.location;
+        }
+      }
+    });
+
     final searchState = ref.watch(searchProvider);
     const navyColor = Color(0xFF0F172A);
     const primaryBlue = Color(0xFF2563EB); // User Brand Blue
