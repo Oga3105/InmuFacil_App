@@ -114,6 +114,7 @@ class PropertyFormState {
     this.hasExterior = false,
     this.hasAccessibility = false,
     this.allowVisits = true,
+    this.energyCertification,
     // Meta
     this.status = PropertyFormStatus.idle,
     this.errorMessage,
@@ -160,6 +161,7 @@ class PropertyFormState {
   final bool hasExterior;
   final bool hasAccessibility;
   final bool allowVisits;
+  final String? energyCertification;
   // Meta
   final PropertyFormStatus status;
   final String? errorMessage;
@@ -212,6 +214,8 @@ class PropertyFormState {
     bool? hasExterior,
     bool? hasAccessibility,
     bool? allowVisits,
+    String? energyCertification,
+    bool clearEnergyCertification = false,
     PropertyFormStatus? status,
     String? errorMessage,
     bool clearErrorMessage = false,
@@ -260,6 +264,9 @@ class PropertyFormState {
       hasExterior: hasExterior ?? this.hasExterior,
       hasAccessibility: hasAccessibility ?? this.hasAccessibility,
       allowVisits: allowVisits ?? this.allowVisits,
+      energyCertification: clearEnergyCertification
+          ? null
+          : (energyCertification ?? this.energyCertification),
       status: status ?? this.status,
       errorMessage:
           clearErrorMessage ? null : (errorMessage ?? this.errorMessage),
@@ -583,6 +590,14 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
     state = state.copyWith(allowVisits: !state.allowVisits);
   }
 
+  void setEnergyCertification(String? value) {
+    if (value == null) {
+      state = state.copyWith(clearEnergyCertification: true);
+    } else {
+      state = state.copyWith(energyCertification: value);
+    }
+  }
+
   /// Patch only allow_visits for a specific property (used from details screen).
   Future<void> patchAllowVisits(String propertyId, {required bool value}) async {
     await _dio.patch('/properties/$propertyId/allow-visits', data: {'allow_visits': value});
@@ -678,6 +693,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         hasExterior: (features['has_exterior'] as bool?) ?? false,
         hasAccessibility: (features['has_accessibility'] as bool?) ?? false,
         allowVisits: (data['allow_visits'] as bool?) ?? true,
+        energyCertification: data['energy_certification'] as String?,
       );
     } on DioException catch (e) {
       final msg = e.response?.data?['detail'] ?? 'Error al cargar la propiedad';
@@ -915,6 +931,8 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
       'allow_visits': state.allowVisits,
+      if (state.energyCertification != null)
+        'energy_certification': state.energyCertification,
       'features': {
         'bedrooms': state.bedrooms,
         'bathrooms': state.bathrooms,
