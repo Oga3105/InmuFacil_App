@@ -92,3 +92,197 @@ class BookVisitNotifier extends Notifier<BookingState> {
 
   void reset() => state = const BookingState();
 }
+
+// ── My Visits Provider ────────────────────────────────────────────────────────
+
+/// A single scheduled visit (booked appointment).
+class MyVisit {
+  const MyVisit({
+    required this.id,
+    required this.propertyTitle,
+    required this.propertyId,
+    required this.startTime,
+    required this.status,
+    required this.role, // 'buyer' or 'seller'
+    this.notes,
+  });
+
+  final String id;
+  final String propertyTitle;
+  final String propertyId;
+  final DateTime startTime;
+  final String status;
+  final String role;
+  final String? notes;
+}
+
+/// Fetches chat-based visits by scanning action messages via the existing
+/// GET /offers/{id}/chat endpoint — no new backend endpoint required.
+final chatVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  if (token == null) return [];
+
+  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  dio.options.headers['Authorization'] = 'Bearer $token';
+
+  // Step 1: get all offers for this user
+  List<dynamic> allOffers = [];
+  try {
+    final me = await dio.get('/users/me');
+    final currentUserId = (me.data['id'] ?? '').toString();
+
+    final results = await Future.wait([
+      dio.get('/offers/me/sent'),
+      dio.get('/offers/me/received'),
+    ]);
+    final sent = results[0].data is List ? results[0].data as List : [];
+    final received = results[1].data is List ? results[1].data as List : [];
+
+    // Keep unique offers; annotate with role
+    final seen = <String>{};
+    for (final o in [...sent, ...received]) {
+      final id = (o['id'] ?? '').toString();
+      if (seen.add(id)) {
+        final buyerId = ((o['buyer'] as Map?)?['id'] ?? o['buyer_id'] ?? '').toString();
+        allOffers.add({...o as Map, '_role': buyerId == currentUserId ? 'buyer' : 'seller'});
+      }
+    }
+  } catch (_) {
+    return [];
+  }
+
+  if (allOffers.isEmpty) return [];
+
+  // Step 2: for each offer, fetch messages and look for visit actions
+  final visits = <MyVisit>[];
+  await Future.wait(allOffers.map((offer) async {
+    final offerId = (offer['id'] ?? '').toString();
+    final propTitle = ((offer['property'] as Map?)?['title'] as String?) ?? 'Propiedad';
+    final propId = ((offer['property'] as Map?)?['id'] ?? offer['property_id'] ?? '').toString();
+    final role = offer['_role'] as String? ?? 'buyer';
+
+    try {
+      final resp = await dio.get('/offers/$offerId/chat');
+      final msgs = resp.data is List ? resp.data as List : [];
+
+      // Find latest visit state from action messages
+      String? visitStatus;
+      String? visitDate;
+      for (final m in msgs) {
+        final meta = m['metadata'] as Map?;
+        if (meta == null) continue;
+        final act = meta['action_type'] as String? ?? '';
+        if (act == 'visit_request') {
+          visitStatus = 'requested';
+          visitDate = meta['date'] as String?;
+        } else if (act == 'visit_accepted') {
+          visitStatus = 'approved';
+          visitDate = meta['date'] as String?;
+        } else if (act == 'visit_rejected' || act == 'visit_cancelled') {
+          visitStatus = 'rejected';
+          visitDate = null;
+        }
+      }
+
+      if (visitStatus == 'requested' || visitStatus == 'approved') {
+        visits.add(MyVisit(
+          id: 'chat_$offerId',
+          propertyTitle: propTitle,
+          propertyId: propId,
+          startTime: _parseVisitDateStr(visitDate) ?? DateTime.now(),
+          status: visitStatus!,
+          role: role,
+        ));
+      }
+    } catch (_) {
+      // Skip offers where messages can't be loaded
+    }
+  }));
+
+  return visits;
+});
+
+DateTime? _parseVisitDateStr(String? s) {
+  if (s == null || s.isEmpty) return null;
+  final iso = DateTime.tryParse(s);
+  if (iso != null) return iso.toLocal();
+  try {
+    final parts = s.split(' ');
+    final dp = parts[0].split('/');
+    final tp = parts.length > 1 ? parts[1].split(':') : ['0', '0'];
+    return DateTime(int.parse(dp[2]), int.parse(dp[1]), int.parse(dp[0]),
+        int.parse(tp[0]), int.parse(tp[1]));
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Fetches all visits for the current user (as buyer + as seller), merged and sorted.
+final myVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  if (token == null) return [];
+
+  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  dio.options.headers['Authorization'] = 'Bearer $token';
+
+  List<dynamic> buyerData = [];
+  List<dynamic> sellerData = [];
+
+  try {
+    final resp = await dio.get('/visits/agenda', queryParameters: {'role': 'buyer'});
+    buyerData = resp.data is List ? resp.data as List : [];
+  } catch (_) {}
+
+  try {
+    final resp = await dio.get('/visits/agenda', queryParameters: {'role': 'seller'});
+    sellerData = resp.data is List ? resp.data as List : [];
+  } catch (_) {}
+
+  MyVisit _map(dynamic item, String role) {
+    final map = item as Map<String, dynamic>;
+    final window = map['window'] as Map<String, dynamic>? ?? {};
+    final property = window['property'] as Map<String, dynamic>? ?? {};
+    return MyVisit(
+      id: (map['id'] ?? '').toString(),
+      propertyTitle: (property['title'] as String?) ?? 'Propiedad',
+      propertyId: (property['id'] ?? '').toString(),
+      startTime:
+          DateTime.tryParse(map['start_time'] as String? ?? '')?.toLocal() ??
+              DateTime.now(),
+      status: (map['status'] as String?) ?? 'requested',
+      role: role,
+      notes: map['notes'] as String?,
+    );
+  }
+
+  final all = [
+    ...buyerData.map((e) => _map(e, 'buyer')),
+    ...sellerData.map((e) => _map(e, 'seller')),
+  ];
+
+  // Deduplicate by id (shouldn't happen but safe)
+  final seen = <String>{};
+  final unique = all.where((v) => seen.add(v.id)).toList();
+  unique.sort((a, b) => a.startTime.compareTo(b.startTime));
+  return unique;
+});
+
+final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmentId) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  if (token == null) return false;
+
+  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  dio.options.headers['Authorization'] = 'Bearer $token';
+
+  try {
+    await dio.patch('/visits/$appointmentId/status', data: {
+      'status': 'cancelled',
+    });
+    return true;
+  } catch (_) {
+    return false;
+  }
+});
