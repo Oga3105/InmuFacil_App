@@ -229,7 +229,20 @@ async def create_offer(
     prop = db.query(Property).filter(Property.id == offer_data.property_id).first()
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
-        
+
+    # 1b. CEE Gate — block offers on EXPOSED properties (missing energy certificate)
+    from backend.src.models.enums import PropertyStatus, EnergyCertification
+    if prop.status == PropertyStatus.EXPOSED:
+        raise HTTPException(
+            status_code=400,
+            detail="Incluye el CEE para recibir ofertas",
+        )
+    if prop.legal and prop.legal.energy_certification == EnergyCertification.EN_TRAMITE:
+        raise HTTPException(
+            status_code=400,
+            detail="Incluye el CEE para recibir ofertas",
+        )
+
     # 2. Defense in Depth: No Self-Offers
     if prop.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="Owner cannot bid on own property")

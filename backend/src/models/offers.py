@@ -37,6 +37,10 @@ class PropertyOffer(Base):
     is_chat_enabled = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Fase 2: Seller solvency acceptance — seller must review buyer passport before timeline advances
+    seller_solvency_accepted = Column(Boolean, nullable=True)
+    seller_solvency_accepted_at = Column(DateTime(timezone=True), nullable=True)
+
     # Hito 13: Digital Signature
     signature_token = Column(String, unique=True, index=True, nullable=True) # One-time token
     signed_contract_path = Column(String, nullable=True) # Path to final signed PDF

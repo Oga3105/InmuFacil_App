@@ -15,3 +15,4 @@ from .handover import PropertyHandover
 from .services import ServiceOrder
 from .solvency import BuyerSolvency
 from .favorites import PropertyFavorite
+from .arras_interview import ArrasInterview

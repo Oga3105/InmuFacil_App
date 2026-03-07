@@ -77,6 +77,7 @@ class Orientation(str, enum.Enum):
 
 class PropertyStatus(str, enum.Enum):
     DRAFT = "draft"
+    EXPOSED = "exposed"      # Published but missing CEE — cannot receive offers
     PUBLISHED = "published"
     UNPUBLISHED = "unpublished"
     RESERVED = "reserved" # Hito 8
