@@ -158,3 +158,19 @@ class NotaryStatus(str, enum.Enum):
     ASSIGNED = "assigned"
     DOSSIER_SENT = "dossier_sent"
     COMPLETED = "completed"
+
+class PaymentMethod(str, enum.Enum):
+    CASH = "cash"
+    MORTGAGE_PENDING = "mortgage_pending"
+    MORTGAGE_APPROVED = "mortgage_approved"
+    HOUSE_TO_SELL = "house_to_sell"
+
+class StressIndex(str, enum.Enum):
+    LOW_RISK = "low_risk"
+    MEDIUM_RISK = "medium_risk"
+    HIGH_RISK = "high_risk"
+
+class SolvencyLevel(str, enum.Enum):
+    BRONZE = "bronze"
+    SILVER = "silver"
+    GOLD = "gold"

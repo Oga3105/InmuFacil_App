@@ -13,4 +13,5 @@ from .financing import MortgageProfile, MortgageSimulation, EmploymentStatus
 from .timeline import TransactionStep
 from .handover import PropertyHandover
 from .services import ServiceOrder
-from .services import ServiceOrder
+from .solvency import BuyerSolvency
+from .favorites import PropertyFavorite

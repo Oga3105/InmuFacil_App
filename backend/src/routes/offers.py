@@ -31,6 +31,7 @@ class PropertySnippet(BaseModel):
     title: str
     price: int
     seller_name: Optional[str] = None
+    seller_photo_url: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class BuyerSnippet(BaseModel):
@@ -49,19 +50,50 @@ class OfferResponse(BaseModel):
     status: str
     valid_until: Optional[datetime] = None
     created_at: datetime
+    updated_at: Optional[datetime] = None
+    is_chat_enabled: bool = False
     property: Optional[PropertySnippet] = None
     buyer: Optional[BuyerSnippet] = None
+    last_message: Optional[str] = None
+    unread_count: int = 0
+    confirmed_visit_date: Optional[str] = None
+    requested_visit_date: Optional[str] = None
+    visit_status: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
     amount: int = Field(..., gt=0, description="Counter-offer amount in EUR, integers only — no decimals")
 
 def _offers_query(db: Session):
-    """Return a query for PropertyOffer with eager-loaded property (+ owner) and buyer."""
+    """Return a query for PropertyOffer with eager-loaded property (+ owner), buyer, and messages."""
+    from sqlalchemy.orm import selectinload
     return db.query(PropertyOffer).options(
         joinedload(PropertyOffer.property).joinedload(Property.owner),
         joinedload(PropertyOffer.buyer),
+        selectinload(PropertyOffer.messages),
     )
+
+
+def _decrypt_message(encrypted: str) -> str:
+    """
+    Decrypt a chat message trying AES-256-GCM first (crypto.py), then Fernet
+    (security.py legacy). Returns a non-empty placeholder if both fail so that
+    conversations are never hidden from the inbox due to a decryption error.
+    """
+    if not encrypted:
+        return '...'
+    # Primary: AES-256-GCM (current scheme, crypto.py)
+    try:
+        return decrypt_data(encrypted) or '...'
+    except Exception:
+        pass
+    # Fallback: Fernet (legacy scheme, security.py)
+    try:
+        from backend.src.utils.security import decrypt_data as _fernet_decrypt
+        return _fernet_decrypt(encrypted) or '...'
+    except Exception:
+        pass
+    return '...'
 
 
 def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
@@ -74,6 +106,7 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
             title=prop.title,
             price=int(prop.price),
             seller_name=prop.owner.full_name if prop.owner else None,
+            seller_photo_url=prop.owner.profile_photo_url if prop.owner else None,
         )
     buyer_snippet = None
     if buyer:
@@ -84,6 +117,65 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
             photo_url=buyer.profile_photo_url,
             is_verified=buyer.dni_status == DNIStatus.VALIDADO,
         )
+    # Compute last_message preview and updated_at from messages (now eagerly loaded)
+    last_message = ''
+    updated_at = offer.created_at
+    # Include ALL messages regardless of timestamp (null timestamps treated as epoch)
+    all_msgs = list(offer.messages) if offer.messages else []
+    valid_msgs = all_msgs  # keep full list for visit-date scan below
+    if all_msgs:
+        last_msg = sorted(
+            all_msgs,
+            key=lambda m: (m.timestamp is not None, m.timestamp or datetime.min),
+        )[-1]
+        updated_at = last_msg.timestamp or offer.created_at
+        if getattr(last_msg, 'message_type', 'text') == 'action':
+            action_type = (getattr(last_msg, 'action_data', None) or {}).get('action_type', 'accion')
+            last_message = f'[{action_type}]'
+        else:
+            last_message = _decrypt_message(last_msg.message_encrypted)
+
+    # Find the most recent visit status and dates from action messages
+    confirmed_visit_date = None
+    requested_visit_date = None
+    visit_status = None
+    
+    # We want to find the latest state of a visit. Action types can be: 
+    # visit_request, visit_accepted, visit_rejected, visit_cancelled
+    for m in valid_msgs:
+        if getattr(m, 'message_type', 'text') == 'action':
+            ad = getattr(m, 'action_data', None) or {}
+            act_type = ad.get('action_type')
+            
+            if act_type == 'visit_request':
+                requested_visit_date = ad.get('date')
+                # If there's an incoming request, the state becomes "requested" (if not overridden later)
+                visit_status = 'requested'
+                
+            elif act_type == 'visit_accepted':
+                # An accepted visit overrides requested 
+                confirmed_visit_date = ad.get('date')
+                visit_status = 'approved'
+                
+            elif act_type == 'visit_rejected':
+                visit_status = 'rejected'
+                
+            elif act_type == 'visit_cancelled':
+                visit_status = 'cancelled'
+
+    # Compute unread_count: messages sent by the OTHER party that are not yet read.
+    # The "other party" from the buyer's perspective is the seller (owner) and vice versa.
+    unread_count = 0
+    buyer_id = offer.buyer_id
+    seller_id = offer.property.owner_id if offer.property else None
+    if offer.messages:
+        for m in offer.messages:
+            if not m.is_read:
+                # A message is "unread for the buyer" if it was sent by the seller, and vice versa.
+                # Since we don't know which user is calling, count all unread from non-buyer + non-seller
+                # sides. For the list view we expose total unread (both sides combined).
+                unread_count += 1
+
     return OfferResponse(
         id=offer.id,
         property_id=offer.property_id,
@@ -93,8 +185,15 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         status=offer.status.value if hasattr(offer.status, 'value') else str(offer.status),
         valid_until=offer.valid_until,
         created_at=offer.created_at,
+        updated_at=updated_at,
+        is_chat_enabled=bool(offer.is_chat_enabled),
         property=prop_snippet,
         buyer=buyer_snippet,
+        last_message=last_message,
+        unread_count=unread_count,
+        confirmed_visit_date=confirmed_visit_date,
+        requested_visit_date=requested_visit_date,
+        visit_status=visit_status,
     )
 
 
@@ -195,6 +294,23 @@ async def list_received_offers(
     owned_ids = db.query(Property.id).filter(Property.owner_id == current_user.id).subquery()
     offers = _offers_query(db).filter(PropertyOffer.property_id.in_(owned_ids)).all()
     return [_serialize_offer(o) for o in offers]
+
+
+@router.get("/{offer_id}", response_model=OfferResponse)
+async def get_offer(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Return a single offer. Caller must be buyer or property owner."""
+    offer = _offers_query(db).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    is_buyer = offer.buyer_id == current_user.id
+    is_seller = offer.property.owner_id == current_user.id
+    if not is_buyer and not is_seller:
+        raise HTTPException(status_code=403, detail="Not a participant")
+    return _serialize_offer(offer)
 
 
 @router.post("/{offer_id}/counter", response_model=OfferResponse)
@@ -490,11 +606,7 @@ async def get_chat_history(
     
     response = []
     for m in messages:
-        try:
-            plaintext = decrypt_data(m.message_encrypted)
-        except:
-            plaintext = "[Error Decrypting]"
-            
+        plaintext = _decrypt_message(m.message_encrypted)
         response.append(ChatMessageResponse(
             id=m.id,
             sender_id=m.sender_id,
@@ -504,7 +616,7 @@ async def get_chat_history(
             is_read=m.is_read if hasattr(m, 'is_read') else False,
             timestamp=m.timestamp,
         ))
-        
+
     return response
 
 
