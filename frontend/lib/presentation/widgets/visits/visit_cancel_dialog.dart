@@ -28,9 +28,14 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text(
-        'Anular visita',
-        style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F)),
+      title: const Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: 'Anular ', style: TextStyle(color: Color(0xFF2563EB))),
+            TextSpan(text: 'visita', style: TextStyle(color: Color(0xFF16A34A))),
+          ],
+        ),
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
       ),
       content: Form(
         key: _formKey,

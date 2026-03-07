@@ -6,8 +6,10 @@ import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/utils/temp_translations.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/visits/visit_cancel_dialog.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
@@ -650,77 +652,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         // Current user avatar with dropdown menu
         Padding(
           padding: const EdgeInsets.only(right: 16),
-          child: PopupMenuButton<String>(
-            offset: const Offset(0, 40),
-            tooltip: 'Menu de usuario',
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (_) => [
-              const PopupMenuItem(
-                value: 'profile',
-                child: Row(children: [
-                  Icon(Icons.person_outline, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mi Perfil'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'my-properties',
-                child: Row(children: [
-                  Icon(Icons.home_work_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Propiedades'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'offers',
-                child: Row(children: [
-                  Icon(Icons.handshake_outlined, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mis Ofertas'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'messages',
-                child: Row(children: [
-                  Icon(Icons.chat_bubble_outline, size: 20),
-                  SizedBox(width: 8),
-                  Text('Mensajes'),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'logout',
-                child: Row(children: [
-                  Icon(Icons.logout, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Text('Cerrar Sesion', style: TextStyle(color: Colors.red)),
-                ]),
-              ),
-            ],
-            onSelected: (value) async {
-              if (value == 'logout') {
-                await ref.read(authProvider.notifier).logout();
-                if (context.mounted) context.go('/');
-              } else if (value == 'profile') {
-                context.push('/profile');
-              } else if (value == 'my-properties') {
-                context.push('/profile?tab=1');
-              } else if (value == 'offers') {
-                context.push('/profile?tab=2');
-              } else if (value == 'messages') {
-                context.push('/profile?tab=4');
-              }
-            },
-            child: CircleAvatar(
-              radius: 18,
-              backgroundColor: const Color(0xFF1E3A5F),
-              backgroundImage: (myPhoto?.isNotEmpty ?? false)
-                  ? NetworkImage(myPhoto!)
-                  : null,
-              child: (myPhoto?.isNotEmpty ?? false)
-                  ? null
-                  : const Icon(Icons.person_rounded, size: 20, color: Colors.white),
-            ),
-          ),
+          child: const UserAvatarMenu(),
         ),
       ],
     );
