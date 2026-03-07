@@ -13,7 +13,7 @@ CensorshipFilter   — GDPR-compliant text sanitizer.
 
 import re
 import asyncio
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fastapi import WebSocket
 
 
@@ -44,10 +44,17 @@ class ConnectionManager:
         if websocket in bucket:
             bucket.remove(websocket)
 
-    async def broadcast(self, offer_id: int, payload: dict) -> None:
-        """Send payload to every connection in the offer room."""
+    async def broadcast(
+        self,
+        offer_id: int,
+        payload: dict,
+        exclude: Optional[WebSocket] = None,
+    ) -> None:
+        """Send payload to every connection in the offer room, except `exclude`."""
         dead: List[WebSocket] = []
         for ws in list(self._connections.get(offer_id, [])):
+            if ws is exclude:
+                continue
             try:
                 await ws.send_json(payload)
             except Exception:

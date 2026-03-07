@@ -103,7 +103,28 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text('Solicitar documentos'),
+        title: RichText(
+          text: const TextSpan(
+            children: [
+              TextSpan(
+                text: 'Solicitar',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color(0xFF2563EB),
+                ),
+              ),
+              TextSpan(
+                text: ' documentos',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  color: Color(0xFF16A34A),
+                ),
+              ),
+            ],
+          ),
+        ),
         content: const Text(
           'Se enviara una solicitud de documentacion al otro participante.',
         ),
@@ -143,7 +164,6 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
-      locale: const Locale('es', 'ES'),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: _kNavy),
@@ -371,10 +391,14 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   }
 
   AppBar _buildAppBar(BuildContext context, ChatConversation? conv) {
-    final isConnected = ref.watch(chatWsConnectedProvider
-        .select((map) => map[widget.offerId] ?? false));
-    final initial = (conv?.otherUserName.isNotEmpty ?? false)
+    final otherOnline = ref.watch(
+        chatOtherOnlineProvider.select((map) => map[widget.offerId] ?? false));
+    final notifier = ref.read(chatDetailProvider(widget.offerId).notifier);
+    final otherInitial = (conv?.otherUserName.isNotEmpty ?? false)
         ? conv!.otherUserName[0].toUpperCase()
+        : '?';
+    final myInitial = (notifier.currentUserName?.isNotEmpty ?? false)
+        ? notifier.currentUserName![0].toUpperCase()
         : '?';
 
     return AppBar(
@@ -384,21 +408,35 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       titleSpacing: 0,
       title: Row(
         children: [
-          AppBarBackButton(
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          // InmuFacil logo
+          // Back
+          AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
+          // Logo + InmuFácil text
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 4),
             child: Image.asset(
               'assets/images/logo_inmufacil.png',
               height: 22,
               errorBuilder: (_, __, ___) => const SizedBox.shrink(),
             ),
           ),
-          // Avatar
+          const Text(
+            'InmuFácil',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 13,
+            ),
+          ),
+          // Vertical divider
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            height: 26,
+            width: 1,
+            color: Colors.white.withValues(alpha: 0.25),
+          ),
+          // Other user avatar
           CircleAvatar(
-            radius: 18,
+            radius: 16,
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             backgroundImage: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
                 ? NetworkImage(conv!.otherUserPhotoUrl!)
@@ -406,15 +444,16 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             child: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
                 ? null
                 : Text(
-                    initial,
+                    otherInitial,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                   ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 7),
+          // Other user name + presence
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -425,8 +464,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w700,
-                    fontSize: 15,
+                    fontSize: 13,
                   ),
+                  overflow: TextOverflow.ellipsis,
                 ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -435,18 +475,18 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                       width: 6,
                       height: 6,
                       decoration: BoxDecoration(
-                        color: isConnected
+                        color: otherOnline
                             ? const Color(0xFF4ADE80)
                             : const Color(0xFF94A3B8),
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: 3),
                     Text(
-                      isConnected ? 'En linea ahora' : 'Conectando...',
+                      otherOnline ? 'En linea' : 'Desconectado',
                       style: const TextStyle(
                         color: Color(0xFFB0C4DE),
-                        fontSize: 11,
+                        fontSize: 10,
                       ),
                     ),
                   ],
@@ -454,21 +494,47 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               ],
             ),
           ),
-          // Inicio button
-          TextButton.icon(
+          // Inicio button — official blue
+          TextButton(
             onPressed: () => context.go('/'),
-            icon: const Icon(Icons.home_outlined, size: 16, color: Color(0xFFFFD700)),
-            label: const Text(
+            style: TextButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
               'Inicio',
               style: TextStyle(
-                color: Color(0xFFFFD700),
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            ),
+          ),
+          const SizedBox(width: 8),
+          // Current user avatar
+          CircleAvatar(
+            radius: 15,
+            backgroundColor: Colors.white.withValues(alpha: 0.2),
+            backgroundImage:
+                (notifier.currentUserPhotoUrl?.isNotEmpty ?? false)
+                    ? NetworkImage(notifier.currentUserPhotoUrl!)
+                    : null,
+            child: (notifier.currentUserPhotoUrl?.isNotEmpty ?? false)
+                ? null
+                : Text(
+                    myInitial,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
           ),
           const SizedBox(width: 8),
         ],

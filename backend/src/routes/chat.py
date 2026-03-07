@@ -21,7 +21,7 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect, status
+from fastapi import APIRouter, Depends, HTTPException, Query, WebSocket, WebSocketDisconnect, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, joinedload
 
@@ -103,32 +103,50 @@ def _serialize_message(msg: OfferMessage, sender_name: Optional[str] = None) -> 
 async def websocket_chat(
     offer_id: int,
     websocket: WebSocket,
+    user_id: int = Query(0),
     db: Session = Depends(get_db),
 ):
     """
     Real-time WebSocket channel for a given offer conversation.
 
-    Authentication: clients send 'Bearer <token>' as the first text frame
-    immediately after the handshake.  The connection is closed with code 4001
-    if the token is missing or invalid.
+    Query params:
+      user_id  — caller's numeric user ID (used for presence events).
 
     Message protocol (JSON frames):
       Outbound (server → client):
-        { event: 'message', data: <serialized OfferMessage> }
-        { event: 'read',    data: { reader_id } }
-        { event: 'error',   data: { detail } }
+        { event: 'message',  data: <serialized OfferMessage> }
+        { event: 'read',     data: { reader_id, count } }
+        { event: 'presence', data: { user_id, online: bool } }
+        { event: 'error',    data: { detail } }
 
       Inbound (client → server):  text frames are ignored — clients send
       messages via the REST POST /offers/{id}/chat endpoint, which then calls
       manager.broadcast().  The WebSocket is receive-only for notifications.
     """
     await manager.connect(offer_id, websocket)
+
+    # Notify the other participant that this user is now online
+    if user_id:
+        await manager.broadcast(
+            offer_id,
+            {"event": "presence", "data": {"user_id": user_id, "online": True}},
+            exclude=websocket,
+        )
+
     try:
         while True:
             # Keep the connection alive; actual messages come via REST
             await websocket.receive_text()
     except WebSocketDisconnect:
+        pass
+    finally:
         manager.disconnect(offer_id, websocket)
+        # Notify the other participant that this user went offline
+        if user_id:
+            await manager.broadcast(
+                offer_id,
+                {"event": "presence", "data": {"user_id": user_id, "online": False}},
+            )
 
 
 # ============================================================================

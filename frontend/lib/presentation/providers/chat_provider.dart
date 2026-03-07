@@ -195,7 +195,7 @@ final chatDetailProvider = AsyncNotifierProvider.autoDispose
   (offerId) => ChatDetailNotifier(offerId),
 );
 
-/// Tracks WebSocket connection state per offerId.
+/// Tracks WebSocket connection state per offerId (OUR connection).
 class _WsConnectedNotifier extends Notifier<Map<String, bool>> {
   @override
   Map<String, bool> build() => {};
@@ -210,17 +210,35 @@ final chatWsConnectedProvider =
   _WsConnectedNotifier.new,
 );
 
+/// Tracks whether the OTHER participant is online per offerId (presence events).
+class _OtherOnlineNotifier extends Notifier<Map<String, bool>> {
+  @override
+  Map<String, bool> build() => {};
+  void setOnline(String offerId, bool value) {
+    state = {...state, offerId: value};
+  }
+}
+
+final chatOtherOnlineProvider =
+    NotifierProvider<_OtherOnlineNotifier, Map<String, bool>>(
+  _OtherOnlineNotifier.new,
+);
+
 class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   ChatDetailNotifier(this._offerId);
 
   final String _offerId;
   late final Dio _dio;
   String? _currentUserId;
+  String? _currentUserName;
+  String? _currentUserPhotoUrl;
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _wsSub;
   bool _wsConnected = false;
 
   String? get currentUserId => _currentUserId;
+  String? get currentUserName => _currentUserName;
+  String? get currentUserPhotoUrl => _currentUserPhotoUrl;
   bool get wsConnected => _wsConnected;
 
   @override
@@ -232,6 +250,13 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
       _dio.options.headers['Authorization'] = 'Bearer $token';
     }
     _currentUserId = await storage.read(key: 'user_id');
+
+    // Fetch current user info for AppBar avatar
+    try {
+      final meResp = await _dio.get('/users/me');
+      _currentUserName = meResp.data['full_name'] as String?;
+      _currentUserPhotoUrl = meResp.data['photo_url'] as String?;
+    } catch (_) {}
 
     // Mark messages as read when conversation opens
     _markRead();
@@ -275,8 +300,9 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   void _connectWebSocket() {
     try {
+      final userId = _currentUserId ?? '0';
       _channel = WebSocketChannel.connect(
-        Uri.parse('$_kWsBaseUrl/chat/ws/$_offerId'),
+        Uri.parse('$_kWsBaseUrl/chat/ws/$_offerId?user_id=$userId'),
       );
       _wsConnected = true;
       try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, true); } catch (_) {}
@@ -318,6 +344,12 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
         state = AsyncData([...current, newMsg]);
         // Auto-mark read if the message is from the other user
         if (newMsg.senderId != _currentUserId) _markRead();
+      } else if (event == 'presence') {
+        final data = frame['data'] as Map<String, dynamic>? ?? {};
+        final isOnline = data['online'] as bool? ?? false;
+        try {
+          ref.read(chatOtherOnlineProvider.notifier).setOnline(_offerId, isOnline);
+        } catch (_) {}
       } else if (event == 'read') {
         // Update is_read for our optimistic messages
         final current = state.asData?.value ?? [];
