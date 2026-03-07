@@ -7,7 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
-const String _kWsBaseUrl  = 'ws://localhost:8000/api/v1';
+const String _kWsBaseUrl = 'ws://localhost:8000/api/v1';
 
 // ── Trust badge levels ────────────────────────────────────────────────────────
 
@@ -92,7 +92,7 @@ final chatListProvider =
 
 class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
   final _storage = const FlutterSecureStorage();
-  late final Dio _dio;
+  late Dio _dio;
 
   @override
   Future<List<ChatConversation>> build() async {
@@ -104,82 +104,136 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
   }
 
   Future<List<ChatConversation>> _fetchConversations() async {
-    final results = await Future.wait([
-      _dio.get('/offers/me/sent'),
-      _dio.get('/offers/me/received'),
-    ]);
+    try {
+      // Fetch user ID safely — failure is non-blocking
+      String currentUserId = '';
+      try {
+        final meResp = await _dio.get('/users/me');
+        currentUserId = (meResp.data['id'] ?? '').toString();
+      } catch (_) {}
 
-    final List<dynamic> sent =
-        results[0].data is List ? results[0].data as List : [];
-    final List<dynamic> received =
-        results[1].data is List ? results[1].data as List : [];
+      final results = await Future.wait([
+        _dio.get('/offers/me/sent'),
+        _dio.get('/offers/me/received'),
+      ]);
 
-    final allOffers = [...sent, ...received];
-    final seen = <String>{};
-    final conversations = <ChatConversation>[];
+      final List<dynamic> sent =
+          results[0].data is List ? results[0].data as List : [];
+      final List<dynamic> received =
+          results[1].data is List ? results[1].data as List : [];
 
-    final currentUserId = await _storage.read(key: 'user_id');
+      final allOffers = [...sent, ...received];
+      final seen = <String>{};
+      final conversations = <ChatConversation>[];
 
-    for (final offer in allOffers) {
-      final map = offer as Map<String, dynamic>;
-      final isChatEnabled = map['is_chat_enabled'] as bool? ?? false;
-      if (!isChatEnabled) continue;
+      for (final offer in allOffers) {
+        try {
+          final map = offer as Map<String, dynamic>;
 
-      final id = (map['id'] ?? '').toString();
-      if (seen.contains(id)) continue;
-      seen.add(id);
+          final id = (map['id'] ?? '').toString();
+          if (seen.contains(id)) continue;
+          seen.add(id);
 
-      final property = map['property'] as Map<String, dynamic>? ?? {};
-      final buyer = map['buyer'] as Map<String, dynamic>? ?? {};
+          String lastMsg = map['last_message'] as String? ?? '';
+          // Sanitize technical/error placeholders from the backend
+          // (e.g. '[Error Decrypting]', '[offer_proposal]', '[ACTION:...]')
+          if (lastMsg.startsWith('[') && lastMsg.endsWith(']')) lastMsg = '';
+          final unread = (map['unread_count'] as int?) ?? 0;
+          final chatEnabled = map['is_chat_enabled'] as bool? ?? false;
 
-      final buyerId = (buyer['id'] ?? '').toString();
-      final isBuyer = buyerId == currentUserId;
+          // Date from backend serializer (= last message time after backend restart)
+          DateTime? lastDate =
+              DateTime.tryParse(map['updated_at'] as String? ?? '')?.toLocal();
 
-      // Determine the other user's info
-      String otherName;
-      String? otherPhotoUrl;
-      bool otherEmailVerified = false;
-      bool otherDniVerified = false;
-      bool otherFullKyc = false;
+          // Fast path: backend already tells us there are messages.
+          // Slow path: backend hasn't been restarted yet so last_message is empty
+          // even though chat was enabled. Fetch messages directly to check.
+          if (lastMsg.isEmpty && unread == 0) {
+            if (!chatEnabled) continue; // Definitely no messages — skip.
 
-      if (isBuyer) {
-        // Current user is buyer → other user is seller (property owner)
-        final sellerName = property['seller_name'] as String? ?? '';
-        otherName = sellerName.trim().isEmpty ? 'Vendedor' : sellerName.trim();
-        otherPhotoUrl = null; // Seller photo not yet in snippet
-      } else {
-        // Current user is seller → other user is buyer
-        otherName = (buyer['full_name'] as String? ?? '').trim();
-        if (otherName.isEmpty) otherName = 'Comprador';
-        otherPhotoUrl = buyer['photo_url'] as String?;
-        otherEmailVerified = true; // Buyer passed registration
-        otherDniVerified = buyer['is_verified'] as bool? ?? false;
-        otherFullKyc = otherDniVerified;
+            // chatEnabled but backend didn't compute last_message yet.
+            // Call the messages endpoint to get the real state.
+            try {
+              final resp = await _dio.get('/offers/$id/chat');
+              final msgs = resp.data is List ? resp.data as List : [];
+              if (msgs.isEmpty) continue; // No messages — skip.
+
+              // Use last message for display
+              final last = msgs.last as Map<String, dynamic>;
+              lastMsg = last['message'] as String? ?? '...';
+              // Sanitize technical/error strings from the backend
+              if (lastMsg.startsWith('[') && lastMsg.endsWith(']')) lastMsg = '...';
+              lastDate = DateTime.tryParse(
+                    (last['created_at'] ?? last['timestamp'])?.toString() ?? '',
+                  )?.toLocal();
+            } catch (_) {
+              continue; // Can't load messages — skip.
+            }
+          }
+
+          // Fallback date: offer creation time, never DateTime.now()
+          lastDate ??=
+              DateTime.tryParse(map['created_at'] as String? ?? '')?.toLocal() ??
+              DateTime.fromMillisecondsSinceEpoch(0);
+
+          final property = map['property'] as Map<String, dynamic>? ?? {};
+          final buyer = map['buyer'] as Map<String, dynamic>? ?? {};
+
+          final buyerId = (buyer['id'] ?? '').toString();
+          final isBuyer = buyerId == currentUserId;
+
+          // Determine the other user's info
+          String otherName;
+          String? otherPhotoUrl;
+          bool otherEmailVerified = false;
+          bool otherDniVerified = false;
+          bool otherFullKyc = false;
+
+          if (isBuyer) {
+            // Current user is buyer → other user is seller (property owner)
+            final sellerName = property['seller_name'] as String? ?? '';
+            otherName =
+                sellerName.trim().isEmpty ? 'Vendedor' : sellerName.trim();
+            otherPhotoUrl = property['seller_photo_url'] as String?;
+          } else {
+            // Current user is seller → other user is buyer
+            otherName = (buyer['full_name'] as String? ?? '').trim();
+            if (otherName.isEmpty) otherName = 'Comprador';
+            otherPhotoUrl = buyer['photo_url'] as String?;
+            otherEmailVerified = true; // Buyer passed registration
+            otherDniVerified = buyer['is_verified'] as bool? ?? false;
+            otherFullKyc = otherDniVerified;
+          }
+
+          final badge = _deriveTrustBadge(
+            emailVerified: otherEmailVerified,
+            dniVerified: otherDniVerified,
+            fullKyc: otherFullKyc,
+          );
+
+          conversations.add(ChatConversation(
+            offerId: id,
+            otherUserName: otherName,
+            otherUserPhotoUrl: otherPhotoUrl,
+            trustBadge: badge,
+            propertyTitle: property['title'] as String? ?? 'Propiedad',
+            propertyId: (property['id'] ?? '').toString(),
+            lastMessage: lastMsg.isNotEmpty
+                ? lastMsg
+                : (unread > 0 ? '$unread mensaje(s) nuevo(s)' : '...'),
+            lastDate: lastDate,
+            unreadCount: unread,
+          ));
+        } catch (_) {
+          // Skip malformed entries — do not crash the full list.
+        }
       }
 
-      final badge = _deriveTrustBadge(
-        emailVerified: otherEmailVerified,
-        dniVerified: otherDniVerified,
-        fullKyc: otherFullKyc,
-      );
-
-      conversations.add(ChatConversation(
-        offerId: id,
-        otherUserName: otherName,
-        otherUserPhotoUrl: otherPhotoUrl,
-        trustBadge: badge,
-        propertyTitle: property['title'] as String? ?? 'Propiedad',
-        propertyId: (property['id'] ?? '').toString(),
-        lastMessage: map['last_message'] as String? ?? '',
-        lastDate:
-            DateTime.tryParse(map['updated_at'] as String? ?? '') ??
-                DateTime.now(),
-        unreadCount: (map['unread_count'] as int?) ?? 0,
-      ));
+      conversations.sort((a, b) => b.lastDate.compareTo(a.lastDate));
+      return conversations;
+    } catch (_) {
+      rethrow;
     }
-
-    conversations.sort((a, b) => b.lastDate.compareTo(a.lastDate));
-    return conversations;
   }
 
   Future<void> refresh() async {
@@ -202,6 +256,7 @@ class _WsConnectedNotifier extends Notifier<Map<String, bool>> {
   void setConnected(String offerId, bool value) {
     state = {...state, offerId: value};
   }
+
   bool isConnected(String offerId) => state[offerId] ?? false;
 }
 
@@ -232,14 +287,22 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   String? _currentUserId;
   String? _currentUserName;
   String? _currentUserPhotoUrl;
+  String? _otherUserName;
+  String? _otherUserPhotoUrl;
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _wsSub;
   bool _wsConnected = false;
+  bool _isBuyer = false;
+  String? _offerStatus;
 
   String? get currentUserId => _currentUserId;
   String? get currentUserName => _currentUserName;
   String? get currentUserPhotoUrl => _currentUserPhotoUrl;
+  String? get otherUserName => _otherUserName;
+  String? get otherUserPhotoUrl => _otherUserPhotoUrl;
   bool get wsConnected => _wsConnected;
+  bool get isBuyer => _isBuyer;
+  String? get offerStatus => _offerStatus;
 
   @override
   Future<List<ChatMessage>> build() async {
@@ -249,13 +312,58 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
     if (token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $token';
     }
-    _currentUserId = await storage.read(key: 'user_id');
 
-    // Fetch current user info for AppBar avatar
+    // PRIMARY: fetch current user from API (storage may not store user_id after login)
     try {
       final meResp = await _dio.get('/users/me');
+      _currentUserId = (meResp.data['id'] ?? '').toString();
       _currentUserName = meResp.data['full_name'] as String?;
       _currentUserPhotoUrl = meResp.data['photo_url'] as String?;
+    } catch (_) {
+      // Fallback to storage
+      _currentUserId = await storage.read(key: 'user_id');
+    }
+
+    // Determine role and other-user info from sent/received offer lists
+    try {
+      final results = await Future.wait([
+        _dio.get('/offers/me/sent'),
+        _dio.get('/offers/me/received'),
+      ]);
+      final sent = results[0].data is List ? results[0].data as List : [];
+      final received = results[1].data is List ? results[1].data as List : [];
+
+      final sentOffer = sent.cast<Map<String, dynamic>?>().firstWhere(
+          (o) => (o?['id'] ?? '').toString() == _offerId,
+          orElse: () => null);
+      if (sentOffer != null) {
+        _isBuyer = true;
+        _offerStatus = sentOffer['status'] as String?;
+        final property = sentOffer['property'] as Map<String, dynamic>? ?? {};
+        _otherUserName = (property['seller_name'] as String?)?.trim();
+        if (_otherUserName == null || _otherUserName!.isEmpty)
+          _otherUserName = 'Vendedor';
+        _otherUserPhotoUrl = property['seller_photo_url'] as String?;
+      } else {
+        final receivedOffer = received.cast<Map<String, dynamic>?>().firstWhere(
+            (o) => (o?['id'] ?? '').toString() == _offerId,
+            orElse: () => null);
+        if (receivedOffer != null) {
+          _isBuyer = false;
+          _offerStatus = receivedOffer['status'] as String?;
+          final buyer = receivedOffer['buyer'] as Map<String, dynamic>? ?? {};
+          _otherUserName = (buyer['full_name'] as String?)?.trim();
+          if (_otherUserName == null || _otherUserName!.isEmpty)
+            _otherUserName = 'Comprador';
+          _otherUserPhotoUrl = buyer['photo_url'] as String?;
+        }
+      }
+    } catch (_) {}
+
+    // Ensure this chat is visible in the inbox
+    try {
+      await _dio.post('/offers/$_offerId/chat/enable');
+      ref.invalidate(chatListProvider);
     } catch (_) {}
 
     // Mark messages as read when conversation opens
@@ -287,9 +395,10 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
       id: (map['id'] ?? '').toString(),
       senderId: (map['sender_id'] ?? '').toString(),
       message: map['message'] as String? ?? '',
-      timestamp:
-          DateTime.tryParse(map['created_at'] as String? ?? '') ??
-              DateTime.now(),
+      timestamp: DateTime.tryParse(
+            (map['created_at'] ?? map['timestamp'])?.toString() ?? '',
+          )?.toLocal() ??
+          DateTime.now(),
       messageType: map['message_type'] as String? ?? 'text',
       metadata: map['metadata'] as Map<String, dynamic>?,
       isRead: map['is_read'] as bool? ?? false,
@@ -305,17 +414,27 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
         Uri.parse('$_kWsBaseUrl/chat/ws/$_offerId?user_id=$userId'),
       );
       _wsConnected = true;
-      try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, true); } catch (_) {}
+      try {
+        ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, true);
+      } catch (_) {}
       _wsSub = _channel!.stream.listen(
         _onWsMessage,
         onError: (_) {
           _wsConnected = false;
-          try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, false); } catch (_) {}
+          try {
+            ref
+                .read(chatWsConnectedProvider.notifier)
+                .setConnected(_offerId, false);
+          } catch (_) {}
           _scheduleReconnect();
         },
         onDone: () {
           _wsConnected = false;
-          try { ref.read(chatWsConnectedProvider.notifier).setConnected(_offerId, false); } catch (_) {}
+          try {
+            ref
+                .read(chatWsConnectedProvider.notifier)
+                .setConnected(_offerId, false);
+          } catch (_) {}
           _scheduleReconnect();
         },
         cancelOnError: false,
@@ -348,24 +467,28 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
         final data = frame['data'] as Map<String, dynamic>? ?? {};
         final isOnline = data['online'] as bool? ?? false;
         try {
-          ref.read(chatOtherOnlineProvider.notifier).setOnline(_offerId, isOnline);
+          ref
+              .read(chatOtherOnlineProvider.notifier)
+              .setOnline(_offerId, isOnline);
         } catch (_) {}
       } else if (event == 'read') {
         // Update is_read for our optimistic messages
         final current = state.asData?.value ?? [];
         state = AsyncData(
-          current.map((m) => m.isOptimistic
-              ? ChatMessage(
-                  id: m.id,
-                  senderId: m.senderId,
-                  message: m.message,
-                  timestamp: m.timestamp,
-                  messageType: m.messageType,
-                  metadata: m.metadata,
-                  isRead: true,
-                  isOptimistic: false,
-                )
-              : m).toList(),
+          current
+              .map((m) => m.isOptimistic
+                  ? ChatMessage(
+                      id: m.id,
+                      senderId: m.senderId,
+                      message: m.message,
+                      timestamp: m.timestamp,
+                      messageType: m.messageType,
+                      metadata: m.metadata,
+                      isRead: true,
+                      isOptimistic: false,
+                    )
+                  : m)
+              .toList(),
         );
       }
     } catch (_) {

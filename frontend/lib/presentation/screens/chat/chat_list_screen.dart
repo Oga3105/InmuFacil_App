@@ -224,9 +224,6 @@ class _ConversationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasUnread = conversation.unreadCount > 0;
-    final initial = conversation.otherUserName.isNotEmpty
-        ? conversation.otherUserName[0].toUpperCase()
-        : '?';
 
     return Material(
       color: Colors.white,
@@ -251,14 +248,7 @@ class _ConversationTile extends StatelessWidget {
                     child:
                         (conversation.otherUserPhotoUrl?.isNotEmpty ?? false)
                             ? null
-                            : Text(
-                                initial,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 18,
-                                ),
-                              ),
+                            : const Icon(Icons.person_rounded, size: 28, color: Colors.white),
                   ),
                   if (hasUnread)
                     Positioned(

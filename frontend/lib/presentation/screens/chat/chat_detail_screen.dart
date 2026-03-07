@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../../core/utils/temp_translations.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../providers/solvency_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/visits/visit_cancel_dialog.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kNavy      = Color(0xFF1E3A5F);
@@ -164,6 +167,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 60)),
+      locale: Localizations.localeOf(context),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: _kNavy),
@@ -173,21 +177,68 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     );
     if (picked == null || !mounted) return null;
 
+    // Native analog clock time picker with 24H / AM-PM toggle overlaid
+    final use24hNotifier = ValueNotifier<bool>(true);
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 11, minute: 0),
       helpText: 'Hora preferente de visita',
-      builder: (ctx, child) => Theme(
-        data: Theme.of(ctx).copyWith(
-          colorScheme: const ColorScheme.light(primary: _kNavy),
-        ),
-        child: child!,
-      ),
+      builder: (ctx, child) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: use24hNotifier,
+          builder: (ctx2, use24h, _) {
+            final size = MediaQuery.of(ctx).size;
+            // Material 3 dial-mode dialog is ~328×528 px, centered on screen.
+            // The toggle sits to the right of the keyboard-mode icon (bottom-left).
+            const dw = 328.0;
+            const dh = 528.0;
+            final toggleLeft = ((size.width - dw) / 2 + 64).clamp(8.0, size.width - 140);
+            final toggleBottom = ((size.height - dh) / 2 + 10).clamp(8.0, size.height - 60);
+            return MediaQuery(
+              data: MediaQuery.of(ctx).copyWith(alwaysUse24HourFormat: use24h),
+              child: Theme(
+                data: Theme.of(ctx).copyWith(
+                  colorScheme: const ColorScheme.light(primary: _kNavy),
+                ),
+                child: Stack(
+                  children: [
+                    child!,
+                    Positioned(
+                      left: toggleLeft,
+                      bottom: toggleBottom,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _FormatBtn(
+                              label: '24H',
+                              active: use24h,
+                              onTap: () => use24hNotifier.value = true,
+                            ),
+                            const SizedBox(width: 4),
+                            _FormatBtn(
+                              label: 'AM/PM',
+                              active: !use24h,
+                              onTap: () => use24hNotifier.value = false,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
-    if (!mounted) return null;
+    use24hNotifier.dispose();
+    if (pickedTime == null || !mounted) return null;
 
-    final hour = pickedTime?.hour ?? 11;
-    final minute = pickedTime?.minute ?? 0;
+    final hour = pickedTime.hour;
+    final minute = pickedTime.minute;
     return '${picked.day}/${picked.month}/${picked.year} ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
   }
 
@@ -282,6 +333,17 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final messagesAsync = ref.watch(chatDetailProvider(widget.offerId));
     final notifier = ref.read(chatDetailProvider(widget.offerId).notifier);
 
+    // Compute visit status: none | pending | accepted | rejected→none
+    final _msgs = messagesAsync.asData?.value ?? [];
+    String visitStatus = 'none';
+    for (final m in _msgs) {
+      if (!m.isAction) continue;
+      final t = m.metadata?['action_type'] as String?;
+      if (t == 'visit_request') visitStatus = 'pending';
+      else if (t == 'visit_accepted') visitStatus = 'accepted';
+      else if (t == 'visit_rejected') visitStatus = 'none';
+    }
+
     ref.listen<AsyncValue<List<ChatMessage>>>(
       chatDetailProvider(widget.offerId),
       (prev, next) {
@@ -309,6 +371,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               conversation: conv,
               onTap: () => context.push('/property/${conv!.propertyId}'),
             ),
+          // Only show seller solvency banner after provider loaded & user is seller
+          if (messagesAsync is AsyncData && !notifier.isBuyer)
+            _SellerSolvencyBanner(offerId: widget.offerId),
           Expanded(
             child: messagesAsync.when(
               loading: () =>
@@ -353,15 +418,34 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                       return _DateSeparator(date: item);
                     }
                     final msg = item as ChatMessage;
-                    final isMine = msg.senderId == notifier.currentUserId;
+                    final isMine = notifier.currentUserId != null &&
+                        msg.senderId == notifier.currentUserId;
+                    final senderPhoto = isMine
+                        ? notifier.currentUserPhotoUrl
+                        : notifier.otherUserPhotoUrl;
                     if (msg.isAction) {
+                      // A visit_request is answered if a later message has visit_accepted/rejected
+                      bool isAnswered = false;
+                      if (msg.metadata?['action_type'] == 'visit_request') {
+                        final msgIdx = messages.indexOf(msg);
+                        isAnswered = messages.skip(msgIdx + 1).any((m) =>
+                          m.isAction &&
+                          (m.metadata?['action_type'] == 'visit_accepted' ||
+                           m.metadata?['action_type'] == 'visit_rejected'));
+                      }
                       return _ActionCard(
                         message: msg,
                         isMine: isMine,
                         offerId: widget.offerId,
+                        isAnswered: isAnswered,
+                        onReschedule: _sendVisitRequest,
                       );
                     }
-                    return _MessageBubble(message: msg, isMine: isMine);
+                    return _MessageBubble(
+                      message: msg,
+                      isMine: isMine,
+                      senderPhotoUrl: senderPhoto,
+                    );
                   },
                 );
               },
@@ -374,10 +458,10 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             onVisit: _sendVisitRequest,
             onOffer: _sendOfferProposal,
             onDocs: _requestDocuments,
-            hasExistingOfferProposal: messagesAsync.asData?.value
-                .any((m) => m.isAction &&
-                    m.metadata?['action_type'] == 'offer_proposal') ??
-                false,
+            isBuyer: notifier.isBuyer,
+            visitStatus: visitStatus,
+            hasExistingOfferProposal: ['pending', 'counter_offer', 'accepted', 'signing_pending', 'signed', 'completed']
+                .contains(notifier.offerStatus?.toLowerCase() ?? ''),
           ),
           // Input bar
           _InputBar(
@@ -393,78 +477,102 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   AppBar _buildAppBar(BuildContext context, ChatConversation? conv) {
     final otherOnline = ref.watch(
         chatOtherOnlineProvider.select((map) => map[widget.offerId] ?? false));
+    // Watch the async state so the AppBar rebuilds when notifier fields are populated
+    ref.watch(chatDetailProvider(widget.offerId));
     final notifier = ref.read(chatDetailProvider(widget.offerId).notifier);
-    final otherInitial = (conv?.otherUserName.isNotEmpty ?? false)
-        ? conv!.otherUserName[0].toUpperCase()
-        : '?';
-    final myInitial = (notifier.currentUserName?.isNotEmpty ?? false)
-        ? notifier.currentUserName![0].toUpperCase()
-        : '?';
+
+    // Prefer notifier data (fetched from API) over conv (may not be loaded yet)
+    final otherName = notifier.otherUserName ?? conv?.otherUserName ?? '';
+    final otherPhoto = notifier.otherUserPhotoUrl ?? conv?.otherUserPhotoUrl;
+    final myPhoto = notifier.currentUserPhotoUrl;
 
     return AppBar(
-      backgroundColor: _kNavy,
+      backgroundColor: Colors.white,
       elevation: 0,
       automaticallyImplyLeading: false,
-      titleSpacing: 0,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: Colors.grey.shade200, height: 1),
+      ),
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: AppBarBackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
+        ),
+      ),
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Back
-          AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-          // Logo + InmuFácil text
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Image.asset(
-              'assets/images/logo_inmufacil.png',
-              height: 22,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-          ),
-          const Text(
-            'InmuFácil',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              fontSize: 13,
+          // Logo + brand text (matches offer_management_screen style)
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/logo_inmufacil.png',
+                    height: 32,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text.rich(
+                    TextSpan(
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                      children: [
+                        TextSpan(
+                          text: 'Inmu',
+                          style: TextStyle(color: Color(0xFF2563EB)),
+                        ),
+                        TextSpan(
+                          text: 'Fácil',
+                          style: TextStyle(color: Color(0xFF16A34A)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           // Vertical divider
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            height: 26,
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            height: 28,
             width: 1,
-            color: Colors.white.withValues(alpha: 0.25),
+            color: Colors.grey.shade300,
           ),
           // Other user avatar
           CircleAvatar(
-            radius: 16,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
-            backgroundImage: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
-                ? NetworkImage(conv!.otherUserPhotoUrl!)
+            radius: 17,
+            backgroundColor: const Color(0xFF1E3A5F),
+            backgroundImage: (otherPhoto?.isNotEmpty ?? false)
+                ? NetworkImage(otherPhoto!)
                 : null,
-            child: (conv?.otherUserPhotoUrl?.isNotEmpty ?? false)
+            child: (otherPhoto?.isNotEmpty ?? false)
                 ? null
-                : Text(
-                    otherInitial,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                  ),
+                : const Icon(Icons.person_rounded, size: 19, color: Colors.white),
           ),
-          const SizedBox(width: 7),
-          // Other user name + presence
-          Expanded(
+          const SizedBox(width: 8),
+          // Other user name + presence dot
+          Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  conv?.otherUserName ?? 'Chat',
+                  otherName.isEmpty ? 'Chat' : otherName,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1E293B),
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 14,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -472,21 +580,21 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      width: 6,
-                      height: 6,
+                      width: 7,
+                      height: 7,
                       decoration: BoxDecoration(
                         color: otherOnline
-                            ? const Color(0xFF4ADE80)
-                            : const Color(0xFF94A3B8),
+                            ? const Color(0xFF16A34A)
+                            : const Color(0xFFCBD5E1),
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 3),
+                    const SizedBox(width: 4),
                     Text(
                       otherOnline ? 'En linea' : 'Desconectado',
                       style: const TextStyle(
-                        color: Color(0xFFB0C4DE),
-                        fontSize: 10,
+                        color: Color(0xFF94A3B8),
+                        fontSize: 11,
                       ),
                     ),
                   ],
@@ -494,51 +602,127 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               ],
             ),
           ),
-          // Inicio button — official blue
-          TextButton(
-            onPressed: () => context.go('/'),
-            style: TextButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text(
-              'Inicio',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Current user avatar
-          CircleAvatar(
-            radius: 15,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
-            backgroundImage:
-                (notifier.currentUserPhotoUrl?.isNotEmpty ?? false)
-                    ? NetworkImage(notifier.currentUserPhotoUrl!)
-                    : null,
-            child: (notifier.currentUserPhotoUrl?.isNotEmpty ?? false)
-                ? null
-                : Text(
-                    myInitial,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 8),
         ],
       ),
+      actions: [
+        // Inicio button — same style as offer_management_screen
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  'Inicio',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        IconButton(
+          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+          onPressed: () {},
+        ),
+        const SizedBox(width: 8),
+        // Current user avatar with dropdown menu
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: PopupMenuButton<String>(
+            offset: const Offset(0, 40),
+            tooltip: 'Menu de usuario',
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            itemBuilder: (_) => [
+              const PopupMenuItem(
+                value: 'profile',
+                child: Row(children: [
+                  Icon(Icons.person_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mi Perfil'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'my-properties',
+                child: Row(children: [
+                  Icon(Icons.home_work_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Propiedades'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'offers',
+                child: Row(children: [
+                  Icon(Icons.handshake_outlined, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mis Ofertas'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'messages',
+                child: Row(children: [
+                  Icon(Icons.chat_bubble_outline, size: 20),
+                  SizedBox(width: 8),
+                  Text('Mensajes'),
+                ]),
+              ),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(children: [
+                  Icon(Icons.logout, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Text('Cerrar Sesion', style: TextStyle(color: Colors.red)),
+                ]),
+              ),
+            ],
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await ref.read(authProvider.notifier).logout();
+                if (context.mounted) context.go('/');
+              } else if (value == 'profile') {
+                context.push('/profile');
+              } else if (value == 'my-properties') {
+                context.push('/profile?tab=1');
+              } else if (value == 'offers') {
+                context.push('/profile?tab=2');
+              } else if (value == 'messages') {
+                context.push('/profile?tab=4');
+              }
+            },
+            child: CircleAvatar(
+              radius: 18,
+              backgroundColor: const Color(0xFF1E3A5F),
+              backgroundImage: (myPhoto?.isNotEmpty ?? false)
+                  ? NetworkImage(myPhoto!)
+                  : null,
+              child: (myPhoto?.isNotEmpty ?? false)
+                  ? null
+                  : const Icon(Icons.person_rounded, size: 20, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -559,6 +743,182 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
 }
 
 // ── Property banner ───────────────────────────────────────────────────────────
+
+// ── Seller's anonymised solvency banner ──────────────────────────────────────
+
+class _SellerSolvencyBanner extends ConsumerWidget {
+  const _SellerSolvencyBanner({required this.offerId});
+
+  final String offerId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(buyerPassportProvider(offerId));
+
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (passport) {
+        if (passport == null) {
+          // Buyer has not submitted a passport yet
+          return Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFFBEB),
+              border: Border(bottom: BorderSide(color: Color(0xFFFDE68A))),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                const Icon(Icons.shield_outlined, color: Color(0xFFB45309), size: 18),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'El comprador aun no ha completado su Pasaporte de Solvencia.',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final level = passport.solvencyLevel ?? 'bronze';
+        final (levelLabel, levelColor, levelIcon) = switch (level) {
+          'gold'   => ('Oro',    const Color(0xFFB8860B), Icons.emoji_events_rounded),
+          'silver' => ('Plata',  const Color(0xFF64748B), Icons.shield_rounded),
+          _        => ('Bronce', const Color(0xFFCD7F32), Icons.shield_outlined),
+        };
+
+        final stressLabel = switch (passport.stressIndex) {
+          'low_risk'    => ('Bajo riesgo',   const Color(0xFF16A34A)),
+          'medium_risk' => ('Riesgo medio',  Colors.orange),
+          _             => ('Alto riesgo',   Colors.red),
+        };
+
+        final paymentLabel = switch (passport.paymentMethod) {
+          'cash'              => 'Pago al contado',
+          'mortgage_approved' => 'Hipoteca aprobada',
+          'mortgage_pending'  => 'Hipoteca en tramite',
+          'house_to_sell'     => 'Venta de vivienda',
+          _                   => 'No especificado',
+        };
+
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+          ),
+          child: Theme(
+            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+            child: ExpansionTile(
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              leading: Icon(levelIcon, color: levelColor, size: 22),
+              title: Row(
+                children: [
+                  Text(
+                    'Candidato Cualificado — Nivel $levelLabel',
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _kNavy),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: stressLabel.$2.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      stressLabel.$1,
+                      style: TextStyle(color: stressLabel.$2, fontSize: 10, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              subtitle: Text(
+                'Toca para ver detalles del pasaporte',
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+              ),
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        _SolvencyChip(Icons.payments_outlined, paymentLabel),
+                        const SizedBox(width: 8),
+                        if (passport.hasPreApproval)
+                          _SolvencyChip(Icons.check_circle_outline, 'Preaprobacion bancaria'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (passport.knowsExtraCosts)
+                          _SolvencyChip(Icons.lightbulb_outline, 'Conoce los gastos'),
+                        const SizedBox(width: 8),
+                        if (passport.hasInitialSavings)
+                          _SolvencyChip(Icons.savings_outlined, 'Tiene ahorros iniciales'),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Funcion de Borrador de Arras disponible en Hito 12.'),
+                              backgroundColor: _kNavy,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.handshake_outlined, color: Colors.white, size: 18),
+                        label: const Text(
+                          'Aceptar Solvencia y Proceder a Borrador de Arras',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _kNavy,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SolvencyChip extends StatelessWidget {
+  const _SolvencyChip(this.icon, this.label);
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEEF3FA),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: _kNavy),
+          const SizedBox(width: 5),
+          Text(label, style: const TextStyle(fontSize: 11, color: _kNavy, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+}
 
 class _PropertyBanner extends StatelessWidget {
   const _PropertyBanner({required this.conversation, required this.onTap});
@@ -678,10 +1038,15 @@ class _DateSeparator extends StatelessWidget {
 // ── Message bubble ────────────────────────────────────────────────────────────
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message, required this.isMine});
+  const _MessageBubble({
+    required this.message,
+    required this.isMine,
+    this.senderPhotoUrl,
+  });
 
   final ChatMessage message;
   final bool isMine;
+  final String? senderPhotoUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -693,10 +1058,15 @@ class _MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMine) ...[
-            const CircleAvatar(
-              radius: 12,
-              backgroundColor: Color(0xFFE2E8F0),
-              child: Icon(Icons.person, size: 14, color: Color(0xFF64748B)),
+            CircleAvatar(
+              radius: 13,
+              backgroundColor: const Color(0xFF1E3A5F),
+              backgroundImage: (senderPhotoUrl?.isNotEmpty ?? false)
+                  ? NetworkImage(senderPhotoUrl!)
+                  : null,
+              child: (senderPhotoUrl?.isNotEmpty ?? false)
+                  ? null
+                  : const Icon(Icons.person_rounded, size: 16, color: Colors.white),
             ),
             const SizedBox(width: 6),
           ],
@@ -810,11 +1180,15 @@ class _ActionCard extends ConsumerStatefulWidget {
     required this.message,
     required this.isMine,
     required this.offerId,
+    this.isAnswered = false,
+    this.onReschedule,
   });
 
   final ChatMessage message;
   final bool isMine;
   final String offerId;
+  final bool isAnswered;
+  final VoidCallback? onReschedule;
 
   @override
   ConsumerState<_ActionCard> createState() => _ActionCardState();
@@ -826,12 +1200,73 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
   String get _actionType =>
       widget.message.metadata?['action_type'] as String? ?? '';
 
+  Future<void> _respond(String status) async {
+    setState(() => _loading = true);
+    try {
+      final date = widget.message.metadata?['date'] as String?;
+      await ref.read(chatDetailProvider(widget.offerId).notifier).sendAction(
+        actionType: status == 'accepted' ? 'visit_accepted' : 'visit_rejected',
+        metadata: date != null ? {'date': date} : {},
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al responder. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _reschedule() async {
+    if (widget.onReschedule != null) {
+      widget.onReschedule!();
+    }
+  }
+
+  Future<void> _cancel() async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (_) => const VisitCancelDialog(),
+    );
+    if (reason == null || !mounted) return;
+
+    setState(() => _loading = true);
+    try {
+      await ref.read(chatDetailProvider(widget.offerId).notifier).sendAction(
+        actionType: 'visit_cancelled',
+        metadata: {'reason': reason},
+      );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al anular. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
   (IconData, String, Color, Color) get _config => switch (_actionType) {
         'visit_request' => (
             Icons.calendar_month_outlined,
             'Solicitud de Visita',
             _kNavy,
             _kNavyLight,
+          ),
+        'visit_accepted' => (
+            Icons.check_circle_outline,
+            'Visita Confirmada',
+            const Color(0xFF16A34A),
+            const Color(0xFFDCFCE7),
+          ),
+        'visit_rejected' => (
+            Icons.cancel_outlined,
+            'Visita Rechazada',
+            Colors.red,
+            const Color(0xFFFEF2F2),
           ),
         'offer_proposal' => (
             Icons.monetization_on_outlined,
@@ -960,8 +1395,8 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                         ],
                       ),
                   ],
-                  // Action buttons (only shown to receiver)
-                  if (!widget.isMine) ...[
+                  // Action buttons (only to receiver, only while not yet answered)
+                  if (!widget.isMine && _actionType == 'visit_request' && !widget.isAnswered) ...[
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -975,7 +1410,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                                   borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
-                            onPressed: _loading ? null : () {},
+                            onPressed: _loading ? null : () => _respond('rejected'),
                             child: const Text(
                               'Rechazar',
                               style: TextStyle(
@@ -992,7 +1427,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                                   borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
-                            onPressed: _loading ? null : () {},
+                            onPressed: _loading ? null : () => _respond('accepted'),
                             child: _loading
                                 ? const SizedBox(
                                     width: 14,
@@ -1008,6 +1443,51 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700),
                                   ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  // Replace / Cancel buttons for Confirmed visits
+                  if (_actionType == 'visit_accepted') ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: _kNavy,
+                              side: BorderSide(
+                                  color: _kNavy.withValues(alpha: 0.5)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            onPressed: _loading ? null : _reschedule,
+                            child: const Text(
+                              'Reprogramar',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: BorderSide(
+                                  color: Colors.red.withValues(alpha: 0.5)),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            onPressed: _loading ? null : _cancel,
+                            child: const Text(
+                              'Anular',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
                           ),
                         ),
                       ],
@@ -1040,16 +1520,23 @@ class _QuickActionBar extends StatelessWidget {
     required this.onVisit,
     required this.onOffer,
     required this.onDocs,
+    required this.isBuyer,
+    required this.visitStatus,
     required this.hasExistingOfferProposal,
   });
 
   final VoidCallback onVisit;
   final VoidCallback onOffer;
   final VoidCallback onDocs;
+  final bool isBuyer;
+  /// 'none' | 'pending' | 'accepted' | rejected maps back to 'none'
+  final String visitStatus;
   final bool hasExistingOfferProposal;
 
   @override
   Widget build(BuildContext context) {
+    // Buyer can request a visit only when none is pending/accepted
+    final showVisita = isBuyer && visitStatus != 'pending' && visitStatus != 'accepted';
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -1058,21 +1545,24 @@ class _QuickActionBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          _QuickActionButton(
-            icon: Icons.calendar_month_outlined,
-            label: 'Visita',
-            color: _kNavy,
-            onTap: onVisit,
-          ),
-          const SizedBox(width: 8),
-          if (!hasExistingOfferProposal)
+          if (showVisita) ...[
             _QuickActionButton(
-              icon: Icons.monetization_on_outlined,
+              icon: Icons.calendar_month_outlined,
+              label: 'Visita',
+              color: _kNavy,
+              onTap: onVisit,
+            ),
+            const SizedBox(width: 8),
+          ],
+          if (!hasExistingOfferProposal) ...[
+            _QuickActionButton(
+              icon: Icons.payments_outlined,
               label: 'Oferta',
               color: _kGold,
               onTap: onOffer,
             ),
-          if (!hasExistingOfferProposal) const SizedBox(width: 8),
+            const SizedBox(width: 8),
+          ],
           _QuickActionButton(
             icon: Icons.folder_outlined,
             label: 'Documentos',
@@ -1234,6 +1724,39 @@ class _InputBar extends StatelessWidget {
                   ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── 24H / AM-PM format toggle button ─────────────────────────────────────────
+
+class _FormatBtn extends StatelessWidget {
+  const _FormatBtn({required this.label, required this.active, required this.onTap});
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? _kNavy : Colors.transparent,
+          border: Border.all(color: _kNavy),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? Colors.white : _kNavy,
+            fontWeight: FontWeight.w700,
+            fontSize: 11,
+          ),
+        ),
       ),
     );
   }
