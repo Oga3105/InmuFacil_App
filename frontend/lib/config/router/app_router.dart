@@ -21,6 +21,13 @@ import '../../presentation/screens/offers/transaction_timeline_screen.dart';
 import '../../presentation/screens/solvency/solvency_wizard_screen.dart';
 import '../../presentation/screens/solvency/solvency_passport_screen.dart';
 import '../../presentation/providers/offers_provider.dart';
+import '../../presentation/screens/offers/arras_interview_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/notaria_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/post_venta_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/entrega_llaves_screen.dart';
+import '../../presentation/screens/info/info_screen.dart';
+import '../../presentation/screens/info/trust_dashboard_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -220,6 +227,104 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           appBar: AppBar(title: const Text('Mis Contratos')),
           body: const Center(child: Text('Zona de Contratos (Hito 12)')),
         ),
+      ),
+
+      // Arras Interview
+      GoRoute(
+        path: '/offers/:offerId/arras',
+        name: 'arras-interview',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return ArrasInterviewScreen(offer: offer);
+        },
+      ),
+
+      // Timeline sub-pages
+      GoRoute(
+        path: '/offers/:offerId/tasacion',
+        name: 'tasacion',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return TasacionScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/notaria',
+        name: 'notaria',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return NotariaScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/post-venta',
+        name: 'post-venta',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return PostVentaScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/entrega-llaves',
+        name: 'entrega-llaves',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return EntregaLlavesScreen(offer: offer);
+        },
+      ),
+
+      // Info & Legal pages
+      GoRoute(
+        path: '/info/what-is',
+        name: 'info-what-is',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.whatIsInmufacil),
+      ),
+      GoRoute(
+        path: '/info/how-it-works',
+        name: 'info-how-it-works',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.howItWorks),
+      ),
+      GoRoute(
+        path: '/info/buyer-guide',
+        name: 'info-buyer-guide',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.buyerGuide),
+      ),
+      GoRoute(
+        path: '/info/seller-guide',
+        name: 'info-seller-guide',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.sellerGuide),
+      ),
+      GoRoute(
+        path: '/info/contact',
+        name: 'info-contact',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.contact),
+      ),
+      GoRoute(
+        path: '/info/faq',
+        name: 'info-faq',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.faq),
+      ),
+      GoRoute(
+        path: '/info/privacy',
+        name: 'info-privacy',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.privacy),
+      ),
+      GoRoute(
+        path: '/info/terms',
+        name: 'info-terms',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.terms),
+      ),
+      GoRoute(
+        path: '/info/legal',
+        name: 'info-legal',
+        builder: (_, __) => const InfoScreen(pageType: InfoPageType.legalNotice),
+      ),
+
+      // Trust Dashboard
+      GoRoute(
+        path: '/trust-dashboard',
+        name: 'trust-dashboard',
+        builder: (_, __) => const TrustDashboardScreen(),
       ),
     ],
     
