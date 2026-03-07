@@ -94,16 +94,6 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:1",
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,  # Specific origins only - Security by Design
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
-    expose_headers=["X-Request-ID"],
-)
-
-
 # ============================================================================
 # @Shield - Security Headers Middleware
 # ============================================================================
@@ -112,18 +102,23 @@ app.add_middleware(
 async def add_security_headers(request: Request, call_next):
     """
     Add security headers to all responses.
+    Skip OPTIONS requests — CORS preflight must not be modified by
+    BaseHTTPMiddleware wrappers to avoid Starlette ASGI response conflicts.
     """
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     response = await call_next(request)
-    
+
     # Prevent MIME type sniffing
     response.headers["X-Content-Type-Options"] = "nosniff"
-    
+
     # Prevent clickjacking
     response.headers["X-Frame-Options"] = "DENY"
-    
+
     # Enable XSS protection
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    
+
     # Content Security Policy - Adjusted for Swagger UI
     csp_policy = (
         "default-src 'self'; "
@@ -131,10 +126,10 @@ async def add_security_headers(request: Request, call_next):
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "img-src 'self' data: https://fastapi.tiangolo.com; "
         "font-src 'self' data:; "
-        "connect-src 'self'"
+        "connect-src *"
     )
     response.headers["Content-Security-Policy"] = csp_policy
-    
+
     return response
 
 
@@ -151,6 +146,21 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     # Logging omitted for brevity
     return response
+
+
+# ============================================================================
+# @Shield - CORS (registered LAST = outermost middleware, runs before all
+# BaseHTTPMiddleware wrappers so OPTIONS preflight never touches them)
+# ============================================================================
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,  # Specific origins only - Security by Design
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["X-Request-ID"],
+)
 
 
 # ============================================================================
@@ -301,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites
 
 from fastapi import APIRouter
 
@@ -327,7 +337,9 @@ api_v1_router.include_router(signature.router) # Prefix defined in router (/cont
 api_v1_router.include_router(notary.router) # Prefix defined in router (/notaries)
 api_v1_router.include_router(timeline.router) # Prefix defined in router (/timeline)
 api_v1_router.include_router(leads.router)  # Hito 18 - Lead Magnet (404)
-api_v1_router.include_router(chat.router)   # Hito Chat - Real-time messaging
+api_v1_router.include_router(chat.router)     # Hito Chat - Real-time messaging
+api_v1_router.include_router(solvency.router) # Pasaporte de Solvencia Consciente
+api_v1_router.include_router(favorites.router, prefix="/favorites", tags=["Favorites"]) # Property favorites
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
