@@ -666,7 +666,9 @@ class _DoneRow extends StatelessWidget {
                 if (step.ctaLabel != null &&
                     (step.ctaCallback != null || step.ctaRoute != null)) ...[
                   const SizedBox(height: 8),
-                  GestureDetector(
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
                     onTap: step.ctaCallback ?? () => context.go(step.ctaRoute!),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -685,6 +687,7 @@ class _DoneRow extends StatelessWidget {
                         ),
                       ],
                     ),
+                  ),
                   ),
                 ],
               ],
