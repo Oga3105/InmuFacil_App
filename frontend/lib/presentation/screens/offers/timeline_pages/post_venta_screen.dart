@@ -1,9 +1,17 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+
+const String _kApiBase = 'http://localhost:8000/api/v1';
+const _storage = FlutterSecureStorage();
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
@@ -25,18 +33,51 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabCtrl;
 
-  // Mock upload states (in production these come from the handover API)
-  final Map<String, bool> _uploaded = {
-    'electricity': false,
-    'water': false,
-    'gas': false,
-    'community': false,
+  // Upload states: null = not started, false = uploading, true = done
+  final Map<String, bool?> _uploaded = {
+    'electricity': null,
+    'water': null,
+    'gas': null,
+    'ibi': null,
+    'community': null,
   };
+
+  List<Map<String, dynamic>> _buyerDocs = [];
+  bool _loadingDocs = false;
 
   @override
   void initState() {
     super.initState();
     _tabCtrl = TabController(length: 2, vsync: this);
+    _loadDocuments();
+  }
+
+  Future<void> _loadDocuments() async {
+    setState(() => _loadingDocs = true);
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      final dio = Dio();
+      final resp = await dio.get(
+        '$_kApiBase/post-sale/${widget.offer.id}/documents',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (mounted) {
+        final docs = List<Map<String, dynamic>>.from(resp.data as List);
+        setState(() {
+          _buyerDocs = docs;
+          for (final doc in docs) {
+            final key = doc['doc_type'] as String?;
+            if (key != null && _uploaded.containsKey(key)) {
+              _uploaded[key] = true;
+            }
+          }
+        });
+      }
+    } catch (_) {
+      // Gate not met yet (403) or network error — silently ignore for buyer tab
+    } finally {
+      if (mounted) setState(() => _loadingDocs = false);
+    }
   }
 
   @override
@@ -45,14 +86,47 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
     super.dispose();
   }
 
-  void _mockUpload(String key) {
-    setState(() => _uploaded[key] = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Documento "$key" subido correctamente.'),
-        backgroundColor: _kGreen,
-      ),
-    );
+  Future<void> _uploadDocument(String docType) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    setState(() => _uploaded[docType] = false); // uploading state
+
+    try {
+      final token = await _storage.read(key: 'jwt_token');
+      final file  = await MultipartFile.fromFile(
+        picked.path,
+        filename: picked.name,
+      );
+      final formData = FormData.fromMap({
+        'doc_type': docType,
+        'file': file,
+      });
+      final dio = Dio();
+      await dio.post(
+        '$_kApiBase/post-sale/${widget.offer.id}/documents',
+        data: formData,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (!mounted) return;
+      setState(() => _uploaded[docType] = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Documento "$docType" subido correctamente.'),
+          backgroundColor: _kGreen,
+        ),
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      setState(() => _uploaded[docType] = null);
+      final msg = (e.response?.data as Map?)?['detail'] as String? ??
+          'Error al subir el documento.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
+      );
+    }
   }
 
   @override
@@ -139,13 +213,14 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
               padding: const EdgeInsets.only(bottom: 12),
               child: _UploadCard(
                 doc: doc,
-                isUploaded: _uploaded[doc.key] ?? false,
+                isUploaded: _uploaded[doc.key] == true,
+                isUploading: _uploaded[doc.key] == false,
                 canUpload: isCurrentUser,
-                onUpload: () => _mockUpload(doc.key),
+                onUpload: () => _uploadDocument(doc.key),
               ),
             )),
         const SizedBox(height: 8),
-        if (isCurrentUser && _uploaded.values.every((v) => v))
+        if (isCurrentUser && _uploaded.values.every((v) => v == true))
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -303,10 +378,12 @@ class _UploadCard extends StatelessWidget {
     required this.isUploaded,
     required this.canUpload,
     required this.onUpload,
+    this.isUploading = false,
   });
 
   final _DocInfo doc;
   final bool isUploaded;
+  final bool isUploading;
   final bool canUpload;
   final VoidCallback onUpload;
 
@@ -349,6 +426,12 @@ class _UploadCard extends StatelessWidget {
           const SizedBox(width: 8),
           if (isUploaded)
             const Icon(Icons.check_circle, color: _kGreen, size: 24)
+          else if (isUploading)
+            const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2, color: _kBlue),
+            )
           else if (canUpload)
             TextButton(
               onPressed: onUpload,
