@@ -23,6 +23,7 @@ import '../../presentation/screens/solvency/solvency_passport_screen.dart';
 import '../../presentation/providers/offers_provider.dart';
 import '../../presentation/screens/offers/arras_interview_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/fein_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/notaria_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/notary_signing_page.dart';
 import '../../presentation/screens/offers/timeline_pages/post_venta_screen.dart';
@@ -247,6 +248,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final offer = state.extra as OfferData;
           return TasacionScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/fein',
+        name: 'fein',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return FeinScreen(offer: offer);
         },
       ),
       GoRoute(

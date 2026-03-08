@@ -92,7 +92,6 @@ class TransactionTimelineScreen extends ConsumerWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -285,17 +284,31 @@ class TransactionTimelineScreen extends ConsumerWidget {
             : null,
       ),
       _TimelineStep(
-        title: 'Tasacion y Gestion Hipotecaria',
+        title: 'Tasacion de la Vivienda',
         subtitle: stage > 3
-            ? 'Tasacion completada y financiacion tramitada'
+            ? 'Informe del tasador completado'
             : stage == 3
-                ? 'Tramitando tasacion y financiacion hipotecaria'
+                ? 'Cita con el tasador pendiente de confirmar'
                 : 'Pendiente de firma de arras',
         state: stepState(3),
-        ctaLabel: stage == 3 ? 'Gestionar tasacion' : null,
+        ctaLabel: stage == 3 ? 'Agendar visita del tasador' : null,
         ctaIcon: stage == 3 ? Icons.home_work_outlined : null,
         ctaCallback: stage == 3
             ? () => context.push('/offers/${offer.id}/tasacion', extra: offer)
+            : null,
+      ),
+      _TimelineStep(
+        title: 'Formalizacion Bancaria (FEIN)',
+        subtitle: stage > 3
+            ? 'FEIN recibida y condiciones confirmadas'
+            : stage == 3
+                ? 'Pendiente tras tasacion — banco emite la FEIN'
+                : 'Pendiente de firma de arras',
+        state: stage == 3 ? _StepState.active : stepState(3),
+        ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
+        ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
+        ctaCallback: stage == 3
+            ? () => context.push('/offers/${offer.id}/fein', extra: offer)
             : null,
       ),
       _TimelineStep(
@@ -355,40 +368,6 @@ class TransactionTimelineScreen extends ConsumerWidget {
     }
 
     return steps;
-  }
-}
-
-// ── User avatar widget ────────────────────────────────────────────────────────
-
-class _UserAvatar extends StatelessWidget {
-  const _UserAvatar({required this.user});
-
-  final dynamic user;
-
-  @override
-  Widget build(BuildContext context) {
-    final photoUrl = user?.profilePhotoUrl as String?;
-    return SizedBox(
-      width: 32,
-      height: 32,
-      child: ClipOval(
-        child: photoUrl != null && photoUrl.isNotEmpty
-            ? Image.network(
-                photoUrl,
-                width: 32,
-                height: 32,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: const Color(0xFF2563EB),
-                  child: const Icon(Icons.person, color: Colors.white, size: 20),
-                ),
-              )
-            : Container(
-                color: const Color(0xFF2563EB),
-                child: const Icon(Icons.person, color: Colors.white, size: 20),
-              ),
-      ),
-    );
   }
 }
 

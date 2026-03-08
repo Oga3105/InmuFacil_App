@@ -101,7 +101,6 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authProvider).user;
     final isBuyer = currentUser?.id == widget.offer.buyerId;
-    final myConfirmed = isBuyer ? _buyerConfirmed : _sellerConfirmed;
     final isComplete = _buyerConfirmed && _sellerConfirmed;
 
     return Scaffold(

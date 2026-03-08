@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein
 
 from fastapi import APIRouter
 
@@ -342,6 +342,7 @@ api_v1_router.include_router(solvency.router) # Pasaporte de Solvencia Conscient
 api_v1_router.include_router(favorites.router, prefix="/favorites", tags=["Favorites"]) # Property favorites
 api_v1_router.include_router(arras_interview.router) # Arras Penitenciales Interview
 api_v1_router.include_router(post_sale.router) # Sprint V7 - Post-Sale Documents
+api_v1_router.include_router(fein.router)      # Sprint V8 - FEIN Banking Formalization
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
