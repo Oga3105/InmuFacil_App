@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,8 +40,6 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
     'community': null,
   };
 
-  List<Map<String, dynamic>> _buyerDocs = [];
-  bool _loadingDocs = false;
 
   @override
   void initState() {
@@ -53,7 +49,6 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
   }
 
   Future<void> _loadDocuments() async {
-    setState(() => _loadingDocs = true);
     try {
       final token = await _storage.read(key: 'jwt_token');
       final dio = Dio();
@@ -64,7 +59,6 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
       if (mounted) {
         final docs = List<Map<String, dynamic>>.from(resp.data as List);
         setState(() {
-          _buyerDocs = docs;
           for (final doc in docs) {
             final key = doc['doc_type'] as String?;
             if (key != null && _uploaded.containsKey(key)) {
@@ -75,8 +69,6 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen>
       }
     } catch (_) {
       // Gate not met yet (403) or network error — silently ignore for buyer tab
-    } finally {
-      if (mounted) setState(() => _loadingDocs = false);
     }
   }
 

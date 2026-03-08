@@ -26,7 +26,8 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   final _notesCtrl = TextEditingController();
-  bool _confirmed = false;
+  bool _confirmed       = false;
+  bool _reportConfirmed = false;
 
   @override
   void dispose() {
@@ -201,6 +202,117 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               'Plano de la vivienda si dispones de el',
             ],
           ),
+          if (_confirmed) ...[
+            const SizedBox(height: 20),
+            _buildReportConfirmationSection(context, isSeller),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportConfirmationSection(BuildContext context, bool isSeller) {
+    if (_reportConfirmed) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _kGreen.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _kGreen.withOpacity(0.3)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.check_circle, color: _kGreen, size: 36),
+            const SizedBox(height: 8),
+            const Text(
+              'Tasacion completada',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold, color: _kGreen, fontSize: 15),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Siguiente paso: Formalizacion Bancaria (FEIN).',
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push(
+                  '/offers/${widget.offer.id}/fein',
+                  extra: widget.offer,
+                ),
+                icon: const Icon(Icons.account_balance_outlined),
+                label: const Text('Ir a Formalizacion Bancaria'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _kBlue,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.assessment_outlined, color: _kBlue, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Confirmar visita del tasador',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1E3A5F)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            isSeller
+                ? 'Una vez el tasador haya visitado la vivienda y '
+                  'emitido el informe, confirma que la tasacion ha concluido.'
+                : 'El vendedor confirmara cuando el tasador haya completado la visita '
+                  'y el informe este en poder del banco.',
+            style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
+          ),
+          if (isSeller) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => setState(() => _reportConfirmed = true),
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('El tasador ha visitado la vivienda'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _kGreen,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

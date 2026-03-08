@@ -38,25 +38,32 @@ STANDARD_TIMELINE_STEPS = [
         "order": 4
     },
     {
-        "key": "MORTGAGE_APPROVAL",
-        "label": "Aprobación Hipotecaria",
-        "desc": "El comprador confirma disposición de fondos.",
-        "role": StepRole.BUYER,
+        "key": "TASACION_APPOINTMENT",
+        "label": "Tasacion de la Vivienda",
+        "desc": "El tasador visita la vivienda y emite el informe de valor de mercado.",
+        "role": StepRole.BOTH,
         "order": 5
     },
     {
-        "key": "NOTARY_ASSIGNMENT",
-        "label": "Asignación Notario",
-        "desc": "Notario seleccionado y cita agendada.",
-        "role": StepRole.BOTH, # Or System if one assigns and other accepts. Let's say BOTH for consensus.
+        "key": "FEIN_CONFIRMATION",
+        "label": "Formalizacion Bancaria (FEIN)",
+        "desc": "El banco emite la FEIN/FIPER y confirma la viabilidad economica final.",
+        "role": StepRole.BUYER,
         "order": 6
     },
     {
-        "key": "DEED_SIGNATURE",
-        "label": "Firma Escritura Pública",
-        "desc": "Cierre final ante notario.",
+        "key": "NOTARY_ASSIGNMENT",
+        "label": "Asignacion Notario y Firma",
+        "desc": "Notario seleccionado, cita agendada y escritura firmada con entrega de llaves.",
         "role": StepRole.BOTH,
         "order": 7
+    },
+    {
+        "key": "DEED_SIGNATURE",
+        "label": "Cierre y Post-Venta",
+        "desc": "Traspaso de documentacion de suministros y cambio de titularidad.",
+        "role": StepRole.BOTH,
+        "order": 8
     }
 ]
 

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/formatters/currency_input_formatter.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/my_properties_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
@@ -234,7 +233,6 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
