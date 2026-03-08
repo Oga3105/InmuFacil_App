@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
@@ -108,6 +109,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
 
           const SizedBox(height: 24),
           _buildDocumentChecklist(),
+          const SizedBox(height: 24),
+          _buildSigningCta(context),
         ],
       ),
     );
@@ -289,6 +292,60 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                       TextStyle(color: Colors.orange.shade700, fontSize: 13),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSigningCta(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _kGreen.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kGreen.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_outlined, color: _kGreen, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Ya realizamos la firma',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF14532D)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Si la firma ante notario ya tuvo lugar, '
+            'confirma la firma y la entrega de llaves para cerrar este hito.',
+            style: TextStyle(
+                fontSize: 13, color: _kGreen.withOpacity(0.85), height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => context.push(
+                '/offers/${widget.offer.id}/notaria-firma',
+                extra: widget.offer,
+              ),
+              icon: const Icon(Icons.key_outlined),
+              label: const Text('Confirmar firma y entrega de llaves'),
+              style: FilledButton.styleFrom(
+                backgroundColor: _kGreen,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
             ),
           ),
         ],

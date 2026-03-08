@@ -24,6 +24,7 @@ import '../../presentation/providers/offers_provider.dart';
 import '../../presentation/screens/offers/arras_interview_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/notaria_screen.dart';
+import '../../presentation/screens/offers/timeline_pages/notary_signing_page.dart';
 import '../../presentation/screens/offers/timeline_pages/post_venta_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/entrega_llaves_screen.dart';
 import '../../presentation/screens/info/info_screen.dart';
@@ -254,6 +255,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final offer = state.extra as OfferData;
           return NotariaScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/notaria-firma',
+        name: 'notaria-firma',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return NotarySigningPage(offer: offer);
         },
       ),
       GoRoute(

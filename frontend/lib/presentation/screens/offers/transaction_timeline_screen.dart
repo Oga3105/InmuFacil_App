@@ -299,12 +299,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
             : null,
       ),
       _TimelineStep(
-        title: 'Firma en Notaria',
+        title: 'Firma en Notaria y Entrega de Llaves',
         subtitle: stage >= 4
-            ? 'Escrituras firmadas en notaria'
-            : 'Paso final de la transaccion',
+            ? 'Escrituras firmadas y llaves entregadas'
+            : 'Paso final de la firma — incluye entrega de llaves',
         state: stepState(4),
-        ctaLabel: stage == 4 ? 'Preparar cita en notaria' : null,
+        ctaLabel: stage == 4 ? 'Gestionar cita y confirmar firma' : null,
         ctaIcon: stage == 4 ? Icons.gavel_outlined : null,
         ctaCallback: stage == 4
             ? () => context.push('/offers/${offer.id}/notaria', extra: offer)
@@ -314,24 +314,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
         title: 'Post-Venta y Suministros',
         subtitle: stage >= 4
             ? 'Gestiona el cambio de titularidad de los suministros'
-            : 'Pendiente de firma en notaria',
+            : 'Accesible tras la firma en notaria',
         state: stage >= 4 ? _StepState.active : _StepState.locked,
         ctaLabel: stage >= 4 ? 'Gestionar suministros' : null,
         ctaIcon: stage >= 4 ? Icons.receipt_long_outlined : null,
         ctaCallback: stage >= 4
             ? () => context.push('/offers/${offer.id}/post-venta', extra: offer)
-            : null,
-      ),
-      _TimelineStep(
-        title: 'Entrega de Llaves',
-        subtitle: stage >= 4
-            ? 'Confirma la entrega para cerrar la transaccion'
-            : 'Pendiente de firma en notaria',
-        state: stage >= 4 ? _StepState.active : _StepState.locked,
-        ctaLabel: stage >= 4 ? 'Confirmar entrega' : null,
-        ctaIcon: stage >= 4 ? Icons.vpn_key_outlined : null,
-        ctaCallback: stage >= 4
-            ? () => context.push('/offers/${offer.id}/entrega-llaves', extra: offer)
             : null,
       ),
     ];
