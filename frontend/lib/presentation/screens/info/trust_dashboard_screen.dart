@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../providers/auth_provider.dart';
@@ -35,13 +36,36 @@ class TrustDashboardScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text(
-          'Nivel de Confianza',
-          style: TextStyle(
-              color: _kNavy, fontWeight: FontWeight.bold, fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+          ),
+        ),
+        title: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 32),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: _kBlue)),
+                      TextSpan(text: 'Facil', style: TextStyle(color: _kGreen)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
@@ -53,7 +77,7 @@ class TrustDashboardScreen extends ConsumerWidget {
         error: (_, __) => _buildNoPassport(context),
         data: (passport) => passport == null
             ? _buildNoPassport(context)
-            : _buildDashboard(context, passport as solvency_prov.SolvencyPassport, currentUser),
+            : _buildDashboard(context, passport, currentUser),
       ),
     );
   }

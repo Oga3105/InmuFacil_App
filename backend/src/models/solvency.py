@@ -43,6 +43,12 @@ class BuyerSolvency(Base):
     # AES-256-GCM encrypted URL — decrypted only for the buyer themselves
     pre_approval_pdf_url_encrypted = Column(String, nullable=True)
 
+    # --- ADN Financiero (Sprint V9) — AES-256-GCM encrypted integers stored as text ---
+    # Never stored in plain text. Decrypted only server-side for viability calculation.
+    net_monthly_income_enc = Column(String, nullable=True)   # EUR/month net income
+    total_savings_enc = Column(String, nullable=True)         # EUR total liquid savings
+    total_monthly_debt_enc = Column(String, nullable=True)    # EUR/month existing debt obligations
+
     # --- Computed scores ---
     stress_index = Column(Enum(StressIndex), nullable=True)
     solvency_level = Column(Enum(SolvencyLevel), nullable=True)

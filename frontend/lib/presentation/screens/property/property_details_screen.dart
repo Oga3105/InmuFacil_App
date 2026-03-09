@@ -12,6 +12,7 @@ import '../../providers/search_provider.dart';
 import '../../providers/favorites_provider.dart'; // [NEW] Favorites Logic
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
+import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../providers/property_form_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
@@ -73,13 +74,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     // Favorite Logic
     final favoriteIds = ref.watch(favoritesProvider);
     final isFavorite = favoriteIds.contains(property.id);
-
-    // Colors from HTML
-    final colorPrimary = const Color(0xFF135bec);
-    final colorNavy = const Color(0xFF0f172a);
-    
-    // Shared AppBar Logic
-    final searchState = ref.watch(searchProvider);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -318,6 +312,11 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       _LocationSection(location: property.location), // Passing location
                       const SizedBox(height: 32),
                       _OwnerCard(property: property),
+                      if (!isOwner) ...[
+                        const SizedBox(height: 24),
+                        _PropertyViabilityCard(propertyId: property.id, ref: ref),
+                        const SizedBox(height: 80), // space for bottom bar
+                      ],
                    ],
                  ),
                ),
@@ -855,10 +854,166 @@ class _SummaryCard extends ConsumerWidget {
           const SizedBox(height: 16),
           _OwnerCard(property: property),
           const SizedBox(height: 24),
+          // Viability widget — only shown to non-owners (buyers)
+          if (!isOwner) ...[
+            _PropertyViabilityCard(propertyId: property.id, ref: ref),
+            const SizedBox(height: 16),
+          ],
           // Action buttons
           _ActionBar(property: property, ref: ref, context: context, vertical: true),
         ],
       ),
+    );
+  }
+}
+
+// ─── Property Viability Card (buyer-only) ────────────────────────────────────
+
+class _PropertyViabilityCard extends ConsumerWidget {
+  const _PropertyViabilityCard({required this.propertyId, required this.ref});
+
+  final String propertyId;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(solvency_prov.propertyViabilityProvider(propertyId));
+
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (viability) {
+        if (viability == null) return const SizedBox.shrink();
+
+        Color bg;
+        Color border;
+        Color textColor;
+        IconData icon;
+
+        switch (viability.verdict) {
+          case 'green':
+            bg = const Color(0xFFF0FDF4);
+            border = const Color(0xFF86EFAC);
+            textColor = const Color(0xFF166534);
+            icon = Icons.check_circle_outline;
+            break;
+          case 'amber':
+            bg = const Color(0xFFFFFBEB);
+            border = const Color(0xFFFBBF24);
+            textColor = const Color(0xFF92400E);
+            icon = Icons.warning_amber_outlined;
+            break;
+          case 'red':
+            bg = const Color(0xFFFFF1F2);
+            border = const Color(0xFFFCA5A5);
+            textColor = const Color(0xFF991B1B);
+            icon = Icons.cancel_outlined;
+            break;
+          default: // insufficient_data
+            bg = const Color(0xFFF8FAFC);
+            border = const Color(0xFFCBD5E1);
+            textColor = const Color(0xFF475569);
+            icon = Icons.info_outline;
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.bar_chart_outlined, color: textColor, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Mi Viabilidad para este Piso',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: textColor),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(icon, color: textColor, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      viability.verdictLabel,
+                      style: TextStyle(fontSize: 12, color: textColor, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+              if (viability.hasFinancialDna && viability.dtiRatio != null) ...[
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _ViabilityMetric(
+                        label: 'Ratio deuda/ingreso',
+                        value: '${(viability.dtiRatio! * 100).toStringAsFixed(0)}%',
+                        color: textColor,
+                      ),
+                    ),
+                    if (viability.monthlyMortgageEstimate != null)
+                      Expanded(
+                        child: _ViabilityMetric(
+                          label: 'Cuota est.',
+                          value: '${viability.monthlyMortgageEstimate} EUR/mes',
+                          color: textColor,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+              if (!viability.hasFinancialDna) ...[
+                const SizedBox(height: 10),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => context.push('/solvency/wizard'),
+                    child: Text(
+                      'Completar ADN Financiero',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: textColor,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ViabilityMetric extends StatelessWidget {
+  const _ViabilityMetric({required this.label, required this.value, required this.color});
+
+  final String label;
+  final String value;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 10, color: color.withOpacity(0.7))),
+        Text(value, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)),
+      ],
     );
   }
 }

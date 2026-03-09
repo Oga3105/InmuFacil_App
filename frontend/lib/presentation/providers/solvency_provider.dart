@@ -56,6 +56,42 @@ class SolvencyPassport {
   bool get isValid => expiresAt != null && expiresAt!.isAfter(DateTime.now());
 }
 
+class PropertyViability {
+  final int propertyId;
+  final int propertyPrice;
+  final int entryCostEstimate;
+  final String verdict;          // "green" | "amber" | "red" | "insufficient_data"
+  final String verdictLabel;
+  final double? savingsCoveragePct;
+  final double? dtiRatio;
+  final int? monthlyMortgageEstimate;
+  final bool hasFinancialDna;
+
+  const PropertyViability({
+    required this.propertyId,
+    required this.propertyPrice,
+    required this.entryCostEstimate,
+    required this.verdict,
+    required this.verdictLabel,
+    this.savingsCoveragePct,
+    this.dtiRatio,
+    this.monthlyMortgageEstimate,
+    required this.hasFinancialDna,
+  });
+
+  factory PropertyViability.fromJson(Map<String, dynamic> j) => PropertyViability(
+        propertyId: j['property_id'] as int,
+        propertyPrice: j['property_price'] as int,
+        entryCostEstimate: j['entry_cost_estimate'] as int,
+        verdict: j['verdict'] as String,
+        verdictLabel: j['verdict_label'] as String,
+        savingsCoveragePct: (j['savings_coverage_pct'] as num?)?.toDouble(),
+        dtiRatio: (j['dti_ratio'] as num?)?.toDouble(),
+        monthlyMortgageEstimate: j['monthly_mortgage_estimate'] as int?,
+        hasFinancialDna: j['has_financial_dna'] as bool? ?? false,
+      );
+}
+
 class AnonymisedPassport {
   final int buyerId;
   final String? solvencyLevel;
@@ -117,6 +153,24 @@ final mySolvencyProvider = FutureProvider.autoDispose<SolvencyPassport?>((ref) a
   }
 });
 
+/// Fetches property-specific viability for the current buyer. Buyer-only — never shared with seller.
+final propertyViabilityProvider = FutureProvider.autoDispose.family<PropertyViability?, String>((ref, propertyId) async {
+  final token = await _getToken();
+  if (token == null) return null;
+
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      'http://localhost:8000/api/v1/solvency/viability/$propertyId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return PropertyViability.fromJson(resp.data as Map<String, dynamic>);
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 404) return null;
+    rethrow;
+  }
+});
+
 /// Fetches the anonymised buyer passport visible to the seller for a given offer.
 final buyerPassportProvider = FutureProvider.autoDispose.family<AnonymisedPassport?, String>((ref, offerId) async {
   final token = await _getToken();
@@ -150,6 +204,10 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
     required bool hasInitialSavings,
     required bool hasPreApproval,
     String? preApprovalPdfUrl,
+    // ADN Financiero (Sprint V9)
+    int? netMonthlyIncome,
+    int? totalSavings,
+    int? totalMonthlyDebt,
   }) async {
     final token = await _getToken();
     if (token == null) throw Exception('Not authenticated');
@@ -167,6 +225,9 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
         'has_initial_savings': hasInitialSavings,
         'has_pre_approval': hasPreApproval,
         if (preApprovalPdfUrl != null) 'pre_approval_pdf_url': preApprovalPdfUrl,
+        if (netMonthlyIncome != null) 'net_monthly_income': netMonthlyIncome,
+        if (totalSavings != null) 'total_savings': totalSavings,
+        if (totalMonthlyDebt != null) 'total_monthly_debt': totalMonthlyDebt,
       },
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );

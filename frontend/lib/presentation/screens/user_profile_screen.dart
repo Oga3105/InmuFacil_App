@@ -913,13 +913,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         width: double.infinity,
                         child: OutlinedButton(
                           onPressed: () async {
-                            // Toggle suspension via API
-                            final newStatus =
-                                !isSuspended; // If currently suspended, we want to reactivate (active=true) which corresponds to isSuspended=false.
-                            // Wait, isSuspended = !isActive.
-                            // If isSuspended is true -> isActive is false. Reactivate -> isActive = true.
-                            // If isSuspended is false -> isActive is true. Suspend -> isActive = false.
-
                             // TODO: Account suspension via backend when endpoint is ready
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -1027,85 +1020,91 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         }
 
         if (!hasPassport) {
-          return GestureDetector(
-            onTap: () => context.push('/solvency/wizard'),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E3A5F).withOpacity(0.06),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF1E3A5F).withOpacity(0.15)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E3A5F).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
+          return MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.push('/solvency/wizard'),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E3A5F).withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF1E3A5F).withOpacity(0.15)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E3A5F).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.shield_outlined, color: Color(0xFF1E3A5F), size: 24),
                     ),
-                    child: const Icon(Icons.shield_outlined, color: Color(0xFF1E3A5F), size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pasaporte de Solvencia',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F), fontSize: 13),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Completa el asistente para mostrar tu nivel de cualificacion',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.4),
-                        ),
-                      ],
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pasaporte de Solvencia',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F), fontSize: 13),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            'Completa el asistente para mostrar tu nivel de cualificacion',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.4),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Icon(Icons.chevron_right, color: Color(0xFF1E3A5F), size: 20),
-                ],
+                    const Icon(Icons.chevron_right, color: Color(0xFF1E3A5F), size: 20),
+                  ],
+                ),
               ),
             ),
           );
         }
 
-        return GestureDetector(
-          onTap: () => context.push('/solvency/passport'),
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [gradStart, gradEnd],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(color: gradStart.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(levelIcon, color: Colors.white, size: 28),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'PASAPORTE DE SOLVENCIA',
-                        style: TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        'Nivel $levelLabel',
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.push('/solvency/passport'),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [gradStart, gradEnd],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
-              ],
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: gradStart.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(levelIcon, color: Colors.white, size: 28),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'PASAPORTE DE SOLVENCIA',
+                          style: TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
+                        ),
+                        Text(
+                          'Nivel $levelLabel',
+                          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
+                ],
+              ),
             ),
           ),
         );
@@ -3328,131 +3327,6 @@ class _GestionarMenu extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ── Visit card widget ─────────────────────────────────────────────────────────
-
-class _VisitCard extends StatelessWidget {
-  const _VisitCard({
-    required this.offer,
-    required this.isBuyer,
-    required this.otherParty,
-    required this.onTap,
-  });
-
-  final OfferData offer;
-  final bool isBuyer;
-  final String otherParty;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    const kNavy = Color(0xFF1E3A5F);
-    const kNavyLight = Color(0xFFEEF3FA);
-    const kGreen = Color(0xFF16A34A);
-    const kGreenLight = Color(0xFFDCFCE7);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: kGreenLight,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.check_circle, size: 12, color: kGreen),
-                        SizedBox(width: 4),
-                        Text(
-                          'VISITA CONFIRMADA',
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              color: kGreen,
-                              letterSpacing: 0.5),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.chevron_right,
-                      color: Color(0xFF94A3B8), size: 18),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.calendar_today_outlined,
-                      size: 16, color: kNavy),
-                  const SizedBox(width: 6),
-                  Text(
-                    offer.confirmedVisitDate ?? '',
-                    style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: kNavy),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                offer.propertyTitle ?? 'Propiedad',
-                style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF334155),
-                    fontWeight: FontWeight.w500),
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: kNavyLight,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      isBuyer ? 'COMPRADOR' : 'VENDEDOR',
-                      style: const TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          color: kNavy),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Con $otherParty',
-                    style:
-                        const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
