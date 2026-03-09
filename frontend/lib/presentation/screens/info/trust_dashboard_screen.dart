@@ -207,7 +207,7 @@ class TrustDashboardScreen extends ConsumerWidget {
       children: [
         _LevelHeroCard(
           level: level,
-          userName: user?.fullName ?? 'Usuario',
+          userName: user?.name ?? 'Usuario',
           isMultiBuyer: passport.isMultiBuyer,
         ),
         const SizedBox(height: 24),
