@@ -1042,16 +1042,29 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       child: const Icon(Icons.shield_outlined, color: Color(0xFF1E3A5F), size: 24),
                     ),
                     const SizedBox(width: 14),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Pasaporte de Solvencia',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F), fontSize: 13),
+                          Row(
+                            children: [
+                              const Text(
+                                'Pasaporte de Solvencia',
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F), fontSize: 13),
+                              ),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF2563EB),
+                                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                                ),
+                                child: const Text('Solo compradores', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 2),
-                          Text(
+                          const SizedBox(height: 2),
+                          const Text(
                             'Completa el asistente para mostrar tu nivel de cualificacion',
                             style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.4),
                           ),
