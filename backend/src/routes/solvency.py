@@ -45,9 +45,12 @@ class SolvencySubmit(BaseModel):
     has_pre_approval: bool
     pre_approval_pdf_url: Optional[str] = None
     # ADN Financiero (Sprint V9) — quantitative fields, optional for backward compat
-    net_monthly_income: Optional[int] = Field(None, ge=0, description="EUR net monthly income")
-    total_savings: Optional[int] = Field(None, ge=0, description="EUR total liquid savings")
-    total_monthly_debt: Optional[int] = Field(None, ge=0, description="EUR existing monthly debt obligations")
+    # For multi-buyer purchases these values represent the TOTAL of all buyers combined.
+    net_monthly_income: Optional[int] = Field(None, ge=0, description="EUR net monthly income (total of all buyers)")
+    total_savings: Optional[int] = Field(None, ge=0, description="EUR total liquid savings (total of all buyers)")
+    total_monthly_debt: Optional[int] = Field(None, ge=0, description="EUR existing monthly debt obligations (total)")
+    # Multi-buyer flag (Sprint V10)
+    is_multi_buyer: bool = Field(False, description="True when two or more buyers purchase jointly")
 
 
 class PropertyViability(BaseModel):
@@ -87,6 +90,10 @@ class SolvencyPassport(BaseModel):
     expires_at: Optional[datetime]
     # pre_approval_pdf_url is decrypted and returned only here
     pre_approval_pdf_url: Optional[str] = None
+    # Multi-buyer (Sprint V10)
+    is_multi_buyer: bool = False
+    # Derived: True when a second identity verification is required in the timeline
+    needs_second_identity_verification: bool = False
 
 
 class AnonymisedPassport(BaseModel):
@@ -163,6 +170,7 @@ async def get_my_solvency(
         except Exception:
             pdf_url = None
 
+    is_multi = bool(record.is_multi_buyer)
     return SolvencyPassport(
         id=record.id,
         buyer_id=record.buyer_id,
@@ -179,6 +187,8 @@ async def get_my_solvency(
         created_at=record.created_at,
         expires_at=record.expires_at,
         pre_approval_pdf_url=pdf_url,
+        is_multi_buyer=is_multi,
+        needs_second_identity_verification=is_multi,
     )
 
 
@@ -229,6 +239,7 @@ async def submit_solvency(
         record.net_monthly_income_enc = enc_income
         record.total_savings_enc = enc_savings
         record.total_monthly_debt_enc = enc_debt
+        record.is_multi_buyer = body.is_multi_buyer
         record.stress_index = stress
         record.solvency_level = level
         record.expires_at = expires
@@ -247,6 +258,7 @@ async def submit_solvency(
             net_monthly_income_enc=enc_income,
             total_savings_enc=enc_savings,
             total_monthly_debt_enc=enc_debt,
+            is_multi_buyer=body.is_multi_buyer,
             stress_index=stress,
             solvency_level=level,
             expires_at=expires,
@@ -263,6 +275,7 @@ async def submit_solvency(
         except Exception:
             pdf_url = None
 
+    is_multi = bool(record.is_multi_buyer)
     return SolvencyPassport(
         id=record.id,
         buyer_id=record.buyer_id,
@@ -279,6 +292,8 @@ async def submit_solvency(
         created_at=record.created_at,
         expires_at=record.expires_at,
         pre_approval_pdf_url=pdf_url,
+        is_multi_buyer=is_multi,
+        needs_second_identity_verification=is_multi,
     )
 
 

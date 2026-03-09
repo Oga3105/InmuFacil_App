@@ -20,6 +20,9 @@ class SolvencyPassport {
   final String? preApprovalPdfUrl;
   final DateTime? expiresAt;
   final DateTime? createdAt;
+  // Multi-buyer (Sprint V10)
+  final bool isMultiBuyer;
+  final bool needsSecondIdentityVerification;
 
   const SolvencyPassport({
     required this.id,
@@ -35,6 +38,8 @@ class SolvencyPassport {
     this.preApprovalPdfUrl,
     this.expiresAt,
     this.createdAt,
+    this.isMultiBuyer = false,
+    this.needsSecondIdentityVerification = false,
   });
 
   factory SolvencyPassport.fromJson(Map<String, dynamic> j) => SolvencyPassport(
@@ -51,6 +56,8 @@ class SolvencyPassport {
         preApprovalPdfUrl: j['pre_approval_pdf_url'] as String?,
         expiresAt: j['expires_at'] != null ? DateTime.tryParse(j['expires_at'] as String) : null,
         createdAt: j['created_at'] != null ? DateTime.tryParse(j['created_at'] as String) : null,
+        isMultiBuyer: j['is_multi_buyer'] as bool? ?? false,
+        needsSecondIdentityVerification: j['needs_second_identity_verification'] as bool? ?? false,
       );
 
   bool get isValid => expiresAt != null && expiresAt!.isAfter(DateTime.now());
@@ -204,10 +211,12 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
     required bool hasInitialSavings,
     required bool hasPreApproval,
     String? preApprovalPdfUrl,
-    // ADN Financiero (Sprint V9)
+    // ADN Financiero (Sprint V9) — totals for all buyers combined
     int? netMonthlyIncome,
     int? totalSavings,
     int? totalMonthlyDebt,
+    // Multi-buyer (Sprint V10)
+    bool isMultiBuyer = false,
   }) async {
     final token = await _getToken();
     if (token == null) throw Exception('Not authenticated');
@@ -228,6 +237,7 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
         if (netMonthlyIncome != null) 'net_monthly_income': netMonthlyIncome,
         if (totalSavings != null) 'total_savings': totalSavings,
         if (totalMonthlyDebt != null) 'total_monthly_debt': totalMonthlyDebt,
+        'is_multi_buyer': isMultiBuyer,
       },
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );

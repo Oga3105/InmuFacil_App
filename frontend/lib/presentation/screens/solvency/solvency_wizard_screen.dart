@@ -23,6 +23,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
   final _pageController = PageController();
   int _page = 0;
 
+  // Layer 0 — Tipo de compra (Sprint V10)
+  bool? _isMultiBuyer;
+
   // Layer 1 — Disclaimer
   bool _termsAccepted = false;
 
@@ -36,23 +39,26 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
   bool? _hasInitialSavings;
   bool? _hasPreApproval;
 
-  // Layer 4 — ADN Financiero (optional quantitative fields)
+  // Layer 4 — ADN Financiero (optional quantitative fields; totals for all buyers)
   final _incomeCtrl  = TextEditingController();
   final _savingsCtrl = TextEditingController();
   final _debtCtrl    = TextEditingController();
 
+  static const int _totalPages = 5;
+
   bool get _canNext {
     switch (_page) {
-      case 0: return _termsAccepted;
-      case 1: return _knowsExtraCosts != null && _hasEmergencyFund != null;
-      case 2: return _paymentMethod != null && _hasInitialSavings != null && _hasPreApproval != null;
-      case 3: return true; // ADN Financiero is optional
+      case 0: return _isMultiBuyer != null;
+      case 1: return _termsAccepted;
+      case 2: return _knowsExtraCosts != null && _hasEmergencyFund != null;
+      case 3: return _paymentMethod != null && _hasInitialSavings != null && _hasPreApproval != null;
+      case 4: return true; // ADN Financiero is optional
       default: return true;
     }
   }
 
   void _next() {
-    if (_page < 3) {
+    if (_page < _totalPages - 1) {
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
       _submit();
@@ -76,6 +82,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
         netMonthlyIncome: income,
         totalSavings: savings,
         totalMonthlyDebt: debt,
+        isMultiBuyer: _isMultiBuyer ?? false,
       );
       if (mounted) context.go('/solvency/passport');
     } catch (e) {
@@ -182,7 +189,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
         children: [
           // Progress indicator
           LinearProgressIndicator(
-            value: (_page + 1) / 4,
+            value: (_page + 1) / _totalPages,
             backgroundColor: Colors.grey.shade200,
             color: _kNavy,
             minHeight: 4,
@@ -192,12 +199,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             child: Row(
               children: [
                 Text(
-                  'Paso ${_page + 1} de 4',
+                  'Paso ${_page + 1} de $_totalPages',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const Spacer(),
                 Text(
-                  ['Aviso Legal', 'Conciencia Financiera', 'Declaracion', 'ADN Financiero'][_page],
+                  ['Tipo de Compra', 'Aviso Legal', 'Conciencia Financiera', 'Declaracion', 'ADN Financiero'][_page],
                   style: const TextStyle(color: _kNavy, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -209,6 +216,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               physics: const NeverScrollableScrollPhysics(),
               onPageChanged: (p) => setState(() => _page = p),
               children: [
+                _buildPage0(),
                 _buildPage1(),
                 _buildPage2(),
                 _buildPage3(),
@@ -246,16 +254,78 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: isLoading && _page == 3
+                  child: isLoading && _page == _totalPages - 1
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                          _page < 3 ? 'Continuar' : 'Obtener mi Pasaporte',
+                          _page < _totalPages - 1 ? 'Continuar' : 'Obtener mi Pasaporte',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ── Page 0: Tipo de compra ────────────────────────────────────────────────
+
+  Widget _buildPage0() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Tipo de compra',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Para personalizar tu pasaporte necesitamos saber cuantos titulares participan en la compra.',
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+          ),
+          const SizedBox(height: 32),
+          _BuyerTypeCard(
+            selected: _isMultiBuyer == false,
+            icon: Icons.person_outline,
+            title: 'Solo yo',
+            subtitle: 'Compra individual. Solo tu figura como titular.',
+            onTap: () => setState(() => _isMultiBuyer = false),
+          ),
+          const SizedBox(height: 16),
+          _BuyerTypeCard(
+            selected: _isMultiBuyer == true,
+            icon: Icons.group_outlined,
+            title: 'Con alguien mas',
+            subtitle: 'Compra conjunta: pareja, familiar u otro cotitular.',
+            onTap: () => setState(() => _isMultiBuyer = true),
+          ),
+          if (_isMultiBuyer == true) ...[
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: _kNavy.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _kNavy.withOpacity(0.2)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline_rounded, color: _kNavy, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Perfecto. En los siguientes pasos introduce los datos financieros SUMADOS de ambos titulares. Mas adelante solicitaremos la verificacion de identidad del segundo titular.',
+                      style: TextStyle(fontSize: 13, color: _kNavy, height: 1.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -556,21 +626,27 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               const SizedBox(height: 24),
               _MoneyField(
                 controller: _incomeCtrl,
-                label: 'Ingresos netos mensuales',
+                label: _isMultiBuyer == true
+                    ? 'Ingresos netos mensuales (total compradores)'
+                    : 'Ingresos netos mensuales',
                 hint: 'ej. 2.500',
                 icon: Icons.account_balance_wallet_outlined,
               ),
               const SizedBox(height: 16),
               _MoneyField(
                 controller: _savingsCtrl,
-                label: 'Ahorros liquidos totales',
+                label: _isMultiBuyer == true
+                    ? 'Ahorros liquidos totales (suma de compradores)'
+                    : 'Ahorros liquidos totales',
                 hint: 'ej. 50.000',
                 icon: Icons.savings_outlined,
               ),
               const SizedBox(height: 16),
               _MoneyField(
                 controller: _debtCtrl,
-                label: 'Deudas mensuales actuales',
+                label: _isMultiBuyer == true
+                    ? 'Deudas mensuales actuales (total compradores)'
+                    : 'Deudas mensuales actuales',
                 hint: 'ej. 300 (prestamos, tarjetas...)',
                 icon: Icons.credit_card_outlined,
               ),
@@ -830,6 +906,76 @@ class _MoneyField extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: _kNavy, width: 2),
+        ),
+      ),
+    );
+  }
+}
+
+class _BuyerTypeCard extends StatelessWidget {
+  const _BuyerTypeCard({
+    required this.selected,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: selected ? _kNavy.withOpacity(0.06) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? _kNavy : Colors.grey.shade200,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: selected ? _kNavy.withOpacity(0.1) : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: selected ? _kNavy : Colors.grey.shade400, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: selected ? _kNavy : Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  ),
+                ],
+              ),
+            ),
+            if (selected)
+              Icon(Icons.check_circle, color: _kNavy, size: 20),
+          ],
         ),
       ),
     );
