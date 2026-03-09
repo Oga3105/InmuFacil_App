@@ -1377,15 +1377,53 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
                 );
               }
               final level = passport.solvencyLevel ?? 'bronze';
-              final levelLabel = level == 'gold'
-                  ? 'Oro'
-                  : level == 'silver'
-                      ? 'Plata'
-                      : 'Bronce';
+              final (levelLabel, levelColor, levelBg, levelIcon) = switch (level) {
+                'gold'   => ('Oro',   const Color(0xFFB8860B), const Color(0xFFFFFBEB), Icons.emoji_events_outlined),
+                'silver' => ('Plata', const Color(0xFF64748B), const Color(0xFFF8FAFC), Icons.verified_outlined),
+                _        => ('Bronce', const Color(0xFFD97706), const Color(0xFFFFF7ED), Icons.shield_outlined),
+              };
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _SolvencyRow(label: 'Nivel de confianza', value: levelLabel),
+                  // Solvency level badge
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: levelBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: levelColor.withOpacity(0.4)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(levelIcon, color: levelColor, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Nivel $levelLabel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: levelColor,
+                          ),
+                        ),
+                        if (passport.isMultiBuyer) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Compra conjunta',
+                              style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                   _SolvencyRow(
                       label: 'Conoce gastos adicionales',
                       value: passport.knowsExtraCosts ? 'Si' : 'No'),
@@ -1396,8 +1434,8 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
                       label: 'Preaprobacion hipotecaria',
                       value: passport.hasPreApproval ? 'Si' : 'No'),
                   _SolvencyRow(
-                      label: 'Metodo de pago',
-                      value: passport.paymentMethod ?? '-'),
+                      label: 'Financiacion',
+                      value: passport.paymentMethodLabel ?? passport.paymentMethod ?? '-'),
                 ],
               );
             },

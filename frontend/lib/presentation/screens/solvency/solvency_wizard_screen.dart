@@ -11,6 +11,7 @@ const _kNavy     = Color(0xFF2563EB);
 const _kGold     = Color(0xFFB8860B);
 const _kGoldBg   = Color(0xFFFFF8E1);
 const _kGreen    = Color(0xFF16A34A);
+const _kAmber    = Color(0xFFD97706);
 
 class SolvencyWizardScreen extends ConsumerStatefulWidget {
   const SolvencyWizardScreen({super.key});
@@ -269,6 +270,27 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
     );
   }
 
+  // ── Solvency preview (mirrors backend _compute_solvency) ─────────────────
+
+  /// Returns ('gold'|'silver'|'bronze', score) based on current wizard state.
+  (String, int) _previewSolvencyLevel() {
+    int score = 0;
+    if (_knowsExtraCosts == true) score += 1;
+    if (_debtRatio < 0.35) score += 1;
+    if (_hasEmergencyFund == true) score += 1;
+    if (_hasInitialSavings == true) score += 1;
+    if (_paymentMethod == 'cash' || _paymentMethod == 'mortgage_approved') {
+      score += 2;
+    } else if (_paymentMethod == 'mortgage_pending' || _paymentMethod == 'savings_plus_mortgage') {
+      score += 1;
+    }
+    if (_hasPreApproval == true) score += 1;
+
+    if (score >= 6) return ('gold', score);
+    if (score >= 4) return ('silver', score);
+    return ('bronze', score);
+  }
+
   // ── Page 0: Tipo de compra ────────────────────────────────────────────────
 
   Widget _buildPage0() {
@@ -422,7 +444,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
 
               // Costs awareness
               _YesNoQuestion(
-                question: '¿Conoces los gastos adicionales de la compra?\n(ITP/IVA, notaría, gestoría, registro...)',
+                question: _isMultiBuyer == true
+                    ? '¿Habeis tenido en cuenta los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)'
+                    : '¿Conoces los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)',
                 hint: 'Generalmente un 10-15% adicional sobre el precio de compra.',
                 value: _knowsExtraCosts,
                 onChanged: (v) => setState(() => _knowsExtraCosts = v),
@@ -508,7 +532,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
 
               // Emergency fund
               _YesNoQuestion(
-                question: '¿Cuentas con un fondo de emergencia de al menos 3-6 meses de gastos?',
+                question: _isMultiBuyer == true
+                    ? '¿Contais con un fondo de emergencia de al menos 3-6 meses de gastos?'
+                    : '¿Cuentas con un fondo de emergencia de al menos 3-6 meses de gastos?',
                 hint: 'Independiente del dinero para la compra.',
                 value: _hasEmergencyFund,
                 onChanged: (v) => setState(() => _hasEmergencyFund = v),
@@ -551,8 +577,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     ...[
                       ('cash', 'Pago al contado', Icons.payments_outlined),
                       ('mortgage_approved', 'Hipoteca aprobada', Icons.check_circle_outline),
-                      ('mortgage_pending', 'Hipoteca en tramitación', Icons.hourglass_empty_outlined),
+                      ('mortgage_pending', 'Hipoteca en tramitacion', Icons.hourglass_empty_outlined),
+                      ('savings_plus_mortgage', 'Ahorros + hipoteca', Icons.account_balance_outlined),
                       ('house_to_sell', 'Venta de vivienda actual', Icons.home_outlined),
+                      ('bridge_mortgage', 'Hipoteca puente', Icons.swap_horiz_outlined),
                     ].map((opt) => _OptionTile(
                           value: opt.$1,
                           label: opt.$2,
@@ -566,7 +594,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               const SizedBox(height: 24),
 
               _YesNoQuestion(
-                question: '¿Dispones de ahorros iniciales para la entrada y gastos?',
+                question: _isMultiBuyer == true
+                    ? '¿Disponeis de ahorros iniciales para la entrada y gastos?'
+                    : '¿Dispones de ahorros iniciales para la entrada y gastos?',
                 hint: 'Habitualmente entre un 20-30% del precio de la propiedad.',
                 value: _hasInitialSavings,
                 onChanged: (v) => setState(() => _hasInitialSavings = v),
@@ -574,8 +604,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               const SizedBox(height: 24),
 
               _YesNoQuestion(
-                question: '¿Tienes una preaprobación hipotecaria de un banco?',
-                hint: 'Un documento oficial que confirma que el banco te prestaría el dinero.',
+                question: _isMultiBuyer == true
+                    ? '¿Teneis una preaprobacion hipotecaria de un banco?'
+                    : '¿Tienes una preaprobacion hipotecaria de un banco?',
+                hint: 'Un documento oficial que confirma que el banco te prestaria el dinero.',
                 value: _hasPreApproval,
                 onChanged: (v) => setState(() => _hasPreApproval = v),
               ),
@@ -623,7 +655,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+              _SolvencyPreviewCard(level: _previewSolvencyLevel()),
+              const SizedBox(height: 20),
               _MoneyField(
                 controller: _incomeCtrl,
                 label: _isMultiBuyer == true
@@ -907,6 +941,105 @@ class _MoneyField extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: _kNavy, width: 2),
         ),
+      ),
+    );
+  }
+}
+
+// ── Solvency preview semaphore ────────────────────────────────────────────────
+
+class _SolvencyPreviewCard extends StatelessWidget {
+  const _SolvencyPreviewCard({required this.level});
+
+  final (String, int) level;
+
+  @override
+  Widget build(BuildContext context) {
+    final (levelKey, score) = level;
+
+    final Color bgColor;
+    final Color borderColor;
+    final Color iconColor;
+    final IconData icon;
+    final String levelLabel;
+    final String description;
+
+    switch (levelKey) {
+      case 'gold':
+        bgColor = const Color(0xFFFFFBEB);
+        borderColor = const Color(0xFFFCD34D);
+        iconColor = _kGold;
+        icon = Icons.emoji_events_outlined;
+        levelLabel = 'Oro';
+        description = 'Perfil financiero solido. Destaca frente a otros compradores.';
+      case 'silver':
+        bgColor = const Color(0xFFF8FAFC);
+        borderColor = const Color(0xFF94A3B8);
+        iconColor = const Color(0xFF64748B);
+        icon = Icons.verified_outlined;
+        levelLabel = 'Plata';
+        description = 'Buen perfil. Puedes mejorar con preaprobacion hipotecaria o menor endeudamiento.';
+      default:
+        bgColor = const Color(0xFFFFF7ED);
+        borderColor = const Color(0xFFFDBA74);
+        iconColor = _kAmber;
+        icon = Icons.shield_outlined;
+        levelLabel = 'Bronce';
+        description = 'Perfil basico. Completar el ADN Financiero puede mejorar tu puntuacion.';
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: iconColor, size: 26),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Estimacion: ',
+                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                    ),
+                    Text(
+                      'Nivel $levelLabel',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: iconColor,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '$score/7 pts',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

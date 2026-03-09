@@ -107,7 +107,9 @@ class AnonymisedPassport {
   final bool hasInitialSavings;
   final bool hasPreApproval;
   final String? paymentMethod;
+  final String? paymentMethodLabel;   // Sprint V12: human-readable label
   final DateTime? expiresAt;
+  final bool isMultiBuyer;            // Sprint V12
 
   const AnonymisedPassport({
     required this.buyerId,
@@ -117,7 +119,9 @@ class AnonymisedPassport {
     required this.hasInitialSavings,
     required this.hasPreApproval,
     this.paymentMethod,
+    this.paymentMethodLabel,
     this.expiresAt,
+    this.isMultiBuyer = false,
   });
 
   factory AnonymisedPassport.fromJson(Map<String, dynamic> j) => AnonymisedPassport(
@@ -128,7 +132,9 @@ class AnonymisedPassport {
         hasInitialSavings: j['has_initial_savings'] as bool? ?? false,
         hasPreApproval: j['has_pre_approval'] as bool? ?? false,
         paymentMethod: j['payment_method'] as String?,
+        paymentMethodLabel: j['payment_method_label'] as String?,
         expiresAt: j['expires_at'] != null ? DateTime.tryParse(j['expires_at'] as String) : null,
+        isMultiBuyer: j['is_multi_buyer'] as bool? ?? false,
       );
 
   bool get isValid => expiresAt != null && expiresAt!.isAfter(DateTime.now());
