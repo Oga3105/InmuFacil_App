@@ -165,6 +165,8 @@ class PaymentMethod(str, enum.Enum):
     MORTGAGE_PENDING = "mortgage_pending"
     MORTGAGE_APPROVED = "mortgage_approved"
     HOUSE_TO_SELL = "house_to_sell"
+    SAVINGS_PLUS_MORTGAGE = "savings_plus_mortgage"   # Sprint V12
+    BRIDGE_MORTGAGE = "bridge_mortgage"               # Sprint V12
 
 class StressIndex(str, enum.Enum):
     LOW_RISK = "low_risk"

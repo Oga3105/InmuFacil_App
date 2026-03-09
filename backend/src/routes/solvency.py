@@ -96,6 +96,16 @@ class SolvencyPassport(BaseModel):
     needs_second_identity_verification: bool = False
 
 
+_PAYMENT_METHOD_LABELS: dict[str, str] = {
+    "cash": "Pago al contado",
+    "mortgage_pending": "Hipoteca en tramitacion",
+    "mortgage_approved": "Hipoteca aprobada",
+    "house_to_sell": "Venta de vivienda actual",
+    "savings_plus_mortgage": "Ahorros + hipoteca",
+    "bridge_mortgage": "Hipoteca puente",
+}
+
+
 class AnonymisedPassport(BaseModel):
     """Anonymised view for the seller — no salary or private data."""
     solvency_level: Optional[str]
@@ -104,8 +114,10 @@ class AnonymisedPassport(BaseModel):
     has_initial_savings: bool
     has_pre_approval: bool
     payment_method: Optional[str]
+    payment_method_label: Optional[str] = None   # Human-readable label (Sprint V12)
     expires_at: Optional[datetime]
     buyer_id: int
+    is_multi_buyer: bool = False                  # Sprint V12
 
 
 # ============================================================================
@@ -125,8 +137,9 @@ def _compute_solvency(data: SolvencySubmit) -> tuple[StressIndex, SolvencyLevel]
         score += 1
     if data.payment_method in (PaymentMethod.CASH, PaymentMethod.MORTGAGE_APPROVED):
         score += 2
-    elif data.payment_method == PaymentMethod.MORTGAGE_PENDING:
+    elif data.payment_method in (PaymentMethod.MORTGAGE_PENDING, PaymentMethod.SAVINGS_PLUS_MORTGAGE):
         score += 1
+    # HOUSE_TO_SELL and BRIDGE_MORTGAGE score 0 (highest uncertainty)
     if data.has_pre_approval:
         score += 1
 
@@ -480,13 +493,16 @@ async def get_buyer_passport_for_offer(
             detail="El comprador no ha completado su Pasaporte de Solvencia todavia.",
         )
 
+    pm_value = record.payment_method.value if record.payment_method else None
     return AnonymisedPassport(
         solvency_level=record.solvency_level.value if record.solvency_level else None,
         stress_index=record.stress_index.value if record.stress_index else None,
         knows_extra_costs=bool(record.knows_extra_costs),
         has_initial_savings=bool(record.has_initial_savings),
         has_pre_approval=bool(record.has_pre_approval),
-        payment_method=record.payment_method.value if record.payment_method else None,
+        payment_method=pm_value,
+        payment_method_label=_PAYMENT_METHOD_LABELS.get(pm_value) if pm_value else None,
         expires_at=record.expires_at,
         buyer_id=record.buyer_id,
+        is_multi_buyer=bool(record.is_multi_buyer),
     )
