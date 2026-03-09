@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/solvency_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
@@ -925,7 +925,7 @@ class _MoneyField extends StatelessWidget {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
-      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      inputFormatters: [CurrencyInputFormatter()],
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
