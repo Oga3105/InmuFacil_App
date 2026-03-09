@@ -186,7 +186,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               if (isDesktop) {
                  return _buildDesktopLayout(context, property, isFavorite, ref);
               } else {
-                return _buildMobileLayout(context, property, isFavorite, ref);
+                return _buildMobileLayout(context, property, isFavorite, ref, isOwner);
               }
             },
           ),
@@ -266,7 +266,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     );
   }
 
-  Widget _buildMobileLayout(BuildContext context, Property property, bool isFavorite, WidgetRef ref) {
+  Widget _buildMobileLayout(BuildContext context, Property property, bool isFavorite, WidgetRef ref, bool isOwner) {
     return Stack(
       children: [
         SingleChildScrollView(
@@ -796,6 +796,11 @@ class _SummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentUserId = ref.watch(authProvider).user?.id;
+    final isOwner = property.ownerId != null &&
+        currentUserId != null &&
+        property.ownerId == currentUserId;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
