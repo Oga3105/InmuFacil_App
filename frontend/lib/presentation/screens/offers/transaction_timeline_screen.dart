@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
+import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -22,6 +23,15 @@ class TransactionTimelineScreen extends ConsumerWidget {
     // Buyer can withdraw while arras not yet signed (not counter_offer — buyer has dedicated actions there)
     final canWithdraw = isBuyer &&
         (s == 'pending' || s == 'accepted' || s == 'signing_pending');
+    // Multi-buyer: check if a second identity verification step is needed
+    final passportAsync = isBuyer
+        ? ref.watch(solvency_prov.mySolvencyProvider)
+        : const AsyncData<solvency_prov.SolvencyPassport?>(null);
+    final needsSecondIdentity = passportAsync.when(
+      data: (p) => p?.needsSecondIdentityVerification ?? false,
+      loading: () => false,
+      error: (_, __) => false,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -67,6 +77,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   child: _TimelineWidget(steps: _buildSteps(
                     context,
                     offer.status,
+                    isBuyer: isBuyer,
+                    needsSecondIdentity: needsSecondIdentity,
                     confirmedVisitDate: offer.confirmedVisitDate,
                     requestedVisitDate: offer.requestedVisitDate,
                     visitStatus: offer.visitStatus,
@@ -187,6 +199,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
   List<_TimelineStep> _buildSteps(
     BuildContext context,
     String status, {
+    required bool isBuyer,
+    bool needsSecondIdentity = false,
     String? confirmedVisitDate,
     String? requestedVisitDate,
     String? visitStatus,
@@ -263,8 +277,25 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
         state: stepState(1),
-        // No CTA: automatic process handled by InmuFacil
+        ctaLabel: isBuyer && stage == 1 ? 'Completar pasaporte' : null,
+        ctaIcon: isBuyer && stage == 1 ? Icons.verified_user_outlined : null,
+        ctaCallback: isBuyer && stage == 1
+            ? () => context.go('/solvency/wizard')
+            : null,
       ),
+      if (needsSecondIdentity)
+        _TimelineStep(
+          title: 'Verificacion de Identidad — 2° Titular',
+          subtitle: stage > 1
+              ? 'Identidad del segundo titular verificada'
+              : stage == 1
+                  ? 'Pendiente: el segundo comprador debe completar la verificacion'
+                  : 'Se activara tras la verificacion de solvencia',
+          description: stage == 1
+              ? 'Para que el contrato de arras sea legalmente vinculante, el segundo titular debe verificar su identidad (DNI + prueba de vida) a traves del enlace que se enviara por correo.'
+              : null,
+          state: stepState(1),
+        ),
       _TimelineStep(
         title: 'Contrato de Arras',
         subtitle: stage > 2

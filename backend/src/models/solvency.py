@@ -43,6 +43,10 @@ class BuyerSolvency(Base):
     # AES-256-GCM encrypted URL — decrypted only for the buyer themselves
     pre_approval_pdf_url_encrypted = Column(String, nullable=True)
 
+    # --- Multi-buyer flag (Sprint V10) ---
+    # True when two or more buyers purchase jointly. Financial fields store TOTALS.
+    is_multi_buyer = Column(Boolean, nullable=False, default=False, server_default="false")
+
     # --- ADN Financiero (Sprint V9) — AES-256-GCM encrypted integers stored as text ---
     # Never stored in plain text. Decrypted only server-side for viability calculation.
     net_monthly_income_enc = Column(String, nullable=True)   # EUR/month net income

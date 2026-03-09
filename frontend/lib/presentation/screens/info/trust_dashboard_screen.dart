@@ -205,7 +205,11 @@ class TrustDashboardScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _LevelHeroCard(level: level, userName: user?.fullName ?? 'Usuario'),
+        _LevelHeroCard(
+          level: level,
+          userName: user?.fullName ?? 'Usuario',
+          isMultiBuyer: passport.isMultiBuyer,
+        ),
         const SizedBox(height: 24),
         _TrustFactorsCard(passport: passport),
         const SizedBox(height: 20),
@@ -222,10 +226,15 @@ class TrustDashboardScreen extends ConsumerWidget {
 // ── Sub-widgets ────────────────────────────────────────────────────────────────
 
 class _LevelHeroCard extends StatelessWidget {
-  const _LevelHeroCard({required this.level, required this.userName});
+  const _LevelHeroCard({
+    required this.level,
+    required this.userName,
+    this.isMultiBuyer = false,
+  });
 
   final _TrustLevel level;
   final String userName;
+  final bool isMultiBuyer;
 
   @override
   Widget build(BuildContext context) {
@@ -261,6 +270,26 @@ class _LevelHeroCard extends StatelessWidget {
             'Nivel de confianza de $userName',
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
+          if (isMultiBuyer) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withOpacity(0.5)),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.group, color: Colors.white, size: 14),
+                  SizedBox(width: 5),
+                  Text('Solvencia Conjunta',
+                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Text(
             config.description,
