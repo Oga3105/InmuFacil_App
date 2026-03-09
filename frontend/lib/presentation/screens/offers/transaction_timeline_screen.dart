@@ -32,6 +32,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
+    // Passport is considered complete when it exists and has not expired
+    final hasPassport = passportAsync.when(
+      data: (p) => p != null && p.isValid,
+      loading: () => true, // avoid CTA flicker while loading
+      error: (_, __) => false,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -78,6 +84,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     context,
                     offer.status,
                     isBuyer: isBuyer,
+                    hasPassport: hasPassport,
                     needsSecondIdentity: needsSecondIdentity,
                     confirmedVisitDate: offer.confirmedVisitDate,
                     requestedVisitDate: offer.requestedVisitDate,
@@ -200,6 +207,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     BuildContext context,
     String status, {
     required bool isBuyer,
+    bool hasPassport = false,
     bool needsSecondIdentity = false,
     String? confirmedVisitDate,
     String? requestedVisitDate,
@@ -277,9 +285,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
         state: stepState(1),
-        ctaLabel: isBuyer && stage == 1 ? 'Completar pasaporte' : null,
-        ctaIcon: isBuyer && stage == 1 ? Icons.verified_user_outlined : null,
-        ctaCallback: isBuyer && stage == 1
+        ctaLabel: isBuyer && stage == 1 && !hasPassport ? 'Completar pasaporte' : null,
+        ctaIcon: isBuyer && stage == 1 && !hasPassport ? Icons.verified_user_outlined : null,
+        ctaCallback: isBuyer && stage == 1 && !hasPassport
             ? () => context.go('/solvency/wizard')
             : null,
       ),
