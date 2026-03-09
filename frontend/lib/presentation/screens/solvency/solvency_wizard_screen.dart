@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/solvency_provider.dart';
+import '../../widgets/common/app_bar_back_button.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kNavy     = Color(0xFF1E3A5F);
@@ -33,17 +35,23 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
   bool? _hasInitialSavings;
   bool? _hasPreApproval;
 
+  // Layer 4 — ADN Financiero (optional quantitative fields)
+  final _incomeCtrl  = TextEditingController();
+  final _savingsCtrl = TextEditingController();
+  final _debtCtrl    = TextEditingController();
+
   bool get _canNext {
     switch (_page) {
       case 0: return _termsAccepted;
       case 1: return _knowsExtraCosts != null && _hasEmergencyFund != null;
       case 2: return _paymentMethod != null && _hasInitialSavings != null && _hasPreApproval != null;
+      case 3: return true; // ADN Financiero is optional
       default: return true;
     }
   }
 
   void _next() {
-    if (_page < 2) {
+    if (_page < 3) {
       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
     } else {
       _submit();
@@ -51,6 +59,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
   }
 
   Future<void> _submit() async {
+    final income = int.tryParse(_incomeCtrl.text.replaceAll('.', '').replaceAll(',', ''));
+    final savings = int.tryParse(_savingsCtrl.text.replaceAll('.', '').replaceAll(',', ''));
+    final debt = int.tryParse(_debtCtrl.text.replaceAll('.', '').replaceAll(',', ''));
+
     try {
       await ref.read(solvencyNotifierProvider.notifier).submit(
         termsAccepted: _termsAccepted,
@@ -60,6 +72,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
         paymentMethod: _paymentMethod!,
         hasInitialSavings: _hasInitialSavings!,
         hasPreApproval: _hasPreApproval!,
+        netMonthlyIncome: income,
+        totalSavings: savings,
+        totalMonthlyDebt: debt,
       );
       if (mounted) context.go('/solvency/passport');
     } catch (e) {
@@ -74,6 +89,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
   @override
   void dispose() {
     _pageController.dispose();
+    _incomeCtrl.dispose();
+    _savingsCtrl.dispose();
+    _debtCtrl.dispose();
     super.dispose();
   }
 
@@ -87,24 +105,44 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: _kNavy),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/profile'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarCloseButton(
+            onPressed: () => context.canPop() ? context.pop() : context.go('/profile'),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 28),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Facil', style: TextStyle(color: Color(0xFF16A34A))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
-        ),
-        title: const Text(
-          'Pasaporte de Solvencia Consciente',
-          style: TextStyle(color: _kNavy, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
       body: Column(
         children: [
           // Progress indicator
           LinearProgressIndicator(
-            value: (_page + 1) / 3,
+            value: (_page + 1) / 4,
             backgroundColor: Colors.grey.shade200,
             color: _kNavy,
             minHeight: 4,
@@ -114,12 +152,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             child: Row(
               children: [
                 Text(
-                  'Paso ${_page + 1} de 3',
+                  'Paso ${_page + 1} de 4',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const Spacer(),
                 Text(
-                  ['Aviso Legal', 'Conciencia Financiera', 'Declaración'][_page],
+                  ['Aviso Legal', 'Conciencia Financiera', 'Declaracion', 'ADN Financiero'][_page],
                   style: const TextStyle(color: _kNavy, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -134,6 +172,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                 _buildPage1(),
                 _buildPage2(),
                 _buildPage3(),
+                _buildPage4(),
               ],
             ),
           ),
@@ -167,10 +206,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: isLoading && _page == 2
+                  child: isLoading && _page == 3
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                          _page < 2 ? 'Continuar' : 'Obtener mi Pasaporte',
+                          _page < 3 ? 'Continuar' : 'Obtener mi Pasaporte',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                 ),
@@ -436,6 +475,77 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
       ),
     );
   }
+
+  // ── Page 4: ADN Financiero (optional) ───────────────────────────────────────
+
+  Widget _buildPage4() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _SectionHeader(
+                icon: Icons.analytics_outlined,
+                title: 'ADN Financiero',
+                subtitle: 'Calculo personalizado de viabilidad — opcional y privado',
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0FDF4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF86EFAC)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.lock_outline, color: Color(0xFF16A34A), size: 18),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Estos datos se cifran con AES-256. El vendedor NUNCA ve tus ingresos ni deudas — solo recibe el resultado de viabilidad (Verde/Ambar/Rojo).',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF166534), height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              _MoneyField(
+                controller: _incomeCtrl,
+                label: 'Ingresos netos mensuales',
+                hint: 'ej. 2.500',
+                icon: Icons.account_balance_wallet_outlined,
+              ),
+              const SizedBox(height: 16),
+              _MoneyField(
+                controller: _savingsCtrl,
+                label: 'Ahorros liquidos totales',
+                hint: 'ej. 50.000',
+                icon: Icons.savings_outlined,
+              ),
+              const SizedBox(height: 16),
+              _MoneyField(
+                controller: _debtCtrl,
+                label: 'Deudas mensuales actuales',
+                hint: 'ej. 300 (prestamos, tarjetas...)',
+                icon: Icons.credit_card_outlined,
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Si prefieres no rellenar estos campos ahora, puedes hacerlo mas adelante actualizando tu pasaporte.',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade500, height: 1.5),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ── Reusable sub-widgets ──────────────────────────────────────────────────────
@@ -640,6 +750,46 @@ class _OptionTile extends StatelessWidget {
             if (selected)
               const Icon(Icons.check_circle, color: _kNavy, size: 18),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _MoneyField extends StatelessWidget {
+  const _MoneyField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, color: _kNavy, size: 20),
+        suffixText: 'EUR',
+        labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _kNavy, width: 2),
         ),
       ),
     );

@@ -3,9 +3,11 @@ Solvency Router — Pasaporte de Solvencia Consciente
 Handles buyer self-qualification and anonymised seller passport views.
 
 Endpoints:
-  GET  /solvency/me                       Buyer: fetch own passport
-  POST /solvency/me                       Buyer: create/update passport (wizard)
-  GET  /solvency/offer/{offer_id}/buyer   Seller: anonymised buyer passport for an offer
+  GET  /solvency/me                          Buyer: fetch own passport
+  POST /solvency/me                          Buyer: create/update passport (wizard)
+  GET  /solvency/viability/{property_id}     Buyer: property-specific viability calculation
+  POST /solvency/offer/{offer_id}/accept     Seller: accept buyer solvency to unlock timeline
+  GET  /solvency/offer/{offer_id}/buyer      Seller: anonymised buyer passport for an offer
 """
 from __future__ import annotations
 
@@ -42,6 +44,27 @@ class SolvencySubmit(BaseModel):
     has_initial_savings: bool
     has_pre_approval: bool
     pre_approval_pdf_url: Optional[str] = None
+    # ADN Financiero (Sprint V9) — quantitative fields, optional for backward compat
+    net_monthly_income: Optional[int] = Field(None, ge=0, description="EUR net monthly income")
+    total_savings: Optional[int] = Field(None, ge=0, description="EUR total liquid savings")
+    total_monthly_debt: Optional[int] = Field(None, ge=0, description="EUR existing monthly debt obligations")
+
+
+class PropertyViability(BaseModel):
+    """Buyer-specific viability result for a given property. Never sent to seller."""
+    property_id: int
+    property_price: int
+    # Entry cost = price * 1.12 (10% taxes ITP/IVA + 2% notary/registry)
+    entry_cost_estimate: int
+    # Viability verdict
+    verdict: str          # "green" | "amber" | "red" | "insufficient_data"
+    verdict_label: str    # Human-readable Spanish label
+    # Breakdown (shown to buyer only)
+    savings_coverage_pct: Optional[float] = None   # savings / entry_cost * 100
+    dti_ratio: Optional[float] = None              # total_monthly_payment / net_income
+    monthly_mortgage_estimate: Optional[int] = None
+    # Privacy flag: quantitative data available
+    has_financial_dna: bool
 
 
 class SolvencyPassport(BaseModel):
@@ -181,6 +204,11 @@ async def submit_solvency(
     if body.pre_approval_pdf_url:
         encrypted_pdf = encrypt_data(body.pre_approval_pdf_url)
 
+    # Encrypt ADN Financiero fields (Sprint V9)
+    enc_income = encrypt_data(str(body.net_monthly_income)) if body.net_monthly_income is not None else None
+    enc_savings = encrypt_data(str(body.total_savings)) if body.total_savings is not None else None
+    enc_debt = encrypt_data(str(body.total_monthly_debt)) if body.total_monthly_debt is not None else None
+
     now = datetime.now(timezone.utc)
     expires = now + timedelta(days=_DOCUMENT_TTL_DAYS)
 
@@ -198,6 +226,9 @@ async def submit_solvency(
         record.has_initial_savings = body.has_initial_savings
         record.has_pre_approval = body.has_pre_approval
         record.pre_approval_pdf_url_encrypted = encrypted_pdf
+        record.net_monthly_income_enc = enc_income
+        record.total_savings_enc = enc_savings
+        record.total_monthly_debt_enc = enc_debt
         record.stress_index = stress
         record.solvency_level = level
         record.expires_at = expires
@@ -213,6 +244,9 @@ async def submit_solvency(
             has_initial_savings=body.has_initial_savings,
             has_pre_approval=body.has_pre_approval,
             pre_approval_pdf_url_encrypted=encrypted_pdf,
+            net_monthly_income_enc=enc_income,
+            total_savings_enc=enc_savings,
+            total_monthly_debt_enc=enc_debt,
             stress_index=stress,
             solvency_level=level,
             expires_at=expires,
@@ -245,6 +279,113 @@ async def submit_solvency(
         created_at=record.created_at,
         expires_at=record.expires_at,
         pre_approval_pdf_url=pdf_url,
+    )
+
+
+# ── Mortgage payment formula (30 years, 3% annual rate) ──────────────────────
+_ANNUAL_RATE = 0.03
+_MONTHS = 360
+
+
+def _monthly_mortgage(principal: float) -> int:
+    """Calculates monthly payment using standard amortization formula."""
+    r = _ANNUAL_RATE / 12
+    payment = principal * r * (1 + r) ** _MONTHS / ((1 + r) ** _MONTHS - 1)
+    return int(payment)
+
+
+def _decrypt_int(enc: Optional[str]) -> Optional[int]:
+    if not enc:
+        return None
+    try:
+        return int(decrypt_data(enc))
+    except Exception:
+        return None
+
+
+@router.get("/viability/{property_id}", response_model=PropertyViability)
+async def get_property_viability(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer-only: calculates property-specific financial viability.
+    Privacy: this result is NEVER shared with the seller.
+    Formula:
+      entry_cost = price * 1.12  (10% taxes + 2% notary/registry)
+      mortgage   = price * 0.80  (80% LTV)
+      monthly_mortgage = amortization(mortgage, 30yr, 3%)
+      dti = (monthly_mortgage + total_monthly_debt) / net_monthly_income
+      verdict = green if savings >= entry_cost*0.20 AND dti <= 0.35
+                amber  if savings >= entry_cost*0.15 AND dti <= 0.40
+                red    otherwise
+    """
+    prop = db.query(Property).filter(Property.id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    passport = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == current_user.id
+    ).first()
+
+    price = int(prop.price)
+    entry_cost = int(price * 1.12)
+
+    if not passport:
+        return PropertyViability(
+            property_id=property_id,
+            property_price=price,
+            entry_cost_estimate=entry_cost,
+            verdict="insufficient_data",
+            verdict_label="Completa tu Pasaporte de Solvencia para ver tu viabilidad",
+            has_financial_dna=False,
+        )
+
+    income = _decrypt_int(passport.net_monthly_income_enc)
+    savings = _decrypt_int(passport.total_savings_enc)
+    debt = _decrypt_int(passport.total_monthly_debt_enc) or 0
+
+    if income is None or savings is None:
+        # Qualitative passport exists but no quantitative ADN Financiero
+        return PropertyViability(
+            property_id=property_id,
+            property_price=price,
+            entry_cost_estimate=entry_cost,
+            verdict="insufficient_data",
+            verdict_label="Actualiza tu pasaporte con tus datos financieros para ver la viabilidad exacta",
+            has_financial_dna=False,
+        )
+
+    mortgage_principal = price * 0.80
+    monthly_mortgage = _monthly_mortgage(mortgage_principal)
+    total_monthly_payment = monthly_mortgage + debt
+    dti = total_monthly_payment / income if income > 0 else 999.0
+    savings_pct = savings / entry_cost * 100 if entry_cost > 0 else 0.0
+
+    # Verdict logic
+    savings_ok = savings >= entry_cost * 0.20  # Covers at least 20% entry
+    savings_min = savings >= entry_cost * 0.15  # Covers at least 15% entry
+    if savings_ok and dti <= 0.35:
+        verdict = "green"
+        verdict_label = "Viabilidad alta — cumples los criterios bancarios estandar"
+    elif savings_min and dti <= 0.40:
+        verdict = "amber"
+        verdict_label = "Viabilidad media — posible con buen historial crediticio"
+    else:
+        verdict = "red"
+        verdict_label = "Viabilidad baja — cuota o ahorros por debajo del umbral recomendado"
+
+    return PropertyViability(
+        property_id=property_id,
+        property_price=price,
+        entry_cost_estimate=entry_cost,
+        verdict=verdict,
+        verdict_label=verdict_label,
+        savings_coverage_pct=round(savings_pct, 1),
+        dti_ratio=round(dti, 3),
+        monthly_mortgage_estimate=monthly_mortgage,
+        has_financial_dna=True,
     )
 
 
