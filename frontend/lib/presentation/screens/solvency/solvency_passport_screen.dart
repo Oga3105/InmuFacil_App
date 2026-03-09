@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/solvency_provider.dart';
+import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kNavy  = Color(0xFF1E3A5F);
+const _kNavy  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
 
 class SolvencyPassportScreen extends ConsumerWidget {
@@ -20,17 +22,76 @@ class SolvencyPassportScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: _kNavy, size: 20),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/profile'),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => context.canPop() ? context.pop() : context.go('/profile'),
+          ),
         ),
+        title: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 28),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Facil', style: TextStyle(color: Color(0xFF16A34A))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _kNavy,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _kNavy.withOpacity(0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 4),
+          const UserAvatarMenu(),
+          const SizedBox(width: 16),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
-        ),
-        title: const Text(
-          'Mi Pasaporte de Solvencia',
-          style: TextStyle(color: _kNavy, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
       body: async.when(
@@ -190,13 +251,13 @@ class SolvencyPassportScreen extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: (daysLeft > 30 ? _kGreen : Colors.orange).withOpacity(0.25),
+                            color: daysLeft > 30 ? _kGreen : Colors.orange.shade700,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             daysLeft > 30 ? 'Valido' : 'Proxima caducidad',
-                            style: TextStyle(
-                              color: daysLeft > 30 ? Colors.white : Colors.orange.shade100,
+                            style: const TextStyle(
+                              color: Colors.white,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -427,11 +488,13 @@ _LevelConfig _levelConfig(String level) {
 
 String _paymentLabel(String? method) {
   switch (method) {
-    case 'cash':              return 'Pago al contado';
-    case 'mortgage_approved': return 'Hipoteca aprobada';
-    case 'mortgage_pending':  return 'Hipoteca en tramite';
-    case 'house_to_sell':     return 'Venta de vivienda';
-    default:                  return 'No especificado';
+    case 'cash':                   return 'Pago al contado';
+    case 'mortgage_approved':      return 'Hipoteca aprobada';
+    case 'mortgage_pending':       return 'Hipoteca en tramite';
+    case 'house_to_sell':          return 'Venta de vivienda';
+    case 'savings_plus_mortgage':  return 'Ahorros + hipoteca';
+    case 'bridge_mortgage':        return 'Hipoteca puente';
+    default:                       return 'No especificado';
   }
 }
 
