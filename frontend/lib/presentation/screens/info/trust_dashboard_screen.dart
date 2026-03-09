@@ -112,12 +112,38 @@ class TrustDashboardScreen extends ConsumerWidget {
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
       ),
-      body: solvencyAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator(color: _kBlue)),
-        error: (_, __) => _buildNoPassport(context),
-        data: (passport) => passport == null
-            ? _buildNoPassport(context)
-            : _buildDashboard(context, passport, currentUser),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: _kBlue.withOpacity(0.07),
+              border: Border(bottom: BorderSide(color: _kBlue.withOpacity(0.15))),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded, size: 16, color: _kBlue),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Este pasaporte es exclusivo para compradores. Solo es necesario si tu intencion es adquirir una propiedad.',
+                    style: TextStyle(fontSize: 12, color: _kBlue, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: solvencyAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator(color: _kBlue)),
+              error: (_, __) => _buildNoPassport(context),
+              data: (passport) => passport == null
+                  ? _buildNoPassport(context)
+                  : _buildDashboard(context, passport, currentUser),
+            ),
+          ),
+        ],
       ),
     );
   }
