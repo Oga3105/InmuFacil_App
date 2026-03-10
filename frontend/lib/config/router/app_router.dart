@@ -20,6 +20,7 @@ import '../../presentation/screens/offers/offer_management_screen.dart';
 import '../../presentation/screens/offers/transaction_timeline_screen.dart';
 import '../../presentation/screens/solvency/solvency_wizard_screen.dart';
 import '../../presentation/screens/solvency/solvency_passport_screen.dart';
+import '../../presentation/screens/solvency/second_buyer_screen.dart';
 import '../../presentation/providers/offers_provider.dart';
 import '../../presentation/screens/offers/arras_interview_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
@@ -219,6 +220,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/solvency/passport',
         name: 'solvency-passport',
         builder: (context, state) => const SolvencyPassportScreen(),
+      ),
+      GoRoute(
+        path: '/solvency/second-buyer',
+        name: 'solvency-second-buyer',
+        builder: (context, state) => const SecondBuyerScreen(),
       ),
 
       // Contracts (Hito 12 Placeholder)

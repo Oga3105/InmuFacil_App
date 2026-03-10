@@ -32,6 +32,18 @@ class TransactionTimelineScreen extends ConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
+    // Passport is considered complete when it exists and has not expired
+    final hasPassport = passportAsync.when(
+      data: (p) => p != null && p.isValid,
+      loading: () => true, // avoid CTA flicker while loading
+      error: (_, __) => false,
+    );
+    // Multi-buyer: buyer marked compra conjunta in their solvency wizard
+    final isMultiBuyer = passportAsync.when(
+      data: (p) => p?.isMultiBuyer ?? false,
+      loading: () => false,
+      error: (_, __) => false,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -78,15 +90,25 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     context,
                     offer.status,
                     isBuyer: isBuyer,
+                    hasPassport: hasPassport,
                     needsSecondIdentity: needsSecondIdentity,
+                    isMultiBuyer: isMultiBuyer,
                     confirmedVisitDate: offer.confirmedVisitDate,
                     requestedVisitDate: offer.requestedVisitDate,
                     visitStatus: offer.visitStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: offer)
                         : null,
-                    withdrawAction: canWithdraw
-                        ? _WithdrawOfferButton(offer: offer)
+                    // Withdraw in step 0 only for pending/counter_offer
+                    withdrawAction:
+                        canWithdraw && (s == 'pending' || s == 'counter_offer')
+                            ? _WithdrawOfferButton(offer: offer)
+                            : null,
+                    // Solvency step actions: seller sees passport+reject, buyer can withdraw
+                    solvencyActionsWidget: s == 'accepted'
+                        ? (!isBuyer
+                            ? _SellerSolvencySection(offer: offer)
+                            : _WithdrawOfferButton(offer: offer))
                         : null,
                   )),
                 ),
@@ -200,12 +222,15 @@ class TransactionTimelineScreen extends ConsumerWidget {
     BuildContext context,
     String status, {
     required bool isBuyer,
+    bool hasPassport = false,
     bool needsSecondIdentity = false,
+    bool isMultiBuyer = false,
     String? confirmedVisitDate,
     String? requestedVisitDate,
     String? visitStatus,
     Widget? buyerActions,
     Widget? withdrawAction,
+    Widget? solvencyActionsWidget,
   }) {
     final s = status.toLowerCase();
 
@@ -277,11 +302,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
         state: stepState(1),
-        ctaLabel: isBuyer && stage == 1 ? 'Completar pasaporte' : null,
-        ctaIcon: isBuyer && stage == 1 ? Icons.verified_user_outlined : null,
-        ctaCallback: isBuyer && stage == 1
+        ctaLabel: isBuyer && stage == 1 && !hasPassport
+            ? 'Completar pasaporte'
+            : null,
+        ctaIcon: isBuyer && stage == 1 && !hasPassport
+            ? Icons.verified_user_outlined
+            : null,
+        ctaCallback: isBuyer && stage == 1 && !hasPassport
             ? () => context.go('/solvency/wizard')
             : null,
+        actionsWidget: solvencyActionsWidget,
       ),
       if (needsSecondIdentity)
         _TimelineStep(
@@ -295,6 +325,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
               ? 'Para que el contrato de arras sea legalmente vinculante, el segundo titular debe verificar su identidad (DNI + prueba de vida) a traves del enlace que se enviara por correo.'
               : null,
           state: stepState(1),
+          // Buyer can initiate second-buyer data entry from here
+          ctaLabel: isBuyer && stage == 1 && isMultiBuyer
+              ? 'Añadir datos del 2° comprador'
+              : null,
+          ctaIcon: isBuyer && stage == 1 && isMultiBuyer
+              ? Icons.person_add_alt_1_outlined
+              : null,
+          ctaCallback: isBuyer && stage == 1 && isMultiBuyer
+              ? () => context.push('/solvency/second-buyer')
+              : null,
         ),
       _TimelineStep(
         title: 'Contrato de Arras',
@@ -1324,6 +1364,319 @@ class _BuyerCounterOfferActionsState
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Seller solvency section (embedded in solvency timeline step) ──────────────
+
+class _SellerSolvencySection extends ConsumerStatefulWidget {
+  const _SellerSolvencySection({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_SellerSolvencySection> createState() =>
+      _SellerSolvencySectionState();
+}
+
+class _SellerSolvencySectionState
+    extends ConsumerState<_SellerSolvencySection> {
+  bool _loading = false;
+  bool _accepting = false;
+
+  Future<void> _acceptSolvency(BuildContext context) async {
+    setState(() => _accepting = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .acceptSolvency(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Solvencia aceptada')),
+        );
+        ref.invalidate(receivedOffersProvider);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al aceptar la solvencia')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _accepting = false);
+    }
+  }
+
+  Future<void> _confirmReject(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Rechazar oferta'),
+        content: const Text(
+            'El comprador sera notificado de que su oferta ha sido rechazada.'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rechazar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .reject(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Oferta rechazada')),
+        );
+        context.go('/profile');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al rechazar la oferta')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final passportAsync =
+        ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF86EFAC)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.verified_user_outlined,
+                  color: Color(0xFF16A34A), size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Solvencia del comprador',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF166534)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          passportAsync.when(
+            loading: () => const Center(
+                child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))),
+            error: (_, __) => const Text(
+              'El comprador aun no tiene pasaporte de solvencia.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
+            data: (passport) {
+              if (passport == null) {
+                return const Text(
+                  'El comprador aun no ha completado el pasaporte de solvencia.',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                );
+              }
+              final level = passport.solvencyLevel ?? 'bronze';
+              final (levelLabel, levelColor, levelBg, levelIcon) =
+                  switch (level) {
+                'gold' => (
+                  'Oro',
+                  const Color(0xFFB8860B),
+                  const Color(0xFFFFFBEB),
+                  Icons.emoji_events_outlined
+                ),
+                'silver' => (
+                  'Plata',
+                  const Color(0xFF64748B),
+                  const Color(0xFFF8FAFC),
+                  Icons.verified_outlined
+                ),
+                _ => (
+                  'Bronce',
+                  const Color(0xFFD97706),
+                  const Color(0xFFFFF7ED),
+                  Icons.shield_outlined
+                ),
+              };
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: levelBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: levelColor.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(levelIcon, color: levelColor, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Nivel $levelLabel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: levelColor,
+                          ),
+                        ),
+                        if (passport.isMultiBuyer) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Compra conjunta',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  _SolvencyRowCompact('Conoce gastos adicionales',
+                      passport.knowsExtraCosts ? 'Si' : 'No'),
+                  _SolvencyRowCompact('Ahorros iniciales',
+                      passport.hasInitialSavings ? 'Si' : 'No'),
+                  _SolvencyRowCompact('Preaprobacion hipotecaria',
+                      passport.hasPreApproval ? 'Si' : 'No'),
+                  _SolvencyRowCompact(
+                      'Financiacion',
+                      passport.paymentMethodLabel ??
+                          passport.paymentMethod ??
+                          '-'),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: (_accepting || _loading)
+                      ? null
+                      : () => _acceptSolvency(context),
+                  icon: _accepting
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.verified_user_outlined, size: 16),
+                  label: const Text('Aceptar Solvencia',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF16A34A),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                onPressed: (_loading || _accepting)
+                    ? null
+                    : () => _confirmReject(context),
+                icon: _loading
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.cancel_outlined, size: 16),
+                label: const Text('Rechazar',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SolvencyRowCompact extends StatelessWidget {
+  const _SolvencyRowCompact(this.label, this.value);
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 210,
+            child: Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 12, color: Color(0xFF64748B)),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF166534)),
+          ),
+        ],
+      ),
     );
   }
 }

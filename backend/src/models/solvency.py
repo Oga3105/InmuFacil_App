@@ -53,6 +53,13 @@ class BuyerSolvency(Base):
     total_savings_enc = Column(String, nullable=True)         # EUR total liquid savings
     total_monthly_debt_enc = Column(String, nullable=True)    # EUR/month existing debt obligations
 
+    # --- Second buyer identity (Sprint V11) — AES-256-GCM encrypted PII ---
+    # Populated via POST /solvency/second-buyer. Separate from the primary wizard.
+    second_buyer_name_enc = Column(String, nullable=True)
+    second_buyer_dni_enc = Column(String, nullable=True)
+    second_buyer_email_enc = Column(String, nullable=True)
+    second_buyer_verified_at = Column(DateTime(timezone=True), nullable=True)
+
     # --- Computed scores ---
     stress_index = Column(Enum(StressIndex), nullable=True)
     solvency_level = Column(Enum(SolvencyLevel), nullable=True)

@@ -164,11 +164,23 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
     await refresh();
   }
 
+  Future<void> reject(String offerId) async {
+    await _dio.post('/offers/$offerId/reject');
+    await refresh();
+  }
+
   /// Enable chat for an offer.
   Future<void> enableChat(String offerId) async {
     await _dio.post('/offers/$offerId/chat/enable');
     // Refresh chat list so the conversation appears in the inbox
     ref.invalidate(chatListProvider);
+  }
+
+  /// Seller accepts the buyer's solvency passport to unlock the timeline.
+  Future<void> acceptSolvency(String offerId) async {
+    // Use full URL — solvency router has a different prefix than offers router
+    await _dio.post('${_kOffersApiBaseUrl}/solvency/offer/$offerId/accept');
+    await refresh();
   }
 }
 

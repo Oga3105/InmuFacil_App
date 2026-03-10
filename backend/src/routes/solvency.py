@@ -96,6 +96,16 @@ class SolvencyPassport(BaseModel):
     needs_second_identity_verification: bool = False
 
 
+_PAYMENT_METHOD_LABELS: dict[str, str] = {
+    "cash": "Pago al contado",
+    "mortgage_pending": "Hipoteca en tramitacion",
+    "mortgage_approved": "Hipoteca aprobada",
+    "house_to_sell": "Venta de vivienda actual",
+    "savings_plus_mortgage": "Ahorros + hipoteca",
+    "bridge_mortgage": "Hipoteca puente",
+}
+
+
 class AnonymisedPassport(BaseModel):
     """Anonymised view for the seller — no salary or private data."""
     solvency_level: Optional[str]
@@ -104,8 +114,10 @@ class AnonymisedPassport(BaseModel):
     has_initial_savings: bool
     has_pre_approval: bool
     payment_method: Optional[str]
+    payment_method_label: Optional[str] = None   # Human-readable label (Sprint V12)
     expires_at: Optional[datetime]
     buyer_id: int
+    is_multi_buyer: bool = False                  # Sprint V12
 
 
 # ============================================================================
@@ -125,8 +137,9 @@ def _compute_solvency(data: SolvencySubmit) -> tuple[StressIndex, SolvencyLevel]
         score += 1
     if data.payment_method in (PaymentMethod.CASH, PaymentMethod.MORTGAGE_APPROVED):
         score += 2
-    elif data.payment_method == PaymentMethod.MORTGAGE_PENDING:
+    elif data.payment_method in (PaymentMethod.MORTGAGE_PENDING, PaymentMethod.SAVINGS_PLUS_MORTGAGE):
         score += 1
+    # HOUSE_TO_SELL and BRIDGE_MORTGAGE score 0 (highest uncertainty)
     if data.has_pre_approval:
         score += 1
 
@@ -447,6 +460,59 @@ async def seller_accept_solvency(
     }
 
 
+class SecondBuyerSubmit(BaseModel):
+    """Identity data for the second buyer in a joint purchase."""
+    full_name: str = Field(..., min_length=2, max_length=200)
+    dni: str = Field(..., min_length=5, max_length=20, description="DNI or NIE of the second buyer")
+    email: str = Field(..., description="Contact email of the second buyer")
+
+
+class SecondBuyerResponse(BaseModel):
+    """Confirmation returned after second buyer data is stored."""
+    message: str
+    second_buyer_verified_at: datetime
+
+
+@router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
+async def submit_second_buyer(
+    body: SecondBuyerSubmit,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer submits identity data for a second joint purchaser.
+    The buyer must already have an active solvency passport with is_multi_buyer=True.
+    All PII is AES-256-GCM encrypted at rest (GDPR compliance).
+    Returns 404 if the buyer has no active passport.
+    Returns 400 if is_multi_buyer is not set on the existing record.
+    """
+    record = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == current_user.id
+    ).first()
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Completa primero tu Pasaporte de Solvencia antes de añadir un segundo comprador.",
+        )
+    if not record.is_multi_buyer:
+        raise HTTPException(
+            status_code=400,
+            detail="Tu pasaporte no esta marcado como compra conjunta. Actualiza el pasaporte primero.",
+        )
+
+    # Encrypt all PII before storing
+    record.second_buyer_name_enc = encrypt_data(body.full_name)
+    record.second_buyer_dni_enc = encrypt_data(body.dni)
+    record.second_buyer_email_enc = encrypt_data(body.email)
+    record.second_buyer_verified_at = datetime.now(timezone.utc)
+    db.commit()
+
+    return SecondBuyerResponse(
+        message="Datos del segundo comprador guardados correctamente.",
+        second_buyer_verified_at=record.second_buyer_verified_at,
+    )
+
+
 @router.get("/offer/{offer_id}/buyer", response_model=AnonymisedPassport)
 async def get_buyer_passport_for_offer(
     offer_id: int,
@@ -480,13 +546,16 @@ async def get_buyer_passport_for_offer(
             detail="El comprador no ha completado su Pasaporte de Solvencia todavia.",
         )
 
+    pm_value = record.payment_method.value if record.payment_method else None
     return AnonymisedPassport(
         solvency_level=record.solvency_level.value if record.solvency_level else None,
         stress_index=record.stress_index.value if record.stress_index else None,
         knows_extra_costs=bool(record.knows_extra_costs),
         has_initial_savings=bool(record.has_initial_savings),
         has_pre_approval=bool(record.has_pre_approval),
-        payment_method=record.payment_method.value if record.payment_method else None,
+        payment_method=pm_value,
+        payment_method_label=_PAYMENT_METHOD_LABELS.get(pm_value) if pm_value else None,
         expires_at=record.expires_at,
         buyer_id=record.buyer_id,
+        is_multi_buyer=bool(record.is_multi_buyer),
     )
