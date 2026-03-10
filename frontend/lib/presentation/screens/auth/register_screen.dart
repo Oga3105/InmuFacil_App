@@ -1,8 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
+import '../info/info_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -549,13 +551,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
                                  children: [
                                    TextSpan(
-                                     text: 'Términos y Condiciones',
-                                     style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.w600),
+                                     text: 'Terminos y Condiciones',
+                                     style: TextStyle(
+                                       color: _glowBlueColor,
+                                       fontWeight: FontWeight.w600,
+                                       decoration: TextDecoration.underline,
+                                     ),
+                                     recognizer: TapGestureRecognizer()
+                                       ..onTap = () => context.push(
+                                             InfoScreen.routeFor(
+                                                 InfoPageType.terms),
+                                           ),
                                    ),
                                    const TextSpan(text: ' y la '),
                                    TextSpan(
-                                     text: 'Política de Privacidad',
-                                     style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.w600),
+                                     text: 'Politica de Privacidad',
+                                     style: TextStyle(
+                                       color: _glowBlueColor,
+                                       fontWeight: FontWeight.w600,
+                                       decoration: TextDecoration.underline,
+                                     ),
+                                     recognizer: TapGestureRecognizer()
+                                       ..onTap = () => context.push(
+                                             InfoScreen.routeFor(
+                                                 InfoPageType.privacy),
+                                           ),
                                    ),
                                  ],
                                ),
