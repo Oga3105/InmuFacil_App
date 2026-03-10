@@ -38,6 +38,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
       loading: () => true, // avoid CTA flicker while loading
       error: (_, __) => false,
     );
+    // Multi-buyer: buyer marked compra conjunta in their solvency wizard
+    final isMultiBuyer = passportAsync.when(
+      data: (p) => p?.isMultiBuyer ?? false,
+      loading: () => false,
+      error: (_, __) => false,
+    );
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -86,6 +92,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     isBuyer: isBuyer,
                     hasPassport: hasPassport,
                     needsSecondIdentity: needsSecondIdentity,
+                    isMultiBuyer: isMultiBuyer,
                     confirmedVisitDate: offer.confirmedVisitDate,
                     requestedVisitDate: offer.requestedVisitDate,
                     visitStatus: offer.visitStatus,
@@ -217,6 +224,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     required bool isBuyer,
     bool hasPassport = false,
     bool needsSecondIdentity = false,
+    bool isMultiBuyer = false,
     String? confirmedVisitDate,
     String? requestedVisitDate,
     String? visitStatus,
@@ -317,6 +325,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
               ? 'Para que el contrato de arras sea legalmente vinculante, el segundo titular debe verificar su identidad (DNI + prueba de vida) a traves del enlace que se enviara por correo.'
               : null,
           state: stepState(1),
+          // Buyer can initiate second-buyer data entry from here
+          ctaLabel: isBuyer && stage == 1 && isMultiBuyer
+              ? 'Añadir datos del 2° comprador'
+              : null,
+          ctaIcon: isBuyer && stage == 1 && isMultiBuyer
+              ? Icons.person_add_alt_1_outlined
+              : null,
+          ctaCallback: isBuyer && stage == 1 && isMultiBuyer
+              ? () => context.go('/solvency/wizard')
+              : null,
         ),
       _TimelineStep(
         title: 'Contrato de Arras',
@@ -1423,93 +1441,158 @@ class _SellerSolvencySectionState
     final passportAsync =
         ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Divider(height: 20),
-        const Text(
-          'Solvencia del comprador',
-          style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF166534)),
-        ),
-        const SizedBox(height: 8),
-        passportAsync.when(
-          loading: () => const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2)),
-          error: (_, __) => const Text(
-            'Sin datos de solvencia',
-            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-          ),
-          data: (passport) {
-            if (passport == null) {
-              return const Text(
-                'El comprador aun no ha completado el pasaporte.',
-                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-              );
-            }
-            final level = passport.solvencyLevel ?? 'bronze';
-            final (levelLabel, levelColor) = switch (level) {
-              'gold' => ('Oro', const Color(0xFFB8860B)),
-              'silver' => ('Plata', const Color(0xFF64748B)),
-              _ => ('Bronce', const Color(0xFFD97706)),
-            };
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Nivel $levelLabel',
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: levelColor),
-                ),
-                const SizedBox(height: 4),
-                _SolvencyRowCompact('Conoce gastos adicionales',
-                    passport.knowsExtraCosts ? 'Si' : 'No'),
-                _SolvencyRowCompact('Ahorros iniciales',
-                    passport.hasInitialSavings ? 'Si' : 'No'),
-                _SolvencyRowCompact('Preaprobacion hipotecaria',
-                    passport.hasPreApproval ? 'Si' : 'No'),
-                _SolvencyRowCompact(
-                    'Financiacion',
-                    passport.paymentMethodLabel ??
-                        passport.paymentMethod ??
-                        '-'),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _loading ? null : () => _confirmReject(context),
-            icon: _loading
-                ? const SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                        strokeWidth: 2, color: Colors.red),
-                  )
-                : const Icon(Icons.cancel_outlined,
-                    size: 16, color: Colors.red),
-            label: const Text('Rechazar Oferta',
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF86EFAC)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.verified_user_outlined,
+                  color: Color(0xFF16A34A), size: 18),
+              SizedBox(width: 8),
+              Text(
+                'Solvencia del comprador',
                 style: TextStyle(
-                    color: Colors.red, fontWeight: FontWeight.w700)),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              padding: const EdgeInsets.symmetric(vertical: 10),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF166534)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          passportAsync.when(
+            loading: () => const Center(
+                child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))),
+            error: (_, __) => const Text(
+              'El comprador aun no tiene pasaporte de solvencia.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            ),
+            data: (passport) {
+              if (passport == null) {
+                return const Text(
+                  'El comprador aun no ha completado el pasaporte de solvencia.',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                );
+              }
+              final level = passport.solvencyLevel ?? 'bronze';
+              final (levelLabel, levelColor, levelBg, levelIcon) =
+                  switch (level) {
+                'gold' => (
+                  'Oro',
+                  const Color(0xFFB8860B),
+                  const Color(0xFFFFFBEB),
+                  Icons.emoji_events_outlined
+                ),
+                'silver' => (
+                  'Plata',
+                  const Color(0xFF64748B),
+                  const Color(0xFFF8FAFC),
+                  Icons.verified_outlined
+                ),
+                _ => (
+                  'Bronce',
+                  const Color(0xFFD97706),
+                  const Color(0xFFFFF7ED),
+                  Icons.shield_outlined
+                ),
+              };
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: levelBg,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: levelColor.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(levelIcon, color: levelColor, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Nivel $levelLabel',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: levelColor,
+                          ),
+                        ),
+                        if (passport.isMultiBuyer) ...[
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'Compra conjunta',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  _SolvencyRowCompact('Conoce gastos adicionales',
+                      passport.knowsExtraCosts ? 'Si' : 'No'),
+                  _SolvencyRowCompact('Ahorros iniciales',
+                      passport.hasInitialSavings ? 'Si' : 'No'),
+                  _SolvencyRowCompact('Preaprobacion hipotecaria',
+                      passport.hasPreApproval ? 'Si' : 'No'),
+                  _SolvencyRowCompact(
+                      'Financiacion',
+                      passport.paymentMethodLabel ??
+                          passport.paymentMethod ??
+                          '-'),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: _loading ? null : () => _confirmReject(context),
+              icon: _loading
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.cancel_outlined, size: 16),
+              label: const Text('Rechazar Oferta',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1522,18 +1605,24 @@ class _SolvencyRowCompact extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label,
+          SizedBox(
+            width: 210,
+            child: Text(
+              label,
               style: const TextStyle(
-                  fontSize: 11, color: Color(0xFF64748B))),
-          Text(value,
-              style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF166534))),
+                  fontSize: 12, color: Color(0xFF64748B)),
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF166534)),
+          ),
         ],
       ),
     );
