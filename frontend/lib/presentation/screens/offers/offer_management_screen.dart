@@ -678,26 +678,28 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Action buttons (vertical stack) - only for pending
                 if (isPending)
-                  _ActionButtonsColumn(
+                  _ActionButtonsRow(
                     offer: offer,
                     onAccept: () => _confirmAccept(context),
                     onCounter: () => _showCounterDialog(context),
                     onReject: () => _confirmReject(context),
                   )
                 else
-                  _StatusBadge(status: offer.status),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StatusBadge(status: offer.status),
+                      if (offer.status != 'withdrawn' &&
+                          offer.status != 'rejected') ...[
+                        const SizedBox(width: 8),
+                        _ChatButtonSmall(offerId: offer.id),
+                      ],
+                    ],
+                  ),
               ],
             ),
           ),
-
-          // ---- Chat button row (hidden for terminal states) ----
-          if (offer.status != 'withdrawn' && offer.status != 'rejected')
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: _ChatButton(offerId: offer.id),
-            ),
 
           Divider(
               height: 1, thickness: 1, color: Colors.grey.shade100),
@@ -928,7 +930,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
     if (confirmed == true && mounted) {
       await ref
           .read(receivedOffersProvider.notifier)
-          .counter(widget.offer.id, widget.offer.amount);
+          .reject(widget.offer.id);
     }
   }
 
@@ -1004,11 +1006,11 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
 }
 
 // ---------------------------------------------------------------------------
-// Action Buttons Column (vertical stack on right of offer card)
+// Action Buttons Row (horizontal layout on right of offer card)
 // ---------------------------------------------------------------------------
 
-class _ActionButtonsColumn extends StatelessWidget {
-  const _ActionButtonsColumn({
+class _ActionButtonsRow extends StatelessWidget {
+  const _ActionButtonsRow({
     required this.offer,
     required this.onAccept,
     required this.onCounter,
@@ -1020,59 +1022,54 @@ class _ActionButtonsColumn extends StatelessWidget {
   final VoidCallback onCounter;
   final VoidCallback onReject;
 
+  static const _shape =
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)));
+  static const _pad = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
+  static const _tts = MaterialTapTargetSize.shrinkWrap;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      alignment: WrapAlignment.end,
       children: [
-        SizedBox(
-          width: 132,
-          child: FilledButton(
-            onPressed: onAccept,
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-            ),
-            child: const Text('Aceptar Oferta',
-                style:
-                    TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+        FilledButton(
+          onPressed: onAccept,
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF2563EB),
+            shape: _shape,
+            padding: _pad,
+            tapTargetSize: _tts,
           ),
+          child: const Text('Aceptar Oferta',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 132,
-          child: OutlinedButton(
-            onPressed: onCounter,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFF59E0B),
-              side: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-            ),
-            child: const Text('Contraofertar',
-                style:
-                    TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+        OutlinedButton(
+          onPressed: onCounter,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFF59E0B),
+            side: const BorderSide(color: Color(0xFFF59E0B), width: 1.5),
+            shape: _shape,
+            padding: _pad,
+            tapTargetSize: _tts,
           ),
+          child: const Text('Contraofertar',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 132,
-          child: OutlinedButton(
-            onPressed: onReject,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF94A3B8),
-              side: const BorderSide(color: Color(0xFFCBD5E1)),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(vertical: 10),
-            ),
-            child: const Text('Rechazar',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        OutlinedButton(
+          onPressed: onReject,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFF94A3B8),
+            side: const BorderSide(color: Color(0xFFCBD5E1)),
+            shape: _shape,
+            padding: _pad,
+            tapTargetSize: _tts,
           ),
+          child: const Text('Rechazar',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
+        _ChatButtonSmall(offerId: offer.id),
       ],
     );
   }
@@ -1325,14 +1322,71 @@ class _StatusBadge extends StatelessWidget {
 // Solvency Acceptance Section — shown inside _OfferCard when status == 'accepted'
 // ---------------------------------------------------------------------------
 
-class _SolvencyAcceptanceSection extends ConsumerWidget {
+class _SolvencyAcceptanceSection extends ConsumerStatefulWidget {
   const _SolvencyAcceptanceSection({required this.offer});
 
   final OfferData offer;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final passportAsync = ref.watch(solvency_prov.buyerPassportProvider(offer.id));
+  ConsumerState<_SolvencyAcceptanceSection> createState() =>
+      _SolvencyAcceptanceSectionState();
+}
+
+class _SolvencyAcceptanceSectionState
+    extends ConsumerState<_SolvencyAcceptanceSection> {
+  bool _rejecting = false;
+
+  Future<void> _confirmReject(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Rechazar oferta'),
+        content: const Text(
+            'El comprador sera notificado de que su oferta ha sido rechazada. Esta accion no se puede deshacer.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Rechazar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _rejecting = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .reject(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Oferta rechazada')),
+        );
+        context.pop();
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Error al rechazar la oferta. Intentalo de nuevo.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _rejecting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final passportAsync =
+        ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -1347,7 +1401,8 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.verified_user_outlined, color: Color(0xFF16A34A), size: 18),
+              Icon(Icons.verified_user_outlined,
+                  color: Color(0xFF16A34A), size: 18),
               SizedBox(width: 8),
               Text(
                 'Solvencia del comprador',
@@ -1377,22 +1432,39 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
                 );
               }
               final level = passport.solvencyLevel ?? 'bronze';
-              final (levelLabel, levelColor, levelBg, levelIcon) = switch (level) {
-                'gold'   => ('Oro',   const Color(0xFFB8860B), const Color(0xFFFFFBEB), Icons.emoji_events_outlined),
-                'silver' => ('Plata', const Color(0xFF64748B), const Color(0xFFF8FAFC), Icons.verified_outlined),
-                _        => ('Bronce', const Color(0xFFD97706), const Color(0xFFFFF7ED), Icons.shield_outlined),
+              final (levelLabel, levelColor, levelBg, levelIcon) =
+                  switch (level) {
+                'gold' => (
+                  'Oro',
+                  const Color(0xFFB8860B),
+                  const Color(0xFFFFFBEB),
+                  Icons.emoji_events_outlined
+                ),
+                'silver' => (
+                  'Plata',
+                  const Color(0xFF64748B),
+                  const Color(0xFFF8FAFC),
+                  Icons.verified_outlined
+                ),
+                _ => (
+                  'Bronce',
+                  const Color(0xFFD97706),
+                  const Color(0xFFFFF7ED),
+                  Icons.shield_outlined
+                ),
               };
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Solvency level badge
                   Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: levelBg,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: levelColor.withOpacity(0.4)),
+                      border:
+                          Border.all(color: levelColor.withOpacity(0.4)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -1410,14 +1482,18 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
                         if (passport.isMultiBuyer) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: const Color(0xFF2563EB),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
                               'Compra conjunta',
-                              style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                         ],
@@ -1435,28 +1511,54 @@ class _SolvencyAcceptanceSection extends ConsumerWidget {
                       value: passport.hasPreApproval ? 'Si' : 'No'),
                   _SolvencyRow(
                       label: 'Financiacion',
-                      value: passport.paymentMethodLabel ?? passport.paymentMethod ?? '-'),
+                      value: passport.paymentMethodLabel ??
+                          passport.paymentMethod ??
+                          '-'),
                 ],
               );
             },
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () => context.push(
-                '/offers/${offer.id}/timeline',
-                extra: offer,
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: () => context.push(
+                    '/offers/${widget.offer.id}/timeline',
+                    extra: widget.offer,
+                  ),
+                  icon: const Icon(Icons.play_circle_outline, size: 16),
+                  label: const Text('Aceptar y ver timeline'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF16A34A),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
               ),
-              icon: const Icon(Icons.play_circle_outline, size: 16),
-              label: const Text('Aceptar y ver timeline'),
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF16A34A),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                onPressed:
+                    _rejecting ? null : () => _confirmReject(context),
+                icon: _rejecting
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.cancel_outlined, size: 16),
+                label: const Text('Rechazar'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -1632,18 +1734,18 @@ class _FooterLink extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _ChatButton — habilita chat y navega a la sala privada
+// _ChatButtonSmall — habilita chat y navega a la sala privada (compacto)
 // ---------------------------------------------------------------------------
 
-class _ChatButton extends ConsumerStatefulWidget {
-  const _ChatButton({required this.offerId});
+class _ChatButtonSmall extends ConsumerStatefulWidget {
+  const _ChatButtonSmall({required this.offerId});
   final String offerId;
 
   @override
-  ConsumerState<_ChatButton> createState() => _ChatButtonState();
+  ConsumerState<_ChatButtonSmall> createState() => _ChatButtonSmallState();
 }
 
-class _ChatButtonState extends ConsumerState<_ChatButton> {
+class _ChatButtonSmallState extends ConsumerState<_ChatButtonSmall> {
   bool _loading = false;
 
   Future<void> _onPressed() async {
@@ -1660,26 +1762,24 @@ class _ChatButtonState extends ConsumerState<_ChatButton> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: _loading ? null : _onPressed,
-        icon: _loading
-            ? const SizedBox(
-                width: 16, height: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.chat_bubble_outline, size: 18),
-        label: const Text(
-          'Abrir Chat con el Comprador',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        ),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF2563EB),
-          side: const BorderSide(color: Color(0xFF2563EB)),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+    return OutlinedButton.icon(
+      onPressed: _loading ? null : _onPressed,
+      icon: _loading
+          ? const SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.chat_bubble_outline, size: 14),
+      label: const Text('Chat',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF2563EB),
+        side: const BorderSide(color: Color(0xFF2563EB)),
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8))),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }

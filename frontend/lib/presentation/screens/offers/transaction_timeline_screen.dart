@@ -92,8 +92,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: offer)
                         : null,
-                    withdrawAction: canWithdraw
-                        ? _WithdrawOfferButton(offer: offer)
+                    // Withdraw in step 0 only for pending/counter_offer
+                    withdrawAction:
+                        canWithdraw && (s == 'pending' || s == 'counter_offer')
+                            ? _WithdrawOfferButton(offer: offer)
+                            : null,
+                    // Solvency step actions: seller sees passport+reject, buyer can withdraw
+                    solvencyActionsWidget: s == 'accepted'
+                        ? (!isBuyer
+                            ? _SellerSolvencySection(offer: offer)
+                            : _WithdrawOfferButton(offer: offer))
                         : null,
                   )),
                 ),
@@ -214,6 +222,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     String? visitStatus,
     Widget? buyerActions,
     Widget? withdrawAction,
+    Widget? solvencyActionsWidget,
   }) {
     final s = status.toLowerCase();
 
@@ -285,11 +294,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
         state: stepState(1),
-        ctaLabel: isBuyer && stage == 1 && !hasPassport ? 'Completar pasaporte' : null,
-        ctaIcon: isBuyer && stage == 1 && !hasPassport ? Icons.verified_user_outlined : null,
+        ctaLabel: isBuyer && stage == 1 && !hasPassport
+            ? 'Completar pasaporte'
+            : null,
+        ctaIcon: isBuyer && stage == 1 && !hasPassport
+            ? Icons.verified_user_outlined
+            : null,
         ctaCallback: isBuyer && stage == 1 && !hasPassport
             ? () => context.go('/solvency/wizard')
             : null,
+        actionsWidget: solvencyActionsWidget,
       ),
       if (needsSecondIdentity)
         _TimelineStep(
@@ -1332,6 +1346,196 @@ class _BuyerCounterOfferActionsState
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Seller solvency section (embedded in solvency timeline step) ──────────────
+
+class _SellerSolvencySection extends ConsumerStatefulWidget {
+  const _SellerSolvencySection({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_SellerSolvencySection> createState() =>
+      _SellerSolvencySectionState();
+}
+
+class _SellerSolvencySectionState
+    extends ConsumerState<_SellerSolvencySection> {
+  bool _loading = false;
+
+  Future<void> _confirmReject(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: const Text('Rechazar oferta'),
+        content: const Text(
+            'El comprador sera notificado de que su oferta ha sido rechazada.'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Rechazar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .reject(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Oferta rechazada')),
+        );
+        context.go('/profile');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al rechazar la oferta')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final passportAsync =
+        ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(height: 20),
+        const Text(
+          'Solvencia del comprador',
+          style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF166534)),
+        ),
+        const SizedBox(height: 8),
+        passportAsync.when(
+          loading: () => const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2)),
+          error: (_, __) => const Text(
+            'Sin datos de solvencia',
+            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
+          data: (passport) {
+            if (passport == null) {
+              return const Text(
+                'El comprador aun no ha completado el pasaporte.',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              );
+            }
+            final level = passport.solvencyLevel ?? 'bronze';
+            final (levelLabel, levelColor) = switch (level) {
+              'gold' => ('Oro', const Color(0xFFB8860B)),
+              'silver' => ('Plata', const Color(0xFF64748B)),
+              _ => ('Bronce', const Color(0xFFD97706)),
+            };
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Nivel $levelLabel',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: levelColor),
+                ),
+                const SizedBox(height: 4),
+                _SolvencyRowCompact('Conoce gastos adicionales',
+                    passport.knowsExtraCosts ? 'Si' : 'No'),
+                _SolvencyRowCompact('Ahorros iniciales',
+                    passport.hasInitialSavings ? 'Si' : 'No'),
+                _SolvencyRowCompact('Preaprobacion hipotecaria',
+                    passport.hasPreApproval ? 'Si' : 'No'),
+                _SolvencyRowCompact(
+                    'Financiacion',
+                    passport.paymentMethodLabel ??
+                        passport.paymentMethod ??
+                        '-'),
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: _loading ? null : () => _confirmReject(context),
+            icon: _loading
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.red),
+                  )
+                : const Icon(Icons.cancel_outlined,
+                    size: 16, color: Colors.red),
+            label: const Text('Rechazar Oferta',
+                style: TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.w700)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red,
+              side: const BorderSide(color: Colors.red),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SolvencyRowCompact extends StatelessWidget {
+  const _SolvencyRowCompact(this.label, this.value);
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 11, color: Color(0xFF64748B))),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF166534))),
+        ],
+      ),
     );
   }
 }

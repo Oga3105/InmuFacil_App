@@ -164,6 +164,11 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
     await refresh();
   }
 
+  Future<void> reject(String offerId) async {
+    await _dio.post('/offers/$offerId/reject');
+    await refresh();
+  }
+
   /// Enable chat for an offer.
   Future<void> enableChat(String offerId) async {
     await _dio.post('/offers/$offerId/chat/enable');
