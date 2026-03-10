@@ -333,7 +333,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
               ? Icons.person_add_alt_1_outlined
               : null,
           ctaCallback: isBuyer && stage == 1 && isMultiBuyer
-              ? () => context.go('/solvency/wizard')
+              ? () => context.push('/solvency/second-buyer')
               : null,
         ),
       _TimelineStep(
@@ -1382,6 +1382,30 @@ class _SellerSolvencySection extends ConsumerStatefulWidget {
 class _SellerSolvencySectionState
     extends ConsumerState<_SellerSolvencySection> {
   bool _loading = false;
+  bool _accepting = false;
+
+  Future<void> _acceptSolvency(BuildContext context) async {
+    setState(() => _accepting = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .acceptSolvency(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Solvencia aceptada')),
+        );
+        ref.invalidate(receivedOffersProvider);
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al aceptar la solvencia')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _accepting = false);
+    }
+  }
 
   Future<void> _confirmReject(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -1569,27 +1593,55 @@ class _SellerSolvencySectionState
             },
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: _loading ? null : () => _confirmReject(context),
-              icon: _loading
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                          strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Icon(Icons.cancel_outlined, size: 16),
-              label: const Text('Rechazar Oferta',
-                  style: TextStyle(fontWeight: FontWeight.w700)),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: (_accepting || _loading)
+                      ? null
+                      : () => _acceptSolvency(context),
+                  icon: _accepting
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.verified_user_outlined, size: 16),
+                  label: const Text('Aceptar Solvencia',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF16A34A),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                onPressed: (_loading || _accepting)
+                    ? null
+                    : () => _confirmReject(context),
+                icon: _loading
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.cancel_outlined, size: 16),
+                label: const Text('Rechazar',
+                    style: TextStyle(fontWeight: FontWeight.w700)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 12, horizontal: 16),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+            ],
           ),
         ],
       ),

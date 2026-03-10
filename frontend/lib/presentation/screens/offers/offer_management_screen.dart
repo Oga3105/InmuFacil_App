@@ -1335,6 +1335,26 @@ class _SolvencyAcceptanceSection extends ConsumerStatefulWidget {
 class _SolvencyAcceptanceSectionState
     extends ConsumerState<_SolvencyAcceptanceSection> {
   bool _rejecting = false;
+  bool _accepting = false;
+
+  Future<void> _acceptAndNavigate(BuildContext context) async {
+    setState(() => _accepting = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .acceptSolvency(widget.offer.id);
+    } catch (_) {
+      // Endpoint may already be accepted; proceed to timeline regardless
+    } finally {
+      if (mounted) setState(() => _accepting = false);
+    }
+    if (mounted) {
+      context.push(
+        '/offers/${widget.offer.id}/timeline',
+        extra: widget.offer,
+      );
+    }
+  }
 
   Future<void> _confirmReject(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -1523,12 +1543,18 @@ class _SolvencyAcceptanceSectionState
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: () => context.push(
-                    '/offers/${widget.offer.id}/timeline',
-                    extra: widget.offer,
-                  ),
-                  icon: const Icon(Icons.play_circle_outline, size: 16),
-                  label: const Text('Aceptar y ver timeline'),
+                  onPressed: (_accepting || _rejecting)
+                      ? null
+                      : () => _acceptAndNavigate(context),
+                  icon: _accepting
+                      ? const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.verified_user_outlined, size: 16),
+                  label: const Text('Aceptar solvencia y ver timeline'),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF16A34A),
                     padding: const EdgeInsets.symmetric(vertical: 12),

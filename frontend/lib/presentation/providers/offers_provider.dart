@@ -175,6 +175,13 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
     // Refresh chat list so the conversation appears in the inbox
     ref.invalidate(chatListProvider);
   }
+
+  /// Seller accepts the buyer's solvency passport to unlock the timeline.
+  Future<void> acceptSolvency(String offerId) async {
+    // Use full URL — solvency router has a different prefix than offers router
+    await _dio.post('${_kOffersApiBaseUrl}/solvency/offer/$offerId/accept');
+    await refresh();
+  }
 }
 
 // --- Make Offer Notifier (Notifier — Riverpod 3 compatible) ---

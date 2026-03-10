@@ -256,3 +256,51 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
 
 final solvencyNotifierProvider =
     AsyncNotifierProvider<SolvencyNotifier, SolvencyPassport?>(SolvencyNotifier.new);
+
+
+// ============================================================================
+// Second Buyer Notifier (Sprint V11)
+// ============================================================================
+
+class SecondBuyerState {
+  const SecondBuyerState({this.submitting = false, this.done = false});
+  final bool submitting;
+  final bool done;
+}
+
+class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
+  @override
+  SecondBuyerState build() => const SecondBuyerState();
+
+  Future<void> submit({
+    required String fullName,
+    required String dni,
+    required String email,
+  }) async {
+    final token = await _getToken();
+    if (token == null) throw Exception('No estas autenticado');
+
+    state = const SecondBuyerState(submitting: true);
+    try {
+      final dio = Dio();
+      await dio.post(
+        'http://localhost:8000/api/v1/solvency/second-buyer',
+        data: {
+          'full_name': fullName,
+          'dni': dni,
+          'email': email,
+        },
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      state = const SecondBuyerState(done: true);
+      ref.invalidate(mySolvencyProvider);
+    } on DioException catch (e) {
+      state = const SecondBuyerState();
+      final detail = (e.response?.data as Map<String, dynamic>?)?['detail'] as String?;
+      throw Exception(detail ?? 'Error al guardar los datos. Intentalo de nuevo.');
+    }
+  }
+}
+
+final secondBuyerNotifierProvider =
+    NotifierProvider<SecondBuyerNotifier, SecondBuyerState>(SecondBuyerNotifier.new);

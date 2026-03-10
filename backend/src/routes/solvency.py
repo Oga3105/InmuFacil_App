@@ -460,6 +460,59 @@ async def seller_accept_solvency(
     }
 
 
+class SecondBuyerSubmit(BaseModel):
+    """Identity data for the second buyer in a joint purchase."""
+    full_name: str = Field(..., min_length=2, max_length=200)
+    dni: str = Field(..., min_length=5, max_length=20, description="DNI or NIE of the second buyer")
+    email: str = Field(..., description="Contact email of the second buyer")
+
+
+class SecondBuyerResponse(BaseModel):
+    """Confirmation returned after second buyer data is stored."""
+    message: str
+    second_buyer_verified_at: datetime
+
+
+@router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
+async def submit_second_buyer(
+    body: SecondBuyerSubmit,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer submits identity data for a second joint purchaser.
+    The buyer must already have an active solvency passport with is_multi_buyer=True.
+    All PII is AES-256-GCM encrypted at rest (GDPR compliance).
+    Returns 404 if the buyer has no active passport.
+    Returns 400 if is_multi_buyer is not set on the existing record.
+    """
+    record = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == current_user.id
+    ).first()
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Completa primero tu Pasaporte de Solvencia antes de añadir un segundo comprador.",
+        )
+    if not record.is_multi_buyer:
+        raise HTTPException(
+            status_code=400,
+            detail="Tu pasaporte no esta marcado como compra conjunta. Actualiza el pasaporte primero.",
+        )
+
+    # Encrypt all PII before storing
+    record.second_buyer_name_enc = encrypt_data(body.full_name)
+    record.second_buyer_dni_enc = encrypt_data(body.dni)
+    record.second_buyer_email_enc = encrypt_data(body.email)
+    record.second_buyer_verified_at = datetime.now(timezone.utc)
+    db.commit()
+
+    return SecondBuyerResponse(
+        message="Datos del segundo comprador guardados correctamente.",
+        second_buyer_verified_at=record.second_buyer_verified_at,
+    )
+
+
 @router.get("/offer/{offer_id}/buyer", response_model=AnonymisedPassport)
 async def get_buyer_passport_for_offer(
     offer_id: int,
