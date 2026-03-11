@@ -8,8 +8,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:frontend/presentation/providers/offers_provider.dart';
-import 'package:frontend/presentation/providers/urgency_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/urgency_provider.dart';
 
 // ─── Fixture helpers ──────────────────────────────────────────────────────────
 
