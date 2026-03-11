@@ -2291,15 +2291,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   Widget _buildVisitsTab() {
     const kNavy = Color(0xFF1E3A5F);
     const kNavyLight = Color(0xFFEEF3FA);
-    final currentUserId = ref.watch(authProvider).user?.id;
-    final sentAsync = ref.watch(sentOffersProvider);
-    final receivedAsync = ref.watch(receivedOffersProvider);
     final agendaAsync = ref.watch(myVisitsProvider);
     final chatVisitsAsync = ref.watch(chatVisitsProvider);
 
-    final isLoading = sentAsync.isLoading || receivedAsync.isLoading ||
-        agendaAsync.isLoading || chatVisitsAsync.isLoading;
-    final hasError = sentAsync.hasError || receivedAsync.hasError;
+    final isLoading = agendaAsync.isLoading || chatVisitsAsync.isLoading;
+    final hasError = agendaAsync.hasError || chatVisitsAsync.hasError;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2364,51 +2360,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         else
           Builder(
             builder: (context) {
-              final sent = sentAsync.value ?? [];
-              final received = receivedAsync.value ?? [];
-              final seen = <String>{};
-
-              // Source 1: visits derived from chat action messages (visit_request / visit_accepted)
-              final offerVisits = [...sent, ...received]
-                  .where((o) =>
-                      (o.visitStatus != null &&
-                          ['requested', 'approved', 'completed']
-                              .contains(o.visitStatus)) ||
-                      (o.confirmedVisitDate != null &&
-                          o.confirmedVisitDate!.isNotEmpty) ||
-                      (o.requestedVisitDate != null &&
-                          o.requestedVisitDate!.isNotEmpty))
-                  .where((o) => seen.add(o.id))
-                  .map((o) {
-                final isConfirmed =
-                    o.visitStatus == 'approved' || o.visitStatus == 'completed';
-                final dateStr = isConfirmed
-                    ? o.confirmedVisitDate
-                    : (o.requestedVisitDate ?? o.confirmedVisitDate);
-                final dt = _parseVisitDate(dateStr) ?? DateTime.now();
-                final role = o.buyerId == currentUserId ? 'buyer' : 'seller';
-                final status = o.visitStatus ?? 'requested';
-                return MyVisit(
-                  id: 'offer_${o.id}',
-                  propertyTitle: o.propertyTitle ?? 'Propiedad',
-                  propertyId: o.propertyId,
-                  startTime: dt,
-                  status: status,
-                  role: role,
-                );
-              }).toList();
-
-              // Source 2: direct chat-action visit scan (/visits/chat — most reliable)
+              // Source 1: chat-action visit scan via /visits/chat (most reliable)
               final chatVisits = chatVisitsAsync.value ?? [];
 
-              // Source 3: visits from the booking system (/visits/agenda)
+              // Source 2: visits from the booking system (/visits/agenda)
               final agendaVisits = agendaAsync.value ?? [];
 
-              // Merge, deduplicate (chat-action first — highest reliability)
+              // Merge, deduplicate by id
               final seenIds = <String>{};
               var visits = [
                 ...chatVisits.where((v) => seenIds.add(v.id)),
-                ...offerVisits.where((v) => seenIds.add(v.id)),
                 ...agendaVisits.where((v) => seenIds.add(v.id)),
               ];
               switch (_visitsSortBy) {
