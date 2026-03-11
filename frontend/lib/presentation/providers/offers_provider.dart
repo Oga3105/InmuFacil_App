@@ -30,6 +30,7 @@ class OfferData {
     this.confirmedVisitDate,
     this.requestedVisitDate,
     this.visitStatus,
+    this.paymentMethod,
   });
 
   final String id;
@@ -58,6 +59,10 @@ class OfferData {
 
   /// Status of the latest visit action (requested, approved, rejected, cancelled).
   final String? visitStatus;
+
+  /// Buyer's declared payment method (e.g. cash, mortgage_pending, savings_plus_mortgage).
+  /// Null when the buyer has not yet submitted their solvency passport.
+  final String? paymentMethod;
 }
 
 // --- Sent Offers Provider ---
@@ -276,6 +281,7 @@ OfferData _mapOffer(dynamic item) {
     confirmedVisitDate: map['confirmed_visit_date'] as String?,
     requestedVisitDate: map['requested_visit_date'] as String?,
     visitStatus: map['visit_status'] as String?,
+    paymentMethod: map['payment_method'] as String?,
   );
 
   return offer;
