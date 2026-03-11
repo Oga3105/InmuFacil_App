@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -123,9 +125,21 @@ class InfoScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          const UserAvatarMenu(),
-          const SizedBox(width: 16),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated =
+                  ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
+          ),
         ],
       ),
       body: _buildContent(context),
