@@ -176,22 +176,97 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => context.pop()),
-        title: const Text(
-          'Segundo Comprador',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: _kSlate,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(onPressed: () => context.pop()),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Segundo Comprador',
+                  style: TextStyle(
+                    color: Color(0xFF2563EB),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
-        actions: const [UserAvatarMenu(), SizedBox(width: 8)],
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const UserAvatarMenu(),
+          const SizedBox(width: 16),
+        ],
       ),
       body: _done ? _buildSuccess() : _buildForm(),
     );
