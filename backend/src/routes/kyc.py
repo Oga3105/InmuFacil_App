@@ -91,6 +91,9 @@ def _run_gemini_verification(
             user.dni_status = new_dni_status
             if not result.approved:
                 user.rejection_reason = result.reason
+            elif result.doc_number:
+                from backend.src.utils.crypto import encrypt_data as _encrypt
+                user.encrypted_dni = _encrypt(result.doc_number)
 
         db.commit()
 

@@ -14,7 +14,10 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+import shutil
+
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -118,6 +121,7 @@ class AnonymisedPassport(BaseModel):
     expires_at: Optional[datetime]
     buyer_id: int
     is_multi_buyer: bool = False                  # Sprint V12
+    second_buyer_name: Optional[str] = None       # Decrypted name visible to seller (Sprint V13)
 
 
 # ============================================================================
@@ -460,32 +464,36 @@ async def seller_accept_solvency(
     }
 
 
-class SecondBuyerSubmit(BaseModel):
-    """Identity data for the second buyer in a joint purchase."""
-    full_name: str = Field(..., min_length=2, max_length=200)
-    dni: str = Field(..., min_length=5, max_length=20, description="DNI or NIE of the second buyer")
-    email: str = Field(..., description="Contact email of the second buyer")
-
-
 class SecondBuyerResponse(BaseModel):
-    """Confirmation returned after second buyer data is stored."""
+    """Confirmation returned after second buyer KYC is stored."""
     message: str
     second_buyer_verified_at: datetime
 
 
+_SECOND_BUYER_UPLOAD_DIR = "uploads/second_buyer"
+
+
 @router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
 async def submit_second_buyer(
-    body: SecondBuyerSubmit,
+    full_name: str = Form(..., min_length=2, max_length=200),
+    email: str = Form(...),
+    front: UploadFile = File(...),
+    back: UploadFile = File(None),
+    selfie: UploadFile = File(...),
+    document_type: str = Form("dni"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Buyer submits identity data for a second joint purchaser.
-    The buyer must already have an active solvency passport with is_multi_buyer=True.
+    Buyer submits identity documents for the second joint purchaser.
+    Documents are verified synchronously via Gemini AI.
+    DNI is auto-extracted from the document — not entered manually.
     All PII is AES-256-GCM encrypted at rest (GDPR compliance).
     Returns 404 if the buyer has no active passport.
-    Returns 400 if is_multi_buyer is not set on the existing record.
+    Returns 400 if is_multi_buyer is not set or KYC is rejected.
     """
+    from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
+
     record = db.query(BuyerSolvency).filter(
         BuyerSolvency.buyer_id == current_user.id
     ).first()
@@ -500,15 +508,57 @@ async def submit_second_buyer(
             detail="Tu pasaporte no esta marcado como compra conjunta. Actualiza el pasaporte primero.",
         )
 
-    # Encrypt all PII before storing
-    record.second_buyer_name_enc = encrypt_data(body.full_name)
-    record.second_buyer_dni_enc = encrypt_data(body.dni)
-    record.second_buyer_email_enc = encrypt_data(body.email)
+    os.makedirs(_SECOND_BUYER_UPLOAD_DIR, exist_ok=True)
+    saved_paths: dict[str, str] = {}
+
+    for file_key, upload_file in [("front", front), ("back", back), ("selfie", selfie)]:
+        if upload_file is None:
+            continue
+        safe_name = f"sb_{current_user.id}_{file_key}_{upload_file.filename}"
+        path = os.path.join(_SECOND_BUYER_UPLOAD_DIR, safe_name)
+        try:
+            with open(path, "wb") as buf:
+                shutil.copyfileobj(upload_file.file, buf)
+            saved_paths[file_key] = path
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error guardando imagen ({file_key}): {exc}",
+            )
+
+    result = verify_identity_with_gemini(
+        front_path=saved_paths.get("front"),
+        back_path=saved_paths.get("back"),
+        selfie_path=saved_paths.get("selfie"),
+        document_type=document_type,
+    )
+
+    if result.reason == "__QUOTA_EXCEEDED__":
+        raise HTTPException(
+            status_code=503,
+            detail="Servicio de verificacion temporalmente no disponible. Intentalo en unos minutos.",
+        )
+
+    if not result.approved:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Verificacion de identidad fallida: {result.reason}",
+        )
+
+    if not result.doc_number:
+        raise HTTPException(
+            status_code=400,
+            detail="No se pudo extraer el numero de documento. Asegurate de que la imagen del frente sea legible.",
+        )
+
+    record.second_buyer_name_enc = encrypt_data(full_name)
+    record.second_buyer_dni_enc = encrypt_data(result.doc_number)
+    record.second_buyer_email_enc = encrypt_data(email)
     record.second_buyer_verified_at = datetime.now(timezone.utc)
     db.commit()
 
     return SecondBuyerResponse(
-        message="Datos del segundo comprador guardados correctamente.",
+        message="Identidad del segundo comprador verificada y guardada correctamente.",
         second_buyer_verified_at=record.second_buyer_verified_at,
     )
 
@@ -547,6 +597,12 @@ async def get_buyer_passport_for_offer(
         )
 
     pm_value = record.payment_method.value if record.payment_method else None
+    second_buyer_name: Optional[str] = None
+    if record.second_buyer_name_enc:
+        try:
+            second_buyer_name = decrypt_data(record.second_buyer_name_enc)
+        except Exception:
+            pass
     return AnonymisedPassport(
         solvency_level=record.solvency_level.value if record.solvency_level else None,
         stress_index=record.stress_index.value if record.stress_index else None,
@@ -558,4 +614,5 @@ async def get_buyer_passport_for_offer(
         expires_at=record.expires_at,
         buyer_id=record.buyer_id,
         is_multi_buyer=bool(record.is_multi_buyer),
+        second_buyer_name=second_buyer_name,
     )

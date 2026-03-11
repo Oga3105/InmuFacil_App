@@ -110,6 +110,7 @@ class AnonymisedPassport {
   final String? paymentMethodLabel;   // Sprint V12: human-readable label
   final DateTime? expiresAt;
   final bool isMultiBuyer;            // Sprint V12
+  final String? secondBuyerName;      // Sprint V13: visible to seller
 
   const AnonymisedPassport({
     required this.buyerId,
@@ -122,6 +123,7 @@ class AnonymisedPassport {
     this.paymentMethodLabel,
     this.expiresAt,
     this.isMultiBuyer = false,
+    this.secondBuyerName,
   });
 
   factory AnonymisedPassport.fromJson(Map<String, dynamic> j) => AnonymisedPassport(
@@ -135,6 +137,7 @@ class AnonymisedPassport {
         paymentMethodLabel: j['payment_method_label'] as String?,
         expiresAt: j['expires_at'] != null ? DateTime.tryParse(j['expires_at'] as String) : null,
         isMultiBuyer: j['is_multi_buyer'] as bool? ?? false,
+        secondBuyerName: j['second_buyer_name'] as String?,
       );
 
   bool get isValid => expiresAt != null && expiresAt!.isAfter(DateTime.now());
@@ -274,8 +277,11 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
 
   Future<void> submit({
     required String fullName,
-    required String dni,
     required String email,
+    required String frontPath,
+    String? backPath,
+    required String selfiePath,
+    String documentType = 'dni',
   }) async {
     final token = await _getToken();
     if (token == null) throw Exception('No estas autenticado');
@@ -283,13 +289,18 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
     state = const SecondBuyerState(submitting: true);
     try {
       final dio = Dio();
+      final formData = FormData.fromMap({
+        'full_name': fullName,
+        'email': email,
+        'document_type': documentType,
+        'front': await MultipartFile.fromFile(frontPath, filename: 'front.jpg'),
+        if (backPath != null)
+          'back': await MultipartFile.fromFile(backPath, filename: 'back.jpg'),
+        'selfie': await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
+      });
       await dio.post(
         'http://localhost:8000/api/v1/solvency/second-buyer',
-        data: {
-          'full_name': fullName,
-          'dni': dni,
-          'email': email,
-        },
+        data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       state = const SecondBuyerState(done: true);
