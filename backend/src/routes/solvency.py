@@ -106,6 +106,8 @@ _PAYMENT_METHOD_LABELS: dict[str, str] = {
     "house_to_sell": "Venta de vivienda actual",
     "savings_plus_mortgage": "Ahorros + hipoteca",
     "bridge_mortgage": "Hipoteca puente",
+    "savings_only": "Solo ahorros (Sin banco aun)",
+    "no_process": "Sin tramites iniciados",
 }
 
 

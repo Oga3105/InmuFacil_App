@@ -581,6 +581,8 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                       ('savings_plus_mortgage', 'Ahorros + hipoteca', Icons.account_balance_outlined),
                       ('house_to_sell', 'Venta de vivienda actual', Icons.home_outlined),
                       ('bridge_mortgage', 'Hipoteca puente', Icons.swap_horiz_outlined),
+                      ('savings_only', 'Solo ahorros (Sin banco aun)', Icons.savings_outlined),
+                      ('no_process', 'Sin tramites iniciados', Icons.rule_folder_outlined),
                     ].map((opt) => _OptionTile(
                           value: opt.$1,
                           label: opt.$2,

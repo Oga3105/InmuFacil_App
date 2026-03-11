@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kBlue  = Color(0xFF2563EB);
@@ -50,37 +53,99 @@ class InfoScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: Text(
-          _titleFor(pageType),
-          style: const TextStyle(
-              color: _kNavy, fontWeight: FontWeight.bold, fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated =
+                  ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       body: _buildContent(context),
     );
   }
 
-  String _titleFor(InfoPageType type) {
-    const map = {
-      InfoPageType.whatIsInmufacil: 'Que es InmuFacil?',
-      InfoPageType.howItWorks: 'Como funciona',
-      InfoPageType.buyerGuide: 'Guia del Comprador',
-      InfoPageType.sellerGuide: 'Guia del Vendedor',
-      InfoPageType.contact: 'Contacto',
-      InfoPageType.faq: 'Preguntas frecuentes',
-      InfoPageType.privacy: 'Privacidad',
-      InfoPageType.terms: 'Terminos de uso',
-      InfoPageType.legalNotice: 'Aviso Legal',
-    };
-    return map[type] ?? 'Informacion';
-  }
 
   Widget _buildContent(BuildContext context) {
     switch (pageType) {
