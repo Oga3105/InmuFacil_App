@@ -31,6 +31,8 @@ class OfferData {
     this.requestedVisitDate,
     this.visitStatus,
     this.paymentMethod,
+    this.buyerSolvencySubmitted = false,
+    this.sellerSolvencyAccepted = false,
   });
 
   final String id;
@@ -63,6 +65,12 @@ class OfferData {
   /// Buyer's declared payment method (e.g. cash, mortgage_pending, savings_plus_mortgage).
   /// Null when the buyer has not yet submitted their solvency passport.
   final String? paymentMethod;
+
+  /// True when the buyer has submitted their solvency passport for this offer.
+  final bool buyerSolvencySubmitted;
+
+  /// True when the seller has explicitly validated the buyer's solvency passport.
+  final bool sellerSolvencyAccepted;
 }
 
 // --- Sent Offers Provider ---
@@ -282,6 +290,8 @@ OfferData _mapOffer(dynamic item) {
     requestedVisitDate: map['requested_visit_date'] as String?,
     visitStatus: map['visit_status'] as String?,
     paymentMethod: map['payment_method'] as String?,
+    buyerSolvencySubmitted: map['buyer_solvency_submitted'] as bool? ?? false,
+    sellerSolvencyAccepted: map['seller_solvency_accepted'] as bool? ?? false,
   );
 
   return offer;
