@@ -60,6 +60,8 @@ class OfferResponse(BaseModel):
     requested_visit_date: Optional[str] = None
     visit_status: Optional[str] = None
     payment_method: Optional[str] = None
+    buyer_solvency_submitted: bool = False
+    seller_solvency_accepted: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
@@ -179,6 +181,8 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
 
     solvency = db.query(BuyerSolvency).filter(BuyerSolvency.buyer_id == offer.buyer_id).first()
     payment_method = solvency.payment_method.value if solvency and solvency.payment_method else None
+    buyer_solvency_submitted = solvency is not None
+    seller_solvency_accepted = bool(getattr(offer, 'seller_solvency_accepted', False) or False)
 
     return OfferResponse(
         id=offer.id,
@@ -199,6 +203,8 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
         requested_visit_date=requested_visit_date,
         visit_status=visit_status,
         payment_method=payment_method,
+        buyer_solvency_submitted=buyer_solvency_submitted,
+        seller_solvency_accepted=seller_solvency_accepted,
     )
 
 
