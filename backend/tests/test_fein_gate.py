@@ -119,3 +119,82 @@ class TestFeinAccessGate:
             )
 
         assert response.status_code == 403
+
+
+class TestFeinAutoMessage:
+    """
+    Tests that confirming FEIN as BUYER triggers an automatic chat message,
+    and confirming as SELLER does not.
+    """
+
+    def test_confirm_fein_step_buyer_calls_auto_message(self):
+        """
+        GREEN: _confirm_fein_step with role=BUYER calls _send_fein_auto_message.
+        """
+        from backend.src.routes.fein import _confirm_fein_step
+
+        mock_db = MagicMock()
+        mock_step = MagicMock()
+        mock_step.status = StepStatus.PARTIALLY_COMPLETED
+        mock_step.buyer_confirmed_at = None
+        mock_step.seller_confirmed_at = None
+        mock_step.metadata_json = {}
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_step
+
+        with patch("backend.src.routes.fein._send_fein_auto_message") as mock_auto_msg:
+            _confirm_fein_step(
+                offer_id=42, user_id=10, role="BUYER", notes="", db=mock_db
+            )
+
+        mock_auto_msg.assert_called_once_with(offer_id=42, buyer_id=10, db=mock_db)
+
+    def test_confirm_fein_step_seller_does_not_call_auto_message(self):
+        """
+        GREEN: _confirm_fein_step with role=SELLER does NOT call _send_fein_auto_message.
+        The auto-message is buyer-only — it notifies the seller of bank approval.
+        """
+        from backend.src.routes.fein import _confirm_fein_step
+
+        mock_db = MagicMock()
+        mock_step = MagicMock()
+        mock_step.status = StepStatus.PARTIALLY_COMPLETED
+        mock_step.buyer_confirmed_at = MagicMock()  # buyer already confirmed
+        mock_step.seller_confirmed_at = None
+        mock_step.metadata_json = {}
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_step
+
+        with patch("backend.src.routes.fein._send_fein_auto_message") as mock_auto_msg:
+            _confirm_fein_step(
+                offer_id=42, user_id=99, role="SELLER", notes="", db=mock_db
+            )
+
+        mock_auto_msg.assert_not_called()
+
+    def test_send_fein_auto_message_content(self):
+        """
+        Unit test: _send_fein_auto_message inserts an OfferMessage with the
+        correct action_type and display_text.
+        Patches source modules since imports inside _send_fein_auto_message are local.
+        """
+        from backend.src.routes.fein import _send_fein_auto_message, _FEIN_AUTO_MESSAGE
+
+        mock_db = MagicMock()
+        msg_instance = MagicMock()
+        msg_instance.timestamp = None
+
+        with (
+            patch("backend.src.models.offers.OfferMessage", return_value=msg_instance) as mock_msg_cls,
+            patch("backend.src.utils.crypto.encrypt_data", return_value="encrypted"),
+            patch("backend.src.services.chat_service.CensorshipFilter") as mock_censor,
+            patch("backend.src.services.chat_service.manager"),
+        ):
+            mock_censor.sanitize.return_value = _FEIN_AUTO_MESSAGE
+
+            _send_fein_auto_message(offer_id=42, buyer_id=10, db=mock_db)
+
+        mock_msg_cls.assert_called_once()
+        call_kwargs = mock_msg_cls.call_args.kwargs
+        assert call_kwargs["message_type"] == "action"
+        assert call_kwargs["action_data"]["action_type"] == "fein_bank_approved"
+        assert "aprobacion bancaria final" in call_kwargs["action_data"]["display_text"]
+        mock_db.add.assert_called_once_with(msg_instance)

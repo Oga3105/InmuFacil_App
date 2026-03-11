@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel, Field, ConfigDict
 
 from backend.src.config.database import get_db
-from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage
+from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage, BuyerSolvency
 from backend.src.utils.security import get_current_active_user
 from backend.src.utils.crypto import encrypt_data, decrypt_data
 
@@ -59,6 +59,7 @@ class OfferResponse(BaseModel):
     confirmed_visit_date: Optional[str] = None
     requested_visit_date: Optional[str] = None
     visit_status: Optional[str] = None
+    payment_method: Optional[str] = None
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
@@ -96,7 +97,7 @@ def _decrypt_message(encrypted: str) -> str:
     return '...'
 
 
-def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
+def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
     prop = offer.property
     buyer = offer.buyer
     prop_snippet = None
@@ -176,6 +177,9 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
                 # sides. For the list view we expose total unread (both sides combined).
                 unread_count += 1
 
+    solvency = db.query(BuyerSolvency).filter(BuyerSolvency.buyer_id == offer.buyer_id).first()
+    payment_method = solvency.payment_method.value if solvency and solvency.payment_method else None
+
     return OfferResponse(
         id=offer.id,
         property_id=offer.property_id,
@@ -194,6 +198,7 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         confirmed_visit_date=confirmed_visit_date,
         requested_visit_date=requested_visit_date,
         visit_status=visit_status,
+        payment_method=payment_method,
     )
 
 
@@ -278,7 +283,7 @@ async def create_offer(
     db.commit()
     # Re-fetch with eager loads so the response includes nested property and buyer
     created = _offers_query(db).filter(PropertyOffer.id == offer.id).first()
-    return _serialize_offer(created)
+    return _serialize_offer(created, db)
 
 
 @router.get("/me/sent", response_model=List[OfferResponse])
@@ -292,7 +297,7 @@ async def list_sent_offers(
     offers = _offers_query(db).filter(
         PropertyOffer.buyer_id == current_user.id
     ).all()
-    return [_serialize_offer(o) for o in offers]
+    return [_serialize_offer(o, db) for o in offers]
 
 
 @router.get("/me/received", response_model=List[OfferResponse])
@@ -306,7 +311,7 @@ async def list_received_offers(
     # Use subquery to avoid conflicting JOIN with joinedload on the same table
     owned_ids = db.query(Property.id).filter(Property.owner_id == current_user.id).subquery()
     offers = _offers_query(db).filter(PropertyOffer.property_id.in_(owned_ids)).all()
-    return [_serialize_offer(o) for o in offers]
+    return [_serialize_offer(o, db) for o in offers]
 
 
 @router.get("/{offer_id}", response_model=OfferResponse)
@@ -323,7 +328,7 @@ async def get_offer(
     is_seller = offer.property.owner_id == current_user.id
     if not is_buyer and not is_seller:
         raise HTTPException(status_code=403, detail="Not a participant")
-    return _serialize_offer(offer)
+    return _serialize_offer(offer, db)
 
 
 @router.post("/{offer_id}/counter", response_model=OfferResponse)

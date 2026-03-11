@@ -72,6 +72,55 @@ def _require_participant(offer: PropertyOffer, user: User) -> None:
         )
 
 
+_FEIN_AUTO_MESSAGE = (
+    "Buenas noticias! El comprador ya tiene la aprobacion bancaria final"
+)
+
+
+def _send_fein_auto_message(offer_id: int, buyer_id: int, db: Session) -> None:
+    """Creates an automated action message notifying the seller of bank approval."""
+    from backend.src.models.offers import OfferMessage
+    from backend.src.utils.crypto import encrypt_data
+    from backend.src.services.chat_service import CensorshipFilter, manager as _ws_manager
+
+    sanitized = CensorshipFilter.sanitize(_FEIN_AUTO_MESSAGE)
+    msg = OfferMessage(
+        offer_id=offer_id,
+        sender_id=buyer_id,
+        message_encrypted=encrypt_data(sanitized),
+        message_type="action",
+        action_data={
+            "action_type": "fein_bank_approved",
+            "display_text": _FEIN_AUTO_MESSAGE,
+        },
+        is_read=False,
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+
+    import asyncio
+    ws_payload = {
+        "event": "message",
+        "data": {
+            "id": msg.id,
+            "offer_id": offer_id,
+            "sender_id": buyer_id,
+            "message": sanitized,
+            "message_type": "action",
+            "action_data": msg.action_data,
+            "is_read": False,
+            "created_at": msg.timestamp.isoformat() if msg.timestamp else None,
+        },
+    }
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.ensure_future(_ws_manager.broadcast(offer_id, ws_payload))
+    except Exception:
+        pass
+
+
 def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: Session) -> dict:
     """
     Confirms the FEIN step for the given role.
@@ -111,6 +160,9 @@ def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: S
 
     db.commit()
     db.refresh(step)
+
+    if role.upper() == "BUYER":
+        _send_fein_auto_message(offer_id=offer_id, buyer_id=user_id, db=db)
 
     return {
         "offer_id": offer_id,

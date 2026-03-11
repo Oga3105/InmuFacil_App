@@ -277,6 +277,17 @@ class TransactionTimelineScreen extends ConsumerWidget {
       );
     }
 
+    // FEIN only applies to purchases with bank financing.
+    // If paymentMethod is null (solvency not yet submitted), default to showing it.
+    const feinPaymentMethods = {
+      'mortgage_pending',
+      'mortgage_approved',
+      'savings_plus_mortgage',
+      'bridge_mortgage',
+    };
+    final requiresFein = offer.paymentMethod == null ||
+        feinPaymentMethods.contains(offer.paymentMethod);
+
     final steps = <_TimelineStep>[
       _TimelineStep(
         title: stage == 0
@@ -368,20 +379,21 @@ class TransactionTimelineScreen extends ConsumerWidget {
             ? () => context.push('/offers/${offer.id}/tasacion', extra: offer)
             : null,
       ),
-      _TimelineStep(
-        title: 'Formalizacion Bancaria (FEIN)',
-        subtitle: stage > 3
-            ? 'FEIN recibida y condiciones confirmadas'
-            : stage == 3
-                ? 'Pendiente tras tasacion — banco emite la FEIN'
-                : 'Pendiente de firma de arras',
-        state: stage == 3 ? _StepState.active : stepState(3),
-        ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
-        ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
-        ctaCallback: stage == 3
-            ? () => context.push('/offers/${offer.id}/fein', extra: offer)
-            : null,
-      ),
+      if (requiresFein)
+        _TimelineStep(
+          title: 'Formalizacion Bancaria (FEIN)',
+          subtitle: stage > 3
+              ? 'FEIN recibida y condiciones confirmadas'
+              : stage == 3
+                  ? 'Pendiente tras tasacion — banco emite la FEIN'
+                  : 'Pendiente de firma de arras',
+          state: stage == 3 ? _StepState.active : stepState(3),
+          ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
+          ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
+          ctaCallback: stage == 3
+              ? () => context.push('/offers/${offer.id}/fein', extra: offer)
+              : null,
+        ),
       _TimelineStep(
         title: 'Firma en Notaria y Entrega de Llaves',
         subtitle: stage >= 4
