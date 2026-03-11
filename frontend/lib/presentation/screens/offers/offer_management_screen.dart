@@ -1534,6 +1534,11 @@ class _SolvencyAcceptanceSectionState
                       value: passport.paymentMethodLabel ??
                           passport.paymentMethod ??
                           '-'),
+                  if (passport.isMultiBuyer &&
+                      passport.secondBuyerName != null)
+                    _SolvencyRow(
+                        label: 'Segundo comprador',
+                        value: passport.secondBuyerName!),
                 ],
               );
             },
