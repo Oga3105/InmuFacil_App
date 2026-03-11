@@ -30,6 +30,8 @@ class OfferData {
     this.confirmedVisitDate,
     this.requestedVisitDate,
     this.visitStatus,
+    this.buyerSolvencySubmitted = false,
+    this.sellerSolvencyAccepted = false,
   });
 
   final String id;
@@ -58,6 +60,12 @@ class OfferData {
 
   /// Status of the latest visit action (requested, approved, rejected, cancelled).
   final String? visitStatus;
+
+  /// True when the buyer has submitted their solvency passport for this offer.
+  final bool buyerSolvencySubmitted;
+
+  /// True when the seller has explicitly validated the buyer's solvency passport.
+  final bool sellerSolvencyAccepted;
 }
 
 // --- Sent Offers Provider ---
@@ -276,6 +284,8 @@ OfferData _mapOffer(dynamic item) {
     confirmedVisitDate: map['confirmed_visit_date'] as String?,
     requestedVisitDate: map['requested_visit_date'] as String?,
     visitStatus: map['visit_status'] as String?,
+    buyerSolvencySubmitted: map['buyer_solvency_submitted'] as bool? ?? false,
+    sellerSolvencyAccepted: map['seller_solvency_accepted'] as bool? ?? false,
   );
 
   return offer;

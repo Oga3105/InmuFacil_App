@@ -59,6 +59,8 @@ class OfferResponse(BaseModel):
     confirmed_visit_date: Optional[str] = None
     requested_visit_date: Optional[str] = None
     visit_status: Optional[str] = None
+    buyer_solvency_submitted: bool = False
+    seller_solvency_accepted: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
@@ -176,6 +178,10 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
                 # sides. For the list view we expose total unread (both sides combined).
                 unread_count += 1
 
+    solvency = db.query(BuyerSolvency).filter(BuyerSolvency.buyer_id == offer.buyer_id).first()
+    buyer_solvency_submitted = solvency is not None
+    seller_solvency_accepted = bool(getattr(offer, 'seller_solvency_accepted', False) or False)
+
     return OfferResponse(
         id=offer.id,
         property_id=offer.property_id,
@@ -194,6 +200,8 @@ def _serialize_offer(offer: PropertyOffer) -> OfferResponse:
         confirmed_visit_date=confirmed_visit_date,
         requested_visit_date=requested_visit_date,
         visit_status=visit_status,
+        buyer_solvency_submitted=buyer_solvency_submitted,
+        seller_solvency_accepted=seller_solvency_accepted,
     )
 
 
