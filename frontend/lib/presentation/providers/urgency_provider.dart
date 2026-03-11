@@ -130,7 +130,7 @@ UrgentAction? buyerBlockingAction(OfferData offer, String currentUserId) {
       propertyTitle: title,
       type: UrgentActionType.completeSolvency,
       label: 'Completar Pasaporte de Solvencia',
-      route: '/solvency/wizard',
+      route: '/solvency/second-buyer',
       offer: offer,
     );
   }
