@@ -319,12 +319,14 @@ class TransactionTimelineScreen extends ConsumerWidget {
       ),
       _TimelineStep(
         title: 'Verificacion de Solvencia',
-        subtitle: stage > 1
+        subtitle: stage > 1 || offerData.sellerSolvencyAccepted
             ? 'Validado por InmuFacil Secure-Tech'
             : stage == 1
                 ? 'Verificando solvencia del comprador'
                 : 'Pendiente de aceptacion de oferta',
-        state: stepState(1),
+        state: offerData.sellerSolvencyAccepted
+            ? _StepState.done
+            : stepState(1),
         ctaLabel: isBuyer && stage == 1 && !hasPassport
             ? 'Completar pasaporte'
             : null,
