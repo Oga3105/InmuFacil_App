@@ -25,6 +25,7 @@ from backend.src.services.notification_service import (
     upsert_urgency_notification,
     mark_notification_read,
     mark_all_read,
+    purge_old_notifications,
 )
 
 
@@ -227,6 +228,46 @@ class TestMarkAllRead:
         count = mark_all_read(db, user_id=10)
 
         assert count == 3
+        db.commit.assert_called_once()
+
+
+# ─── Tests de servicio: purge_old_notifications ───────────────────────────────
+
+class TestPurgeOldNotifications:
+
+    def test_deletes_records_older_than_retention(self):
+        """
+        GREEN: purge_old_notifications elimina registros con la retention correcta.
+        """
+        db = MagicMock()
+        db.query.return_value.filter.return_value.delete.return_value = 7
+
+        deleted = purge_old_notifications(db, retention_days=180)
+
+        assert deleted == 7
+        db.commit.assert_called_once()
+
+    def test_returns_zero_when_nothing_to_delete(self):
+        """
+        GREEN: Retorna 0 cuando no hay notificaciones antiguas que purgar.
+        """
+        db = MagicMock()
+        db.query.return_value.filter.return_value.delete.return_value = 0
+
+        deleted = purge_old_notifications(db, retention_days=180)
+
+        assert deleted == 0
+
+    def test_respects_custom_retention_days(self):
+        """
+        GREEN: Se puede configurar un periodo de retencion distinto al default.
+        """
+        db = MagicMock()
+        db.query.return_value.filter.return_value.delete.return_value = 3
+
+        deleted = purge_old_notifications(db, retention_days=30)
+
+        assert deleted == 3
         db.commit.assert_called_once()
 
 

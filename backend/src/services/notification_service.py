@@ -10,7 +10,7 @@ Servicio de Notificaciones Push (FCM) con degradacion elegante.
 
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -230,3 +230,39 @@ def mark_all_read(db: Session, user_id: int) -> int:
     )
     db.commit()
     return count
+
+
+# ─── Limpieza automatica de logs antiguos ────────────────────────────────────
+
+_RETENTION_DAYS = 180  # 6 meses
+
+
+def purge_old_notifications(db: Session, retention_days: int = _RETENTION_DAYS) -> int:
+    """
+    Elimina notificaciones con mas de `retention_days` dias de antiguedad.
+
+    @Watcher:   Evita saturacion de la tabla notification_logs.
+    @Shield:    Solo elimina registros propios de cada usuario — no afecta auditoria
+                de otras tablas. El borrado es permanente (GDPR: datos de operacion
+                ya completada no necesitan retenerse indefinidamente).
+    @DevOps:    Llamar periodicamente desde un cron job o endpoint de admin.
+                Recomendado: 1 vez al dia en horario de baja carga.
+
+    Retorna el numero de filas eliminadas.
+    """
+    cutoff = datetime.utcnow() - timedelta(days=retention_days)
+
+    deleted_count = (
+        db.query(NotificationLog)
+        .filter(NotificationLog.created_at < cutoff)
+        .delete(synchronize_session=False)
+    )
+
+    db.commit()
+
+    logger.info(
+        f"[NOTIF] Limpieza ejecutada: {deleted_count} notificaciones eliminadas "
+        f"(antiguedad > {retention_days} dias, corte: {cutoff.date()})."
+    )
+
+    return deleted_count

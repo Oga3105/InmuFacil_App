@@ -24,6 +24,7 @@ from backend.src.services.notification_service import (
     upsert_urgency_notification,
     mark_notification_read,
     mark_all_read,
+    purge_old_notifications,
 )
 from backend.src.utils.security import get_current_active_user
 
@@ -181,6 +182,52 @@ def register_fcm_token(
     current_user.fcm_token = payload.fcm_token
     db.commit()
     return {"status": "ok", "message": "Token FCM registrado correctamente."}
+
+
+# ─── DELETE /notifications/purge-old ─────────────────────────────────────────
+
+@router.delete(
+    "/purge-old",
+    status_code=status.HTTP_200_OK,
+    summary="Eliminar notificaciones con mas de 6 meses (limpieza automatica)",
+    tags=["Notifications", "Internal"],
+)
+def purge_old_notification_logs(
+    retention_days: int = 180,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Elimina notificaciones mas antiguas que `retention_days` dias (por defecto 180 = 6 meses).
+
+    @DevOps:  Llamar desde un cron job diario o tarea programada. No requiere privilegios
+              de admin — cada usuario purga solo sus propios registros.
+    @Shield:  La purga aplica solo sobre las notificaciones del usuario autenticado.
+              No afecta datos de auditoria de otras tablas (offers, solvency, etc.).
+    @Watcher: Operacion registrada en log para trazabilidad de mantenimiento.
+    """
+    if retention_days < 1:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="retention_days debe ser >= 1.",
+        )
+
+    from datetime import datetime, timedelta
+    from backend.src.models.notification_log import NotificationLog as NL
+
+    cutoff = datetime.utcnow() - timedelta(days=retention_days)
+    deleted = (
+        db.query(NL)
+        .filter(NL.user_id == current_user.id, NL.created_at < cutoff)
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+
+    return {
+        "deleted": deleted,
+        "retention_days": retention_days,
+        "cutoff_date": cutoff.date().isoformat(),
+    }
 
 
 # ─── Helper privado ───────────────────────────────────────────────────────────
