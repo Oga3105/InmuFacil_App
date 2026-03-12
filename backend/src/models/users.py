@@ -31,6 +31,9 @@ class User(Base):
     # Mission 4 - KYC & Security Fields (@Shield)
     encrypted_dni = Column(String, nullable=True)  # AES-256-GCM encrypted
     encrypted_phone = Column(String, nullable=True)  # AES-256-GCM encrypted
+    # HMAC-SHA256 fingerprint for DNI uniqueness — non-reversible, GDPR-safe.
+    # UNIQUE partial index (WHERE NOT NULL) defined in migration.
+    dni_hmac = Column(String(64), nullable=True, index=False)  # unique enforced at DB level
     
     # MFA Email Verification (@Shield)
     email_verified = Column(Boolean, default=False, nullable=False)

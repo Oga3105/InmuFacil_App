@@ -15,6 +15,8 @@ Token Consumption Tracking: ~800 tokens for crypto implementation
 
 import os
 import base64
+import hashlib
+import hmac as _hmac
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -43,13 +45,13 @@ def get_encryption_key() -> bytes:
     Raises:
         ValueError: If ENCRYPTION_SECRET is not set
     """
-    secret = os.getenv("ENCRYPTION_SECRET")
-    
-    if not secret:
+    env_key = os.getenv("ENCRYPTION_SECRET")
+
+    if not env_key:
         # For development only - in production, this should fail
         logger.warning("[WARNING]  ENCRYPTION_SECRET not set, using default (INSECURE for production)")
-        secret = "dev-secret-change-in-production-12345678"
-    
+        env_key = "dev-encryption-key-change-in-prod"
+
     # Use PBKDF2 to derive a 256-bit key
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
@@ -57,8 +59,8 @@ def get_encryption_key() -> bytes:
         salt=b"inmufacil-salt-v1",  # Static salt (acceptable for this use case)
         iterations=100000,
     )
-    
-    key = kdf.derive(secret.encode())
+
+    key = kdf.derive(env_key.encode())
     return key
 
 
@@ -166,6 +168,57 @@ def decrypt_data(encrypted: str) -> str:
     except Exception as e:
         logger.error(f"[ERROR] Decryption failed: {str(e)}")
         raise ValueError("Failed to decrypt data - data may be corrupted or key is incorrect")
+
+
+# ============================================================================
+# @Shield - DNI Uniqueness HMAC
+# ============================================================================
+
+def compute_dni_hmac(doc_number: str) -> str:
+    """
+    Compute a deterministic, non-reversible HMAC-SHA256 fingerprint of a
+    document number (DNI / NIE / Pasaporte) for uniqueness checking.
+
+    Why HMAC and not plain hash:
+    - A keyed HMAC prevents offline rainbow-table attacks against the stored
+      fingerprint.  An attacker who dumps the database still cannot enumerate
+      valid DNI values without knowing DNI_HMAC_SECRET.
+
+    Normalisation applied before hashing:
+    - Strip whitespace, convert to uppercase.
+    - This makes "12345678a" == "12345678A" == " 12345678A ".
+
+    Security notes:
+    - Uses a SEPARATE secret (DNI_HMAC_SECRET) from the AES encryption key.
+    - Output is a 64-character hex string stored in users.dni_hmac.
+    - The UNIQUE partial index (WHERE dni_hmac IS NOT NULL) enforces
+      one-account-per-document at the database level, catching race conditions.
+
+    Args:
+        doc_number: Raw document number as extracted from OCR or submitted by user.
+
+    Returns:
+        64-character lowercase hex HMAC-SHA256 digest.
+
+    Raises:
+        ValueError: If doc_number is empty.
+    """
+    if not doc_number or not doc_number.strip():
+        raise ValueError("doc_number must not be empty")
+
+    hmac_key = os.getenv("DNI_HMAC_SECRET")
+    if not hmac_key:
+        # Development fallback — must be overridden in production .env
+        logger.warning("[SHIELD] DNI_HMAC_SECRET not set — using insecure dev fallback")
+        hmac_key = "dev-dni-hmac-key-change-in-prod"
+
+    normalised = doc_number.strip().upper()
+    digest = _hmac.new(
+        hmac_key.encode("utf-8"),
+        normalised.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return digest
 
 
 # ============================================================================
