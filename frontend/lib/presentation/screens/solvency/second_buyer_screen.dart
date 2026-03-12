@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +37,9 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   XFile? _frontImage;
   XFile? _backImage;
   XFile? _selfieImage;
+  Uint8List? _frontBytes;
+  Uint8List? _backBytes;
+  Uint8List? _selfieBytes;
   bool _consentAccepted = false;
   bool _submitting = false;
   bool _done = false;
@@ -113,10 +116,11 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
     if (source == null || !mounted) return;
     final file = await _picker.pickImage(source: source, imageQuality: 85);
     if (file == null) return;
+    final bytes = await file.readAsBytes();
     setState(() {
-      if (slot == 'front') _frontImage = file;
-      if (slot == 'back') _backImage = file;
-      if (slot == 'selfie') _selfieImage = file;
+      if (slot == 'front') { _frontImage = file; _frontBytes = bytes; }
+      if (slot == 'back') { _backImage = file; _backBytes = bytes; }
+      if (slot == 'selfie') { _selfieImage = file; _selfieBytes = bytes; }
     });
   }
 
@@ -565,7 +569,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   child: _SecondBuyerDocCard(
                     title: 'Parte Frontal',
                     subtitle: 'Requerido',
-                    image: _frontImage,
+                    bytes: _frontBytes,
                     onTap: () => _pickImage('front'),
                   ),
                 ),
@@ -574,7 +578,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   child: _SecondBuyerDocCard(
                     title: 'Parte Trasera',
                     subtitle: 'Opcional',
-                    image: _backImage,
+                    bytes: _backBytes,
                     onTap: () => _pickImage('back'),
                   ),
                 ),
@@ -717,9 +721,9 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   color: hasSelfie ? Colors.green : const Color(0xFFCBD5E1),
                   width: hasSelfie ? 3 : 2,
                 ),
-                image: hasSelfie
+                image: hasSelfie && _selfieBytes != null
                     ? DecorationImage(
-                        image: FileImage(File(_selfieImage!.path)),
+                        image: MemoryImage(_selfieBytes!),
                         fit: BoxFit.cover,
                       )
                     : null,
@@ -1006,16 +1010,16 @@ class _SecondBuyerDocCard extends StatelessWidget {
   const _SecondBuyerDocCard({
     required this.title,
     required this.subtitle,
-    required this.image,
+    required this.bytes,
     required this.onTap,
   });
 
   final String title;
   final String subtitle;
-  final XFile? image;
+  final Uint8List? bytes;
   final VoidCallback onTap;
 
-  bool get _hasImage => image != null;
+  bool get _hasImage => bytes != null;
 
   @override
   Widget build(BuildContext context) {
@@ -1045,8 +1049,8 @@ class _SecondBuyerDocCard extends StatelessWidget {
                 if (_hasImage)
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.file(
-                      File(image!.path),
+                    child: Image.memory(
+                      bytes!,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.cover,
