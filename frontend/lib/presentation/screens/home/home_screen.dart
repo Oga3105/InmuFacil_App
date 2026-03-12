@@ -14,7 +14,9 @@ import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.d
 import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/notifications_provider.dart';
 import '../../providers/offers_provider.dart';
+import '../../providers/urgency_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
 /// Home/Landing Screen with Google Maps Integration
@@ -1406,7 +1408,13 @@ class _MapNavigationBar extends ConsumerWidget {
                     fullWidth: false,
                   ),
                   const SizedBox(width: 12),
-                  
+
+                  // Campana de notificaciones — visible solo cuando autenticado
+                  if (isAuthenticated)
+                    _NotificationBell(),
+                  if (isAuthenticated)
+                    const SizedBox(width: 8),
+
                   // [AUTH STATE LOGIC]
                   if (isAuthenticated)
                     const UserAvatarMenu()
@@ -1644,6 +1652,64 @@ class _PremiumGlowButton extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Campana de notificaciones ─────────────────────────────────────────────────
+
+/// Icono de campana con badge de no leidos.
+/// Se muestra a la izquierda del UserAvatarMenu cuando el usuario esta autenticado.
+class _NotificationBell extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
+
+    return InkWell(
+      onTap: () => context.push('/notifications'),
+      borderRadius: BorderRadius.circular(20),
+      child: SizedBox(
+        width: 36,
+        height: 36,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Center(
+              child: Icon(
+                Icons.notifications_none_rounded,
+                size: 22,
+                color: unreadCount > 0
+                    ? const Color(kUrgencyGreen)
+                    : Colors.grey[600],
+              ),
+            ),
+            if (unreadCount > 0)
+              Positioned(
+                top: 2,
+                right: 2,
+                child: Container(
+                  constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(kUrgencyGreen),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    unreadCount > 9 ? '9+' : '$unreadCount',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

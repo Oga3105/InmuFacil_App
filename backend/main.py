@@ -240,7 +240,7 @@ async def startup_event():
         from backend.src.config.database import engine
         from backend.src.models.base import Base
         # Ensure models are loaded for metadata
-        from backend.src.models import timeline, leads 
+        from backend.src.models import timeline, leads, notification_log
 
         if len(SECRET_KEY) < 32:
              logger.warning("JWT SECRET_KEY might be weak.")
@@ -312,6 +312,7 @@ async def health_check():
 # ============================================================================
 
 from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein
+from backend.src.routes import notifications as notifications_router
 
 from fastapi import APIRouter
 
@@ -343,6 +344,7 @@ api_v1_router.include_router(favorites.router, prefix="/favorites", tags=["Favor
 api_v1_router.include_router(arras_interview.router) # Arras Penitenciales Interview
 api_v1_router.include_router(post_sale.router) # Sprint V7 - Post-Sale Documents
 api_v1_router.include_router(fein.router)      # Sprint V8 - FEIN Banking Formalization
+api_v1_router.include_router(notifications_router.router)  # V17 - Notification Center
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
