@@ -62,6 +62,7 @@ class OfferResponse(BaseModel):
     payment_method: Optional[str] = None
     buyer_solvency_submitted: bool = False
     seller_solvency_accepted: bool = False
+    second_buyer_pending: bool = False
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
@@ -183,6 +184,10 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
     payment_method = solvency.payment_method.value if solvency and solvency.payment_method else None
     buyer_solvency_submitted = solvency is not None
     seller_solvency_accepted = bool(getattr(offer, 'seller_solvency_accepted', False) or False)
+    # True when buyer declared joint purchase but second buyer has not yet submitted identity data
+    second_buyer_pending = bool(
+        solvency and solvency.is_multi_buyer and solvency.second_buyer_verified_at is None
+    )
 
     return OfferResponse(
         id=offer.id,
@@ -205,6 +210,7 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
         payment_method=payment_method,
         buyer_solvency_submitted=buyer_solvency_submitted,
         seller_solvency_accepted=seller_solvency_accepted,
+        second_buyer_pending=second_buyer_pending,
     )
 
 

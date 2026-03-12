@@ -336,26 +336,25 @@ class TransactionTimelineScreen extends ConsumerWidget {
             : null,
         actionsWidget: solvencyActionsWidget,
       ),
-      if (needsSecondIdentity)
+      // Paso condicional: visible mientras el segundo comprador no haya verificado
+      // su identidad. Desaparece automaticamente cuando second_buyer_pending = false.
+      if (needsSecondIdentity || offerData.secondBuyerPending)
         _TimelineStep(
           title: 'Verificacion de Identidad — 2° Titular',
-          subtitle: stage > 1
-              ? 'Identidad del segundo titular verificada'
-              : stage == 1
-                  ? 'Pendiente: el segundo comprador debe completar la verificacion'
-                  : 'Se activara tras la verificacion de solvencia',
-          description: stage == 1
-              ? 'Para que el contrato de arras sea legalmente vinculante, el segundo titular debe verificar su identidad (DNI + prueba de vida) a traves del enlace que se enviara por correo.'
-              : null,
-          state: stepState(1),
-          // Buyer can initiate second-buyer data entry from here
-          ctaLabel: isBuyer && stage == 1 && isMultiBuyer
+          subtitle: isBuyer
+              ? 'Tu segundo comprador debe completar su verificacion'
+              : 'Pendiente: el segundo comprador debe verificar su identidad',
+          description: isBuyer
+              ? 'Para avanzar al contrato de Arras, el segundo comprador debe enviar sus datos de identidad. Usa el boton de abajo para añadirlos.'
+              : 'En cuanto el segundo comprador complete la verificacion, el proceso continuara automaticamente hacia la firma de Arras.',
+          state: _StepState.active,
+          ctaLabel: isBuyer && isMultiBuyer
               ? 'Añadir datos del 2° comprador'
               : null,
-          ctaIcon: isBuyer && stage == 1 && isMultiBuyer
+          ctaIcon: isBuyer && isMultiBuyer
               ? Icons.person_add_alt_1_outlined
               : null,
-          ctaCallback: isBuyer && stage == 1 && isMultiBuyer
+          ctaCallback: isBuyer && isMultiBuyer
               ? () => context.push('/solvency/second-buyer')
               : null,
         ),
