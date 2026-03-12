@@ -55,6 +55,9 @@ class User(Base):
     provider_category = Column(String, nullable=True) # e.g. "NOTARY", "VALUER"
     service_zone = Column(String, nullable=True) # e.g. "Madrid", "Barcelona"
 
+    # Push Notifications — FCM device token (V17 Notification Center)
+    fcm_token = Column(String(512), nullable=True)
+
     # Relationships
     # Using string references to avoid circular imports
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")
@@ -63,6 +66,9 @@ class User(Base):
     # Hito 11: Financing
     mortgage_profile = relationship("MortgageProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     simulations = relationship("MortgageSimulation", back_populates="user", cascade="all, delete-orphan")
+
+    # V17: Notification Center
+    notifications = relationship("NotificationLog", back_populates="user", cascade="all, delete-orphan")
     
     # Advisor Relationship (Self-Referential)
     financial_advisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)

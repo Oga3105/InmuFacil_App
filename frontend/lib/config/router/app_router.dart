@@ -31,6 +31,7 @@ import '../../presentation/screens/offers/timeline_pages/post_venta_screen.dart'
 import '../../presentation/screens/offers/timeline_pages/entrega_llaves_screen.dart';
 import '../../presentation/screens/info/info_screen.dart';
 import '../../presentation/screens/info/trust_dashboard_screen.dart';
+import '../../presentation/screens/notifications/notifications_page.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -349,6 +350,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/trust-dashboard',
         name: 'trust-dashboard',
         builder: (_, __) => const TrustDashboardScreen(),
+      ),
+
+      // Notification Center (V17)
+      GoRoute(
+        path: '/notifications',
+        name: 'notifications',
+        builder: (_, __) => const NotificationsPage(),
       ),
     ],
     
