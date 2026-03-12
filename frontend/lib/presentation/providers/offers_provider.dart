@@ -33,6 +33,7 @@ class OfferData {
     this.paymentMethod,
     this.buyerSolvencySubmitted = false,
     this.sellerSolvencyAccepted = false,
+    this.secondBuyerPending = false,
   });
 
   final String id;
@@ -71,6 +72,10 @@ class OfferData {
 
   /// True when the seller has explicitly validated the buyer's solvency passport.
   final bool sellerSolvencyAccepted;
+
+  /// True when buyer declared joint purchase (is_multi_buyer) but the second
+  /// buyer has not yet submitted and verified their identity data.
+  final bool secondBuyerPending;
 }
 
 // --- Sent Offers Provider ---
@@ -292,6 +297,7 @@ OfferData _mapOffer(dynamic item) {
     paymentMethod: map['payment_method'] as String?,
     buyerSolvencySubmitted: map['buyer_solvency_submitted'] as bool? ?? false,
     sellerSolvencyAccepted: map['seller_solvency_accepted'] as bool? ?? false,
+    secondBuyerPending: map['second_buyer_pending'] as bool? ?? false,
   );
 
   return offer;
