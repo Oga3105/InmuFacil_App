@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +18,19 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Leer la oferta en vivo desde los providers para que el timeline
+    // se redibuje tras mutaciones (aceptar/rechazar solvencia, etc.).
+    // Fallback al snapshot de GoRouter si los providers aun no cargaron.
+    final receivedList = ref.watch(receivedOffersProvider).asData?.value;
+    final sentList = ref.watch(sentOffersProvider).asData?.value;
+    final liveOffer =
+        receivedList?.firstWhereOrNull((o) => o.id == offer.id) ??
+        sentList?.firstWhereOrNull((o) => o.id == offer.id) ??
+        offer;
+
     final currentUser = ref.watch(authProvider).user;
-    final isBuyer = currentUser?.id == offer.buyerId;
-    final s = offer.status.toLowerCase();
+    final isBuyer = currentUser?.id == liveOffer.buyerId;
+    final s = liveOffer.status.toLowerCase();
     // Buyer can withdraw while arras not yet signed (not counter_offer — buyer has dedicated actions there)
     final canWithdraw = isBuyer &&
         (s == 'pending' || s == 'accepted' || s == 'signing_pending');
@@ -57,7 +68,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 // ── Header cards ────────────────────────────────────────────
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: _HeaderCards(offer: offer),
+                  child: _HeaderCards(offer: liveOffer),
                 ),
                 // ── Title ───────────────────────────────────────────────────
                 const Padding(
@@ -88,27 +99,28 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
                   child: _TimelineWidget(steps: _buildSteps(
                     context,
-                    offer.status,
+                    liveOffer,
                     isBuyer: isBuyer,
                     hasPassport: hasPassport,
                     needsSecondIdentity: needsSecondIdentity,
                     isMultiBuyer: isMultiBuyer,
-                    confirmedVisitDate: offer.confirmedVisitDate,
-                    requestedVisitDate: offer.requestedVisitDate,
-                    visitStatus: offer.visitStatus,
+                    confirmedVisitDate: liveOffer.confirmedVisitDate,
+                    requestedVisitDate: liveOffer.requestedVisitDate,
+                    visitStatus: liveOffer.visitStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
-                        ? _BuyerCounterOfferActions(offer: offer)
+                        ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
                     // Withdraw in step 0 only for pending/counter_offer
                     withdrawAction:
                         canWithdraw && (s == 'pending' || s == 'counter_offer')
-                            ? _WithdrawOfferButton(offer: offer)
+                            ? _WithdrawOfferButton(offer: liveOffer)
                             : null,
-                    // Solvency step actions: seller sees passport+reject, buyer can withdraw
+                    // Solvency step: seller ve pasaporte+botones SOLO si aun no acepto.
+                    // Tras aceptar solvencia, la seccion desaparece y el paso queda completado.
                     solvencyActionsWidget: s == 'accepted'
-                        ? (!isBuyer
-                            ? _SellerSolvencySection(offer: offer)
-                            : _WithdrawOfferButton(offer: offer))
+                        ? (!isBuyer && !liveOffer.sellerSolvencyAccepted
+                            ? _SellerSolvencySection(offer: liveOffer)
+                            : (isBuyer ? _WithdrawOfferButton(offer: liveOffer) : null))
                         : null,
                   )),
                 ),
@@ -220,7 +232,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
   List<_TimelineStep> _buildSteps(
     BuildContext context,
-    String status, {
+    OfferData offerData, {
     required bool isBuyer,
     bool hasPassport = false,
     bool needsSecondIdentity = false,
@@ -232,7 +244,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     Widget? withdrawAction,
     Widget? solvencyActionsWidget,
   }) {
-    final s = status.toLowerCase();
+    final s = offerData.status.toLowerCase();
 
     // Map offer status to pipeline stage index:
     // 0 = pending (offer not yet accepted)
@@ -285,8 +297,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
       'savings_plus_mortgage',
       'bridge_mortgage',
     };
-    final requiresFein = offer.paymentMethod == null ||
-        feinPaymentMethods.contains(offer.paymentMethod);
+    final requiresFein = offerData.paymentMethod == null ||
+        feinPaymentMethods.contains(offerData.paymentMethod);
 
     final steps = <_TimelineStep>[
       _TimelineStep(
@@ -362,7 +374,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         ctaLabel: stage == 2 ? 'Ir a Firmar Ahora' : null,
         ctaIcon: stage == 2 ? Icons.edit_outlined : null,
         ctaCallback: stage == 2
-            ? () => context.push('/offers/${offer.id}/arras', extra: offer)
+            ? () => context.push('/offers/${offerData.id}/arras', extra: offerData)
             : null,
       ),
       _TimelineStep(
@@ -376,7 +388,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         ctaLabel: stage == 3 ? 'Agendar visita del tasador' : null,
         ctaIcon: stage == 3 ? Icons.home_work_outlined : null,
         ctaCallback: stage == 3
-            ? () => context.push('/offers/${offer.id}/tasacion', extra: offer)
+            ? () => context.push('/offers/${offerData.id}/tasacion', extra: offerData)
             : null,
       ),
       if (requiresFein)
@@ -391,7 +403,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
           ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
           ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
           ctaCallback: stage == 3
-              ? () => context.push('/offers/${offer.id}/fein', extra: offer)
+              ? () => context.push('/offers/${offerData.id}/fein', extra: offerData)
               : null,
         ),
       _TimelineStep(
@@ -403,7 +415,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         ctaLabel: stage == 4 ? 'Gestionar cita y confirmar firma' : null,
         ctaIcon: stage == 4 ? Icons.gavel_outlined : null,
         ctaCallback: stage == 4
-            ? () => context.push('/offers/${offer.id}/notaria', extra: offer)
+            ? () => context.push('/offers/${offerData.id}/notaria', extra: offerData)
             : null,
       ),
       _TimelineStep(
@@ -415,7 +427,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         ctaLabel: stage >= 4 ? 'Gestionar suministros' : null,
         ctaIcon: stage >= 4 ? Icons.receipt_long_outlined : null,
         ctaCallback: stage >= 4
-            ? () => context.push('/offers/${offer.id}/post-venta', extra: offer)
+            ? () => context.push('/offers/${offerData.id}/post-venta', extra: offerData)
             : null,
       ),
     ];
