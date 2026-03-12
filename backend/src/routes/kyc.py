@@ -92,10 +92,60 @@ def _run_gemini_verification(
             if not result.approved:
                 user.rejection_reason = result.reason
             elif result.doc_number:
-                from backend.src.utils.crypto import encrypt_data as _encrypt
-                user.encrypted_dni = _encrypt(result.doc_number)
+                from backend.src.utils.crypto import encrypt_data as _encrypt, compute_dni_hmac
+                from sqlalchemy.exc import IntegrityError
 
-        db.commit()
+                dni_hmac = compute_dni_hmac(result.doc_number)
+
+                # Check for duplicate before committing to provide a clear error message
+                existing = (
+                    db.query(User)
+                    .filter(User.dni_hmac == dni_hmac, User.id != user_id)
+                    .first()
+                )
+                if existing:
+                    # DNI already linked to another account — reject this verification
+                    user.dni_status = "RECHAZADO"
+                    user.rejection_reason = (
+                        "Este documento de identidad ya esta vinculado a otra cuenta. "
+                        "Si crees que es un error, contacta con soporte."
+                    )
+                    records_to_reject = (
+                        db.query(KYCVerification)
+                        .filter(KYCVerification.user_id == user_id, KYCVerification.status == "pending")
+                        .all()
+                    )
+                    for rec in records_to_reject:
+                        rec.status = "rechazado"
+                        rec.rejection_reason = user.rejection_reason
+                    logger.warning(
+                        "[SHIELD] DNI duplicate detected: user_id=%s tried to register DNI already "
+                        "linked to user_id=%s", user_id, existing.id
+                    )
+                    db.commit()
+                    return
+
+                user.encrypted_dni = _encrypt(result.doc_number)
+                user.dni_hmac = dni_hmac
+
+        try:
+            db.commit()
+        except Exception as integrity_exc:
+            # Race condition: another request committed the same dni_hmac between
+            # our SELECT and our INSERT. Treat as duplicate.
+            db.rollback()
+            user = db.query(User).filter(User.id == user_id).first()
+            if user:
+                user.dni_status = "RECHAZADO"
+                user.rejection_reason = (
+                    "Este documento de identidad ya esta vinculado a otra cuenta. "
+                    "Si crees que es un error, contacta con soporte."
+                )
+                user.encrypted_dni = None
+                user.dni_hmac = None
+                db.commit()
+            logger.warning("[SHIELD] DNI uniqueness race condition for user_id=%s: %s", user_id, integrity_exc)
+            return
 
     except Exception as e:
         logger.error("Gemini verification background task failed for user %s: %s", user_id, e)
