@@ -3,12 +3,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+
+const _kTimelineApiBase = 'http://localhost:8000/api/v1';
+
+final _arrasStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token =
+      await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'none';
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      '$_kTimelineApiBase/arras/$offerId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
+        'none';
+  } catch (_) {
+    return 'none';
+  }
+});
 
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
 class TransactionTimelineScreen extends ConsumerWidget {
@@ -55,6 +78,11 @@ class TransactionTimelineScreen extends ConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
+
+    // Arras status (only relevant when stage == 2)
+    final arrasStatus = s == 'signing_pending'
+        ? ref.watch(_arrasStatusProvider(liveOffer.id)).asData?.value ?? 'none'
+        : 'none';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -107,6 +135,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     confirmedVisitDate: liveOffer.confirmedVisitDate,
                     requestedVisitDate: liveOffer.requestedVisitDate,
                     visitStatus: liveOffer.visitStatus,
+                    arrasStatus: arrasStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
@@ -240,6 +269,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     String? confirmedVisitDate,
     String? requestedVisitDate,
     String? visitStatus,
+    String arrasStatus = 'none',
     Widget? buyerActions,
     Widget? withdrawAction,
     Widget? solvencyActionsWidget,
@@ -343,20 +373,24 @@ class TransactionTimelineScreen extends ConsumerWidget {
       if (needsSecondIdentity || offerData.secondBuyerPending)
         _TimelineStep(
           title: 'Verificacion de Identidad — 2° Titular',
-          subtitle: isBuyer
-              ? 'Tu segundo comprador debe completar su verificacion'
-              : 'Pendiente: el segundo comprador debe verificar su identidad',
-          description: isBuyer
+          subtitle: offerData.secondBuyerPending
+              ? (isBuyer
+                  ? 'Tu segundo comprador debe completar su verificacion'
+                  : 'Pendiente: el segundo comprador debe verificar su identidad')
+              : 'Identidad del segundo titular confirmada',
+          description: offerData.secondBuyerPending && isBuyer
               ? 'Para avanzar al contrato de Arras, el segundo comprador debe enviar sus datos de identidad. Usa el boton de abajo para añadirlos.'
-              : 'En cuanto el segundo comprador complete la verificacion, el proceso continuara automaticamente hacia la firma de Arras.',
-          state: _StepState.active,
-          ctaLabel: isBuyer
+              : null,
+          state: offerData.secondBuyerPending
+              ? _StepState.active
+              : _StepState.done,
+          ctaLabel: isBuyer && offerData.secondBuyerPending
               ? 'Añadir datos del 2° comprador'
               : null,
-          ctaIcon: isBuyer
+          ctaIcon: isBuyer && offerData.secondBuyerPending
               ? Icons.person_add_alt_1_outlined
               : null,
-          ctaCallback: isBuyer
+          ctaCallback: isBuyer && offerData.secondBuyerPending
               ? () => context.push('/solvency/second-buyer')
               : null,
         ),
@@ -365,15 +399,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
         subtitle: stage > 2
             ? 'Firmado por ambas partes'
             : stage == 2
-                ? 'Faltan las firmas del contrato'
+                ? _arrasSubtitle(arrasStatus, isBuyer)
                 : 'Pendiente de verificacion de solvencia',
-        description: stage == 2
-            ? 'Ambas partes deben revisar y firmar digitalmente el documento de '
-              'reserva para proceder con el bloqueo oficial del inmueble.'
+        description: stage == 2 &&
+                arrasStatus != 'accepted'
+            ? 'Ambas partes deben completar su entrevista. La IA generara el '
+              'contrato cuando ambos confirmen sus respuestas.'
             : null,
-        state: stepState(2),
-        ctaLabel: stage == 2 ? 'Ir a Firmar Ahora' : null,
-        ctaIcon: stage == 2 ? Icons.edit_outlined : null,
+        state: arrasStatus == 'accepted' ? _StepState.done : stepState(2),
+        ctaLabel: stage == 2 ? _arrasCtaLabel(arrasStatus, isBuyer) : null,
+        ctaIcon: stage == 2 ? _arrasCtaIcon(arrasStatus) : null,
         ctaCallback: stage == 2
             ? () => context.push('/offers/${offerData.id}/arras', extra: offerData)
             : null,
@@ -464,6 +499,63 @@ class TransactionTimelineScreen extends ConsumerWidget {
     }
 
     return steps;
+  }
+
+  // ── Arras step helpers ──────────────────────────────────────────────────
+
+  String _arrasSubtitle(String arrasStatus, bool isBuyer) {
+    switch (arrasStatus) {
+      case 'accepted':
+        return 'Firmado por ambas partes';
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return 'Contrato listo — pendiente de firma';
+      case 'generating':
+        return 'Generando contrato con IA...';
+      case 'both_done':
+        return 'Ambas entrevistas completadas — generando contrato';
+      case 'buyer_done':
+        return isBuyer
+            ? 'Tu entrevista completada — esperando al vendedor'
+            : 'Comprador listo — completa tu entrevista';
+      case 'seller_done':
+        return !isBuyer
+            ? 'Tu entrevista completada — esperando al comprador'
+            : 'Vendedor listo — completa tu entrevista';
+      default:
+        return 'Completa tu entrevista para continuar';
+    }
+  }
+
+  String? _arrasCtaLabel(String arrasStatus, bool isBuyer) {
+    switch (arrasStatus) {
+      case 'accepted':
+        return null;
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return 'Revisar contrato';
+      case 'generating':
+      case 'both_done':
+        return 'Ver estado';
+      default:
+        return isBuyer ? 'Comenzar entrevista' : 'Completar entrevista';
+    }
+  }
+
+  IconData? _arrasCtaIcon(String arrasStatus) {
+    switch (arrasStatus) {
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return Icons.description_outlined;
+      case 'generating':
+      case 'both_done':
+        return Icons.auto_awesome_outlined;
+      default:
+        return Icons.edit_outlined;
+    }
   }
 }
 
@@ -873,7 +965,7 @@ class _ActiveRow extends StatelessWidget {
                             backgroundColor: const Color(0xFF2563EB),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -1107,7 +1199,7 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
         foregroundColor: Colors.red,
         side: const BorderSide(color: Colors.red),
         minimumSize: const Size(double.infinity, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -1340,7 +1432,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1364,7 +1456,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1384,7 +1476,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1639,7 +1731,7 @@ class _SellerSolvencySectionState
                     backgroundColor: const Color(0xFF16A34A),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),
@@ -1663,7 +1755,7 @@ class _SellerSolvencySectionState
                   padding: const EdgeInsets.symmetric(
                       vertical: 12, horizontal: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ],

@@ -21,8 +21,12 @@ import '../../presentation/screens/offers/transaction_timeline_screen.dart';
 import '../../presentation/screens/solvency/solvency_wizard_screen.dart';
 import '../../presentation/screens/solvency/solvency_passport_screen.dart';
 import '../../presentation/screens/solvency/second_buyer_screen.dart';
+import '../../presentation/screens/solvency/second_buyer_status_screen.dart';
 import '../../presentation/providers/offers_provider.dart';
 import '../../presentation/screens/offers/arras_interview_screen.dart';
+import '../../presentation/screens/offers/arras_buyer_stepper_screen.dart';
+import '../../presentation/screens/offers/arras_seller_stepper_screen.dart';
+import '../../presentation/screens/offers/arras_contract_review_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/fein_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/notaria_screen.dart';
@@ -227,6 +231,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'solvency-second-buyer',
         builder: (context, state) => const SecondBuyerScreen(),
       ),
+      GoRoute(
+        path: '/solvency/second-buyer/status',
+        name: 'solvency-second-buyer-status',
+        builder: (context, state) => const SecondBuyerStatusScreen(),
+      ),
 
       // Contracts (Hito 12 Placeholder)
       GoRoute(
@@ -238,13 +247,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
 
-      // Arras Interview
+      // Arras Interview (hub + sub-screens)
       GoRoute(
         path: '/offers/:offerId/arras',
         name: 'arras-interview',
         builder: (context, state) {
           final offer = state.extra as OfferData;
           return ArrasInterviewScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/arras/buyer',
+        name: 'arras-buyer',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return ArrasBuyerStepperScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/arras/seller',
+        name: 'arras-seller',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return ArrasSellerStepperScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/arras/contract',
+        name: 'arras-contract',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return ArrasContractReviewScreen(offer: offer);
         },
       ),
 

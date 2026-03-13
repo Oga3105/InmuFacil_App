@@ -65,8 +65,11 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             child: const Text('Seguir aquí'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
             onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Sí, cancelar'),
           ),
         ],
@@ -148,7 +151,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             selfieBytes: _selfieBytes!,
             documentType: _documentType!,
           );
-      if (mounted) setState(() => _done = true);
+      if (mounted) context.go('/solvency/second-buyer/status');
     } catch (e) {
       messenger.showSnackBar(SnackBar(
         content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -704,8 +707,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     side: const BorderSide(color: Colors.red),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                   shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Text('Cancelar',
                       style: TextStyle(color: Colors.red)),
@@ -730,7 +733,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.arrow_forward, size: 18),
                     label: const Text(

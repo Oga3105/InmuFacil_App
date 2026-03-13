@@ -61,6 +61,34 @@ class ArrasInterview(Base):
     # Metadata adicional (respuestas libres en JSON)
     extra_answers_json = Column(JSON, nullable=True)
 
+    # --- V2: Entrevistas separadas por rol (Sprint V23) ---
+    # JSON con todas las respuestas del comprador / vendedor
+    buyer_answers_json = Column(JSON, nullable=True)
+    seller_answers_json = Column(JSON, nullable=True)
+
+    # Confirmacion individual de la entrevista (independiente de buyer_confirmed legacy)
+    buyer_interview_confirmed = Column(Boolean, default=False, nullable=False, server_default="false")
+    seller_interview_confirmed = Column(Boolean, default=False, nullable=False, server_default="false")
+
+    # Contrato generado por IA
+    contract_text = Column(Text, nullable=True)
+    # null | "generating" | "ready" | "buyer_accepted" | "seller_accepted" | "fully_accepted"
+    contract_status = Column(String(30), nullable=True)
+    generation_count = Column(Integer, default=0, nullable=False, server_default="0")
+
+    # Aceptacion del contrato por cada parte
+    buyer_contract_accepted = Column(Boolean, default=False, nullable=False, server_default="false")
+    buyer_contract_accepted_at = Column(DateTime(timezone=True), nullable=True)
+    seller_contract_accepted = Column(Boolean, default=False, nullable=False, server_default="false")
+    seller_contract_accepted_at = Column(DateTime(timezone=True), nullable=True)
+
+    # Notas de rechazo (para solicitar cambios)
+    buyer_rejection_notes = Column(Text, nullable=True)
+    seller_rejection_notes = Column(Text, nullable=True)
+
+    # IBAN del vendedor cifrado (PII)
+    seller_iban_enc = Column(String, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
