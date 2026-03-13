@@ -163,7 +163,7 @@ async def register(
         hashed_password=hashed_password,
         full_name=user_data.full_name,
         user_type=UserType(user_data.user_type),
-        dni_status=DNIStatus.PENDIENTE,
+        dni_status=DNIStatus.SIN_VERIFICAR,
         email_verified=False,
         verification_token=verification_token,
         token_expires_at=token_expires,
