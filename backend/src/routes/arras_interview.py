@@ -338,8 +338,9 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
 
         from google import genai as google_genai
         client = google_genai.Client(api_key=api_key)
+        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model=model_id,
             contents=prompt,
         )
         contract_text = response.text
