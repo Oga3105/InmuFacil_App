@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -278,9 +280,9 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
   Future<void> submit({
     required String fullName,
     required String email,
-    required String frontPath,
-    String? backPath,
-    required String selfiePath,
+    required Uint8List frontBytes,
+    Uint8List? backBytes,
+    required Uint8List selfieBytes,
     String documentType = 'dni',
   }) async {
     final token = await _getToken();
@@ -293,10 +295,10 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
         'full_name': fullName,
         'email': email,
         'document_type': documentType,
-        'front': await MultipartFile.fromFile(frontPath, filename: 'front.jpg'),
-        if (backPath != null)
-          'back': await MultipartFile.fromFile(backPath, filename: 'back.jpg'),
-        'selfie': await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
+        'front': MultipartFile.fromBytes(frontBytes, filename: 'front.jpg'),
+        if (backBytes != null)
+          'back': MultipartFile.fromBytes(backBytes, filename: 'back.jpg'),
+        'selfie': MultipartFile.fromBytes(selfieBytes, filename: 'selfie.jpg'),
       });
       await dio.post(
         'http://localhost:8000/api/v1/solvency/second-buyer',
