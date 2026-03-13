@@ -460,6 +460,9 @@ class _ArrasContractReviewScreenState
           generationCount: generationCount,
         ),
 
+        // ── Equity analysis CTA ────────────────────────────────
+        _EquityAnalysisBanner(offer: widget.offer),
+
         // ── Rejection notes if any ─────────────────────────────
         if (otherRejectionNotes != null && otherRejectionNotes.isNotEmpty)
           _RejectionNotesBanner(
@@ -877,6 +880,64 @@ class _WaitingBanner extends StatelessWidget {
                     fontSize: 13),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EquityAnalysisBanner extends StatelessWidget {
+  const _EquityAnalysisBanner({required this.offer});
+
+  final OfferData offer;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.push(
+        '/offers/${offer.id}/arras/equity',
+        extra: offer,
+      ),
+      child: Container(
+        color: const Color(0xFFF0F9FF),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _kBlue.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.analytics_outlined,
+                  color: _kBlue, size: 20),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Analizar mi posicion',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E3A5F),
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'IA analiza cada clausula desde tu perspectiva',
+                    style: TextStyle(
+                        fontSize: 12, color: Color(0xFF64748B)),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right,
+                color: _kBlue, size: 20),
           ],
         ),
       ),

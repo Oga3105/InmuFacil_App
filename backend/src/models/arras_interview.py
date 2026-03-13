@@ -89,6 +89,11 @@ class ArrasInterview(Base):
     # IBAN del vendedor cifrado (PII)
     seller_iban_enc = Column(String, nullable=True)
 
+    # --- V3: Analisis de equidad generado por IA (Sprint V26) ---
+    # Analisis JSON con score e items para cada parte (cacheado)
+    buyer_equity_json = Column(JSON, nullable=True)
+    seller_equity_json = Column(JSON, nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

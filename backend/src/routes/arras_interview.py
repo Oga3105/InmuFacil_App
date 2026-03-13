@@ -10,10 +10,13 @@ Endpoints:
   POST /arras/{offer_id}/seller/confirm   Vendedor confirma su entrevista
   POST /arras/{offer_id}/contract/accept  Aceptar el contrato generado por IA
   POST /arras/{offer_id}/contract/reject  Rechazar contrato y pedir cambios
+  POST /arras/{offer_id}/contract/regenerate  Forzar regeneracion del contrato
+  GET  /arras/{offer_id}/equity           Analisis de equidad por rol (cached)
   GET  /arras/{offer_id}/pdf              Descargar borrador PDF
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -637,6 +640,9 @@ async def reject_contract(
     record.seller_contract_accepted_at = None
     record.contract_status = None
     record.contract_text = None
+    # Clear equity cache so analysis reflects the new contract when regenerated
+    record.buyer_equity_json = None
+    record.seller_equity_json = None
 
     db.commit()
     db.refresh(record)
@@ -668,11 +674,179 @@ async def regenerate_contract(
 
     record.contract_status = "generating"
     record.contract_text = None
+    # Clear equity cache so it is regenerated against the new contract
+    record.buyer_equity_json = None
+    record.seller_equity_json = None
     db.commit()
     background_tasks.add_task(_generate_arras_contract_gemini, offer_id=offer_id)
     logger.info("Contract regeneration triggered for offer_id=%s by user=%s", offer_id, current_user.id)
     db.refresh(record)
     return _serialize(record, int(offer.amount))
+
+
+@router.get("/{offer_id}/equity")
+async def get_equity_analysis(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Returns the AI equity analysis for the requesting party (buyer or seller).
+    Generates and caches the analysis on first call using the current contract text.
+    Response: { "score": int, "items": [ { "key", "label", "status", "description" } ] }
+    """
+    offer, role = _get_offer_and_role(offer_id, current_user, db)
+    record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Entrevista no encontrada")
+    if not record.contract_text or record.contract_status not in (
+        "ready", "buyer_accepted", "seller_accepted", "fully_accepted"
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="El analisis solo esta disponible cuando el contrato ha sido generado",
+        )
+
+    # Return cached analysis if available for this role
+    if role == "BUYER" and record.buyer_equity_json:
+        return record.buyer_equity_json
+    if role == "SELLER" and record.seller_equity_json:
+        return record.seller_equity_json
+
+    # --- Generate equity analysis via Gemini ---
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="El servicio de IA no esta configurado. Contacta con el administrador.",
+        )
+
+    ba = record.buyer_answers_json or {}
+    sa = record.seller_answers_json or {}
+
+    def yn(val): return "Si" if val else "No"
+
+    buyer_context = (
+        f"- Sujeto a hipoteca: {yn(ba.get('subject_to_mortgage', False))}\n"
+        f"- Penalizacion comprador (pierde arras): Si el comprador desiste, pierde el importe de arras\n"
+        f"- Prorrateo IBI por dias: {yn(ba.get('ibi_proration_by_days', True))}\n"
+        f"- Retencion IBI no emitido: {yn(ba.get('retain_pending_ibi', False))}\n"
+        f"- Acepta clausula vicios ocultos art. 1484 CC: {yn(ba.get('hidden_defects_accepted', False))}\n"
+        f"- Retencion por deudas de comunidad: {yn(ba.get('community_debt_retention', False))}\n"
+        f"- Plazo maximo para escritura: {ba.get('deadline_days', record.deadline_days or 60)} dias\n"
+        f"- Porcentaje arras: {ba.get('deposit_percentage', record.deposit_percentage or 10)}%\n"
+        f"- Notaria preferida: {ba.get('notary_preference', 'A determinar')}"
+    )
+    seller_context = (
+        f"- Vivienda libre de arrendatarios: {yn(sa.get('property_free_of_tenants', True))}\n"
+        f"- Suministros activos: {yn(sa.get('utilities_active', True))}\n"
+        f"- Compromiso mantenimiento suministros: {yn(sa.get('utilities_maintenance_commitment', True))}\n"
+        f"- Derramas aprobadas no comunicadas: {yn(sa.get('has_approved_levies', False))}\n"
+        f"- Certificado cero deudas comunidad: {yn(sa.get('zero_debt_certificate', True))}\n"
+        f"- Hipoteca pendiente de cancelar: {yn(sa.get('has_mortgage_to_cancel', False))}\n"
+        f"- Importe hipoteca: {sa.get('mortgage_amount', 0)} EUR\n"
+        f"- Asume plusvalia municipal: {yn(sa.get('plusvalia_assumed', True))}\n"
+        f"- Acepta retencion IBI: {yn(sa.get('ibi_retention_accepted', True))}"
+    )
+
+    prompt = f"""Eres un asesor juridico inmobiliario espanol experto en contratos de arras penitenciales.
+Analiza el siguiente contrato y las condiciones pactadas desde la perspectiva de cada parte.
+Devuelve UNICAMENTE un JSON valido con el siguiente formato exacto. Sin texto adicional, sin markdown, sin comentarios.
+
+FORMATO REQUERIDO:
+{{
+  "buyer": {{
+    "score": <entero 0-100 que indica cuan favorable es el contrato para el comprador>,
+    "items": [
+      {{
+        "key": "<identificador_snake_case>",
+        "label": "<Titulo del aspecto en espanol>",
+        "status": "<favorable|neutral|alerta|critico>",
+        "description": "<Explicacion concisa de 1-2 frases en espanol>"
+      }}
+    ]
+  }},
+  "seller": {{
+    "score": <entero 0-100 que indica cuan favorable es el contrato para el vendedor>,
+    "items": [...]
+  }}
+}}
+
+CRITERIOS DE STATUS:
+- favorable: el termino beneficia claramente a esta parte (verde)
+- neutral: clausula estandar, ni beneficia ni perjudica especialmente (azul)
+- alerta: condicion que requiere atencion o tiene cierto riesgo (naranja)
+- critico: condicion desfavorable o con alto riesgo para esta parte (rojo)
+
+ITEMS OBLIGATORIOS PARA EL COMPRADOR (usa exactamente estas keys):
+1. hipoteca — condicion suspensiva de financiacion hipotecaria
+2. notaria — gastos notariales y quien los asume
+3. plazo — plazo de firma de escritura y si es suficiente
+4. ibi — prorrateo del IBI y proteccion frente a IBI no emitido
+5. vicios_ocultos — clausula de vicios ocultos articulo 1484 del Codigo Civil
+6. penalizacion_arras — consecuencias economicas de desistimiento del comprador
+7. deudas_comunidad — proteccion frente a deudas de comunidad del vendedor
+
+ITEMS OBLIGATORIOS PARA EL VENDEDOR (usa exactamente estas keys):
+1. compromiso_entrega — estado de la vivienda y libre de arrendatarios
+2. suministros — situacion de los suministros y compromisos de mantenimiento
+3. plusvalia — quien asume la plusvalia municipal
+4. hipoteca_vendedor — cancelacion de hipoteca existente y riesgo para el plazo
+5. penalizacion_arras — consecuencias economicas de desistimiento del vendedor (devolver doble)
+6. plazo_liberacion — suficiencia del plazo para preparar la documentacion y la venta
+7. ibi_retencion — retencion o prorrateo del IBI y impacto economico para el vendedor
+
+CONDICIONES DECLARADAS POR EL COMPRADOR:
+{buyer_context}
+
+CONDICIONES DECLARADAS POR EL VENDEDOR:
+{seller_context}
+
+TEXTO DEL CONTRATO (primeras 3000 palabras):
+{record.contract_text[:3000] if record.contract_text else ""}
+"""
+
+    try:
+        from google import genai as google_genai
+        client = google_genai.Client(api_key=api_key)
+        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt,
+        )
+        raw = response.text.strip()
+        # Strip markdown code fences if present
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        equity_data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        logger.error("Equity analysis JSON parse error for offer_id=%s: %s", offer_id, exc)
+        raise HTTPException(
+            status_code=502,
+            detail="El servicio de IA devolvio una respuesta invalida. Intentalo de nuevo.",
+        )
+    except Exception as exc:
+        err_str = str(exc)
+        logger.exception("Equity analysis failed for offer_id=%s: %s", offer_id, exc)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
+            raise HTTPException(
+                status_code=429,
+                detail="El servicio de IA ha superado su cuota. Intenta de nuevo en unos minutos.",
+            )
+        raise HTTPException(status_code=502, detail="Error al generar el analisis de equidad.")
+
+    buyer_analysis = equity_data.get("buyer", {})
+    seller_analysis = equity_data.get("seller", {})
+
+    # Cache both analyses
+    record.buyer_equity_json = buyer_analysis
+    record.seller_equity_json = seller_analysis
+    db.commit()
+    logger.info("Equity analysis cached for offer_id=%s", offer_id)
+
+    return buyer_analysis if role == "BUYER" else seller_analysis
 
 
 @router.post("/{offer_id}/confirm", response_model=ArrasInterviewResponse)

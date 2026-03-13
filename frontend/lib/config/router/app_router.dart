@@ -27,6 +27,7 @@ import '../../presentation/screens/offers/arras_interview_screen.dart';
 import '../../presentation/screens/offers/arras_buyer_stepper_screen.dart';
 import '../../presentation/screens/offers/arras_seller_stepper_screen.dart';
 import '../../presentation/screens/offers/arras_contract_review_screen.dart';
+import '../../presentation/screens/offers/arras_equity_analysis_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/tasacion_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/fein_screen.dart';
 import '../../presentation/screens/offers/timeline_pages/notaria_screen.dart';
@@ -278,6 +279,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final offer = state.extra as OfferData;
           return ArrasContractReviewScreen(offer: offer);
+        },
+      ),
+      GoRoute(
+        path: '/offers/:offerId/arras/equity',
+        name: 'arras-equity',
+        builder: (context, state) {
+          final offer = state.extra as OfferData;
+          return ArrasEquityAnalysisScreen(offer: offer);
         },
       ),
 
