@@ -91,6 +91,41 @@ class _ArrasContractReviewScreenState
     ));
   }
 
+  Future<void> _regenerateContract() async {
+    setState(() => _actionLoading = true);
+    final dio = await _buildDio();
+    if (dio == null) {
+      setState(() => _actionLoading = false);
+      return;
+    }
+    try {
+      await dio.post('/arras/${widget.offer.id}/contract/regenerate');
+      ref.invalidate(_arrasContractProvider(widget.offer.id));
+      // Restart polling
+      _pollTimer?.cancel();
+      _pollTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+        final data = ref
+            .read(_arrasContractProvider(widget.offer.id))
+            .asData
+            ?.value;
+        final status = data?['contract_status'] as String?;
+        if (status == 'generating' || status == null) {
+          ref.invalidate(_arrasContractProvider(widget.offer.id));
+        } else {
+          _pollTimer?.cancel();
+        }
+      });
+    } on DioException catch (e) {
+      final msg = e.response?.data?['detail'] ?? 'Error al reintentar';
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(msg.toString())));
+      }
+    } finally {
+      if (mounted) setState(() => _actionLoading = false);
+    }
+  }
+
   Future<void> _acceptContract() async {
     setState(() => _actionLoading = true);
     final dio = await _buildDio();
@@ -180,6 +215,10 @@ class _ArrasContractReviewScreenState
           final otherAccepted = isBuyer ? sellerAccepted : buyerAccepted;
           final fullyAccepted = contractStatus == 'fully_accepted';
 
+          if (contractStatus == 'error') {
+            return _buildErrorView(contractText ?? 'Error al generar el contrato.');
+          }
+
           if (contractStatus == 'generating' || contractText == null) {
             return _buildGeneratingView();
           }
@@ -206,6 +245,78 @@ class _ArrasContractReviewScreenState
   }
 
   // ─── Views ────────────────────────────────────────────────────────────────
+
+  Widget _buildErrorView(String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: _kRed.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.error_outline, color: _kRed, size: 56),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Error al generar el contrato',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E3A5F)),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _kRed.withValues(alpha: 0.2)),
+              ),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF991B1B),
+                    height: 1.5),
+              ),
+            ),
+            const SizedBox(height: 28),
+            FilledButton.icon(
+              onPressed: _actionLoading ? null : _regenerateContract,
+              icon: _actionLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                          color: Colors.white, strokeWidth: 2))
+                  : const Icon(Icons.refresh_outlined),
+              label: const Text('Reintentar generacion'),
+              style: FilledButton.styleFrom(
+                backgroundColor: _kBlue,
+                disabledBackgroundColor: Colors.grey.shade300,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 28, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Si el problema persiste, espera unos minutos antes de reintentar.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildGeneratingView() {
     return Center(

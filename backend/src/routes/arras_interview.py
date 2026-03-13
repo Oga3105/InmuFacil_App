@@ -133,6 +133,8 @@ def _compute_arras_status(record: ArrasInterview) -> str:
         return "contract_ready"
     if cs == "generating":
         return "generating"
+    if cs == "error":
+        return "error"
     b = bool(record.buyer_interview_confirmed)
     s = bool(record.seller_interview_confirmed)
     if b and s:
@@ -352,11 +354,21 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
 
     except Exception as exc:
         logger.exception("Arras contract generation failed for offer_id=%s: %s", offer_id, exc)
+        err_str = str(exc)
+        if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower():
+            user_msg = (
+                "El servicio de IA ha superado su cuota de uso. "
+                "Puedes reintentar en unos minutos o contactar con el soporte."
+            )
+        elif "API_KEY" in err_str.upper() or "invalid" in err_str.lower():
+            user_msg = "La clave de API de Gemini no es valida. Contacta con el administrador."
+        else:
+            user_msg = "Error al generar el contrato. Puedes reintentar."
         try:
             record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
             if record:
-                record.contract_status = "ready"
-                record.contract_text = f"[Error generando contrato: {exc}. Intenta de nuevo.]"
+                record.contract_status = "error"
+                record.contract_text = user_msg
                 db.commit()
         except Exception:
             pass
@@ -367,7 +379,7 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
 def _maybe_trigger_generation(record: ArrasInterview, background_tasks: BackgroundTasks) -> None:
     """Triggers Gemini generation if both parties have confirmed and no contract exists yet."""
     if bool(record.buyer_interview_confirmed) and bool(record.seller_interview_confirmed):
-        if record.contract_status not in ("generating", "ready", "buyer_accepted", "seller_accepted", "fully_accepted"):
+        if record.contract_status not in ("generating", "ready", "buyer_accepted", "seller_accepted", "fully_accepted",):
             record.contract_status = "generating"
             background_tasks.add_task(_generate_arras_contract_gemini, offer_id=record.offer_id)
             logger.info("Arras contract generation triggered for offer_id=%s", record.offer_id)
@@ -626,6 +638,38 @@ async def reject_contract(
     record.contract_text = None
 
     db.commit()
+    db.refresh(record)
+    return _serialize(record, int(offer.amount))
+
+
+@router.post("/{offer_id}/contract/regenerate", response_model=ArrasInterviewResponse)
+async def regenerate_contract(
+    offer_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Re-triggers Gemini contract generation.
+    Allowed when contract_status is 'error' and both interviews are confirmed.
+    """
+    offer, _ = _get_offer_and_role(offer_id, current_user, db)
+    record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Entrevista no encontrada")
+    if not (record.buyer_interview_confirmed and record.seller_interview_confirmed):
+        raise HTTPException(
+            status_code=400,
+            detail="Ambas partes deben confirmar su entrevista antes de regenerar el contrato",
+        )
+    if record.contract_status == "fully_accepted":
+        raise HTTPException(status_code=400, detail="El contrato ya fue aceptado por ambas partes")
+
+    record.contract_status = "generating"
+    record.contract_text = None
+    db.commit()
+    background_tasks.add_task(_generate_arras_contract_gemini, offer_id=offer_id)
+    logger.info("Contract regeneration triggered for offer_id=%s by user=%s", offer_id, current_user.id)
     db.refresh(record)
     return _serialize(record, int(offer.amount))
 
