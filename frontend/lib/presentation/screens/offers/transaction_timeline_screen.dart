@@ -350,13 +350,13 @@ class TransactionTimelineScreen extends ConsumerWidget {
               ? 'Para avanzar al contrato de Arras, el segundo comprador debe enviar sus datos de identidad. Usa el boton de abajo para añadirlos.'
               : 'En cuanto el segundo comprador complete la verificacion, el proceso continuara automaticamente hacia la firma de Arras.',
           state: _StepState.active,
-          ctaLabel: isBuyer && isMultiBuyer
+          ctaLabel: isBuyer
               ? 'Añadir datos del 2° comprador'
               : null,
-          ctaIcon: isBuyer && isMultiBuyer
+          ctaIcon: isBuyer
               ? Icons.person_add_alt_1_outlined
               : null,
-          ctaCallback: isBuyer && isMultiBuyer
+          ctaCallback: isBuyer
               ? () => context.push('/solvency/second-buyer')
               : null,
         ),
