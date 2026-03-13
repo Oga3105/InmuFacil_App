@@ -17,17 +17,20 @@ from typing import Optional
 import os
 import shutil
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+import logging
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
-from backend.src.config.database import get_db
+from backend.src.config.database import get_db, SessionLocal
 from backend.src.models import User, PropertyOffer, Property, BuyerSolvency
 from backend.src.models.enums import PaymentMethod, StressIndex, SolvencyLevel
 from backend.src.utils.crypto import encrypt_data, decrypt_data
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/solvency", tags=["Solvency"])
+logger = logging.getLogger(__name__)
 
 _TERMS_VERSION = "v1.0"
 _DOCUMENT_TTL_DAYS = 90
@@ -467,16 +470,74 @@ async def seller_accept_solvency(
 
 
 class SecondBuyerResponse(BaseModel):
-    """Confirmation returned after second buyer KYC is stored."""
+    """Confirmation returned after second buyer KYC upload is accepted."""
     message: str
-    second_buyer_verified_at: datetime
+    status: str = "processing"
 
 
 _SECOND_BUYER_UPLOAD_DIR = "uploads/second_buyer"
 
 
+def _run_second_buyer_gemini(
+    buyer_id: int,
+    full_name: str,
+    email: str,
+    saved_paths: dict,
+    document_type: str,
+) -> None:
+    """
+    Background task: runs Gemini verification after the upload endpoint returns.
+    Opens its own DB session (the request session is already closed).
+    Updates BuyerSolvency with the encrypted PII on success.
+    """
+    from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
+
+    db: Session = SessionLocal()
+    try:
+        result = verify_identity_with_gemini(
+            front_path=saved_paths.get("front"),
+            back_path=saved_paths.get("back"),
+            selfie_path=saved_paths.get("selfie"),
+            document_type=document_type,
+        )
+
+        logger.info(
+            "Second-buyer Gemini result for buyer_id=%s: approved=%s reason=%s",
+            buyer_id, result.approved, result.reason,
+        )
+
+        record = db.query(BuyerSolvency).filter(
+            BuyerSolvency.buyer_id == buyer_id
+        ).first()
+        if not record:
+            logger.error("Second-buyer background task: no solvency record for buyer_id=%s", buyer_id)
+            return
+
+        if result.reason == "__QUOTA_EXCEEDED__":
+            logger.warning("Gemini quota exceeded for second-buyer buyer_id=%s", buyer_id)
+            return
+
+        if result.approved and result.doc_number:
+            record.second_buyer_name_enc = encrypt_data(full_name)
+            record.second_buyer_dni_enc = encrypt_data(result.doc_number)
+            record.second_buyer_email_enc = encrypt_data(email)
+            record.second_buyer_verified_at = datetime.now(timezone.utc)
+            db.commit()
+            logger.info("Second-buyer verification saved for buyer_id=%s", buyer_id)
+        else:
+            logger.warning(
+                "Second-buyer verification rejected for buyer_id=%s: %s",
+                buyer_id, result.reason,
+            )
+    except Exception as exc:
+        logger.exception("Second-buyer background task error for buyer_id=%s: %s", buyer_id, exc)
+    finally:
+        db.close()
+
+
 @router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
 async def submit_second_buyer(
+    background_tasks: BackgroundTasks,
     full_name: str = Form(..., min_length=2, max_length=200),
     email: str = Form(...),
     front: UploadFile = File(...),
@@ -487,15 +548,12 @@ async def submit_second_buyer(
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Buyer submits identity documents for the second joint purchaser.
-    Documents are verified synchronously via Gemini AI.
-    DNI is auto-extracted from the document — not entered manually.
-    All PII is AES-256-GCM encrypted at rest (GDPR compliance).
+    Buyer uploads identity documents for the second joint purchaser.
+    Files are saved immediately and the endpoint returns 200.
+    Gemini AI verification runs in the background (same pattern as /kyc/verify).
     Returns 404 if the buyer has no active passport.
-    Returns 400 if is_multi_buyer is not set or KYC is rejected.
+    Returns 400 if is_multi_buyer is not set.
     """
-    from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
-
     record = db.query(BuyerSolvency).filter(
         BuyerSolvency.buyer_id == current_user.id
     ).first()
@@ -528,40 +586,18 @@ async def submit_second_buyer(
                 detail=f"Error guardando imagen ({file_key}): {exc}",
             )
 
-    result = verify_identity_with_gemini(
-        front_path=saved_paths.get("front"),
-        back_path=saved_paths.get("back"),
-        selfie_path=saved_paths.get("selfie"),
+    background_tasks.add_task(
+        _run_second_buyer_gemini,
+        buyer_id=current_user.id,
+        full_name=full_name,
+        email=email,
+        saved_paths=saved_paths,
         document_type=document_type,
     )
 
-    if result.reason == "__QUOTA_EXCEEDED__":
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de verificacion temporalmente no disponible. Intentalo en unos minutos.",
-        )
-
-    if not result.approved:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Verificacion de identidad fallida: {result.reason}",
-        )
-
-    if not result.doc_number:
-        raise HTTPException(
-            status_code=400,
-            detail="No se pudo extraer el numero de documento. Asegurate de que la imagen del frente sea legible.",
-        )
-
-    record.second_buyer_name_enc = encrypt_data(full_name)
-    record.second_buyer_dni_enc = encrypt_data(result.doc_number)
-    record.second_buyer_email_enc = encrypt_data(email)
-    record.second_buyer_verified_at = datetime.now(timezone.utc)
-    db.commit()
-
     return SecondBuyerResponse(
-        message="Identidad del segundo comprador verificada y guardada correctamente.",
-        second_buyer_verified_at=record.second_buyer_verified_at,
+        message="Documentos recibidos. La verificacion se esta procesando en segundo plano.",
+        status="processing",
     )
 
 
