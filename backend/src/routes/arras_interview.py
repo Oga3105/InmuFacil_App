@@ -66,6 +66,11 @@ class BuyerArrasAnswers(BaseModel):
     community_debt_retention: bool = False
     payment_method: Optional[str] = None
     additional_clauses: Optional[str] = None
+    # Datos identificativos (Sprint V27)
+    buyer_address: Optional[str] = None
+    property_address_full: Optional[str] = None
+    cadastral_reference: Optional[str] = None
+    registry_data: Optional[str] = None
 
 
 class SellerArrasAnswers(BaseModel):
@@ -80,7 +85,10 @@ class SellerArrasAnswers(BaseModel):
     plusvalia_assumed: bool = True
     ibi_retention_accepted: bool = True
     iban: Optional[str] = None
+    bank_name: Optional[str] = None
     additional_clauses: Optional[str] = None
+    # Datos identificativos (Sprint V27)
+    seller_address: Optional[str] = None
 
 
 class ContractRejectBody(BaseModel):
@@ -215,11 +223,30 @@ def _get_offer_and_role(offer_id: int, current_user: User, db: Session):
 # Gemini Contract Generation (BackgroundTask)
 # ============================================================================
 
+_PAYMENT_METHOD_LABELS = {
+    "cash": "Pago al contado",
+    "mortgage_approved": "Hipoteca bancaria aprobada",
+    "mortgage_pending": "Hipoteca bancaria en tramitacion",
+    "savings_plus_mortgage": "Ahorros mas hipoteca",
+    "house_to_sell": "Venta de vivienda actual",
+}
+
+_EXTENSION_REASON_LABELS = {
+    "work": "Motivos laborales",
+    "mortgage_delay": "Retraso en la concesion hipotecaria",
+    "family": "Motivos familiares",
+    "legal": "Procedimiento legal",
+    "other": "Otras causas",
+}
+
+
 def _generate_arras_contract_gemini(offer_id: int) -> None:
     """
     Background task: generates the Arras Penitenciales contract text using Gemini.
     Triggered when both buyer and seller confirm their interviews.
     """
+    from backend.src.models.solvency import SolvencyPassport
+
     api_key = os.getenv("GEMINI_API_KEY", "")
     db: Session = SessionLocal()
     try:
@@ -249,13 +276,58 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
         deposit_amount = offer_amount * deposit_pct // 100
         deadline_days = ba.get("deadline_days", record.deadline_days or 60)
 
-        # Decrypt IBAN for contract (only included as masked placeholder)
-        iban_display = "ES** **** **** **** **** ****"
+        # --- Decrypt DNI for buyer and seller ---
+        buyer_dni = "En tramitacion"
+        if buyer and getattr(buyer, "encrypted_dni", None):
+            try:
+                buyer_dni = decrypt_data(buyer.encrypted_dni)
+            except Exception:
+                pass
+
+        seller_dni = "En tramitacion"
+        if seller and getattr(seller, "encrypted_dni", None):
+            try:
+                seller_dni = decrypt_data(seller.encrypted_dni)
+            except Exception:
+                pass
+
+        # --- Addresses ---
+        buyer_address = ba.get("buyer_address") or "A rellenar por el comprador"
+        seller_address = sa.get("seller_address") or "A rellenar por el vendedor"
+        property_address_full = ba.get("property_address_full") or property_address
+        cadastral_reference = ba.get("cadastral_reference") or "A determinar"
+        registry_data = ba.get("registry_data") or "A determinar"
+
+        # --- Full IBAN + bank name ---
+        iban_display = "A facilitar por el vendedor"
+        bank_name = sa.get("bank_name") or ""
         if record.seller_iban_enc:
             try:
-                raw_iban = decrypt_data(record.seller_iban_enc)
-                if len(raw_iban) > 8:
-                    iban_display = raw_iban[:4] + " **** **** **** " + raw_iban[-4:]
+                iban_display = decrypt_data(record.seller_iban_enc)
+            except Exception:
+                iban_display = "Error al descifrar IBAN"
+
+        iban_bank_line = iban_display
+        if bank_name:
+            iban_bank_line = f"{iban_display} ({bank_name})"
+
+        # --- Second buyer ---
+        second_buyer_block = ""
+        solvency = db.query(SolvencyPassport).filter(
+            SolvencyPassport.buyer_id == (buyer.id if buyer else -1)
+        ).first()
+        if solvency and solvency.second_buyer_status == "verified" and solvency.second_buyer_name_enc:
+            try:
+                sb_name = decrypt_data(solvency.second_buyer_name_enc)
+                sb_dni = "En tramitacion"
+                if solvency.second_buyer_dni_enc:
+                    try:
+                        sb_dni = decrypt_data(solvency.second_buyer_dni_enc)
+                    except Exception:
+                        pass
+                second_buyer_block = (
+                    f"\n- Segundo comprador: {sb_name}, DNI/NIE: {sb_dni}"
+                )
             except Exception:
                 pass
 
@@ -264,22 +336,35 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
 
         def yn(val): return "Si" if val else "No"
 
+        payment_method_raw = ba.get("payment_method", "")
+        payment_method_label = _PAYMENT_METHOD_LABELS.get(payment_method_raw, payment_method_raw or "Por determinar")
+
+        extension_reasons_raw = ba.get("extension_reasons") or []
+        extension_reasons_label = (
+            ", ".join(_EXTENSION_REASON_LABELS.get(r, r) for r in extension_reasons_raw)
+            if extension_reasons_raw else "N/A"
+        )
+
         buyer_summary = f"""
+- Comprador: {buyer_name}, DNI/NIE: {buyer_dni}
+- Domicilio comprador: {buyer_address}{second_buyer_block}
 - Porcentaje de arras: {deposit_pct}%
 - Plazo maximo para escritura: {deadline_days} dias
 - Notaria preferida: {ba.get('notary_preference', 'A determinar')}
 - Fecha maxima firma: {ba.get('max_signing_date', 'Segun plazo pactado')}
 - Sujeto a hipoteca: {yn(ba.get('subject_to_mortgage', False))}
 - Prorrogas automaticas: {yn(ba.get('extension_allowed', False))}
-- Causas de prorroga: {', '.join(ba.get('extension_reasons', [])) if ba.get('extension_reasons') else 'N/A'}
+- Causas de prorroga: {extension_reasons_label}
 - Prorrateo IBI por dias: {yn(ba.get('ibi_proration_by_days', True))}
 - Retencion IBI no emitido: {yn(ba.get('retain_pending_ibi', False))}
 - Acepta clausula vicios ocultos (art. 1484 CC): {yn(ba.get('hidden_defects_accepted', False))}
 - Retencion por deudas comunidad: {yn(ba.get('community_debt_retention', False))}
-- Metodo de financiacion: {ba.get('payment_method', 'Por determinar')}
+- Metodo de financiacion: {payment_method_label}
 - Clausulas adicionales comprador: {buyer_clauses if buyer_clauses else 'Ninguna'}"""
 
         seller_summary = f"""
+- Vendedor: {seller_name}, DNI/NIE: {seller_dni}
+- Domicilio vendedor: {seller_address}
 - Vivienda libre de arrendatarios: {yn(sa.get('property_free_of_tenants', True))}
 - Suministros activos: {yn(sa.get('utilities_active', True))}
 - Compromiso mantenimiento suministros: {yn(sa.get('utilities_maintenance_commitment', True))}
@@ -290,15 +375,17 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
 - Importe hipoteca pendiente: {sa.get('mortgage_amount', 0)} EUR
 - Asume plusvalia municipal: {yn(sa.get('plusvalia_assumed', True))}
 - Acepta retencion IBI: {yn(sa.get('ibi_retention_accepted', True))}
-- IBAN para ingreso arras: {iban_display}
+- IBAN para ingreso arras: {iban_bank_line}
 - Clausulas adicionales vendedor: {seller_clauses if seller_clauses else 'Ninguna'}"""
 
         prompt = f"""Eres un abogado especialista en derecho inmobiliario espanol. Genera un CONTRATO DE ARRAS PENITENCIALES completo y formal en espanol basado en los siguientes datos. El contrato debe ser riguroso, profesional y listo para revisar por las partes. No uses placeholders como "[X]" — usa los datos proporcionados.
 
 DATOS DE LA OPERACION:
-- Comprador: {buyer_name}
-- Vendedor: {seller_name}
-- Inmueble: {property_address}
+- Comprador: {buyer_name}, DNI/NIE: {buyer_dni}, Domicilio: {buyer_address}{second_buyer_block}
+- Vendedor: {seller_name}, DNI/NIE: {seller_dni}, Domicilio: {seller_address}
+- Inmueble: {property_address_full}
+- Referencia catastral: {cadastral_reference}
+- Datos registrales: {registry_data}
 - Precio de compraventa: {offer_amount:,} EUR
 - Importe de arras ({deposit_pct}%): {deposit_amount:,} EUR
 - Plazo maximo escritura: {deadline_days} dias desde la firma de arras
@@ -308,22 +395,25 @@ DECLARACIONES DEL COMPRADOR:{buyer_summary}
 DECLARACIONES DEL VENDEDOR:{seller_summary}
 
 Estructura el contrato con las siguientes secciones:
-1. REUNIDOS (identificacion de partes)
-2. EXPONEN
+1. REUNIDOS (identificacion completa de las partes con nombre, DNI/NIE y domicilio)
+2. EXPONEN (descripcion del inmueble con referencia catastral y datos registrales)
 3. ESTIPULAN:
    - Primera: Objeto del contrato
    - Segunda: Precio de compraventa
    - Tercera: Arras penitenciales (importe, condiciones, penalizaciones)
    - Cuarta: Plazo y condiciones de la compraventa
-   - Quinta: Condiciones suspensivas (hipoteca si aplica)
-   - Sexta: Prorrogas (si aplica)
+   - Quinta: Condiciones suspensivas (hipoteca si aplica — metodo: {payment_method_label})
+   - Sexta: Prorrogas (causas admitidas: {extension_reasons_label} — solo incluir si extension_allowed es Si)
    - Septima: Gastos e impuestos (ITP/IVA, plusvalia, notaria, registro)
    - Octava: IBI y gastos de comunidad
    - Novena: Estado de la vivienda y suministros
    - Decima: Vicios ocultos
    - Undecima: Clausulas adicionales de las partes
-   - Duodecima: Jurisdiccion
-4. FIRMAS
+   - Duodecima: Cuenta bancaria para el ingreso de las arras: {iban_bank_line}
+   - Decimotercera: Jurisdiccion
+4. FIRMAS — incluir nombre completo, DNI/NIE y espacio para firma de cada parte:
+   - Comprador: {buyer_name}, DNI/NIE: {buyer_dni}{"" if not second_buyer_block else f" y segundo comprador"}
+   - Vendedor: {seller_name}, DNI/NIE: {seller_dni}
 
 Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
 """
@@ -496,7 +586,7 @@ async def save_seller_answers(
         record = ArrasInterview(offer_id=offer_id)
         db.add(record)
 
-    # Encrypt IBAN before storing
+    # Encrypt IBAN before storing; keep bank_name and seller_address in plain JSON
     answers = body.model_dump()
     iban_raw = answers.pop("iban", None)
     record.seller_answers_json = answers

@@ -37,6 +37,10 @@ class _ArrasBuyerStepperScreenState
   int _deadlineDays = 60;
   final _notaryPrefCtrl = TextEditingController();
   DateTime? _maxSigningDate;
+  final _buyerAddressCtrl = TextEditingController();
+  final _propertyAddressCtrl = TextEditingController();
+  final _cadastralRefCtrl = TextEditingController();
+  final _registryDataCtrl = TextEditingController();
 
   // ── Step 2: Seguridad y Flexibilidad ────────────────────────
   bool _subjectToMortgage = false;
@@ -56,6 +60,10 @@ class _ArrasBuyerStepperScreenState
     _pageCtrl.dispose();
     _notaryPrefCtrl.dispose();
     _additionalClausesCtrl.dispose();
+    _buyerAddressCtrl.dispose();
+    _propertyAddressCtrl.dispose();
+    _cadastralRefCtrl.dispose();
+    _registryDataCtrl.dispose();
     super.dispose();
   }
 
@@ -98,6 +106,18 @@ class _ArrasBuyerStepperScreenState
       'additional_clauses': _additionalClausesCtrl.text.isEmpty
           ? null
           : _additionalClausesCtrl.text.trim(),
+      'buyer_address': _buyerAddressCtrl.text.trim().isEmpty
+          ? null
+          : _buyerAddressCtrl.text.trim(),
+      'property_address_full': _propertyAddressCtrl.text.trim().isEmpty
+          ? null
+          : _propertyAddressCtrl.text.trim(),
+      'cadastral_reference': _cadastralRefCtrl.text.trim().isEmpty
+          ? null
+          : _cadastralRefCtrl.text.trim(),
+      'registry_data': _registryDataCtrl.text.trim().isEmpty
+          ? null
+          : _registryDataCtrl.text.trim(),
     };
   }
 
@@ -372,6 +392,55 @@ class _ArrasBuyerStepperScreenState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ArrasInterviewCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Datos identificativos del inmueble',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF1E3A5F)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Necesarios para la validez legal del contrato',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
+                const SizedBox(height: 16),
+                _LabeledField(
+                  label: 'Tu domicilio (comprador)',
+                  controller: _buyerAddressCtrl,
+                  hint: 'Calle, numero, piso, localidad, CP',
+                  icon: Icons.home_outlined,
+                ),
+                const SizedBox(height: 12),
+                _LabeledField(
+                  label: 'Direccion completa de la vivienda',
+                  controller: _propertyAddressCtrl,
+                  hint: 'Calle, numero, piso, localidad, CP',
+                  icon: Icons.location_on_outlined,
+                ),
+                const SizedBox(height: 12),
+                _LabeledField(
+                  label: 'Referencia catastral',
+                  controller: _cadastralRefCtrl,
+                  hint: 'Ej: 9872023 VH5797S 0001 WX',
+                  icon: Icons.grid_view_outlined,
+                  caps: TextCapitalization.characters,
+                ),
+                const SizedBox(height: 12),
+                _LabeledField(
+                  label: 'Datos registrales',
+                  controller: _registryDataCtrl,
+                  hint: 'Registro, tomo, folio, finca, inscripcion',
+                  icon: Icons.article_outlined,
                 ),
               ],
             ),
@@ -667,3 +736,57 @@ class _ArrasBuyerStepperScreenState
   }
 }
 
+
+// ── Shared helper widget ──────────────────────────────────────────────────────
+
+class _LabeledField extends StatelessWidget {
+  const _LabeledField({
+    required this.label,
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.caps = TextCapitalization.sentences,
+  });
+
+  final String label;
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextCapitalization caps;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+              color: Color(0xFF1E3A5F)),
+        ),
+        const SizedBox(height: 6),
+        TextField(
+          controller: controller,
+          textCapitalization: caps,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, color: _kBlue, size: 18),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300)),
+            enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300)),
+            focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _kBlue, width: 2)),
+          ),
+        ),
+      ],
+    );
+  }
+}

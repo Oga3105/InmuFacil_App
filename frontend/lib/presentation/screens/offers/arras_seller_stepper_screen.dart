@@ -34,6 +34,7 @@ class _ArrasSellerStepperScreenState
   bool _propertyFreeOfTenants = true;
   bool _utilitiesActive = true;
   bool _utilitiesMaintenanceCommitment = true;
+  final _sellerAddressCtrl = TextEditingController();
 
   // ── Step 2: Comunidad y Cargas ───────────────────────────────
   bool _hasApprovedLevies = false;
@@ -46,6 +47,7 @@ class _ArrasSellerStepperScreenState
   bool _plusvaliaAssumed = true;
   bool _ibiRetentionAccepted = true;
   final _ibanCtrl = TextEditingController();
+  final _bankNameCtrl = TextEditingController();
   final _additionalClausesCtrl = TextEditingController();
   bool _ibanObscured = true;
 
@@ -55,7 +57,9 @@ class _ArrasSellerStepperScreenState
     _levyDetailsCtrl.dispose();
     _mortgageAmountCtrl.dispose();
     _ibanCtrl.dispose();
+    _bankNameCtrl.dispose();
     _additionalClausesCtrl.dispose();
+    _sellerAddressCtrl.dispose();
     super.dispose();
   }
 
@@ -91,9 +95,15 @@ class _ArrasSellerStepperScreenState
       'plusvalia_assumed': _plusvaliaAssumed,
       'ibi_retention_accepted': _ibiRetentionAccepted,
       'iban': _ibanCtrl.text.trim().isEmpty ? null : _ibanCtrl.text.trim(),
+      'bank_name': _bankNameCtrl.text.trim().isEmpty
+          ? null
+          : _bankNameCtrl.text.trim(),
       'additional_clauses': _additionalClausesCtrl.text.isEmpty
           ? null
           : _additionalClausesCtrl.text.trim(),
+      'seller_address': _sellerAddressCtrl.text.trim().isEmpty
+          ? null
+          : _sellerAddressCtrl.text.trim(),
     };
   }
 
@@ -215,6 +225,48 @@ class _ArrasSellerStepperScreenState
                 'de incumplimiento del contrato y pueden implicar devolver el doble de las arras.',
             color: Colors.blue.shade700,
             background: Colors.blue.shade50,
+          ),
+          const SizedBox(height: 16),
+          ArrasInterviewCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tu domicilio (vendedor)',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: Color(0xFF1E3A5F)),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Necesario para identificarte en el contrato',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _sellerAddressCtrl,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: InputDecoration(
+                    hintText: 'Calle, numero, piso, localidad, CP',
+                    prefixIcon: const Icon(Icons.home_outlined,
+                        color: kArrasBlue, size: 18),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: kArrasBlue, width: 2)),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -456,6 +508,36 @@ class _ArrasSellerStepperScreenState
                     ),
                   ),
                 ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Entidad bancaria',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      color: Color(0xFF1E3A5F)),
+                ),
+                const SizedBox(height: 6),
+                TextField(
+                  controller: _bankNameCtrl,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
+                    hintText: 'Ej: CaixaBank, Santander, BBVA...',
+                    prefixIcon: const Icon(Icons.account_balance_outlined,
+                        color: kArrasBlue, size: 18),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 12),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide:
+                            const BorderSide(color: kArrasBlue, width: 2)),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.all(10),
@@ -470,8 +552,8 @@ class _ArrasSellerStepperScreenState
                       const SizedBox(width: 8),
                       const Expanded(
                         child: Text(
-                          'Tu IBAN se almacena cifrado con AES-256. Solo se usa para '
-                          'incluir una version enmascarada en el contrato.',
+                          'Tu IBAN se almacena cifrado con AES-256. El numero completo y la '
+                          'entidad bancaria apareceran en el contrato para el pago de las arras.',
                           style: TextStyle(
                               fontSize: 11, color: Color(0xFF166534)),
                         ),
