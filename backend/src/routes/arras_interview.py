@@ -864,9 +864,18 @@ FORMATO REQUERIDO:
 
 CRITERIOS DE STATUS:
 - favorable: el termino beneficia claramente a esta parte (verde)
-- neutral: clausula estandar, ni beneficia ni perjudica especialmente (azul)
-- alerta: condicion que requiere atencion o tiene cierto riesgo (naranja)
-- critico: condicion desfavorable o con alto riesgo para esta parte (rojo)
+- neutral: clausula estandar o consecuencia legal automatica en Espana, ni beneficia ni perjudica especialmente (azul)
+- alerta: condicion que va mas alla de lo habitual y requiere atencion real o tiene riesgo concreto (naranja)
+- critico: condicion claramente desfavorable o con alto riesgo economico o juridico para esta parte (rojo)
+
+NORMAS LEGALES ESPANOLAS QUE DEBES APLICAR AL VALORAR:
+- La plusvalia municipal (IIVTNU) corresponde legalmente al vendedor por defecto (art. 104 TRLRHL). Si el vendedor la asume, es lo NORMAL y LEGAL — clasifica como "neutral", no como alerta.
+- El prorrateo del IBI entre comprador y vendedor es practica habitual y estandar en transmisiones inmobiliarias en Espana — clasifica como "neutral".
+- El mantenimiento de suministros activos hasta la escritura es obligacion habitual del vendedor — clasifica como "neutral".
+- La penalizacion del doble de las arras para el vendedor en caso de desistimiento es la consecuencia legal tipica del art. 1454 CC — clasifica como "neutral".
+- El estado libre de arrendatarios es un requisito estandar — clasifica como "favorable" para el comprador y "neutral" para el vendedor (es lo esperable).
+- Solo usa "alerta" cuando la condicion concreta suponga un riesgo o coste ADICIONAL al estandar legal.
+- Solo usa "critico" para condiciones verdaderamente perjudiciales o inusuales que van en contra del interes de la parte.
 
 ITEMS OBLIGATORIOS PARA EL COMPRADOR (usa exactamente estas keys):
 1. hipoteca — condicion suspensiva de financiacion hipotecaria
