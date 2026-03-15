@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../widgets/common/user_avatar_menu.dart';
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
@@ -30,11 +32,41 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   bool _feinReceived    = false;
   bool _conditionsRead  = false;
   bool _isLoading       = false;
+  bool _isInitializing  = true;
   bool _submitted       = false;
   String? _errorMessage;
 
   bool get _isBuyer =>
       ref.read(authProvider).user?.id.toString() == widget.offer.buyerId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      if (token == null) return;
+      final resp = await Dio().get(
+        '$_kApiBase/fein/${widget.offer.id}/status',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final data = resp.data as Map<String, dynamic>;
+      if (!mounted) return;
+      final buyerConfirmed = data['buyer_confirmed'] as bool? ?? false;
+      // FEIN is a buyer-bank process: process is complete when buyer confirms.
+      // Both buyer and seller see the success view once buyer has confirmed.
+      if (buyerConfirmed) {
+        setState(() => _submitted = true);
+      }
+    } catch (_) {
+      // non-blocking — show empty form
+    } finally {
+      if (mounted) setState(() => _isInitializing = false);
+    }
+  }
 
   Future<void> _confirm() async {
     if (!_feinReceived || !_conditionsRead) return;
@@ -44,7 +76,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
     });
 
     try {
-      final token = await _storage.read(key: 'jwt_token');
+      final token = await _storage.read(key: 'auth_token');
       final dio   = Dio();
       await dio.post(
         '$_kApiBase/fein/${widget.offer.id}/confirm',
@@ -54,7 +86,11 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
-      if (mounted) setState(() => _submitted = true);
+      if (!mounted) return;
+      setState(() => _submitted = true);
+      // Invalidate offers lists so urgency provider reflects FEIN confirmed
+      ref.invalidate(sentOffersProvider);
+      ref.invalidate(receivedOffersProvider);
     } on DioException catch (e) {
       if (!mounted) return;
       final detail = (e.response?.data as Map?)?['detail'] as String?;
@@ -72,20 +108,96 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text(
-          'Formalizacion Bancaria (FEIN)',
-          style: TextStyle(
-              color: _kNavy, fontWeight: FontWeight.bold, fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
+          ),
+        ],
       ),
-      body: _submitted
+      body: _isInitializing
+          ? const Center(child: CircularProgressIndicator())
+          : _submitted
           ? _buildSuccessView()
           : ListView(
               padding: const EdgeInsets.all(20),
@@ -457,42 +569,59 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Has confirmado la recepcion de la FEIN. '
-              'Recuerda que deberan pasar al menos 10 dias antes de la firma en notaria.',
+              _isBuyer
+                  ? 'Has confirmado la recepcion de la FEIN. El plazo de 10 dias '
+                    'es informativo — ya puedes coordinar la cita en notaria.'
+                  : 'El comprador ha confirmado la FEIN. Ya podeis coordinar '
+                    'la cita en notaria para la firma final.',
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14, color: Colors.grey.shade600, height: 1.6),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _kBlue.withOpacity(0.07),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.amber.shade200),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.calendar_today_outlined, color: _kBlue, size: 20),
-                  const SizedBox(width: 12),
+                  Icon(Icons.info_outline, color: Colors.amber.shade700, size: 18),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Proximo paso',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: _kBlue,
-                                fontSize: 13)),
-                        Text('Coordina la cita en notaria cuando hayan pasado 10 dias.',
-                            style: TextStyle(
-                                fontSize: 12, color: _kBlue.withOpacity(0.8))),
-                      ],
+                    child: Text(
+                      'La ley exige 10 dias entre la recepcion de la FEIN y la firma. '
+                      'Asegurate de coordinar la cita con ese margen.',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.amber.shade900,
+                          height: 1.4),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.push(
+                  '/offers/${widget.offer.id}/notaria',
+                  extra: widget.offer,
+                ),
+                icon: const Icon(Icons.gavel_outlined),
+                label: const Text('Ir a Firma en Notaria'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _kBlue,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Volver al timeline',

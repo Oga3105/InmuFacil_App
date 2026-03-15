@@ -52,6 +52,21 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   }
 });
 
+final _feinStatusProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return false;
+  try {
+    final resp = await Dio().get(
+      '$_kTimelineApiBase/fein/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ?? false;
+  } catch (_) {
+    return false;
+  }
+});
+
 final _notariaStatusProvider = FutureProvider.autoDispose
     .family<String, String>((ref, offerId) async {
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
@@ -126,8 +141,11 @@ class TransactionTimelineScreen extends ConsumerWidget {
             'pending'
         : 'pending';
 
-    // FEIN buyer confirmation — read from OfferData (enriched by backend)
-    final feinBuyerConfirmed = liveOffer.feinBuyerConfirmed;
+    // FEIN buyer confirmation — live query from backend (authoritative)
+    final feinBuyerConfirmed = s == 'signed'
+        ? ref.watch(_feinStatusProvider(liveOffer.id)).asData?.value ??
+            liveOffer.feinBuyerConfirmed
+        : (s == 'completed' ? true : false);
 
     // Notaria appointment status — live query when gate is open
     final notariaGateOpen = feinBuyerConfirmed || s == 'completed';
