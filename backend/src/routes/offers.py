@@ -63,6 +63,9 @@ class OfferResponse(BaseModel):
     buyer_solvency_submitted: bool = False
     seller_solvency_accepted: bool = False
     second_buyer_pending: bool = False
+    tasacion_appointment_status: Optional[str] = None  # pending|proposed|rejected|accepted|completed
+    fein_buyer_confirmed: bool = False
+    notaria_appt_status: Optional[str] = None  # pending|scheduled|completed
     model_config = ConfigDict(from_attributes=True)
 
 class OfferCounter(BaseModel):
@@ -189,6 +192,44 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
         solvency and solvency.is_multi_buyer and solvency.second_buyer_verified_at is None
     )
 
+    # Tasacion step sub-status — used by urgency engine to route the buyer to the correct action
+    from backend.src.models.timeline import TransactionStep
+    tasacion_step = (
+        db.query(TransactionStep)
+        .filter(
+            TransactionStep.offer_id == offer.id,
+            TransactionStep.step_key == "TASACION_APPOINTMENT",
+        )
+        .first()
+    )
+    tasacion_appointment_status = None
+    if tasacion_step and tasacion_step.metadata_json:
+        tasacion_appointment_status = tasacion_step.metadata_json.get("appointment_status")
+
+    # FEIN buyer confirmation — used by urgency engine and timeline to gate notaria step
+    fein_step = (
+        db.query(TransactionStep)
+        .filter(
+            TransactionStep.offer_id == offer.id,
+            TransactionStep.step_key.in_(["FEIN_CONFIRMATION", "MORTGAGE_APPROVAL"]),
+        )
+        .first()
+    )
+    fein_buyer_confirmed = fein_step is not None and fein_step.buyer_confirmed_at is not None
+
+    # Notaria appointment sub-status — used by timeline to show coordinated scheduling
+    notaria_step = (
+        db.query(TransactionStep)
+        .filter(
+            TransactionStep.offer_id == offer.id,
+            TransactionStep.step_key == "NOTARIA_APPOINTMENT",
+        )
+        .first()
+    )
+    notaria_appt_status = None
+    if notaria_step and notaria_step.metadata_json:
+        notaria_appt_status = notaria_step.metadata_json.get("appointment_status")
+
     return OfferResponse(
         id=offer.id,
         property_id=offer.property_id,
@@ -211,6 +252,9 @@ def _serialize_offer(offer: PropertyOffer, db: Session) -> OfferResponse:
         buyer_solvency_submitted=buyer_solvency_submitted,
         seller_solvency_accepted=seller_solvency_accepted,
         second_buyer_pending=second_buyer_pending,
+        tasacion_appointment_status=tasacion_appointment_status,
+        fein_buyer_confirmed=fein_buyer_confirmed,
+        notaria_appt_status=notaria_appt_status,
     )
 
 

@@ -149,29 +149,69 @@ UrgentAction? buyerBlockingAction(OfferData offer, String currentUserId) {
   }
 
   if (s == 'signed') {
-    const _feinMethods = {
-      'mortgage_pending',
-      'mortgage_approved',
-      'savings_plus_mortgage',
-      'bridge_mortgage',
-    };
-    if (_feinMethods.contains(offer.paymentMethod)) {
+    final ts = offer.tasacionStatus;
+
+    // FEIN confirmed — buyer must now coordinate notaria appointment
+    if (offer.feinBuyerConfirmed) {
+      final ns = offer.notariaApptStatus ?? 'pending';
+      if (ns == 'completed') return null; // notaria done, no urgent action
+      return UrgentAction(
+        offerId: offer.id,
+        propertyTitle: title,
+        type: UrgentActionType.notaryAppointment,
+        label: ns == 'scheduled'
+            ? 'Cita en notaria pendiente — confirmar firma'
+            : 'Coordinar cita en notaria',
+        route: '/offers/${offer.id}/notaria',
+        routeExtra: offer,
+        offer: offer,
+      );
+    }
+
+    // Tasacion completada -> llevar directamente a FEIN
+    if (ts == 'completed') {
       return UrgentAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmFein,
-        label: 'Confirmar FEIN del banco',
+        label: 'Ir a Formalizacion Bancaria (FEIN)',
         route: '/offers/${offer.id}/fein',
         routeExtra: offer,
         offer: offer,
       );
     }
-    // Non-mortgage buyers go straight to tasacion
+    // Cita acordada, esperando visita fisica
+    if (ts == 'accepted') {
+      return UrgentAction(
+        offerId: offer.id,
+        propertyTitle: title,
+        type: UrgentActionType.confirmTasacion,
+        label: 'Cita del tasador confirmada',
+        route: '/offers/${offer.id}/tasacion',
+        routeExtra: offer,
+        offer: offer,
+      );
+    }
+    // Propuesta enviada, esperando respuesta del vendedor
+    if (ts == 'proposed') {
+      return UrgentAction(
+        offerId: offer.id,
+        propertyTitle: title,
+        type: UrgentActionType.confirmTasacion,
+        label: 'Esperando confirmacion del vendedor',
+        route: '/offers/${offer.id}/tasacion',
+        routeExtra: offer,
+        offer: offer,
+      );
+    }
+    // pending o rejected: el comprador debe agendar o re-agendar
     return UrgentAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.confirmTasacion,
-      label: 'Gestionar cita de tasacion',
+      label: ts == 'rejected'
+          ? 'Responder contraoferta del tasador'
+          : 'Agendar visita del tasador',
       route: '/offers/${offer.id}/tasacion',
       routeExtra: offer,
       offer: offer,
@@ -215,17 +255,54 @@ UrgentAction? sellerBlockingAction(OfferData offer) {
     );
   }
 
-  // Post-arras: tasacion coordination
+  // Post-arras: tasacion + FEIN coordination (seller perspective)
   if (s == 'signed') {
-    return UrgentAction(
-      offerId: offer.id,
-      propertyTitle: title,
-      type: UrgentActionType.confirmTasacion,
-      label: 'Coordinar visita del tasador',
-      route: '/offers/${offer.id}/tasacion',
-      routeExtra: offer,
-      offer: offer,
-    );
+    final ts = offer.tasacionStatus;
+    // Buyer's proposal waiting for seller response
+    if (ts == 'proposed') {
+      return UrgentAction(
+        offerId: offer.id,
+        propertyTitle: title,
+        type: UrgentActionType.confirmTasacion,
+        label: 'Confirmar cita del tasador',
+        route: '/offers/${offer.id}/tasacion',
+        routeExtra: offer,
+        offer: offer,
+      );
+    }
+    // Seller must confirm the physical visit happened
+    if (ts == 'accepted') {
+      return UrgentAction(
+        offerId: offer.id,
+        propertyTitle: title,
+        type: UrgentActionType.confirmTasacion,
+        label: 'Confirmar visita del tasador',
+        route: '/offers/${offer.id}/tasacion',
+        routeExtra: offer,
+        offer: offer,
+      );
+    }
+    // Tasacion completed — check if FEIN confirmed and notaria needs coordination
+    if (ts == 'completed') {
+      if (offer.feinBuyerConfirmed) {
+        final ns = offer.notariaApptStatus ?? 'pending';
+        if (ns == 'completed') return null;
+        return UrgentAction(
+          offerId: offer.id,
+          propertyTitle: title,
+          type: UrgentActionType.notaryAppointment,
+          label: ns == 'scheduled'
+              ? 'Confirmar cita en notaria'
+              : 'A la espera de cita en notaria',
+          route: '/offers/${offer.id}/notaria',
+          routeExtra: offer,
+          offer: offer,
+        );
+      }
+      return null;
+    }
+    // pending / rejected: seller waits for buyer proposal or counter-accepted
+    return null;
   }
 
   return null;

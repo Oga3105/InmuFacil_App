@@ -33,6 +33,42 @@ final _arrasStatusProvider = FutureProvider.autoDispose
   }
 });
 
+final _tasacionStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token =
+      await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      '$_kTimelineApiBase/tasacion/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
+
+final _notariaStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  try {
+    final resp = await Dio().get(
+      '$_kTimelineApiBase/notaria-appt/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
+
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
 class TransactionTimelineScreen extends ConsumerWidget {
   const TransactionTimelineScreen({super.key, required this.offer});
@@ -83,6 +119,23 @@ class TransactionTimelineScreen extends ConsumerWidget {
     final arrasStatus = s == 'signing_pending'
         ? ref.watch(_arrasStatusProvider(liveOffer.id)).asData?.value ?? 'none'
         : 'none';
+
+    // Tasacion appointment status (only relevant when stage == 3)
+    final tasacionApptStatus = s == 'signed'
+        ? ref.watch(_tasacionStatusProvider(liveOffer.id)).asData?.value ??
+            'pending'
+        : 'pending';
+
+    // FEIN buyer confirmation — read from OfferData (enriched by backend)
+    final feinBuyerConfirmed = liveOffer.feinBuyerConfirmed;
+
+    // Notaria appointment status — live query when gate is open
+    final notariaGateOpen = feinBuyerConfirmed || s == 'completed';
+    final notariaApptStatus = notariaGateOpen
+        ? ref.watch(_notariaStatusProvider(liveOffer.id)).asData?.value ??
+            liveOffer.notariaApptStatus ??
+            'pending'
+        : liveOffer.notariaApptStatus ?? 'pending';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -136,6 +189,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     requestedVisitDate: liveOffer.requestedVisitDate,
                     visitStatus: liveOffer.visitStatus,
                     arrasStatus: arrasStatus,
+                    tasacionApptStatus: tasacionApptStatus,
+                    feinBuyerConfirmed: feinBuyerConfirmed,
+                    notariaApptStatus: notariaApptStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
@@ -270,6 +326,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
     String? requestedVisitDate,
     String? visitStatus,
     String arrasStatus = 'none',
+    String tasacionApptStatus = 'pending',
+    bool feinBuyerConfirmed = false,
+    String notariaApptStatus = 'pending',
     Widget? buyerActions,
     Widget? withdrawAction,
     Widget? solvencyActionsWidget,
@@ -418,27 +477,50 @@ class TransactionTimelineScreen extends ConsumerWidget {
         subtitle: stage > 3
             ? 'Informe del tasador completado'
             : stage == 3
-                ? 'Cita con el tasador pendiente de confirmar'
+                ? _tasacionSubtitle(tasacionApptStatus, isBuyer)
                 : 'Pendiente de firma de arras',
-        state: stepState(3),
-        ctaLabel: stage == 3 ? 'Agendar visita del tasador' : null,
-        ctaIcon: stage == 3 ? Icons.home_work_outlined : null,
-        ctaCallback: stage == 3
-            ? () => context.push('/offers/${offerData.id}/tasacion', extra: offerData)
+        state: tasacionApptStatus == 'completed' && stage == 3
+            ? _StepState.done
+            : stepState(3),
+        ctaLabel: stage == 3
+            ? _tasacionCtaLabel(tasacionApptStatus, isBuyer)
+            : null,
+        ctaIcon: stage == 3
+            ? _tasacionCtaIcon(tasacionApptStatus, isBuyer)
+            : null,
+        ctaCallback: stage == 3 &&
+                _tasacionCtaLabel(tasacionApptStatus, isBuyer) != null
+            ? () => context.push(
+                '/offers/${offerData.id}/tasacion',
+                extra: offerData,
+              )
             : null,
       ),
       if (requiresFein)
         _TimelineStep(
           title: 'Formalizacion Bancaria (FEIN)',
-          subtitle: stage > 3
-              ? 'FEIN recibida y condiciones confirmadas'
-              : stage == 3
-                  ? 'Pendiente tras tasacion — banco emite la FEIN'
-                  : 'Pendiente de firma de arras',
-          state: stage == 3 ? _StepState.active : stepState(3),
-          ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
-          ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
-          ctaCallback: stage == 3
+          subtitle: stage > 3 || feinBuyerConfirmed
+              ? 'FEIN confirmada — banco ha aprobado la hipoteca'
+              : stage == 3 && tasacionApptStatus == 'completed'
+                  ? (isBuyer
+                      ? 'Tu banco debe emitirte la FEIN — confirma cuando la recibas'
+                      : 'El banco del comprador esta tramitando la FEIN')
+                  : stage == 3
+                      ? 'Pendiente tras tasacion — banco emite la FEIN'
+                      : 'Pendiente de firma de arras',
+          state: stage > 3 || feinBuyerConfirmed
+              ? _StepState.done
+              : (stage == 3 && tasacionApptStatus == 'completed'
+                  ? _StepState.active
+                  : _StepState.locked),
+          // CTA solo para el comprador, y solo si aun no ha confirmado
+          ctaLabel: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
+              ? 'Confirmar FEIN del banco'
+              : null,
+          ctaIcon: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
+              ? Icons.account_balance_outlined
+              : null,
+          ctaCallback: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
               ? () => context.push('/offers/${offerData.id}/fein', extra: offerData)
               : null,
         ),
@@ -446,11 +528,21 @@ class TransactionTimelineScreen extends ConsumerWidget {
         title: 'Firma en Notaria y Entrega de Llaves',
         subtitle: stage >= 4
             ? 'Escrituras firmadas y llaves entregadas'
-            : 'Paso final de la firma — incluye entrega de llaves',
-        state: stepState(4),
-        ctaLabel: stage == 4 ? 'Gestionar cita y confirmar firma' : null,
-        ctaIcon: stage == 4 ? Icons.gavel_outlined : null,
-        ctaCallback: stage == 4
+            : feinBuyerConfirmed
+                ? _notariaSubtitle(notariaApptStatus, isBuyer)
+                : 'Pendiente de formalizacion bancaria (FEIN)',
+        state: stage >= 4
+            ? _StepState.done
+            : feinBuyerConfirmed
+                ? _StepState.active
+                : _StepState.locked,
+        ctaLabel: (feinBuyerConfirmed || stage >= 4)
+            ? _notariaCtaLabel(notariaApptStatus, isBuyer, stage)
+            : null,
+        ctaIcon: (feinBuyerConfirmed || stage >= 4)
+            ? _notariaCtaIcon(notariaApptStatus, isBuyer, stage)
+            : null,
+        ctaCallback: (feinBuyerConfirmed || stage >= 4)
             ? () => context.push('/offers/${offerData.id}/notaria', extra: offerData)
             : null,
       ),
@@ -555,6 +647,110 @@ class TransactionTimelineScreen extends ConsumerWidget {
         return Icons.auto_awesome_outlined;
       default:
         return Icons.edit_outlined;
+    }
+  }
+
+  // ── Tasacion step helpers ────────────────────────────────────────────────
+
+  String _tasacionSubtitle(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return 'Tasacion completada — informe emitido';
+      case 'accepted':
+        return isBuyer
+            ? 'Cita acordada — pendiente de visita del tasador'
+            : 'Cita acordada — confirma cuando el tasador visite la vivienda';
+      case 'rejected':
+        return isBuyer
+            ? 'Vendedor propuso fecha alternativa — pendiente de tu respuesta'
+            : 'Fecha rechazada — pendiente de nueva propuesta del comprador';
+      case 'proposed':
+        return isBuyer
+            ? 'Fecha propuesta — pendiente de confirmacion del vendedor'
+            : 'Comprador propuso una fecha — pendiente de tu respuesta';
+      default: // pending
+        return isBuyer
+            ? 'Agenda la visita del tasador para continuar'
+            : 'Pendiente de que el comprador proponga una fecha';
+    }
+  }
+
+  String? _tasacionCtaLabel(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return null;
+      case 'accepted':
+        return isBuyer ? 'Ver cita confirmada' : 'Confirmar visita del tasador';
+      case 'rejected':
+        return isBuyer
+            ? 'Ver propuesta del vendedor'
+            : 'Ver estado — esperando comprador';
+      case 'proposed':
+        return isBuyer
+            ? 'Ver propuesta enviada'
+            : 'Aceptar o rechazar propuesta';
+      default: // pending
+        return isBuyer ? 'Agendar visita del tasador' : null;
+    }
+  }
+
+  IconData? _tasacionCtaIcon(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'accepted':
+        return isBuyer
+            ? Icons.event_available_outlined
+            : Icons.check_circle_outline;
+      case 'rejected':
+        return isBuyer ? Icons.event_outlined : Icons.hourglass_empty_outlined;
+      case 'proposed':
+        return isBuyer
+            ? Icons.pending_outlined
+            : Icons.edit_calendar_outlined;
+      default:
+        return isBuyer ? Icons.home_work_outlined : null;
+    }
+  }
+
+  // ── Notaria step helpers ─────────────────────────────────────────────────
+
+  String _notariaSubtitle(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return 'Firma realizada — pendiente de entrega de llaves';
+      case 'scheduled':
+        return isBuyer
+            ? 'Cita propuesta — pendiente de confirmacion del vendedor'
+            : 'Comprador propuso cita — pendiente de tu confirmacion';
+      default: // pending
+        return isBuyer
+            ? 'A la espera de cita en notaria — propone fecha y lugar'
+            : 'A la espera de cita en notaria — el comprador eligira fecha';
+    }
+  }
+
+  String? _notariaCtaLabel(String apptStatus, bool isBuyer, int stage) {
+    if (stage >= 4) return 'Ver estado de la firma';
+    switch (apptStatus) {
+      case 'completed':
+        return 'Confirmar firma y entrega de llaves';
+      case 'scheduled':
+        return isBuyer ? 'Ver cita propuesta' : 'Confirmar cita en notaria';
+      default: // pending
+        return isBuyer ? 'Proponer cita en notaria' : 'Ver estado';
+    }
+  }
+
+  IconData? _notariaCtaIcon(String apptStatus, bool isBuyer, int stage) {
+    if (stage >= 4) return Icons.gavel_outlined;
+    switch (apptStatus) {
+      case 'completed':
+        return Icons.key_outlined;
+      case 'scheduled':
+        return isBuyer
+            ? Icons.pending_outlined
+            : Icons.event_available_outlined;
+      default:
+        return isBuyer ? Icons.calendar_today_outlined : Icons.hourglass_empty_outlined;
     }
   }
 }
