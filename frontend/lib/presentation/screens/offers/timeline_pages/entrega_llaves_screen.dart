@@ -1,13 +1,20 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../widgets/common/user_avatar_menu.dart';
 
-const _kBlue  = Color(0xFF2563EB);
-const _kGreen = Color(0xFF16A34A);
-const _kBg    = Color(0xFFF8FAFC);
+const _kApiBase = 'http://localhost:8000/api/v1';
+const _kBlue    = Color(0xFF2563EB);
+const _kGreen   = Color(0xFF16A34A);
+const _kBg      = Color(0xFFF8FAFC);
+const _kNavy    = Color(0xFF1E3A5F);
+const _kStorage = FlutterSecureStorage();
 
 /// Pantalla de Entrega de Llaves — hito final de cierre de la transaccion.
 /// Ambas partes confirman la entrega. Documentacion pendiente adjunta.
@@ -22,26 +29,68 @@ class EntregaLlavesScreen extends ConsumerStatefulWidget {
 
 class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
   bool _sellerConfirmed = false;
-  bool _buyerConfirmed = false;
+  bool _buyerConfirmed  = false;
+  bool _isLoading       = false;
+  bool _isInitializing  = true;
+  String? _errorMessage;
 
-  void _confirm(bool isBuyer) {
-    setState(() {
-      if (isBuyer) {
-        _buyerConfirmed = true;
-      } else {
-        _sellerConfirmed = true;
-      }
-    });
-    if (_buyerConfirmed && _sellerConfirmed) {
-      _showCompletionDialog();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Tu confirmacion registrada. Esperando a la otra parte.'),
-          backgroundColor: _kGreen,
-        ),
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    try {
+      final token = await _kStorage.read(key: 'auth_token');
+      if (token == null) return;
+      final resp = await Dio().get(
+        '$_kApiBase/entrega-llaves/${widget.offer.id}/status',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      final data = resp.data as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _buyerConfirmed  = data['buyer_confirmed'] as bool? ?? false;
+        _sellerConfirmed = data['seller_confirmed'] as bool? ?? false;
+      });
+    } catch (_) {
+      // non-blocking — show empty state
+    } finally {
+      if (mounted) setState(() => _isInitializing = false);
+    }
+  }
+
+  Future<void> _confirm() async {
+    setState(() { _isLoading = true; _errorMessage = null; });
+    try {
+      final token = await _kStorage.read(key: 'auth_token');
+      final resp = await Dio().post(
+        '$_kApiBase/entrega-llaves/${widget.offer.id}/confirm',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final data = resp.data as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _buyerConfirmed  = data['buyer_confirmed'] as bool? ?? false;
+        _sellerConfirmed = data['seller_confirmed'] as bool? ?? false;
+      });
+      if (data['offer_completed'] == true) {
+        _showCompletionDialog();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tu confirmacion registrada. Esperando a la otra parte.'),
+            backgroundColor: _kGreen,
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final detail = (e.response?.data as Map?)?['detail'] as String?;
+      setState(() => _errorMessage = detail ?? 'Error al confirmar. Intentalo de nuevo.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -69,7 +118,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F)),
+                  color: _kNavy),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -88,7 +137,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
             style: FilledButton.styleFrom(
               backgroundColor: _kBlue,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
             child: const Text('Aceptar'),
           ),
@@ -100,60 +149,142 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authProvider).user;
-    final isBuyer = currentUser?.id == widget.offer.buyerId;
+    final isBuyer    = currentUser?.id == widget.offer.buyerId;
     final isComplete = _buyerConfirmed && _sellerConfirmed;
 
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text(
-          'Entrega de Llaves',
-          style: TextStyle(
-              color: Color(0xFF1E3A5F),
-              fontWeight: FontWeight.bold,
-              fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // Hero card
-          _HeroCard(isComplete: isComplete),
-          const SizedBox(height: 24),
-
-          // Dual confirmation
-          _ConfirmationCard(
-            label: 'Vendedor',
-            icon: Icons.home_outlined,
-            confirmed: _sellerConfirmed,
-            isCurrentUser: !isBuyer,
-            onConfirm: () => _confirm(false),
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          const SizedBox(height: 12),
-          _ConfirmationCard(
-            label: 'Comprador',
-            icon: Icons.person_outline,
-            confirmed: _buyerConfirmed,
-            isCurrentUser: isBuyer,
-            onConfirm: () => _confirm(true),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
           ),
-          const SizedBox(height: 24),
-
-          // Pending documents
-          _PendingDocsCard(),
-          const SizedBox(height: 20),
-
-          // Tips
-          _TipsCard(),
         ],
       ),
+      body: _isInitializing
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                _HeroCard(isComplete: isComplete),
+                const SizedBox(height: 24),
+                _ConfirmationCard(
+                  label: 'Vendedor',
+                  icon: Icons.home_outlined,
+                  confirmed: _sellerConfirmed,
+                  isCurrentUser: !isBuyer,
+                  isLoading: _isLoading && !isBuyer,
+                  onConfirm: _confirm,
+                ),
+                const SizedBox(height: 12),
+                _ConfirmationCard(
+                  label: 'Comprador',
+                  icon: Icons.person_outline,
+                  confirmed: _buyerConfirmed,
+                  isCurrentUser: isBuyer,
+                  isLoading: _isLoading && isBuyer,
+                  onConfirm: _confirm,
+                ),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(_errorMessage!,
+                        style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                const _PendingDocsCard(),
+                const SizedBox(height: 20),
+                const _TipsCard(),
+              ],
+            ),
     );
   }
 }
@@ -214,6 +345,7 @@ class _ConfirmationCard extends StatelessWidget {
     required this.icon,
     required this.confirmed,
     required this.isCurrentUser,
+    required this.isLoading,
     required this.onConfirm,
   });
 
@@ -221,6 +353,7 @@ class _ConfirmationCard extends StatelessWidget {
   final IconData icon;
   final bool confirmed;
   final bool isCurrentUser;
+  final bool isLoading;
   final VoidCallback onConfirm;
 
   @override
@@ -275,7 +408,7 @@ class _ConfirmationCard extends StatelessWidget {
             const Icon(Icons.check_circle, color: _kGreen, size: 24)
           else if (isCurrentUser)
             FilledButton(
-              onPressed: onConfirm,
+              onPressed: isLoading ? null : onConfirm,
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 shape: RoundedRectangleBorder(
@@ -283,7 +416,11 @@ class _ConfirmationCard extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
-              child: const Text('Confirmar', style: TextStyle(fontSize: 13)),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 16, height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Text('Confirmar', style: TextStyle(fontSize: 13)),
             )
           else
             Icon(Icons.hourglass_empty, color: Colors.grey.shade400, size: 20),

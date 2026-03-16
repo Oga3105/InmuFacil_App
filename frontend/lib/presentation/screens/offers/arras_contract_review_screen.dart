@@ -658,11 +658,47 @@ class _ArrasContractReviewScreenState
           builder: (context, ref, _) {
             final isAuthenticated = ref.watch(authProvider).isAuthenticated;
             if (!isAuthenticated) return const SizedBox.shrink();
-            return const Row(
+            return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                UserAvatarMenu(),
-                SizedBox(width: 16),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text(
+                            'Inicio',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const UserAvatarMenu(),
+                const SizedBox(width: 16),
               ],
             );
           },
@@ -894,51 +930,52 @@ class _EquityAnalysisBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.push(
-        '/offers/${offer.id}/arras/equity',
-        extra: offer,
-      ),
-      child: Container(
-        color: const Color(0xFFF0F9FF),
-        padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _kBlue.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.push(
+          '/offers/${offer.id}/arras/equity',
+          extra: offer,
+        ),
+        child: Container(
+          color: const Color(0xFFF0F9FF),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: _kBlue.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.analytics_outlined,
+                    color: _kBlue, size: 20),
               ),
-              child: const Icon(Icons.analytics_outlined,
-                  color: _kBlue, size: 20),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Analizar mi posicion',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E3A5F),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Analizar mi posicion',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E3A5F),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'IA analiza cada clausula desde tu perspectiva',
-                    style: TextStyle(
-                        fontSize: 12, color: Color(0xFF64748B)),
-                  ),
-                ],
+                    SizedBox(height: 2),
+                    Text(
+                      'IA analiza cada clausula desde tu perspectiva',
+                      style: TextStyle(
+                          fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right,
-                color: _kBlue, size: 20),
-          ],
+              const Icon(Icons.chevron_right, color: _kBlue, size: 20),
+            ],
+          ),
         ),
       ),
     );

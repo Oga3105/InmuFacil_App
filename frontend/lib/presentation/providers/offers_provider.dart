@@ -273,6 +273,45 @@ class MakeOfferNotifier extends Notifier<OfferFormState> {
   void reset() => state = const OfferFormState();
 }
 
+// --- Shared live FEIN status provider ---
+
+/// Live query to check if the buyer has confirmed their FEIN document.
+/// Used by urgencyProvider and the timeline to avoid relying on stale OfferData cache.
+final feinConfirmedProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return false;
+  try {
+    final resp = await Dio().get(
+      '$_kOffersApiBaseUrl/fein/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ??
+        false;
+  } catch (_) {
+    return false;
+  }
+});
+
+/// Live query for the notaría appointment sub-status.
+/// Used by urgencyProvider to avoid relying on stale OfferData cache.
+final notariaApptStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  try {
+    final resp = await Dio().get(
+      '$_kOffersApiBaseUrl/notaria-appt/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
+
 // --- Shared mapper ---
 
 OfferData _mapOffer(dynamic item) {

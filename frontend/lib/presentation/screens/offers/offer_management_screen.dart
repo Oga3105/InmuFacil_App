@@ -892,7 +892,9 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF16A34A)),
+              backgroundColor: const Color(0xFF16A34A),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Aceptar'),
           ),
         ],
@@ -921,7 +923,10 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: const Text('Rechazar'),
           ),
         ],
@@ -1023,7 +1028,7 @@ class _ActionButtonsRow extends StatelessWidget {
   final VoidCallback onReject;
 
   static const _shape =
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8)));
+      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12)));
   static const _pad = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
   static const _tts = MaterialTapTargetSize.shrinkWrap;
 

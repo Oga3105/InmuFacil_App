@@ -52,21 +52,6 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   }
 });
 
-final _feinStatusProvider = FutureProvider.autoDispose
-    .family<bool, String>((ref, offerId) async {
-  final token = await const FlutterSecureStorage().read(key: 'auth_token');
-  if (token == null) return false;
-  try {
-    final resp = await Dio().get(
-      '$_kTimelineApiBase/fein/$offerId/status',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
-    return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ?? false;
-  } catch (_) {
-    return false;
-  }
-});
-
 final _notariaStatusProvider = FutureProvider.autoDispose
     .family<String, String>((ref, offerId) async {
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
@@ -141,9 +126,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
             'pending'
         : 'pending';
 
-    // FEIN buyer confirmation — live query from backend (authoritative)
+    // FEIN buyer confirmation — shared live provider (authoritative, avoids stale cache)
     final feinBuyerConfirmed = s == 'signed'
-        ? ref.watch(_feinStatusProvider(liveOffer.id)).asData?.value ??
+        ? ref.watch(feinConfirmedProvider(liveOffer.id)).asData?.value ??
             liveOffer.feinBuyerConfirmed
         : (s == 'completed' ? true : false);
 
@@ -736,9 +721,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
       case 'completed':
         return 'Firma realizada — pendiente de entrega de llaves';
       case 'scheduled':
-        return isBuyer
-            ? 'Cita propuesta — pendiente de confirmacion del vendedor'
-            : 'Comprador propuso cita — pendiente de tu confirmacion';
+        return 'Cita acordada — pendiente de firma en notaria';
       default: // pending
         return isBuyer
             ? 'A la espera de cita en notaria — propone fecha y lugar'
@@ -750,9 +733,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
     if (stage >= 4) return 'Ver estado de la firma';
     switch (apptStatus) {
       case 'completed':
-        return 'Confirmar firma y entrega de llaves';
       case 'scheduled':
-        return isBuyer ? 'Ver cita propuesta' : 'Confirmar cita en notaria';
+        return 'Confirmar firma y entrega de llaves';
       default: // pending
         return isBuyer ? 'Proponer cita en notaria' : 'Ver estado';
     }
@@ -762,11 +744,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
     if (stage >= 4) return Icons.gavel_outlined;
     switch (apptStatus) {
       case 'completed':
-        return Icons.key_outlined;
       case 'scheduled':
-        return isBuyer
-            ? Icons.pending_outlined
-            : Icons.event_available_outlined;
+        return Icons.key_outlined;
       default:
         return isBuyer ? Icons.calendar_today_outlined : Icons.hourglass_empty_outlined;
     }

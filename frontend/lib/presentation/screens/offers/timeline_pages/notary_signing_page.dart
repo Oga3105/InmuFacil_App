@@ -1,10 +1,16 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
+import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+
+const _kApiBase = 'http://localhost:8000/api/v1';
+const _notaryStorage = FlutterSecureStorage();
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
@@ -28,19 +34,80 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
   bool _keysConfirmed    = false;
   bool _submitted        = false;
   bool _isLoading        = false;
+  bool _isInitializing   = true;
+
+  // Persisted confirmation state from backend
+  bool _buyerConfirmed  = false;
+  bool _sellerConfirmed = false;
+
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
+
+  Future<void> _loadStatus() async {
+    try {
+      final token = await _notaryStorage.read(key: 'auth_token');
+      final resp = await Dio().get(
+        '$_kApiBase/notaria-appt/${widget.offer.id}/status',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final d = resp.data as Map<String, dynamic>;
+      if (!mounted) return;
+      final currentUser = ref.read(authProvider).user;
+      final isBuyer = currentUser?.id.toString() == widget.offer.buyerId;
+      final buyerConf  = (d['buyer_confirmed']  as bool?) ?? false;
+      final sellerConf = (d['seller_confirmed'] as bool?) ?? false;
+      setState(() {
+        _buyerConfirmed  = buyerConf;
+        _sellerConfirmed = sellerConf;
+        // If the current user already confirmed in a prior session, show success
+        _submitted = isBuyer ? buyerConf : sellerConf;
+      });
+    } catch (_) {
+      // Silent — show form with defaults
+    } finally {
+      if (mounted) setState(() => _isInitializing = false);
+    }
+  }
 
   Future<void> _submit() async {
     if (!_signingConfirmed || !_keysConfirmed) return;
-    setState(() => _isLoading = true);
+    setState(() { _isLoading = true; _errorMessage = null; });
+    try {
+      final token = await _notaryStorage.read(key: 'auth_token');
+      final headers = {'Authorization': 'Bearer $token'};
+      final dio = Dio();
 
-    // Simulate brief async operation (real: POST /timeline/{step_id}/confirm)
-    await Future.delayed(const Duration(milliseconds: 600));
+      // Confirma firma en notaria — este es el paso crítico que abre Post-Venta.
+      await dio.post(
+        '$_kApiBase/notaria-appt/${widget.offer.id}/confirm',
+        options: Options(headers: headers),
+      );
 
-    if (!mounted) return;
-    setState(() {
-      _submitted  = true;
-      _isLoading  = false;
-    });
+      // Confirma entrega de llaves — ignorar errores (puede que el endpoint
+      // no exista aún o ya esté confirmado), la firma de notaria es suficiente.
+      try {
+        await dio.post(
+          '$_kApiBase/entrega-llaves/${widget.offer.id}/confirm',
+          options: Options(headers: headers),
+        );
+      } on DioException {
+        // No bloqueante — la confirmacion de notaria ya fue registrada.
+      }
+
+      if (!mounted) return;
+      setState(() { _submitted = true; });
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final detail = (e.response?.data as Map?)?['detail'] as String?;
+      setState(() => _errorMessage = detail ?? 'Error al confirmar. Intentalo de nuevo.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -51,20 +118,96 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text(
-          'Confirmar Firma y Llaves',
-          style: TextStyle(
-              color: _kNavy, fontWeight: FontWeight.bold, fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
+          ),
+        ],
       ),
-      body: _submitted
+      body: _isInitializing
+          ? const Center(child: CircularProgressIndicator())
+          : _submitted
           ? _buildSuccessView(context, isBuyer)
           : ListView(
               padding: const EdgeInsets.all(20),
@@ -76,6 +219,19 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                 _buildConfirmationForm(isBuyer),
                 const SizedBox(height: 24),
                 _buildSubmitButton(),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(_errorMessage!,
+                        style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
+                  ),
+                ],
               ],
             ),
     );
@@ -122,6 +278,8 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
   }
 
   Widget _buildStatusCard(bool isBuyer) {
+    final myConfirmed    = isBuyer ? _buyerConfirmed  : _sellerConfirmed;
+    final otherConfirmed = isBuyer ? _sellerConfirmed : _buyerConfirmed;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -147,13 +305,13 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
           const SizedBox(height: 12),
           _StatusRow(
             label: isBuyer ? 'Tu confirmacion (Comprador)' : 'Tu confirmacion (Vendedor)',
-            isPending: !_submitted,
+            isPending: !myConfirmed && !_submitted,
             isCurrentUser: true,
           ),
           const SizedBox(height: 8),
           _StatusRow(
             label: isBuyer ? 'Confirmacion del Vendedor' : 'Confirmacion del Comprador',
-            isPending: true,
+            isPending: !otherConfirmed,
             isCurrentUser: false,
           ),
         ],
