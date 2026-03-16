@@ -28,6 +28,9 @@ dependencies:
    
   # Secure Storage
   flutter_secure_storage: ^10.0.0
+
+  # Local Persistence (favoritos cache)
+  shared_preferences: ^2.3.3
    
   # JSON Serialization
   json_annotation: ^4.9.0
