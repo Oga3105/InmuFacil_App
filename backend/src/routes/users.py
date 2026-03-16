@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
-from backend.src.models import User
+from backend.src.models import User, KYCVerification
+from backend.src.models.enums import DNIStatus
 from backend.src.schemas.base import UserCreate, UserResponse, UserUpdate
 from backend.src.utils.security import get_current_active_user, get_password_hash, encrypt_data, decrypt_data, get_current_admin_user
 
@@ -30,7 +31,7 @@ def _build_user_response(user: User, decrypted_phone: Optional[str] = None) -> U
         email=user.email,
         full_name=user.full_name,
         user_type=user.user_type,
-        dni_status=user.dni_status.value if user.dni_status else "pendiente",
+        dni_status=user.dni_status.value if user.dni_status else "sin_verificar",
         is_active=user.is_active,
         created_at=user.created_at,
         updated_at=user.updated_at,
@@ -43,10 +44,14 @@ def _build_user_response(user: User, decrypted_phone: Optional[str] = None) -> U
 # --- ENDPOINTS DE PERFIL (Usuario Logueado) ---
 
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def read_users_me(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
     """
     Ver mi propio perfil.
     Decrypts phone number for the owner.
+    Auto-heals stale 'pendiente' status for users who never submitted KYC documents.
     """
     decrypted_phone = None
     if current_user.encrypted_phone:
@@ -54,6 +59,16 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
             decrypted_phone = decrypt_data(current_user.encrypted_phone)
         except Exception:
             decrypted_phone = None
+
+    # Auto-heal: if dni_status is 'pendiente' but no KYC record exists, reset to 'sin_verificar'
+    if current_user.dni_status == DNIStatus.PENDIENTE:
+        has_kyc = db.query(KYCVerification).filter(
+            KYCVerification.user_id == current_user.id
+        ).first() is not None
+        if not has_kyc:
+            current_user.dni_status = DNIStatus.SIN_VERIFICAR
+            db.commit()
+            db.refresh(current_user)
 
     return _build_user_response(current_user, decrypted_phone)
 

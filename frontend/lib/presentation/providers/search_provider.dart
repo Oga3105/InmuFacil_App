@@ -535,7 +535,10 @@ class SearchNotifier extends Notifier<SearchState> {
   void clearError() {
     state = state.copyWith(clearError: true);
   }
-  
+
+  /// Force-reload the property list from the API (call after create/edit).
+  Future<void> refresh() => _loadProperties();
+
   /// Reset all filters and clear geographic map bounds so filteredByMapPropertiesProvider
   /// returns all loaded properties (no location filter active).
   void reset() {

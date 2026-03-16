@@ -1,14 +1,20 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../widgets/common/user_avatar_menu.dart';
 
-const _kBlue  = Color(0xFF2563EB);
-const _kGreen = Color(0xFF16A34A);
-const _kBg    = Color(0xFFF8FAFC);
+const _kBlue    = Color(0xFF2563EB);
+const _kGreen   = Color(0xFF16A34A);
+const _kOrange  = Color(0xFFEA580C);
+const _kBg      = Color(0xFFF8FAFC);
+const _kApiBase = 'http://localhost:8000/api/v1';
+const _storage  = FlutterSecureStorage();
 
 /// Pantalla de Notaria — comprador elige lugar, fecha y hora.
 /// Muestra checklist de documentos obligatorios para entregar en notaria.
@@ -25,7 +31,25 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   final _cityCtrl = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  bool _confirmed = false;
+
+  // Backend state
+  String _apptStatus    = 'pending'; // pending | scheduled | completed
+  bool _isLoading       = false;
+  bool _isInitializing  = true;
+  String? _errorMessage;
+
+  // Datos guardados (vienen del backend)
+  String? _savedCity;
+  String? _savedDate;
+  String? _savedTime;
+  bool _buyerConfirmed  = false;
+  bool _sellerConfirmed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStatus();
+  }
 
   @override
   void dispose() {
@@ -33,12 +57,46 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
     super.dispose();
   }
 
+  Future<void> _loadStatus() async {
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      final resp = await Dio().get(
+        '$_kApiBase/notaria-appt/${widget.offer.id}/status',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final d = resp.data as Map<String, dynamic>;
+      if (!mounted) return;
+      setState(() {
+        _apptStatus      = (d['appointment_status'] as String?) ?? 'pending';
+        _savedCity       = d['city'] as String?;
+        _savedDate       = d['appointment_date'] as String?;
+        _savedTime       = d['appointment_time'] as String?;
+        _buyerConfirmed  = (d['buyer_confirmed'] as bool?) ?? false;
+        _sellerConfirmed = (d['seller_confirmed'] as bool?) ?? false;
+        // Pre-fill form if already scheduled
+        if (_savedCity != null) _cityCtrl.text = _savedCity!;
+        if (_savedDate != null) {
+          final p = _savedDate!.split('-');
+          _selectedDate = DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
+        }
+        if (_savedTime != null) {
+          final p = _savedTime!.split(':');
+          _selectedTime = TimeOfDay(hour: int.parse(p[0]), minute: int.parse(p[1]));
+        }
+      });
+    } catch (_) {
+      // Silencioso: muestra estado local
+    } finally {
+      if (mounted) setState(() => _isInitializing = false);
+    }
+  }
+
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(const Duration(days: 15)),
-      firstDate: DateTime.now().add(const Duration(days: 7)),
-      lastDate: DateTime.now().add(const Duration(days: 180)),
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
             colorScheme: const ColorScheme.light(primary: _kBlue)),
@@ -61,15 +119,44 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
     if (picked != null) setState(() => _selectedTime = picked);
   }
 
-  void _confirm() {
+  Future<void> _scheduleNotaria() async {
     if (_cityCtrl.text.isEmpty || _selectedDate == null || _selectedTime == null) return;
-    setState(() => _confirmed = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Cita en notaria propuesta. Se notificara al vendedor.'),
-        backgroundColor: _kGreen,
-      ),
-    );
+    setState(() { _isLoading = true; _errorMessage = null; });
+    try {
+      final token = await _storage.read(key: 'auth_token');
+      final d = _selectedDate!;
+      final t = _selectedTime!;
+      await Dio().post(
+        '$_kApiBase/notaria-appt/${widget.offer.id}/schedule',
+        data: {
+          'city': _cityCtrl.text.trim(),
+          'appointment_date':
+              '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}',
+          'appointment_time':
+              '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}',
+        },
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (!mounted) return;
+      setState(() {
+        _apptStatus = 'scheduled';
+        _savedCity  = _cityCtrl.text.trim();
+        _savedDate  = '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+        _savedTime  = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cita en notaria propuesta. Se notificara al vendedor.'),
+          backgroundColor: _kGreen,
+        ),
+      );
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final detail = (e.response?.data as Map?)?['detail'] as String?;
+      setState(() => _errorMessage = detail ?? 'Error al guardar la propuesta.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -80,39 +167,136 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
     return Scaffold(
       backgroundColor: _kBg,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => Navigator.of(context).pop()),
-        title: const Text(
-          'Cita en Notaria',
-          style: TextStyle(
-              color: Color(0xFF1E3A5F), fontWeight: FontWeight.bold, fontSize: 17),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        title: GestureDetector(
+          onTap: () => context.go('/'),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('assets/images/logo_inmufacil.png', height: 32),
+              const SizedBox(width: 8),
+              const Text.rich(
+                TextSpan(
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  children: [
+                    TextSpan(
+                      text: 'Inmu',
+                      style: TextStyle(color: Color(0xFF2563EB)),
+                    ),
+                    TextSpan(
+                      text: 'Facil',
+                      style: TextStyle(color: Color(0xFF16A34A)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Colors.grey.shade200, height: 1),
         ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          // Info
-          _buildInfoBanner(),
-          const SizedBox(height: 20),
-
-          if (isBuyer && !_confirmed)
-            _buildBuyerForm()
-          else if (isBuyer && _confirmed)
-            _buildConfirmedBanner()
-          else
-            _buildSellerView(),
-
-          const SizedBox(height: 24),
-          _buildDocumentChecklist(),
-          const SizedBox(height: 24),
-          _buildSigningCta(context),
+        actions: [
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  SizedBox(width: 6),
+                  Text(
+                    'Inicio',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Consumer(
+            builder: (context, ref, _) {
+              final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+              if (!isAuthenticated) return const SizedBox.shrink();
+              return const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(width: 12),
+                  UserAvatarMenu(),
+                  SizedBox(width: 16),
+                ],
+              );
+            },
+          ),
         ],
       ),
+      body: _isInitializing
+          ? const Center(child: CircularProgressIndicator())
+          : ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                // Top banner: waiting message replaces info banner when confirmed
+                if (_apptStatus != 'pending' &&
+                    (isBuyer ? _buyerConfirmed : _sellerConfirmed))
+                  _buildWaitingBanner(isBuyer)
+                else
+                  _buildInfoBanner(),
+                const SizedBox(height: 20),
+                if (isBuyer && _apptStatus == 'pending')
+                  _buildBuyerForm()
+                else if (isBuyer && _apptStatus != 'pending')
+                  _buildConfirmedBanner()
+                else if (_apptStatus == 'pending')
+                  _buildSellerView()
+                else
+                  _buildSellerScheduledView(),
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(_errorMessage!,
+                        style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                _buildDocumentChecklist(),
+                // Signing CTA only when appointment is set and not yet confirmed
+                if (_apptStatus != 'pending' &&
+                    !(isBuyer ? _buyerConfirmed : _sellerConfirmed)) ...[
+                  const SizedBox(height: 24),
+                  _buildSigningCta(context),
+                ],
+              ],
+            ),
     );
   }
 
@@ -215,12 +399,15 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: (_cityCtrl.text.isNotEmpty &&
+              onPressed: (!_isLoading &&
+                      _cityCtrl.text.isNotEmpty &&
                       _selectedDate != null &&
                       _selectedTime != null)
-                  ? _confirm
+                  ? _scheduleNotaria
                   : null,
-              icon: const Icon(Icons.send_outlined),
+              icon: _isLoading
+                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.send_outlined),
               label: const Text('Proponer al vendedor'),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
@@ -237,28 +424,55 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildConfirmedBanner() {
+    final isCompleted = _apptStatus == 'completed';
+    final accentColor = isCompleted ? _kGreen : _kBlue;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.08),
+        color: accentColor.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kGreen.withOpacity(0.3)),
+        border: Border.all(color: accentColor.withOpacity(0.3)),
       ),
       child: Column(
         children: [
-          const Icon(Icons.check_circle, color: _kGreen, size: 40),
-          const SizedBox(height: 12),
-          const Text('Propuesta enviada',
-              style: TextStyle(
-                  fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
-          const SizedBox(height: 6),
-          Text(
-            '${_cityCtrl.text}\n'
-            '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-            ' a las ${_selectedTime!.format(context)}',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+          Icon(
+            isCompleted ? Icons.verified_outlined : Icons.event_available_outlined,
+            color: accentColor,
+            size: 40,
           ),
+          const SizedBox(height: 12),
+          Text(
+            isCompleted ? 'Firma confirmada por ambas partes' : 'Cita programada',
+            style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: accentColor),
+          ),
+          const SizedBox(height: 6),
+          if (_savedCity != null || _savedDate != null)
+            Text(
+              '${_savedCity ?? ''}\n${_savedDate ?? ''}'
+              '${_savedTime != null ? ' a las $_savedTime' : ''}',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+            ),
+          if (_apptStatus == 'scheduled') ...[
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle, size: 16,
+                    color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
+                const SizedBox(width: 4),
+                Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                const SizedBox(width: 16),
+                Icon(Icons.check_circle, size: 16,
+                    color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
+                const SizedBox(width: 4),
+                Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ],
+            ),
+          ],
         ],
       ),
     );
@@ -288,8 +502,96 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 const SizedBox(height: 4),
                 Text(
                   'El comprador esta eligiendo la notaria y la fecha.',
-                  style:
-                      TextStyle(color: Colors.orange.shade700, fontSize: 13),
+                  style: TextStyle(color: Colors.orange.shade700, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSellerScheduledView() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.event_outlined, color: _kBlue, size: 20),
+            SizedBox(width: 8),
+            Text('Cita notarial propuesta por el comprador',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E3A5F))),
+          ]),
+          const SizedBox(height: 12),
+          if (_savedCity != null)
+            _DetailRow(icon: Icons.location_on_outlined, label: 'Notaria', value: _savedCity!),
+          if (_savedDate != null)
+            _DetailRow(icon: Icons.calendar_today_outlined, label: 'Fecha', value: _savedDate!),
+          if (_savedTime != null)
+            _DetailRow(icon: Icons.access_time_outlined, label: 'Hora', value: _savedTime!),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.check_circle, size: 16,
+                  color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
+              const SizedBox(width: 4),
+              Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              const SizedBox(width: 16),
+              Icon(Icons.check_circle, size: 16,
+                  color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
+              const SizedBox(width: 4),
+              Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWaitingBanner(bool isBuyer) {
+    final otherParty = isBuyer ? 'el vendedor' : 'el comprador';
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _kGreen.withOpacity(0.07),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kGreen.withOpacity(0.3)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.verified_outlined, color: _kGreen, size: 28),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tu confirmacion registrada',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF14532D),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Has confirmado la firma y la entrega de llaves. '
+                  'Estamos esperando a que $otherParty confirme tambien '
+                  'para cerrar la transaccion.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: _kGreen.withOpacity(0.85),
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -423,6 +725,29 @@ class _DatePickerRow extends StatelessWidget {
             Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.icon, required this.label, required this.value});
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: _kBlue, size: 16),
+          const SizedBox(width: 8),
+          Text('$label: ', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+          Expanded(child: Text(value,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1E3A5F)))),
+        ],
       ),
     );
   }

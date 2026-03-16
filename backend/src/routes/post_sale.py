@@ -16,7 +16,7 @@ from backend.src.config.database import get_db
 from backend.src.utils.security import get_current_active_user
 from backend.src.models.users import User
 from backend.src.models.offers import PropertyOffer
-from backend.src.models.post_sale import PostSaleDocument, PostSaleDocType
+from backend.src.models.post_sale import PostSaleDocument, PostSaleDocType, PostSaleDocFlag
 from backend.src.models.timeline import TransactionStep, StepStatus
 
 router = APIRouter(prefix="/post-sale", tags=["Post-Sale"])
@@ -30,29 +30,46 @@ MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 # ─── Internal helpers ────────────────────────────────────────────────────────
 
-def _get_deed_step_status(offer_id: int, db: Session) -> StepStatus:
-    """Returns the status of the DEED_SIGNATURE step for the given offer."""
+def _require_deed_completed(offer_id: int, db: Session) -> None:
+    """
+    Raises 403 unless both parties have confirmed the notaría signing.
+
+    Accepts either:
+      (a) step.status == COMPLETED  (normal path), OR
+      (b) both buyer_confirmed_at and seller_confirmed_at are set
+          (belt-and-suspenders: covers state inconsistency between enum and metadata).
+    """
     step = (
         db.query(TransactionStep)
         .filter(
             TransactionStep.offer_id == offer_id,
-            TransactionStep.step_key == "DEED_SIGNATURE",
+            TransactionStep.step_key == "NOTARIA_APPOINTMENT",
         )
         .first()
     )
+
     if step is None:
-        return StepStatus.PENDING
-    return step.status
-
-
-def _require_deed_completed(offer_id: int, db: Session) -> None:
-    """Raises 403 if DEED_SIGNATURE step is not COMPLETED."""
-    step_status = _get_deed_step_status(offer_id, db)
-    if step_status != StepStatus.COMPLETED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Documentos de post-venta accesibles solo tras la firma en notaria.",
         )
+
+    enum_completed = step.status == StepStatus.COMPLETED
+    both_confirmed = (
+        step.buyer_confirmed_at is not None
+        and step.seller_confirmed_at is not None
+    )
+
+    if not (enum_completed or both_confirmed):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Documentos de post-venta accesibles solo tras la firma en notaria.",
+        )
+
+    # Auto-repair: if both confirmed but enum is stale, fix it now.
+    if both_confirmed and not enum_completed:
+        step.status = StepStatus.COMPLETED
+        db.commit()
 
 
 def _get_offer_or_404(offer_id: int, db: Session) -> PropertyOffer:
@@ -144,6 +161,110 @@ class DocumentOut(BaseModel):
 
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
+
+_VALID_FLAGS = {"in_person", "not_applicable"}
+
+
+class DocFlagRequest(BaseModel):
+    doc_type: str
+    flag: str  # "in_person" | "not_applicable"
+
+
+class DocStatusItem(BaseModel):
+    status: str | None = None   # "uploaded" | "in_person" | "not_applicable" | None
+    doc_id: int | None = None
+    filename: str | None = None
+
+
+@router.get("/{offer_id}/status")
+async def get_doc_status(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> dict:
+    """
+    Returns the combined delivery status for every doc type.
+    Priority: uploaded file > flag (in_person/not_applicable) > None.
+    """
+    _require_deed_completed(offer_id, db)
+    offer = _get_offer_or_404(offer_id, db)
+    _require_participant(offer, current_user)
+
+    uploaded = (
+        db.query(PostSaleDocument)
+        .filter(PostSaleDocument.offer_id == offer_id)
+        .all()
+    )
+    flags = (
+        db.query(PostSaleDocFlag)
+        .filter(PostSaleDocFlag.offer_id == offer_id)
+        .all()
+    )
+
+    uploaded_map = {d.doc_type.value: {"doc_id": d.id, "filename": d.filename} for d in uploaded}
+    flag_map = {f.doc_type.value: f.flag for f in flags}
+
+    result = {}
+    for doc_type in PostSaleDocType:
+        key = doc_type.value
+        if key in uploaded_map:
+            result[key] = {
+                "status": "uploaded",
+                "doc_id": uploaded_map[key]["doc_id"],
+                "filename": uploaded_map[key]["filename"],
+            }
+        elif key in flag_map:
+            result[key] = {"status": flag_map[key], "doc_id": None, "filename": None}
+        else:
+            result[key] = {"status": None, "doc_id": None, "filename": None}
+
+    return result
+
+
+@router.post("/{offer_id}/flag")
+async def set_doc_flag(
+    offer_id: int,
+    body: DocFlagRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer or Seller mark a doc type as delivered in person or not applicable.
+    Either party can set the flag — last writer wins.
+    Upserts the flag (one per offer+doc_type).
+    """
+    _require_deed_completed(offer_id, db)
+    offer = _get_offer_or_404(offer_id, db)
+    _require_participant(offer, current_user)
+    if body.doc_type not in [t.value for t in PostSaleDocType]:
+        raise HTTPException(status_code=422, detail="Tipo de documento invalido.")
+    if body.flag not in _VALID_FLAGS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Flag invalido. Valores: {list(_VALID_FLAGS)}",
+        )
+
+    existing = (
+        db.query(PostSaleDocFlag)
+        .filter(
+            PostSaleDocFlag.offer_id == offer_id,
+            PostSaleDocFlag.doc_type == body.doc_type,
+        )
+        .first()
+    )
+    if existing:
+        existing.flag = body.flag
+        existing.set_by = current_user.id
+    else:
+        db.add(PostSaleDocFlag(
+            offer_id=offer_id,
+            doc_type=body.doc_type,
+            flag=body.flag,
+            set_by=current_user.id,
+        ))
+    db.commit()
+    return {"doc_type": body.doc_type, "flag": body.flag}
+
 
 @router.get("/{offer_id}/documents", response_model=List[DocumentOut])
 async def list_documents(

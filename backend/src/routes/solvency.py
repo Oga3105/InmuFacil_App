@@ -17,17 +17,20 @@ from typing import Optional
 import os
 import shutil
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+import logging
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
-from backend.src.config.database import get_db
+from backend.src.config.database import get_db, SessionLocal
 from backend.src.models import User, PropertyOffer, Property, BuyerSolvency
-from backend.src.models.enums import PaymentMethod, StressIndex, SolvencyLevel
+from backend.src.models.enums import PaymentMethod, StressIndex, SolvencyLevel, OfferStatus
 from backend.src.utils.crypto import encrypt_data, decrypt_data
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/solvency", tags=["Solvency"])
+logger = logging.getLogger(__name__)
 
 _TERMS_VERSION = "v1.0"
 _DOCUMENT_TTL_DAYS = 90
@@ -454,9 +457,22 @@ async def seller_accept_solvency(
             detail="El comprador no ha completado su Pasaporte de Solvencia todavia.",
         )
 
-    from backend.src.models.offers import PropertyOffer as _Offer
     offer.seller_solvency_accepted = True
     offer.seller_solvency_accepted_at = datetime.now(timezone.utc)
+
+    # Advance offer to signing_pending if second buyer verification is not required
+    # or has already been completed.
+    solvency_rec = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == offer.buyer_id
+    ).first()
+    second_buyer_done = (
+        not solvency_rec
+        or not solvency_rec.is_multi_buyer
+        or solvency_rec.second_buyer_verified_at is not None
+    )
+    if second_buyer_done:
+        offer.status = OfferStatus.SIGNING_PENDING
+
     db.commit()
 
     return {
@@ -467,16 +483,161 @@ async def seller_accept_solvency(
 
 
 class SecondBuyerResponse(BaseModel):
-    """Confirmation returned after second buyer KYC is stored."""
+    """Confirmation returned after second buyer KYC upload is accepted."""
     message: str
-    second_buyer_verified_at: datetime
+    status: str = "processing"
 
 
 _SECOND_BUYER_UPLOAD_DIR = "uploads/second_buyer"
 
 
+def _run_second_buyer_gemini(
+    buyer_id: int,
+    full_name: str,
+    email: str,
+    saved_paths: dict,
+    document_type: str,
+) -> None:
+    """
+    Background task: runs Gemini verification after the upload endpoint returns.
+    Opens its own DB session (the request session is already closed).
+    Updates BuyerSolvency with the encrypted PII on success.
+    """
+    from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
+
+    db: Session = SessionLocal()
+    try:
+        result = verify_identity_with_gemini(
+            front_path=saved_paths.get("front"),
+            back_path=saved_paths.get("back"),
+            selfie_path=saved_paths.get("selfie"),
+            document_type=document_type,
+        )
+
+        logger.info(
+            "Second-buyer Gemini result for buyer_id=%s: approved=%s reason=%s",
+            buyer_id, result.approved, result.reason,
+        )
+
+        record = db.query(BuyerSolvency).filter(
+            BuyerSolvency.buyer_id == buyer_id
+        ).first()
+        if not record:
+            logger.error("Second-buyer background task: no solvency record for buyer_id=%s", buyer_id)
+            return
+
+        if result.reason == "__QUOTA_EXCEEDED__":
+            logger.warning("Gemini quota exceeded for second-buyer buyer_id=%s; leaving as pending", buyer_id)
+            return
+
+        if result.approved and result.doc_number:
+            from backend.src.utils.crypto import compute_dni_hmac
+            from backend.src.models.users import User
+
+            second_hmac = compute_dni_hmac(result.doc_number)
+
+            # --- DNI uniqueness checks ---
+            # 1. The second buyer must not be the same person as the primary buyer.
+            primary_user = db.query(User).filter(User.id == buyer_id).first()
+            if primary_user and primary_user.dni_hmac and primary_user.dni_hmac == second_hmac:
+                record.second_buyer_status = "rechazado"
+                record.second_buyer_rejection_reason = (
+                    "El documento del segundo titular es el mismo que el del comprador principal. "
+                    "El segundo comprador debe ser una persona diferente."
+                )
+                db.commit()
+                logger.warning(
+                    "[SHIELD] Second-buyer DNI matches primary buyer for buyer_id=%s", buyer_id
+                )
+                return
+
+            # 2. The second buyer's DNI must not already be registered as a primary user.
+            existing_user = (
+                db.query(User)
+                .filter(User.dni_hmac == second_hmac, User.id != buyer_id)
+                .first()
+            )
+            if existing_user:
+                record.second_buyer_status = "rechazado"
+                record.second_buyer_rejection_reason = (
+                    "Este documento de identidad ya esta vinculado a una cuenta existente en la plataforma. "
+                    "Si crees que es un error, contacta con soporte."
+                )
+                db.commit()
+                logger.warning(
+                    "[SHIELD] Second-buyer DNI already registered as user for buyer_id=%s", buyer_id
+                )
+                return
+
+            # 3. The same DNI must not already be registered as second buyer in another record.
+            existing_second = (
+                db.query(BuyerSolvency)
+                .filter(
+                    BuyerSolvency.second_buyer_dni_hmac == second_hmac,
+                    BuyerSolvency.buyer_id != buyer_id,
+                )
+                .first()
+            )
+            if existing_second:
+                record.second_buyer_status = "rechazado"
+                record.second_buyer_rejection_reason = (
+                    "Este documento de identidad ya esta vinculado como segundo comprador en otra operacion. "
+                    "Si crees que es un error, contacta con soporte."
+                )
+                db.commit()
+                logger.warning(
+                    "[SHIELD] Second-buyer DNI already used in another solvency record for buyer_id=%s",
+                    buyer_id,
+                )
+                return
+
+            record.second_buyer_name_enc = encrypt_data(full_name)
+            record.second_buyer_dni_enc = encrypt_data(result.doc_number)
+            record.second_buyer_dni_hmac = second_hmac
+            record.second_buyer_email_enc = encrypt_data(email)
+            record.second_buyer_verified_at = datetime.now(timezone.utc)
+            record.second_buyer_status = "validado"
+            record.second_buyer_rejection_reason = None
+
+            # If the seller has already accepted solvency, advance eligible offers
+            # to signing_pending so the Arras step unlocks immediately.
+            # Cast status to TEXT and compare case-insensitively to handle
+            # both uppercase (legacy DB enum labels) and lowercase (Python enum values).
+            from sqlalchemy import cast, String, func as sa_func
+            eligible_offers = (
+                db.query(PropertyOffer)
+                .filter(
+                    PropertyOffer.buyer_id == buyer_id,
+                    sa_func.upper(cast(PropertyOffer.status, String)) == "ACCEPTED",
+                    PropertyOffer.seller_solvency_accepted == True,
+                )
+                .all()
+            )
+            for elig in eligible_offers:
+                elig.status = OfferStatus.SIGNING_PENDING
+                logger.info(
+                    "Second-buyer approved: advancing offer_id=%s to signing_pending", elig.id
+                )
+
+            db.commit()
+            logger.info("Second-buyer verification approved for buyer_id=%s", buyer_id)
+        else:
+            record.second_buyer_status = "rechazado"
+            record.second_buyer_rejection_reason = result.reason
+            db.commit()
+            logger.warning(
+                "Second-buyer verification rejected for buyer_id=%s: %s",
+                buyer_id, result.reason,
+            )
+    except Exception as exc:
+        logger.exception("Second-buyer background task error for buyer_id=%s: %s", buyer_id, exc)
+    finally:
+        db.close()
+
+
 @router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
 async def submit_second_buyer(
+    background_tasks: BackgroundTasks,
     full_name: str = Form(..., min_length=2, max_length=200),
     email: str = Form(...),
     front: UploadFile = File(...),
@@ -487,15 +648,12 @@ async def submit_second_buyer(
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Buyer submits identity documents for the second joint purchaser.
-    Documents are verified synchronously via Gemini AI.
-    DNI is auto-extracted from the document — not entered manually.
-    All PII is AES-256-GCM encrypted at rest (GDPR compliance).
+    Buyer uploads identity documents for the second joint purchaser.
+    Files are saved immediately and the endpoint returns 200.
+    Gemini AI verification runs in the background (same pattern as /kyc/verify).
     Returns 404 if the buyer has no active passport.
-    Returns 400 if is_multi_buyer is not set or KYC is rejected.
+    Returns 400 if is_multi_buyer is not set.
     """
-    from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
-
     record = db.query(BuyerSolvency).filter(
         BuyerSolvency.buyer_id == current_user.id
     ).first()
@@ -528,40 +686,50 @@ async def submit_second_buyer(
                 detail=f"Error guardando imagen ({file_key}): {exc}",
             )
 
-    result = verify_identity_with_gemini(
-        front_path=saved_paths.get("front"),
-        back_path=saved_paths.get("back"),
-        selfie_path=saved_paths.get("selfie"),
+    # Mark as pending immediately so the status page reflects reality
+    record.second_buyer_status = "pending"
+    record.second_buyer_rejection_reason = None
+    db.commit()
+
+    background_tasks.add_task(
+        _run_second_buyer_gemini,
+        buyer_id=current_user.id,
+        full_name=full_name,
+        email=email,
+        saved_paths=saved_paths,
         document_type=document_type,
     )
 
-    if result.reason == "__QUOTA_EXCEEDED__":
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de verificacion temporalmente no disponible. Intentalo en unos minutos.",
-        )
-
-    if not result.approved:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Verificacion de identidad fallida: {result.reason}",
-        )
-
-    if not result.doc_number:
-        raise HTTPException(
-            status_code=400,
-            detail="No se pudo extraer el numero de documento. Asegurate de que la imagen del frente sea legible.",
-        )
-
-    record.second_buyer_name_enc = encrypt_data(full_name)
-    record.second_buyer_dni_enc = encrypt_data(result.doc_number)
-    record.second_buyer_email_enc = encrypt_data(email)
-    record.second_buyer_verified_at = datetime.now(timezone.utc)
-    db.commit()
-
     return SecondBuyerResponse(
-        message="Identidad del segundo comprador verificada y guardada correctamente.",
-        second_buyer_verified_at=record.second_buyer_verified_at,
+        message="Documentos recibidos. La verificacion se esta procesando en segundo plano.",
+        status="pending",
+    )
+
+
+class SecondBuyerStatusResponse(BaseModel):
+    """Real-time verification status of the second buyer KYC."""
+    status: str                          # null | "pending" | "validado" | "rechazado"
+    rejection_reason: Optional[str] = None
+
+
+@router.get("/second-buyer/status", response_model=SecondBuyerStatusResponse)
+async def get_second_buyer_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Returns the verification status of the second buyer for the current buyer.
+    Mirrors /kyc/status for the second-buyer flow.
+    """
+    record = db.query(BuyerSolvency).filter(
+        BuyerSolvency.buyer_id == current_user.id
+    ).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Pasaporte de solvencia no encontrado.")
+
+    return SecondBuyerStatusResponse(
+        status=record.second_buyer_status or "not_submitted",
+        rejection_reason=record.second_buyer_rejection_reason,
     )
 
 

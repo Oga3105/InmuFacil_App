@@ -223,16 +223,76 @@ class _VerificationStatusScreenState
   }
 
   Widget _buildStatusCard(VerificationState state) {
-    final status = state.kycStatus?.toLowerCase() ?? 'pendiente';
+    final status = state.kycStatus?.toLowerCase() ?? 'unverified';
 
     switch (status) {
       case 'validado':
         return _buildApprovedCard();
       case 'rechazado':
         return _buildRejectedCard(state);
+      case 'unverified':
+      case 'sin_verificar':
+        return _buildNotStartedCard();
       default:
         return _buildPendingCard(state);
     }
+  }
+
+  // ── NOT STARTED ───────────────────────────────────────────────────────
+
+  Widget _buildNotStartedCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.badge_outlined,
+                  size: 40, color: Colors.blue.shade400),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Verifica tu identidad',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Todavia no has enviado tus documentos. Completa la verificacion para acceder a todas las funcionalidades.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            ),
+            const SizedBox(height: 28),
+            PremiumButton(
+              label: 'Iniciar verificacion',
+              icon: Icons.arrow_forward,
+              color: const Color(0xFF2563EB),
+              onPressed: () => context.push('/verify-identity'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ── PENDING ──────────────────────────────────────────────────────────

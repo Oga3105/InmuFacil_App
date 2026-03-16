@@ -9,6 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 
 from backend.src.config.database import get_db
 from backend.src.utils.security import get_current_active_user
@@ -121,11 +122,8 @@ def _send_fein_auto_message(offer_id: int, buyer_id: int, db: Session) -> None:
         pass
 
 
-def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: Session) -> dict:
-    """
-    Confirms the FEIN step for the given role.
-    Uses MORTGAGE_APPROVAL or FEIN_CONFIRMATION step key.
-    """
+def _get_or_create_fein_step(offer_id: int, db: Session) -> TransactionStep:
+    """Returns the FEIN step, creating it if it does not exist yet."""
     step = (
         db.query(TransactionStep)
         .filter(
@@ -134,15 +132,36 @@ def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: S
         )
         .first()
     )
+    if step is not None:
+        return step
+    step = TransactionStep(
+        offer_id=offer_id,
+        step_order=5,
+        step_key="FEIN_CONFIRMATION",
+        label="Formalizacion Bancaria (FEIN)",
+        description="El banco emite la FEIN. El comprador confirma su recepcion.",
+        required_role="BUYER",
+        status=StepStatus.PENDING,
+        metadata_json={},
+    )
+    db.add(step)
+    db.commit()
+    db.refresh(step)
+    return step
 
-    if not step:
-        return {"offer_id": offer_id, "fein_status": "step_not_initialized"}
+
+def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: Session) -> dict:
+    """
+    Confirms the FEIN step for the given role.
+    Creates the step if it does not exist yet.
+    """
+    step = _get_or_create_fein_step(offer_id, db)
 
     if step.status == StepStatus.COMPLETED:
         return {"offer_id": offer_id, "fein_status": "already_completed"}
 
     now = datetime.now(timezone.utc)
-    metadata = step.metadata_json or {}
+    metadata = dict(step.metadata_json or {})
 
     if role.upper() == "BUYER":
         step.buyer_confirmed_at = now
@@ -152,10 +171,13 @@ def _confirm_fein_step(offer_id: int, user_id: int, role: str, notes: str, db: S
         metadata["seller_fein_log"] = {"user_id": user_id, "notes": notes, "at": str(now)}
 
     step.metadata_json = metadata
+    flag_modified(step, "metadata_json")
 
-    if step.buyer_confirmed_at and step.seller_confirmed_at:
+    # FEIN is a buyer-bank process: completed as soon as buyer confirms.
+    # Seller has no confirmation action required.
+    if step.buyer_confirmed_at:
         step.status = StepStatus.COMPLETED
-    elif step.buyer_confirmed_at or step.seller_confirmed_at:
+    elif step.seller_confirmed_at:
         step.status = StepStatus.PARTIALLY_COMPLETED
 
     db.commit()
@@ -202,21 +224,14 @@ async def get_fein_status(
     offer = _get_offer_or_404(offer_id, db)
     _require_participant(offer, current_user)
 
-    fein_step = (
-        db.query(TransactionStep)
-        .filter(
-            TransactionStep.offer_id == offer_id,
-            TransactionStep.step_key.in_(["FEIN_CONFIRMATION", "MORTGAGE_APPROVAL"]),
-        )
-        .first()
-    )
+    fein_step = _get_or_create_fein_step(offer_id, db)
 
     return FeinStatusResponse(
         offer_id=offer_id,
         tasacion_completed=True,
-        fein_status=fein_step.status.value if fein_step else "not_initialized",
-        buyer_confirmed=fein_step.buyer_confirmed_at is not None if fein_step else False,
-        seller_confirmed=fein_step.seller_confirmed_at is not None if fein_step else False,
+        fein_status=fein_step.status.value,
+        buyer_confirmed=fein_step.buyer_confirmed_at is not None,
+        seller_confirmed=fein_step.seller_confirmed_at is not None,
     )
 
 

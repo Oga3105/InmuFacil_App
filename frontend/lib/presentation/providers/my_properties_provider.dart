@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../core/config/env_config.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
 
@@ -74,8 +75,16 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
     }
 
     final mediaList = data['media'] as List<dynamic>? ?? [];
+    final staticBase = EnvConfig.apiBaseUrl.replaceAll(RegExp(r'/api/v\d+/?$'), '');
     final images = mediaList
-        .map((m) => (m as Map<String, dynamic>)['file_path'] as String? ?? '')
+        .cast<Map<String, dynamic>>()
+        .where((m) => m['media_type'] == 'image')
+        .map((m) {
+          final path = m['file_path'] as String? ?? '';
+          if (path.isEmpty) return '';
+          if (path.startsWith('http')) return path;
+          return '$staticBase/${path.startsWith('/') ? path.substring(1) : path}';
+        })
         .where((url) => url.isNotEmpty)
         .toList();
 
@@ -100,6 +109,7 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
       ownerName: data['owner_name'] as String?,
       ownerIsVerified: data['owner_is_verified'] as bool? ?? false,
       ownerPhotoUrl: data['owner_photo_url'] as String?,
+      hideExactLocation: data['hide_exact_location'] as bool? ?? false,
     );
   }
 }

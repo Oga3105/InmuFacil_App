@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -165,6 +167,7 @@ final mySolvencyProvider = FutureProvider.autoDispose<SolvencyPassport?>((ref) a
     return SolvencyPassport.fromJson(resp.data as Map<String, dynamic>);
   } on DioException catch (e) {
     if (e.response?.statusCode == 404) return null;
+    if (e.response?.statusCode == 401) return null; // session expired
     rethrow;
   }
 });
@@ -278,9 +281,9 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
   Future<void> submit({
     required String fullName,
     required String email,
-    required String frontPath,
-    String? backPath,
-    required String selfiePath,
+    required Uint8List frontBytes,
+    Uint8List? backBytes,
+    required Uint8List selfieBytes,
     String documentType = 'dni',
   }) async {
     final token = await _getToken();
@@ -293,10 +296,10 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
         'full_name': fullName,
         'email': email,
         'document_type': documentType,
-        'front': await MultipartFile.fromFile(frontPath, filename: 'front.jpg'),
-        if (backPath != null)
-          'back': await MultipartFile.fromFile(backPath, filename: 'back.jpg'),
-        'selfie': await MultipartFile.fromFile(selfiePath, filename: 'selfie.jpg'),
+        'front': MultipartFile.fromBytes(frontBytes, filename: 'front.jpg'),
+        if (backBytes != null)
+          'back': MultipartFile.fromBytes(backBytes, filename: 'back.jpg'),
+        'selfie': MultipartFile.fromBytes(selfieBytes, filename: 'selfie.jpg'),
       });
       await dio.post(
         'http://localhost:8000/api/v1/solvency/second-buyer',
@@ -307,6 +310,9 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
       ref.invalidate(mySolvencyProvider);
     } on DioException catch (e) {
       state = const SecondBuyerState();
+      if (e.response?.statusCode == 401) {
+        throw Exception('Tu sesion ha expirado. Vuelve a iniciar sesion e intentalo de nuevo.');
+      }
       final detail = (e.response?.data as Map<String, dynamic>?)?['detail'] as String?;
       throw Exception(detail ?? 'Error al guardar los datos. Intentalo de nuevo.');
     }
@@ -315,3 +321,39 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
 
 final secondBuyerNotifierProvider =
     NotifierProvider<SecondBuyerNotifier, SecondBuyerState>(SecondBuyerNotifier.new);
+
+
+// ============================================================================
+// Second Buyer Status Provider
+// ============================================================================
+
+class SecondBuyerVerificationStatus {
+  const SecondBuyerVerificationStatus({required this.status, this.rejectionReason});
+  /// "not_submitted" | "pending" | "validado" | "rechazado"
+  final String status;
+  final String? rejectionReason;
+
+  factory SecondBuyerVerificationStatus.fromJson(Map<String, dynamic> j) =>
+      SecondBuyerVerificationStatus(
+        status: j['status'] as String? ?? 'not_submitted',
+        rejectionReason: j['rejection_reason'] as String?,
+      );
+}
+
+final secondBuyerStatusProvider =
+    FutureProvider.autoDispose<SecondBuyerVerificationStatus?>((ref) async {
+  final token = await _getToken();
+  if (token == null) return null;
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      'http://localhost:8000/api/v1/solvency/second-buyer/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return SecondBuyerVerificationStatus.fromJson(resp.data as Map<String, dynamic>);
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 404) return null;
+    if (e.response?.statusCode == 401) return null; // session expired
+    rethrow;
+  }
+});

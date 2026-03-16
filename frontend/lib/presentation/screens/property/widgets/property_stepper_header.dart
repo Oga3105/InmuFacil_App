@@ -6,7 +6,7 @@ import '../../../providers/property_form_provider.dart';
 class PropertyStepperHeader extends ConsumerWidget {
   const PropertyStepperHeader({super.key});
 
-  static const _steps = ['Tipo y Ubicación', 'Detalles y Precio', 'Fotos y Extras'];
+  static const _steps = ['Ubicacion', 'Detalles', 'Fotos', 'Descripcion', 'Publicar'];
 
   static const _blue = Color(0xFF2563EB);
   static const _slate200 = Color(0xFFE2E8F0);

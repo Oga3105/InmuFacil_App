@@ -34,6 +34,9 @@ class OfferData {
     this.buyerSolvencySubmitted = false,
     this.sellerSolvencyAccepted = false,
     this.secondBuyerPending = false,
+    this.tasacionStatus,
+    this.feinBuyerConfirmed = false,
+    this.notariaApptStatus,
   });
 
   final String id;
@@ -76,6 +79,17 @@ class OfferData {
   /// True when buyer declared joint purchase (is_multi_buyer) but the second
   /// buyer has not yet submitted and verified their identity data.
   final bool secondBuyerPending;
+
+  /// Sub-status of the TASACION_APPOINTMENT step: pending|proposed|rejected|accepted|completed.
+  /// Null when the step has not been created yet.
+  final String? tasacionStatus;
+
+  /// True when the buyer has confirmed receipt of the FEIN document from their bank.
+  final bool feinBuyerConfirmed;
+
+  /// Sub-status of the NOTARIA_APPOINTMENT step: pending|scheduled|completed.
+  /// Null when the step has not been created yet.
+  final String? notariaApptStatus;
 }
 
 // --- Sent Offers Provider ---
@@ -259,6 +273,45 @@ class MakeOfferNotifier extends Notifier<OfferFormState> {
   void reset() => state = const OfferFormState();
 }
 
+// --- Shared live FEIN status provider ---
+
+/// Live query to check if the buyer has confirmed their FEIN document.
+/// Used by urgencyProvider and the timeline to avoid relying on stale OfferData cache.
+final feinConfirmedProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return false;
+  try {
+    final resp = await Dio().get(
+      '$_kOffersApiBaseUrl/fein/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ??
+        false;
+  } catch (_) {
+    return false;
+  }
+});
+
+/// Live query for the notaría appointment sub-status.
+/// Used by urgencyProvider to avoid relying on stale OfferData cache.
+final notariaApptStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  try {
+    final resp = await Dio().get(
+      '$_kOffersApiBaseUrl/notaria-appt/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
+
 // --- Shared mapper ---
 
 OfferData _mapOffer(dynamic item) {
@@ -298,6 +351,9 @@ OfferData _mapOffer(dynamic item) {
     buyerSolvencySubmitted: map['buyer_solvency_submitted'] as bool? ?? false,
     sellerSolvencyAccepted: map['seller_solvency_accepted'] as bool? ?? false,
     secondBuyerPending: map['second_buyer_pending'] as bool? ?? false,
+    tasacionStatus: map['tasacion_appointment_status'] as String?,
+    feinBuyerConfirmed: map['fein_buyer_confirmed'] as bool? ?? false,
+    notariaApptStatus: map['notaria_appt_status'] as String?,
   );
 
   return offer;

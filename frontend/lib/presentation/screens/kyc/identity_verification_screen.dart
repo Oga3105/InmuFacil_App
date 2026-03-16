@@ -50,7 +50,10 @@ class _IdentityVerificationScreenState
             child: const Text('Seguir aquí'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red.shade600,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: const Text('Sí, cancelar'),
           ),
@@ -578,7 +581,7 @@ class _IdentityVerificationScreenState
                         horizontal: 20, vertical: 10),
                     side: const BorderSide(color: Colors.red),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: const Text('Cancelar',
                       style: TextStyle(color: Colors.red)),
@@ -606,7 +609,7 @@ class _IdentityVerificationScreenState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8)),
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.arrow_forward, size: 18),
                     label: const Text(

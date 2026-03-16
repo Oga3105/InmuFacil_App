@@ -3,12 +3,71 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import '../../../core/formatters/currency_input_formatter.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+
+const _kTimelineApiBase = 'http://localhost:8000/api/v1';
+
+final _arrasStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token =
+      await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'none';
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      '$_kTimelineApiBase/arras/$offerId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
+        'none';
+  } catch (_) {
+    return 'none';
+  }
+});
+
+final _tasacionStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token =
+      await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  final dio = Dio();
+  try {
+    final resp = await dio.get(
+      '$_kTimelineApiBase/tasacion/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
+
+final _notariaStatusProvider = FutureProvider.autoDispose
+    .family<String, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return 'pending';
+  try {
+    final resp = await Dio().get(
+      '$_kTimelineApiBase/notaria-appt/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return (resp.data as Map<String, dynamic>)['appointment_status']
+            as String? ??
+        'pending';
+  } catch (_) {
+    return 'pending';
+  }
+});
 
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
 class TransactionTimelineScreen extends ConsumerWidget {
@@ -55,6 +114,31 @@ class TransactionTimelineScreen extends ConsumerWidget {
       loading: () => false,
       error: (_, __) => false,
     );
+
+    // Arras status (only relevant when stage == 2)
+    final arrasStatus = s == 'signing_pending'
+        ? ref.watch(_arrasStatusProvider(liveOffer.id)).asData?.value ?? 'none'
+        : 'none';
+
+    // Tasacion appointment status (only relevant when stage == 3)
+    final tasacionApptStatus = s == 'signed'
+        ? ref.watch(_tasacionStatusProvider(liveOffer.id)).asData?.value ??
+            'pending'
+        : 'pending';
+
+    // FEIN buyer confirmation — shared live provider (authoritative, avoids stale cache)
+    final feinBuyerConfirmed = s == 'signed'
+        ? ref.watch(feinConfirmedProvider(liveOffer.id)).asData?.value ??
+            liveOffer.feinBuyerConfirmed
+        : (s == 'completed' ? true : false);
+
+    // Notaria appointment status — live query when gate is open
+    final notariaGateOpen = feinBuyerConfirmed || s == 'completed';
+    final notariaApptStatus = notariaGateOpen
+        ? ref.watch(_notariaStatusProvider(liveOffer.id)).asData?.value ??
+            liveOffer.notariaApptStatus ??
+            'pending'
+        : liveOffer.notariaApptStatus ?? 'pending';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -107,6 +191,10 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     confirmedVisitDate: liveOffer.confirmedVisitDate,
                     requestedVisitDate: liveOffer.requestedVisitDate,
                     visitStatus: liveOffer.visitStatus,
+                    arrasStatus: arrasStatus,
+                    tasacionApptStatus: tasacionApptStatus,
+                    feinBuyerConfirmed: feinBuyerConfirmed,
+                    notariaApptStatus: notariaApptStatus,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
@@ -240,6 +328,10 @@ class TransactionTimelineScreen extends ConsumerWidget {
     String? confirmedVisitDate,
     String? requestedVisitDate,
     String? visitStatus,
+    String arrasStatus = 'none',
+    String tasacionApptStatus = 'pending',
+    bool feinBuyerConfirmed = false,
+    String notariaApptStatus = 'pending',
     Widget? buyerActions,
     Widget? withdrawAction,
     Widget? solvencyActionsWidget,
@@ -343,20 +435,24 @@ class TransactionTimelineScreen extends ConsumerWidget {
       if (needsSecondIdentity || offerData.secondBuyerPending)
         _TimelineStep(
           title: 'Verificacion de Identidad — 2° Titular',
-          subtitle: isBuyer
-              ? 'Tu segundo comprador debe completar su verificacion'
-              : 'Pendiente: el segundo comprador debe verificar su identidad',
-          description: isBuyer
+          subtitle: offerData.secondBuyerPending
+              ? (isBuyer
+                  ? 'Tu segundo comprador debe completar su verificacion'
+                  : 'Pendiente: el segundo comprador debe verificar su identidad')
+              : 'Identidad del segundo titular confirmada',
+          description: offerData.secondBuyerPending && isBuyer
               ? 'Para avanzar al contrato de Arras, el segundo comprador debe enviar sus datos de identidad. Usa el boton de abajo para añadirlos.'
-              : 'En cuanto el segundo comprador complete la verificacion, el proceso continuara automaticamente hacia la firma de Arras.',
-          state: _StepState.active,
-          ctaLabel: isBuyer && isMultiBuyer
+              : null,
+          state: offerData.secondBuyerPending
+              ? _StepState.active
+              : _StepState.done,
+          ctaLabel: isBuyer && offerData.secondBuyerPending
               ? 'Añadir datos del 2° comprador'
               : null,
-          ctaIcon: isBuyer && isMultiBuyer
+          ctaIcon: isBuyer && offerData.secondBuyerPending
               ? Icons.person_add_alt_1_outlined
               : null,
-          ctaCallback: isBuyer && isMultiBuyer
+          ctaCallback: isBuyer && offerData.secondBuyerPending
               ? () => context.push('/solvency/second-buyer')
               : null,
         ),
@@ -365,15 +461,16 @@ class TransactionTimelineScreen extends ConsumerWidget {
         subtitle: stage > 2
             ? 'Firmado por ambas partes'
             : stage == 2
-                ? 'Faltan las firmas del contrato'
+                ? _arrasSubtitle(arrasStatus, isBuyer)
                 : 'Pendiente de verificacion de solvencia',
-        description: stage == 2
-            ? 'Ambas partes deben revisar y firmar digitalmente el documento de '
-              'reserva para proceder con el bloqueo oficial del inmueble.'
+        description: stage == 2 &&
+                arrasStatus != 'accepted'
+            ? 'Ambas partes deben completar su entrevista. La IA generara el '
+              'contrato cuando ambos confirmen sus respuestas.'
             : null,
-        state: stepState(2),
-        ctaLabel: stage == 2 ? 'Ir a Firmar Ahora' : null,
-        ctaIcon: stage == 2 ? Icons.edit_outlined : null,
+        state: arrasStatus == 'accepted' ? _StepState.done : stepState(2),
+        ctaLabel: stage == 2 ? _arrasCtaLabel(arrasStatus, isBuyer) : null,
+        ctaIcon: stage == 2 ? _arrasCtaIcon(arrasStatus) : null,
         ctaCallback: stage == 2
             ? () => context.push('/offers/${offerData.id}/arras', extra: offerData)
             : null,
@@ -383,27 +480,50 @@ class TransactionTimelineScreen extends ConsumerWidget {
         subtitle: stage > 3
             ? 'Informe del tasador completado'
             : stage == 3
-                ? 'Cita con el tasador pendiente de confirmar'
+                ? _tasacionSubtitle(tasacionApptStatus, isBuyer)
                 : 'Pendiente de firma de arras',
-        state: stepState(3),
-        ctaLabel: stage == 3 ? 'Agendar visita del tasador' : null,
-        ctaIcon: stage == 3 ? Icons.home_work_outlined : null,
-        ctaCallback: stage == 3
-            ? () => context.push('/offers/${offerData.id}/tasacion', extra: offerData)
+        state: tasacionApptStatus == 'completed' && stage == 3
+            ? _StepState.done
+            : stepState(3),
+        ctaLabel: stage == 3
+            ? _tasacionCtaLabel(tasacionApptStatus, isBuyer)
+            : null,
+        ctaIcon: stage == 3
+            ? _tasacionCtaIcon(tasacionApptStatus, isBuyer)
+            : null,
+        ctaCallback: stage == 3 &&
+                _tasacionCtaLabel(tasacionApptStatus, isBuyer) != null
+            ? () => context.push(
+                '/offers/${offerData.id}/tasacion',
+                extra: offerData,
+              )
             : null,
       ),
       if (requiresFein)
         _TimelineStep(
           title: 'Formalizacion Bancaria (FEIN)',
-          subtitle: stage > 3
-              ? 'FEIN recibida y condiciones confirmadas'
-              : stage == 3
-                  ? 'Pendiente tras tasacion — banco emite la FEIN'
-                  : 'Pendiente de firma de arras',
-          state: stage == 3 ? _StepState.active : stepState(3),
-          ctaLabel: stage == 3 ? 'Confirmar FEIN del banco' : null,
-          ctaIcon: stage == 3 ? Icons.account_balance_outlined : null,
-          ctaCallback: stage == 3
+          subtitle: stage > 3 || feinBuyerConfirmed
+              ? 'FEIN confirmada — banco ha aprobado la hipoteca'
+              : stage == 3 && tasacionApptStatus == 'completed'
+                  ? (isBuyer
+                      ? 'Tu banco debe emitirte la FEIN — confirma cuando la recibas'
+                      : 'El banco del comprador esta tramitando la FEIN')
+                  : stage == 3
+                      ? 'Pendiente tras tasacion — banco emite la FEIN'
+                      : 'Pendiente de firma de arras',
+          state: stage > 3 || feinBuyerConfirmed
+              ? _StepState.done
+              : (stage == 3 && tasacionApptStatus == 'completed'
+                  ? _StepState.active
+                  : _StepState.locked),
+          // CTA solo para el comprador, y solo si aun no ha confirmado
+          ctaLabel: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
+              ? 'Confirmar FEIN del banco'
+              : null,
+          ctaIcon: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
+              ? Icons.account_balance_outlined
+              : null,
+          ctaCallback: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
               ? () => context.push('/offers/${offerData.id}/fein', extra: offerData)
               : null,
         ),
@@ -411,11 +531,21 @@ class TransactionTimelineScreen extends ConsumerWidget {
         title: 'Firma en Notaria y Entrega de Llaves',
         subtitle: stage >= 4
             ? 'Escrituras firmadas y llaves entregadas'
-            : 'Paso final de la firma — incluye entrega de llaves',
-        state: stepState(4),
-        ctaLabel: stage == 4 ? 'Gestionar cita y confirmar firma' : null,
-        ctaIcon: stage == 4 ? Icons.gavel_outlined : null,
-        ctaCallback: stage == 4
+            : feinBuyerConfirmed
+                ? _notariaSubtitle(notariaApptStatus, isBuyer)
+                : 'Pendiente de formalizacion bancaria (FEIN)',
+        state: stage >= 4
+            ? _StepState.done
+            : feinBuyerConfirmed
+                ? _StepState.active
+                : _StepState.locked,
+        ctaLabel: (feinBuyerConfirmed || stage >= 4)
+            ? _notariaCtaLabel(notariaApptStatus, isBuyer, stage)
+            : null,
+        ctaIcon: (feinBuyerConfirmed || stage >= 4)
+            ? _notariaCtaIcon(notariaApptStatus, isBuyer, stage)
+            : null,
+        ctaCallback: (feinBuyerConfirmed || stage >= 4)
             ? () => context.push('/offers/${offerData.id}/notaria', extra: offerData)
             : null,
       ),
@@ -464,6 +594,161 @@ class TransactionTimelineScreen extends ConsumerWidget {
     }
 
     return steps;
+  }
+
+  // ── Arras step helpers ──────────────────────────────────────────────────
+
+  String _arrasSubtitle(String arrasStatus, bool isBuyer) {
+    switch (arrasStatus) {
+      case 'accepted':
+        return 'Firmado por ambas partes';
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return 'Contrato listo — pendiente de firma';
+      case 'generating':
+        return 'Generando contrato con IA...';
+      case 'both_done':
+        return 'Ambas entrevistas completadas — generando contrato';
+      case 'buyer_done':
+        return isBuyer
+            ? 'Tu entrevista completada — esperando al vendedor'
+            : 'Comprador listo — completa tu entrevista';
+      case 'seller_done':
+        return !isBuyer
+            ? 'Tu entrevista completada — esperando al comprador'
+            : 'Vendedor listo — completa tu entrevista';
+      default:
+        return 'Completa tu entrevista para continuar';
+    }
+  }
+
+  String? _arrasCtaLabel(String arrasStatus, bool isBuyer) {
+    switch (arrasStatus) {
+      case 'accepted':
+        return null;
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return 'Revisar contrato';
+      case 'generating':
+      case 'both_done':
+        return 'Ver estado';
+      default:
+        return isBuyer ? 'Comenzar entrevista' : 'Completar entrevista';
+    }
+  }
+
+  IconData? _arrasCtaIcon(String arrasStatus) {
+    switch (arrasStatus) {
+      case 'contract_ready':
+      case 'buyer_accepted':
+      case 'seller_accepted':
+        return Icons.description_outlined;
+      case 'generating':
+      case 'both_done':
+        return Icons.auto_awesome_outlined;
+      default:
+        return Icons.edit_outlined;
+    }
+  }
+
+  // ── Tasacion step helpers ────────────────────────────────────────────────
+
+  String _tasacionSubtitle(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return 'Tasacion completada — informe emitido';
+      case 'accepted':
+        return isBuyer
+            ? 'Cita acordada — pendiente de visita del tasador'
+            : 'Cita acordada — confirma cuando el tasador visite la vivienda';
+      case 'rejected':
+        return isBuyer
+            ? 'Vendedor propuso fecha alternativa — pendiente de tu respuesta'
+            : 'Fecha rechazada — pendiente de nueva propuesta del comprador';
+      case 'proposed':
+        return isBuyer
+            ? 'Fecha propuesta — pendiente de confirmacion del vendedor'
+            : 'Comprador propuso una fecha — pendiente de tu respuesta';
+      default: // pending
+        return isBuyer
+            ? 'Agenda la visita del tasador para continuar'
+            : 'Pendiente de que el comprador proponga una fecha';
+    }
+  }
+
+  String? _tasacionCtaLabel(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return null;
+      case 'accepted':
+        return isBuyer ? 'Ver cita confirmada' : 'Confirmar visita del tasador';
+      case 'rejected':
+        return isBuyer
+            ? 'Ver propuesta del vendedor'
+            : 'Ver estado — esperando comprador';
+      case 'proposed':
+        return isBuyer
+            ? 'Ver propuesta enviada'
+            : 'Aceptar o rechazar propuesta';
+      default: // pending
+        return isBuyer ? 'Agendar visita del tasador' : null;
+    }
+  }
+
+  IconData? _tasacionCtaIcon(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'accepted':
+        return isBuyer
+            ? Icons.event_available_outlined
+            : Icons.check_circle_outline;
+      case 'rejected':
+        return isBuyer ? Icons.event_outlined : Icons.hourglass_empty_outlined;
+      case 'proposed':
+        return isBuyer
+            ? Icons.pending_outlined
+            : Icons.edit_calendar_outlined;
+      default:
+        return isBuyer ? Icons.home_work_outlined : null;
+    }
+  }
+
+  // ── Notaria step helpers ─────────────────────────────────────────────────
+
+  String _notariaSubtitle(String apptStatus, bool isBuyer) {
+    switch (apptStatus) {
+      case 'completed':
+        return 'Firma realizada — pendiente de entrega de llaves';
+      case 'scheduled':
+        return 'Cita acordada — pendiente de firma en notaria';
+      default: // pending
+        return isBuyer
+            ? 'A la espera de cita en notaria — propone fecha y lugar'
+            : 'A la espera de cita en notaria — el comprador eligira fecha';
+    }
+  }
+
+  String? _notariaCtaLabel(String apptStatus, bool isBuyer, int stage) {
+    if (stage >= 4) return 'Ver estado de la firma';
+    switch (apptStatus) {
+      case 'completed':
+      case 'scheduled':
+        return 'Confirmar firma y entrega de llaves';
+      default: // pending
+        return isBuyer ? 'Proponer cita en notaria' : 'Ver estado';
+    }
+  }
+
+  IconData? _notariaCtaIcon(String apptStatus, bool isBuyer, int stage) {
+    if (stage >= 4) return Icons.gavel_outlined;
+    switch (apptStatus) {
+      case 'completed':
+      case 'scheduled':
+        return Icons.key_outlined;
+      default:
+        return isBuyer ? Icons.calendar_today_outlined : Icons.hourglass_empty_outlined;
+    }
   }
 }
 
@@ -873,7 +1158,7 @@ class _ActiveRow extends StatelessWidget {
                             backgroundColor: const Color(0xFF2563EB),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ),
@@ -1107,7 +1392,7 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
         foregroundColor: Colors.red,
         side: const BorderSide(color: Colors.red),
         minimumSize: const Size(double.infinity, 48),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -1340,7 +1625,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1364,7 +1649,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1384,7 +1669,7 @@ class _BuyerCounterOfferActionsState
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                  borderRadius: BorderRadius.circular(12)),
             ),
           ),
         ),
@@ -1639,7 +1924,7 @@ class _SellerSolvencySectionState
                     backgroundColor: const Color(0xFF16A34A),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
               ),
@@ -1663,7 +1948,7 @@ class _SellerSolvencySectionState
                   padding: const EdgeInsets.symmetric(
                       vertical: 12, horizontal: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ],
