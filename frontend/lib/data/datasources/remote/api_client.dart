@@ -24,7 +24,7 @@ class ApiClient {
   late final Dio _dio;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   
-  static const String _tokenKey = 'jwt_token';
+  static const String _tokenKey = 'auth_token';
 
   void _setupInterceptors() {
     // JWT Authentication Interceptor

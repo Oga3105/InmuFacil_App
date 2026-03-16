@@ -14,6 +14,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../providers/property_form_provider.dart';
+import '../../providers/property_analytics_provider.dart';
 import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -30,33 +31,60 @@ class PropertyDetailsScreen extends ConsumerStatefulWidget {
 
 class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
   @override
-  Widget build(BuildContext context) {
-    // Find property from provider
-    final properties = ref.watch(searchProvider).filteredProperties;
-    // Fallback to a default mock/empty if not found (prevents crash on reload)
-    // In a real app, this should trigger a fetchById(propertyId)
-    final property = properties.firstWhere(
-      (p) => p.id == widget.propertyId,
-      orElse: () => Property(
-        id: 'fallback', 
-        title: 'Cargando Propiedad...', 
-        description: '',
-        type: PropertyType.all, 
-        price: 0, 
-        location: const LatLng(40.4168, -3.7038), 
-        address: '...',
-        bedrooms: 0,
-        bathrooms: 0,
-        squareMeters: 0,
-        images: const [],
-        isVerified: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    );
+  void initState() {
+    super.initState();
+    // Log view once after first frame (fire-and-forget)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(logPropertyViewProvider(widget.propertyId));
+      }
+    });
+  }
 
-    // If still fallback/loading, maybe show spinner? 
-    // For now, render with what we have.
+  @override
+  Widget build(BuildContext context) {
+    // 1. Try search cache first (fast path)
+    final properties = ref.watch(searchProvider).filteredProperties;
+    Property? cachedProperty;
+    try {
+      cachedProperty = properties.firstWhere((p) => p.id == widget.propertyId);
+    } catch (_) {
+      cachedProperty = null;
+    }
+
+    // 2. If not in cache, fetch directly from API (e.g. just created / just edited)
+    final directFetchAsync = cachedProperty == null
+        ? ref.watch(propertyByIdProvider(widget.propertyId))
+        : null;
+
+    // Show spinner while fetching
+    if (cachedProperty == null && directFetchAsync != null) {
+      if (directFetchAsync.isLoading) {
+        return const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
+    }
+
+    final property = cachedProperty ??
+        directFetchAsync?.value ??
+        Property(
+          id: 'fallback',
+          title: 'Cargando Propiedad...',
+          description: '',
+          type: PropertyType.all,
+          price: 0,
+          location: const LatLng(40.4168, -3.7038),
+          address: '...',
+          bedrooms: 0,
+          bathrooms: 0,
+          squareMeters: 0,
+          images: const [],
+          isVerified: true,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
 
     // Navigation Logic (Next/Prev)
     final currentIndex = properties.indexWhere((p) => p.id == widget.propertyId);
@@ -312,11 +340,13 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       _LocationSection(location: property.location), // Passing location
                       const SizedBox(height: 32),
                       _OwnerCard(property: property),
+                      const SizedBox(height: 24),
+                      _SellerMetricsCard(propertyId: property.id, status: property.status),
                       if (!isOwner) ...[
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         _PropertyViabilityCard(propertyId: property.id, ref: ref),
-                        const SizedBox(height: 80), // space for bottom bar
                       ],
+                      const SizedBox(height: 80), // space for bottom bar
                    ],
                  ),
                ),
@@ -378,20 +408,37 @@ class _HeroImageSection extends StatefulWidget {
   State<_HeroImageSection> createState() => _HeroImageSectionState();
 }
 
-class _HeroImageSectionState extends State<_HeroImageSection> {
+class _HeroImageSectionState extends State<_HeroImageSection>
+    with SingleTickerProviderStateMixin {
   late final PageController _pageController;
+  late final AnimationController _heartController;
+  late final Animation<double> _heartScale;
   int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _heartController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _heartScale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.35), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.35, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _heartController, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _heartController.dispose();
     super.dispose();
+  }
+
+  void _onToggleFavorite() {
+    _heartController.forward(from: 0.0);
+    widget.onToggleFavorite();
   }
 
   List<String> get _imageList {
@@ -476,10 +523,17 @@ class _HeroImageSectionState extends State<_HeroImageSection> {
               children: [
                 _CircleButton(icon: Icons.share_outlined, color: const Color(0xFF0f172a), onPressed: () {}),
                 const SizedBox(width: 8),
-                _CircleButton(
-                  icon: widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: widget.isFavorite ? Colors.red : Colors.grey.shade400,
-                  onPressed: widget.onToggleFavorite,
+                AnimatedBuilder(
+                  animation: _heartScale,
+                  builder: (_, child) => Transform.scale(
+                    scale: _heartScale.value,
+                    child: child,
+                  ),
+                  child: _CircleButton(
+                    icon: widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: widget.isFavorite ? Colors.red : Colors.grey.shade400,
+                    onPressed: _onToggleFavorite,
+                  ),
                 ),
               ],
             ),
@@ -658,36 +712,54 @@ class _CircleButton extends StatelessWidget {
   }
 }
 
-class _DescriptionSection extends StatelessWidget {
+class _DescriptionSection extends StatefulWidget {
   const _DescriptionSection({required this.property});
   final Property property;
 
   @override
+  State<_DescriptionSection> createState() => _DescriptionSectionState();
+}
+
+class _DescriptionSectionState extends State<_DescriptionSection> {
+  bool _expanded = false;
+  static const int _previewLines = 3;
+
+  @override
   Widget build(BuildContext context) {
+    final text = widget.property.description.isNotEmpty
+        ? widget.property.description
+        : 'No hay descripción disponible para esta propiedad.';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Sobre esta propiedad', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+        const Text(
+          'Sobre esta propiedad',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a)),
+        ),
         const SizedBox(height: 12),
         Text(
-          property.description.isNotEmpty 
-              ? property.description 
-              : 'No hay descipción disponible para esta propiedad.', // [FIX] Fallback text
+          text,
+          maxLines: _expanded ? null : _previewLines,
+          overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
           style: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569)),
         ),
         const SizedBox(height: 8),
         TextButton(
-          onPressed: () {},
+          onPressed: () => setState(() => _expanded = !_expanded),
           style: TextButton.styleFrom(
             padding: EdgeInsets.zero,
             alignment: Alignment.centerLeft,
             foregroundColor: const Color(0xFF135bec),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Leer más', style: TextStyle(fontWeight: FontWeight.bold)),
-              Icon(Icons.keyboard_arrow_down, size: 16),
+              Text(
+                _expanded ? 'Leer menos' : 'Leer más',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16),
             ],
           ),
         ),
@@ -835,17 +907,22 @@ class _SummaryCard extends ConsumerWidget {
             property.title,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.3),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
-              const SizedBox(width: 4),
-              Text(
-                property.address.isNotEmpty ? property.address : 'Dirección no disponible',
-                style: const TextStyle(color: Color(0xFF64748b)),
-              ),
-            ],
-          ),
+          if (!property.hideExactLocation) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    property.address.isNotEmpty ? property.address : 'Dirección no disponible',
+                    style: const TextStyle(color: Color(0xFF64748b)),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 12),
           PropertyTimeBadge(
             createdAt: property.createdAt,
@@ -859,6 +936,8 @@ class _SummaryCard extends ConsumerWidget {
           const SizedBox(height: 16),
           _OwnerCard(property: property),
           const SizedBox(height: 24),
+          _SellerMetricsCard(propertyId: property.id, status: property.status),
+          const SizedBox(height: 16),
           // Viability widget — only shown to non-owners (buyers)
           if (!isOwner) ...[
             _PropertyViabilityCard(propertyId: property.id, ref: ref),
@@ -1411,6 +1490,191 @@ class _StatItem extends StatelessWidget {
     );
   }
 }
+
+// ─── Seller Metrics Card (V32) ────────────────────────────────────────────────
+
+class _SellerMetricsCard extends ConsumerWidget {
+  const _SellerMetricsCard({required this.propertyId, this.status});
+  final String propertyId;
+  final String? status;
+
+  static const _blue = Color(0xFF2563EB);
+  static const _green = Color(0xFF16A34A);
+
+  String get _badgeLabel {
+    switch (status) {
+      case 'published': return 'ACTIVO';
+      case 'draft':     return 'BORRADOR';
+      case 'reserved':  return 'RESERVADO';
+      case 'sold':      return 'VENDIDO';
+      default:          return 'INACTIVO';
+    }
+  }
+
+  Color get _badgeColor {
+    switch (status) {
+      case 'published': return _green;
+      case 'reserved':  return const Color(0xFFF59E0B);
+      case 'sold':      return const Color(0xFF6366F1);
+      default:          return const Color(0xFF94A3B8);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analyticsAsync = ref.watch(propertyAnalyticsProvider(propertyId));
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.bar_chart_outlined, color: _blue, size: 18),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Rendimiento del Anuncio',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: _badgeColor,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  _badgeLabel,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          analyticsAsync.when(
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: _blue,
+                ),
+              ),
+            ),
+            error: (_, __) => const SizedBox.shrink(),
+            data: (analytics) {
+              final data = analytics ??
+                  const PropertyAnalytics(views: 0, favorites: 0, offers: 0);
+              return Row(
+                children: [
+                  _MetricCell(
+                    value: data.views,
+                    label: 'Visitas',
+                    icon: Icons.remove_red_eye_outlined,
+                    color: _blue,
+                  ),
+                  _MetricDivider(),
+                  _MetricCell(
+                    value: data.favorites,
+                    label: 'Favoritos',
+                    icon: Icons.favorite_border_outlined,
+                    color: const Color(0xFFDC2626),
+                  ),
+                  _MetricDivider(),
+                  _MetricCell(
+                    value: data.offers,
+                    label: 'Ofertas',
+                    icon: Icons.payments_outlined,
+                    color: _green,
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetricCell extends StatelessWidget {
+  const _MetricCell({
+    required this.value,
+    required this.label,
+    required this.icon,
+    required this.color,
+  });
+  final int value;
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 6),
+            Text(
+              '$value',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+      );
+}
+
+class _MetricDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 1,
+        height: 50,
+        color: const Color(0xFFE2E8F0),
+      );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _OwnerCard extends StatelessWidget {
   const _OwnerCard({required this.property});

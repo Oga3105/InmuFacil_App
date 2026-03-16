@@ -127,15 +127,24 @@ class PropertyRepositoryImpl implements PropertyRepository {
           );
         }
       
+      case DioExceptionType.connectionError:
+        return const ServiceUnavailableFailure(
+          'No se puede conectar con el servidor. Comprueba que el servicio está activo e inténtalo de nuevo.',
+        );
+
       case DioExceptionType.cancel:
         return const ServerFailure('Petición cancelada');
-      
+
       case DioExceptionType.unknown:
       default:
         if (error.message?.contains('SocketException') ?? false) {
-          return const NetworkFailure();
+          return const ServiceUnavailableFailure(
+            'No se puede conectar con el servidor. Comprueba que el servicio está activo e inténtalo de nuevo.',
+          );
         }
-        return ServerFailure('Error desconocido: ${error.message}');
+        return const ServiceUnavailableFailure(
+          'No se puede conectar con el servidor. Comprueba que el servicio está activo e inténtalo de nuevo.',
+        );
     }
   }
   

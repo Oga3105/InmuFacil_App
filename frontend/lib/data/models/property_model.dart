@@ -32,6 +32,7 @@ class PropertyModel {
     this.ownerName,
     this.ownerIsVerified = false,
     this.ownerPhotoUrl,
+    this.hideExactLocation = false,
   });
 
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
@@ -92,6 +93,7 @@ class PropertyModel {
       ownerName: json['owner_name'] as String?,
       ownerIsVerified: json['owner_is_verified'] as bool? ?? false,
       ownerPhotoUrl: json['owner_photo_url'] as String?,
+      hideExactLocation: json['hide_exact_location'] as bool? ?? false,
     );
   }
   final int id;
@@ -115,6 +117,7 @@ class PropertyModel {
   final String? ownerName;
   final bool ownerIsVerified;
   final String? ownerPhotoUrl;
+  final bool hideExactLocation;
 
   /// Convert to domain entity
   Property toEntity() {
@@ -139,6 +142,7 @@ class PropertyModel {
       ownerName: ownerName,
       ownerIsVerified: ownerIsVerified,
       ownerPhotoUrl: ownerPhotoUrl,
+      hideExactLocation: hideExactLocation,
     );
   }
   

@@ -26,6 +26,7 @@ class Property { // Added
     this.ownerName,
     this.ownerIsVerified = false,
     this.ownerPhotoUrl,
+    this.hideExactLocation = false,
   });
   final String id;
   final String title;
@@ -51,6 +52,7 @@ class Property { // Added
   final String? ownerName;
   final bool ownerIsVerified;
   final String? ownerPhotoUrl;
+  final bool hideExactLocation;
 
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;
