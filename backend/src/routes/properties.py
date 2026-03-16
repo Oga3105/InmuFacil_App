@@ -291,7 +291,14 @@ async def update_property_status(
     prop = verify_property_ownership(db, property_id, current_user.id)
     prop.status = PropertyStatus(body.status)
     db.commit()
-    db.refresh(prop)
+    # Re-query with eager owner join so Pydantic serialization never triggers
+    # a lazy load on an expired session object (SQLAlchemy 2.0 behaviour).
+    prop = (
+        db.query(Property)
+        .options(joinedload(Property.owner))
+        .filter(Property.id == property_id)
+        .first()
+    )
     return prop
 
 
