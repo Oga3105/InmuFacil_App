@@ -21,7 +21,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
     final currentStep = formState.currentStep;
     final isSubmitting = formState.status == PropertyFormStatus.submitting ||
         formState.status == PropertyFormStatus.uploadingImages;
-    final isLastStep = currentStep == 2;
+    final isLastStep = currentStep == 4;
 
     return Container(
       decoration: BoxDecoration(
@@ -64,7 +64,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                     }
                   },
             style: FilledButton.styleFrom(
-              backgroundColor: _blue,
+              backgroundColor: isLastStep ? const Color(0xFF16A34A) : _blue,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -80,17 +80,21 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                 : Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (isLastStep)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 6),
+                          child: Icon(Icons.rocket_launch_outlined, size: 16),
+                        ),
                       Text(
                         isLastStep
-                            ? 'property_wizard.publish'.tr()
+                            ? 'Publicar anuncio'
                             : 'property_wizard.next'.tr(),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        isLastStep ? '' : '→',
-                        style: const TextStyle(fontSize: 15),
-                      ),
+                      if (!isLastStep) ...[
+                        const SizedBox(width: 6),
+                        const Text('→', style: TextStyle(fontSize: 15)),
+                      ],
                     ],
                   ),
           ),

@@ -10,6 +10,8 @@ import 'widgets/property_stepper_header.dart';
 import 'widgets/property_step1_type_location.dart';
 import 'widgets/property_step2_details_price.dart';
 import 'widgets/property_step3_photos_extras.dart';
+import 'widgets/property_step4_ai_description.dart';
+import 'widgets/property_step5_preview.dart';
 import 'widgets/property_wizard_bottom_bar.dart';
 
 class CreateEditPropertyScreen extends ConsumerStatefulWidget {
@@ -81,6 +83,29 @@ class _CreateEditPropertyScreenState
     final formState = ref.watch(propertyFormProvider);
     final notifier = ref.read(propertyFormProvider.notifier);
 
+    // Show API errors as SnackBar (any error that is not session_expired)
+    ref.listen<PropertyFormState>(propertyFormProvider, (prev, next) {
+      if (next.status == PropertyFormStatus.error &&
+          next.errorMessage != null &&
+          next.errorMessage != '__session_expired__' &&
+          prev?.errorMessage != next.errorMessage) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.errorMessage!),
+            backgroundColor: const Color(0xFFDC2626),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 6),
+            action: SnackBarAction(
+              label: 'Cerrar',
+              textColor: Colors.white,
+              onPressed: () =>
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar(),
+            ),
+          ),
+        );
+      }
+    });
+
     // Session expired
     if (formState.errorMessage == '__session_expired__') {
       return _SessionExpiredScreen();
@@ -114,8 +139,12 @@ class _CreateEditPropertyScreenState
                 final Widget stepWidget = switch (formState.currentStep) {
                   0 => const PropertyStep1TypeLocation(),
                   1 => const PropertyStep2DetailsPrice(),
-                  _ => const PropertyStep3PhotosExtras(),
+                  2 => const PropertyStep3PhotosExtras(),
+                  3 => const PropertyStep4AiDescription(),
+                  _ => const PropertyStep5Preview(),
                 };
+                // Step 5 (preview) manages its own scroll
+                if (formState.currentStep == 4) return stepWidget;
                 return SingleChildScrollView(child: stepWidget);
               },
             ),

@@ -20,12 +20,10 @@ class _PropertyStep2DetailsPriceState
   late final TextEditingController _priceCtrl;
   late final TextEditingController _surfaceCtrl;
   late final TextEditingController _titleCtrl;
-  late final TextEditingController _descCtrl;
 
   final _priceFocus = FocusNode();
   final _surfaceFocus = FocusNode();
   final _titleFocus = FocusNode();
-  final _descFocus = FocusNode();
 
   @override
   void initState() {
@@ -34,7 +32,6 @@ class _PropertyStep2DetailsPriceState
     _priceCtrl = TextEditingController(text: s.priceText);
     _surfaceCtrl = TextEditingController(text: s.surfaceText);
     _titleCtrl = TextEditingController(text: s.titleText);
-    _descCtrl = TextEditingController(text: s.descriptionText);
   }
 
   @override
@@ -42,11 +39,9 @@ class _PropertyStep2DetailsPriceState
     _priceCtrl.dispose();
     _surfaceCtrl.dispose();
     _titleCtrl.dispose();
-    _descCtrl.dispose();
     _priceFocus.dispose();
     _surfaceFocus.dispose();
     _titleFocus.dispose();
-    _descFocus.dispose();
     super.dispose();
   }
 
@@ -96,7 +91,6 @@ class _PropertyStep2DetailsPriceState
     _sync(_priceCtrl, _priceFocus, s.priceText);
     _sync(_surfaceCtrl, _surfaceFocus, s.surfaceText);
     _sync(_titleCtrl, _titleFocus, s.titleText);
-    _sync(_descCtrl, _descFocus, s.descriptionText);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -176,9 +170,9 @@ class _PropertyStep2DetailsPriceState
           ),
           const SizedBox(height: 16),
 
-          // ── Descripción card ──────────────────────────────────────────────
+          // ── Titulo card ───────────────────────────────────────────────────
           _SectionCard(
-            icon: Icons.description_outlined,
+            icon: Icons.title_outlined,
             title: 'property_wizard.description_card'.tr(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,17 +189,25 @@ class _PropertyStep2DetailsPriceState
                     onChanged: notifier.setTitle,
                   ),
                 ),
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'property_wizard.description_label'.tr(),
-                  child: TextField(
-                    controller: _descCtrl,
-                    focusNode: _descFocus,
-                    cursorColor: cursorColor,
-                    maxLines: 5,
-                    maxLength: 2000,
-                    decoration: _inputDec('property_wizard.description_hint'.tr()),
-                    onChanged: notifier.setDescription,
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF0FDF4),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.auto_awesome, color: Color(0xFF16A34A), size: 14),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'La descripcion comercial se genera con IA en el siguiente paso.',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF16A34A)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

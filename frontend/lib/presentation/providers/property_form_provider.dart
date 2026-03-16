@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
@@ -11,8 +12,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/formatters/currency_input_formatter.dart';
-
 import '../../domain/entities/property_type.dart';
+import 'search_provider.dart' show searchProvider;
 
 const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
 
@@ -124,6 +125,9 @@ class PropertyFormState {
     this.step1Error,
     this.step2Error,
     this.step3Error,
+    this.step4Error,
+    // AI generation state
+    this.isGeneratingAiDescription = false,
   });
 
   final int currentStep;
@@ -171,6 +175,9 @@ class PropertyFormState {
   final String? step1Error;
   final String? step2Error;
   final String? step3Error;
+  final String? step4Error;
+  // AI generation
+  final bool isGeneratingAiDescription;
 
   bool get isEditMode => editingPropertyId != null;
 
@@ -228,6 +235,9 @@ class PropertyFormState {
     bool clearStep2Error = false,
     String? step3Error,
     bool clearStep3Error = false,
+    String? step4Error,
+    bool clearStep4Error = false,
+    bool? isGeneratingAiDescription,
   }) {
     return PropertyFormState(
       currentStep: currentStep ?? this.currentStep,
@@ -277,6 +287,8 @@ class PropertyFormState {
       step1Error: clearStep1Error ? null : (step1Error ?? this.step1Error),
       step2Error: clearStep2Error ? null : (step2Error ?? this.step2Error),
       step3Error: clearStep3Error ? null : (step3Error ?? this.step3Error),
+      step4Error: clearStep4Error ? null : (step4Error ?? this.step4Error),
+      isGeneratingAiDescription: isGeneratingAiDescription ?? this.isGeneratingAiDescription,
     );
   }
 }
@@ -314,7 +326,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   bool nextStep() {
     if (!_validateCurrentStep()) return false;
-    if (state.currentStep < 2) {
+    if (state.currentStep < 4) {
       state = state.copyWith(currentStep: state.currentStep + 1);
     }
     return true;
@@ -480,7 +492,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
   }
 
   void setDescription(String description) {
-    state = state.copyWith(descriptionText: description, clearStep2Error: true);
+    state = state.copyWith(descriptionText: description, clearStep2Error: true, clearStep4Error: true);
   }
 
   // ---------------------------------------------------------------------------
@@ -710,16 +722,96 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
   }
 
   // ---------------------------------------------------------------------------
+  // AI Description Generation
+  // ---------------------------------------------------------------------------
+
+  Future<void> generateAiDescription() async {
+    state = state.copyWith(isGeneratingAiDescription: true, clearStep4Error: true);
+    try {
+      await _ensureAuth();
+
+      final propertyData = {
+        'property_type': state.selectedType?.backendValue ?? 'piso',
+        'price': CurrencyInputFormatter.parse(state.priceText) ?? 0,
+        'surface_area': double.tryParse(state.surfaceText) ?? 0,
+        'bedrooms': state.bedrooms,
+        'bathrooms': state.bathrooms,
+        'city': state.cityText,
+        'province': state.provinceText,
+        'title': state.titleText,
+        'draft_description': state.descriptionText,
+        'has_lift': state.hasLift,
+        'has_garage': state.hasGarage,
+        'has_pool': state.hasPool,
+        'has_terrace': state.hasTerrace,
+        'has_garden': state.hasGarden,
+        'has_ac': state.hasAC,
+        'has_heating': state.hasHeating,
+        'has_exterior': state.hasExterior,
+        if (state.energyCertification != null)
+          'energy_certification': state.energyCertification,
+      };
+
+      final formData = FormData.fromMap({
+        'property_data': jsonEncode(propertyData),
+      });
+
+      // Attach up to 5 local images for multimodal analysis
+      final localImages = state.mediaItems
+          .where((m) => m.isLocal && !m.markedForDeletion)
+          .take(5)
+          .toList();
+      for (final item in localImages) {
+        if (kIsWeb) {
+          final bytes = item.previewBytes ?? await item.xFile!.readAsBytes();
+          formData.files.add(MapEntry(
+            'images',
+            MultipartFile.fromBytes(bytes, filename: item.xFile!.name),
+          ));
+        } else {
+          formData.files.add(MapEntry(
+            'images',
+            await MultipartFile.fromFile(item.xFile!.path,
+                filename: item.xFile!.name),
+          ));
+        }
+      }
+
+      final resp = await _dio.post('/properties/generate-description', data: formData);
+      final generated = (resp.data['description'] as String? ?? '').trim();
+      state = state.copyWith(
+        descriptionText: generated,
+        isGeneratingAiDescription: false,
+      );
+    } on DioException catch (e) {
+      final msg = e.response?.data?['detail'] ?? 'Error al generar la descripcion';
+      state = state.copyWith(
+        isGeneratingAiDescription: false,
+        step4Error: msg is String ? msg : 'Error al generar la descripcion',
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isGeneratingAiDescription: false,
+        step4Error: 'Error inesperado al generar la descripcion',
+      );
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Submit
   // ---------------------------------------------------------------------------
 
   Future<void> submit(BuildContext context) async {
     // Validate all steps
-    if (!_validateStep(0) || !_validateStep(1) || !_validateStep(2)) {
+    if (!_validateStep(0) || !_validateStep(1) || !_validateStep(2) || !_validateStep(3)) {
       if (state.step1Error != null) {
         state = state.copyWith(currentStep: 0);
       } else if (state.step2Error != null) {
         state = state.copyWith(currentStep: 1);
+      } else if (state.step3Error != null) {
+        state = state.copyWith(currentStep: 2);
+      } else if (state.step4Error != null) {
+        state = state.copyWith(currentStep: 3);
       }
       return;
     }
@@ -780,6 +872,9 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         status: PropertyFormStatus.success,
         successPropertyId: propertyId,
       );
+
+      // Refresh search results so property_details_screen can find the new/updated property
+      await ref.read(searchProvider.notifier).refresh();
 
       if (context.mounted) {
         context.pushReplacement('/property/$propertyId');
@@ -982,19 +1077,12 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
           return false;
         }
         if (surface <= 0) {
-          state =
-              state.copyWith(step2Error: 'Introduce una superficie válida');
+          state = state.copyWith(step2Error: 'Introduce una superficie válida');
           return false;
         }
         if (state.titleText.length < 5) {
           state = state.copyWith(
               step2Error: 'El título debe tener al menos 5 caracteres');
-          return false;
-        }
-        if (state.descriptionText.length < 20) {
-          state = state.copyWith(
-              step2Error:
-                  'La descripción debe tener al menos 20 caracteres');
           return false;
         }
         state = state.copyWith(clearStep2Error: true);
@@ -1005,6 +1093,17 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
           return false;
         }
         state = state.copyWith(clearStep3Error: true);
+        return true;
+      case 3:
+        if (state.descriptionText.length < 20) {
+          state = state.copyWith(
+              step4Error:
+                  'La descripción debe tener al menos 20 caracteres. Escríbela o usa el botón de generación con IA.');
+          return false;
+        }
+        state = state.copyWith(clearStep4Error: true);
+        return true;
+      case 4:
         return true;
       default:
         return true;
