@@ -1,12 +1,13 @@
 """
 Image Service (@Jules)
 Handles secure image processing, resizing, and storage.
+Includes InmuFacil watermark applied at 30% opacity (bottom-right corner).
 """
 
 import os
 import shutil
 import uuid
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from fastapi import UploadFile, HTTPException
 from pathlib import Path
 
@@ -18,6 +19,66 @@ ALLOWED_FORMATS = {"JPEG", "JPG", "PNG", "WEBP"}
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+
+def _apply_watermark(img: Image.Image) -> Image.Image:
+    """
+    Add 'InmuFacil' text watermark centered horizontally at the bottom.
+    Font scales to occupy ~40% of image width. White text + dark shadow for
+    visibility on any background.
+    """
+    img_rgba = img.convert("RGBA")
+    w, h = img_rgba.size
+
+    text = "InmuFacil"
+
+    # Find the font size that makes text_width ≈ 40% of image width.
+    # Binary-search between 10 and 400 px.
+    target_w = int(w * 0.40)
+    lo, hi = 10, 400
+    font = ImageFont.load_default()
+    chosen_size = lo
+    _probe_img = Image.new("RGBA", (1, 1))
+    _probe_draw = ImageDraw.Draw(_probe_img)
+    for _ in range(20):          # ~20 iterations is enough
+        mid = (lo + hi) // 2
+        try:
+            f = ImageFont.load_default(size=mid)
+        except TypeError:
+            f = ImageFont.load_default()
+        bb = _probe_draw.textbbox((0, 0), text, font=f)
+        tw = bb[2] - bb[0]
+        if tw < target_w:
+            lo = mid
+            font = f
+            chosen_size = mid
+        else:
+            hi = mid
+        if hi - lo <= 1:
+            break
+
+    # Measure final dimensions
+    bb = _probe_draw.textbbox((0, 0), text, font=font)
+    text_w = bb[2] - bb[0]
+    text_h = bb[3] - bb[1]
+
+    # Position: centered horizontally, bottom area with small margin
+    margin_bottom = max(16, h // 20)
+    x = (w - text_w) // 2
+    y = h - text_h - margin_bottom
+
+    txt_layer = Image.new("RGBA", img_rgba.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(txt_layer)
+
+    # Dark shadow (2 px offset) for contrast on light backgrounds
+    shadow_offset = max(2, chosen_size // 20)
+    draw.text((x + shadow_offset, y + shadow_offset), text, font=font,
+              fill=(0, 0, 0, 160))
+    # White text at 75% opacity: 0.75 * 255 ≈ 191
+    draw.text((x, y), text, font=font, fill=(255, 255, 255, 191))
+
+    watermarked = Image.alpha_composite(img_rgba, txt_layer)
+    return watermarked.convert("RGB")
 
 
 def validate_image(file: UploadFile) -> None:
@@ -64,7 +125,10 @@ def process_and_save_image(file: UploadFile, property_id: int) -> str:
                 
             # Resize fit
             img.thumbnail(MAX_IMAGE_SIZE, Image.Resampling.LANCZOS)
-            
+
+            # Apply InmuFacil watermark (30% opacity, bottom-right)
+            img = _apply_watermark(img)
+
             # Save optimized
             img.save(file_path, optimize=True, quality=85)
             
