@@ -59,6 +59,13 @@ class BuyerSolvency(Base):
     second_buyer_dni_enc = Column(String, nullable=True)
     second_buyer_email_enc = Column(String, nullable=True)
     second_buyer_verified_at = Column(DateTime(timezone=True), nullable=True)
+    # Verification lifecycle: null | "pending" | "validado" | "rechazado"
+    second_buyer_status = Column(String(20), nullable=True)
+    second_buyer_rejection_reason = Column(String, nullable=True)
+    # HMAC-SHA256 fingerprint for second-buyer DNI uniqueness — non-reversible.
+    # Used to detect if the same person tries to verify as both buyer 1 and buyer 2,
+    # or if the same DNI is reused across multiple solvency records.
+    second_buyer_dni_hmac = Column(String(64), nullable=True)
 
     # --- Computed scores ---
     stress_index = Column(Enum(StressIndex), nullable=True)

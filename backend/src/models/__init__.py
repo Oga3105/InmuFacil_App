@@ -16,3 +16,4 @@ from .services import ServiceOrder
 from .solvency import BuyerSolvency
 from .favorites import PropertyFavorite
 from .arras_interview import ArrasInterview
+from .property_view_log import PropertyViewLog

@@ -6,8 +6,9 @@ and AES-256 data encryption.
 """
 
 import bcrypt as _bcrypt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 import os
@@ -139,6 +140,29 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+async def get_optional_current_user(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> Optional[User]:
+    """
+    Returns the current authenticated user if a valid Bearer token is provided,
+    or None for unauthenticated requests. Never raises 401.
+    """
+    authorization = request.headers.get("Authorization", "")
+    scheme, token = get_authorization_scheme_param(authorization)
+    if not token or scheme.lower() != "bearer":
+        return None
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        user = db.query(User).filter(User.email == email).first()
+        return user if (user and user.is_active) else None
+    except JWTError:
+        return None
+
 
 async def get_current_admin_user(current_user: User = Depends(get_current_active_user)):
     """
