@@ -54,6 +54,24 @@ class Property { // Added
   final String? ownerPhotoUrl;
   final bool hideExactLocation;
 
+  /// Empty/loading placeholder — use while fetching the real property.
+  factory Property.empty() => Property(
+        id: 'fallback',
+        title: 'Cargando Propiedad...',
+        description: '',
+        type: PropertyType.all,
+        price: 0,
+        location: const LatLng(40.4168, -3.7038),
+        address: '',
+        bedrooms: 0,
+        bathrooms: 0,
+        squareMeters: 0,
+        images: const [],
+        isVerified: true,
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+        updatedAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+
   /// Compatibility getter for legacy code
   String? get imageUrl => images.isNotEmpty ? images.first : null;
   
