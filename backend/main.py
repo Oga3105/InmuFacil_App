@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics
 from backend.src.routes import notifications as notifications_router
 
 from fastapi import APIRouter
@@ -323,6 +323,8 @@ api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_v1_router.include_router(users.router, prefix="/users", tags=["Users", "Admin"])
 api_v1_router.include_router(kyc.router, prefix="/kyc", tags=["KYC", "Admin"])
+api_v1_router.include_router(ai_description.router)        # V30 - AI Property Description (must be before properties to avoid /{id} capture)
+api_v1_router.include_router(property_analytics.router)    # V32 - Seller Analytics Dashboard (must be before properties)
 api_v1_router.include_router(properties.router) # has internal /properties prefix
 api_v1_router.include_router(visits.router)
 api_v1_router.include_router(offers.router)
@@ -344,6 +346,9 @@ api_v1_router.include_router(favorites.router, prefix="/favorites", tags=["Favor
 api_v1_router.include_router(arras_interview.router) # Arras Penitenciales Interview
 api_v1_router.include_router(post_sale.router) # Sprint V7 - Post-Sale Documents
 api_v1_router.include_router(fein.router)      # Sprint V8 - FEIN Banking Formalization
+api_v1_router.include_router(tasacion.router)     # Sprint V9 - Tasacion Appointment
+api_v1_router.include_router(notaria_appt.router) # Sprint V10 - Notaria Appointment
+api_v1_router.include_router(entrega_llaves.router) # Sprint V10 - Entrega de Llaves
 api_v1_router.include_router(notifications_router.router)  # V17 - Notification Center
 
 # Include V1 Router in App
@@ -361,6 +366,99 @@ app.mount("/uploads", StaticFiles(directory=str(_uploads_dir)), name="uploads")
 # ============================================================================
 # @DevOps - Temporary Seeding & Reset Endpoints
 # ============================================================================
+@app.get("/developer/notaria-step/{offer_id}", tags=["Internal"])
+async def check_notaria_step(offer_id: int):
+    """
+    Diagnostic: return NOTARIA_APPOINTMENT step state for an offer.
+    Shows whether the post-sale gate would pass.
+    """
+    from backend.src.config.database import SessionLocal
+    from backend.src.models.timeline import TransactionStep, StepStatus
+    db = SessionLocal()
+    try:
+        step = (
+            db.query(TransactionStep)
+            .filter(
+                TransactionStep.offer_id == offer_id,
+                TransactionStep.step_key == "NOTARIA_APPOINTMENT",
+            )
+            .first()
+        )
+        if step is None:
+            return {
+                "step_found": False,
+                "gate_passes": False,
+                "hint": "The NOTARIA_APPOINTMENT step has never been created for this offer. "
+                        "Navigate to the Notaria screen and propose/accept an appointment first.",
+            }
+        both_confirmed = (
+            step.buyer_confirmed_at is not None
+            and step.seller_confirmed_at is not None
+        )
+        gate_passes = step.status == StepStatus.COMPLETED or both_confirmed
+        return {
+            "step_found": True,
+            "step_id": step.id,
+            "step_status": step.status.value,
+            "buyer_confirmed_at": step.buyer_confirmed_at.isoformat() if step.buyer_confirmed_at else None,
+            "seller_confirmed_at": step.seller_confirmed_at.isoformat() if step.seller_confirmed_at else None,
+            "both_confirmed": both_confirmed,
+            "gate_passes": gate_passes,
+            "metadata": step.metadata_json,
+        }
+    finally:
+        db.close()
+
+
+@app.post("/developer/notaria-step/{offer_id}/force-complete", tags=["Internal"])
+async def force_complete_notaria_step(offer_id: int):
+    """
+    Developer fix: force NOTARIA_APPOINTMENT step to COMPLETED.
+    Use only when both parties have physically signed and you need to unblock post-venta.
+    """
+    from datetime import datetime, timezone
+    from backend.src.config.database import SessionLocal
+    from backend.src.models.timeline import TransactionStep, StepStatus
+    from sqlalchemy.orm.attributes import flag_modified
+    db = SessionLocal()
+    try:
+        step = (
+            db.query(TransactionStep)
+            .filter(
+                TransactionStep.offer_id == offer_id,
+                TransactionStep.step_key == "NOTARIA_APPOINTMENT",
+            )
+            .first()
+        )
+        if step is None:
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=404,
+                detail=f"NOTARIA_APPOINTMENT step not found for offer {offer_id}.",
+            )
+        now = datetime.now(timezone.utc)
+        if step.buyer_confirmed_at is None:
+            step.buyer_confirmed_at = now
+        if step.seller_confirmed_at is None:
+            step.seller_confirmed_at = now
+        step.status = StepStatus.COMPLETED
+        meta = dict(step.metadata_json or {})
+        meta["appointment_status"] = "completed"
+        step.metadata_json = meta
+        flag_modified(step, "metadata_json")
+        db.commit()
+        return {
+            "status": "fixed",
+            "offer_id": offer_id,
+            "step_status": "completed",
+            "buyer_confirmed_at": step.buyer_confirmed_at.isoformat(),
+            "seller_confirmed_at": step.seller_confirmed_at.isoformat(),
+            "gate_passes": True,
+        }
+    finally:
+        db.close()
+
+
 @app.post("/developer/reset", tags=["Internal"])
 async def reset_database():
     """
