@@ -55,7 +55,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
           // Next / Submit button
           FilledButton(
             onPressed: isSubmitting
-                ? null
+                ? () {} // keep enabled so color stays vivid
                 : () {
                     if (isLastStep) {
                       onSubmit();
@@ -65,17 +65,32 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                   },
             style: FilledButton.styleFrom(
               backgroundColor: isLastStep ? const Color(0xFF16A34A) : _blue,
+              disabledBackgroundColor: isLastStep ? const Color(0xFF16A34A) : _blue,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: isSubmitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+            child: isSubmitting && isLastStep
+                ? const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Publicando...',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   )
                 : Row(
                     mainAxisSize: MainAxisSize.min,
