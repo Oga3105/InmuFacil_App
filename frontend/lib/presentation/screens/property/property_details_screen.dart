@@ -45,46 +45,25 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
   Widget build(BuildContext context) {
     // 1. Try search cache first (fast path)
     final properties = ref.watch(searchProvider).filteredProperties;
-    Property? cachedProperty;
-    try {
-      cachedProperty = properties.firstWhere((p) => p.id == widget.propertyId);
-    } catch (_) {
-      cachedProperty = null;
-    }
+    final Property? cachedProperty = properties
+        .cast<Property?>()
+        .firstWhere((p) => p?.id == widget.propertyId, orElse: () => null);
 
-    // 2. If not in cache, fetch directly from API (e.g. just created / just edited)
-    final directFetchAsync = cachedProperty == null
-        ? ref.watch(propertyByIdProvider(widget.propertyId))
-        : null;
+    // 2. Always watch direct-fetch provider (Riverpod requires unconditional watches).
+    //    Result is only used when not in cache (e.g. just created / just edited).
+    final directFetchAsync = ref.watch(propertyByIdProvider(widget.propertyId));
 
-    // Show spinner while fetching
-    if (cachedProperty == null && directFetchAsync != null) {
-      if (directFetchAsync.isLoading) {
-        return const Scaffold(
-          backgroundColor: Colors.white,
-          body: Center(child: CircularProgressIndicator()),
-        );
-      }
+    // Show spinner while fetching from API (cache miss path)
+    if (cachedProperty == null && directFetchAsync.isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
     }
 
     final property = cachedProperty ??
-        directFetchAsync?.value ??
-        Property(
-          id: 'fallback',
-          title: 'Cargando Propiedad...',
-          description: '',
-          type: PropertyType.all,
-          price: 0,
-          location: const LatLng(40.4168, -3.7038),
-          address: '...',
-          bedrooms: 0,
-          bathrooms: 0,
-          squareMeters: 0,
-          images: const [],
-          isVerified: true,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        directFetchAsync.value ??
+        Property.empty();
 
     // Navigation Logic (Next/Prev)
     final currentIndex = properties.indexWhere((p) => p.id == widget.propertyId);
