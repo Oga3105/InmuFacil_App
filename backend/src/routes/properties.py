@@ -289,7 +289,7 @@ async def update_property_status(
     Change status of a property: draft -> published -> unpublished.
     """
     prop = verify_property_ownership(db, property_id, current_user.id)
-    prop.status = body.status
+    prop.status = PropertyStatus(body.status)
     db.commit()
     db.refresh(prop)
     return prop
