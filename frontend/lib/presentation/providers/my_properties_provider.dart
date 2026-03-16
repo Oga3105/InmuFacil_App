@@ -40,6 +40,9 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
   }
 
   Future<void> updateStatus(String propertyId, String newStatus) async {
+    // Re-read token on every authenticated call (build() may have run before login)
+    final token = await _storage.read(key: 'auth_token');
+    if (token != null) _dio.options.headers['Authorization'] = 'Bearer $token';
     await _dio.patch('/properties/$propertyId/status', data: {'status': newStatus});
     await refresh();
   }
