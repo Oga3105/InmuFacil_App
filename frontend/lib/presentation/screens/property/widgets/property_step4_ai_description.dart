@@ -141,8 +141,8 @@ class _PropertyStep4AiDescriptionState
                   const SizedBox(height: 6),
                   Text(
                     hasImages
-                        ? 'Analizando datos e imagenes con Gemini 2.5 Flash...'
-                        : 'Generando descripcion a partir de los datos tecnicos...',
+                        ? 'La IA esta analizando datos e imagenes...'
+                        : 'La IA esta generando la descripcion...',
                     style: const TextStyle(
                       fontSize: 12,
                       color: _green,
