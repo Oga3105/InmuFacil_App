@@ -393,6 +393,23 @@ class _VerificationStatusScreenState
               color: const Color(0xFF64748B),
               onPressed: () => context.go('/'),
             ),
+
+            const SizedBox(height: 12),
+
+            TextButton(
+              onPressed: () {
+                ref.read(verificationProvider.notifier).reset();
+                context.go('/verify-identity');
+              },
+              child: const Text(
+                'Volver a enviar documentos',
+                style: TextStyle(
+                  color: Color(0xFF94A3B8),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ),
           ],
         ),
       ),
