@@ -20,7 +20,7 @@ from backend.src.services.valuation_service import ValuationService
 from backend.src.utils.security import get_current_active_user
 from backend.src.services.image_service import validate_image, process_image_to_bytes
 from backend.src.services.payment_service import MockPaymentProvider
-from backend.src.services.document_service import process_document, get_decrypted_document, ComplianceError
+from backend.src.services.document_service import process_document, get_decrypted_document, get_decrypted_document_from_path, ComplianceError
 from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import or_
@@ -694,7 +694,8 @@ async def upload_document(
             property_id=property.id,
             doc_type=doc_type,
             filename=file.filename,
-            file_path=result["file_path"],
+            file_path=None,
+            encrypted_content=result["encrypted_content"],
             is_encrypted=True,
             status=status_doc,
             extracted_metadata=metadata_str
@@ -743,9 +744,14 @@ async def download_document(
         raise HTTPException(status_code=403, detail="Not authorized")
         
     try:
-        # Decrypt
-        decrypted_bytes = get_decrypted_document(doc.file_path)
-        
+        # Decrypt from DB or legacy file_path
+        if doc.encrypted_content:
+            decrypted_bytes = get_decrypted_document(doc.encrypted_content)
+        elif doc.file_path:
+            decrypted_bytes = get_decrypted_document_from_path(doc.file_path)
+        else:
+            raise HTTPException(status_code=404, detail="Document content not found")
+
         from fastapi.responses import Response
         # Return as downloadable stream
         return Response(
@@ -753,8 +759,10 @@ async def download_document(
             media_type="application/octet-stream",
             headers={"Content-Disposition": f"attachment; filename={doc.filename}"}
         )
+    except HTTPException:
+        raise
     except Exception:
-         raise HTTPException(status_code=500, detail="Decryption failed")
+        raise HTTPException(status_code=500, detail="Decryption failed")
 
 
 @router.delete("/{property_id}/documents/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)

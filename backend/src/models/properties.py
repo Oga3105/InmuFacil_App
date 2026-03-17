@@ -202,9 +202,10 @@ class PropertyDocument(Base):
     doc_type = Column(Enum(DocumentType), nullable=False)
     filename = Column(String, nullable=False)
     
-    # Security: Encrypted Content (Blob) or Path
-    file_path = Column(String, nullable=False) # Path to encrypted file
-    is_encrypted = Column(Boolean, default=True) 
+    # Security: Encrypted content stored directly in DB (no filesystem)
+    file_path = Column(String, nullable=True)          # deprecated — legacy rows only
+    encrypted_content = Column(Text, nullable=True)    # AES-256 encrypted, base64-wrapped
+    is_encrypted = Column(Boolean, default=True)
     
     # Compliance
     status = Column(String, default="pending") # pending, verified, rejected
