@@ -1,1 +1,0 @@
-This is a dummy contract for testing AI analysis.

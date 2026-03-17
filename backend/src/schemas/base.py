@@ -6,7 +6,7 @@ Request/Response schemas with security best practices.
 Prevents sensitive data exposure in API responses.
 """
 
-from pydantic import BaseModel, EmailStr, Field, validator, model_validator
+from pydantic import BaseModel, EmailStr, Field, validator, model_validator, computed_field, ConfigDict
 from typing import Literal, Optional, List
 from datetime import datetime
 from backend.src.models import (
@@ -156,16 +156,24 @@ class PropertyEnvironmentSchema(BaseModel):
 class PropertyMediaResponse(BaseModel):
     """
     Schema for property media (Images, Videos).
+    file_path is nullable (images stored as BYTEA have no path).
+    url is computed: images → /api/v1/properties/media/{id}/file, videos → file_path.
     """
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     media_type: MediaType
-    file_path: str
+    file_path: Optional[str] = None
     is_main: bool
     order: int
     created_at: datetime
-    
-    class Config:
-        from_attributes = True
+
+    @computed_field
+    @property
+    def url(self) -> str:
+        if self.media_type == MediaType.IMAGE:
+            return f"/api/v1/properties/media/{self.id}/file"
+        return self.file_path or ""
 
 
 class PropertyMediaCreate(BaseModel):

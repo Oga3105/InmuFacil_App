@@ -14,12 +14,14 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import mimetypes
 import os
 import shutil
+import tempfile
 
 import logging
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Response, UploadFile, status
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
@@ -495,18 +497,40 @@ def _run_second_buyer_gemini(
     buyer_id: int,
     full_name: str,
     email: str,
-    saved_paths: dict,
     document_type: str,
 ) -> None:
     """
     Background task: runs Gemini verification after the upload endpoint returns.
     Opens its own DB session (the request session is already closed).
+    Reads image bytes from PostgreSQL, writes to tempfiles for Gemini, then cleans up.
     Updates BuyerSolvency with the encrypted PII on success.
     """
     from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
 
     db: Session = SessionLocal()
+    tmp_files: list[str] = []
     try:
+        record = db.query(BuyerSolvency).filter(BuyerSolvency.buyer_id == buyer_id).first()
+        if not record:
+            logger.error("Second-buyer background task: no solvency record for buyer_id=%s", buyer_id)
+            return
+
+        # Write BYTEA blobs to tempfiles so Gemini service can read them via file path
+        saved_paths: dict[str, str] = {}
+        for key, data_col, ctype_col in [
+            ("front",  record.second_buyer_front_data,  record.second_buyer_front_content_type),
+            ("back",   record.second_buyer_back_data,   record.second_buyer_back_content_type),
+            ("selfie", record.second_buyer_selfie_data, record.second_buyer_selfie_content_type),
+        ]:
+            if data_col is None:
+                continue
+            ext = mimetypes.guess_extension(ctype_col or "image/jpeg") or ".jpg"
+            fd, tmp_path = tempfile.mkstemp(suffix=ext, prefix=f"sb_{buyer_id}_{key}_")
+            os.write(fd, data_col)
+            os.close(fd)
+            saved_paths[key] = tmp_path
+            tmp_files.append(tmp_path)
+
         result = verify_identity_with_gemini(
             front_path=saved_paths.get("front"),
             back_path=saved_paths.get("back"),
@@ -518,13 +542,6 @@ def _run_second_buyer_gemini(
             "Second-buyer Gemini result for buyer_id=%s: approved=%s reason=%s",
             buyer_id, result.approved, result.reason,
         )
-
-        record = db.query(BuyerSolvency).filter(
-            BuyerSolvency.buyer_id == buyer_id
-        ).first()
-        if not record:
-            logger.error("Second-buyer background task: no solvency record for buyer_id=%s", buyer_id)
-            return
 
         if result.reason == "__QUOTA_EXCEEDED__":
             logger.warning("Gemini quota exceeded for second-buyer buyer_id=%s; leaving as pending", buyer_id)
@@ -633,6 +650,11 @@ def _run_second_buyer_gemini(
         logger.exception("Second-buyer background task error for buyer_id=%s: %s", buyer_id, exc)
     finally:
         db.close()
+        for tmp in tmp_files:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
 
 
 @router.post("/second-buyer", response_model=SecondBuyerResponse, status_code=status.HTTP_200_OK)
@@ -668,18 +690,20 @@ async def submit_second_buyer(
             detail="Tu pasaporte no esta marcado como compra conjunta. Actualiza el pasaporte primero.",
         )
 
-    os.makedirs(_SECOND_BUYER_UPLOAD_DIR, exist_ok=True)
-    saved_paths: dict[str, str] = {}
-
-    for file_key, upload_file in [("front", front), ("back", back), ("selfie", selfie)]:
+    # Store documents as BYTEA in PostgreSQL — no filesystem writes
+    for file_key, upload_file, data_attr, ctype_attr in [
+        ("front",  front,  "second_buyer_front_data",  "second_buyer_front_content_type"),
+        ("back",   back,   "second_buyer_back_data",   "second_buyer_back_content_type"),
+        ("selfie", selfie, "second_buyer_selfie_data", "second_buyer_selfie_content_type"),
+    ]:
         if upload_file is None:
             continue
-        safe_name = f"sb_{current_user.id}_{file_key}_{upload_file.filename}"
-        path = os.path.join(_SECOND_BUYER_UPLOAD_DIR, safe_name)
         try:
-            with open(path, "wb") as buf:
-                shutil.copyfileobj(upload_file.file, buf)
-            saved_paths[file_key] = path
+            img_bytes = await upload_file.read()
+            mime, _ = mimetypes.guess_type(upload_file.filename or "")
+            content_type = mime or "image/jpeg"
+            setattr(record, data_attr, img_bytes)
+            setattr(record, ctype_attr, content_type)
         except Exception as exc:
             raise HTTPException(
                 status_code=500,
@@ -696,7 +720,6 @@ async def submit_second_buyer(
         buyer_id=current_user.id,
         full_name=full_name,
         email=email,
-        saved_paths=saved_paths,
         document_type=document_type,
     )
 
@@ -710,6 +733,35 @@ class SecondBuyerStatusResponse(BaseModel):
     """Real-time verification status of the second buyer KYC."""
     status: str                          # null | "pending" | "validado" | "rechazado"
     rejection_reason: Optional[str] = None
+
+
+@router.get("/second-buyer/documents/{file_key}")
+async def get_second_buyer_document(
+    file_key: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Serve a second-buyer identity document (front/back/selfie) stored as BYTEA.
+    Only accessible by the buyer who uploaded it.
+    """
+    if file_key not in ("front", "back", "selfie"):
+        raise HTTPException(status_code=400, detail="file_key must be front, back, or selfie")
+
+    record = db.query(BuyerSolvency).filter(BuyerSolvency.buyer_id == current_user.id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="No solvency record found")
+
+    data = getattr(record, f"second_buyer_{file_key}_data", None)
+    ctype = getattr(record, f"second_buyer_{file_key}_content_type", None) or "image/jpeg"
+    if not data:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return Response(
+        content=data,
+        media_type=ctype,
+        headers={"Cache-Control": "private, no-store"},
+    )
 
 
 @router.get("/second-buyer/status", response_model=SecondBuyerStatusResponse)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import JSON
 from sqlalchemy.sql import func
@@ -30,7 +30,13 @@ class PropertyOffer(Base):
     
     
     contract_data = Column(JSON, nullable=True) # Refinement Hito 12.5
-    custom_contract_path = Column(String, nullable=True) # Refinement Hito 12.6
+    custom_contract_path = Column(String, nullable=True)       # deprecated — kept for legacy rows
+    custom_contract_data = Column(LargeBinary, nullable=True)  # BYTEA storage (replaces path)
+    custom_contract_content_type = Column(String(100), nullable=True)
+    custom_contract_filename = Column(String, nullable=True)
+    # Contract acceptance — both parties must explicitly accept before timeline advances
+    buyer_contract_accepted_at = Column(DateTime(timezone=True), nullable=True)
+    seller_contract_accepted_at = Column(DateTime(timezone=True), nullable=True)
     
     
     valid_until = Column(DateTime(timezone=True))

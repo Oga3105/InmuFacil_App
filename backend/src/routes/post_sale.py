@@ -4,11 +4,9 @@ Post-Sale document management endpoints.
 @Jules: Gate — documents only accessible when DEED_SIGNATURE step is COMPLETED.
 """
 import os
-from pathlib import Path
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, status
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File, Form, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -20,9 +18,6 @@ from backend.src.models.post_sale import PostSaleDocument, PostSaleDocType, Post
 from backend.src.models.timeline import TransactionStep, StepStatus
 
 router = APIRouter(prefix="/post-sale", tags=["Post-Sale"])
-
-UPLOAD_DIR = Path("uploads/post_sale")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_TYPES = {"application/pdf", "image/jpeg", "image/png"}
 MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -97,7 +92,7 @@ def _save_post_sale_document(
     file: UploadFile,
     db: Session,
 ) -> dict:
-    """Persists the uploaded file and creates a DB record."""
+    """Persists the uploaded file as BYTEA in PostgreSQL — no filesystem writes."""
     content = file.file.read()
     if len(content) > MAX_SIZE_BYTES:
         raise HTTPException(
@@ -105,20 +100,14 @@ def _save_post_sale_document(
             detail="Archivo demasiado grande. Maximo 10 MB.",
         )
 
-    dest_dir = UPLOAD_DIR / str(offer_id)
-    dest_dir.mkdir(parents=True, exist_ok=True)
-    safe_name = f"{doc_type}_{file.filename}"
-    dest_path = dest_dir / safe_name
-
-    with open(dest_path, "wb") as f:
-        f.write(content)
-
     doc = PostSaleDocument(
         offer_id=offer_id,
         uploaded_by=user_id,
         doc_type=PostSaleDocType(doc_type),
         filename=file.filename,
-        file_path=str(dest_path),
+        file_data=content,
+        content_type=file.content_type or "application/octet-stream",
+        file_path=None,
         file_size=len(content),
     )
     db.add(doc)
@@ -350,13 +339,24 @@ async def download_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Documento no encontrado.")
 
-    if not os.path.exists(doc.file_path):
-        raise HTTPException(
-            status_code=404, detail="Archivo no disponible en el servidor."
+    # Serve from BYTEA; fall back to filesystem for legacy rows
+    if doc.file_data:
+        return Response(
+            content=doc.file_data,
+            media_type=doc.content_type or "application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{doc.filename}"',
+                "Cache-Control": "private, no-store",
+            },
         )
 
-    return FileResponse(
-        path=doc.file_path,
-        filename=doc.filename,
-        media_type="application/octet-stream",
-    )
+    # Legacy fallback (rows migrated before this change had file_path set)
+    if doc.file_path and os.path.exists(doc.file_path):
+        from fastapi.responses import FileResponse
+        return FileResponse(
+            path=doc.file_path,
+            filename=doc.filename,
+            media_type="application/octet-stream",
+        )
+
+    raise HTTPException(status_code=404, detail="Archivo no disponible en el servidor.")

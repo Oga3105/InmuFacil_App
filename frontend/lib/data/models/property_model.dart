@@ -46,7 +46,7 @@ class PropertyModel {
     final List<String> imageUrls = mediaList
         .where((m) => m['media_type'] == 'image')
         .map((m) {
-          final path = (m['file_path'] as String? ?? '');
+          final path = (m['file_path'] as String?) ?? (m['url'] as String?) ?? '';
           if (path.startsWith('http')) return path;
           return '$_staticBase/${path.startsWith('/') ? path.substring(1) : path}';
         })

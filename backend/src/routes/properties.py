@@ -5,7 +5,7 @@ Handles CRUD operations for real estate listings with Advanced Data Intelligence
 """
 
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form, Response
 from sqlalchemy.orm import Session, joinedload
 from backend.src.config.database import get_db, engine
 from backend.src.models import (
@@ -18,7 +18,7 @@ from backend.src.schemas.base import PropertyCreate, PropertyDraftCreate, Status
 from backend.src.schemas.valuation import ValuationRequest, ValuationResponse
 from backend.src.services.valuation_service import ValuationService
 from backend.src.utils.security import get_current_active_user
-from backend.src.services.image_service import validate_image, process_and_save_image
+from backend.src.services.image_service import validate_image, process_image_to_bytes
 from backend.src.services.payment_service import MockPaymentProvider
 from backend.src.services.document_service import process_document, get_decrypted_document, ComplianceError
 from pydantic import BaseModel
@@ -420,19 +420,20 @@ async def upload_property_images(
         # Validation & Processing called for each file
         # Note: validate_image reads file, ensure pointer resets or use file.spool_max_size
         validate_image(file)
-        file_path = process_and_save_image(file, property_id)
-        
-        # Determine is_main for this specific image in the batch
-        # Only the first image of the batch gets is_main if user requested it, to avoid multiple mains
+        img_bytes, content_type = process_image_to_bytes(file)
+
+        # Only the first image of the batch gets is_main if user requested it
         current_is_main = is_main if i == 0 else False
-        
-        # Create DB Entry
+
+        # Create DB Entry — binary stored in file_data, no filesystem path
         new_media = PropertyMedia(
             property_id=property.id,
             media_type=MediaType.IMAGE,
-            file_path=file_path,
+            file_data=img_bytes,
+            content_type=content_type,
+            file_path=None,
             is_main=current_is_main,
-            order=0 # TODO: Logic to add at end
+            order=0
         )
         db.add(new_media)
         uploaded_media.append(new_media)
@@ -545,6 +546,19 @@ async def get_valuation_history(
         ))
     
     return results
+
+@router.get("/media/{media_id}/file")
+async def get_media_file(media_id: int, db: Session = Depends(get_db)):
+    """Serve image binary stored as BYTEA in PostgreSQL."""
+    media = db.query(PropertyMedia).filter(PropertyMedia.id == media_id).first()
+    if not media or not media.file_data:
+        raise HTTPException(status_code=404, detail="Media not found")
+    return Response(
+        content=media.file_data,
+        media_type=media.content_type or "image/jpeg",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
 
 @router.delete("/media/{media_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_media(
