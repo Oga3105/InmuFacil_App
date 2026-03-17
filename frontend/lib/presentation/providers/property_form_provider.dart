@@ -668,7 +668,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         _mediaIdCounter++;
         return PropertyMediaItem(
           localId: 'remote_$_mediaIdCounter',
-          remoteUrl: (m['file_path'] ?? m['url']) as String?,
+          remoteUrl: _buildMediaUrl(m['file_path'] ?? m['url']),
           remoteMediaId: m['id'] as int?,
         );
       }).toList();
@@ -1112,6 +1112,14 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   void reset() {
     state = const PropertyFormState();
+  }
+
+  String? _buildMediaUrl(dynamic raw) {
+    if (raw == null) return null;
+    final path = raw as String;
+    if (path.startsWith('http')) return path;
+    final base = _kApiBaseUrl.replaceAll(RegExp(r'/api/v\d+/?$'), '');
+    return '$base/${path.startsWith('/') ? path.substring(1) : path}';
   }
 }
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -178,11 +178,13 @@ class PropertyMedia(Base):
     property = relationship("Property", back_populates="media")
     
     media_type = Column(Enum(MediaType), default=MediaType.IMAGE, nullable=False)
-    file_path = Column(String, nullable=False)  # Local path or URL
-    
+    file_path = Column(String, nullable=True)    # URL for VIDEO/VIRTUAL_TOUR; NULL for IMAGE
+    file_data = Column(LargeBinary, nullable=True)  # Binary data for IMAGE (stored in DB)
+    content_type = Column(String(100), nullable=True)  # e.g. "image/jpeg"
+
     is_main = Column(Boolean, default=False)  # Cover image
     order = Column(Integer, default=0)
-    
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 

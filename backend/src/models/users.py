@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -51,8 +51,10 @@ class User(Base):
     # Security Monitoring (@Watcher)
     failed_upload_attempts = Column(Integer, default=0, nullable=False)
 
-    # Profile Photo
+    # Profile Photo — stored as BYTEA; profile_photo_url kept for legacy rows only
     profile_photo_url = Column(String, nullable=True)
+    profile_photo_data = Column(LargeBinary, nullable=True)
+    profile_photo_content_type = Column(String(100), nullable=True)
 
     # Provider Fields (Hito 17 - Service Marketplace)
     provider_category = Column(String, nullable=True) # e.g. "NOTARY", "VALUER"
@@ -90,6 +92,8 @@ class KYCVerification(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     filename = Column(String, nullable=False)
+    file_data = Column(LargeBinary, nullable=True)
+    file_content_type = Column(String(100), nullable=True)
     dni_encrypted = Column(String, nullable=False)
     status = Column(String, default="pending")
     file_type = Column(String, default="front")  # front / back / selfie

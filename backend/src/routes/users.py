@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, Response, status, UploadFile, File
 from sqlalchemy.orm import Session
 from backend.src.config.database import get_db
 from backend.src.models import User, KYCVerification
@@ -124,26 +124,10 @@ async def upload_profile_photo(
             detail=f"La imagen supera el tamaño máximo de {MAX_FILE_SIZE_MB} MB.",
         )
 
-    # Determinar extensión y ruta destino
-    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
-    ext = ext_map[file.content_type]
-    dest_path = UPLOADS_DIR / f"{current_user.id}.{ext}"
-
-    # Eliminar fotos previas con otra extensión
-    for old_ext in ext_map.values():
-        old_file = UPLOADS_DIR / f"{current_user.id}.{old_ext}"
-        if old_file.exists() and old_file != dest_path:
-            old_file.unlink()
-
-    # Guardar archivo
-    with open(dest_path, "wb") as f:
-        f.write(contents)
-
-    # Construir URL pública
-    photo_url = f"http://localhost:8000/uploads/avatars/{current_user.id}.{ext}"
-
-    # Actualizar DB
-    current_user.profile_photo_url = photo_url
+    # Store in PostgreSQL as BYTEA — no filesystem writes
+    current_user.profile_photo_data = contents
+    current_user.profile_photo_content_type = file.content_type
+    current_user.profile_photo_url = f"/api/v1/users/{current_user.id}/photo"
     db.commit()
     db.refresh(current_user)
 
@@ -175,17 +159,26 @@ async def delete_profile_photo(
             detail="El usuario no tiene foto de perfil.",
         )
 
-    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
-    for ext in ext_map.values():
-        file_path = UPLOADS_DIR / f"{current_user.id}.{ext}"
-        if file_path.exists():
-            file_path.unlink()
-
+    current_user.profile_photo_data = None
+    current_user.profile_photo_content_type = None
     current_user.profile_photo_url = None
     db.commit()
 
     logger.info(f"[PHOTO] User {current_user.id} deleted profile photo")
     return None
+
+
+@router.get("/{user_id}/photo")
+async def get_user_photo(user_id: int, db: Session = Depends(get_db)):
+    """Serve a user's profile photo stored as BYTEA. Public endpoint."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user or not user.profile_photo_data:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    return Response(
+        content=user.profile_photo_data,
+        media_type=user.profile_photo_content_type or "image/jpeg",
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
 
 
 # --- ENDPOINTS DE ADMINISTRACIÓN (Solo Admins) ---

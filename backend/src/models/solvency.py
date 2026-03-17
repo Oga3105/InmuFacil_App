@@ -4,7 +4,7 @@ Stores the buyer's self-declared financial qualification data.
 All sensitive fields (pre_approval_pdf_url) are AES-256-GCM encrypted at rest.
 Documents are subject to 90-day automatic purge (expires_at).
 """
-from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Enum, DateTime, Boolean, Float, ForeignKey, LargeBinary
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .base import Base
@@ -66,6 +66,14 @@ class BuyerSolvency(Base):
     # Used to detect if the same person tries to verify as both buyer 1 and buyer 2,
     # or if the same DNI is reused across multiple solvency records.
     second_buyer_dni_hmac = Column(String(64), nullable=True)
+
+    # --- Second buyer identity documents — stored as BYTEA in PostgreSQL (no filesystem) ---
+    second_buyer_front_data = Column(LargeBinary, nullable=True)
+    second_buyer_front_content_type = Column(String(100), nullable=True)
+    second_buyer_back_data = Column(LargeBinary, nullable=True)
+    second_buyer_back_content_type = Column(String(100), nullable=True)
+    second_buyer_selfie_data = Column(LargeBinary, nullable=True)
+    second_buyer_selfie_content_type = Column(String(100), nullable=True)
 
     # --- Computed scores ---
     stress_index = Column(Enum(StressIndex), nullable=True)

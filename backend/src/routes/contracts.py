@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
 from backend.src.config.database import get_db
@@ -8,11 +8,10 @@ from backend.src.routes.auth import get_current_user
 from backend.src.models.offers import PropertyOffer, OfferStatus
 from backend.src.models.properties import Property
 from backend.src.services.contract_service import ContractGenerator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import io
 import json
 import os
-import shutil
 from fastapi import File, UploadFile, Form
 from backend.src.schemas.contracts import ContractDetailsUpdate, ContractDetailsResponse, ContractAnalysisResponse
 from backend.src.models.offers import ContractAnalysis
@@ -172,15 +171,15 @@ async def upload_custom_contract(
     # 4. Security Scan
     await ContractAnalyzer.validate_file(file)
     
-    # 5. Save File
-    upload_dir = "uploads/contracts"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = f"{upload_dir}/{offer_id}_{file.filename}"
-    
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-        
-    offer.custom_contract_path = file_path
+    # 5. Save to PostgreSQL as BYTEA — no filesystem writes
+    file_bytes = await file.read()
+    offer.custom_contract_data = file_bytes
+    offer.custom_contract_content_type = file.content_type or "application/octet-stream"
+    offer.custom_contract_filename = file.filename
+    offer.custom_contract_path = None
+    # Reset previous acceptances — new contract requires fresh approval from both parties
+    offer.buyer_contract_accepted_at = None
+    offer.seller_contract_accepted_at = None
     
     # 6. AI Analysis (if consented)
     if accept_ai_processing:
@@ -222,3 +221,102 @@ async def upload_custom_contract(
         red_flags=[], green_lights=[], missing_clauses=[], cost_estimate=0.0,
         disclaimer=""
     )
+
+
+def _get_offer_with_rbac(offer_id: int, current_user: User, db: Session) -> tuple[PropertyOffer, Property]:
+    """Fetch offer + property and verify the caller is buyer or seller."""
+    offer = db.query(PropertyOffer).filter(PropertyOffer.id == offer_id).first()
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found")
+    prop = db.query(Property).filter(Property.id == offer.property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+    is_buyer = offer.buyer_id == current_user.id
+    is_seller = prop.owner_id == current_user.id
+    if not (is_buyer or is_seller):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    return offer, prop
+
+
+@router.get("/offers/{offer_id}/contract/download")
+def download_contract(
+    offer_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Download the custom contract uploaded for this offer.
+    Accessible by both buyer and seller.
+    Falls back to filesystem path for legacy rows.
+    """
+    offer, _ = _get_offer_with_rbac(offer_id, current_user, db)
+
+    if offer.custom_contract_data:
+        return Response(
+            content=offer.custom_contract_data,
+            media_type=offer.custom_contract_content_type or "application/octet-stream",
+            headers={
+                "Content-Disposition": f'attachment; filename="{offer.custom_contract_filename or f"contract_{offer_id}.pdf"}"',
+                "Cache-Control": "private, no-store",
+            },
+        )
+
+    # Legacy fallback
+    path = offer.custom_contract_path
+    if path and os.path.exists(path):
+        from fastapi.responses import FileResponse
+        return FileResponse(path=path, filename=os.path.basename(path), media_type="application/octet-stream")
+
+    raise HTTPException(status_code=404, detail="No contract uploaded for this offer")
+
+
+@router.post("/offers/{offer_id}/contract/accept", status_code=200)
+def accept_contract(
+    offer_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Buyer or Seller confirms acceptance of the uploaded contract.
+    Records the timestamp for the calling party.
+    """
+    offer, prop = _get_offer_with_rbac(offer_id, current_user, db)
+
+    if not offer.custom_contract_data and not offer.custom_contract_path:
+        raise HTTPException(status_code=400, detail="No contract uploaded yet for this offer")
+
+    is_buyer = offer.buyer_id == current_user.id
+    now = datetime.now(timezone.utc)
+
+    if is_buyer:
+        offer.buyer_contract_accepted_at = now
+    else:
+        offer.seller_contract_accepted_at = now
+
+    db.commit()
+
+    both_accepted = offer.buyer_contract_accepted_at and offer.seller_contract_accepted_at
+    return {
+        "accepted_by": "buyer" if is_buyer else "seller",
+        "accepted_at": now.isoformat(),
+        "both_accepted": bool(both_accepted),
+    }
+
+
+@router.get("/offers/{offer_id}/contract/acceptance")
+def get_contract_acceptance(
+    offer_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Returns the acceptance status of both parties for the contract.
+    """
+    offer, _ = _get_offer_with_rbac(offer_id, current_user, db)
+    return {
+        "has_contract": bool(offer.custom_contract_data or offer.custom_contract_path),
+        "filename": offer.custom_contract_filename,
+        "buyer_accepted_at": offer.buyer_contract_accepted_at.isoformat() if offer.buyer_contract_accepted_at else None,
+        "seller_accepted_at": offer.seller_contract_accepted_at.isoformat() if offer.seller_contract_accepted_at else None,
+        "both_accepted": bool(offer.buyer_contract_accepted_at and offer.seller_contract_accepted_at),
+    }

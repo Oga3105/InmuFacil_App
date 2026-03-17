@@ -1,9 +1,10 @@
 import logging
+import mimetypes
 import os
-import shutil
+import tempfile
 from typing import List, Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from backend.src.config.database import SessionLocal, get_db
@@ -25,22 +26,37 @@ UPLOAD_DIR = "uploads"
 
 def _run_gemini_verification(
     user_id: int,
-    front_path: Optional[str],
-    back_path: Optional[str],
-    selfie_path: Optional[str],
     document_type: str,
 ) -> None:
     """
     Runs in the background after the upload endpoint returns.
-    Opens its own DB session (the request session is already closed).
-    Calls Gemini, then updates KYCVerification records and User.dni_status.
+    Opens its own DB session, reads BYTEA from kyc_verifications,
+    writes to tempfiles for Gemini, cleans up after.
     """
     db: Session = SessionLocal()
+    tmp_files: list[str] = []
     try:
+        # Read latest pending KYC records from DB and write to tempfiles for Gemini
+        records = (
+            db.query(KYCVerification)
+            .filter(KYCVerification.user_id == user_id, KYCVerification.status == "pending")
+            .all()
+        )
+        saved_paths: dict[str, str] = {}
+        for rec in records:
+            if rec.file_data is None:
+                continue
+            ext = mimetypes.guess_extension(rec.file_content_type or "image/jpeg") or ".jpg"
+            fd, tmp_path = tempfile.mkstemp(suffix=ext, prefix=f"kyc_{user_id}_{rec.file_type}_")
+            os.write(fd, rec.file_data)
+            os.close(fd)
+            saved_paths[rec.file_type] = tmp_path
+            tmp_files.append(tmp_path)
+
         result = verify_identity_with_gemini(
-            front_path=front_path,
-            back_path=back_path,
-            selfie_path=selfie_path,
+            front_path=saved_paths.get("front"),
+            back_path=saved_paths.get("back"),
+            selfie_path=saved_paths.get("selfie"),
             document_type=document_type,
         )
 
@@ -152,6 +168,11 @@ def _run_gemini_verification(
         db.rollback()
     finally:
         db.close()
+        for tmp in tmp_files:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
 
 
 # ---------------------------------------------------------------------------
@@ -175,30 +196,26 @@ async def upload_kyc_document(
     if not uploaded:
         raise HTTPException(status_code=400, detail="Debes subir al menos un archivo.")
 
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
     records_created = []
-    saved_paths: dict[str, str] = {}
 
     for file_type_key, upload_file in uploaded.items():
         original_name = upload_file.filename or f"{file_type_key}.jpg"
         ext = os.path.splitext(original_name)[1].lower() or ".jpg"
         safe_filename = f"user_{current_user.id}_{file_type_key}{ext}"
-        file_location = f"{UPLOAD_DIR}/{safe_filename}"
 
         try:
-            with open(file_location, "wb") as buffer:
-                shutil.copyfileobj(upload_file.file, buffer)
+            img_bytes = await upload_file.read()
         except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error guardando imagen ({file_type_key}): {str(e)}",
-            )
+            raise HTTPException(status_code=500, detail=f"Error leyendo imagen ({file_type_key}): {str(e)}")
 
+        content_type = upload_file.content_type or mimetypes.guess_type(original_name)[0] or "image/jpeg"
         encrypted_blob = encrypt_data(f"FILE:{safe_filename}")
 
         db_record = KYCVerification(
             user_id=current_user.id,
             filename=safe_filename,
+            file_data=img_bytes,
+            file_content_type=content_type,
             dni_encrypted=encrypted_blob,
             status="pending",
             file_type=file_type_key,
@@ -206,7 +223,6 @@ async def upload_kyc_document(
         )
         db.add(db_record)
         records_created.append(file_type_key)
-        saved_paths[file_type_key] = file_location
 
     # Immediately mark as pending so the banner updates in the UI
     current_user.dni_status = DNIStatus.PENDIENTE
@@ -216,9 +232,6 @@ async def upload_kyc_document(
     background_tasks.add_task(
         _run_gemini_verification,
         user_id=current_user.id,
-        front_path=saved_paths.get("front"),
-        back_path=saved_paths.get("back"),
-        selfie_path=saved_paths.get("selfie"),
         document_type=document_type,
     )
 
@@ -298,3 +311,32 @@ async def review_kyc(
 
     db.commit()
     return {"id": verification_id, "new_status": record.status}
+
+
+@router.get("/document/{kyc_id}")
+async def get_kyc_document(
+    kyc_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Serve a KYC document stored as BYTEA.
+    Accessible by the document owner or an admin.
+    """
+    record = db.query(KYCVerification).filter(KYCVerification.id == kyc_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Documento no encontrado")
+
+    is_owner = record.user_id == current_user.id
+    is_admin = getattr(current_user, "is_admin", False)
+    if not (is_owner or is_admin):
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    if not record.file_data:
+        raise HTTPException(status_code=404, detail="Archivo no disponible")
+
+    return Response(
+        content=record.file_data,
+        media_type=record.file_content_type or "image/jpeg",
+        headers={"Cache-Control": "private, no-store"},
+    )

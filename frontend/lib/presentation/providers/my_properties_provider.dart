@@ -83,7 +83,7 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
         .cast<Map<String, dynamic>>()
         .where((m) => m['media_type'] == 'image')
         .map((m) {
-          final path = m['file_path'] as String? ?? '';
+          final path = (m['file_path'] as String?) ?? (m['url'] as String?) ?? '';
           if (path.isEmpty) return '';
           if (path.startsWith('http')) return path;
           return '$staticBase/${path.startsWith('/') ? path.substring(1) : path}';

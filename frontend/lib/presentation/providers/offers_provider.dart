@@ -320,7 +320,8 @@ OfferData _mapOffer(dynamic item) {
   final buyer = map['buyer'] as Map<String, dynamic>? ?? {};
   final mediaList = property['media'] as List<dynamic>? ?? [];
   final imageUrl = mediaList.isNotEmpty
-      ? (mediaList.first as Map<String, dynamic>)['file_path'] as String?
+      ? ((mediaList.first as Map<String, dynamic>)['file_path'] as String?) ??
+        (mediaList.first as Map<String, dynamic>)['url'] as String?
       : null;
   final buyerFullName = buyer['full_name'] as String?;
   final sellerName = property['seller_name'] as String?;

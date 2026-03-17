@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SAEnum, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SAEnum, LargeBinary, UniqueConstraint
 from sqlalchemy.sql import func
 from .base import Base
 import enum
@@ -23,10 +23,12 @@ class PostSaleDocument(Base):
     offer_id    = Column(Integer, ForeignKey("offers.id"), nullable=False, index=True)
     uploaded_by = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    doc_type    = Column(SAEnum(PostSaleDocType, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
-    filename    = Column(String, nullable=False)
-    file_path   = Column(String, nullable=False)
-    file_size   = Column(Integer, nullable=True)
+    doc_type     = Column(SAEnum(PostSaleDocType, values_callable=lambda obj: [e.value for e in obj]), nullable=False)
+    filename     = Column(String, nullable=False)
+    file_path    = Column(String, nullable=True)   # deprecated — kept for legacy rows only
+    file_data    = Column(LargeBinary, nullable=True)
+    content_type = Column(String(100), nullable=True)
+    file_size    = Column(Integer, nullable=True)
 
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
 
