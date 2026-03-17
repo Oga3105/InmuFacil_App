@@ -141,20 +141,33 @@ def verify_identity_with_gemini(
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            model="gemini-2.0-flash-lite",
             contents=contents,
         )
         raw = response.text or ""
     except Exception as e:
         logger.error("Gemini API error: %s", e)
         err_str = str(e)
-        if (
+        is_quota = (
             "429" in err_str
             or "RESOURCE_EXHAUSTED" in err_str
             or "quota" in err_str.lower()
-            or "404" in err_str
-            or "NOT_FOUND" in err_str
-        ):
+        )
+        is_model_not_found = (
+            "NOT_FOUND" in err_str
+            or ("404" in err_str and "NOT_FOUND" in err_str)
+        )
+        if is_quota:
+            return GeminiKYCResult(
+                approved=False,
+                confidence=0.0,
+                reason="__QUOTA_EXCEEDED__",
+            )
+        if is_model_not_found:
+            logger.critical(
+                "Gemini model not found. Check the model name in gemini_kyc_service.py. "
+                "Error: %s", e
+            )
             return GeminiKYCResult(
                 approved=False,
                 confidence=0.0,

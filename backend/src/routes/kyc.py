@@ -180,7 +180,9 @@ async def upload_kyc_document(
     saved_paths: dict[str, str] = {}
 
     for file_type_key, upload_file in uploaded.items():
-        safe_filename = f"user_{current_user.id}_{file_type_key}_{upload_file.filename}"
+        original_name = upload_file.filename or f"{file_type_key}.jpg"
+        ext = os.path.splitext(original_name)[1].lower() or ".jpg"
+        safe_filename = f"user_{current_user.id}_{file_type_key}{ext}"
         file_location = f"{UPLOAD_DIR}/{safe_filename}"
 
         try:
