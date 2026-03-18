@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,19 +14,40 @@ void main() async {
   //    F5 en cualquier ruta funciona correctamente con flutter run y Nginx/Cloudflare
   usePathUrlStrategy();
 
-  // 2. Carga segura de variables de entorno
+  // 3. Inicializar easy_localization
+  await EasyLocalization.ensureInitialized();
+
+  // 4. Carga segura de variables de entorno
   try {
     await dotenv.load(fileName: '.env');
-    debugPrint('✅ Environment loaded successfully.');
+    debugPrint('Environment loaded successfully.');
   } catch (e) {
-    debugPrint('⚠️ WARNING: Could not load .env file. Using defaults. Error: $e');
+    debugPrint('WARNING: Could not load .env file. Using defaults. Error: $e');
     // No relanzamos el error para permitir que la app arranque aunque sea sin config
   }
 
-  // 3. Arranque de la App
+  // 5. Arranque de la App envuelta en EasyLocalization
+  //    saveLocale: true persiste automaticamente el idioma elegido entre sesiones
   runApp(
-    const ProviderScope(
-      child: InmuFacilApp(),
+    EasyLocalization(
+      supportedLocales: const [
+        Locale('es', 'ES'),
+        Locale('en', 'US'),
+        Locale('en', 'GB'),
+        Locale('en', 'CA'),
+        Locale('fr', 'FR'),
+        Locale('fr', 'CA'),
+        Locale('ca', 'ES'),
+        Locale('eu', 'ES'),
+        Locale('gl', 'ES'),
+      ],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('es', 'ES'),
+      startLocale: const Locale('es', 'ES'),
+      saveLocale: true,
+      child: const ProviderScope(
+        child: InmuFacilApp(),
+      ),
     ),
   );
 }
