@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/chat_provider.dart';
 
 // ── Palette (Navy Blue & Gold) ────────────────────────────────────────────────

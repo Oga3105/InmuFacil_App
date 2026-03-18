@@ -4,7 +4,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:inmufacil_frontend/presentation/providers/not_found_provider.dart';
-import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class NotFoundScreen extends ConsumerWidget {
 

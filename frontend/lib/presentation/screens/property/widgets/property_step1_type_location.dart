@@ -5,7 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../domain/entities/property_type.dart';
 import '../../../providers/property_form_provider.dart';
 import '../../../providers/search_provider.dart'; // for locationServiceProvider

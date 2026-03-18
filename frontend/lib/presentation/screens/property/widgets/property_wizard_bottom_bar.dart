@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../providers/property_form_provider.dart';
 
 class PropertyWizardBottomBar extends ConsumerWidget {

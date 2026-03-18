@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/formatters/currency_input_formatter.dart';
-import '../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/offers_provider.dart';
@@ -67,7 +67,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al enviar el mensaje. Intentalo de nuevo.')),
+          SnackBar(content: Text('chat.send_error'.tr())),
         );
       }
     } finally {
@@ -139,7 +139,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -147,7 +147,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Solicitar'),
+            child: Text('chat.request_docs_button'.tr()),
           ),
         ],
       ),
@@ -305,7 +305,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -321,7 +321,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 );
               }
             },
-            child: const Text('Enviar'),
+            child: Text('chat.send_button'.tr()),
           ),
         ],
       ),
@@ -798,7 +798,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Funcion de Borrador de Arras disponible en Hito 12.'),
+                              content: Text('chat.solvency_draft_wip'.tr()),
                               backgroundColor: _kNavy,
                             ),
                           );
@@ -1143,7 +1143,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al responder. Intentalo de nuevo.')),
+          SnackBar(content: Text('chat.respond_error'.tr())),
         );
       }
     } finally {
@@ -1173,7 +1173,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al anular. Intentalo de nuevo.')),
+          SnackBar(content: Text('chat.cancel_error'.tr())),
         );
       }
     } finally {
