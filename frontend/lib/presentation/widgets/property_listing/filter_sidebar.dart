@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/search_provider.dart';
 import '../../../domain/entities/property_type.dart';
-import '../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../common/premium_button.dart'; // Corrected Import
 
 class FilterSidebar extends ConsumerStatefulWidget {
@@ -182,7 +182,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   ),
                   child: DropdownButton<int>(
                     value: searchState.minBedrooms > 0 ? searchState.minBedrooms : null,
-                    hint: const Text('Habitaciones', style: TextStyle(fontSize: 13)),
+                    hint: Text('home.bedrooms_filter_label'.tr(), style: const TextStyle(fontSize: 13)),
                     underline: Container(),
                     icon: const Icon(Icons.arrow_drop_down),
                     isExpanded: true,

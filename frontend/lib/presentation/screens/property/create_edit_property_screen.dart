@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../providers/property_form_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';

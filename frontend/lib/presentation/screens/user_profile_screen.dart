@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:image_picker/image_picker.dart';
-import 'package:inmufacil_frontend/core/utils/temp_translations.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
@@ -169,25 +169,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                                 child: Row(children: [
                               Icon(Icons.person, size: 20),
                               SizedBox(width: 8),
-                              Text('Mi Perfil')
+                              Text('profile.tab_my_profile'.tr())
                             ])),
                             const Tab(
                                 child: Row(children: [
                               Icon(Icons.home_work, size: 20),
                               SizedBox(width: 8),
-                              Text('Mis Propiedades')
+                              Text('profile.tab_properties'.tr())
                             ])),
                             const Tab(
                                 child: Row(children: [
                               Icon(Icons.handshake_outlined, size: 20),
                               SizedBox(width: 8),
-                              Text('Mis Ofertas')
+                              Text('profile.tab_offers'.tr())
                             ])),
                             const Tab(
                                 child: Row(children: [
                               Icon(Icons.calendar_month_outlined, size: 20),
                               SizedBox(width: 8),
-                              Text('Visitas')
+                              Text('profile.tab_visits'.tr())
                             ])),
                             Tab(
                               child: Row(
@@ -195,7 +195,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                                   const Icon(Icons.chat_bubble_outline,
                                       size: 20),
                                   const SizedBox(width: 8),
-                                  const Text('Mensajes'),
+                                  Text('profile.tab_messages'.tr()),
                                   const SizedBox(width: 6),
                                   Consumer(
                                     builder: (ctx, r, _) {
@@ -411,16 +411,15 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Eliminar foto de perfil'),
-        content: const Text(
-            '¿Estás seguro de que quieres eliminar tu foto de perfil?'),
+        title: Text('profile.delete_photo_title'.tr()),
+        content: Text('profile.delete_photo_confirm'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -428,7 +427,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               foregroundColor: Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Eliminar'),
+            child: Text('common.delete'.tr()),
           ),
         ],
       ),
@@ -708,8 +707,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Información Personal',
-              style: TextStyle(
+          Text('profile.personal_info_title'.tr(),
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0F172A))),
@@ -763,8 +762,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8)),
                       ),
-                      child: const Text('Cancelar',
-                          style: TextStyle(color: Colors.red)), // Red text
+                      child: Text('common.cancel'.tr(),
+                          style: const TextStyle(color: Colors.red)), // Red text
                     ),
                   ),
                 ElevatedButton(
@@ -840,8 +839,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Seguridad y Privacidad',
-              style: TextStyle(
+          Text('profile.security_title'.tr(),
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF0F172A))),
@@ -862,11 +861,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Contraseña',
-                                style: TextStyle(
+                            Text('profile.password_label'.tr(),
+                                style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 14)),
                             Text(
-                                'Actualiza tu contraseña periódicamente para mayor seguridad.',
+                                'profile.password_update_hint'.tr(),
                                 style: TextStyle(
                                     color: Colors.grey.shade500, fontSize: 12)),
                           ],
@@ -882,8 +881,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text('Cambiar Contraseña',
-                              style: TextStyle(color: Colors.black87)),
+                          child: Text('profile.change_password'.tr(),
+                              style: const TextStyle(color: Colors.black87)),
                         ),
                       ],
                     ),
@@ -905,13 +904,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Suspender Cuenta',
-                          style: TextStyle(
+                      Text('profile.suspend_account'.tr(),
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: Colors.orange)),
                       const SizedBox(height: 4),
-                      Text('Tu perfil no será visible públicamente.',
+                      Text('profile.suspend_hint'.tr(),
                           style: TextStyle(
                               color: Colors.orange.shade300, fontSize: 12)),
                       const SizedBox(height: 12),
@@ -933,7 +932,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text(isSuspended ? 'Reactivar' : 'Suspender',
+                          child: Text(isSuspended ? 'profile.reactivate'.tr() : 'profile.suspend_button'.tr(),
                               style: const TextStyle(color: Colors.orange)),
                         ),
                       ),
@@ -952,13 +951,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Eliminar Cuenta',
-                          style: TextStyle(
+                      Text('profile.delete_account'.tr(),
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                               color: Colors.red)),
                       const SizedBox(height: 4),
-                      Text('Esta acción es irreversible.',
+                      Text('profile.delete_hint'.tr(),
                           style: TextStyle(
                               color: Colors.red.shade300, fontSize: 12)),
                       const SizedBox(height: 12),
@@ -975,8 +974,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                                 borderRadius:
                                     BorderRadius.circular(12)), // 12px radius
                           ),
-                          child: const Text('Eliminar',
-                              style: TextStyle(color: Colors.white)),
+                          child: Text('common.delete'.tr(),
+                              style: const TextStyle(color: Colors.white)),
                         ),
                       ),
                     ],
@@ -1063,7 +1062,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                               color: Color(0xFF2563EB),
                               borderRadius: BorderRadius.all(Radius.circular(4)),
                             ),
-                            child: const Text('Solo compradores', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
+                            child: Text('profile.solvency_buyers_only'.tr(), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
                           ),
                           const SizedBox(height: 4),
                           const Text(
@@ -1133,7 +1132,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: OutlinedButton.icon(
         onPressed: () => context.push('/trust-dashboard'),
         icon: const Icon(Icons.workspace_premium_outlined, size: 16),
-        label: const Text('Ver nivel de confianza'),
+        label: Text('profile.trust_level_button'.tr()),
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF1E3A5F),
           side: const BorderSide(color: Color(0xFFCBD5E1)),
@@ -1160,15 +1159,15 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('¿Vendes tu casa?',
-              style: TextStyle(
+          Text('profile.promo_title'.tr(),
+              style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white)),
           const SizedBox(height: 8),
-          const Text(
-            'Publicala gratis ahora y llega a miles de compradores verificados en nuestra red P2P segura.',
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+          Text(
+            'profile.promo_body'.tr(),
+            style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 24),
           SizedBox(
@@ -1177,8 +1176,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               onPressed: () => context.push('/property/create'),
               icon: const Icon(Icons.add_circle_outline,
                   color: Color(0xFF2563EB), size: 18),
-              label: const Text('Publicar Nueva Propiedad',
-                  style: TextStyle(
+              label: Text('profile.promo_button'.tr(),
+                  style: const TextStyle(
                       color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
@@ -1200,7 +1199,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return myPropertiesAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (err, _) =>
-          Center(child: Text('Error al cargar propiedades: $err')),
+          Center(child: Text('profile.properties_error'.tr(namedArgs: {'error': err.toString()}))),
       data: (allProperties) {
         // Apply status filter
         var myProperties = _propertiesStatusFilter == 'all'
@@ -1229,17 +1228,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Tus Propiedades',
-                        style: TextStyle(
+                    Text('profile.my_properties_title'.tr(),
+                        style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF0F172A))),
-                    SizedBox(height: 4),
-                    Text('Gestiona tus anuncios y su estado.',
-                        style: TextStyle(color: Colors.grey, fontSize: 13)),
+                    const SizedBox(height: 4),
+                    Text('profile.my_properties_subtitle'.tr(),
+                        style: const TextStyle(color: Colors.grey, fontSize: 13)),
                   ],
                 ),
                 _SortButton<String>(
@@ -1437,18 +1436,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   builder: (_) => AlertDialog(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
-                    title: const Text('Eliminar propiedad'),
-                    content: const Text(
-                        'Esta accion no se puede deshacer. La propiedad sera eliminada permanentemente.'),
+                    title: Text('profile.delete_property_title'.tr()),
+                    content: Text('profile.delete_property_confirm'.tr()),
                     actions: [
                       TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancelar')),
+                          child: Text('common.cancel'.tr())),
                       TextButton(
                         onPressed: () => Navigator.pop(context, true),
                         style:
                             TextButton.styleFrom(foregroundColor: Colors.red),
-                        child: const Text('Eliminar'),
+                        child: Text('common.delete'.tr()),
                       ),
                     ],
                   ),
@@ -1561,8 +1559,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: const Icon(Icons.home, size: 32, color: Colors.grey),
           ),
           const SizedBox(height: 16),
-          const Text('No tienes propiedades activas',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('profile.no_properties_title'.tr(),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           const Text(
             '"Empieza hoy mismo tu proceso de venta directa sin intermediarios."',
@@ -1574,7 +1572,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           FilledButton.icon(
             onPressed: () => context.push('/property/create'),
             icon: const Icon(Icons.add_home_outlined, size: 18),
-            label: const Text('Publicar propiedad'),
+            label: Text('profile.publish_property'.tr()),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF2563EB),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -1589,8 +1587,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Ver mis borradores',
-                style: TextStyle(
+            child: Text('profile.see_drafts'.tr(),
+                style: const TextStyle(
                     color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
           ),
         ],
@@ -2239,7 +2237,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               textStyle:
                   const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
             ),
-            child: const Text('Seguimiento'),
+            child: Text('profile.offer_timeline'.tr()),
           ),
         ],
       ),
@@ -2350,15 +2348,15 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 const Icon(Icons.error_outline,
                     size: 40, color: Color(0xFF64748B)),
                 const SizedBox(height: 12),
-                const Text('Error al cargar visitas',
-                    style: TextStyle(color: Color(0xFF64748B))),
+                Text('profile.visits_error'.tr(),
+                    style: const TextStyle(color: Color(0xFF64748B))),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
                     ref.invalidate(sentOffersProvider);
                     ref.invalidate(receivedOffersProvider);
                   },
-                  child: const Text('Reintentar'),
+                  child: Text('profile.retry'.tr()),
                 ),
               ],
             ),
@@ -2611,20 +2609,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               icon: const Icon(Icons.more_vert, color: Color(0xFF64748B)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               itemBuilder: (_) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'reschedule',
                   child: Row(children: [
-                    Icon(Icons.edit_calendar, size: 20, color: Color(0xFF2563EB)),
-                    SizedBox(width: 8),
-                    Text('Reprogramar'),
+                    const Icon(Icons.edit_calendar, size: 20, color: Color(0xFF2563EB)),
+                    const SizedBox(width: 8),
+                    Text('profile.visit_reschedule'.tr()),
                   ]),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'cancel',
                   child: Row(children: [
-                    Icon(Icons.event_busy, size: 20, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Anular', style: TextStyle(color: Colors.red)),
+                    const Icon(Icons.event_busy, size: 20, color: Colors.red),
+                    const SizedBox(width: 8),
+                    Text('profile.visit_cancel'.tr(), style: const TextStyle(color: Colors.red)),
                   ]),
                 ),
               ],
@@ -2637,8 +2635,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Para reprogramar una visita de agenda, anula esta visita y pide una nueva fecha desde la ficha del inmueble.'),
+                      SnackBar(
+                        content: Text('profile.visit_reschedule_hint'.tr()),
                         duration: Duration(seconds: 4),
                       ),
                     );
@@ -2656,20 +2654,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     if (parts.length > 1) {
                        context.push('/chat/${parts[1]}');
                        ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Por favor, anula la visita desde esta pantalla de chat.')),
+                        SnackBar(content: Text('profile.visit_cancel_from_chat'.tr())),
                       );
                     }
                   } else {
                      final success = await ref.read(cancelVisitProvider(v.id).future);
                      if (success && mounted) {
                        ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Visita anulada correctamente.')),
+                         SnackBar(content: Text('profile.visit_cancelled_ok'.tr())),
                        );
                        ref.invalidate(myVisitsProvider);
                        ref.read(slotsProvider(v.propertyId)); // trigger refresh of slots if applicable
                      } else if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                         const SnackBar(content: Text('Error al anular la visita.')),
+                         SnackBar(content: Text('profile.visit_cancel_error'.tr())),
                        );
                      }
                   }
@@ -2790,12 +2788,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 const Icon(Icons.error_outline,
                     size: 40, color: Color(0xFF64748B)),
                 const SizedBox(height: 12),
-                Text('Error: $err',
-                    style: TextStyle(color: Color(0xFF64748B))),
+                Text('${'common.error'.tr()}: $err',
+                    style: const TextStyle(color: Color(0xFF64748B))),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => ref.invalidate(chatListProvider),
-                  child: const Text('Reintentar'),
+                  child: Text('profile.retry'.tr()),
                 ),
               ],
             ),
@@ -3110,7 +3108,7 @@ class _ProfileChatButtonState extends ConsumerState<_ProfileChatButton> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.chat_bubble_outline, size: 16),
-      label: const Text('Chat'),
+      label: Text('chat.title'.tr()),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF2563EB),
         side: const BorderSide(color: Color(0xFF2563EB)),
@@ -3219,34 +3217,34 @@ class _GestionarMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'view',
           child: Row(
-            children: const [
-              Icon(Icons.house_outlined, size: 18, color: Color(0xFF475569)),
-              SizedBox(width: 12),
-              Text('Ver Propiedad',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+            children: [
+              const Icon(Icons.house_outlined, size: 18, color: Color(0xFF475569)),
+              const SizedBox(width: 12),
+              Text('chat.view_property'.tr(),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
             ],
           ),
         ),
         PopupMenuItem(
           value: 'offers',
           child: Row(
-            children: const [
-              Icon(Icons.handshake_outlined,
+            children: [
+              const Icon(Icons.handshake_outlined,
                   size: 18, color: Color(0xFF475569)),
-              SizedBox(width: 12),
-              Text('Ver Ofertas',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+              const SizedBox(width: 12),
+              Text('profile.tab_offers'.tr(),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
             ],
           ),
         ),
         PopupMenuItem(
           value: 'edit',
           child: Row(
-            children: const [
-              Icon(Icons.edit_outlined, size: 18, color: Color(0xFF475569)),
-              SizedBox(width: 12),
-              Text('Editar',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+            children: [
+              const Icon(Icons.edit_outlined, size: 18, color: Color(0xFF475569)),
+              const SizedBox(width: 12),
+              Text('common.edit'.tr(),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
             ],
           ),
         ),
@@ -3263,7 +3261,7 @@ class _GestionarMenu extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Text(
-                _isActive ? 'Desactivar' : 'Activar',
+                _isActive ? 'profile.action_deactivate'.tr() : 'profile.action_activate'.tr(),
                 style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
               ),
             ],
@@ -3277,8 +3275,8 @@ class _GestionarMenu extends StatelessWidget {
               Icon(Icons.delete_outline_rounded,
                   size: 18, color: Color(0xFFDC2626)),
               SizedBox(width: 12),
-              Text('Eliminar',
-                  style: TextStyle(fontSize: 13, color: Color(0xFFDC2626))),
+              Text('common.delete'.tr(),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFFDC2626))),
             ],
           ),
         ),

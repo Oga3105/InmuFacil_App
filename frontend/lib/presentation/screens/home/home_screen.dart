@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-// import 'package:easy_localization/easy_localization.dart'; // TEMP DISABLED
+import 'package:easy_localization/easy_localization.dart';
 
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
-import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart'; // [NEW] Hover Provider
-import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart'; // [NEW] Card Widget
+import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart';
+import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
-// PropertyCard import removed
-// NEW IMPORT (Fix for Property not found)
-import 'package:inmufacil_frontend/core/utils/temp_translations.dart'; // TEMP REPLACEMENT
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/notifications_provider.dart';
@@ -269,7 +266,7 @@ class _MapSection extends ConsumerWidget {
              child: Card(
                child: ListTile(
                  leading: const Icon(Icons.search),
-                 title: const Text('Buscar propiedades...'),
+                 title: Text('home.search_placeholder'.tr()),
                  onTap: () {
                    // Mobile might need a bottom sheet or separate screen for filters
                  },
@@ -593,7 +590,7 @@ class _PropertyResultsView extends ConsumerWidget {
              const Icon(Icons.info_outline, size: 48, color: Colors.red), // Request: "i de informacion en rojo papelera"
              const SizedBox(height: 16),
              Text(
-               'No hemos encontrado nada aquí',
+               'home.no_results_found'.tr(),
                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
              ),
              const SizedBox(height: 8),
@@ -602,7 +599,7 @@ class _PropertyResultsView extends ConsumerWidget {
                    ref.read(searchProvider.notifier).resetFilters();
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Limpiar filtros'),
+                label: Text('home.clear_filters'.tr()),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
                 ),
@@ -623,7 +620,7 @@ class _PropertyResultsView extends ConsumerWidget {
              const Icon(Icons.info_outline, size: 48, color: Colors.red), // Request: "i de informacion en rojo papelera"
              const SizedBox(height: 16),
              Text(
-               'No hemos encontrado nada aquí',
+               'home.no_results_found'.tr(),
                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
              ),
              const SizedBox(height: 8),
@@ -632,7 +629,7 @@ class _PropertyResultsView extends ConsumerWidget {
                    ref.read(searchProvider.notifier).resetFilters();
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Limpiar filtros'),
+                label: Text('home.clear_filters'.tr()),
                 style: TextButton.styleFrom(
                   foregroundColor: theme.colorScheme.error,
                 ),
@@ -979,12 +976,12 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Precio máximo personalizado'),
+        title: Text('home.custom_price_title'.tr()),
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Precio máximo (€)',
+          decoration: InputDecoration(
+            labelText: 'home.custom_price_label'.tr(),
             hintText: '15000000',
             prefixText: '€',
           ),
@@ -997,7 +994,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('Cancelar', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+            child: Text('common.cancel'.tr(), style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1013,7 +1010,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('Aplicar'),
+            child: Text('home.apply'.tr()),
           ),
         ],
       ),
@@ -1347,7 +1344,7 @@ class _MapNavigationBar extends ConsumerWidget {
                                 style: TextButton.styleFrom(
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
-                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+                                child: Text('common.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
                               ),
                               FilledButton(
                                 onPressed: () {
@@ -1358,7 +1355,7 @@ class _MapNavigationBar extends ConsumerWidget {
                                   backgroundColor: const Color(0xFF2563EB),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
-                                child: const Text('Iniciar sesión'),
+                                child: Text('auth.login_button'.tr()),
                               ),
                             ],
                           ),
