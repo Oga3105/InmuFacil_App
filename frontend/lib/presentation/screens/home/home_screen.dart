@@ -18,6 +18,7 @@ import '../../providers/notifications_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/urgency_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../info/info_screen.dart';
 
 /// Home/Landing Screen with Google Maps Integration
 /// 
@@ -1391,6 +1392,87 @@ class _MapNavigationBar extends ConsumerWidget {
                     ),
                     child: Text(
                       'Cómo funciona',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 36),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(
+                        value: 'what-is',
+                        child: Text('Que es InmuFacil',
+                            style: theme.textTheme.bodyMedium
+                                ?.copyWith(fontSize: 14)),
+                      ),
+                      PopupMenuItem(
+                        value: 'buyer-guide',
+                        child: Text('Guia del Comprador',
+                            style: theme.textTheme.bodyMedium
+                                ?.copyWith(fontSize: 14)),
+                      ),
+                      PopupMenuItem(
+                        value: 'seller-guide',
+                        child: Text('Guia del Vendedor',
+                            style: theme.textTheme.bodyMedium
+                                ?.copyWith(fontSize: 14)),
+                      ),
+                    ],
+                    onSelected: (key) {
+                      ref.read(searchProvider.notifier).clearError();
+                      switch (key) {
+                        case 'what-is':
+                          context.push(InfoScreen.routeFor(InfoPageType.whatIsInmufacil));
+                        case 'buyer-guide':
+                          context.push(InfoScreen.routeFor(InfoPageType.buyerGuide));
+                        case 'seller-guide':
+                          context.push(InfoScreen.routeFor(InfoPageType.sellerGuide));
+                      }
+                    },
+                    child: TextButton(
+                      onPressed: null,
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Guias',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Icon(Icons.arrow_drop_down,
+                              size: 18, color: Colors.grey[700]),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      context.push(InfoScreen.routeFor(InfoPageType.contact));
+                    },
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Contacto',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[700],
                         fontWeight: FontWeight.w500,

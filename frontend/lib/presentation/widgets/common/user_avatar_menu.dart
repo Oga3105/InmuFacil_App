@@ -9,6 +9,7 @@ import '../../providers/offers_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../providers/urgency_provider.dart';
 import '../../providers/visits_provider.dart';
+import '../../screens/info/info_screen.dart';
 
 // ─── Menu item value types ────────────────────────────────────────────────────
 
@@ -196,6 +197,64 @@ class UserAvatarMenu extends ConsumerWidget {
 
     items.add(const PopupMenuDivider());
 
+    // ── Info & help section ───────────────────────────────────────────────────
+    items.add(
+      PopupMenuItem<_MenuValue>(
+        enabled: false,
+        height: 28,
+        child: Text(
+          'Informacion y ayuda',
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: Colors.grey[500],
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.4,
+          ),
+        ),
+      ),
+    );
+    items.add(
+      PopupMenuItem<_MenuValue>(
+        value: _NavValue('info-what-is'),
+        child: _NavItem(
+          icon: Icons.info_outline,
+          label: 'Que es InmuFacil',
+          accentColor: const Color(0xFF1E3A5F),
+        ),
+      ),
+    );
+    items.add(
+      PopupMenuItem<_MenuValue>(
+        value: _NavValue('info-buyer-guide'),
+        child: _NavItem(
+          icon: Icons.shopping_bag_outlined,
+          label: 'Guia del Comprador',
+          accentColor: const Color(0xFF2563EB),
+        ),
+      ),
+    );
+    items.add(
+      PopupMenuItem<_MenuValue>(
+        value: _NavValue('info-seller-guide'),
+        child: _NavItem(
+          icon: Icons.sell_outlined,
+          label: 'Guia del Vendedor',
+          accentColor: const Color(0xFF16A34A),
+        ),
+      ),
+    );
+    items.add(
+      PopupMenuItem<_MenuValue>(
+        value: _NavValue('info-contact'),
+        child: _NavItem(
+          icon: Icons.support_agent_outlined,
+          label: 'Contacto y Ayuda',
+          accentColor: const Color(0xFF1E3A5F),
+        ),
+      ),
+    );
+
+    items.add(const PopupMenuDivider());
+
     items.add(
       PopupMenuItem<_MenuValue>(
         value: _LogoutValue(),
@@ -257,6 +316,14 @@ class UserAvatarMenu extends ConsumerWidget {
                 onTabSelected != null
                     ? onTabSelected!(4)
                     : context.push('/profile?tab=4');
+              case 'info-what-is':
+                context.push(InfoScreen.routeFor(InfoPageType.whatIsInmufacil));
+              case 'info-buyer-guide':
+                context.push(InfoScreen.routeFor(InfoPageType.buyerGuide));
+              case 'info-seller-guide':
+                context.push(InfoScreen.routeFor(InfoPageType.sellerGuide));
+              case 'info-contact':
+                context.push(InfoScreen.routeFor(InfoPageType.contact));
             }
         }
       },
