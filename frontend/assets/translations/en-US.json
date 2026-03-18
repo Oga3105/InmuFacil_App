@@ -175,5 +175,34 @@
         "timeout": "Request timed out. Please try again.",
         "request_cancelled": "Request cancelled",
         "connection_error": "Could not connect to the server. Check your internet connection."
+    },
+    "chat": {
+        "title": "Messages",
+        "no_conversations": "You have no conversations yet",
+        "no_conversations_hint": "Chats appear when a message exchange is accepted on an offer.",
+        "error_loading": "Error loading messages",
+        "retry": "Retry",
+        "active_offer": "Active offer",
+        "start_conversation": "Start the conversation",
+        "message_hint": "Type a message...",
+        "online": "Online",
+        "view_property": "View property",
+        "today": "Today",
+        "yesterday": "Yesterday"
+    },
+    "profile": {
+        "change_password": "Change Password",
+        "current_password": "Current Password",
+        "new_password": "New Password",
+        "confirm_password": "Confirm New Password",
+        "update_password": "Update Password",
+        "generate_password": "Generate secure password",
+        "password_mismatch": "Passwords do not match",
+        "password_min_length": "New password must be at least 8 characters",
+        "password_current_required": "Enter your current password",
+        "password_current_incorrect": "Current password is incorrect. Please check and try again.",
+        "password_session_expired": "Your session has expired. Log in again to change your password.",
+        "password_change_error": "Error changing password. Please try again later.",
+        "password_change_success": "Password updated successfully"
     }
 }

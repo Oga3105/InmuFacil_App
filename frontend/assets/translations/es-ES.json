@@ -175,5 +175,34 @@
         "timeout": "Tiempo de espera agotado. Inténtalo de nuevo.",
         "request_cancelled": "Petición cancelada",
         "connection_error": "No se pudo conectar con el servidor. Comprueba tu conexión a internet."
+    },
+    "chat": {
+        "title": "Mensajes",
+        "no_conversations": "Aún no tienes conversaciones",
+        "no_conversations_hint": "Los chats aparecen cuando se acepta un intercambio de mensajes en una oferta.",
+        "error_loading": "Error al cargar mensajes",
+        "retry": "Reintentar",
+        "active_offer": "Oferta activa",
+        "start_conversation": "Inicia la conversación",
+        "message_hint": "Escribe un mensaje...",
+        "online": "En línea",
+        "view_property": "Ver inmueble",
+        "today": "Hoy",
+        "yesterday": "Ayer"
+    },
+    "profile": {
+        "change_password": "Cambiar Contraseña",
+        "current_password": "Contraseña Actual",
+        "new_password": "Nueva Contraseña",
+        "confirm_password": "Confirmar Nueva Contraseña",
+        "update_password": "Actualizar Contraseña",
+        "generate_password": "Generar contraseña segura",
+        "password_mismatch": "Las contraseñas no coinciden",
+        "password_min_length": "La nueva contraseña debe tener al menos 8 caracteres",
+        "password_current_required": "Introduce tu contraseña actual",
+        "password_current_incorrect": "La contraseña actual es incorrecta. Verifica e inténtalo de nuevo.",
+        "password_session_expired": "Tu sesión ha expirado. Inicia sesión de nuevo para cambiar tu contraseña.",
+        "password_change_error": "Error al cambiar la contraseña. Inténtalo más tarde.",
+        "password_change_success": "Contraseña actualizada correctamente"
     }
 }
