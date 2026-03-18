@@ -54,6 +54,9 @@ dependencies:
   camera: ^0.12.0
   http: ^1.2.0
 
+  # External URL launching
+  url_launcher: ^6.3.0
+
   # Real-time chat (WebSocket)
   web_socket_channel: ^3.0.1
 
