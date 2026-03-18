@@ -9,6 +9,7 @@ import '../../widgets/common/app_bar_back_button.dart';
 import 'widgets/property_stepper_header.dart';
 import 'widgets/property_step1_type_location.dart';
 import 'widgets/property_step2_details_price.dart';
+import 'widgets/property_step3_doc_verification.dart';
 import 'widgets/property_step3_photos_extras.dart';
 import 'widgets/property_step4_ai_description.dart';
 import 'widgets/property_step5_preview.dart';
@@ -140,11 +141,12 @@ class _CreateEditPropertyScreenState
                   0 => const PropertyStep1TypeLocation(),
                   1 => const PropertyStep2DetailsPrice(),
                   2 => const PropertyStep3PhotosExtras(),
-                  3 => const PropertyStep4AiDescription(),
+                  3 => const PropertyStep3DocVerification(),
+                  4 => const PropertyStep4AiDescription(),
                   _ => const PropertyStep5Preview(),
                 };
-                // Step 5 (preview) manages its own scroll
-                if (formState.currentStep == 4) return stepWidget;
+                // Step 6 (preview) manages its own scroll
+                if (formState.currentStep == 5) return stepWidget;
                 return SingleChildScrollView(child: stepWidget);
               },
             ),
