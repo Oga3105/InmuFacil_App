@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate
 from backend.src.routes import notifications as notifications_router
 
 from fastapi import APIRouter
@@ -350,6 +350,7 @@ api_v1_router.include_router(tasacion.router)     # Sprint V9 - Tasacion Appoint
 api_v1_router.include_router(notaria_appt.router) # Sprint V10 - Notaria Appointment
 api_v1_router.include_router(entrega_llaves.router) # Sprint V10 - Entrega de Llaves
 api_v1_router.include_router(notifications_router.router)  # V17 - Notification Center
+api_v1_router.include_router(ai_generate.router)          # V41 - AI Smart Fallback + V44 Rate Limiter
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
