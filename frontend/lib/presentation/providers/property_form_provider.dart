@@ -12,6 +12,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/formatters/currency_input_formatter.dart';
+import '../../domain/entities/property_condition.dart';
 import '../../domain/entities/property_type.dart';
 import 'search_provider.dart' show searchProvider;
 
@@ -101,6 +102,7 @@ class PropertyFormState {
     this.bathrooms = 1,
     this.titleText = '',
     this.descriptionText = '',
+    this.propertyCondition,
     // Step 3
     this.mediaItems = const [],
     this.hasLift = false,
@@ -151,6 +153,7 @@ class PropertyFormState {
   final int bathrooms;
   final String titleText;
   final String descriptionText;
+  final PropertyCondition? propertyCondition;
   // Step 3
   final List<PropertyMediaItem> mediaItems;
   final bool hasLift;
@@ -208,6 +211,8 @@ class PropertyFormState {
     int? bathrooms,
     String? titleText,
     String? descriptionText,
+    PropertyCondition? propertyCondition,
+    bool clearPropertyCondition = false,
     List<PropertyMediaItem>? mediaItems,
     bool? hasLift,
     bool? hasGarage,
@@ -261,6 +266,7 @@ class PropertyFormState {
       bathrooms: bathrooms ?? this.bathrooms,
       titleText: titleText ?? this.titleText,
       descriptionText: descriptionText ?? this.descriptionText,
+      propertyCondition: clearPropertyCondition ? null : (propertyCondition ?? this.propertyCondition),
       mediaItems: mediaItems ?? this.mediaItems,
       hasLift: hasLift ?? this.hasLift,
       hasGarage: hasGarage ?? this.hasGarage,
@@ -326,7 +332,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   bool nextStep() {
     if (!_validateCurrentStep()) return false;
-    if (state.currentStep < 4) {
+    if (state.currentStep < 5) {
       state = state.copyWith(currentStep: state.currentStep + 1);
     }
     return true;
@@ -493,6 +499,10 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   void setDescription(String description) {
     state = state.copyWith(descriptionText: description, clearStep2Error: true, clearStep4Error: true);
+  }
+
+  void setPropertyCondition(PropertyCondition condition) {
+    state = state.copyWith(propertyCondition: condition, clearStep2Error: true);
   }
 
   // ---------------------------------------------------------------------------
@@ -706,6 +716,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         hasAccessibility: (features['has_accessibility'] as bool?) ?? false,
         allowVisits: (data['allow_visits'] as bool?) ?? true,
         energyCertification: data['energy_certification'] as String?,
+        propertyCondition: _parseCondition(features['conservation_state'] ?? data['conservation_state']),
       );
     } on DioException catch (e) {
       final msg = e.response?.data?['detail'] ?? 'Error al cargar la propiedad';
@@ -803,7 +814,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   Future<void> submit(BuildContext context) async {
     // Validate all steps
-    if (!_validateStep(0) || !_validateStep(1) || !_validateStep(2) || !_validateStep(3)) {
+    if (!_validateStep(0) || !_validateStep(1) || !_validateStep(2) || !_validateStep(3) || !_validateStep(4)) {
       if (state.step1Error != null) {
         state = state.copyWith(currentStep: 0);
       } else if (state.step2Error != null) {
@@ -811,7 +822,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       } else if (state.step3Error != null) {
         state = state.copyWith(currentStep: 2);
       } else if (state.step4Error != null) {
-        state = state.copyWith(currentStep: 3);
+        state = state.copyWith(currentStep: 4);
       }
       return;
     }
@@ -1028,6 +1039,8 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'allow_visits': state.allowVisits,
       if (state.energyCertification != null)
         'energy_certification': state.energyCertification,
+      if (state.propertyCondition != null)
+        'conservation_state': state.propertyCondition!.backendValue,
       'features': {
         'bedrooms': state.bedrooms,
         'bathrooms': state.bathrooms,
@@ -1085,6 +1098,10 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
               step2Error: 'El título debe tener al menos 5 caracteres');
           return false;
         }
+        if (state.propertyCondition == null) {
+          state = state.copyWith(step2Error: 'Selecciona el estado del inmueble');
+          return false;
+        }
         state = state.copyWith(clearStep2Error: true);
         return true;
       case 2:
@@ -1095,6 +1112,9 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         state = state.copyWith(clearStep3Error: true);
         return true;
       case 3:
+        state = state.copyWith(clearStep3Error: true);
+        return true;
+      case 4:
         if (state.descriptionText.length < 20) {
           state = state.copyWith(
               step4Error:
@@ -1103,7 +1123,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         }
         state = state.copyWith(clearStep4Error: true);
         return true;
-      case 4:
+      case 5:
         return true;
       default:
         return true;
@@ -1112,6 +1132,15 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   void reset() {
     state = const PropertyFormState();
+  }
+
+  PropertyCondition? _parseCondition(dynamic raw) {
+    if (raw == null) return null;
+    final str = raw as String;
+    for (final c in PropertyCondition.values) {
+      if (c.backendValue == str) return c;
+    }
+    return null;
   }
 
   String? _buildMediaUrl(dynamic raw) {

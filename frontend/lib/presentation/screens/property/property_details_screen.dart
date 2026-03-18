@@ -19,6 +19,7 @@ import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../widgets/property/document_status_section.dart';
 
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
 
@@ -321,6 +322,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       _OwnerCard(property: property),
                       const SizedBox(height: 24),
                       _SellerMetricsCard(propertyId: property.id, status: property.status),
+                      if (isOwner) ...[
+                        const SizedBox(height: 24),
+                        DocumentStatusSection(
+                          postalCode: _extractPostalCode(property.address),
+                        ),
+                      ],
                       if (!isOwner) ...[
                         const SizedBox(height: 16),
                         _PropertyViabilityCard(propertyId: property.id, ref: ref),
@@ -339,6 +346,11 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         ),
       ],
     );
+  }
+
+  String _extractPostalCode(String address) {
+    final match = RegExp(r'\b(\d{5})\b').firstMatch(address);
+    return match?.group(1) ?? '';
   }
 
   Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {

@@ -6,6 +6,7 @@ import '../../../../core/formatters/currency_input_formatter.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import '../../../providers/property_form_provider.dart';
+import 'property_condition_selector.dart';
 
 class PropertyStep2DetailsPrice extends ConsumerStatefulWidget {
   const PropertyStep2DetailsPrice({super.key});
@@ -211,6 +212,20 @@ class _PropertyStep2DetailsPriceState
                   ),
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // ── Estado del Inmueble card ───────────────────────────────────────
+          _SectionCard(
+            icon: Icons.home_repair_service_outlined,
+            title: 'property_wizard.condition_title'.tr(),
+            child: PropertyConditionSelector(
+              selected: s.propertyCondition,
+              onSelected: (condition) {
+                ref.read(propertyFormProvider.notifier).setPropertyCondition(condition);
+              },
             ),
           ),
 
