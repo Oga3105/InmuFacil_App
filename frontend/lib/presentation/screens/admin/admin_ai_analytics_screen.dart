@@ -1,0 +1,583 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/services/ai_metrics_service.dart';
+import '../../providers/auth_provider.dart';
+import '../../widgets/common/app_bar_back_button.dart';
+
+const _blue = Color(0xFF2563EB);
+const _amber = Color(0xFFF59E0B);
+const _green = Color(0xFF16A34A);
+const _red = Color(0xFFDC2626);
+
+const _kPanicKey = 'ai_panic_mode_active';
+const _kPanicModelKey = 'ai_panic_forced_model';
+const int _maxDailyRequests = 200;
+
+class AdminAiAnalyticsScreen extends ConsumerStatefulWidget {
+  const AdminAiAnalyticsScreen({super.key});
+
+  @override
+  ConsumerState<AdminAiAnalyticsScreen> createState() =>
+      _AdminAiAnalyticsScreenState();
+}
+
+class _AdminAiAnalyticsScreenState
+    extends ConsumerState<AdminAiAnalyticsScreen> {
+  List<AiCallLog> _logs = [];
+  Map<String, int> _byFeature = {};
+  double _resilienceRatio = 1.0;
+  int _dailyCount = 0;
+  double _dailyRatio = 0.0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMetrics();
+  }
+
+  Future<void> _loadMetrics() async {
+    final service = AiMetricsService.instance;
+    final logs = await service.getLogsForLastDays(30);
+    final today = await service.getLogsForDate(DateTime.now());
+
+    final byFeature = <String, int>{};
+    for (final log in logs) {
+      byFeature[log.feature] = (byFeature[log.feature] ?? 0) + 1;
+    }
+
+    final successful = logs.where((l) => l.success).length;
+    final resilience = logs.isEmpty ? 1.0 : successful / logs.length;
+    final dailyCount = today.length;
+    final dailyRatio = (dailyCount / _maxDailyRequests).clamp(0.0, 1.0);
+
+    if (!mounted) return;
+    setState(() {
+      _logs = logs;
+      _byFeature = byFeature;
+      _resilienceRatio = resilience;
+      _dailyCount = dailyCount;
+      _dailyRatio = dailyRatio;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final isAdmin = authState.user?.userType == 'admin';
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: AppBarBackButton(onPressed: () => context.pop()),
+        title: const Text(
+          'Salud de la IA',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: _blue),
+            onPressed: () {
+              setState(() => _isLoading = true);
+              _loadMetrics();
+            },
+            tooltip: 'Actualizar',
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: !isAdmin
+          ? _buildAccessRestricted()
+          : _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : RefreshIndicator(
+                  onRefresh: _loadMetrics,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      _buildResilienceCard(),
+                      const SizedBox(height: 12),
+                      _buildByFeatureCard(),
+                      const SizedBox(height: 12),
+                      _buildRealtimeLogCard(),
+                      const SizedBox(height: 12),
+                      const _PanicControlCard(),
+                      const SizedBox(height: 12),
+                      _buildDailyBudgetCard(),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+    );
+  }
+
+  Widget _buildAccessRestricted() {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.lock_outline_rounded, size: 64, color: Color(0xFF94A3B8)),
+          SizedBox(height: 16),
+          Text(
+            'Acceso restringido',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Esta seccion es exclusiva para administradores.',
+            style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResilienceCard() {
+    final percent = (_resilienceRatio * 100).toStringAsFixed(1);
+    final Color gaugeColor;
+    if (_resilienceRatio >= 0.9) {
+      gaugeColor = _green;
+    } else if (_resilienceRatio >= 0.7) {
+      gaugeColor = _amber;
+    } else {
+      gaugeColor = _red;
+    }
+
+    return _card(
+      child: Row(
+        children: [
+          SizedBox(
+            width: 72,
+            height: 72,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  value: _resilienceRatio,
+                  strokeWidth: 7,
+                  backgroundColor: const Color(0xFFE2E8F0),
+                  valueColor: AlwaysStoppedAnimation<Color>(gaugeColor),
+                ),
+                Text(
+                  '$percent%',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: gaugeColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ratio de Resiliencia',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Llamadas exitosas sobre el total. '
+                  '${_logs.isEmpty ? "Sin datos registrados." : "Basado en ${_logs.length} llamadas (30d)."}',
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildByFeatureCard() {
+    final entries = _byFeature.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Llamadas por Funcionalidad',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (entries.isEmpty)
+            const Text('Sin datos.',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+          else
+            ...entries.map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: _blue,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          e.key,
+                          style: const TextStyle(
+                              fontSize: 14, color: Color(0xFF334155)),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '${e.value}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRealtimeLogCard() {
+    final recent = _logs.take(10).toList();
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Log Reciente',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (recent.isEmpty)
+            const Text('Sin entradas.',
+                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+          else
+            ...recent.map((log) {
+              final h = log.timestamp.hour.toString().padLeft(2, '0');
+              final m = log.timestamp.minute.toString().padLeft(2, '0');
+              final statusColor = log.success ? _green : _red;
+              final statusLabel = log.success ? 'OK' : 'FAIL';
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 4,
+                      margin: const EdgeInsets.only(top: 7),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '$h:${m}h - [${log.feature}] - ${log.latencyMs}ms - $statusLabel',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: statusColor,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDailyBudgetCard() {
+    final usedPercent = (_dailyRatio * 100).toStringAsFixed(1);
+    final Color barColor;
+    if (_dailyRatio < 0.6) {
+      barColor = _green;
+    } else if (_dailyRatio < 0.85) {
+      barColor = _amber;
+    } else {
+      barColor = _red;
+    }
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Presupuesto IA Diario',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$_dailyCount / $_maxDailyRequests llamadas ($usedPercent%)',
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: LinearProgressIndicator(
+              value: _dailyRatio.clamp(0.0, 1.0),
+              minHeight: 10,
+              backgroundColor: const Color(0xFFE2E8F0),
+              valueColor: AlwaysStoppedAnimation<Color>(barColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _card({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+class _PanicControlCard extends StatefulWidget {
+  const _PanicControlCard();
+
+  @override
+  State<_PanicControlCard> createState() => _PanicControlCardState();
+}
+
+class _PanicControlCardState extends State<_PanicControlCard> {
+  bool _panicActive = false;
+  String _selectedModel = 'flash';
+  bool _isLoading = false;
+
+  static const _models = ['flash', 'flash-lite'];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadState();
+  }
+
+  Future<void> _loadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _panicActive = prefs.getBool(_kPanicKey) ?? false;
+        _selectedModel = prefs.getString(_kPanicModelKey) ?? 'flash';
+      });
+    }
+  }
+
+  Future<void> _togglePanic(bool value) async {
+    if (value) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: const Text('Confirmar activacion de Modo Panico'),
+          content: Text(
+            'Deseas forzar el uso de ${_selectedModel.toUpperCase()} para todos los usuarios? '
+            'Esto anulara la logica de precision Pro.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancelar'),
+            ),
+            FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: _amber),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Activar'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+    }
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kPanicKey, value);
+    if (value) {
+      await prefs.setString(_kPanicModelKey, _selectedModel);
+    } else {
+      await prefs.remove(_kPanicModelKey);
+    }
+    setState(() {
+      _panicActive = value;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Color bgColor =
+        _panicActive ? const Color(0xFFFEF3C7) : const Color(0xFFEFF6FF);
+    final Color titleColor = _panicActive ? _red : _blue;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: _panicActive ? _amber : const Color(0xFFBFDBFE),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'CONTROL GLOBAL DE INFRAESTRUCTURA IA',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
+              color: titleColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Text(
+                'Modelo forzado:',
+                style: TextStyle(fontSize: 14, color: Color(0xFF334155)),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<String>(
+                value: _selectedModel,
+                underline: const SizedBox.shrink(),
+                isDense: true,
+                items: _models
+                    .map(
+                      (m) => DropdownMenuItem(
+                        value: m,
+                        child: Text(m.toUpperCase(),
+                            style: const TextStyle(fontSize: 14)),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _panicActive
+                    ? null
+                    : (v) {
+                        if (v != null) setState(() => _selectedModel = v);
+                      },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Modo Panico',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A)),
+              ),
+              _isLoading
+                  ? const SizedBox(
+                      width: 36,
+                      height: 20,
+                      child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : Switch(
+                      value: _panicActive,
+                      onChanged: _togglePanic,
+                      activeColor: _amber,
+                    ),
+            ],
+          ),
+          if (_panicActive) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF3C7),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _amber),
+              ),
+              child: Text(
+                'ACTIVO - Todos los usuarios usando ${_selectedModel.toUpperCase()}',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF92400E),
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
