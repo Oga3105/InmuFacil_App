@@ -797,7 +797,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
                       child: ElevatedButton.icon(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text('chat.solvency_draft_wip'.tr()),
                               backgroundColor: _kNavy,
                             ),
