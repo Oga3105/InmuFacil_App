@@ -165,29 +165,29 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           labelStyle: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 15),
                           tabs: [
-                            const Tab(
+                            Tab(
                                 child: Row(children: [
-                              Icon(Icons.person, size: 20),
-                              SizedBox(width: 8),
-                              Text('profile.tab_my_profile'.tr())
+                              const Icon(Icons.person, size: 20),
+                              const SizedBox(width: 8),
+                              Text('profile.tab_my_profile'.tr()),
                             ])),
-                            const Tab(
+                            Tab(
                                 child: Row(children: [
-                              Icon(Icons.home_work, size: 20),
-                              SizedBox(width: 8),
-                              Text('profile.tab_properties'.tr())
+                              const Icon(Icons.home_work, size: 20),
+                              const SizedBox(width: 8),
+                              Text('profile.tab_properties'.tr()),
                             ])),
-                            const Tab(
+                            Tab(
                                 child: Row(children: [
-                              Icon(Icons.handshake_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text('profile.tab_offers'.tr())
+                              const Icon(Icons.handshake_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Text('profile.tab_offers'.tr()),
                             ])),
-                            const Tab(
+                            Tab(
                                 child: Row(children: [
-                              Icon(Icons.calendar_month_outlined, size: 20),
-                              SizedBox(width: 8),
-                              Text('profile.tab_visits'.tr())
+                              const Icon(Icons.calendar_month_outlined, size: 20),
+                              const SizedBox(width: 8),
+                              Text('profile.tab_visits'.tr()),
                             ])),
                             Tab(
                               child: Row(
@@ -3271,10 +3271,10 @@ class _GestionarMenu extends StatelessWidget {
         PopupMenuItem(
           value: 'delete',
           child: Row(
-            children: const [
-              Icon(Icons.delete_outline_rounded,
+            children: [
+              const Icon(Icons.delete_outline_rounded,
                   size: 18, color: Color(0xFFDC2626)),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Text('common.delete'.tr(),
                   style: const TextStyle(fontSize: 13, color: Color(0xFFDC2626))),
             ],

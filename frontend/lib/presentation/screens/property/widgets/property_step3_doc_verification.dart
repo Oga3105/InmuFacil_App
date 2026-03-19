@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../../../../core/utils/ccaa_utils.dart';
-import '../../providers/property_form_provider.dart';
+import '../../../../core/utils/ccaa_utils.dart';
+import '../../../providers/property_form_provider.dart';
 
 class PropertyStep3DocVerification extends ConsumerStatefulWidget {
   const PropertyStep3DocVerification({super.key});
