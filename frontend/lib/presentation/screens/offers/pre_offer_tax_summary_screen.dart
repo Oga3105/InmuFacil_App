@@ -233,6 +233,7 @@ class _FiscalBreakdownCard extends StatelessWidget {
                     amount: result.itpAmount,
                     icon: Icons.account_balance_outlined,
                     iconColor: _blue,
+                    dataSource: result.dataSource,
                   ),
           ),
 
@@ -245,6 +246,7 @@ class _FiscalBreakdownCard extends StatelessWidget {
               amount: result.notaryFee,
               icon: Icons.gavel_outlined,
               iconColor: const Color(0xFF7C3AED),
+              dataSource: result.dataSource,
             ),
           ),
 
@@ -257,6 +259,7 @@ class _FiscalBreakdownCard extends StatelessWidget {
               amount: result.registryFee,
               icon: Icons.article_outlined,
               iconColor: const Color(0xFF0891B2),
+              dataSource: result.dataSource,
             ),
           ),
 
@@ -274,6 +277,7 @@ class _FiscalBreakdownCard extends StatelessWidget {
               icon: Icons.handshake_outlined,
               iconColor: _orange,
               isOptional: true,
+              dataSource: result.dataSource,
             ),
           ),
 
@@ -317,6 +321,20 @@ class _FiscalBreakdownCard extends StatelessWidget {
               ],
             ),
           ),
+
+          // Notarial disclaimer
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Text(
+              'pre_offer_tax.notarial_disclaimer'.tr(),
+              style: const TextStyle(
+                fontSize: 10,
+                color: _textMuted,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );
@@ -333,6 +351,7 @@ class _CostRow extends StatelessWidget {
     required this.iconColor,
     this.sublabel,
     this.isOptional = false,
+    this.dataSource,
   });
 
   final String label;
@@ -341,6 +360,7 @@ class _CostRow extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final bool isOptional;
+  final String? dataSource;
 
   static const _textPrimary = Color(0xFF1E293B);
   static const _textSecondary = Color(0xFF64748B);
@@ -408,13 +428,26 @@ class _CostRow extends StatelessWidget {
             ],
           ),
         ),
-        Text(
-          '${CurrencyInputFormatter.format(amount)} €',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: isOptional ? _textSecondary : _textPrimary,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '${CurrencyInputFormatter.format(amount)} €',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: isOptional ? _textSecondary : _textPrimary,
+              ),
+            ),
+            if (dataSource != null)
+              Text(
+                dataSource!,
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: _textMuted,
+                ),
+              ),
+          ],
         ),
       ],
     );
