@@ -276,5 +276,36 @@
     "no_historical_data": "Sen datos históricos suficientes para esta zona. A análise baséase unicamente no diferencial de prezo actual.",
     "statistical_disclaimer": "O risco é estatístico, non unha predición do comportamento humano. Sen datos históricos suficientes.",
     "understood_button": "Entendido"
+  },
+  "kyc": {
+    "doc_number_dialog": {
+      "title_loading": "Lendo o documento",
+      "title_unreadable": "Imaxe ilexible",
+      "title_second_attempt": "Segundo intento",
+      "title_confirm": "Confirma o teu número de documento",
+      "loading_body": "Lendo o número do teu {doc_type}...",
+      "unreadable_body": "Non se puido ler o número do documento nesta imaxe. Asegúrate de que a foto sexa nítida, ben iluminada e sen reflexos.",
+      "unreadable_hint": "Sube de novo o documento para intentalo outra vez.",
+      "second_attempt_warning": "Segundo intento. Se o número segue sendo incorrecto podes introducilo manualmente.",
+      "extracted_number_label": "O sistema leu o seguinte número no teu {doc_type}:",
+      "confirm_question": "É este o número correcto do teu documento?",
+      "confirm_hint": "Comproba o documento físico antes de confirmar.",
+      "manual_toggle_open": "Introducir o número manualmente",
+      "manual_toggle_close": "Cancelar entrada manual",
+      "cif_banner": "Isto parece ser un CIF de empresa. InmuFácil só xestiona compravendas entre particulares. Se representas a unha empresa, contáctanos para máis información.",
+      "btn_reupload": "Subir o documento de novo",
+      "btn_reject": "Non, é incorrecto",
+      "btn_confirm": "Si, é correcto",
+      "placeholder_dni": "Ex: 12345678Z",
+      "placeholder_nie": "Ex: X1234567L",
+      "placeholder_passport": "Ex: PAA123456",
+      "error_empty": "Introduce o número do documento.",
+      "error_dni_format": "Formato incorrecto. Deben ser 8 díxitos seguidos dunha letra (ex: 12345678Z).",
+      "error_dni_letter": "A letra do DNI non é válida. Para ese número a letra correcta é \"{letter}\".",
+      "error_nie_format": "Formato incorrecto. Debe ser X, Y ou Z + 7 díxitos + letra (ex: X1234567L).",
+      "error_nie_letter": "A letra do NIE non é válida. Para ese número a letra correcta é \"{letter}\".",
+      "error_passport_length": "O número de pasaporte debe ter entre 6 e 12 caracteres.",
+      "error_passport_chars": "O número de pasaporte só pode conter letras e números."
+    }
   }
 }

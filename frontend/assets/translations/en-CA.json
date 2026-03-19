@@ -523,5 +523,36 @@
     "no_historical_data": "Insufficient historical data for this area. The analysis is based solely on the current price differential.",
     "statistical_disclaimer": "Risk is statistical, not a prediction of human behaviour. Insufficient historical data.",
     "understood_button": "Understood"
+  },
+  "kyc": {
+    "doc_number_dialog": {
+      "title_loading": "Reading document",
+      "title_unreadable": "Unreadable image",
+      "title_second_attempt": "Second attempt",
+      "title_confirm": "Confirm your document number",
+      "loading_body": "Reading your {doc_type} number...",
+      "unreadable_body": "We couldn't read the document number from this image. Please make sure the photo is clear, well-lit and free of reflections.",
+      "unreadable_hint": "Upload the document again to try once more.",
+      "second_attempt_warning": "Second attempt. If the number is still incorrect, you can enter it manually.",
+      "extracted_number_label": "The system has read the following number from your {doc_type}:",
+      "confirm_question": "Is this the correct number on your document?",
+      "confirm_hint": "Check the physical document before confirming.",
+      "manual_toggle_open": "Enter the number manually",
+      "manual_toggle_close": "Cancel manual entry",
+      "cif_banner": "This looks like a company tax ID (CIF). InmuFácil currently only handles transactions between private individuals. If you represent a company, please contact us for more information.",
+      "btn_reupload": "Upload document again",
+      "btn_reject": "No, it's incorrect",
+      "btn_confirm": "Yes, it's correct",
+      "placeholder_dni": "E.g.: 12345678Z",
+      "placeholder_nie": "E.g.: X1234567L",
+      "placeholder_passport": "E.g.: PAA123456",
+      "error_empty": "Please enter your document number.",
+      "error_dni_format": "Incorrect format. Must be 8 digits followed by a letter (e.g.: 12345678Z).",
+      "error_dni_letter": "The DNI check letter is invalid. The correct letter for that number is \"{letter}\".",
+      "error_nie_format": "Incorrect format. Must be X, Y or Z + 7 digits + a letter (e.g.: X1234567L).",
+      "error_nie_letter": "The NIE check letter is invalid. The correct letter for that number is \"{letter}\".",
+      "error_passport_length": "The passport number must be between 6 and 12 characters.",
+      "error_passport_chars": "The passport number can only contain letters and numbers."
+    }
   }
 }

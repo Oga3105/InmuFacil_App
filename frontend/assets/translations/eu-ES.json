@@ -356,5 +356,36 @@
     "no_historical_data": "Ez dago datu historiko nahikorik eskualde honetarako. Analisia uneko prezio-diferentzialean oinarritzen da.",
     "statistical_disclaimer": "Arriskua estatistikoa da, ez giza portaeraren iragarpen bat. Datu historiko nahikorik ez.",
     "understood_button": "Ulertu dut"
+  },
+  "kyc": {
+    "doc_number_dialog": {
+      "title_loading": "Dokumentua irakurtzen",
+      "title_unreadable": "Irudia irakurrezina",
+      "title_second_attempt": "Bigarren saiakera",
+      "title_confirm": "Berretsi zure dokumentu-zenbakia",
+      "loading_body": "Zure {doc_type}aren zenbakia irakurtzen...",
+      "unreadable_body": "Ezin izan da dokumentuaren zenbakia irakurri irudi honetatik. Ziurtatu argazkia argia, ondo argiztatua eta islak gabe dagoela.",
+      "unreadable_hint": "Igo dokumentua berriro saiatzeko.",
+      "second_attempt_warning": "Bigarren saiakera. Zenbakia oraindik okerra bada, eskuz sartu dezakezu.",
+      "extracted_number_label": "Sistemak zure {doc_type}aren zenbaki hau irakurri du:",
+      "confirm_question": "Al da hau zure dokumentuaren zenbaki zuzena?",
+      "confirm_hint": "Egiaztatu dokumentu fisikoan baieztatu aurretik.",
+      "manual_toggle_open": "Zenbakia eskuz sartu",
+      "manual_toggle_close": "Eskuzko sarrera utzi",
+      "cif_banner": "Hau enpresa baten CIF bat dirudi. InmuFácil, oraingoz, partikularren arteko transakzioak kudeatzen ditu soilik. Enpresa bat ordezkatzen baduzu, jarri gurekin harremanetan.",
+      "btn_reupload": "Dokumentua berriro igo",
+      "btn_reject": "Ez, okerra da",
+      "btn_confirm": "Bai, zuzena da",
+      "placeholder_dni": "Ad.: 12345678Z",
+      "placeholder_nie": "Ad.: X1234567L",
+      "placeholder_passport": "Ad.: PAA123456",
+      "error_empty": "Sartu dokumentuaren zenbakia.",
+      "error_dni_format": "Formatu okerra. 8 zenbaki eta letra bat behar dira (ad.: 12345678Z).",
+      "error_dni_letter": "DNIaren letra ez da baliozkoa. Zenbaki horrentzat letra zuzena \"{letter}\" da.",
+      "error_nie_format": "Formatu okerra. X, Y edo Z + 7 zenbaki + letra behar da (ad.: X1234567L).",
+      "error_nie_letter": "NIEaren letra ez da baliozkoa. Zenbaki horrentzat letra zuzena \"{letter}\" da.",
+      "error_passport_length": "Pasaportearen zenbakiak 6 eta 12 karaktere artean eduki behar ditu.",
+      "error_passport_chars": "Pasaportearen zenbakiak letra eta zenbakiak soilik eduki ditzake."
+    }
   }
 }

@@ -410,5 +410,36 @@
     "no_historical_data": "Sense dades històriques suficients per a aquesta zona. L'anàlisi es basa únicament en el diferencial de preu actual.",
     "statistical_disclaimer": "El risc és estadístic, no una predicció del comportament humà. Sense dades històriques suficients.",
     "understood_button": "Entès"
+  },
+  "kyc": {
+    "doc_number_dialog": {
+      "title_loading": "Llegint el document",
+      "title_unreadable": "Imatge il·legible",
+      "title_second_attempt": "Segon intent",
+      "title_confirm": "Confirma el teu número de document",
+      "loading_body": "Llegint el número del teu {doc_type}...",
+      "unreadable_body": "No s'ha pogut llegir el número del document en aquesta imatge. Assegura't que la foto sigui nítida, ben il·luminada i sense reflexos.",
+      "unreadable_hint": "Torna a pujar el document per intentar-ho de nou.",
+      "second_attempt_warning": "Segon intent. Si el número continua sent incorrecte, el pots introduir manualment.",
+      "extracted_number_label": "El sistema ha llegit el número següent del teu {doc_type}:",
+      "confirm_question": "És aquest el número correcte del teu document?",
+      "confirm_hint": "Comprova-ho al document físic abans de confirmar.",
+      "manual_toggle_open": "Introduir el número manualment",
+      "manual_toggle_close": "Cancel·lar entrada manual",
+      "cif_banner": "Això sembla un CIF d'empresa. InmuFácil, de moment, només gestiona compravendes entre particulars. Si representes una empresa, contacta'ns per a més informació.",
+      "btn_reupload": "Tornar a pujar el document",
+      "btn_reject": "No, és incorrecte",
+      "btn_confirm": "Sí, és correcte",
+      "placeholder_dni": "Ex: 12345678Z",
+      "placeholder_nie": "Ex: X1234567L",
+      "placeholder_passport": "Ex: PAA123456",
+      "error_empty": "Introdueix el número del document.",
+      "error_dni_format": "Format incorrecte. Han de ser 8 dígits seguits d'una lletra (ex: 12345678Z).",
+      "error_dni_letter": "La lletra del DNI no és vàlida. Per a aquest número la lletra correcta és \"{letter}\".",
+      "error_nie_format": "Format incorrecte. Ha de ser X, Y o Z + 7 dígits + lletra (ex: X1234567L).",
+      "error_nie_letter": "La lletra del NIE no és vàlida. Per a aquest número la lletra correcta és \"{letter}\".",
+      "error_passport_length": "El número de passaport ha de tenir entre 6 i 12 caràcters.",
+      "error_passport_chars": "El número de passaport només pot contenir lletres i números."
+    }
   }
 }
