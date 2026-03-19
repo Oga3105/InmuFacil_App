@@ -44,8 +44,9 @@ class _IdentityVerificationScreenState
         docNumber: null,
         readable: false,
         isSecondAttempt: isSecondAttempt,
+        documentType: state.selectedDocumentType,
         documentTypeLabel: docLabel,
-        onConfirm: () {},
+        onConfirm: (_) {},
         onReject: () {},
         onReupload: () {},
       );
@@ -71,6 +72,8 @@ class _IdentityVerificationScreenState
     final readable = result['readable'] == true;
     final docNumber = result['doc_number'] as String?;
 
+    final currentState = ref.read(verificationProvider);
+
     if (!readable || docNumber == null) {
       // Unreadable — show error dialog
       await DocumentNumberConfirmationDialog.show(
@@ -79,8 +82,9 @@ class _IdentityVerificationScreenState
         docNumber: null,
         readable: false,
         isSecondAttempt: isSecondAttempt,
+        documentType: currentState.selectedDocumentType,
         documentTypeLabel: docLabel,
-        onConfirm: () {},
+        onConfirm: (_) {},
         onReject: () {},
         onReupload: () {
           notifier.resetDocumentImages();
@@ -96,9 +100,10 @@ class _IdentityVerificationScreenState
       docNumber: docNumber,
       readable: true,
       isSecondAttempt: isSecondAttempt,
+      documentType: currentState.selectedDocumentType,
       documentTypeLabel: docLabel,
-      onConfirm: () {
-        notifier.confirmDocumentNumber();
+      onConfirm: (confirmedNumber) {
+        notifier.confirmDocumentNumber(confirmedNumber);
         _showSnackBar('Numero de documento confirmado correctamente.');
       },
       onReject: () async {

@@ -330,8 +330,12 @@ class VerificationNotifier extends Notifier<VerificationState> {
   }
 
   /// Called when the user confirms the extracted document number is correct.
-  void confirmDocumentNumber() {
-    state = state.copyWith(documentNumberConfirmed: true);
+  /// [confirmedNumber] is the OCR number or the manually-entered validated one.
+  void confirmDocumentNumber(String confirmedNumber) {
+    state = state.copyWith(
+      documentNumberConfirmed: true,
+      extractedDocNumber: confirmedNumber,
+    );
   }
 
   /// Called when the user rejects the extracted number.
