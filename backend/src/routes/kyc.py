@@ -2,7 +2,9 @@ import logging
 import mimetypes
 import os
 import tempfile
-from typing import List, Optional
+import time
+from collections import defaultdict
+from typing import Dict, List, Optional, Tuple
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Response, UploadFile, status
 from sqlalchemy.orm import Session
@@ -12,7 +14,30 @@ from backend.src.models import KYCVerification, User
 from backend.src.models.enums import DNIStatus
 from backend.src.utils.security import encrypt_data, get_current_active_user, get_current_admin_user
 from backend.src.schemas.base import KYCStatusUpdate, KYCStatusResponse
-from backend.src.services.gemini_kyc_service import verify_identity_with_gemini
+from backend.src.services.gemini_kyc_service import verify_identity_with_gemini, extract_doc_number_from_image
+
+# ---------------------------------------------------------------------------
+# In-memory rate limiter for /extract-doc-number
+# Key: user_id, Value: list of timestamps of calls in the last window
+# ---------------------------------------------------------------------------
+_OCR_RATE_LIMIT_WINDOW_SECONDS = 900   # 15 minutes
+_OCR_RATE_LIMIT_MAX_CALLS = 3
+_ocr_call_log: Dict[int, List[float]] = defaultdict(list)
+
+
+def _check_ocr_rate_limit(user_id: int) -> None:
+    """Raises 429 if user has exceeded OCR extraction rate limit."""
+    now = time.monotonic()
+    window_start = now - _OCR_RATE_LIMIT_WINDOW_SECONDS
+    calls = _ocr_call_log[user_id]
+    # Prune old entries
+    calls[:] = [t for t in calls if t > window_start]
+    if len(calls) >= _OCR_RATE_LIMIT_MAX_CALLS:
+        raise HTTPException(
+            status_code=429,
+            detail="Demasiados intentos de lectura. Espera 15 minutos antes de intentarlo de nuevo.",
+        )
+    calls.append(now)
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["KYC"])
@@ -178,6 +203,45 @@ def _run_gemini_verification(
 # ---------------------------------------------------------------------------
 # User endpoints
 # ---------------------------------------------------------------------------
+
+@router.post("/extract-doc-number")
+async def extract_document_number(
+    front: UploadFile = File(...),
+    document_type: str = Form("dni"),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Extrae el numero del documento de identidad de la imagen del frente.
+    Llamada sincrona, sin escritura en BD.
+    Rate limit: 3 llamadas por usuario cada 15 minutos.
+    """
+    _check_ocr_rate_limit(current_user.id)
+
+    try:
+        img_bytes = await front.read()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error leyendo imagen: {e}")
+
+    ext = os.path.splitext(front.filename or "front.jpg")[1].lower() or ".jpg"
+    fd, tmp_path = tempfile.mkstemp(suffix=ext, prefix=f"ocr_{current_user.id}_")
+    try:
+        os.write(fd, img_bytes)
+        os.close(fd)
+        result = extract_doc_number_from_image(front_path=tmp_path, document_type=document_type)
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+    logger.info(
+        "[OCR] User %s extraction — readable=%s document_type=%s",
+        current_user.id,
+        result.get("readable"),
+        document_type,
+    )
+    return result
+
 
 @router.post("/upload")
 async def upload_kyc_document(

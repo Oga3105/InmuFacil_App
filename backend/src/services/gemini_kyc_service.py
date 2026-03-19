@@ -81,6 +81,105 @@ y baja la puntuación de confianza acordemente.
 # Main service function
 # ---------------------------------------------------------------------------
 
+_OCR_PROMPT = """
+Eres un sistema OCR especializado en documentos de identidad españoles.
+Se te proporciona la imagen del FRENTE (o página de datos) de un documento de identidad.
+
+Tu UNICA tarea es extraer el número del documento con la máxima precisión.
+
+Formatos válidos según tipo:
+- DNI/NIF: 8 dígitos seguidos de una letra mayúscula (ej: 12345678Z)
+- NIE: letra X, Y o Z + 7 dígitos + letra mayúscula (ej: X1234567L)
+- Pasaporte español: 3 letras + 6 dígitos (ej: PAA123456)
+
+Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional:
+
+{
+  "doc_number": "12345678Z",
+  "readable": true
+}
+
+Si la imagen no es legible o no puedes extraer el número con confianza, responde:
+
+{
+  "doc_number": null,
+  "readable": false
+}
+""".strip()
+
+
+def extract_doc_number_from_image(
+    front_path: str,
+    document_type: str = "dni",
+) -> dict:
+    """
+    Lightweight synchronous OCR call to Gemini to extract only the document number.
+    Used for the pre-selfie confirmation step.
+    Returns: {"doc_number": str|None, "readable": bool}
+    Never raises — errors return {"doc_number": None, "readable": False}.
+    """
+    try:
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        logger.error("google-genai not installed.")
+        return {"doc_number": None, "readable": False}
+
+    api_key = os.getenv("GEMINI_API_KEY", "")
+    if not api_key:
+        logger.error("GEMINI_API_KEY not set")
+        return {"doc_number": None, "readable": False}
+
+    if not front_path or not os.path.exists(front_path):
+        return {"doc_number": None, "readable": False}
+
+    try:
+        mime = _infer_mime(front_path)
+        with open(front_path, "rb") as f:
+            data = f.read()
+    except Exception as e:
+        logger.warning("Could not read front image for OCR: %s", e)
+        return {"doc_number": None, "readable": False}
+
+    contents = [
+        _OCR_PROMPT,
+        f"[Imagen: FRENTE del {document_type.upper()}]",
+        types.Part.from_bytes(data=data, mime_type=mime),
+    ]
+
+    try:
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash-lite",
+            contents=contents,
+        )
+        raw = response.text or ""
+    except Exception as e:
+        err_str = str(e)
+        is_quota = "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower()
+        if is_quota:
+            logger.warning("Gemini quota exceeded during OCR extraction.")
+        else:
+            logger.error("Gemini OCR error: %s", e)
+        return {"doc_number": None, "readable": False}
+
+    cleaned = re.sub(r"```(?:json)?", "", raw).strip()
+    match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+    if not match:
+        logger.warning("No JSON in OCR Gemini response: %s", raw[:200])
+        return {"doc_number": None, "readable": False}
+
+    try:
+        result = json.loads(match.group())
+        doc_number = result.get("doc_number") or None
+        readable = bool(result.get("readable", False)) and doc_number is not None
+        logger.info("[OCR] Extraction attempt — readable=%s (doc_number logged separately for audit)", readable)
+        return {"doc_number": doc_number, "readable": readable}
+    except json.JSONDecodeError as e:
+        logger.warning("OCR JSON parse error: %s", e)
+        return {"doc_number": None, "readable": False}
+
+
 def verify_identity_with_gemini(
     front_path: Optional[str],
     back_path: Optional[str],
