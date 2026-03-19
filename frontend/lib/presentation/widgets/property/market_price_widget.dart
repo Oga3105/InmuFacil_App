@@ -18,6 +18,8 @@ class MarketPriceResult {
     required this.confidence,
     required this.lowDensity,
     this.message,
+    this.sourceLabel =
+        'Fuente: Sistema Estatal de Referencia de Precios / Catastro',
   });
 
   final int pricePerM2;
@@ -26,6 +28,9 @@ class MarketPriceResult {
   final String confidence;
   final bool lowDensity;
   final String? message;
+
+  /// Attribution label for the data source of this market price result.
+  final String sourceLabel;
 
   factory MarketPriceResult.fromJson(Map<String, dynamic> j) =>
       MarketPriceResult(
@@ -127,9 +132,10 @@ class MarketPriceWidget extends ConsumerWidget {
 
     return asyncValue.when(
       loading: () => const _MarketPriceLoading(),
-      error: (_, __) => const _MarketPriceEmpty(),
-      data: (result) =>
-          result.lowDensity ? const _MarketPriceEmpty() : _MarketPriceCard(result: result),
+      error: (_, __) => const _MarketPriceError(),
+      data: (result) => result.lowDensity
+          ? const _MarketPriceLowDensity()
+          : _MarketPriceCard(result: result),
     );
   }
 }
@@ -160,11 +166,11 @@ class _MarketPriceLoading extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Empty / low-density state
+// Low-density state (sample_size < 5)
 // ---------------------------------------------------------------------------
 
-class _MarketPriceEmpty extends StatelessWidget {
-  const _MarketPriceEmpty();
+class _MarketPriceLowDensity extends StatelessWidget {
+  const _MarketPriceLowDensity();
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +186,41 @@ class _MarketPriceEmpty extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'market_price.no_data'.tr(),
+                'market_price.low_density'.tr(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Error state
+// ---------------------------------------------------------------------------
+
+class _MarketPriceError extends StatelessWidget {
+  const _MarketPriceError();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      color: Colors.grey.shade100,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.grey.shade500, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'market_price.unavailable'.tr(),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: Colors.grey.shade600,
                 ),
@@ -240,6 +280,14 @@ class _MarketPriceCard extends StatelessWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 4),
+            Text(
+              result.sourceLabel,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: Colors.grey.shade500,
+              ),
+            ),
             const SizedBox(height: 6),
             if (result.zoneLabel.isNotEmpty)
               Text(
@@ -248,6 +296,14 @@ class _MarketPriceCard extends StatelessWidget {
                   color: Colors.grey.shade600,
                 ),
               ),
+            const SizedBox(height: 6),
+            Text(
+              'market_price.no_extrapolation'.tr(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontSize: 10,
+                color: Colors.grey.shade500,
+              ),
+            ),
             const SizedBox(height: 10),
             _ConfidenceBadge(confidence: result.confidence),
           ],

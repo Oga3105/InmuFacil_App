@@ -152,6 +152,7 @@ class SmartBidRiskScreen extends StatelessWidget {
               fill: fill,
               color: color,
               diffText: diffText,
+              diffPct: diff,
             ),
             const SizedBox(height: 16),
 
@@ -305,12 +306,16 @@ class _RiskGaugeCard extends StatelessWidget {
     required this.fill,
     required this.color,
     required this.diffText,
+    required this.diffPct,
   });
 
   final _RiskLevel level;
   final double fill;
   final Color color;
   final String diffText;
+  final double diffPct;
+
+  static const _extremeRed = Color(0xFFEF4444);
 
   static const _textPrimary = Color(0xFF1E293B);
   static const _textSecondary = Color(0xFF64748B);
@@ -346,35 +351,49 @@ class _RiskGaugeCard extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Risk label and percentage badge
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _riskLabelKey(level).tr(),
-                style: TextStyle(
-                  fontSize: 15,
+          if (diffPct < -30)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                'smart_bid_risk.extreme_low_offer'.tr(),
+                style: const TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: color,
+                  color: _extremeRed,
+                  height: 1.4,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  diffText,
+            )
+          else
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _riskLabelKey(level).tr(),
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: color,
                   ),
                 ),
-              ),
-            ],
-          ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    diffText,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: color,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           const SizedBox(height: 14),
 
           // Thermometer bar background

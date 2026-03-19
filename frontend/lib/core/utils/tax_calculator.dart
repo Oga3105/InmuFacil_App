@@ -24,6 +24,7 @@ class TaxResult {
     required this.isForal,
     required this.ccaaName,
     required this.itpRate,
+    this.dataSource = 'Fuente: Ley ITP y AJD vigente 2026',
   });
 
   /// ITP amount in euros. Zero when [isForal] is true.
@@ -53,6 +54,9 @@ class TaxResult {
 
   /// The ITP rate applied (e.g. 0.07 for 7 %). Null when [isForal] is true.
   final double? itpRate;
+
+  /// Legal source attribution for the tax rates used in this calculation.
+  final String dataSource;
 }
 
 /// Calculates the estimated buying costs for a property in [ccaa].
