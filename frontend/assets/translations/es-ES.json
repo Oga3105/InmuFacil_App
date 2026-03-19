@@ -161,7 +161,39 @@
     "viability_title": "Mi Viabilidad para este Piso",
     "complete_financial_dna": "Completar ADN Financiero",
     "debt_income_ratio": "Ratio deuda/ingreso",
-    "monthly_mortgage_estimate": "Cuota est."
+    "monthly_mortgage_estimate": "Cuota est.",
+    "compare": {
+      "add": "Comparar",
+      "in_comparison": "En comparacion"
+    },
+    "comparison": {
+      "title": "Comparar Inmuebles",
+      "property_label": "Propiedad {label}",
+      "row": {
+        "price": "Precio total",
+        "price_m2": "Precio/m2",
+        "surface": "Superficie",
+        "year": "Ano de construccion",
+        "floor": "Planta",
+        "elevator": "Ascensor",
+        "condition": "Estado",
+        "ici_silence": "ICI: Silencio",
+        "ici_security": "ICI: Seguridad",
+        "ici_air": "ICI: Aire",
+        "ici_activity": "ICI: Actividad",
+        "mortgage": "Cuota hipotecaria est.",
+        "escrituracion": "Gastos escrituracion est."
+      },
+      "ai_verdict": {
+        "title": "Analisis de InmuFacil",
+        "property_a": "Propiedad A",
+        "property_a_body": "Mejor relacion precio/superficie en la zona. Menor cuota hipotecaria estimada.",
+        "property_b": "Propiedad B",
+        "property_b_body": "Construccion mas reciente. Menor necesidad de reforma prevista.",
+        "recommendation": "Recomendacion: Basada en tu perfil de estilo de vida, valoramos la Propiedad A por su eficiencia economica y la Propiedad B por su modernidad. Ambas son opciones solidas segun tus preferencias declaradas.",
+        "disclaimer": "Analisis generado por IA. Consulte con un profesional antes de tomar decisiones."
+      }
+    }
   },
   "common": {
     "save": "Guardar",
@@ -619,6 +651,37 @@
     "confirm_button": "Confirmar y Enviar Oferta",
     "back_button": "Volver"
   },
+  "nota_simple": {
+    "upload_button": "Subir Nota Simple (PDF/imagen)",
+    "upload_unavailable": "Funcion de carga disponible proxima version",
+    "summary_title": "Resumen Registral",
+    "titular_label": "Titular registral",
+    "surface_registered": "Superficie registral",
+    "surface_announced": "Superficie anunciada",
+    "surface_alert": "Discrepancia de superficie detectada: {pct}%",
+    "charges_title": "Semaforo de Cargas",
+    "charges_detail_button": "Ver detalle de cargas detectadas",
+    "charges_dialog_title": "Detalle de Cargas Registrales",
+    "charges_dialog_close": "Cerrar",
+    "charge_risk_alto": "RIESGO ALTO",
+    "charge_risk_estandar": "RIESGO ESTANDAR",
+    "charge_risk_informativo": "INFORMATIVO",
+    "invalid_document_title": "Documento no valido",
+    "download_guide_unavailable": "Descarga disponible en proxima version",
+    "encumbrance_resolution_title": "Hoja de Ruta de Seguridad Legal",
+    "encumbrance_disclaimer": "Este plan de accion es una guia informativa generada por IA y no sustituye el asesoramiento de un abogado o notario",
+    "download_guide_button": "Descargar Guia de Resolucion PDF",
+    "judicial_risk_badge": "RIESGO ALTO",
+    "financiera_risk_badge": "RIESGO ESTANDAR",
+    "administrativa_risk_badge": "INFORMATIVO",
+    "judicial_buyer_action": "Solicite al vendedor copia del auto judicial y verifique si el embargo esta cancelado o activo. No firme hasta tener certificado de cancelacion.",
+    "judicial_seller_action": "Aporte documentacion del juzgado que acredite el estado del procedimiento. Si el embargo es activo, debe cancelarse con cargo al precio de venta.",
+    "financiera_buyer_action": "Negocie la subrogacion o solicite al vendedor cancelacion previa al acto notarial. Solicite certificado de deuda pendiente al banco.",
+    "financiera_seller_action": "Coordine con su entidad bancaria la cancelacion registral de la hipoteca, ya sea por pago o por subrogacion del comprador.",
+    "administrativa_buyer_action": "Verifique el alcance de la carga administrativa con el ayuntamiento o administracion competente antes de formalizar la compra.",
+    "administrativa_seller_action": "Aclare con la administracion si la carga es transmisible o debe cancelarse antes de la venta.",
+    "no_charges": "Sin cargas registrales detectadas"
+  },
   "smart_bid_risk": {
     "title": "Análisis de Riesgo de Oferta",
     "your_offer_label": "TU OFERTA",
@@ -637,5 +700,57 @@
     "no_historical_data": "Sin datos históricos suficientes para esta zona. El análisis se basa únicamente en el diferencial de precio actual.",
     "statistical_disclaimer": "El riesgo es estadístico, no una predicción del comportamiento humano. Sin datos históricos suficientes.",
     "understood_button": "Entendido"
+  },
+  "lifestyle": {
+    "screen_title": "Tu Perfil de Estilo de Vida",
+    "pace_title": "Ritmo de vida",
+    "pace_vibrant": "Centro vibrante",
+    "pace_calm": "Periferia tranquila",
+    "work_title": "Entorno laboral",
+    "work_office": "Oficina diaria",
+    "work_home": "Teletrabajo",
+    "mobility_title": "Movilidad",
+    "mobility_public": "Transporte público",
+    "mobility_car": "Coche privado",
+    "sleep_title": "Descanso",
+    "sleep_sensitive": "Sensible al ruido",
+    "sleep_deep": "Duermo profundamente",
+    "green_title": "Entorno",
+    "green_needs": "Necesito zonas verdes",
+    "green_services": "Prefiero servicios cercanos",
+    "light_slider_title": "Luz natural",
+    "light_slider_start": "Luz natural",
+    "light_slider_end": "Clima fresco",
+    "social_slider_title": "Zonas comunes",
+    "social_slider_start": "Zonas comunes",
+    "social_slider_end": "Privacidad total",
+    "ready_slider_title": "Estado del inmueble",
+    "ready_slider_start": "Listo para vivir",
+    "ready_slider_end": "Potencial de reforma",
+    "profile_type_title": "Tipo de perfil",
+    "profile_single": "Soltero/a",
+    "profile_couple": "Pareja",
+    "profile_family_children": "Familia con niños",
+    "profile_family_pets": "Familia con mascotas",
+    "profile_senior": "Senior",
+    "save_button": "Guardar perfil",
+    "saved_snackbar": "Perfil guardado"
+  },
+  "smart_explorer": {
+    "header": "Hemos encontrado tu zona ideal fuera de tu búsqueda habitual",
+    "advantage_price": "Precio",
+    "advantage_quality": "Calidad",
+    "advantage_future": "Futuro"
+  },
+  "discovery": {
+    "twin_zones": {
+      "header": "Zonas Recomendadas en tu Busqueda",
+      "ai_label": "Sugerencia IA",
+      "tooltip_template": "Esta zona ofrece un {pct}% mas de {advantage} por el mismo precio"
+    },
+    "twins": {
+      "header_bottom": "Inmuebles en Zonas con Perfil Similar",
+      "match_score": "{score}% compatibilidad"
+    }
   }
 }

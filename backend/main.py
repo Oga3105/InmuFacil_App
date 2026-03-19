@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides, nota_simple, urban_growth, solvency_passport, market_gap, neighborhood_twins, comfort_index, signature_verification, notifications_email
 from backend.src.routes import notifications as notifications_router
 
 from fastapi import APIRouter
@@ -354,6 +354,14 @@ api_v1_router.include_router(ai_generate.router)          # V41 - AI Smart Fallb
 api_v1_router.include_router(market_price.router)          # V37 - Market Price Analytics (AI)
 api_v1_router.include_router(price_validator.router)       # V38 - Final Price Validator (AI)
 api_v1_router.include_router(legal_guides.router)          # V53 - On-Demand Legal Guides (AI)
+api_v1_router.include_router(nota_simple.router)            # V55 - Nota Simple Analyzer (AI Vision)
+api_v1_router.include_router(urban_growth.router)           # V59 - Urban Growth Index (AI)
+api_v1_router.include_router(solvency_passport.router)      # V57 - Solvency Passport AI
+api_v1_router.include_router(market_gap.router)             # V58 - Market Gap Negotiation Analyzer
+api_v1_router.include_router(neighborhood_twins.router)     # V64 - Neighborhood Twins Discovery
+api_v1_router.include_router(comfort_index.router)          # V62 - Invisible Comfort Index (AI)
+api_v1_router.include_router(signature_verification.router) # V61 - Biometric Signature Verification
+api_v1_router.include_router(notifications_email.router)    # V52 - Email Notification Templates
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
