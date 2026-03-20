@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 import 'widgets/camera_capture_dialog.dart';
 import 'widgets/document_number_confirmation_dialog.dart';
 import 'widgets/document_upload_card.dart';
@@ -208,9 +209,6 @@ class _IdentityVerificationScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(verificationProvider);
     final notifier = ref.read(verificationProvider.notifier);
-    final authState = ref.watch(authProvider);
-    final user = authState.user;
-
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -227,7 +225,7 @@ class _IdentityVerificationScreenState
       },
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFC),
-        appBar: _buildAppBar(context, user),
+        appBar: _buildAppBar(context),
         body: SingleChildScrollView(
           child: Center(
             child: ConstrainedBox(
@@ -276,7 +274,7 @@ class _IdentityVerificationScreenState
   // ──────────────────────────────────────────────
   // AppBar (mismo estilo que UserProfileScreen)
   // ──────────────────────────────────────────────
-  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic user) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -380,46 +378,12 @@ class _IdentityVerificationScreenState
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        // Avatar / icono de usuario
-        _buildUserAvatar(context, user),
+        const SizedBox(width: 8),
+        const UserAvatarMenu(),
         const SizedBox(width: 16),
       ],
     );
   }
-
-  Widget _buildUserAvatar(BuildContext context, dynamic user) {
-    final photoUrl = user?.profilePhotoUrl;
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => _tryNavigateAway('/profile'),
-          customBorder: const CircleBorder(),
-          child: photoUrl != null
-              ? ClipOval(
-                  child: Image.network(
-                    '$photoUrl?v=${DateTime.now().millisecondsSinceEpoch}',
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _defaultAvatar(),
-                  ),
-                )
-              : _defaultAvatar(),
-        ),
-      ),
-    );
-  }
-
-  Widget _defaultAvatar() => const CircleAvatar(
-        radius: 18,
-        backgroundColor: Color(0xFF2563EB),
-        child: Icon(Icons.person, color: Colors.white, size: 20),
-      );
 
   // ──────────────────────────────────────────────
   // Card principal (layout horizontal)

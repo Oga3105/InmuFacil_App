@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -64,9 +66,71 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
-          onPressed: () => context.pop(),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(
+            onPressed: () => context.pop(),
+          ),
+        ),
+        title: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 28),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2563EB),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          const UserAvatarMenu(),
+          const SizedBox(width: 16),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.grey.shade200, height: 1),
         ),
       ),
       body: SafeArea(

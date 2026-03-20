@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/ai_metrics_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 const _blue = Color(0xFF2563EB);
 const _amber = Color(0xFFF59E0B);
@@ -75,26 +76,79 @@ class _AdminAiAnalyticsScreenState
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: AppBarBackButton(onPressed: () => context.pop()),
-        title: const Text(
-          'Salud de la IA',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF0F172A),
+        automaticallyImplyLeading: false,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: AppBarBackButton(onPressed: () => context.pop()),
+        ),
+        title: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 28),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: _blue),
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF2563EB)),
             onPressed: () {
               setState(() => _isLoading = true);
               _loadMetrics();
             },
             tooltip: 'Actualizar',
           ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/'),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2563EB),
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                  ],
+                ),
+              ),
+            ),
+          ),
           const SizedBox(width: 8),
+          const UserAvatarMenu(),
+          const SizedBox(width: 16),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: Colors.grey.shade200, height: 1),
+        ),
       ),
       body: !isAdmin
           ? _buildAccessRestricted()

@@ -201,8 +201,38 @@ class _CreateEditPropertyScreenState
           ),
         ),
       ),
-      // ── Actions: guardar borrador + avatar ───────────────────────────────
+      // ── Actions: inicio + guardar borrador + avatar ───────────────────────────────
       actions: [
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
         _SaveDraftButton(),
         const SizedBox(width: 12),
         _AvatarButton(onTap: () => _confirmCancel(context)),
