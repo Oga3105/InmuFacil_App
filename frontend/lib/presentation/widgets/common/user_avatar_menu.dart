@@ -217,7 +217,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('info-what-is'),
         child: _NavItem(
           icon: Icons.info_outline,
-          label: 'Que es InmuFacil',
+          label: 'Que es InmuFácil',
           accentColor: const Color(0xFF1E3A5F),
         ),
       ),
