@@ -37,6 +37,7 @@ import '../../presentation/screens/offers/timeline_pages/post_venta_screen.dart'
 import '../../presentation/screens/offers/timeline_pages/entrega_llaves_screen.dart';
 import '../../presentation/screens/info/info_screen.dart';
 import '../../presentation/screens/info/trust_dashboard_screen.dart';
+import '../../presentation/screens/settings/ai_consent_history_screen.dart';
 import '../../presentation/screens/notifications/notifications_page.dart';
 
 /// GoRouter configuration provider
@@ -414,6 +415,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/notifications',
         name: 'notifications',
         builder: (_, __) => const NotificationsPage(),
+      ),
+
+      // AI Consent History (GDPR Art. 15)
+      GoRoute(
+        path: AiConsentHistoryScreen.routePath,
+        name: AiConsentHistoryScreen.routeName,
+        builder: (_, __) => const AiConsentHistoryScreen(),
       ),
     ],
     
