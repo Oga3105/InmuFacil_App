@@ -545,22 +545,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     },
                                  ),
                                  
-                                 const SizedBox(height: 8),
-
-                                 Center(
-                                   child: TextButton(
-                                     onPressed: () => context.push('/forgot-password'),
-                                     child: const Text(
-                                       'Olvide mi contrasena',
-                                       style: TextStyle(
-                                         fontSize: 13,
-                                         color: Color(0xFF2563EB),
-                                       ),
-                                     ),
-                                   ),
-                                 ),
-
-                                 const SizedBox(height: 8),
+                                  const SizedBox(height: 8),
 
                                  // Link: Continuar sin cuenta
                                  Center(
