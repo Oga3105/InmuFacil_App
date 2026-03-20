@@ -80,6 +80,39 @@ def get_decrypted_document(encrypted_content: str) -> bytes:
         raise ComplianceError("Decryption failed")
 
 
+class DocumentService:
+    """
+    Class-based wrapper for document operations.
+    Provides save_protected_document for services that require a class interface.
+    """
+
+    UPLOAD_DIR = "/tmp/inmufacil_handover"
+
+    @staticmethod
+    async def save_protected_document(file: UploadFile, prefix: str) -> str:
+        """
+        Reads UploadFile, encrypts content (AES-256), saves to disk, returns path.
+        """
+        os.makedirs(DocumentService.UPLOAD_DIR, exist_ok=True)
+
+        try:
+            content = await file.read()
+        except Exception:
+            raise ComplianceError("Failed to read uploaded file")
+
+        content_b64 = base64.b64encode(content).decode("utf-8")
+        encrypted_blob = encrypt_data(content_b64)
+
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+        filename = f"{prefix}_{timestamp}.enc"
+        file_path = os.path.join(DocumentService.UPLOAD_DIR, filename)
+
+        with open(file_path, "w") as f:
+            f.write(encrypted_blob)
+
+        return file_path
+
+
 def get_decrypted_document_from_path(file_path: str) -> bytes:
     """
     Legacy fallback: reads encrypted file from disk, decrypts, returns bytes.
