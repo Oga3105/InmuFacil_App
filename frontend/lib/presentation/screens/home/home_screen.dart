@@ -1405,7 +1405,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     itemBuilder: (_) => [
                       PopupMenuItem(
                         value: 'what-is',
-                        child: Text('Que es InmuFacil',
+                        child: Text('Que es InmuFácil',
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
