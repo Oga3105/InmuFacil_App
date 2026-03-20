@@ -33,12 +33,15 @@ class PropertyModel {
     this.ownerIsVerified = false,
     this.ownerPhotoUrl,
     this.hideExactLocation = false,
+    this.energyCertification,
   });
 
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
     // Extract nested features
     final features = json['features'] as Map<String, dynamic>? ?? {};
+    // Extract nested legal
+    final legal = json['legal'] as Map<String, dynamic>? ?? {};
     
     // Extract nested media (images only) and build full URLs
     final mediaList = json['media'] as List? ?? [];
@@ -94,6 +97,7 @@ class PropertyModel {
       ownerIsVerified: json['owner_is_verified'] as bool? ?? false,
       ownerPhotoUrl: json['owner_photo_url'] as String?,
       hideExactLocation: json['hide_exact_location'] as bool? ?? false,
+      energyCertification: legal['energy_certification'] as String?,
     );
   }
   final int id;
@@ -118,6 +122,7 @@ class PropertyModel {
   final bool ownerIsVerified;
   final String? ownerPhotoUrl;
   final bool hideExactLocation;
+  final String? energyCertification;
 
   /// Convert to domain entity
   Property toEntity() {
@@ -143,6 +148,7 @@ class PropertyModel {
       ownerIsVerified: ownerIsVerified,
       ownerPhotoUrl: ownerPhotoUrl,
       hideExactLocation: hideExactLocation,
+      energyCertification: energyCertification,
     );
   }
   

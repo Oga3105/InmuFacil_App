@@ -39,6 +39,7 @@ import '../../presentation/screens/info/info_screen.dart';
 import '../../presentation/screens/info/trust_dashboard_screen.dart';
 import '../../presentation/screens/settings/ai_consent_history_screen.dart';
 import '../../presentation/screens/notifications/notifications_page.dart';
+import '../../presentation/screens/lifestyle/lifestyle_questionnaire_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -422,6 +423,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AiConsentHistoryScreen.routePath,
         name: AiConsentHistoryScreen.routeName,
         builder: (_, __) => const AiConsentHistoryScreen(),
+      ),
+
+      // Lifestyle Questionnaire
+      GoRoute(
+        path: '/lifestyle/questionnaire',
+        name: 'lifestyle-questionnaire',
+        builder: (_, __) => const LifestyleQuestionnaireScreen(),
       ),
     ],
     

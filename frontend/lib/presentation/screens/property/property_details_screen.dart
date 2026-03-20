@@ -20,6 +20,7 @@ import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/property/document_status_section.dart';
+import '../../widgets/property/comfort_radar_chart.dart';
 
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
 
@@ -312,12 +313,23 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ),
                         const SizedBox(height: 16),
                         _PropertyStatsGrid(property: property),
+                      if (property.energyCertification != null) ...[
+                        const SizedBox(height: 12),
+                        _EnergyCertBadge(rating: property.energyCertification!),
+                      ],
                       const SizedBox(height: 24),
                       Divider(color: Colors.grey[200]),
                       const SizedBox(height: 24),
                       _DescriptionSection(property: property),
                       const SizedBox(height: 32),
                       _LocationSection(location: property.location), // Passing location
+                      if (_extractPostalCode(property.address).isNotEmpty) ...[
+                        const SizedBox(height: 32),
+                        ComfortRadarChart(
+                          postalCode: _extractPostalCode(property.address),
+                          address: property.address,
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       _OwnerCard(property: property),
                       const SizedBox(height: 24),
@@ -924,6 +936,10 @@ class _SummaryCard extends ConsumerWidget {
           Divider(color: Colors.grey[100]),
           const SizedBox(height: 16),
           _PropertyStatsGrid(property: property),
+          if (property.energyCertification != null) ...[
+            const SizedBox(height: 12),
+            _EnergyCertBadge(rating: property.energyCertification!),
+          ],
           const SizedBox(height: 16),
           _OwnerCard(property: property),
           const SizedBox(height: 24),
@@ -934,6 +950,18 @@ class _SummaryCard extends ConsumerWidget {
             _PropertyViabilityCard(propertyId: property.id, ref: ref),
             const SizedBox(height: 16),
           ],
+          // Comfort Radar Chart — zona analysis
+          Builder(builder: (context) {
+            final match = RegExp(r'\b(\d{5})\b').firstMatch(property.address);
+            final postalCode = match?.group(1) ?? '';
+            if (postalCode.isEmpty) return const SizedBox.shrink();
+            return Column(
+              children: [
+                ComfortRadarChart(postalCode: postalCode, address: property.address),
+                const SizedBox(height: 16),
+              ],
+            );
+          }),
           // Action buttons
           _ActionBar(property: property, ref: ref, context: context, vertical: true),
         ],
@@ -1456,6 +1484,59 @@ class _NavigationArrowState extends State<_NavigationArrow> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ─── Energy Certification Badge ───────────────────────────────────────────────
+
+class _EnergyCertBadge extends StatelessWidget {
+  const _EnergyCertBadge({required this.rating});
+  final String rating;
+
+  static const Map<String, Color> _colors = {
+    'A': Color(0xFF16A34A),
+    'B': Color(0xFF4ADE80),
+    'C': Color(0xFFBEF264),
+    'D': Color(0xFFFACC15),
+    'E': Color(0xFFFB923C),
+    'F': Color(0xFFF87171),
+    'G': Color(0xFFEF4444),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final upperRating = rating.toUpperCase();
+    final isTramite = upperRating == 'EN_TRAMITE' || upperRating == 'EN TRAMITE';
+    final color = isTramite ? const Color(0xFF94A3B8) : (_colors[upperRating] ?? const Color(0xFF94A3B8));
+    final label = isTramite ? 'En Tramite' : 'Calificacion Energetica $upperRating';
+
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withOpacity(0.4)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.bolt_rounded, color: color, size: 16),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

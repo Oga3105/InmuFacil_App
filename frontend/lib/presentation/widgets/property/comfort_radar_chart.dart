@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -432,7 +433,7 @@ class _RadarPainter extends CustomPainter {
     canvas.drawPath(dataPath, dataStrokePaint);
 
     // Labels
-    final textPainter = TextPainter(textDirection: TextDirection.ltr);
+    final textPainter = TextPainter(textDirection: ui.TextDirection.ltr);
     for (int i = 0; i < n; i++) {
       final angle = -math.pi / 2 + i * angleStep;
       final labelR = maxR + 18;
