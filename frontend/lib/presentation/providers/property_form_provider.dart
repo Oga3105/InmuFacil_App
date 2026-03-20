@@ -87,7 +87,7 @@ class PropertyFormState {
     this.addressText = '',
     this.selectedLocation,
     this.floorText = '',
-    this.hideExactLocation = false,
+    this.hideExactLocation = true,
     // Structured address
     this.streetText = '',
     this.streetNumberText = '',
@@ -759,8 +759,10 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         'has_ac': state.hasAC,
         'has_heating': state.hasHeating,
         'has_exterior': state.hasExterior,
-        if (state.energyCertification != null)
-          'energy_certification': state.energyCertification,
+        'legal': {
+          if (state.energyCertification != null)
+            'energy_certification': state.energyCertification,
+        },
       };
 
       final formData = FormData.fromMap({
@@ -1037,10 +1039,12 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
       'allow_visits': state.allowVisits,
-      if (state.energyCertification != null)
-        'energy_certification': state.energyCertification,
       if (state.propertyCondition != null)
         'conservation_state': state.propertyCondition!.backendValue,
+      'legal': {
+        if (state.energyCertification != null)
+          'energy_certification': state.energyCertification,
+      },
       'features': {
         'bedrooms': state.bedrooms,
         'bathrooms': state.bathrooms,

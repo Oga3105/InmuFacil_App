@@ -28,7 +28,7 @@ class SmartExplorerCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(lifestyleProvider);
+    final profile = ref.watch(lifestyleProfileProvider);
     final matchScore = profile != null ? _computeMatchScore(postalCode) : null;
 
     return GestureDetector(

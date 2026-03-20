@@ -473,8 +473,28 @@ class _SearchPanel extends ConsumerWidget {
                          ),
 
                          
+                         // [Lifestyle CTA] — "Descubre tu barrio ideal"
+                         const SizedBox(height: 24),
+                         SizedBox(
+                           width: double.infinity,
+                           child: OutlinedButton.icon(
+                             onPressed: () => context.push('/lifestyle/questionnaire'),
+                             icon: const Icon(Icons.explore_outlined, size: 20),
+                             label: const Text(
+                               'Descubre tu barrio ideal',
+                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                             ),
+                             style: OutlinedButton.styleFrom(
+                               foregroundColor: const Color(0xFF2563EB),
+                               side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                               padding: const EdgeInsets.symmetric(vertical: 16),
+                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                             ),
+                           ),
+                         ),
+
                          // [Clean Filters Button] Moved inside _SearchForm
-                         
+
                          // Removed excessive bottom padding/space as requested
                          const SizedBox(height: 16),
                      ],

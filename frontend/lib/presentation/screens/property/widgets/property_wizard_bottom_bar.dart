@@ -21,7 +21,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
     final currentStep = formState.currentStep;
     final isSubmitting = formState.status == PropertyFormStatus.submitting ||
         formState.status == PropertyFormStatus.uploadingImages;
-    final isLastStep = currentStep == 4;
+    final isLastStep = currentStep == 5;
 
     return Container(
       decoration: BoxDecoration(

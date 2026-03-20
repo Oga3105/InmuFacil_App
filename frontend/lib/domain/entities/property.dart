@@ -27,6 +27,7 @@ class Property { // Added
     this.ownerIsVerified = false,
     this.ownerPhotoUrl,
     this.hideExactLocation = false,
+    this.energyCertification,
   });
   final String id;
   final String title;
@@ -53,6 +54,8 @@ class Property { // Added
   final bool ownerIsVerified;
   final String? ownerPhotoUrl;
   final bool hideExactLocation;
+  /// Energy certification rating (A, B, C, D, E, F, G or 'en_tramite')
+  final String? energyCertification;
 
   /// Empty/loading placeholder — use while fetching the real property.
   factory Property.empty() => Property(

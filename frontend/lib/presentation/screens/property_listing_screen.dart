@@ -5,7 +5,7 @@ import '../providers/search_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/property_listing/property_listing_item.dart';
 import '../widgets/property_listing/filter_sidebar.dart';
-import '../widgets/map/property_floating_card.dart';
+import '../widgets/property/smart_explorer_card.dart';
 import '../widgets/common/premium_button.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
@@ -341,8 +341,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                             ],
                                           )
                                         : null,
-                                    child: PropertyFloatingCard(
-                                      property: p,
+                                    child: SmartExplorerCard(
+                                      propertyId: p.id,
+                                      title: p.title,
+                                      address: p.address,
+                                      priceEur: p.price.round(),
+                                      surfaceM2: p.squareMeters,
+                                      imageUrl: p.imageUrl,
+                                      postalCode: RegExp(r'\b(\d{5})\b').firstMatch(p.address)?.group(1),
                                       onTap: () {
                                         context.pushNamed(
                                           'property-details',
