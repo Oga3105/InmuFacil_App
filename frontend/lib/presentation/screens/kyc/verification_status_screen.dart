@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/premium_button.dart';
 
 class VerificationStatusScreen extends ConsumerStatefulWidget {
@@ -27,11 +27,9 @@ class _VerificationStatusScreenState
   Widget build(BuildContext context) {
     final state = ref.watch(verificationProvider);
 
-    final user = ref.watch(authProvider).user;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: _buildAppBar(context, user),
+      appBar: _buildAppBar(context),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
           : state.errorMessage != null
@@ -51,7 +49,7 @@ class _VerificationStatusScreenState
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic user) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -130,29 +128,9 @@ class _VerificationStatusScreenState
             ),
           ),
         ),
-        const SizedBox(width: 12),
-        // Avatar
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: () => context.go('/profile'),
-              child: user?.profilePhotoUrl != null
-                  ? CircleAvatar(
-                      radius: 18,
-                      backgroundImage: NetworkImage(user!.profilePhotoUrl!),
-                    )
-                  : const CircleAvatar(
-                      radius: 18,
-                      backgroundColor: Color(0xFFE2E8F0),
-                      child: Icon(Icons.person, size: 20, color: Color(0xFF64748B)),
-                    ),
-            ),
-          ),
-        ),
+        const SizedBox(width: 8),
+        const UserAvatarMenu(),
+        const SizedBox(width: 16),
       ],
     );
   }

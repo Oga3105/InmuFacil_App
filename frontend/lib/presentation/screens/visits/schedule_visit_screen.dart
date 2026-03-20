@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../providers/auth_provider.dart';
 import '../../providers/visits_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 
 class ScheduleVisitScreen extends ConsumerStatefulWidget {
   const ScheduleVisitScreen({super.key, required this.propertyId});
@@ -134,10 +134,6 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
-    final user = ref.watch(authProvider).user;
-    final initials =
-        user?.name?.isNotEmpty == true ? user!.name![0].toUpperCase() : '?';
-
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -145,19 +141,13 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
         child: AppBarBackButton(
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          },
+          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
         ),
       ),
-      title: GestureDetector(
-        onTap: () => context.go('/'),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
+      title: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => context.go('/'),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -167,12 +157,8 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                 TextSpan(
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   children: [
-                    TextSpan(
-                        text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
-                    TextSpan(
-                        text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
+                    TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -181,32 +167,37 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => context.go('/'),
-          child: const Text(
-            'Inicio',
-            style: TextStyle(
-              color: Color(0xFF1E293B),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                  SizedBox(width: 5),
+                  Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                ],
+              ),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        GestureDetector(
-          onTap: () => context.go('/profile'),
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: const Color(0xFF2563EB),
-            backgroundImage: user?.profilePhotoUrl != null
-                ? NetworkImage(user!.profilePhotoUrl!)
-                : null,
-            child: user?.profilePhotoUrl == null
-                ? Text(initials,
-                    style: const TextStyle(color: Colors.white, fontSize: 14))
-                : null,
-          ),
-        ),
+        const UserAvatarMenu(),
         const SizedBox(width: 16),
       ],
       bottom: PreferredSize(
