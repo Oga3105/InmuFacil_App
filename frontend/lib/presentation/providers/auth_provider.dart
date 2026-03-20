@@ -80,7 +80,13 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<User> _fetchUserProfile() async {
     try {
       final response = await _dio.get('/users/me');
-      return User.fromJson(response.data);
+      final user = User.fromJson(response.data);
+      final photoUrl = user.profilePhotoUrl;
+      if (photoUrl != null && photoUrl.startsWith('/')) {
+        final origin = Uri.parse(kApiBaseUrl).origin;
+        return user.copyWith(profilePhotoUrl: '$origin$photoUrl');
+      }
+      return user;
     } catch (e) {
       throw Exception('Failed to load user profile: $e');
     }
@@ -260,8 +266,8 @@ class AuthNotifier extends Notifier<AuthState> {
         ),
       });
 
-      final response = await _dio.post('/users/me/photo', data: formData);
-      final updatedUser = User.fromJson(response.data);
+      await _dio.post('/users/me/photo', data: formData);
+      final updatedUser = await _fetchUserProfile();
       state = state.copyWith(user: updatedUser);
       return {'success': true, 'url': updatedUser.profilePhotoUrl};
     } on DioException catch (e) {

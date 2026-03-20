@@ -131,7 +131,7 @@ async def upload_profile_photo(
     db.commit()
     db.refresh(current_user)
 
-    logger.info(f"[PHOTO] User {current_user.id} uploaded profile photo: {photo_url}")
+    logger.info(f"[PHOTO] User {current_user.id} uploaded profile photo: {current_user.profile_photo_url}")
 
     # Decryptar teléfono si existe
     decrypted_phone = None
