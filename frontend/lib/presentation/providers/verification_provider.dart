@@ -35,6 +35,11 @@ class VerificationState {
     this.uploadDate,
     this.errorMessage,
     this.submissionSuccess = false,
+    // Document number confirmation state
+    this.isExtractingDocNumber = false,
+    this.extractedDocNumber,
+    this.documentNumberConfirmed = false,
+    this.docReadAttempts = 0,
   });
   final int currentStepIndex;
   final DocumentType? selectedDocumentType;
@@ -60,9 +65,16 @@ class VerificationState {
   final String? errorMessage;
   final bool submissionSuccess;
 
+  // OCR pre-check state
+  final bool isExtractingDocNumber;
+  final String? extractedDocNumber;
+  final bool documentNumberConfirmed;
+  final int docReadAttempts;
+
   bool get hasFront => frontBytes != null || frontImage != null;
   bool get hasBack => backBytes != null || backImage != null;
   bool get hasSelfie => selfieBytes != null || selfieImage != null;
+  bool get isDocumentScanDone => hasFront && hasBack && documentNumberConfirmed;
 
   VerificationState copyWith({
     int? currentStepIndex,
@@ -85,31 +97,47 @@ class VerificationState {
     DateTime? uploadDate,
     String? errorMessage,
     bool? submissionSuccess,
+    bool? isExtractingDocNumber,
+    Object? extractedDocNumber = _sentinel,
+    bool? documentNumberConfirmed,
+    int? docReadAttempts,
+    // Nullability helpers for clearing images
+    bool clearFrontImage = false,
+    bool clearBackImage = false,
   }) {
     return VerificationState(
       currentStepIndex: currentStepIndex ?? this.currentStepIndex,
       selectedDocumentType: selectedDocumentType ?? this.selectedDocumentType,
-      frontImage: frontImage ?? this.frontImage,
-      backImage: backImage ?? this.backImage,
+      frontImage: clearFrontImage ? null : (frontImage ?? this.frontImage),
+      backImage: clearBackImage ? null : (backImage ?? this.backImage),
       selfieImage: selfieImage ?? this.selfieImage,
-      frontBytes: frontBytes ?? this.frontBytes,
-      backBytes: backBytes ?? this.backBytes,
+      frontBytes: clearFrontImage ? null : (frontBytes ?? this.frontBytes),
+      backBytes: clearBackImage ? null : (backBytes ?? this.backBytes),
       selfieBytes: selfieBytes ?? this.selfieBytes,
-      frontXFile: frontXFile ?? this.frontXFile,
-      backXFile: backXFile ?? this.backXFile,
+      frontXFile: clearFrontImage ? null : (frontXFile ?? this.frontXFile),
+      backXFile: clearBackImage ? null : (backXFile ?? this.backXFile),
       selfieXFile: selfieXFile ?? this.selfieXFile,
       isLoading: isLoading ?? this.isLoading,
-      frontStatus: frontStatus ?? this.frontStatus,
-      backStatus: backStatus ?? this.backStatus,
+      frontStatus: clearFrontImage ? UploadStatus.idle : (frontStatus ?? this.frontStatus),
+      backStatus: clearBackImage ? UploadStatus.idle : (backStatus ?? this.backStatus),
       selfieStatus: selfieStatus ?? this.selfieStatus,
       kycStatus: kycStatus ?? this.kycStatus,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       uploadDate: uploadDate ?? this.uploadDate,
       errorMessage: errorMessage,
       submissionSuccess: submissionSuccess ?? this.submissionSuccess,
+      isExtractingDocNumber: isExtractingDocNumber ?? this.isExtractingDocNumber,
+      extractedDocNumber: extractedDocNumber == _sentinel
+          ? this.extractedDocNumber
+          : extractedDocNumber as String?,
+      documentNumberConfirmed: documentNumberConfirmed ?? this.documentNumberConfirmed,
+      docReadAttempts: docReadAttempts ?? this.docReadAttempts,
     );
   }
 }
+
+// Sentinel for nullable copyWith fields
+const Object _sentinel = Object();
 
 class VerificationNotifier extends Notifier<VerificationState> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
@@ -251,6 +279,90 @@ class VerificationNotifier extends Notifier<VerificationState> {
     }
   }
 
+  /// Calls the backend to extract the document number from the front image.
+  /// Returns the result map: {"doc_number": String?, "readable": bool}
+  /// or null if the request failed unexpectedly.
+  Future<Map<String, dynamic>?> extractDocNumber() async {
+    state = state.copyWith(isExtractingDocNumber: true, errorMessage: null);
+    try {
+      await _ensureAuth();
+      final docType = state.selectedDocumentType?.name ?? 'dni';
+      final formData = FormData.fromMap({'document_type': docType});
+
+      if (kIsWeb && state.frontXFile != null) {
+        final bytes = await state.frontXFile!.readAsBytes();
+        formData.files.add(MapEntry(
+          'front',
+          MultipartFile.fromBytes(bytes, filename: 'front.jpg'),
+        ));
+      } else if (!kIsWeb && state.frontImage != null) {
+        formData.files.add(MapEntry(
+          'front',
+          await MultipartFile.fromFile(state.frontImage!.path, filename: 'front.jpg'),
+        ));
+      } else {
+        state = state.copyWith(isExtractingDocNumber: false);
+        return null;
+      }
+
+      final response = await _dio.post('/kyc/extract-doc-number', data: formData);
+      final data = response.data as Map<String, dynamic>;
+      final docNumber = data['doc_number'] as String?;
+      state = state.copyWith(
+        isExtractingDocNumber: false,
+        extractedDocNumber: docNumber,
+      );
+      return data;
+    } on DioException catch (e) {
+      final detail = e.response?.data?['detail'];
+      state = state.copyWith(
+        isExtractingDocNumber: false,
+        errorMessage: detail is String ? detail : 'Error al leer el documento.',
+      );
+      return null;
+    } catch (_) {
+      state = state.copyWith(
+        isExtractingDocNumber: false,
+        errorMessage: 'Error inesperado al leer el documento.',
+      );
+      return null;
+    }
+  }
+
+  /// Called when the user confirms the extracted document number is correct.
+  /// [confirmedNumber] is the OCR number or the manually-entered validated one.
+  void confirmDocumentNumber(String confirmedNumber) {
+    state = state.copyWith(
+      documentNumberConfirmed: true,
+      extractedDocNumber: confirmedNumber,
+    );
+  }
+
+  /// Called when the user rejects the extracted number.
+  /// Increments attempt count. After 2 rejections, resets document images.
+  /// Returns true if images were reset (max attempts reached).
+  bool rejectDocumentNumber() {
+    final attempts = state.docReadAttempts + 1;
+    if (attempts >= 2) {
+      state = state.copyWith(
+        docReadAttempts: 0,
+        documentNumberConfirmed: false,
+        extractedDocNumber: null,
+        isExtractingDocNumber: false,
+        clearFrontImage: true,
+        clearBackImage: true,
+        errorMessage: null,
+      );
+      return true; // images reset, ask user to re-upload
+    }
+    state = state.copyWith(
+      docReadAttempts: attempts,
+      documentNumberConfirmed: false,
+      extractedDocNumber: null,
+    );
+    return false;
+  }
+
   Future<bool> submitVerification() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
@@ -376,6 +488,18 @@ class VerificationNotifier extends Notifier<VerificationState> {
 
   void reset() {
     state = VerificationState();
+  }
+
+  void resetDocumentImages() {
+    state = state.copyWith(
+      clearFrontImage: true,
+      clearBackImage: true,
+      documentNumberConfirmed: false,
+      extractedDocNumber: null,
+      docReadAttempts: 0,
+      isExtractingDocNumber: false,
+      errorMessage: null,
+    );
   }
 }
 

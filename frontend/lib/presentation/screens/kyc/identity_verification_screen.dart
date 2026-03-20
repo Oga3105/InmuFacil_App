@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import 'widgets/camera_capture_dialog.dart';
+import 'widgets/document_number_confirmation_dialog.dart';
 import 'widgets/document_upload_card.dart';
 
 class IdentityVerificationScreen extends ConsumerStatefulWidget {
@@ -18,6 +19,135 @@ class IdentityVerificationScreen extends ConsumerStatefulWidget {
 
 class _IdentityVerificationScreenState
     extends ConsumerState<IdentityVerificationScreen> {
+
+  /// Called after each document image pick. Triggers OCR when both are ready.
+  Future<void> _onDocumentImagePicked(VerificationNotifier notifier) async {
+    final state = ref.read(verificationProvider);
+    if (state.hasFront && state.hasBack && !state.documentNumberConfirmed) {
+      await _runOcrFlow(notifier);
+    }
+  }
+
+  /// Full OCR confirmation flow. Shows the dialog, handles retry and reset.
+  Future<void> _runOcrFlow(VerificationNotifier notifier) async {
+    if (!mounted) return;
+
+    final state = ref.read(verificationProvider);
+    final isSecondAttempt = state.docReadAttempts > 0;
+    final docLabel = _docTypeLabel(state.selectedDocumentType);
+
+    // Show loading dialog immediately
+    if (mounted) {
+      DocumentNumberConfirmationDialog.show(
+        context: context,
+        isLoading: true,
+        docNumber: null,
+        readable: false,
+        isSecondAttempt: isSecondAttempt,
+        documentType: state.selectedDocumentType,
+        documentTypeLabel: docLabel,
+        onConfirm: (_) {},
+        onReject: () {},
+        onReupload: () {},
+      );
+    }
+
+    // Call backend OCR
+    final result = await notifier.extractDocNumber();
+
+    // Close loading dialog
+    if (mounted) Navigator.of(context, rootNavigator: true).pop();
+    if (!mounted) return;
+
+    // Handle network/auth error (result is null)
+    if (result == null) {
+      _showSnackBar(
+        ref.read(verificationProvider).errorMessage ??
+            'Error al conectar. Intenta de nuevo.',
+        isError: true,
+      );
+      return;
+    }
+
+    final readable = result['readable'] == true;
+    final docNumber = result['doc_number'] as String?;
+
+    final currentState = ref.read(verificationProvider);
+
+    if (!readable || docNumber == null) {
+      // Unreadable — show error dialog
+      await DocumentNumberConfirmationDialog.show(
+        context: context,
+        isLoading: false,
+        docNumber: null,
+        readable: false,
+        isSecondAttempt: isSecondAttempt,
+        documentType: currentState.selectedDocumentType,
+        documentTypeLabel: docLabel,
+        onConfirm: (_) {},
+        onReject: () {},
+        onReupload: () {
+          notifier.resetDocumentImages();
+        },
+      );
+      return;
+    }
+
+    // Show confirmation dialog
+    await DocumentNumberConfirmationDialog.show(
+      context: context,
+      isLoading: false,
+      docNumber: docNumber,
+      readable: true,
+      isSecondAttempt: isSecondAttempt,
+      documentType: currentState.selectedDocumentType,
+      documentTypeLabel: docLabel,
+      onConfirm: (confirmedNumber) {
+        notifier.confirmDocumentNumber(confirmedNumber);
+        _showSnackBar('Numero de documento confirmado correctamente.');
+      },
+      onReject: () async {
+        final imagesReset = notifier.rejectDocumentNumber();
+        if (imagesReset) {
+          if (mounted) {
+            _showSnackBar(
+              'La imagen no es reconocible. Por favor, sube el documento de nuevo.',
+              isError: true,
+            );
+          }
+        } else {
+          // Second attempt — re-run OCR
+          await _runOcrFlow(notifier);
+        }
+      },
+      onReupload: () {
+        notifier.resetDocumentImages();
+      },
+    );
+  }
+
+  String _docTypeLabel(DocumentType? type) {
+    switch (type) {
+      case DocumentType.nie:
+        return 'NIE';
+      case DocumentType.pasaporte:
+        return 'Pasaporte';
+      default:
+        return 'DNI';
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red.shade700 : const Color(0xFF16A34A),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
 
   /// Opens the camera dialog and stores the captured bytes as the selfie.
   Future<void> _openCamera(VerificationNotifier notifier) async {
@@ -32,7 +162,8 @@ class _IdentityVerificationScreenState
     return state.selectedDocumentType != null ||
         state.hasFront ||
         state.hasBack ||
-        state.hasSelfie;
+        state.hasSelfie ||
+        state.documentNumberConfirmed;
   }
 
   Future<bool> _confirmDiscard() async {
@@ -383,7 +514,7 @@ class _IdentityVerificationScreenState
             // ── 3 columnas horizontales ──
             LayoutBuilder(builder: (context, constraints) {
               final step1Done = state.selectedDocumentType != null;
-              final step2Done = state.hasFront && state.hasBack;
+              final step2Done = state.isDocumentScanDone;
               final isWide = constraints.maxWidth > 500;
               if (isWide) {
                 return IntrinsicHeight(
@@ -400,8 +531,12 @@ class _IdentityVerificationScreenState
                           const SizedBox(height: 12),
                           _buildDocumentTypeSelector(state, notifier),
                           const SizedBox(height: 24),
-                          _buildSectionLabel('2', 'Escaneo de Documento',
-                              locked: !step1Done),
+                          _buildSectionLabel(
+                            '2',
+                            'Escaneo de Documento',
+                            locked: !step1Done,
+                            confirmed: state.documentNumberConfirmed,
+                          ),
                           const SizedBox(height: 12),
                           _lockedWrapper(
                             locked: !step1Done,
@@ -410,7 +545,10 @@ class _IdentityVerificationScreenState
                                 Expanded(
                                   child: DocumentUploadCard(
                                     title: 'Parte Frontal',
-                                    onTap: notifier.pickFrontImage,
+                                    onTap: () async {
+                                      await notifier.pickFrontImage();
+                                      await _onDocumentImagePicked(notifier);
+                                    },
                                     imageFile:
                                         kIsWeb ? null : state.frontImage,
                                     imageBytes:
@@ -423,7 +561,10 @@ class _IdentityVerificationScreenState
                                 Expanded(
                                   child: DocumentUploadCard(
                                     title: 'Parte Trasera',
-                                    onTap: notifier.pickBackImage,
+                                    onTap: () async {
+                                      await notifier.pickBackImage();
+                                      await _onDocumentImagePicked(notifier);
+                                    },
                                     imageFile:
                                         kIsWeb ? null : state.backImage,
                                     imageBytes:
@@ -469,8 +610,12 @@ class _IdentityVerificationScreenState
                     const SizedBox(height: 12),
                     _buildDocumentTypeSelector(state, notifier),
                     const SizedBox(height: 24),
-                    _buildSectionLabel('2', 'Escaneo de Documento',
-                        locked: !step1Done),
+                    _buildSectionLabel(
+                      '2',
+                      'Escaneo de Documento',
+                      locked: !step1Done,
+                      confirmed: state.documentNumberConfirmed,
+                    ),
                     const SizedBox(height: 12),
                     _lockedWrapper(
                       locked: !step1Done,
@@ -479,7 +624,10 @@ class _IdentityVerificationScreenState
                           Expanded(
                             child: DocumentUploadCard(
                               title: 'Parte Frontal',
-                              onTap: notifier.pickFrontImage,
+                              onTap: () async {
+                                await notifier.pickFrontImage();
+                                await _onDocumentImagePicked(notifier);
+                              },
                               imageFile: kIsWeb ? null : state.frontImage,
                               imageBytes: kIsWeb ? state.frontBytes : null,
                               status: state.frontStatus,
@@ -490,7 +638,10 @@ class _IdentityVerificationScreenState
                           Expanded(
                             child: DocumentUploadCard(
                               title: 'Parte Trasera',
-                              onTap: notifier.pickBackImage,
+                              onTap: () async {
+                                await notifier.pickBackImage();
+                                await _onDocumentImagePicked(notifier);
+                              },
                               imageFile: kIsWeb ? null : state.backImage,
                               imageBytes: kIsWeb ? state.backBytes : null,
                               status: state.backStatus,
@@ -653,27 +804,35 @@ class _IdentityVerificationScreenState
   // Section label (with optional locked state)
   // ──────────────────────────────────────────────
   Widget _buildSectionLabel(String number, String text,
-      {bool locked = false}) {
+      {bool locked = false, bool confirmed = false}) {
+    final Color bgColor = locked
+        ? Colors.grey.shade300
+        : confirmed
+            ? const Color(0xFF16A34A)
+            : const Color(0xFF2563EB);
+
     return Row(
       children: [
         Container(
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: locked ? Colors.grey.shade300 : const Color(0xFF2563EB),
+            color: bgColor,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: locked
                 ? Icon(Icons.lock_outline, size: 13, color: Colors.grey.shade500)
-                : Text(
-                    number,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                : confirmed
+                    ? const Icon(Icons.check, size: 14, color: Colors.white)
+                    : Text(
+                        number,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
           ),
         ),
         const SizedBox(width: 10),
@@ -685,6 +844,25 @@ class _IdentityVerificationScreenState
             color: locked ? Colors.grey.shade400 : const Color(0xFF1E293B),
           ),
         ),
+        if (confirmed) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDCFCE7),
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(color: const Color(0xFF86EFAC)),
+            ),
+            child: const Text(
+              'Numero verificado',
+              style: TextStyle(
+                color: Color(0xFF16A34A),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -903,6 +1081,7 @@ class _IdentityVerificationScreenState
     return state.selectedDocumentType != null &&
         state.hasFront &&
         state.hasBack &&
+        state.documentNumberConfirmed &&
         state.hasSelfie;
   }
 
