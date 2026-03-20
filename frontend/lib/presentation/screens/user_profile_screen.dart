@@ -15,6 +15,7 @@ import '../../domain/entities/user.dart';
 import '../widgets/common/app_bar_back_button.dart';
 import '../widgets/common/user_avatar_menu.dart';
 import '../widgets/visits/visit_cancel_dialog.dart';
+import '../screens/settings/ai_consent_history_screen.dart';
 
 class UserProfileScreen extends ConsumerStatefulWidget {
   const UserProfileScreen({super.key, this.initialTabIndex = 0});
@@ -667,6 +668,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     _buildSolvencyCard(),
                     const SizedBox(height: 10),
                     _buildTrustDashboardButton(),
+                    const SizedBox(height: 10),
+                    _buildAiConsentHistoryButton(),
                     const SizedBox(height: 24),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
@@ -686,6 +689,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               _buildSolvencyCard(),
               const SizedBox(height: 10),
               _buildTrustDashboardButton(),
+              const SizedBox(height: 10),
+              _buildAiConsentHistoryButton(),
               const SizedBox(height: 24),
               _buildPromoCard(),
               const SizedBox(height: 24),
@@ -1136,6 +1141,23 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF1E3A5F),
           side: const BorderSide(color: Color(0xFFCBD5E1)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiConsentHistoryButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => context.push(AiConsentHistoryScreen.routePath),
+        icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+        label: const Text('Historial de Consentimientos IA'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF7C3AED),
+          side: const BorderSide(color: Color(0xFFDDD6FE)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),

@@ -272,7 +272,7 @@ class RegionalLegalDashboardWidget extends StatelessWidget {
           Expanded(
             child: Text(
               'Tu anuncio es visible, pero los compradores veran que la '
-              'documentacion aun no ha sido verificada por InmuFacil. '
+              'documentacion aun no ha sido verificada por InmuFácil. '
               'Completalo para generar mas confianza.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF92400E),

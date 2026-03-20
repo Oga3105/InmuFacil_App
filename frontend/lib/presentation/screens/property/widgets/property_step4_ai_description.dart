@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/property_form_provider.dart';
+import '../../../../core/services/ai_consent_service.dart';
+import '../../../widgets/ai/ai_consent_dialog.dart';
 
 class PropertyStep4AiDescription extends ConsumerStatefulWidget {
   const PropertyStep4AiDescription({super.key});
@@ -102,7 +104,15 @@ class _PropertyStep4AiDescriptionState
                     FilledButton.icon(
                       onPressed: isGenerating
                           ? null
-                          : () => notifier.generateAiDescription(),
+                          : () async {
+                              final accepted = await AiConsentDialog.show(
+                                context: context,
+                                config: AiConsentConfig.propertyDescription,
+                              );
+                              if (accepted && context.mounted) {
+                                notifier.generateAiDescription();
+                              }
+                            },
                       icon: const Icon(Icons.auto_awesome, size: 15),
                       label: Text(
                         isGenerating ? 'Generando...' : 'Generar con IA',

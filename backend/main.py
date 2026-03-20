@@ -311,7 +311,7 @@ async def health_check():
 # @Architect - Router Integration
 # ============================================================================
 
-from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides, nota_simple, urban_growth, solvency_passport, market_gap, neighborhood_twins, comfort_index, signature_verification, notifications_email
+from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides, nota_simple, urban_growth, solvency_passport, market_gap, neighborhood_twins, comfort_index, signature_verification, notifications_email, ai_consent
 from backend.src.routes import notifications as notifications_router
 
 from fastapi import APIRouter
@@ -362,6 +362,7 @@ api_v1_router.include_router(neighborhood_twins.router)     # V64 - Neighborhood
 api_v1_router.include_router(comfort_index.router)          # V62 - Invisible Comfort Index (AI)
 api_v1_router.include_router(signature_verification.router) # V61 - Biometric Signature Verification
 api_v1_router.include_router(notifications_email.router)    # V52 - Email Notification Templates
+api_v1_router.include_router(ai_consent.router)             # GDPR - AI Consent Logging (Art. 6.1.a)
 
 # Include V1 Router in App
 app.include_router(api_v1_router)

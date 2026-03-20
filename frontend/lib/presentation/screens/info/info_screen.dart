@@ -220,7 +220,7 @@ class _WhatIsScreen extends StatelessWidget {
               const Icon(Icons.home_work_outlined, color: Colors.white, size: 52),
               const SizedBox(height: 16),
               const Text(
-                'InmuFacil',
+                'InmuFácil',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 28,
@@ -238,7 +238,7 @@ class _WhatIsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         const Text(
-          'Por que InmuFacil?',
+          'Por que InmuFácil?',
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
         ),
