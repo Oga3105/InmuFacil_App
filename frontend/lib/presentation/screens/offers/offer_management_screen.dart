@@ -8,6 +8,7 @@ import '../../providers/my_properties_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
+import '../../providers/property_analytics_provider.dart';
 
 enum _OfferSort {
   newest,
@@ -330,7 +331,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
 // Property Header Card
 // ---------------------------------------------------------------------------
 
-class _PropertyHeaderCard extends StatelessWidget {
+class _PropertyHeaderCard extends ConsumerWidget {
   const _PropertyHeaderCard(
       {required this.property, required this.propertyId});
 
@@ -338,7 +339,8 @@ class _PropertyHeaderCard extends StatelessWidget {
   final String propertyId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final analyticsAsync = ref.watch(propertyAnalyticsProvider(propertyId));
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -431,15 +433,40 @@ class _PropertyHeaderCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _StatCell(label: 'OFERTAS', value: '—'),
-                    _StatDivider(),
-                    _StatCell(label: 'VISITAS', value: '—'),
-                    _StatDivider(),
-                    _StatCell(label: 'FAVORITOS', value: '—'),
-                  ],
+                analyticsAsync.when(
+                  loading: () => const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  error: (_, __) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StatCell(label: 'OFERTAS', value: '—'),
+                      _StatDivider(),
+                      _StatCell(label: 'VISITAS', value: '—'),
+                      _StatDivider(),
+                      _StatCell(label: 'FAVORITOS', value: '—'),
+                    ],
+                  ),
+                  data: (analytics) {
+                    final a = analytics ??
+                        const PropertyAnalytics(
+                            views: 0, favorites: 0, offers: 0);
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _StatCell(
+                            label: 'OFERTAS', value: '${a.offers}'),
+                        _StatDivider(),
+                        _StatCell(
+                            label: 'VISITAS', value: '${a.views}'),
+                        _StatDivider(),
+                        _StatCell(
+                            label: 'FAVORITOS', value: '${a.favorites}'),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
