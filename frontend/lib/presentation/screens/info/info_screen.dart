@@ -602,17 +602,8 @@ class _ContactScreen extends StatelessWidget {
           icon: Icons.email_outlined,
           color: _kBlue,
           title: 'Correo electronico',
-          subtitle: 'soporte@inmufacil.es',
+          subtitle: 'soporte@inmufacil.com',
           actionLabel: 'Enviar email',
-          onTap: () {},
-        ),
-        const SizedBox(height: 12),
-        _ContactOption(
-          icon: Icons.chat_bubble_outline,
-          color: _kGreen,
-          title: 'Chat en la aplicacion',
-          subtitle: 'Respuesta en menos de 24 horas',
-          actionLabel: 'Abrir chat',
           onTap: () {},
         ),
         const SizedBox(height: 12),
@@ -928,7 +919,7 @@ class _LegalTextScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Para cualquier consulta legal contacta con nosotros en legal@inmufacil.es',
+                  'Para cualquier consulta legal contacta con nosotros en legal@inmufacil.com',
                   style: TextStyle(
                       fontSize: 11,
                       color: Colors.grey.shade600,
@@ -1050,7 +1041,7 @@ const _privacySections = [
     icon: Icons.business_outlined,
     body:
         'InmuFacil, S.L. (en tramite de constitucion), con domicilio en Sevilla, '
-        'Espana. Correo electronico de proteccion de datos: privacidad@inmufacil.es. '
+        'Espana. Correo electronico de proteccion de datos: privacidad@inmufacil.com. '
         'InmuFacil actua como Responsable del Tratamiento conforme al Reglamento (UE) '
         '2016/679 (RGPD) y la Ley Organica 3/2018 (LOPDGDD).',
   ),
@@ -1166,7 +1157,7 @@ const _privacySections = [
     title: 'Tus derechos RGPD',
     icon: Icons.shield_outlined,
     body:
-        'Puedes ejercer los siguientes derechos en privacidad@inmufacil.es '
+        'Puedes ejercer los siguientes derechos en privacidad@inmufacil.com '
         'adjuntando copia de tu DNI/NIE:\n\n'
         '• Derecho de acceso: conocer que datos tratamos sobre ti.\n'
         '• Derecho de rectificacion: corregir datos inexactos.\n'
@@ -1366,7 +1357,7 @@ const _legalNoticeSections = [
     body:
         'InmuFacil, S.L. — en tramite de constitucion.\n'
         'Domicilio: Sevilla, Espana.\n'
-        'Email de contacto: legal@inmufacil.es\n'
+        'Email de contacto: legal@inmufacil.com\n'
         'Responsable de contenidos: equipo InmuFacil.',
   ),
   _LegalSection(
@@ -1671,7 +1662,11 @@ class _ContactOption extends StatelessWidget {
           ),
           TextButton(
             onPressed: onTap,
-            style: TextButton.styleFrom(foregroundColor: color),
+            style: TextButton.styleFrom(
+              foregroundColor: color,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
             child: Text(actionLabel, style: const TextStyle(fontSize: 13)),
           ),
         ],
