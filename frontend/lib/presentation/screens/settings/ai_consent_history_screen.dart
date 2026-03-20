@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,14 @@ import 'package:intl/intl.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const _kNavy = Color(0xFF0F172A);
+const _kPurple = Color(0xFF7C3AED);
+const _kGreen = Color(0xFF16A34A);
+const _kSlate = Color(0xFF64748B);
+const _kBg = Color(0xFFF8FAFC);
+
 // ─── Data model ───────────────────────────────────────────────────────────────
 
 class _ConsentEntry {
@@ -19,6 +29,7 @@ class _ConsentEntry {
     required this.dataCategories,
     required this.purpose,
     required this.aiProvider,
+    required this.consentTextVersion,
     required this.consentedAt,
     this.ipAddress,
     this.propertyId,
@@ -30,25 +41,30 @@ class _ConsentEntry {
   final List<String> dataCategories;
   final String purpose;
   final String aiProvider;
+  final String consentTextVersion;
   final DateTime consentedAt;
   final String? ipAddress;
   final String? propertyId;
 
   factory _ConsentEntry.fromJson(Map<String, dynamic> json) {
     final raw = json['data_categories'];
-    final List<String> cats;
+    List<String> cats;
     if (raw is List) {
       cats = raw.map((e) => e.toString()).toList();
     } else if (raw is String) {
-      // stored as JSON string: '["a","b"]'
-      cats = raw
-          .replaceAll('[', '')
-          .replaceAll(']', '')
-          .replaceAll('"', '')
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
+      try {
+        final decoded = jsonDecode(raw) as List<dynamic>;
+        cats = decoded.map((e) => e.toString()).toList();
+      } catch (_) {
+        cats = raw
+            .replaceAll('[', '')
+            .replaceAll(']', '')
+            .replaceAll('"', '')
+            .split(',')
+            .map((s) => s.trim())
+            .where((s) => s.isNotEmpty)
+            .toList();
+      }
     } else {
       cats = const [];
     }
@@ -59,7 +75,10 @@ class _ConsentEntry {
       dataCategories: cats,
       purpose: json['purpose'] as String,
       aiProvider: json['ai_provider'] as String,
-      consentedAt: DateTime.parse(json['consented_at'] as String).toLocal(),
+      consentTextVersion:
+          (json['consent_text_version'] as String?) ?? 'v1.0',
+      consentedAt:
+          DateTime.parse(json['consented_at'] as String).toLocal(),
       ipAddress: json['ip_address'] as String?,
       propertyId: json['property_id'] as String?,
     );
@@ -87,7 +106,8 @@ final _aiConsentHistoryProvider =
   final list = response.data as List<dynamic>;
   return list
       .map((e) => _ConsentEntry.fromJson(e as Map<String, dynamic>))
-      .toList();
+      .toList()
+    ..sort((a, b) => b.consentedAt.compareTo(a.consentedAt));
 });
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -104,141 +124,225 @@ class AiConsentHistoryScreen extends ConsumerWidget {
     final historyAsync = ref.watch(_aiConsentHistoryProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: AppBarBackButton(onPressed: () => context.pop()),
-        title: Row(
+      backgroundColor: _kBg,
+      appBar: _buildAppBar(context, authState),
+      body: historyAsync.when(
+        loading: () =>
+            const Center(child: CircularProgressIndicator(color: _kPurple)),
+        error: (err, _) => _ErrorState(message: err.toString()),
+        data: (entries) => CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(child: _PageHeader(count: entries.length)),
+            if (entries.isEmpty)
+              const SliverFillRemaining(child: _EmptyState())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _ConsentCard(entry: entries[index]),
+                    ),
+                    childCount: entries.length,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic authState) {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: AppBarBackButton(
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      title: GestureDetector(
+        onTap: () => context.go('/'),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset(
-              'assets/images/logo_inmufacil.png',
-              height: 28,
-              errorBuilder: (_, __, ___) => const SizedBox(width: 28),
-            ),
+            Image.asset('assets/images/logo_inmufacil.png', height: 32),
             const SizedBox(width: 8),
-            const Text(
-              'InmuFácil',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: Color(0xFF0F172A),
+            const Text.rich(
+              TextSpan(
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                children: [
+                  TextSpan(
+                    text: 'Inmu',
+                    style: TextStyle(color: Color(0xFF2563EB)),
+                  ),
+                  TextSpan(
+                    text: 'Fácil',
+                    style: TextStyle(color: Color(0xFF16A34A)),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => context.go('/'),
-            child: const Text(
-              'Inicio',
-              style: TextStyle(color: Color(0xFF2563EB), fontSize: 13),
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(color: Colors.grey.shade200, height: 1),
+      ),
+      actions: [
+        GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2563EB),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                SizedBox(width: 6),
+                Text(
+                  'Inicio',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
-          if (authState.isAuthenticated)
-            const UserAvatarMenu(),
-          const SizedBox(width: 8),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: const Color(0xFFE2E8F0)),
         ),
-      ),
-      body: historyAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, _) => _ErrorState(message: err.toString()),
-        data: (entries) => entries.isEmpty
-            ? const _EmptyState()
-            : _ConsentList(entries: entries),
-      ),
-    );
-  }
-}
-
-// ─── List ─────────────────────────────────────────────────────────────────────
-
-class _ConsentList extends StatelessWidget {
-  const _ConsentList({required this.entries});
-  final List<_ConsentEntry> entries;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        if (authState.isAuthenticated)
+          const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEDE9FE),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.privacy_tip_outlined,
-                      color: Color(0xFF7C3AED),
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Historial de Consentimientos IA',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${entries.length} registro${entries.length != 1 ? 's' : ''} de consentimiento. '
-                'Base juridica: Art. 6.1.a RGPD / Art. 7 LOPDGDD.',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF64748B),
-                  height: 1.4,
-                ),
-              ),
+              SizedBox(width: 12),
+              UserAvatarMenu(),
+              SizedBox(width: 16),
             ],
           ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 32),
-            itemCount: entries.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, index) =>
-                _ConsentCard(entry: entries[index]),
-          ),
-        ),
       ],
     );
   }
 }
 
-// ─── Card ─────────────────────────────────────────────────────────────────────
+// ─── Page header ──────────────────────────────────────────────────────────────
 
-class _ConsentCard extends StatelessWidget {
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEDE9FE),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.privacy_tip_outlined,
+                    color: _kPurple, size: 22),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Historial de Consentimientos IA',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: _kNavy,
+                      ),
+                    ),
+                    Text(
+                      count == 0
+                          ? 'Sin registros todavía'
+                          : '$count consentimiento${count != 1 ? 's' : ''} '
+                              'registrado${count != 1 ? 's' : ''}',
+                      style: const TextStyle(fontSize: 13, color: _kSlate),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFFBEB),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFFCD34D)),
+            ),
+            child: const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline,
+                    size: 14, color: Color(0xFF92400E)),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Este historial es tu registro de consentimientos explícitos otorgados para el '
+                    'tratamiento de datos por sistemas de IA. '
+                    'Base jurídica: Art. 6.1.a RGPD / Art. 7 LOPDGDD. '
+                    'Derecho de acceso: Art. 15 RGPD.',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF92400E),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (count > 0) const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Consent Card (expandable) ────────────────────────────────────────────────
+
+class _ConsentCard extends StatefulWidget {
   const _ConsentCard({required this.entry});
   final _ConsentEntry entry;
 
-  static const _purple = Color(0xFF7C3AED);
-  static const _green = Color(0xFF16A34A);
+  @override
+  State<_ConsentCard> createState() => _ConsentCardState();
+}
 
-  IconData _iconForActionType(String type) {
+class _ConsentCardState extends State<_ConsentCard> {
+  bool _expanded = false;
+
+  static IconData _iconForType(String type) {
     switch (type) {
       case 'property_description':
         return Icons.auto_awesome;
@@ -251,7 +355,9 @@ class _ConsentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = DateFormat('d MMM yyyy, HH:mm', 'es').format(entry.consentedAt);
+    final e = widget.entry;
+    final dateLabel =
+        DateFormat('d MMM yyyy · HH:mm', 'es').format(e.consentedAt);
 
     return Container(
       decoration: BoxDecoration(
@@ -266,121 +372,163 @@ class _ConsentCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Row: icon + label + badge
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEDE9FE),
-                  borderRadius: BorderRadius.circular(8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Column(
+          children: [
+            // Always-visible row
+            InkWell(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEDE9FE),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(_iconForType(e.actionType),
+                          color: _kPurple, size: 18),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            e.actionLabel,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _kNavy,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              const Icon(Icons.schedule_outlined,
+                                  size: 11, color: _kSlate),
+                              const SizedBox(width: 3),
+                              Text(
+                                dateLabel,
+                                style: const TextStyle(
+                                    fontSize: 11, color: _kSlate),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _kGreen.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                            color: _kGreen.withValues(alpha: 0.25)),
+                      ),
+                      child: const Text(
+                        'ACEPTADO',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: _kGreen,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _expanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: _kSlate,
+                      size: 18,
+                    ),
+                  ],
                 ),
-                child: Icon(_iconForActionType(entry.actionType),
-                    color: _purple, size: 18),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  entry.actionLabel,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: _green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: _green.withValues(alpha: 0.2)),
-                ),
-                child: const Text(
-                  'ACEPTADO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: _green,
-                    letterSpacing: 0.4,
-                  ),
+            ),
+
+            // Expandable detail
+            if (_expanded) ...[
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _DetailRow(
+                      icon: Icons.smart_toy_outlined,
+                      label: 'Proveedor de IA',
+                      value: e.aiProvider,
+                    ),
+                    const SizedBox(height: 10),
+                    _DetailRow(
+                      icon: Icons.flag_outlined,
+                      label: 'Finalidad',
+                      value: e.purpose,
+                    ),
+                    const SizedBox(height: 10),
+                    _DetailRow(
+                      icon: Icons.upload_outlined,
+                      label: 'Datos enviados al proveedor',
+                      value: e.dataCategories.map((c) => '• $c').join('\n'),
+                    ),
+                    if (e.propertyId != null) ...[
+                      const SizedBox(height: 10),
+                      _DetailRow(
+                        icon: Icons.home_outlined,
+                        label: 'Inmueble de referencia',
+                        value: 'ID: ${e.propertyId}',
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _kBg,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Wrap(
+                        spacing: 16,
+                        runSpacing: 4,
+                        children: [
+                          _MetaChip(
+                              icon: Icons.tag, text: 'Registro #${e.id}'),
+                          _MetaChip(
+                              icon: Icons.verified_outlined,
+                              text: 'Version ${e.consentTextVersion}'),
+                          if (e.ipAddress != null)
+                            _MetaChip(
+                                icon: Icons.router_outlined,
+                                text: 'IP: ${e.ipAddress}'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 10),
-          const Divider(height: 1, color: Color(0xFFF1F5F9)),
-          const SizedBox(height: 10),
-
-          // Date
-          _InfoLine(
-            icon: Icons.schedule_outlined,
-            label: 'Fecha',
-            value: dateLabel,
-          ),
-          const SizedBox(height: 6),
-
-          // Provider
-          _InfoLine(
-            icon: Icons.smart_toy_outlined,
-            label: 'Proveedor IA',
-            value: entry.aiProvider,
-          ),
-          const SizedBox(height: 6),
-
-          // Purpose
-          _InfoLine(
-            icon: Icons.flag_outlined,
-            label: 'Finalidad',
-            value: entry.purpose,
-          ),
-          const SizedBox(height: 6),
-
-          // Data categories
-          _InfoLine(
-            icon: Icons.upload_outlined,
-            label: 'Datos enviados',
-            value: entry.dataCategories.map((c) => '• $c').join('\n'),
-          ),
-
-          // Property ref (optional)
-          if (entry.propertyId != null) ...[
-            const SizedBox(height: 6),
-            _InfoLine(
-              icon: Icons.home_outlined,
-              label: 'Inmueble',
-              value: 'ID: ${entry.propertyId}',
-            ),
           ],
-
-          // IP (optional)
-          if (entry.ipAddress != null) ...[
-            const SizedBox(height: 6),
-            _InfoLine(
-              icon: Icons.router_outlined,
-              label: 'IP de sesion',
-              value: entry.ipAddress!,
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
 }
 
-class _InfoLine extends StatelessWidget {
-  const _InfoLine({
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
   });
-
   final IconData icon;
   final String label;
   final String value;
@@ -390,8 +538,8 @@ class _InfoLine extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 13, color: const Color(0xFF94A3B8)),
-        const SizedBox(width: 6),
+        Icon(icon, size: 14, color: _kSlate),
+        const SizedBox(width: 8),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,17 +549,17 @@ class _InfoLine extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF94A3B8),
+                  color: _kSlate,
                   letterSpacing: 0.6,
                 ),
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 2),
               Text(
                 value,
                 style: const TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF334155),
-                  height: 1.4,
+                  color: _kNavy,
+                  height: 1.5,
                 ),
               ),
             ],
@@ -422,7 +570,25 @@ class _InfoLine extends StatelessWidget {
   }
 }
 
-// ─── Empty / Error states ─────────────────────────────────────────────────────
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.icon, required this.text});
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 11, color: _kSlate),
+        const SizedBox(width: 3),
+        Text(text, style: const TextStyle(fontSize: 10, color: _kSlate)),
+      ],
+    );
+  }
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
 
 class _EmptyState extends StatelessWidget {
   const _EmptyState();
@@ -436,35 +602,44 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEDE9FE),
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                color: Color(0xFFEDE9FE),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.shield_outlined,
-                color: Color(0xFF7C3AED),
-                size: 36,
-              ),
+              child: const Icon(Icons.shield_outlined,
+                  color: _kPurple, size: 38),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             const Text(
               'Sin registros de consentimiento',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: _kNavy,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             const Text(
-              'Aqui apareceran los consentimientos que hayas otorgado para el uso de IA en la plataforma.',
+              'Cuando uses funciones de IA (descripción de inmueble, '
+              'verificación de identidad…) y otorgues tu consentimiento, '
+              'los registros aparecerán aquí.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF64748B),
-                height: 1.5,
+              style: TextStyle(fontSize: 13, color: _kSlate, height: 1.6),
+            ),
+            const SizedBox(height: 28),
+            OutlinedButton.icon(
+              onPressed: () => context.go('/'),
+              icon: const Icon(Icons.home_outlined, size: 16),
+              label: const Text('Volver al inicio'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: _kPurple,
+                side: const BorderSide(color: Color(0xFFDDD6FE)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 12),
               ),
             ),
           ],
@@ -474,6 +649,8 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
+// ─── Error state ──────────────────────────────────────────────────────────────
+
 class _ErrorState extends StatelessWidget {
   const _ErrorState({required this.message});
   final String message;
@@ -482,25 +659,26 @@ class _ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 40),
-            const SizedBox(height: 12),
+            const Icon(Icons.cloud_off_outlined,
+                color: Color(0xFFDC2626), size: 44),
+            const SizedBox(height: 16),
             const Text(
               'No se pudo cargar el historial',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: _kNavy,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+              style: const TextStyle(fontSize: 12, color: _kSlate),
             ),
           ],
         ),
