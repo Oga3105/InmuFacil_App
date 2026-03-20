@@ -1760,26 +1760,73 @@ class _MortgageCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFF135bec).withOpacity(0.1)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            const Column(
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFF135bec).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.support_agent_outlined,
+              color: Color(0xFF135bec),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('TU HIPOTECA IDEAL', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF135bec), letterSpacing: 1)),
+                Text(
+                  'TU HIPOTECA IDEAL',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF135bec),
+                    letterSpacing: 1,
+                  ),
+                ),
                 SizedBox(height: 4),
-                Text('Desde 2.140€ / mes', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                Text(
+                  'Asesores a tu lado',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0f172a),
+                  ),
+                ),
+                SizedBox(height: 6),
+                Text(
+                  'Pronto podrás conectar con especialistas financieros que te ayudarán a encontrar la mejor hipoteca para esta propiedad.',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
-            IconButton(
-              onPressed: () {}, 
-              icon: const Icon(Icons.calculate_outlined), 
-              color: const Color(0xFF135bec),
-              style: IconButton.styleFrom(
-                 backgroundColor: Colors.white,
-                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                 side: BorderSide(color: const Color(0xFF135bec).withValues(alpha: 0.1)),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF135bec).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Text(
+              'PRÓXIMAMENTE',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF135bec),
+                letterSpacing: 0.5,
               ),
             ),
+          ),
         ],
       ),
     );
