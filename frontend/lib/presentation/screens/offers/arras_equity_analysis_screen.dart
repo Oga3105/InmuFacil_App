@@ -116,7 +116,7 @@ class ArrasEquityAnalysisScreen extends ConsumerWidget {
                       text: 'Inmu',
                       style: TextStyle(color: _kBlue)),
                   TextSpan(
-                      text: 'Facil',
+                      text: 'Fácil',
                       style: TextStyle(color: _kGreen)),
                 ],
               ),

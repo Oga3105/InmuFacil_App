@@ -133,7 +133,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                       style: TextStyle(color: Color(0xFF2563EB)),
                     ),
                     TextSpan(
-                      text: 'Facil',
+                      text: 'Fácil',
                       style: TextStyle(color: Color(0xFF16A34A)),
                     ),
                   ],

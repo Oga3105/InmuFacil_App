@@ -60,7 +60,7 @@ class TrustDashboardScreen extends ConsumerWidget {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                     children: [
                       TextSpan(text: 'Inmu', style: TextStyle(color: _kBlue)),
-                      TextSpan(text: 'Facil', style: TextStyle(color: _kGreen)),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: _kGreen)),
                     ],
                   ),
                 ),

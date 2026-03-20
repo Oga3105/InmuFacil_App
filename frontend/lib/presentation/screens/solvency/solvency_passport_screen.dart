@@ -42,7 +42,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
                       TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      TextSpan(text: 'Facil', style: TextStyle(color: Color(0xFF16A34A))),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
                 ),
