@@ -52,7 +52,31 @@
     "security_guaranteed": "Security Guaranteed Between Individuals",
     "p2p_verified_label": "VERIFIED P2P",
     "no_commissions_label": "NO COMMISSIONS",
-    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH"
+    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH",
+    "google_sign_in_button": "Continue with Google",
+    "or_separator": "or",
+    "google_error_cancelled": "Google sign-in cancelled",
+    "google_error_generic": "Error authenticating with Google"
+  },
+  "onboarding": {
+    "gdpr_title": "Before you continue",
+    "gdpr_subtitle": "To use InmuFácil we need your consent.",
+    "gdpr_item_1": "We process your data in accordance with GDPR (EU) 2016/679.",
+    "gdpr_item_2": "You can exercise your right to erasure at any time from your profile.",
+    "gdpr_item_3": "Your identity data is encrypted with AES-256.",
+    "gdpr_accept_button": "I accept — continue",
+    "gdpr_decline_button": "I decline — exit",
+    "gdpr_terms_prefix": "By continuing you accept the ",
+    "gdpr_terms_link": "Terms and Conditions",
+    "gdpr_privacy_link": "Privacy Policy",
+    "user_type_title": "How will you use InmuFácil?",
+    "user_type_subtitle": "Choose the profile that best describes you.",
+    "user_type_particular": "Individual",
+    "user_type_particular_desc": "I buy or sell my home without intermediaries.",
+    "user_type_profesional": "Professional",
+    "user_type_profesional_desc": "I am a real estate professional.",
+    "user_type_continue": "Continue",
+    "user_type_required": "Select a profile type to continue"
   },
   "home": {
     "welcome": "Welcome to InmuFácil",

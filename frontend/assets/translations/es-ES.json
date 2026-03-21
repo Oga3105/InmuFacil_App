@@ -52,7 +52,31 @@
     "security_guaranteed": "Seguridad Garantizada entre Particulares",
     "p2p_verified_label": "P2P VERIFICADO",
     "no_commissions_label": "SIN COMISIONES",
-    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH"
+    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH",
+    "google_sign_in_button": "Continuar con Google",
+    "or_separator": "o",
+    "google_error_cancelled": "Inicio de sesión con Google cancelado",
+    "google_error_generic": "Error al autenticar con Google"
+  },
+  "onboarding": {
+    "gdpr_title": "Antes de continuar",
+    "gdpr_subtitle": "Para usar InmuFácil necesitamos tu consentimiento.",
+    "gdpr_item_1": "Tratamos tus datos conforme al RGPD (UE) 2016/679.",
+    "gdpr_item_2": "Puedes ejercer tu derecho al olvido en cualquier momento desde tu perfil.",
+    "gdpr_item_3": "Tus datos de identidad se cifran con AES-256.",
+    "gdpr_accept_button": "Acepto y continuar",
+    "gdpr_decline_button": "No acepto — salir",
+    "gdpr_terms_prefix": "Al continuar aceptas los ",
+    "gdpr_terms_link": "Términos y Condiciones",
+    "gdpr_privacy_link": "Política de Privacidad",
+    "user_type_title": "¿Cómo vas a usar InmuFácil?",
+    "user_type_subtitle": "Elige el perfil que mejor te describe.",
+    "user_type_particular": "Particular",
+    "user_type_particular_desc": "Compro o vendo mi vivienda sin intermediarios.",
+    "user_type_profesional": "Profesional",
+    "user_type_profesional_desc": "Soy profesional del sector inmobiliario.",
+    "user_type_continue": "Continuar",
+    "user_type_required": "Selecciona un tipo de perfil para continuar"
   },
   "home": {
     "welcome": "Bienvenido a InmuFácil",

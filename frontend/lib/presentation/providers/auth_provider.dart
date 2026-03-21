@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import '../../domain/entities/user.dart';
 import 'my_properties_provider.dart';
 import 'offers_provider.dart';
@@ -38,6 +40,7 @@ class AuthState {
 
 class AuthNotifier extends Notifier<AuthState> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
   final Dio _dio = Dio(BaseOptions(
     baseUrl: kApiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
@@ -294,10 +297,76 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Google Sign-In — retorna is_new_user o lanza excepcion
+  Future<bool> signInWithGoogle() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      // Paso 1: Flujo nativo de Google
+      final googleAccount = await _googleSignIn.signIn();
+      if (googleAccount == null) {
+        // Usuario cancelo el dialogo
+        state = state.copyWith(isLoading: false);
+        return false;
+      }
+
+      // Paso 2: Obtener Firebase ID token (verificado server-side)
+      final googleAuth = await googleAccount.authentication;
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final firebaseUserCredential =
+          await fb.FirebaseAuth.instance.signInWithCredential(credential);
+      final firebaseIdToken =
+          await firebaseUserCredential.user!.getIdToken();
+
+      // Paso 3: Enviar Firebase ID token al backend
+      final response = await _dio.post(
+        '/auth/google',
+        data: {'firebase_id_token': firebaseIdToken},
+      );
+
+      final token = response.data['access_token'] as String;
+      final isNewUser = response.data['is_new_user'] as bool? ?? false;
+
+      // Paso 4: Persistir JWT propio y cargar perfil
+      await _storage.write(key: 'auth_token', value: token);
+      _dio.options.headers['Authorization'] = 'Bearer $token';
+
+      if (!isNewUser) {
+        final user = await _fetchUserProfile();
+        state = state.copyWith(isLoading: false, user: user);
+        ref.invalidate(myPropertiesProvider);
+        ref.invalidate(sentOffersProvider);
+        ref.invalidate(receivedOffersProvider);
+        ref.invalidate(chatListProvider);
+      } else {
+        // Usuario nuevo: no cargamos perfil aun, el onboarding lo completara
+        state = state.copyWith(isLoading: false);
+      }
+
+      return isNewUser;
+    } on DioException catch (e) {
+      final msg = e.response?.data['detail'] ?? 'Error al autenticar con Google';
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: msg is String ? msg : 'Error al autenticar con Google',
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Error inesperado con Google Sign-In',
+      );
+      return false;
+    }
+  }
+
   /// Logout
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
     _dio.options.headers.remove('Authorization');
+    await _googleSignIn.signOut().catchError((_) {});
     // Invalidate user-scoped providers so stale data is not shown on next login
     ref.invalidate(myPropertiesProvider);
     ref.invalidate(sentOffersProvider);

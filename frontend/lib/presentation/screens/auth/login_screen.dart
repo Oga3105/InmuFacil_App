@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/auth/google_sign_in_button.dart';
 
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -545,7 +547,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     },
                                  ),
                                  
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 20),
+
+                                 // Divisor "o"
+                                 Row(
+                                   children: [
+                                     Expanded(child: Divider(color: Colors.grey[300])),
+                                     Padding(
+                                       padding: const EdgeInsets.symmetric(horizontal: 12),
+                                       child: Text(
+                                         'auth.or_separator'.tr(),
+                                         style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                                       ),
+                                     ),
+                                     Expanded(child: Divider(color: Colors.grey[300])),
+                                   ],
+                                 ),
+
+                                 const SizedBox(height: 16),
+
+                                 // Boton Google
+                                 const GoogleSignInButton(),
+
+                                 const SizedBox(height: 8),
 
                                  // Link: Continuar sin cuenta
                                  Center(

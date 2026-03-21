@@ -12,7 +12,8 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password = Column(String, nullable=True)  # NULL para cuentas Google-only
+    google_id = Column(String(128), unique=True, nullable=True, index=True)  # Google OAuth sub
     is_active = Column(Boolean, default=True)  # Soft delete support
     full_name = Column(String, nullable=False)
     dni_status = Column(
