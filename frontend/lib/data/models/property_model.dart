@@ -36,6 +36,15 @@ class PropertyModel {
     this.energyCertification,
   });
 
+  /// Safely parse dynamic value to int regardless of whether backend sends int, num or String.
+  static int? _parseInt(dynamic v) {
+    if (v == null) return null;
+    if (v is int) return v;
+    if (v is num) return v.toInt();
+    if (v is String) return int.tryParse(v);
+    return null;
+  }
+
   /// Convert from JSON (Manual Mapping for Nested Backend Data)
   factory PropertyModel.fromJson(Map<String, dynamic> json) {
     // Extract nested features
@@ -75,7 +84,7 @@ class PropertyModel {
     }
 
     return PropertyModel(
-      id: json['id'] as int,
+      id: _parseInt(json['id']) ?? 0,
       title: json['title'] as String,
       description: json['description'] as String? ?? '',
       type: json['property_type'] as String? ?? 'piso',
@@ -83,8 +92,8 @@ class PropertyModel {
       latitude: lat,
       longitude: lon,
       address: json['location'] as String? ?? '',
-      bedrooms: (features['bedrooms'] ?? 0) as int,
-      bathrooms: (features['bathrooms'] ?? 0) as int,
+      bedrooms: _parseInt(features['bedrooms']) ?? 0,
+      bathrooms: _parseInt(features['bathrooms']) ?? 0,
       floor: features['floor']?.toString(),
       squareMeters: (json['surface_area'] ?? 0.0).toDouble(),
       images: imageUrls,
