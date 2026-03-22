@@ -7,8 +7,6 @@ import '../../core/config/env_config.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
 
-const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
-
 final myPropertiesProvider =
     AsyncNotifierProvider<MyPropertiesNotifier, List<Property>>(
   MyPropertiesNotifier.new,
@@ -20,7 +18,7 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
 
   @override
   Future<List<Property>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
+    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
     if (token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $token';

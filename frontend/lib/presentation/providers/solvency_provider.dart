@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../core/config/env_config.dart';
+
 // ============================================================================
 // Models
 // ============================================================================
@@ -161,7 +163,7 @@ final mySolvencyProvider = FutureProvider.autoDispose<SolvencyPassport?>((ref) a
   final dio = Dio();
   try {
     final resp = await dio.get(
-      'http://localhost:8000/api/v1/solvency/me',
+      '${EnvConfig.apiBaseUrl}/solvency/me',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return SolvencyPassport.fromJson(resp.data as Map<String, dynamic>);
@@ -180,7 +182,7 @@ final propertyViabilityProvider = FutureProvider.autoDispose.family<PropertyViab
   final dio = Dio();
   try {
     final resp = await dio.get(
-      'http://localhost:8000/api/v1/solvency/viability/$propertyId',
+      '${EnvConfig.apiBaseUrl}/solvency/viability/$propertyId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return PropertyViability.fromJson(resp.data as Map<String, dynamic>);
@@ -198,7 +200,7 @@ final buyerPassportProvider = FutureProvider.autoDispose.family<AnonymisedPasspo
   final dio = Dio();
   try {
     final resp = await dio.get(
-      'http://localhost:8000/api/v1/solvency/offer/$offerId/buyer',
+      '${EnvConfig.apiBaseUrl}/solvency/offer/$offerId/buyer',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return AnonymisedPassport.fromJson(resp.data as Map<String, dynamic>);
@@ -236,7 +238,7 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
     state = const AsyncLoading();
     final dio = Dio();
     final resp = await dio.post(
-      'http://localhost:8000/api/v1/solvency/me',
+      '${EnvConfig.apiBaseUrl}/solvency/me',
       data: {
         'terms_accepted': termsAccepted,
         'knows_extra_costs': knowsExtraCosts,
@@ -302,7 +304,7 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
         'selfie': MultipartFile.fromBytes(selfieBytes, filename: 'selfie.jpg'),
       });
       await dio.post(
-        'http://localhost:8000/api/v1/solvency/second-buyer',
+        '${EnvConfig.apiBaseUrl}/solvency/second-buyer',
         data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -347,7 +349,7 @@ final secondBuyerStatusProvider =
   final dio = Dio();
   try {
     final resp = await dio.get(
-      'http://localhost:8000/api/v1/solvency/second-buyer/status',
+      '${EnvConfig.apiBaseUrl}/solvency/second-buyer/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return SecondBuyerVerificationStatus.fromJson(resp.data as Map<String, dynamic>);

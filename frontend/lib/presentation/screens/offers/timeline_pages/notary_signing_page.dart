@@ -8,8 +8,8 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../../core/config/env_config.dart';
 
-const _kApiBase = 'http://localhost:8000/api/v1';
 const _notaryStorage = FlutterSecureStorage();
 
 const _kBlue  = Color(0xFF2563EB);
@@ -52,7 +52,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     try {
       final token = await _notaryStorage.read(key: 'auth_token');
       final resp = await Dio().get(
-        '$_kApiBase/notaria-appt/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -84,7 +84,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
 
       // Confirma firma en notaria — este es el paso crítico que abre Post-Venta.
       await dio.post(
-        '$_kApiBase/notaria-appt/${widget.offer.id}/confirm',
+        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/confirm',
         options: Options(headers: headers),
       );
 
@@ -92,7 +92,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
       // no exista aún o ya esté confirmado), la firma de notaria es suficiente.
       try {
         await dio.post(
-          '$_kApiBase/entrega-llaves/${widget.offer.id}/confirm',
+          '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/confirm',
           options: Options(headers: headers),
         );
       } on DioException {

@@ -12,8 +12,7 @@ import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
-
-const _kTimelineApiBase = 'http://localhost:8000/api/v1';
+import '../../../core/config/env_config.dart';
 
 final _arrasStatusProvider = FutureProvider.autoDispose
     .family<String, String>((ref, offerId) async {
@@ -23,7 +22,7 @@ final _arrasStatusProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kTimelineApiBase/arras/$offerId',
+      '$EnvConfig.apiBaseUrl/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
@@ -41,7 +40,7 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kTimelineApiBase/tasacion/$offerId/status',
+      '$EnvConfig.apiBaseUrl/tasacion/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -58,7 +57,7 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await Dio().get(
-      '$_kTimelineApiBase/notaria-appt/$offerId/status',
+      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']

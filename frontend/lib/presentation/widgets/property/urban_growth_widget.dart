@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/config/env_config.dart';
+
 // ---------------------------------------------------------------------------
 // Model
 // ---------------------------------------------------------------------------
@@ -84,7 +86,7 @@ final _urbanGrowthProvider =
     final dio = Dio();
     try {
       final resp = await dio.post(
-        'http://localhost:8000/api/v1/ai/urban-growth',
+        '${EnvConfig.apiBaseUrl}/ai/urban-growth',
         data: {
           'postal_code': args.postalCode,
           'address': args.address,

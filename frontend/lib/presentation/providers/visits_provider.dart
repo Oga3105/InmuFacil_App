@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-const String _kVisitsApiBaseUrl = 'http://localhost:8000/api/v1';
+import '../../core/config/env_config.dart';
 
 // --- Entity ---
 
@@ -26,7 +26,7 @@ final slotsProvider = FutureProvider.autoDispose
     .family<List<VisitSlot>, String>((ref, propertyId) async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'auth_token');
-  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
   if (token != null) {
     dio.options.headers['Authorization'] = 'Bearer $token';
   }
@@ -72,7 +72,7 @@ class BookVisitNotifier extends Notifier<BookingState> {
     try {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'auth_token');
-      final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+      final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
       if (token != null) {
         dio.options.headers['Authorization'] = 'Bearer $token';
       }
@@ -123,7 +123,7 @@ final chatVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
   final token = await storage.read(key: 'auth_token');
   if (token == null) return [];
 
-  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
   dio.options.headers['Authorization'] = 'Bearer $token';
 
   // Step 1: get all offers for this user
@@ -224,7 +224,7 @@ final myVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
   final token = await storage.read(key: 'auth_token');
   if (token == null) return [];
 
-  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
   dio.options.headers['Authorization'] = 'Bearer $token';
 
   List<dynamic> buyerData = [];
@@ -274,7 +274,7 @@ final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmen
   final token = await storage.read(key: 'auth_token');
   if (token == null) return false;
 
-  final dio = Dio(BaseOptions(baseUrl: _kVisitsApiBaseUrl));
+  final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
   dio.options.headers['Authorization'] = 'Bearer $token';
 
   try {

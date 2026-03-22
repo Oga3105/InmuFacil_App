@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/config/env_config.dart';
+
 // ---------------------------------------------------------------------------
 // Model
 // ---------------------------------------------------------------------------
@@ -80,7 +82,7 @@ final _marketGapProvider =
     final token = await _storage.read(key: 'auth_token');
     final dio = Dio();
     final resp = await dio.post(
-      'http://localhost:8000/api/v1/ai/market-gap',
+      '${EnvConfig.apiBaseUrl}/ai/market-gap',
       data: {
         'postal_code': args.postalCode,
         'asking_price': args.askingPrice,

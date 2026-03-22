@@ -6,8 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
-const String _kWsBaseUrl = 'ws://localhost:8000/api/v1';
+import '../../core/config/env_config.dart';
 
 // ── Trust badge levels ────────────────────────────────────────────────────────
 
@@ -96,7 +95,7 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
 
   @override
   Future<List<ChatConversation>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
+    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -306,7 +305,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   @override
   Future<List<ChatMessage>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: _kApiBaseUrl));
+    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
     if (token != null) {
@@ -411,7 +410,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
     try {
       final userId = _currentUserId ?? '0';
       _channel = WebSocketChannel.connect(
-        Uri.parse('$_kWsBaseUrl/chat/ws/$_offerId?user_id=$userId'),
+        Uri.parse('$EnvConfig.apiBaseUrl.replaceFirst('http', 'ws')/chat/ws/$_offerId?user_id=$userId'),
       );
       _wsConnected = true;
       try {

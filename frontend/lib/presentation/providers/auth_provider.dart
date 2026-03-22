@@ -2,13 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/config/env_config.dart';
 import '../../domain/entities/user.dart';
 import 'my_properties_provider.dart';
 import 'offers_provider.dart';
 import 'chat_provider.dart';
-
-// Configuration - Move to Env in production
-const String kApiBaseUrl = 'http://localhost:8000/api/v1';
 
 class AuthState {
 
@@ -39,7 +37,7 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: kApiBaseUrl,
+    baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ),);
@@ -83,7 +81,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final user = User.fromJson(response.data);
       final photoUrl = user.profilePhotoUrl;
       if (photoUrl != null && photoUrl.startsWith('/')) {
-        final origin = Uri.parse(kApiBaseUrl).origin;
+        final origin = Uri.parse(EnvConfig.apiBaseUrl).origin;
         return user.copyWith(profilePhotoUrl: '$origin$photoUrl');
       }
       return user;
