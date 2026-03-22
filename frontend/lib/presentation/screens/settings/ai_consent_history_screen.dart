@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/config/env_config.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -94,7 +95,7 @@ final _aiConsentHistoryProvider =
   if (token == null) return [];
 
   final dio = Dio(BaseOptions(
-    baseUrl: kApiBaseUrl,
+    baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));

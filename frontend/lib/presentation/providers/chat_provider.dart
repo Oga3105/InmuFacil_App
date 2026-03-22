@@ -410,7 +410,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
     try {
       final userId = _currentUserId ?? '0';
       _channel = WebSocketChannel.connect(
-        Uri.parse('$EnvConfig.apiBaseUrl.replaceFirst('http', 'ws')/chat/ws/$_offerId?user_id=$userId'),
+        Uri.parse('${EnvConfig.apiBaseUrl.replaceFirst('https', 'wss').replaceFirst('http', 'ws')}/chat/ws/$_offerId?user_id=$userId'),
       );
       _wsConnected = true;
       try {
