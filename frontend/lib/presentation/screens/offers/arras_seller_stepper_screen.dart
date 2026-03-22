@@ -9,10 +9,10 @@ import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../../core/config/env_config.dart';
 import 'arras_shared_widgets.dart';
 
 const _kBg   = Color(0xFFF8FAFC);
-const _kBase = 'http://localhost:8000/api/v1';
 
 class ArrasSellerStepperScreen extends ConsumerStatefulWidget {
   const ArrasSellerStepperScreen({super.key, required this.offer});
@@ -67,7 +67,7 @@ class _ArrasSellerStepperScreenState
     final token = await const FlutterSecureStorage().read(key: 'auth_token');
     if (token == null) return null;
     return Dio(BaseOptions(
-      baseUrl: _kBase,
+      baseUrl: EnvConfig.apiBaseUrl,
       headers: {'Authorization': 'Bearer $token'},
     ));
   }

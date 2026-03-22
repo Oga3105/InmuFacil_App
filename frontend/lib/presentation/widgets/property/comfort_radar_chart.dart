@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/config/env_config.dart';
+
 // ---------------------------------------------------------------------------
 // Model
 // ---------------------------------------------------------------------------
@@ -100,7 +102,7 @@ final _comfortIndexProvider =
     final token = await _storage.read(key: 'auth_token');
     final dio = Dio();
     final resp = await dio.post(
-      'http://localhost:8000/api/v1/ai/comfort-index',
+      '${EnvConfig.apiBaseUrl}/ai/comfort-index',
       data: {'postal_code': args.postalCode, 'address': args.address},
       options: token != null
           ? Options(headers: {'Authorization': 'Bearer $token'})

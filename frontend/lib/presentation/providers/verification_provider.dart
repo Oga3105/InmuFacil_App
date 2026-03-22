@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
-const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
+import '../../core/config/env_config.dart';
 
 enum VerificationStep { documentType, documentScan, selfie, review }
 enum DocumentType { dni, nie, pasaporte }
@@ -146,7 +146,7 @@ class VerificationNotifier extends Notifier<VerificationState> {
   @override
   VerificationState build() {
     _dio = Dio(BaseOptions(
-      baseUrl: _kApiBaseUrl,
+      baseUrl: EnvConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ));

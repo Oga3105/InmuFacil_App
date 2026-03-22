@@ -1,11 +1,11 @@
 {
-    "name": "inmufacil_frontend",
-    "short_name": "inmufacil_frontend",
-    "start_url": ".",
+    "name": "InmuFacil",
+    "short_name": "InmuFacil",
+    "start_url": "/TFM/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#1E3A5F",
+    "description": "Compraventa inmobiliaria entre particulares",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

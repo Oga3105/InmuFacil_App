@@ -1,261 +1,230 @@
-# Memoria del Proyecto InmuFácil
-- **Estado Actual:** ✅ SINCRONIZADO - DOCUMENTACIÓN PÚBLICA AL DÍA
-- **Repositorio Remoto:** https://github.com/Oga3105/InmuFacil_App.git
-- **Rama Activa:** `develop` ⚡
-- **Último Commit:** 6fba00e - docs: finalize professional README with security specifications
-- **Verificación:** ✅ .env protegido | ✅ README actualizado | ✅ 0 commits pendientes
-- **Misiones Completadas:** M1-M9 | **Próximo Hito:** 🎯 HITO 10 - Frontend App (Flutter)
+# Memoria del Proyecto InmuFacil
 
-
-## Estrategia de Ramificación (Git Flow)
-- **Rama Activa de Desarrollo:** `develop` ⚡
-- **Rama de Producción Estable:** `main` 🔒
-- **Política:** Todo desarrollo, testing y seguridad se ejecuta en `develop`. Solo versiones estables y validadas se fusionan a `main`.
-
-## 📋 Estado de Misiones
-
-### ✅ Misión 4: KYC Seguro - COMPLETADA Y AUDITADA
-**Estado:** CONSOLIDADO EN GITHUB (Commit: 50a20b2)  
-**Fecha Completado:** 2026-01-25  
-**Auditoría:** ✅ Aprobada
-
-**Entregables:**
-- ✅ Cifrado AES-256-GCM con PBKDF2 (100,000 iteraciones)
-- ✅ MFA Email con tokens de 6 dígitos (15 min expiration)
-- ✅ Redacción automática de DNI (MRZ, Firma, Equipo Emisor)
-- ✅ Validación MIME multi-capa
-- ✅ Brute Force Prevention (MITRE T1110)
-- ✅ Pre-commit hooks para detección de secretos
-- ✅ Audit logging sin datos sensibles
-
-**Compliance:**
-- ✅ GDPR: Cifrado de datos personales
-- ✅ OWASP Top 10: Mitigación completa
-- ✅ PCI DSS: Cifrado at-rest, audit logging
-- ✅ MITRE ATT&CK: T1110, T1566, T1552, T1078
-
-### ✅ Misión 3: Escudo Anti-Agencias - COMPLETADA
-**Estado:** ACTIVO Y OPERACIONAL  
-**Entregables:**
-- ✅ Filtro heurístico (30+ dominios, 40+ keywords)
-- ✅ Validación multi-factor
-- ✅ IP tracking y análisis de patrones
-- ✅ 15+ tests de cobertura
-
-### ✅ Misión 2: Modelos y Seguridad Base - COMPLETADA
-**Entregables:**
-- ✅ User model con SQLAlchemy
-- ✅ Bcrypt password hashing
-- ✅ Pydantic schemas con RLS
-- ✅ Logging estructurado
-
-### ✅ Misión 5: Vault Activation - COMPLETADA
-**Estado:** CONSOLIDADO (Commit: e34b514)
-**Entregables:**
-- ✅ Master encryption key generada (32 bytes, base64)
-- ✅ `backend/core/security.py` - AES-256-GCM encrypt/decrypt
-- ✅ Fail-safe startup validation (app won't start without key)
-- ✅ `.env.example` template creado
-- ✅ Key rotation procedure documentado
-
-### ✅ Misión 6: Security Breach Remediation - COMPLETADA
-**Estado:** CONSOLIDADO (Commit: 2eb6971, f6389a7)
-**Entregables:**
-- ✅ `.env.example` sanitizado (real key removed)
-- ✅ Local `.env` creado con real key (gitignored)
-- ✅ AES-256-GCM verified (Galois/Counter Mode)
-- ✅ Encryption test suite created
-
-### ✅ Misión 7: Automated DNI Redaction - COMPLETADA
-**Estado:** CONSOLIDADO (Commit: dcd867c, 724e0c1)
-**Entregables:**
-- ✅ `POST /auth/verify-identity` endpoint
-- ✅ File hashing (SHA-256) for audit trail
-- ✅ Secure cleanup with verification
-- ✅ OCR simulation + encryption integration
-- ✅ `tests/test_redaction.py` - 100% opacity verified (170,000+ pixels)
-
-### ✅ Misión 8: API Frontend Integration - COMPLETADA
-**Estado:** CONSOLIDADO (Commit: ff79d71)
-**Entregables:**
-- ✅ Secure CORS (specific origins only, no wildcards)
-- ✅ Security headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, CSP)
-- ✅ Enhanced Swagger documentation
-- ✅ Improved `/health` endpoint (validates encryption + database)
-- ✅ External connection audit logging
+**Version:** 12.0
+**Fecha ultima actualizacion:** 2026-03-22
+**Estado:** DOCUMENTACION ACTUALIZADA — Google OAuth implementado
+**Repositorio:** https://github.com/Oga3105/InmuFacil_App.git
+**Rama principal de desarrollo:** `develop`
+**Ultimo commit en develop:** ac02e0b — Merge PR #160 (lifestyle integration)
+**En progreso:** `feature/google-oauth-registration` (PR #161 abierto)
 
 ---
 
-### ✅ Misión 9: Autenticación JWT - COMPLETADA
-**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
-**Entregables:**
-- ✅ Endpoint POST /auth/register con integración KYC
-- ✅ Endpoint POST /auth/login con JWT generation
-- ✅ Endpoint POST /auth/verify-email (MFA)
-- [/] Endpoint POST /auth/upload-dni con redacción (Integrado en flujo)
-- ✅ Endpoint POST /auth/request-password-reset
-- ✅ Endpoint POST /auth/reset-password con MFA
-- ✅ Middleware de autenticación JWT
-- ✅ Tests de integración end-to-end (`tests/test_auth.py`)
+## Estado de Ramas
 
-### ✅ Misión 10 (Hito 10): Sistema de Tasación - COMPLETADA
-**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
-**Entregables:**
-- ✅ Modelo `PropertyValuation` (SQLAlchemy)
-- ✅ Servicio `ValuationService` (Internal Algo + External Mock)
-- ✅ Endpoint `POST /valuation` (Owner Only)
-- ✅ Endpoint `GET /valuation` (History)
-- ✅ Tests verificados (`tests/test_valuation.py`)
-
-### ✅ Misión 11 (Hito 11): Sistema de Financiación - COMPLETADA
-**Estado:** ACTIVO Y VERIFICADO (Tests Pass)
-**Entregables:**
-- ✅ Modelo `MortgageProfile` y `MortgageSimulation`
-- ✅ Servicio `FinancingService` con Scoring de Solvencia
-- ✅ Mock "Meta-Buscador": iAhorro, BBVA, Santander
-- ✅ Rol `FINANCIERO` y asignación de asesores
-- ✅ Tests verificados (`tests/test_financing.py`)
-
-### ✅ Misión 12 (Hito 12): Generador de Contratos - COMPLETADA
-**Estado:** CONSOLIDADO EN GITHUB (Merge a `develop`)
-**Entregables:**
-- ✅ Motor de Contratos con ReportLab
-- ✅ Endpoint Seguro de Descarga (RBAC)
-- ✅ Tests de Integración y Seguridad
-- ✅ ADR 012 Documentado
-
-### ✅ Refinamiento 12.5: Cuestionario Legal (Feedback Usuario)
-**Estado:** COMPLETADO
-- ✅ OCR de contrato aportado por usuario
-- ✅ ADR 013 (Contratos Dinámicos)
-- ✅ Schema `PropertyOffer.contract_data` (JSON)
-- ✅ Endpoint `PUT /details` para cuestionario
-- ✅ Endpoint `PUT /details` para cuestionario
-- ✅ Generado PDF con cláusulas condicionales (Cuerpo Cierto, AML, etc.)
-
-### ✅ Refinamiento 12.6: Contratos Personalizados e IA 🤖
-**Estado:** COMPLETADO
-- ✅ Subida de contratos propios (PDF/Word)
-- ✅ Análisis de riesgos con IA (Simulado en Mock)
-- ✅ **Legal:** Consentimiento expreso + Descarga de responsabilidad (Liability Waiver) guarda en DB.
-
-
-
-
-### Security by Design
-**Filosofía:** La seguridad se considera desde el diseño inicial, no como añadido posterior.
-
-**Implementaciones:**
-- ✅ **Arquitectura Zero Trust**: Verificación en cada capa
-- ✅ **Principio de Mínimo Privilegio**: Schemas Pydantic solo exponen datos necesarios
-- ✅ **Defense in Depth**: 6 capas de seguridad (Perímetro, Identidad, Datos, Acceso, Monitoreo, Desarrollo)
-- ✅ **Fail Secure**: Sistema falla en modo seguro (bloqueos, no exposición)
-
-### Security by Default
-**Filosofía:** Configuración segura out-of-the-box, sin requerir configuración adicional.
-
-**Implementaciones:**
-- ✅ **Cifrado Automático**: AES-256-GCM activado por defecto para DNI/teléfono
-- ✅ **Logs Seguros**: Filtros automáticos de datos sensibles
-- ✅ **MFA Obligatorio**: Email verification requerida antes de upload DNI
-- ✅ **Rate Limiting**: Brute force prevention activo desde el inicio
-- ✅ **Secrets Protection**: Pre-commit hooks activos automáticamente
-
-### DevSecOps
-**Filosofía:** Integración de seguridad en todo el ciclo de desarrollo.
-
-**Implementaciones:**
-- ✅ **Shift Left**: Seguridad desde el primer commit
-- ✅ **Automated Testing**: Tests de seguridad en CI/CD
-- ✅ **Code Review**: Revisión obligatoria antes de merge
-- ✅ **Secret Scanning**: Pre-commit hooks detectan secretos
-- ✅ **Audit Trail**: Logs completos de todas las operaciones
-- ✅ **Continuous Monitoring**: Security monitor en tiempo real
+| Rama | Estado | Descripcion |
+|---|---|---|
+| `develop` | Rama principal | Base de todo el desarrollo |
+| `feature/google-oauth-registration` | PR #161 abierto | Google OAuth implementado, pendiente merge |
+| `docs/update-project-documentation-march-2026` | En progreso | Esta rama — actualizacion docs |
 
 ---
 
-## 🔐 Hito 2 - KYC Protegido (Misión 4 - DevSecOps)
-- **Estado:** ✅ ACTIVO
-- **Cifrado:** AES-256-GCM para DNI y teléfono
-- **MFA:** Verificación email con tokens de 6 dígitos (15 min expiration)
-- **Redacción DNI:** Automática (MRZ, Firma, Equipo Emisor)
-- **Validación MIME:** Prevención de archivos maliciosos
-- **Brute Force Prevention:** Bloqueo tras 3 intentos (MITRE T1110)
-- **Pre-Commit Hook:** Detección de secretos en código
-- **Audit Logging:** Sin datos sensibles (Security by Default)
+## Estrategia de Ramificacion (Git Flow)
 
-## 🛡️ Escudo Anti-Inmo (Misión 3)
-- **Estado:** ✅ ACTIVO
-- **Dominios Bloqueados:** 30+ agencias inmobiliarias conocidas
-- **Detección:** Email domain + Keywords profesionales
-- **Prevención Falsos Positivos:** Multi-factor validation
-- **Logging:** Alertas estructuradas con IP tracking
-- **Cobertura Tests:** 15+ casos de prueba
-
-## Archivos Desplegados - Misión 4 (DevSecOps)
-### Security & Encryption (@Shield)
-- ✅ `backend/crypto.py` - AES-256-GCM encryption/decryption con key derivation
-- ✅ `backend/services/email_service.py` - MFA tokens con rate limiting
-- ✅ `backend/models.py` - Campos cifrados y MFA en User model
-
-### Secure Document Processing (@Jules)
-- ✅ `backend/services/kyc_service.py` - Redacción DNI + MIME validation
-- ✅ DNI Image Redaction: MRZ, Firma, Equipo Emisor zones
-
-### Security Monitoring (@Watcher)
-- ✅ `backend/security_monitor.py` - Brute force prevention + audit logging
-- ✅ Sensitive data filter para logs (Security by Default)
-
-### CI/CD Security (@Architect)
-- ✅ `.git/hooks/pre-commit` - Secret detection hook
-- ✅ `requirements.txt` - Dependencias: cryptography, Pillow, python-magic
-
-## Archivos Desplegados - Misión 3
-### Anti-Agency Filter
-- ✅ `backend/filters.py` - Filtro heurístico anti-agencias (@Jules + @Shield)
-- ✅ `tests/test_filters.py` - Suite de tests del filtro (@Jules)
-- ✅ `backend/main.py` - Integración con logging y middleware (@Watcher + @Architect)
-
-## Archivos Desplegados - Misión 2
-### Backend Core
-- ✅ `backend/models.py` - Modelo User con SQLAlchemy (@Jules)
-- ✅ `backend/database.py` - Configuración de base de datos y sesiones
-- ✅ `backend/security.py` - Hashing Bcrypt y verificación (@Shield)
-- ✅ `backend/schemas.py` - Schemas Pydantic con RLS (@Shield)
-
-### Testing & Dependencies
-- ✅ `tests/test_auth.py` - Suite de tests TDD para autenticación (@Jules)
-- ✅ `requirements.txt` - Dependencias del proyecto
-
-### Documentación Base
-- ✅ `docs/vision_proyecto.md` - Visión completa del proyecto con 15 hitos
-- ✅ `.gitignore` - Configuración Python/FastAPI
-- ✅ `scratchpad.md` - Memoria del proyecto
-
-## Token Consumption Tracking (@Watcher)
-### Misión 4 (DevSecOps)
-- Crypto Implementation (AES-256-GCM): ~800 tokens
-- Email Service (MFA): ~500 tokens
-- KYC Service (Image Redaction): ~900 tokens
-- Security Monitor (Brute Force): ~600 tokens
-- Pre-Commit Hook: ~400 tokens
-- **Misión 4 Total:** ~3,200 tokens
-
-### Misión 3
-- Filter Implementation: ~700 tokens
-- Filter Tests: ~500 tokens
-- Integration & Logging: ~400 tokens
-- **Misión 3 Total:** ~1,600 tokens
-
-### Misión 2
-- Security Implementation: ~500 tokens
-- Schema Definitions: ~400 tokens
-- Logging Setup: ~300 tokens
-- Test Implementation: ~600 tokens
-- **Misión 2 Total:** ~1,800 tokens
-
-### **Total Acumulado:** ~6,600 tokens
+- **Rama de Desarrollo:** `develop`
+- **Rama Produccion Estable:** `main`
+- **Politica:** Todo desarrollo en ramas `feature/` o `fix/`. PR obligatoria para merge a `develop`. Solo versiones validadas fusionan a `main`.
 
 ---
 
+## Hitos Completados (Backend FastAPI)
 
+### Hito 1-2: Estructura Base + KYC Seguro
+- Autenticacion JWT completa (registro, login, MFA email, recuperacion contrasena)
+- KYC: cifrado AES-256-GCM para DNI/telefono, redaccion automatica, validacion MIME
+- MFA: tokens 6 digitos, 15 min expiracion
+- Brute Force Prevention (MITRE T1110)
+- Audit logging sin datos sensibles
+
+### Hito 3: Escudo Anti-Agencias
+- Filtro heurístico: 30+ dominios, 40+ keywords
+- Validacion multi-factor, IP tracking, 15+ tests
+
+### Hito 4: Busqueda y Filtrado
+- SQL Query Builder dinamico (precio, m2, habitaciones, tipo, georeferencia)
+- Prevencion SQL Injection via Pydantic + ORM
+
+### Hito 5: Visitas en Bloque
+- Algoritmo de slot scheduling automatico
+- Dashboard de estado (Requested, Approved, Completed)
+- RBAC: Owner vs Buyer
+
+### Hito 6: Ofertas Transparentes
+- Modelo `PropertyOffer` transaccional
+- Prevencion auto-ofertas, estados gestionados
+
+### Hito 7: Negociacion Hibrida
+- Protocolo de contraofertas
+- Chat encriptado (Fernet) activado bajo demanda
+- Historial de negociacion inmutable
+
+### Hito 8: Reserva y Senal
+- Payment Mock Provider
+- Idempotencia, bloqueo de concurrencia
+- Visibilidad configurable al reservar
+
+### Hito 9: Verificacion Documental
+- OCR de Nota Simple (EasyOCR)
+- Deteccion automatica de Referencia Catastral
+- Politica de retencion y borrado seguro
+
+### Hito 10: Tasacion
+- Algoritmo de valoracion comparativa
+- Historico de tasaciones
+- Mock de fuentes externas
+
+### Hito 11: Financiacion
+- Scoring hipotecario, simulacion de cuotas
+- Mock meta-buscador: iAhorro, BBVA, Santander
+- Rol FINANCIERO y asignacion de asesores
+
+### Hito 12: Contratos Dinamicos
+- Generacion PDF con ReportLab (Arras Penitenciales)
+- Cuestionario legal (clausulas condicionales: Cuerpo Cierto, AML, etc.)
+- Analisis de contratos propios con Gemini AI
+- Consentimiento expreso + liability waiver en DB
+
+### Hito 13: Firma Digital
+- Arquitectura hexagonal (Ports & Adapters)
+- Mock provider con tokens OTP (secrets.token_urlsafe)
+- Trazabilidad de estados: SIGNING_PENDING -> SIGNED
+
+### Hito 14: Preparacion Notarial
+- Gestion de notarios colaboradores
+- Dossier ZIP: contrato, nota simple, DNIs desencriptados, MANIFEST.txt SHA-256
+- The Great Unmasking (des-anonimizacion controlada)
+
+### Hito 15: Cierre Definitivo
+- Automatizacion de estado SOLD/COMPLETED
+- Certificado de Cierre Digital
+- Integracion con Timeline
+
+### Hito 16: Post-Sales Intelligence
+- Estimador de costes (ITP, notaria, registro)
+- Traspaso seguro de suministros (CUPS, facturas cifradas)
+- Compliance legal (disclaimers obligatorios)
+
+### Hito 17: Mercado de Servicios
+- API Router unificado `/services/*`
+- RBAC (Admin/Provider/User)
+- Tickets y seguimiento de ordenes
+- Modelos extensibles (notarios, tasadores, mudanzas)
+
+---
+
+## Funcionalidades Frontend Flutter (Completadas)
+
+### Core
+- Login, registro, recuperacion de contrasena
+- Google OAuth (PR #161 — pendiente merge)
+- Perfil de usuario: foto, edicion, cambio de contrasena
+- KYC: captura de documento (camara/galeria), validacion numero (NIE/NIF/Pasaporte con checksum)
+- Solvency Passport: asistente wizard, segundo comprador
+- Chat: lista de conversaciones, detalle con mensajeria
+- Notificaciones push (backend)
+
+### Propiedades
+- Wizard de publicacion 5 pasos (tipo/ubicacion → detalles/precio → fotos → descripcion IA → preview)
+- Listado: grid inteligente (SmartExplorerCard), filtros avanzados
+- Mapa interactivo: flutter_map + OpenStreetMap, filtros geograficos
+- Comparador hibrido de propiedades
+- CEE (Certificado Eficiencia Energetica): display en tarjeta de propiedad
+- ComfortRadar: widget de indice de confort por barrio
+- Lifestyle questionnaire: matching de barrio por estilo de vida
+
+### Flujo de Compraventa
+- Make Offer screen con validacion monetaria
+- Offer Management: contraofertas, timeline de estados
+- Arras Interview (3 paginas)
+- Arras buyer/seller stepper
+- Smart Bid Risk: analisis de riesgo de oferta
+- Pre-offer tax summary (ITP estimado)
+- Transaction Timeline completo: tasacion, FEIN, notaria, firma, post-venta, entrega llaves
+
+### Legal y Seguridad
+- Info screen (9 tipos de informacion legal/funcional)
+- Trust Dashboard (Bronze/Silver/Gold segun nivel de verificacion)
+- GDPR AI Consent: consentimiento explicito por tipo de IA (RGPD Art. 6.1.a)
+- AI Consent History screen (historial de cambios)
+- Onboarding Google: GDPR consent + user type selection
+
+### Admin
+- AI analytics dashboard
+- Weekly report screen
+
+### i18n
+- 9 idiomas: es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO
+
+---
+
+## Infraestructura
+
+### DNS / Cloudflare
+- Nameservers de IONOS cambiados a Cloudflare
+- Zone ID: 117f5abc1238908b73a3cea2c8b2bd6a
+- Registros A configurados: raiz, www, api → IP VPS
+- Proxy Cloudflare activo (icono naranja)
+- Dominio principal: inmufacil.com
+
+### VPS
+- Nuevo VPS adquirido (Marzo 2026), configuracion en progreso
+- SO: Debian 12
+- Docker: instalacion pendiente
+
+### Local
+- Docker Compose con backend (FastAPI puerto 8000) + PostgreSQL 15
+- Frontend corre en localhost:8001 (flutter run -d chrome --web-port 8001)
+
+---
+
+## Pendientes
+
+### Inmediatos
+- [ ] Completar instalacion Docker en nuevo VPS
+- [ ] Configurar Nginx en VPS para servir Flutter Web en /TFM
+- [ ] Build Flutter Web produccion y subir al VPS
+- [ ] Merge PR #161 (Google OAuth) tras completar instalacion Docker y verificar en produccion
+- [ ] Cambiar contrasena root del VPS (seguridad)
+- [ ] Configurar GOOGLE_WEB_CLIENT_ID en ambos .env con credencial real de Google Cloud
+
+### A medio plazo
+- [ ] Configurar dominios adicionales (inmufacil.es, etc.) con redirect rules en Cloudflare
+- [ ] Activar HTTPS Full (strict) en Cloudflare una vez VPS tenga certificado
+- [ ] Configurar `X-Robots-Tag: noindex` durante fase TFM
+- [ ] Configurar GitHub Actions para CI/CD automatico
+
+---
+
+## Seguridad
+
+### Variables de Entorno (NUNCA en git)
+- `DATABASE_URL` — URL de conexion PostgreSQL
+- `SECRET_KEY_JWT` — firma JWT (cambiar en produccion)
+- `INMUFACIL_MASTER_KEY` — cifrado AES-256 PII
+- `GEMINI_API_KEY` — API de Gemini
+- `GOOGLE_WEB_CLIENT_ID` — OAuth Web Client ID
+
+### Compliance activo
+- GDPR: cifrado PII, consentimiento IA explicito, derecho al olvido
+- OWASP Top 10: SQLi, XSS, CSRF mitigados
+- MITRE ATT&CK: T1110, T1566, T1552, T1078
+- ISO 27001: RBAC implementado
+
+---
+
+## Documentacion
+
+| Archivo | Estado | Contenido |
+|---|---|---|
+| `docs/vision_proyecto.md` | ACTUALIZADO (v12.0) | Vision completa con estado actual Marzo 2026 |
+| `docs/ARCHITECTURE.md` | ACTUALIZADO (v3.0) | Stack completo backend + frontend |
+| `docs/API_REFERENCE.md` | ACTUALIZADO (v3.0) | Todos los endpoints actuales |
+| `docs/DEPLOYMENT_GUIDE.md` | ACTUALIZADO (v2.0) | VPS + Docker + Cloudflare |
+| `docs/GETTING_STARTED.md` | ACTUALIZADO (v2.0) | Setup completo local + produccion |
+| `docs/adrs/001-015` | Existentes | Decisiones arquitectonicas previas |
+| `docs/adrs/016` | NUEVO | Google OAuth sin Firebase |
+| `docs/adrs/017` | NUEVO | Flutter Clean Architecture + Riverpod v3 |
+| `docs/adrs/018` | NUEVO | Integracion Gemini AI |
+| `docs/adrs/019` | NUEVO | GDPR AI Consent (RGPD Art. 6.1.a) |
+| `docs/adrs/020` | NUEVO | Cloudflare + VPS deployment |

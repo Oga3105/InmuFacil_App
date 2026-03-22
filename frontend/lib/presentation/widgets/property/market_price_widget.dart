@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/config/env_config.dart';
+
 import '../../../core/formatters/currency_input_formatter.dart';
 
 // ---------------------------------------------------------------------------
@@ -78,7 +80,7 @@ final _marketPriceProvider =
     final dio = Dio();
     try {
       final resp = await dio.post(
-        'http://localhost:8000/api/v1/ai/market-price',
+        '${EnvConfig.apiBaseUrl}/ai/market-price',
         data: {
           'postal_code': args.postalCode,
           'surface_area': args.surfaceArea,

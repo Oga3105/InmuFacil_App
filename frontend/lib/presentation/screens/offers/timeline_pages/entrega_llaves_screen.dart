@@ -8,8 +8,7 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
-
-const _kApiBase = 'http://localhost:8000/api/v1';
+import '../../../../core/config/env_config.dart';
 const _kBlue    = Color(0xFF2563EB);
 const _kGreen   = Color(0xFF16A34A);
 const _kBg      = Color(0xFFF8FAFC);
@@ -45,7 +44,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
       final token = await _kStorage.read(key: 'auth_token');
       if (token == null) return;
       final resp = await Dio().get(
-        '$_kApiBase/entrega-llaves/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;
@@ -66,7 +65,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
     try {
       final token = await _kStorage.read(key: 'auth_token');
       final resp = await Dio().post(
-        '$_kApiBase/entrega-llaves/${widget.offer.id}/confirm',
+        '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/confirm',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;

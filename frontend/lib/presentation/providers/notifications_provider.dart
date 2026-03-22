@@ -2,11 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../core/config/env_config.dart';
 import '../../data/models/notification_model.dart';
 import 'auth_provider.dart';
 import 'urgency_provider.dart';
-
-const String _kBaseUrl = 'http://localhost:8000/api/v1';
 
 // ─── Dio helpers (reusa el patron existente del proyecto) ─────────────────────
 
@@ -15,7 +14,7 @@ Future<String?> _getToken() async {
   return storage.read(key: 'auth_token');
 }
 
-Dio _buildDio() => Dio(BaseOptions(baseUrl: _kBaseUrl));
+Dio _buildDio() => Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
 
 // ─── Provider principal: historial de notificaciones ──────────────────────────
 
