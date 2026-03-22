@@ -1,309 +1,217 @@
-# Visión del Proyecto InmuFácil
+# Vision del Proyecto InmuFacil
+
+**Version:** 12.0
+**Fecha:** Marzo 2026
+**Estado:** TFM en desarrollo activo — Frontend + Backend operacionales
+
+---
 
 ## Resumen Ejecutivo
 
-**InmuFácil** es una plataforma P2P (Peer-to-Peer) revolucionaria que transforma el proceso de compraventa inmobiliaria, eliminando intermediarios tradicionales y empoderando a compradores y vendedores para gestionar sus transacciones de forma directa, transparente y eficiente.
+**InmuFacil** es una plataforma P2P (Peer-to-Peer) que transforma el proceso de compraventa inmobiliaria eliminando intermediarios tradicionales. Conecta directamente a compradores y vendedores particulares con herramientas de grado profesional: verificacion de identidad, negociacion guiada, contratos legales y cierre notarial automatizado.
 
-**Filosofía Central:** *"Donde la tecnología reemplaza la confianza"*
+**Filosofia Central:** *La tecnologia reemplaza la confianza — criptografia, IA y procesos automatizados sustituyen lo que antes hacian los intermediarios.*
 
 ---
 
-## 🎯 Concepto Central: P2P Puro
-
-### La Revolución del Modelo P2P
-
-InmuFácil no es simplemente una plataforma de anuncios; es un **ecosistema P2P completo** donde:
-
-- **La tecnología sustituye a las agencias**: Gemini AI + Cifrado de grado militar reemplazan la "confianza" que tradicionalmente proporcionaban los intermediarios
-- **Verificación automatizada**: KYC (Know Your Customer) con validación de identidad elimina la necesidad de verificación manual
-- **Seguridad por diseño**: Cada interacción está protegida por múltiples capas de seguridad
-- **Transparencia total**: Blockchain-ready para trazabilidad completa de transacciones
-
-### ¿Por qué P2P es el Futuro?
+## Concepto: P2P Puro
 
 **Modelo Tradicional (Agencias):**
-```
-Vendedor → Agencia (3-5% comisión) → Comprador
-         ↓
-    Confianza basada en reputación
-    Costes elevados
-    Proceso opaco
-```
+- Vendedor paga 3-5% de comision a una agencia
+- Proceso opaco, dependiente de la reputacion del agente
+- Costes de 6.000-15.000 EUR en transacciones tipicas
 
-**Modelo InmuFácil (P2P):**
-```
-Vendedor ←→ Plataforma (tecnología) ←→ Comprador
-         ↓
-    Confianza basada en criptografía
-    Costes mínimos
-    Proceso transparente
-```
+**Modelo InmuFacil (P2P):**
+- La plataforma actua como garante tecnologico, no como intermediario comercial
+- Verificacion KYC automatica (identidad, solvencia, documentacion)
+- Comision de exito 0.5-1% solo en cierres completados
+- Proceso de 17 hitos completamente trazable y auditado
 
 ---
 
-## 🛡️ Defensa en Profundidad (Defense in Depth)
+## Estado Actual del Proyecto (Marzo 2026)
 
-InmuFácil implementa una estrategia de **seguridad multicapa** donde cada capa protege contra diferentes vectores de ataque:
+### Infraestructura Completa
 
-### Capa 1: Perímetro (Escudo Anti-Agencias)
-**Objetivo:** Mantener el ecosistema P2P puro
-- 🚫 Bloqueo de 30+ dominios de agencias inmobiliarias
-- 🔍 Detección de 40+ keywords profesionales
-- 🛡️ Validación multi-factor para prevenir falsos positivos
-- 📊 IP tracking y análisis de patrones
+| Componente | Estado | Detalle |
+|---|---|---|
+| Backend FastAPI | OPERACIONAL | 40+ routers, PostgreSQL 15, Docker |
+| Frontend Flutter | OPERACIONAL | 50+ pantallas, Web + Android |
+| Base de datos | OPERACIONAL | PostgreSQL en Docker, 30+ tablas |
+| Autenticacion | OPERACIONAL | JWT + MFA Email + Google OAuth |
+| KYC | OPERACIONAL | DNI/Pasaporte, Gemini Vision, cifrado AES-256 |
+| Chat | OPERACIONAL | Mensajeria en tiempo real (WebSocket) |
+| Contratos | OPERACIONAL | PDF dinamico con ReportLab, arras, firma digital |
+| i18n | OPERACIONAL | 9 idiomas (es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO) |
+| DNS/CDN | CONFIGURADO | Cloudflare — dominio inmufacil.com activo |
+| VPS Despliegue | EN PROGRESO | Nuevo servidor VPS en configuracion |
 
-### Capa 2: Identidad (KYC Seguro)
-**Objetivo:** Verificar identidad sin comprometer privacidad
-- 📧 MFA por email (tokens 6 dígitos, 15 min expiration)
-- 🖼️ Redacción automática de DNI (MRZ, Firma, Equipo Emisor)
-- 🔐 Cifrado AES-256-GCM de datos personales
-- ✅ Validación MIME para prevenir archivos maliciosos
+### Hitos Completados (Backend)
 
-### Capa 3: Datos (Cifrado at-Rest)
-**Objetivo:** Proteger información sensible almacenada
-- 🔒 AES-256-GCM con autenticación de integridad
-- 🔑 PBKDF2 con 100,000 iteraciones para derivación de claves
-- 🎲 IV único (12 bytes) por cada operación de cifrado
-- 🚫 Zero-knowledge: La plataforma no puede leer datos cifrados
+- **Hito 1-2:** Estructura base, autenticacion JWT, KYC cifrado AES-256-GCM
+- **Hito 3:** Anti-agency filter (Escudo Anti-Inmo) — 30+ dominios, 40+ keywords
+- **Hito 4:** Busqueda y filtrado de propiedades (SQL Query Builder dinamico)
+- **Hito 5:** Visitas en Bloque (slot scheduling, dashboard de estado)
+- **Hito 6:** Ofertas Transparentes (modelo transaccional, anti-auto-oferta)
+- **Hito 7:** Negociacion Hibrida (contraofertas + Chat encriptado Fernet)
+- **Hito 8:** Reserva y Senal (Payment Mock, idempotencia, bloqueo concurrencia)
+- **Hito 9:** Verificacion Documental (Nota Simple OCR, ref. catastral, retencion datos)
+- **Hito 10:** Tasacion (algoritmo comparativo, historico, mock fuentes externas)
+- **Hito 11:** Financiacion (scoring hipotecario, simulacion cuotas, asesores)
+- **Hito 12:** Contratos Dinamicos (ReportLab PDF, cuestionario legal, IA Gemini)
+- **Hito 13:** Firma Digital (arquitectura hexagonal, mock provider, tokens OTP)
+- **Hito 14:** Preparacion Notarial (dossier ZIP, SHA-256 manifest, unmasking)
+- **Hito 15:** Cierre Definitivo (certificado digital, cambio estado SOLD/COMPLETED)
+- **Hito 16:** Post-Sales Intelligence (ITP/notaria/registro, traspaso suministros)
+- **Hito 17:** Mercado de Servicios (API unificada, RBAC, tickets, ordenes)
 
-### Capa 4: Acceso (Brute Force Prevention)
-**Objetivo:** Prevenir ataques de fuerza bruta
-- ⚠️ Máximo 3 intentos fallidos
-- ⏱️ Bloqueo temporal de 15 minutos
-- 📊 Ventana deslizante de 30 minutos
-- 🚨 Alertas MITRE T1110 en tiempo real
+### Funcionalidades Frontend Implementadas (Flutter)
 
-### Capa 5: Monitoreo (Audit & Observability)
-**Objetivo:** Detectar y responder a incidentes
-- 📝 Logs estructurados para SIEM
-- 🔍 Filtros automáticos de datos sensibles
-- 🎯 Eventos de seguridad con severidad
-- ✅ Cumplimiento GDPR y PCI DSS
-
-### Capa 6: Desarrollo (DevSecOps)
-**Objetivo:** Seguridad desde el código
-- 🔍 Pre-commit hooks (detección de secretos)
-- 🧪 Tests de seguridad automatizados
-- 📋 Code review obligatorio
-- 🚀 CI/CD con validación de seguridad
-
----
-
-## 📊 Estado Actual del Proyecto
-
-### Hitos Completados ✅
-
-**Hito 1: Estructura Base y Autenticación**
-- ✅ Configuración Git Flow (main/develop)
-- ✅ Modelos de datos con SQLAlchemy
-- ✅ Hashing Bcrypt para contraseñas
-- ✅ Schemas Pydantic con RLS
-
-**Hito 2: Validación de Identidad (KYC Seguro)** 🔐
-- ✅ Cifrado AES-256-GCM implementado
-- ✅ MFA por email con tokens seguros
-- ✅ Redacción automática de DNI
-- ✅ Validación MIME y prevención brute force
-- ✅ Escudo Anti-Agencias activo
-- ✅ Audit logging sin datos sensibles
-
-**Hito 3 / Misión 9: Autenticación Completa** 🔐
-- ✅ Registro de Usuarios (Particular/Profesional)
-- ✅ Login Seguro con JWT
-- ✅ MFA V2 (Email Token)
-- ✅ Recuperación de Contraseña
-
-
-**Hito 4: Búsqueda y Filtrado (Search Engine)** ✅
-- ✅ Algoritmo de filtrado combinatorio (Precio, Ubicación, Características)
-- ✅ Optimización de consultas SQL (Query Builder dinámico)
-- ✅ Prevención de SQL Injection en filtros
-
-**Hito 5: Gestión de Visitas (Block Scheduling)** ✅
-- ✅ Algoritmo de Visitas en Bloque (Slots automáticos)
-- ✅ Dashboard de Estado (Requested, Approved, Completed)
-- ✅ Control de Acceso basado en Roles (Owner vs Buyer)
-
-**Hito 6: Ofertas Transparentes** ✅
-- ✅ Modelo `PropertyOffer` transparente
-- ✅ Prevención de auto-ofertas
-- ✅ Estados de oferta gestionados (Pending, Accepted, Rejected)
-
-**Hito 7: Negociación y Chat (Híbrido)** ✅
-- ✅ Protocolo de Contraofertas
-- ✅ Chat Encriptado (Fernet) activado bajo demanda
-- ✅ Historial de negociación inmutable (Audit Log)
-
-**Hito 8: Reserva y Señal (Payment Mock)** ✅
-- ✅ Gestión de Pagos (Mock Provider)
-- ✅ Bloqueo de Concurrencia (Idempotencia)
-- ✅ Visibilidad Configurable (Ocultar al reservar)
-
-**Hito 9: Verificación Documental (Compliance)** ✅
-- ✅ Upload de Notas Simples con OCR
-- ✅ Detección automática de Ref. Catastral
-- ✅ Política de Retención de Datos
-- ✅ Borrado seguro y anonimización
-
-**Hito 10: Tasación (Valuation)** ✅
-- ✅ Algoritmo de valoración comparativa
-- ✅ Histórico de tasaciones
-- ✅ Integración (Mock) con fuentes externas
-
-**Hito 11: Financiación** ✅
-- ✅ Perfiles hipotecarios y Scoring
-- ✅ Simulación de cuotas en tiempo real
-- ✅ Asignación de asesores financieros
-
-**Hito 12: Contratos (Drafts)** ✅
-- ✅ Generación PDF con ReportLab (Arras Penitenciales)
-- ✅ Análisis de Contratos Propios con IA (Gemini)
-- ✅ Cuestionario Legal para personalización de cláusulas
-
-**Hito 13: Firma Digital** ✅
-- ✅ Infraestructura de Firma Remota (Mock Provider Hexagonal)
-- ✅ Tokens de un solo uso (One-Time Token)
-- ✅ Trazabilidad del ciclo de vida de la firma
-
-**Hito 14: Preparación Notarial** ✅
-- ✅ Gestión de Notarios
-- ✅ Generación de Dossier Seguro (Unmasking bajo demanda)
-- ✅ Manifest de Integridad (SHA256)
-
-**Hito 15: Cierre Definitivo (Closing)** ✅
-- ✅ Automatización de cambio de estado a SOLD/COMPLETED
-- ✅ Certificado de Cierre Digital
-- ✅ Integración con Timeline
-
-**Hito 16: Post-Sales Management** ✅
-- ✅ **Parte A: Inteligencia Financiera**: Estimador de Costes (ITP, Notaría, Registro)
-- ✅ **Parte B: Digital Vault**: Traspaso seguro de suministros (CUPS, Facturas cifradas)
-- ✅ Compliance Legal (Disclaimers obligatorios)
-
-183: ---
-184: 
-185: **Hito 17: Arquitectura de Mercado de Servicios** ✅
-186: - ✅ API Router Unificado (`/services/*`)
-187: - ✅ Control de Acceso basado en Roles (Admin/Provider/User)
-188: - ✅ Sistema de Tickets y Seguimiento de Órdenes
-189: - ✅ Modelos extensibles para nuevos servicios (Mudanzas, Reformas, Certificados)
-190: 
-191: ---
-
-## 🏗️ Los 15 Hitos de Compraventa
-
-1. ✅ **Publicación de Inmueble** - El vendedor crea y publica su propiedad
-2. ✅ **Búsqueda y Filtrado** - Compradores encuentran propiedades de interés
-3. ✅ **Solicitud de Visita** - Compradores solicitan visitas a inmuebles
-4. ✅ **Coordinación de Visitas en Bloque** - Sistema agrupa visitas eficientemente
-5. ✅ **Realización de Visitas** - Dashboard de ejecución y estados seguros
-6. ✅ **Manifestación de Interés** - Ofertas Transparentes formalizadas
-7. ✅ **Negociación de Precio** - Protocolo de Contraofertas + Chat Encriptado
-8. ✅ **Reserva del Inmueble** - Comprador reserva con señal y bloqueo
-9. ✅ **Verificación Documental** - Validación de documentación legal (OCR + Cifrado)
-10. ✅ **Tasación del Inmueble** - Valoración profesional del inmueble
-11. ✅ **Solicitud de Hipoteca** - Gestión de financiación bancaria
-12. ✅ **Elaboración de Contrato** - Generación de contrato de compraventa (Dinámico + Cuestionario)
-13. ✅ **Firma de Arras** - Formalización del compromiso de compra (Firma Digital)
-14. ✅ **Preparación Notarial** - Coordinación con notaría y Dossier Seguro (Unmasking)
-15. ✅ **Cierre Definitivo** - Control automatizado de estados y Certificado de Cierre
-16. ✅ **Post-Sales Intelligence** - Estimación de Costes (Parte A) y Traspaso de Suministros (Parte B)
-17. ✅ **Arquitectura de Mercado de Servicios** - Backend unificado para proveedores (Notarios, Tasadores, etc.)
+- Autenticacion completa: login, registro, recuperacion de contrasena, Google OAuth
+- Perfil de usuario: foto, KYC, configuracion, notificaciones
+- Publicacion de inmuebles: wizard 5 pasos con IA para descripcion
+- Listado de propiedades: grid/mapa, comparador hibrido, SmartExplorerCard
+- Mapa interactivo: flutter_map, OpenStreetMap, filtros geograficos
+- Ofertas y negociacion: estado de oferta, contraofertas, timeline completo
+- Arras: interview screen (3 paginas), buyer/seller stepper, revision de contrato
+- Firma digital: flujo de firma simulado
+- Notaria: pantalla de cita, FEIN, gestion tasacion
+- Post-venta y entrega de llaves
+- Solvency Passport: asistente de solvencia, segundo comprador
+- KYC: verificacion de identidad con camara, validacion numero documento (NIE/NIF/Pasaporte)
+- Chat: lista de conversaciones, detalle de chat
+- Lifestyle: cuestionario de estilo de vida para matching de barrio
+- Info y legal: pantalla de informacion (9 tipos), trust dashboard (Bronze/Silver/Gold)
+- Admin: AI analytics, informe semanal
+- GDPR: consentimiento IA (RGPD Art. 6.1.a), historial de consentimientos
+- Onboarding Google: pantalla de consentimiento GDPR + seleccion tipo usuario
+- 404 Lead Magnet: captura de emails en error de navegacion
 
 ---
 
-## 💡 Modelo de "Visitas en Bloque"
+## Seguridad por Capas (Defense in Depth)
 
-Una de las innovaciones clave de InmuFácil es el sistema de **Visitas en Bloque**, que optimiza el tiempo tanto de vendedores como de compradores:
+### Capa 1: Perimetro — Escudo Anti-Agencias
+- Bloqueo de 30+ dominios de agencias inmobiliarias conocidas
+- Deteccion de 40+ keywords profesionales en emails/nombres
+- Validacion multi-factor para prevenir falsos positivos
+- IP tracking y analisis de patrones de comportamiento
 
-- **Agrupación Inteligente**: El sistema agrupa múltiples solicitudes de visita para un mismo inmueble en franjas horarias específicas
-- **Eficiencia Temporal**: El vendedor organiza una única sesión de visitas en lugar de múltiples citas individuales
-- **Transparencia**: Los compradores conocen que pueden coincidir con otros interesados, fomentando decisiones más ágiles
-- **Flexibilidad**: Sistema de slots horarios que se adapta a la disponibilidad del vendedor
+### Capa 2: Identidad — KYC + Google OAuth
+- MFA por email (tokens 6 digitos, 15 min expiracion)
+- Verificacion de identidad con Gemini Vision API
+- Validacion de DNI/NIE/Pasaporte con checksum algoritmo oficial
+- Redaccion automatica de datos sensibles del documento (MRZ, firma, equipo emisor)
+- Google OAuth via google_sign_in + tokeninfo API (sin Firebase en cliente)
+- Cifrado AES-256-GCM de datos personales (GDPR)
 
----
+### Capa 3: Datos — Cifrado at-Rest
+- AES-256-GCM con autenticacion de integridad (GCM tag)
+- PBKDF2 con 100.000 iteraciones para derivacion de claves
+- IV unico (12 bytes) por operacion de cifrado
+- Master Key en variables de entorno, nunca en codigo
 
-## 🎁 Propuesta de Valor
+### Capa 4: Acceso — RBAC + Brute Force Prevention
+- Roles: PARTICULAR, PROFESIONAL, FINANCIERO, ADMIN
+- OAuth2 con JWT (HS256), expiracion configurable
+- Bloqueo tras 3 intentos fallidos (15 minutos, ventana deslizante 30 min)
+- Alerta MITRE T1110 en tiempo real
 
-### Para Vendedores
-- ✅ **Ahorro masivo**: Elimina comisiones del 3-5% (€6,000-€10,000 en un piso de €200,000)
-- ✅ **Control total**: Gestión directa sin intermediarios
-- ✅ **Seguridad garantizada**: Verificación KYC de todos los compradores
-- ✅ **Eficiencia**: Visitas en bloque optimizan tiempo
-- ✅ **Transparencia**: Visibilidad completa del proceso
+### Capa 5: Monitoreo — Audit Logging
+- Logs estructurados JSON (python-json-logger)
+- Filtros automaticos de datos sensibles en logs
+- Eventos de seguridad con severidad y clasificacion MITRE
+- Audit trail inmutable de operaciones sobre datos personales
 
-### Para Compradores
-- ✅ **Acceso directo**: Comunicación sin filtros con vendedores
-- ✅ **Información verificada**: Documentación validada automáticamente
-- ✅ **Proceso guiado**: 15 hitos claros hasta la firma
-- ✅ **Seguridad**: Vendedores verificados con KYC
-- ✅ **Herramientas**: Negociación y gestión documental integrada
-
----
-
-## 🔧 Tecnología y Arquitectura
-
-### Stack Tecnológico
-- **Backend**: FastAPI 0.104.1 (Python) - API REST de alto rendimiento
-- **Base de Datos**: SQLAlchemy 2.0.23 (SQLite dev, PostgreSQL prod)
-- **Autenticación**: JWT + MFA Email + Bcrypt
-- **Cifrado**: AES-256-GCM (Cryptography 41.0.7)
-- **Procesamiento**: Pillow 10.1.0 (redacción de imágenes)
-- **Validación**: Pydantic 2.5.0 con schemas seguros
-
-### Principios de Diseño Activos
-
-**Security by Design:**
-- Seguridad considerada desde el diseño inicial
-- Arquitectura de confianza cero (Zero Trust)
-- Principio de mínimo privilegio
-
-**Security by Default:**
-- Configuración segura out-of-the-box
-- Cifrado activado por defecto
-- Logs sin datos sensibles automáticamente
-
-**DevSecOps:**
-- Shift Left: Seguridad en todas las fases
-- Automatización de tests de seguridad
-- CI/CD con validación continua
+### Capa 6: Desarrollo — DevSecOps
+- Pre-commit hooks para deteccion de secretos hardcodeados
+- TDD con pytest (backend) y flutter test (frontend)
+- Protocolo de agentes internos (@Shield, @Jules, @Architect, etc.)
+- Code review obligatorio via Pull Request antes de merge
 
 ---
 
-## 💰 Modelo de Negocio
+## Compliance
 
-- **Freemium**: Publicación básica gratuita para vendedores
-- **Premium**: Funcionalidades avanzadas (destacados, análisis de mercado)
-- **Servicios Adicionales**: Tasaciones, asesoría legal, gestión hipotecaria
-- **Comisión por Éxito**: 0.5-1% solo en transacciones completadas (vs 3-5% de agencias)
-
-**Ventaja Competitiva:** Costes 5-10x menores que agencias tradicionales
-
----
-
-## 🌟 Visión a Futuro
-
-InmuFácil aspira a convertirse en la plataforma de referencia para la compraventa inmobiliaria P2P en España, democratizando el acceso al mercado inmobiliario y reduciendo los costes de transacción para todos los participantes.
-
-**Roadmap 2026-2027:**
-- Q1 2026: Lanzamiento MVP con Hitos 1-5
-- Q2 2026: Integración con notarías y bancos
-- Q3 2026: Expansión a principales ciudades españolas
-- Q4 2026: Blockchain integration para trazabilidad
-- 2027: Expansión internacional (Portugal, Francia)
+| Normativa | Estado | Implementacion |
+|---|---|---|
+| GDPR | ACTIVO | Cifrado PII, derecho al olvido, consentimiento IA explicito (Art. 6.1.a) |
+| OWASP Top 10 | ACTIVO | SQLi prevenido (Pydantic + ORM), XSS headers, CSRF proteccion |
+| PCI DSS | PARCIAL | Cifrado at-rest, audit logging — integracion pagos reales pendiente |
+| ISO 27001 | ACTIVO | RBAC, controles de acceso, gestion de secretos |
+| MITRE ATT&CK | ACTIVO | Cobertura T1110, T1566, T1552, T1078 |
+| eIDAS | PENDIENTE | Firma digital en mock; QTSP real (Signaturit/Logalty) en hoja de ruta |
 
 ---
 
-## 📜 Compliance y Certificaciones
+## Stack Tecnologico Actualizado
 
-- ✅ **GDPR**: Cifrado de datos personales, derecho al olvido
-- ✅ **OWASP Top 10**: Mitigación completa
-- ✅ **PCI DSS**: Cifrado at-rest, audit logging
-- ✅ **ISO 27001**: Controles de seguridad implementados
-- ✅ **MITRE ATT&CK**: Cobertura T1110, T1566, T1552, T1078
+### Backend
+- **FastAPI 0.135.1** — framework async, OpenAPI 3.1 automatico
+- **Python 3.13** — ultima version estable
+- **PostgreSQL 15** — base de datos en produccion (Docker volume)
+- **SQLAlchemy 2.0.48** — ORM async, migraciones via SQL raw (no Alembic)
+- **Pydantic v2 2.12.5** — validacion y serializacion
+- **python-jose** — JWT HS256
+- **cryptography 46.0.5** — AES-256-GCM
+- **EasyOCR** — analisis de documentos (DNI, Nota Simple)
+- **google-genai >= 1.0** — Gemini Vision y descripcion de propiedades
+- **ReportLab** — generacion de contratos PDF
+- **httpx** — cliente HTTP async (verificacion Google tokeninfo)
+
+### Frontend
+- **Flutter SDK** — ultima version estable, targets: Web + Android (APK)
+- **Riverpod 3.2.1** — gestion de estado reactiva (StateNotifier eliminado)
+- **GoRouter 17.1.0** — navegacion declarativa con nested routes
+- **Dio 5.9.2** — cliente HTTP con interceptores y FormData
+- **flutter_map 8.2.2** — mapas con OpenStreetMap (sin coste de licencia)
+- **easy_localization 3.0.3** — i18n con 9 idiomas
+- **flutter_secure_storage** — almacenamiento seguro de JWT
+- **google_sign_in 6.2.1** — Google OAuth sin Firebase en cliente
+- **flutter_dotenv** — variables de entorno en build
+- **image_picker + camera** — captura de imagenes KYC
+
+### Infraestructura
+- **Docker + Docker Compose** — contenedorizacion completa (backend + db)
+- **Cloudflare** — DNS, proxy, SSL/TLS (dominio inmufacil.com)
+- **VPS (nuevo)** — Debian 12, configuracion en progreso
+- **GitHub Actions** — CI/CD (workflows en .github/)
 
 ---
 
-*Documento de Visión - InmuFácil Project*  
-*Versión 8.0 - Enero 2026*  
-*Actualizado con DevSecOps Standards - Hito 8 Completado*
+## Arquitectura de Datos — Propiedades
+
+Las propiedades usan un esquema de "Tablas Satelite" para evitar columnas nulas masivas:
+- `properties` — tabla principal con datos comunes
+- `property_features` — caracteristicas opcionales (piscina, garaje, etc.)
+- `property_documents` — documentos asociados (nota simple, CEE, fotos)
+- `property_media` — imagenes en bytea (almacenamiento en BD)
+
+El campo CEE (Certificado de Eficiencia Energetica) se gestiona como parte de property_documents y se muestra en el frontend mediante la widget CEE Display.
+
+---
+
+## Modelo de Negocio
+
+- **Freemium**: Publicacion basica gratuita para vendedores particulares
+- **Premium**: Funcionalidades avanzadas (destacados, analytics de mercado)
+- **Servicios adicionales**: Tasaciones, asesoria legal, gestion hipotecaria
+- **Comision por exito**: 0.5-1% solo en transacciones completadas (vs 3-5% de agencias)
+
+---
+
+## Roadmap
+
+| Periodo | Objetivo |
+|---|---|
+| Q1 2026 (actual) | MVP completo — backend + frontend funcionales, Google OAuth, KYC IA |
+| Q2 2026 | Despliegue produccion VPS, dominio inmufacil.com publico, APK Android |
+| Q3 2026 | Integracion pasarela de pagos real, firma digital QTSP (Signaturit) |
+| Q4 2026 | Expansion a principales ciudades espanolas, analytics avanzados |
+| 2027 | Expansion internacional (Portugal, Francia) |
+
+---
+
+*Documento de Vision — InmuFacil Project*
+*Version 12.0 — Marzo 2026*
+*Actualizado con Google OAuth, Flutter App completa, CEE, Lifestyle, GDPR AI Consent*
