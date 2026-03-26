@@ -54,7 +54,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
 
   
-  Widget _buildTrustBadgeSimple({
+  Widget _buildTrustBadgeSimple(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
@@ -67,7 +68,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36, 
+            width: 36,
             height: 36,
             decoration: BoxDecoration(
               color: bgColor,
@@ -76,28 +77,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Icon(
               icon,
               color: iconColor,
-              size: 20, 
+              size: 20,
             ),
           ),
-          const SizedBox(width: 12), 
+          const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 9, 
-                  fontWeight: FontWeight.w900, 
-                  color: Colors.grey[400], 
-                  letterSpacing: 1.2, 
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.2,
                 ),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13, 
-                  fontWeight: FontWeight.bold, 
-                  color: Colors.grey[700], 
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -120,7 +121,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final isDesktop = screenSize.width >= 900;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Row(
         children: [
           // LEFT SIDE - Branding (Desktop Only)
@@ -305,7 +306,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                          elevation: 8,
                          shadowColor: Colors.black.withOpacity(0.08),
                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-                         color: Colors.white,
+                         color: Theme.of(context).colorScheme.surfaceContainerLowest,
                          child: Padding(
                            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
                            child: Form(
@@ -343,7 +344,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    'Bienvenido de nuevo',
                                    textAlign: TextAlign.center,
                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                     color: const Color(0xFF1E293B), // Slate 800
+                                     color: Theme.of(context).colorScheme.onSurface,
                                      fontWeight: FontWeight.bold,
                                    ),
                                  ),
@@ -352,19 +353,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    'Accede a tu panel seguro de InmuFácil.',
                                    textAlign: TextAlign.center,
                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                     color: const Color(0xFF64748B), // Slate 500
+                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                                    ),
                                  ),
                                  const SizedBox(height: 40),
     
                                  // Email Field
-                                 const Text(
+                                 Text(
                                    'CORREO ELECTRÓNICO',
                                    style: TextStyle(
                                      fontSize: 11,
                                      fontWeight: FontWeight.bold,
                                      letterSpacing: 1.2,
-                                     color: Color(0xFF64748B),
+                                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                                    ),
                                  ),
                                  const SizedBox(height: 8),
@@ -378,18 +379,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                                      border: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
-                                       borderSide: BorderSide(color: Colors.grey[200]!),
+                                       borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                                      ),
                                      enabledBorder: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
-                                       borderSide: BorderSide(color: Colors.grey[300]!),
+                                       borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                      ),
                                      focusedBorder: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
                                        borderSide: BorderSide(color: _glowBlueColor, width: 2),
                                      ),
                                      filled: true,
-                                     fillColor: Colors.white,
+                                     fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
                                    ),
                                    validator: (value) {
                                      if (value == null || value.isEmpty) {
@@ -409,13 +410,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  Row(
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                    children: [
-                                     const Text(
+                                     Text(
                                        'CONTRASEÑA',
                                        style: TextStyle(
                                          fontSize: 11,
                                          fontWeight: FontWeight.bold,
                                          letterSpacing: 1.2,
-                                         color: Color(0xFF64748B),
+                                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                                        ),
                                      ),
                                      TextButton(
@@ -457,18 +458,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      ),
                                      border: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
-                                       borderSide: BorderSide(color: Colors.grey[200]!),
+                                       borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
                                      ),
                                      enabledBorder: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
-                                       borderSide: BorderSide(color: Colors.grey[300]!),
+                                       borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                      ),
                                      focusedBorder: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
                                        borderSide: BorderSide(color: _glowBlueColor, width: 2),
                                      ),
                                      filled: true,
-                                     fillColor: Colors.white,
+                                     fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
                                    ),
                                    validator: (value) {
                                      if (value == null || value.isEmpty) {
@@ -607,6 +608,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       alignment: WrapAlignment.center,
                       children: [
                         _buildTrustBadgeSimple(
+                           context,
                            icon: Icons.shield,
                            iconColor: const Color(0xFF16A34A),
                            bgColor: const Color(0xFFDCFCE7),
@@ -614,6 +616,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                            title: 'Tu venta tranquila',
                          ),
                          _buildTrustBadgeSimple(
+                           context,
                            icon: Icons.lock,
                            iconColor: const Color(0xFF2563EB),
                            bgColor: const Color(0xFFDBEAFE),

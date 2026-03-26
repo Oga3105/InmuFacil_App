@@ -154,8 +154,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   child: _HeaderCards(offer: liveOffer),
                 ),
                 // ── Title ───────────────────────────────────────────────────
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 28, 20, 4),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
                   child: Text(
                     'Estado de la Transaccion',
                     textAlign: TextAlign.center,
@@ -166,8 +166,8 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Sigue el progreso de tu venta en tiempo real',
                     textAlign: TextAlign.center,
@@ -1272,7 +1272,7 @@ class _HelpFooter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          const Text(
+          Text(
             '¿Necesitas ayuda con este paso?',
             style: TextStyle(
               fontSize: 13,
@@ -1803,13 +1803,13 @@ class _SellerSolvencySectionState
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
-            error: (_, __) => const Text(
+            error: (_, __) => Text(
               'El comprador aun no tiene pasaporte de solvencia.',
               style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
-                return const Text(
+                return Text(
                   'El comprador aun no ha completado el pasaporte de solvencia.',
                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
@@ -2002,7 +2002,7 @@ class _BrandBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.verified_user_outlined,
+          Icon(Icons.verified_user_outlined,
               size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
           const Expanded(

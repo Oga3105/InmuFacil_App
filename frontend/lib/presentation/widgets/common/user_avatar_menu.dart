@@ -218,7 +218,7 @@ class UserAvatarMenu extends ConsumerWidget {
         child: _NavItem(
           icon: Icons.info_outline,
           label: 'Que es InmuFácil',
-          accentColor: const Color(0xFF1E3A5F),
+          accentColor: theme.colorScheme.onSurface,
         ),
       ),
     );
@@ -248,7 +248,7 @@ class UserAvatarMenu extends ConsumerWidget {
         child: _NavItem(
           icon: Icons.support_agent_outlined,
           label: 'Contacto y Ayuda',
-          accentColor: const Color(0xFF1E3A5F),
+          accentColor: theme.colorScheme.onSurface,
         ),
       ),
     );
