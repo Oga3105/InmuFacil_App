@@ -275,20 +275,76 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const Divider(),
                 const SizedBox(height: 16),
 
+                // Lifestyle Filter Section
+                _buildSectionTitle('lifestyle.lifestyle_filter_title'.tr()),
+                const SizedBox(height: 8),
+                Text(
+                  'lifestyle.lifestyle_filter_description'.tr(),
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.psychology_outlined, color: Color(0xFF2563EB), size: 20),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'lifestyle.lifestyle_filter_title'.tr(),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.8,
+                      alignment: Alignment.centerRight,
+                      child: Switch(
+                        value: searchState.useLifestyleFilter,
+                        onChanged: (_) => ref.read(searchProvider.notifier).toggleLifestyleFilter(),
+                        activeThumbColor: const Color(0xFF2563EB),
+                        activeTrackColor: const Color(0xFF2563EB).withOpacity(0.3),
+                      ),
+                    ),
+                  ],
+                ),
+                if (searchState.useLifestyleFilter) ...[
+                  const SizedBox(height: 4),
+                  InkWell(
+                    onTap: () => context.push('/lifestyle/questionnaire'),
+                    child: Text(
+                      'Editar mi perfil de estilo de vida →',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: const Color(0xFF2563EB).withOpacity(0.8),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 16),
+
                 // Verified Toggle
                 Row(
                   children: [
                     const Icon(Icons.verified_user, color: Color(0xFF16A34A), size: 20),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Verificado InmuFácil',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                    const Flexible(
+                      child: Text(
+                        'Verificado InmuFácil',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const Spacer(),
-                    Switch(
-                      value: searchState.onlyVerified, 
-                      onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
-                      activeThumbColor: const Color(0xFF16A34A),
+                    Transform.scale(
+                      scale: 0.8,
+                      alignment: Alignment.centerRight,
+                      child: Switch(
+                        value: searchState.onlyVerified,
+                        onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
+                        activeThumbColor: const Color(0xFF16A34A),
+                      ),
                     ),
                   ],
                 ),

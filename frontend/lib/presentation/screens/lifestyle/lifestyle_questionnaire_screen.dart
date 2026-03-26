@@ -125,78 +125,124 @@ class _LifestyleQuestionnaireScreenState
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         children: [
+          // ── Screen header ──────────────────────────────────────────────────
+          Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.psychology_outlined, color: Colors.white, size: 28),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'lifestyle.screen_title'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'lifestyle.screen_description'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
           // ── Question 1: Ritmo de vida ───────────────────────────────────────
           _QuestionCard(
             title: 'lifestyle.pace_title'.tr(),
-            child: _TwoOptionSelector<LifestylePace>(
+            child: _MultiOptionSelector<LifestylePace>(
               value: _draft.pace,
-              optionA: LifestylePace.vibrant_center,
-              labelA: 'lifestyle.pace_vibrant'.tr(),
-              optionB: LifestylePace.calm_peripheral,
-              labelB: 'lifestyle.pace_calm'.tr(),
-              onChanged: (v) => setState(() {
-                _draft = _draft.copyWith(pace: v);
-              }),
+              options: [
+                (LifestylePace.vibrant_center, 'lifestyle.pace_vibrant'.tr()),
+                (LifestylePace.calm_peripheral, 'lifestyle.pace_calm'.tr()),
+                (LifestylePace.residential_neighborhood, 'lifestyle.pace_residential'.tr()),
+                (LifestylePace.cultural_zone, 'lifestyle.pace_cultural'.tr()),
+                (LifestylePace.rural, 'lifestyle.pace_rural'.tr()),
+              ],
+              onChanged: (v) => setState(() { _draft = _draft.copyWith(pace: v); }),
             ),
           ),
 
           // ── Question 2: Entorno laboral ────────────────────────────────────
           _QuestionCard(
             title: 'lifestyle.work_title'.tr(),
-            child: _TwoOptionSelector<WorkStyle>(
+            child: _MultiOptionSelector<WorkStyle>(
               value: _draft.workStyle,
-              optionA: WorkStyle.daily_office,
-              labelA: 'lifestyle.work_office'.tr(),
-              optionB: WorkStyle.home_office,
-              labelB: 'lifestyle.work_home'.tr(),
-              onChanged: (v) => setState(() {
-                _draft = _draft.copyWith(workStyle: v);
-              }),
+              options: [
+                (WorkStyle.daily_office, 'lifestyle.work_office'.tr()),
+                (WorkStyle.home_office, 'lifestyle.work_home'.tr()),
+                (WorkStyle.hybrid, 'lifestyle.work_hybrid'.tr()),
+                (WorkStyle.freelance, 'lifestyle.work_freelance'.tr()),
+              ],
+              onChanged: (v) => setState(() { _draft = _draft.copyWith(workStyle: v); }),
             ),
           ),
 
           // ── Question 3: Movilidad ──────────────────────────────────────────
           _QuestionCard(
             title: 'lifestyle.mobility_title'.tr(),
-            child: _TwoOptionSelector<MobilityStyle>(
+            child: _MultiOptionSelector<MobilityStyle>(
               value: _draft.mobility,
-              optionA: MobilityStyle.public_transport,
-              labelA: 'lifestyle.mobility_public'.tr(),
-              optionB: MobilityStyle.private_car,
-              labelB: 'lifestyle.mobility_car'.tr(),
-              onChanged: (v) => setState(() {
-                _draft = _draft.copyWith(mobility: v);
-              }),
+              options: [
+                (MobilityStyle.public_transport, 'lifestyle.mobility_public'.tr()),
+                (MobilityStyle.private_car, 'lifestyle.mobility_car'.tr()),
+                (MobilityStyle.cycling, 'lifestyle.mobility_cycling'.tr()),
+                (MobilityStyle.walking, 'lifestyle.mobility_walking'.tr()),
+              ],
+              onChanged: (v) => setState(() { _draft = _draft.copyWith(mobility: v); }),
             ),
           ),
 
           // ── Question 4: Descanso ───────────────────────────────────────────
           _QuestionCard(
             title: 'lifestyle.sleep_title'.tr(),
-            child: _TwoOptionSelector<SleepSensitivity>(
+            child: _MultiOptionSelector<SleepSensitivity>(
               value: _draft.sleep,
-              optionA: SleepSensitivity.high_noise_sensitivity,
-              labelA: 'lifestyle.sleep_sensitive'.tr(),
-              optionB: SleepSensitivity.deep_sleeper,
-              labelB: 'lifestyle.sleep_deep'.tr(),
-              onChanged: (v) => setState(() {
-                _draft = _draft.copyWith(sleep: v);
-              }),
+              options: [
+                (SleepSensitivity.high_noise_sensitivity, 'lifestyle.sleep_sensitive'.tr()),
+                (SleepSensitivity.deep_sleeper, 'lifestyle.sleep_deep'.tr()),
+                (SleepSensitivity.needs_darkness, 'lifestyle.sleep_darkness'.tr()),
+                (SleepSensitivity.night_owl, 'lifestyle.sleep_night_owl'.tr()),
+              ],
+              onChanged: (v) => setState(() { _draft = _draft.copyWith(sleep: v); }),
             ),
           ),
 
           // ── Question 5: Entorno ────────────────────────────────────────────
           _QuestionCard(
             title: 'lifestyle.green_title'.tr(),
-            child: _TwoOptionSelector<GreenNeeds>(
+            child: _MultiOptionSelector<GreenNeeds>(
               value: _draft.greenNeeds,
-              optionA: GreenNeeds.needs_green,
-              labelA: 'lifestyle.green_needs'.tr(),
-              optionB: GreenNeeds.prefers_services,
-              labelB: 'lifestyle.green_services'.tr(),
-              onChanged: (v) => setState(() {
-                _draft = _draft.copyWith(greenNeeds: v);
-              }),
+              options: [
+                (GreenNeeds.needs_green, 'lifestyle.green_needs'.tr()),
+                (GreenNeeds.prefers_services, 'lifestyle.green_services'.tr()),
+                (GreenNeeds.near_water, 'lifestyle.green_water'.tr()),
+                (GreenNeeds.mountain_nature, 'lifestyle.green_mountain'.tr()),
+                (GreenNeeds.historic_center, 'lifestyle.green_historic'.tr()),
+              ],
+              onChanged: (v) => setState(() { _draft = _draft.copyWith(greenNeeds: v); }),
             ),
           ),
 
@@ -333,89 +379,55 @@ class _QuestionCard extends StatelessWidget {
   }
 }
 
-/// A two-option visual radio selector with rounded selection chips.
-class _TwoOptionSelector<T> extends StatelessWidget {
-  const _TwoOptionSelector({
+/// Multi-option selector — renders N options as a Wrap of selectable chips.
+class _MultiOptionSelector<T> extends StatelessWidget {
+  const _MultiOptionSelector({
     required this.value,
-    required this.optionA,
-    required this.labelA,
-    required this.optionB,
-    required this.labelB,
+    required this.options,
     required this.onChanged,
+    this.accentColor = const Color(0xFF2563EB),
   });
 
   final T value;
-  final T optionA;
-  final String labelA;
-  final T optionB;
-  final String labelB;
+  final List<(T, String)> options;
   final ValueChanged<T> onChanged;
+  final Color accentColor;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _OptionChip<T>(
-            label: labelA,
-            selected: value == optionA,
-            onTap: () => onChanged(optionA),
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: options.map((opt) {
+        final selected = value == opt.$1;
+        return GestureDetector(
+          onTap: () => onChanged(opt.$1),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            decoration: BoxDecoration(
+              color: selected
+                  ? accentColor
+                  : accentColor.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selected
+                    ? accentColor
+                    : accentColor.withValues(alpha: 0.2),
+                width: 1.5,
+              ),
+            ),
+            child: Text(
+              opt.$2,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: selected ? Colors.white : accentColor,
+              ),
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _OptionChip<T>(
-            label: labelB,
-            selected: value == optionB,
-            onTap: () => onChanged(optionB),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Individual selectable chip for binary options.
-class _OptionChip<T> extends StatelessWidget {
-  const _OptionChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: selected
-              ? const Color(0xFF2563EB)
-              : const Color(0xFF2563EB).withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected
-                ? const Color(0xFF2563EB)
-                : const Color(0xFF2563EB).withValues(alpha: 0.2),
-            width: 1.5,
-          ),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: selected ? Colors.white : const Color(0xFF2563EB),
-          ),
-        ),
-      ),
+        );
+      }).toList(),
     );
   }
 }
@@ -494,6 +506,8 @@ class _ProfileTypeSelector extends StatelessWidget {
     ProfileType.family_children: 'lifestyle.profile_family_children',
     ProfileType.family_pets: 'lifestyle.profile_family_pets',
     ProfileType.senior: 'lifestyle.profile_senior',
+    ProfileType.investor: 'lifestyle.profile_investor',
+    ProfileType.student: 'lifestyle.profile_student',
   };
 
   @override

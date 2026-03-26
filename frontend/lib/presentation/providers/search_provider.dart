@@ -14,6 +14,8 @@ import 'package:inmufacil_frontend/data/repositories/property_repository_impl.da
 import 'package:inmufacil_frontend/data/datasources/remote/api_client.dart';
 import 'package:inmufacil_frontend/core/services/location_service.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/lifestyle_provider.dart';
+import 'package:inmufacil_frontend/domain/entities/lifestyle_profile.dart';
 
 /// Search state for property filtering
 class SearchState {
@@ -21,8 +23,8 @@ class SearchState {
   const SearchState({
     this.propertyType = PropertyType.all,
     this.location = '',
-    this.priceRange = const RangeValues(0, 1000000), 
-    this.currentMaxPriceLimit = 1000000, 
+    this.priceRange = const RangeValues(0, 1000000),
+    this.currentMaxPriceLimit = 1000000,
     this.filteredProperties = const [],
     this.mapCenter = _spainCenter,
     this.isLoading = false,
@@ -38,6 +40,7 @@ class SearchState {
     this.selectedExtras = const [],
     this.lastSearchResultGeoJson,
     this.lastSearchResultBbox,
+    this.useLifestyleFilter = false,
   });
   final PropertyType propertyType;
   final String location;
@@ -58,6 +61,7 @@ class SearchState {
   final List<String> selectedExtras; // Added missing field
   final String? lastSearchResultGeoJson; // Restored
   final List<String>? lastSearchResultBbox; // Restored
+  final bool useLifestyleFilter;
   
   // Spain center coordinates for initial wide view (shows entire country)
   static const LatLng _spainCenter = LatLng(40.4, -3.7);
@@ -83,6 +87,7 @@ class SearchState {
     List<String>? selectedExtras,
     String? lastSearchResultGeoJson,
     List<String>? lastSearchResultBbox,
+    bool? useLifestyleFilter,
   }) {
     return SearchState(
       propertyType: propertyType ?? this.propertyType,
@@ -104,6 +109,7 @@ class SearchState {
       selectedExtras: selectedExtras ?? this.selectedExtras,
       lastSearchResultGeoJson: lastSearchResultGeoJson ?? this.lastSearchResultGeoJson,
       lastSearchResultBbox: lastSearchResultBbox ?? this.lastSearchResultBbox,
+      useLifestyleFilter: useLifestyleFilter ?? this.useLifestyleFilter,
     );
   }
 }
@@ -194,6 +200,11 @@ class SearchNotifier extends Notifier<SearchState> {
   void toggleOnlyVerified() {
     state = state.copyWith(onlyVerified: !state.onlyVerified, currentPage: 1);
     _loadProperties();
+  }
+
+  /// Toggle lifestyle profile filter
+  void toggleLifestyleFilter() {
+    state = state.copyWith(useLifestyleFilter: !state.useLifestyleFilter);
   }
 
   /// Update current page for pagination
@@ -577,7 +588,7 @@ final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
   
   if (properties.isEmpty) return [];
 
-  return properties.where((property) {
+  var filtered = properties.where((property) {
     // 1. Check Custom Zone (Highest priority if active)
     if (mapState.currentZonePolygon.isNotEmpty) {
       if (!_isPointInPolygon(property.location, mapState.currentZonePolygon)) {
@@ -590,17 +601,60 @@ final filteredByMapPropertiesProvider = Provider<List<Property>>((ref) {
         return false;
       }
     }
-    
+
     // 3. ALWAYS check Visible Viewport
     if (mapState.visibleBounds != null) {
       if (!mapState.visibleBounds!.contains(property.location)) {
         return false;
       }
     }
-    
+
     return true;
   }).toList();
+
+  // Lifestyle filter — sort by match score (best first), never hide properties
+  if (searchState.useLifestyleFilter) {
+    final profile = ref.watch(lifestyleProfileProvider);
+    filtered.sort((a, b) =>
+        _lifestyleScore(b, profile).compareTo(_lifestyleScore(a, profile)));
+  }
+
+  return filtered;
 });
+
+/// Computes a lifestyle compatibility score for a property given a profile.
+/// Uses text search on title+description+address (same as extras filtering).
+int _lifestyleScore(Property prop, LifestyleProfile profile) {
+  int score = 0;
+  final txt = '${prop.title} ${prop.description} ${prop.address}'.toLowerCase();
+  final bedrooms = prop.bedrooms;
+
+  // Movilidad → Garaje
+  if (profile.mobility == MobilityStyle.private_car &&
+      (txt.contains('garaje') || txt.contains('parking') || txt.contains('plaza'))) score++;
+  // Entorno verde → Jardin, Terraza
+  if ((profile.greenNeeds == GreenNeeds.needs_green || profile.greenNeeds == GreenNeeds.mountain_nature) &&
+      (txt.contains('jardín') || txt.contains('jardin') || txt.contains('terraza'))) score++;
+  // Teletrabajo/hibrido/freelance → habitacion extra (minimo 2 hab)
+  if ((profile.workStyle == WorkStyle.home_office || profile.workStyle == WorkStyle.hybrid || profile.workStyle == WorkStyle.freelance) &&
+      bedrooms >= 2) score++;
+  // Familia con niños → mas habitaciones
+  if (profile.profileType == ProfileType.family_children && bedrooms >= 3) score++;
+  // Senior → ascensor
+  if (profile.profileType == ProfileType.senior &&
+      (txt.contains('ascensor') || txt.contains('lift') || txt.contains('elevator'))) score++;
+  // Sensible al ruido → exterior
+  if (profile.sleep == SleepSensitivity.high_noise_sensitivity && txt.contains('exterior')) score++;
+  // Social alto → piscina
+  if (profile.socialWeight > 0.6 && txt.contains('piscina')) score++;
+  // Bicicleta/a pie → terraza o exterior
+  if ((profile.mobility == MobilityStyle.cycling || profile.mobility == MobilityStyle.walking) &&
+      (txt.contains('exterior') || txt.contains('terraza'))) score++;
+  // Inversor → cualquier propiedad suma (siempre positivo)
+  if (profile.profileType == ProfileType.investor) score++;
+
+  return score;
+}
 
 /// Ray-casting algorithm to determine if a point is within a polygon
 bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
