@@ -28,6 +28,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   /// Maps property id -> GlobalKey so we can scroll to the highlighted item
   final Map<String, GlobalKey> _itemKeys = {};
   bool _didScroll = false;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -82,10 +83,11 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
     final paginatedProperties = _getPaginatedSlice(allFilteredProperties, searchState.currentPage, searchState.itemsPerPage);
     final theme = Theme.of(context);
     final navyColor = theme.colorScheme.onSurface;
-    const bgLight = Color(0xFFF8FAFC);
 
-    // Responsive helper
-    final isDesktop = MediaQuery.of(context).size.width >= 1024;
+    // Responsive helpers
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 1024;
+    final isMobileAppBar = screenWidth < 650;
 
     void handleProtectedAction(String route) {
       final isAuthenticated = ref.read(authProvider).isAuthenticated;
@@ -101,9 +103,21 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
     final isAuthenticated = authState.isAuthenticated;
 
     return Scaffold(
-      backgroundColor: bgLight,
+      key: _scaffoldKey,
+      backgroundColor: theme.colorScheme.surface,
+      // Mobile: Filter sidebar available as an end drawer
+      endDrawer: !isDesktop
+          ? Drawer(
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: const FilterSidebar(),
+                ),
+              ),
+            )
+          : null,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -145,114 +159,174 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
           ),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 24.0),
-            child: Row(
-              children: [
-                TextButton(
-                  onPressed: () {
-                    if (isAuthenticated) {
-                      context.push('/property/create');
-                    } else {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          icon: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFEFF6FF),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
-                          ),
-                          title: const Text(
-                            'Cuenta requerida',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                          ),
-                          content: const Text(
-                            'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-                          ),
-                          actionsAlignment: MainAxisAlignment.center,
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
-                            ),
-                            FilledButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                context.pushNamed('login');
-                              },
-                              style: FilledButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                              child: const Text('Iniciar sesión'),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Vender', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+          if (isMobileAppBar) ...[
+            // Mobile: hamburger menu + avatar
+            PopupMenuButton<String>(
+              icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
+              offset: const Offset(0, 42),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onSelected: (value) {
+                switch (value) {
+                  case 'sell':
+                    handleProtectedAction('/property/create');
+                  case 'how':
+                    context.push('/info/how-it-works');
+                  case 'favorites':
+                    ref.read(searchProvider.notifier).toggleOnlyFavorites();
+                  case 'publish':
+                    handleProtectedAction('/property/create');
+                  case 'filters':
+                    _scaffoldKey.currentState?.openEndDrawer();
+                }
+              },
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'sell',
+                  child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Vender')]),
                 ),
-                TextButton(
-                  onPressed: () => context.push('/404-how-it-works'),
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('Cómo funciona', style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                PopupMenuItem(
+                  value: 'how',
+                  child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')]),
                 ),
-                Container(height: 20, width: 1, color: Colors.grey.shade300, margin: const EdgeInsets.symmetric(horizontal: 16)),
-                // Favorites Toggle
-                TextButton.icon(
-                  onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(), 
-                  icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? Colors.red : Colors.grey[600], size: 20),
-                  label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : Colors.grey[700], fontWeight: FontWeight.bold)),
-                  style: TextButton.styleFrom(
-                    backgroundColor: searchState.onlyFavorites ? Colors.red.withOpacity(0.05) : null,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
+                PopupMenuItem(
+                  value: 'favorites',
+                  child: Row(children: [
+                    Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border,
+                        color: searchState.onlyFavorites ? Colors.red : null),
+                    const SizedBox(width: 8),
+                    Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : null)),
+                  ]),
                 ),
-                const SizedBox(width: 16),
-                
-                // Publicar Propiedad
-                PremiumButton(
-                  label: 'Publicar propiedad',
-                  onPressed: () => handleProtectedAction('/404-publish'),
-                  color: const Color(0xFF2563EB),
-                  fontSize: 13,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  fullWidth: false,
-                ),
-                const SizedBox(width: 16),
-                
-                // AUTH LOGIC (Unified with HomeScreen _MapNavigationBar)
-                if (isAuthenticated)
-                  const UserAvatarMenu()
-                else
-                  InkWell(
-                    onTap: () => context.pushNamed('login'),
-                    borderRadius: BorderRadius.circular(20),
-                    child: _buildUserAvatar(ref, authenticated: false),
+                if (!isDesktop)
+                  PopupMenuItem(
+                    value: 'filters',
+                    child: Row(children: [const Icon(Icons.filter_list), const SizedBox(width: 8), const Text('Filtros')]),
                   ),
+                PopupMenuItem(
+                  value: 'publish',
+                  child: Row(children: [const Icon(Icons.add_home_outlined, color: Color(0xFF2563EB)), const SizedBox(width: 8), const Text('Publicar propiedad', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))]),
+                ),
               ],
             ),
-          ),
+            if (isAuthenticated)
+              const UserAvatarMenu()
+            else
+              InkWell(
+                onTap: () => context.pushNamed('login'),
+                borderRadius: BorderRadius.circular(20),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: _buildUserAvatar(ref, authenticated: false),
+                ),
+              ),
+            const SizedBox(width: 8),
+          ] else ...[
+            // Desktop: full action row
+            Padding(
+              padding: const EdgeInsets.only(right: 24.0),
+              child: Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      if (isAuthenticated) {
+                        context.push('/property/create');
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            icon: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFEFF6FF),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
+                            ),
+                            title: const Text(
+                              'Cuenta requerida',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                              'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                            ),
+                            actionsAlignment: MainAxisAlignment.center,
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  context.pushNamed('login');
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFF2563EB),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: const Text('Iniciar sesión'),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Vender', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                  ),
+                  TextButton(
+                    onPressed: () => context.push('/info/how-it-works'),
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Cómo funciona', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                  ),
+                  Container(height: 20, width: 1, color: theme.colorScheme.outlineVariant, margin: const EdgeInsets.symmetric(horizontal: 16)),
+                  // Favorites Toggle
+                  TextButton.icon(
+                    onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(),
+                    icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? Colors.red : theme.colorScheme.onSurfaceVariant, size: 20),
+                    label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    style: TextButton.styleFrom(
+                      backgroundColor: searchState.onlyFavorites ? Colors.red.withOpacity(0.05) : null,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  PremiumButton(
+                    label: 'Publicar propiedad',
+                    onPressed: () => handleProtectedAction('/property/create'),
+                    color: const Color(0xFF2563EB),
+                    fontSize: 13,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    fullWidth: false,
+                  ),
+                  const SizedBox(width: 16),
+                  if (isAuthenticated)
+                    const UserAvatarMenu()
+                  else
+                    InkWell(
+                      onTap: () => context.pushNamed('login'),
+                      borderRadius: BorderRadius.circular(20),
+                      child: _buildUserAvatar(ref, authenticated: false),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -262,6 +336,27 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
             constraints: const BoxConstraints(maxWidth: 1280),
             child: Column(
               children: [
+                // Mobile: filter button above results
+                if (!isDesktop)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+                          icon: const Icon(Icons.filter_list, size: 18),
+                          label: const Text('Filtros y búsqueda'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF2563EB),
+                            side: const BorderSide(color: Color(0xFF2563EB)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Breadcrumbs & Title Row
                 _buildHeaderDetails(context, allFilteredProperties.length, searchState, ref),
                 
@@ -488,25 +583,26 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   }
 
   Widget _buildEmptyState() {
-     return Container(
-       padding: const EdgeInsets.all(40),
-       alignment: Alignment.center,
-       child: Column(
-         children: [
-           Icon(Icons.search_off, size: 64, color: Colors.grey.shade300),
-           const SizedBox(height: 16),
-           const Text(
-             'No encontramos propiedades en esta zona.',
-             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-           ),
-           const SizedBox(height: 8),
-           Text(
-             'Intenta cambiar los filtros o buscar en otra ubicación.',
-             style: TextStyle(color: Colors.grey.shade500),
-           ),
-         ],
-       ),
-     );
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(40),
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Icon(Icons.search_off, size: 64, color: theme.colorScheme.outlineVariant),
+          const SizedBox(height: 16),
+          Text(
+            'No encontramos propiedades en esta zona.',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Intenta cambiar los filtros o buscar en otra ubicación.',
+            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildPagination(WidgetRef ref, SearchState searchState, int totalFilteredCount) {
@@ -624,27 +720,32 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
             ),
           )
           .toList(),
-      child: Container(
-        height: 42,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.sort, size: 14, color: Color(0xFF64748B)),
-            const SizedBox(width: 4),
-            Text(
-              currentLabel,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+      child: Builder(
+        builder: (context) {
+          final theme = Theme.of(context);
+          return Container(
+            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(6),
             ),
-            const SizedBox(width: 4),
-            const Icon(Icons.expand_more, size: 14, color: Color(0xFF64748B)),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.sort, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(width: 4),
+                Text(
+                  currentLabel,
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.expand_more, size: 14, color: theme.colorScheme.onSurfaceVariant),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

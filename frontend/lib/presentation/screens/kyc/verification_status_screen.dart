@@ -28,7 +28,7 @@ class _VerificationStatusScreenState
     final state = ref.watch(verificationProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context),
       body: state.isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -84,14 +84,15 @@ class _VerificationStatusScreenState
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         // Botón Inicio
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

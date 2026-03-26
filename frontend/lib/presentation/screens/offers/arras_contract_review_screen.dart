@@ -483,9 +483,9 @@ class _ArrasContractReviewScreenState
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -619,7 +619,7 @@ class _ArrasContractReviewScreenState
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -651,7 +651,7 @@ class _ArrasContractReviewScreenState
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         Consumer(
@@ -661,6 +661,7 @@ class _ArrasContractReviewScreenState
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (MediaQuery.sizeOf(context).width >= 650)
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(

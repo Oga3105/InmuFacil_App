@@ -15,21 +15,274 @@ class PropertyListingItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Favorites Logic
+    final theme = Theme.of(context);
     final isFavorite = ref.watch(favoritesProvider).contains(property.id);
-    // Brand Colors
-    const brandBlue = Color(0xFF2563EB); // Corporate blue specified
-    const navyColor = Color(0xFF0F172A); // Keep dark for text contrast
+    const brandBlue = Color(0xFF2563EB);
     const successGreen = Color(0xFF16A34A);
+    final onSurface = theme.colorScheme.onSurface;
+    final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
 
     final currencyFormat = NumberFormat.currency(locale: 'es_ES', symbol: '€', decimalDigits: 0);
+
+    Widget buildImageStack() => Stack(
+      fit: StackFit.expand,
+      children: [
+        Image.network(
+          property.imageUrl ?? 'https://placehold.co/600x400/png',
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: theme.colorScheme.surfaceContainerHigh,
+              child: Icon(Icons.broken_image, color: theme.colorScheme.onSurfaceVariant),
+            );
+          },
+        ),
+        if (property.price > 500000)
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'TOP CHOICE',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: onSurface,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+        Positioned(
+          top: 16,
+          right: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.9),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : Colors.grey.shade400,
+              ),
+              onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(property.id),
+              constraints: const BoxConstraints(),
+              padding: const EdgeInsets.all(8),
+              iconSize: 20,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 16,
+          left: 16,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.camera_alt, color: Colors.white, size: 12),
+                SizedBox(width: 4),
+                Text(
+                  '1',
+                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+
+    Widget buildContentSection({required bool isMobile}) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: Title & Price
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        property.title,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        property.address,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      currencyFormat.format(property.price),
+                      style: TextStyle(
+                        fontSize: isMobile ? 18 : 22,
+                        fontWeight: FontWeight.w900,
+                        color: onSurface,
+                      ),
+                    ),
+                    Text(
+                      '${(property.price / (property.squareMeters > 0 ? property.squareMeters : 1)).toStringAsFixed(0)} €/m²',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            // Stats Row (uses Wrap to avoid overflow on mobile)
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                  horizontal: BorderSide(color: theme.colorScheme.outlineVariant),
+                ),
+              ),
+              child: Wrap(
+                spacing: 16,
+                runSpacing: 8,
+                children: [
+                  _buildStat(Icons.bed, '${property.bedrooms} Hab.', onSurface, onSurfaceVariant),
+                  _buildStat(Icons.bathtub_outlined, '${property.bathrooms} Baños', onSurface, onSurfaceVariant),
+                  _buildStat(Icons.square_foot, '${property.squareMeters} m²', onSurface, onSurfaceVariant),
+                  if (property.floor != null)
+                    _buildStat(Icons.apartment, '${property.floor}', onSurface, onSurfaceVariant),
+                ],
+              ),
+            ),
+
+            // Description Snippet
+            const SizedBox(height: 16),
+            Text(
+              'Magnífica oportunidad en ${property.address}. Vivienda luminosa con excelentes calidades, lista para entrar a vivir. Zona consolidada con todos los servicios.',
+              style: TextStyle(
+                fontSize: 13,
+                color: onSurfaceVariant,
+                height: 1.5,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            // Time Badge
+            const SizedBox(height: 12),
+            PropertyTimeBadge(
+              createdAt: property.createdAt,
+              updatedAt: property.updatedAt,
+            ),
+
+            // Spacer only works in desktop (bounded via IntrinsicHeight)
+            if (!isMobile) const Spacer(),
+            if (isMobile) const SizedBox(height: 16),
+
+            // Footer: Tags & CTA
+            Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (property.isVerified)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: successGreen.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: successGreen.withOpacity(0.2)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.verified, size: 16, color: successGreen),
+                        SizedBox(width: 6),
+                        Text(
+                          'VENDEDOR VERIFICADO',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: successGreen,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined),
+                      color: onSurfaceVariant,
+                      onPressed: () {},
+                      tooltip: 'Compartir',
+                    ),
+                    const SizedBox(width: 8),
+                    PremiumButton(
+                      label: 'Contactar Particular',
+                      icon: Icons.chat_bubble_outline,
+                      color: brandBlue,
+                      fullWidth: false,
+                      fontSize: 13,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      onPressed: () => _handleContactAction(context, ref),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -41,285 +294,53 @@ class PropertyListingItem extends ConsumerWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => context.pushNamed('property-details', pathParameters: {'id': property.id}),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Image Section (Left - 300px fixed)
-              SizedBox(
-                width: 300,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      property.imageUrl ?? 'https://placehold.co/600x400/png',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.broken_image, color: Colors.grey),
-                        );
-                      },
-                    ),
-                    if (property.price > 500000)
-                      Positioned(
-                        top: 16,
-                        left: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Text(
-                            'TOP CHOICE',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: navyColor,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: IconButton(
-                          icon: Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? Colors.red : Colors.grey.shade400,
-                          ),
-                          onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(property.id),
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(8),
-                          iconSize: 20,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 16,
-                      left: 16,
-                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.camera_alt, color: Colors.white, size: 12),
-                            SizedBox(width: 4),
-                            Text(
-                              '1', // Single image for now based on Entity
-                              style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Content Section (Right)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header: Title & Price
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  property.title,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: navyColor,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  property.address,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade500,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                currencyFormat.format(property.price),
-                                style: const TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w900,
-                                  color: navyColor,
-                                ),
-                              ),
-                              Text(
-                                '${(property.price / (property.squareMeters > 0 ? property.squareMeters : 1)).toStringAsFixed(0)} €/m²',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade400,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-
-                       // Stats Row
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border.symmetric(
-                            horizontal: BorderSide(color: Colors.grey.shade100),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            _buildStat(Icons.bed, '${property.bedrooms} Hab.', navyColor),
-                            const SizedBox(width: 24),
-                            _buildStat(Icons.bathtub_outlined, '${property.bathrooms} Baños', navyColor),
-                            const SizedBox(width: 24),
-                            _buildStat(Icons.square_foot, '${property.squareMeters} m²', navyColor),
-                            if (property.floor != null) ...[
-                              const SizedBox(width: 24),
-                              _buildStat(Icons.apartment, '${property.floor}', navyColor),
-                            ],
-                          ],
-                        ),
-                      ),
-
-                      // Description Snippet (Mocked as entity lacks description)
-                      const SizedBox(height: 16),
-                      Text(
-                        'Magnífica oportunidad en ${property.address}. Vivienda luminosa con excelentes calidades, lista para entrar a vivir. Zona consolidada con todos los servicios.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                          height: 1.5,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                      // Time Badge
-                      const SizedBox(height: 12),
-                      PropertyTimeBadge(
-                        createdAt: property.createdAt,
-                        updatedAt: property.updatedAt,
-                      ),
-
-                      const Spacer(),
-
-                      // Footer: Tags & CTA
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Verified Tag
-                          if (property.isVerified)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: successGreen.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: successGreen.withOpacity(0.2)),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.verified, size: 16, color: successGreen),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'VENDEDOR VERIFICADO',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: successGreen.withOpacity(0.9),
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          else
-                            const SizedBox.shrink(),
-
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.share_outlined),
-                                color: Colors.grey.shade400,
-                                onPressed: () {},
-                                tooltip: 'Compartir',
-                              ),
-                              const SizedBox(width: 8),
-                              const SizedBox(width: 8),
-                              PremiumButton(
-                                label: 'Contactar Particular',
-                                icon: Icons.chat_bubble_outline,
-                                color: brandBlue,
-                                fullWidth: false,
-                                fontSize: 13,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                onPressed: () => _handleContactAction(context, ref),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
+        child: LayoutBuilder(
+          builder: (ctx, constraints) {
+            final isMobile = constraints.maxWidth < 560;
+            if (isMobile) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 200,
+                    child: buildImageStack(),
                   ),
-                ),
+                  buildContentSection(isMobile: true),
+                ],
+              );
+            }
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: 300,
+                    child: buildImageStack(),
+                  ),
+                  Expanded(
+                    child: buildContentSection(isMobile: false),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildStat(IconData icon, String label, Color color) {
+  Widget _buildStat(IconData icon, String label, Color textColor, Color iconColor) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 18, color: Colors.grey.shade400),
+        Icon(icon, size: 18, color: iconColor),
         const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: color,
+            color: textColor,
           ),
         ),
       ],
@@ -343,7 +364,7 @@ class PropertyListingItem extends ConsumerWidget {
             color: Color(0xFFEFF6FF),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: Color(0xFF2563EB), size: 28),
+          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
         ),
         title: Text(title, textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
@@ -403,4 +424,3 @@ class PropertyListingItem extends ConsumerWidget {
     // context.push('/chat/${property.ownerId}');
   }
 }
-

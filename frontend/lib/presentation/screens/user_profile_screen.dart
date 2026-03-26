@@ -132,14 +132,14 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     // Layout
     // Header -> Tabs -> Content
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // background-light
+      backgroundColor: Theme.of(context).colorScheme.surface, // background-light
       appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Header Profile Card (Full Width Container)
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.only(top: 24, bottom: 0),
               child: Center(
                 child: ConstrainedBox(
@@ -310,69 +310,71 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => context.go('/'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
-                  Text(
-                    'Inicio',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+        Builder(builder: (context) {
+          final isMobile = MediaQuery.of(context).size.width < 650;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isMobile) ...[
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                        ],
+                      ),
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 16),
+              ],
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+                onPressed: () {},
               ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-            onPressed: () {}),
-        const SizedBox(width: 8),
-
-        // [UPDATED] Profile Menu with Logout
-        AnimatedBuilder(
-          animation: _tabController,
-          builder: (context, _) {
-            final activeTab = _tabController.index;
-            return UserAvatarMenu(
-              onTabSelected: (index) {
-                if (index != activeTab) {
-                  _tabController.animateTo(index);
-                }
-              },
-            );
-          },
-        ),
-        const SizedBox(width: 24),
+              const SizedBox(width: 8),
+              AnimatedBuilder(
+                animation: _tabController,
+                builder: (context, _) {
+                  final activeTab = _tabController.index;
+                  return UserAvatarMenu(
+                    onTabSelected: (index) {
+                      if (index != activeTab) {
+                        _tabController.animateTo(index);
+                      }
+                    },
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -555,10 +557,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             children: [
               Text(
                 user.name ?? 'Usuario InmuFácil',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A)),
+                    color: Theme.of(context).colorScheme.onSurface),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -702,45 +704,42 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildPersonalInfoCard(User user) {
-    return Container(
-      padding: const EdgeInsets.all(32),
+    return Builder(builder: (context) {
+      final theme = Theme.of(context);
+      final isMobile = MediaQuery.of(context).size.width < 600;
+      return Container(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('profile.personal_info_title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A))),
+                  color: theme.colorScheme.onSurface)),
           const SizedBox(height: 24),
 
           // [UPDATED] ReadOnly logic based on _isEditing
-          Row(
-            children: [
-              Expanded(
-                  child: _buildTextField(
-                      'Nombre Completo', _nameController, !_isEditing)),
-              const SizedBox(width: 24),
-              Expanded(
-                  child: _buildTextField(
-                      'Teléfono', _phoneController, !_isEditing)),
-            ],
-          ),
+          if (isMobile) ...[
+            _buildTextField('Nombre Completo', _nameController, !_isEditing),
+            const SizedBox(height: 16),
+            _buildTextField('Teléfono', _phoneController, !_isEditing),
+          ] else
+            Row(
+              children: [
+                Expanded(child: _buildTextField('Nombre Completo', _nameController, !_isEditing)),
+                const SizedBox(width: 24),
+                Expanded(child: _buildTextField('Teléfono', _phoneController, !_isEditing)),
+              ],
+            ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                  child: _buildTextField('Correo Electrónico (No editable)',
-                      TextEditingController(text: user.email), true)),
-              const SizedBox(width: 24),
-              const Expanded(child: SizedBox.shrink()),
-            ],
-          ),
+          _buildTextField('Correo Electrónico (No editable)',
+              TextEditingController(text: user.email), true),
 
           const SizedBox(height: 32),
           Align(
@@ -828,6 +827,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         ],
       ),
     );
+    }); // Builder
   }
 
   Widget _buildSecurityCard(User user) {
@@ -837,18 +837,18 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('profile.security_title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A))),
+                  color: Theme.of(context).colorScheme.onSurface)),
           const SizedBox(height: 24),
 
           // [UPDATED] Password Change Section
@@ -1072,7 +1072,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           const SizedBox(height: 4),
                           const Text(
                             'Completa el asistente para mostrar tu nivel de cualificacion',
-                            style: TextStyle(fontSize: 11, color: Color(0xFF64748B), height: 1.4),
+                            style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
                           ),
                         ],
                       ),
@@ -1202,7 +1202,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: const TextStyle(
                       color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
@@ -1254,10 +1254,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('profile.my_properties_title'.tr(),
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A))),
+                            color: Theme.of(context).colorScheme.onSurface)),
                     const SizedBox(height: 4),
                     Text('profile.my_properties_subtitle'.tr(),
                         style: const TextStyle(color: Colors.grey, fontSize: 13)),
@@ -1333,9 +1333,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -1372,10 +1372,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       Flexible(
                         child: Text(
                           p.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
-                            color: Color(0xFF1E293B),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1395,9 +1395,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           p.address.isNotEmpty
                               ? p.address
                               : p.location.toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -1512,7 +1512,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: () => context.push('/property/create'),
@@ -1543,7 +1543,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1567,9 +1567,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       padding: EdgeInsets.all(small ? 24 : 48),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1668,10 +1668,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('profile.change_password'.tr(),
-            style: const TextStyle(
+            style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Color(0xFF0F172A))),
+                color: Theme.of(context).colorScheme.onSurface)),
         const SizedBox(height: 16),
 
         // Current Password (with visibility toggle)
@@ -1679,10 +1679,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('profile.current_password'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: Color(0xFF334155))),
+                    color: Theme.of(context).colorScheme.onSurface)),
             const SizedBox(height: 8),
             TextFormField(
               controller: _currentPasswordController,
@@ -1729,10 +1729,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('profile.new_password'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: Color(0xFF334155))),
+                          color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _newPasswordController,
@@ -1797,10 +1797,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('profile.confirm_password'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: Color(0xFF334155))),
+                          color: Theme.of(context).colorScheme.onSurface)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
@@ -1954,10 +1954,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
-                color: Color(0xFF334155))),
+                color: Theme.of(context).colorScheme.onSurface)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -2034,7 +2034,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           const SizedBox(width: 16),
           Expanded(
             child:
-                Text(message, style: const TextStyle(color: Color(0xFF1E293B))),
+                Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
           ),
           OutlinedButton(
             onPressed: () => context.push(destination),
@@ -2098,7 +2098,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A)),
+                      color: Theme.of(context).colorScheme.onSurface),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -2126,7 +2126,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             decoration: BoxDecoration(
               color: const Color(0xFFF8FAFF),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: const Center(
               child: Text(
@@ -2161,9 +2161,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -2185,10 +2185,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -2337,12 +2337,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A)),
+                      color: Theme.of(context).colorScheme.onSurface),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'Visitas programadas como comprador o vendedor.',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -2368,10 +2368,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.error_outline,
-                    size: 40, color: Color(0xFF64748B)),
+                    size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 const SizedBox(height: 12),
                 Text('profile.visits_error'.tr(),
-                    style: const TextStyle(color: Color(0xFF64748B))),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
@@ -2436,7 +2436,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF1E293B),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -2497,7 +2497,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
             color: isUpcoming
@@ -2556,10 +2556,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     Flexible(
                       child: Text(
                         v.propertyTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: Color(0xFF1E293B),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2590,8 +2590,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     const SizedBox(width: 4),
                     Text(
                       '${v.startTime.hour.toString().padLeft(2, '0')}:${v.startTime.minute.toString().padLeft(2, '0')} · ${v.startTime.day}/${v.startTime.month}/${v.startTime.year}',
-                      style: const TextStyle(
-                          fontSize: 12, color: Color(0xFF64748B)),
+                      style: TextStyle(
+                          fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -2628,7 +2628,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           // Actions Menu
           if (isUpcoming && v.status != 'cancelled' && v.status != 'rejected')
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: Color(0xFF64748B)),
+              icon: const Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurfaceVariant),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               itemBuilder: (_) => [
                 PopupMenuItem(
@@ -2775,7 +2775,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A)),
+                      color: Theme.of(context).colorScheme.onSurface),
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -2808,10 +2808,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(Icons.error_outline,
-                    size: 40, color: Color(0xFF64748B)),
+                    size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 const SizedBox(height: 12),
                 Text('${'common.error'.tr()}: $err',
-                    style: const TextStyle(color: Color(0xFF64748B))),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () => ref.invalidate(chatListProvider),
@@ -2865,7 +2865,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -2897,7 +2897,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
@@ -2970,7 +2970,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                                       ? FontWeight.w700
                                       : FontWeight.w600,
                                   fontSize: 14,
-                                  color: const Color(0xFF1E293B),
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -3243,7 +3243,7 @@ class _GestionarMenu extends StatelessWidget {
               const Icon(Icons.house_outlined, size: 18, color: Color(0xFF475569)),
               const SizedBox(width: 12),
               Text('chat.view_property'.tr(),
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),
         ),
@@ -3255,7 +3255,7 @@ class _GestionarMenu extends StatelessWidget {
                   size: 18, color: Color(0xFF475569)),
               const SizedBox(width: 12),
               Text('profile.tab_offers'.tr(),
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),
         ),
@@ -3266,7 +3266,7 @@ class _GestionarMenu extends StatelessWidget {
               const Icon(Icons.edit_outlined, size: 18, color: Color(0xFF475569)),
               const SizedBox(width: 12),
               Text('common.edit'.tr(),
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B))),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),
         ),
@@ -3284,7 +3284,7 @@ class _GestionarMenu extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 _isActive ? 'profile.action_deactivate'.tr() : 'profile.action_activate'.tr(),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface),
               ),
             ],
           ),
@@ -3306,7 +3306,7 @@ class _GestionarMenu extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E293B),
+          color: Theme.of(context).colorScheme.onSurface,
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(
@@ -3383,23 +3383,23 @@ class _SortButton<T> extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
+          color: Theme.of(context).colorScheme.surface,
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sort, size: 14, color: Color(0xFF64748B)),
+            const Icon(Icons.sort, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 4),
             Text(
               options[value] ?? '',
               style:
-                  const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(width: 4),
             const Icon(Icons.expand_more,
-                size: 14, color: Color(0xFF64748B)),
+                size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ],
         ),
       ),

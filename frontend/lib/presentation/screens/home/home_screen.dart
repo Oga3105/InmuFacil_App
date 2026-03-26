@@ -118,13 +118,13 @@ class _DesktopLayoutState extends State<_DesktopLayout> {
                     },
                     child: Container(
                       width: 8,
-                      color: Colors.grey[100],
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
                       child: Center(
                         child: Container(
                           width: 4,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.grey[300],
+                            color: Theme.of(context).colorScheme.outline,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -257,19 +257,50 @@ class _MapSection extends ConsumerWidget {
           ),
           
            
-        // Mobile Search Trigger (Floating Card)
+        // Mobile Search Trigger (Floating Card) - opens full search panel in bottom sheet
         if (isMobile)
            Positioned(
              top: 80,
              left: 16,
              right: 16,
-             child: Card(
-               child: ListTile(
-                 leading: const Icon(Icons.search),
-                 title: Text('home.search_placeholder'.tr()),
+             child: Material(
+               elevation: 4,
+               borderRadius: BorderRadius.circular(12),
+               child: InkWell(
+                 borderRadius: BorderRadius.circular(12),
                  onTap: () {
-                   // Mobile might need a bottom sheet or separate screen for filters
+                   showModalBottomSheet(
+                     context: context,
+                     isScrollControlled: true,
+                     useSafeArea: true,
+                     shape: const RoundedRectangleBorder(
+                       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                     ),
+                     builder: (ctx) => SizedBox(
+                       height: MediaQuery.of(context).size.height * 0.92,
+                       child: const _SearchPanel(),
+                     ),
+                   );
                  },
+                 child: Padding(
+                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                   child: Row(
+                     children: [
+                       const Icon(Icons.search, color: Color(0xFF2563EB)),
+                       const SizedBox(width: 12),
+                       Expanded(
+                         child: Text(
+                           'Buscar por ciudad, zona...',
+                           style: TextStyle(
+                             color: Theme.of(context).colorScheme.onSurfaceVariant,
+                             fontSize: 15,
+                           ),
+                         ),
+                       ),
+                       Icon(Icons.tune, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                     ],
+                   ),
+                 ),
                ),
              ),
            ),
@@ -287,7 +318,7 @@ class _MapSection extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -300,13 +331,13 @@ class _MapSection extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                     const Icon(Icons.info_outline, size: 18, color: Colors.red), // Rojo papelera
+                     const Icon(Icons.info_outline, size: 18, color: Colors.red),
                      const SizedBox(width: 8),
                      Flexible(
                        child: Text(
                         '0 inmuebles encontrados',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[800],
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -383,7 +414,7 @@ class _SearchPanel extends ConsumerWidget {
                         Text.rich(
                           TextSpan(
                             children: [
-                              TextSpan(text: 'home.tagline_part1'.tr(), style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                              TextSpan(text: 'home.tagline_part1'.tr(), style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
                               TextSpan(text: 'home.tagline_part2'.tr(), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
@@ -399,7 +430,7 @@ class _SearchPanel extends ConsumerWidget {
                               fontSize: 52, // Increased size per green highlighter feedback
                               fontWeight: FontWeight.w900, // font-black
                               height: 1.1, // leading-[1.1]
-                              color: Colors.black, // Default text color
+                              color: theme.colorScheme.onSurface, // Adapts to dark mode
                               letterSpacing: -1.0, // tracking-tight
                             ),
                             children: const [
@@ -419,7 +450,7 @@ class _SearchPanel extends ConsumerWidget {
                           'Compra y vende sin comisiones.',
                           style: theme.textTheme.titleLarge?.copyWith( // ~ text-lg
                             fontWeight: FontWeight.bold, // font-bold
-                            color: Colors.grey[800], // text-slate-800
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                         
@@ -453,18 +484,18 @@ class _SearchPanel extends ConsumerWidget {
                                _buildTrustBadgeItem(
                                  context,
                                  icon: Icons.shield,
-                                 iconColor: const Color(0xFF16A34A), // text-green-600
-                                 bgColor: const Color(0xFFDCFCE7),   // bg-green-100
+                                 iconColor: const Color(0xFF16A34A),
+                                 bgColor: const Color(0xFF16A34A).withOpacity(0.12),
                                  label: 'GARANTÍA INMUFÁCIL',
                                  title: 'Tu venta tranquila',
                                ),
-                               
+
                                // Badge 2: Blue Lock
                                _buildTrustBadgeItem(
                                  context,
                                  icon: Icons.lock,
-                                 iconColor: const Color(0xFF2563EB), // #2563EB Specified
-                                 bgColor: const Color(0xFFDBEAFE),   // bg-blue-100
+                                 iconColor: const Color(0xFF2563EB),
+                                 bgColor: const Color(0xFF2563EB).withOpacity(0.12),
                                  label: 'P2P VERIFICADO',
                                  title: 'Tu compra segura',
                                ),
@@ -523,7 +554,7 @@ class _SearchPanel extends ConsumerWidget {
             text,
             style: TextStyle(
               fontWeight: FontWeight.w500, // font-medium
-              color: Colors.grey[600], // text-slate-600
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 16,
             ),
           ),
@@ -574,7 +605,7 @@ class _SearchPanel extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 14, // text-sm
                 fontWeight: FontWeight.bold, // font-bold
-                color: Colors.grey[700], // text-slate-700
+                color: theme.colorScheme.onSurfaceVariant, // text-slate-700
               ),
             ),
           ],
@@ -1123,7 +1154,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
             text,
             style: TextStyle(
               fontWeight: FontWeight.w500, // font-medium
-              color: Colors.grey[600], // text-slate-600
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 16,
             ),
           ),
@@ -1283,19 +1314,101 @@ class _MapNavigationBar extends ConsumerWidget {
       }
     }
 
+    final navTextStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w500,
+      fontSize: 14,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface, // Match left panel background
+        color: theme.colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey[200]!,
+            color: theme.colorScheme.outlineVariant,
             width: 1,
           ),
         ),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final isNarrow = constraints.maxWidth < 600;
+
+          if (isNarrow) {
+            // Mobile: compact nav with logo text + hamburger + avatar
+            return Row(
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: const [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w800, fontSize: 18)),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A), fontWeight: FontWeight.w800, fontSize: 18)),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.menu, color: theme.colorScheme.onSurface),
+                  offset: const Offset(0, 40),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  onSelected: (key) {
+                    ref.read(searchProvider.notifier).clearError();
+                    switch (key) {
+                      case 'buy':
+                        final visible = ref.read(filteredByMapPropertiesProvider);
+                        if (visible.isEmpty) ref.read(searchProvider.notifier).reset();
+                        context.go('/search');
+                      case 'sell':
+                        if (isAuthenticated) {
+                          context.push('/property/create');
+                        } else {
+                          context.pushNamed('login');
+                        }
+                      case 'how':
+                        context.push('/info/how-it-works');
+                      case 'what-is':
+                        context.push(InfoScreen.routeFor(InfoPageType.whatIsInmufacil));
+                      case 'buyer-guide':
+                        context.push(InfoScreen.routeFor(InfoPageType.buyerGuide));
+                      case 'seller-guide':
+                        context.push(InfoScreen.routeFor(InfoPageType.sellerGuide));
+                      case 'contact':
+                        context.push(InfoScreen.routeFor(InfoPageType.contact));
+                    }
+                  },
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'buy', child: Row(children: [const Icon(Icons.search), const SizedBox(width: 8), const Text('Comprar')])),
+                    PopupMenuItem(value: 'sell', child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Vender')])),
+                    PopupMenuItem(value: 'how', child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')])),
+                    PopupMenuItem(value: 'what-is', child: Row(children: [const Icon(Icons.home_outlined), const SizedBox(width: 8), const Text('Qué es InmuFácil')])),
+                    PopupMenuItem(value: 'buyer-guide', child: Row(children: [const Icon(Icons.person_outline), const SizedBox(width: 8), const Text('Guía del Comprador')])),
+                    PopupMenuItem(value: 'seller-guide', child: Row(children: [const Icon(Icons.storefront_outlined), const SizedBox(width: 8), const Text('Guía del Vendedor')])),
+                    PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.mail_outline), const SizedBox(width: 8), const Text('Contacto')])),
+                  ],
+                ),
+                if (isAuthenticated) ...[
+                  _NotificationBell(),
+                  const SizedBox(width: 4),
+                  const UserAvatarMenu(),
+                ] else
+                  InkWell(
+                    onTap: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      context.pushNamed('login');
+                    },
+                    borderRadius: BorderRadius.circular(20),
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.person, color: theme.colorScheme.onSurfaceVariant, size: 20),
+                    ),
+                  ),
+              ],
+            );
+          }
+
+          // Desktop: existing full nav
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
@@ -1321,11 +1434,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     ),
                     child: Text(
                       'Comprar',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
+                      style: navTextStyle,
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -1390,7 +1499,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     child: Text(
                       'Vender',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -1410,7 +1519,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     child: Text(
                       'Cómo funciona',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -1466,13 +1575,13 @@ class _MapNavigationBar extends ConsumerWidget {
                           Text(
                             'Guias',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.grey[700],
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
                             ),
                           ),
                           Icon(Icons.arrow_drop_down,
-                              size: 18, color: Colors.grey[700]),
+                              size: 18, color: theme.colorScheme.onSurfaceVariant),
                         ],
                       ),
                     ),
@@ -1491,7 +1600,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     child: Text(
                       'Contacto',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[700],
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
                       ),
@@ -1526,8 +1635,8 @@ class _MapNavigationBar extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(20),
                       child: CircleAvatar(
                          radius: 18,
-                         backgroundColor: Colors.grey[200], // Grey/Default
-                         child: Icon(Icons.person, color: Colors.grey[600], size: 20), // Silhouette
+                         backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                         child: Icon(Icons.person, color: theme.colorScheme.onSurfaceVariant, size: 20),
                       ),
                     ),
                 ],

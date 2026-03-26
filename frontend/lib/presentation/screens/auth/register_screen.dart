@@ -651,7 +651,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7), // Light gray background
+      backgroundColor: Theme.of(context).colorScheme.surface, // Light gray background
       body: Row(
         children: [
           // ON DESKTOP: Form on Left (flex 1), Branding on Right (flex 1)

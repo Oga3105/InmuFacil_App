@@ -158,7 +158,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context, dynamic authState) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -193,9 +193,10 @@ class AiConsentHistoryScreen extends ConsumerWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         GestureDetector(
           onTap: () => context.go('/'),
           child: Container(
@@ -362,9 +363,9 @@ class _ConsentCardState extends State<_ConsentCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

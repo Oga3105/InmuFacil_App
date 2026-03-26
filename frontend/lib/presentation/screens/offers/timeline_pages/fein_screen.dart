@@ -109,7 +109,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       backgroundColor: _kBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -144,9 +144,10 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(

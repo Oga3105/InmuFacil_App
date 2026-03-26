@@ -22,7 +22,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -54,6 +54,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -89,7 +90,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: ListView(

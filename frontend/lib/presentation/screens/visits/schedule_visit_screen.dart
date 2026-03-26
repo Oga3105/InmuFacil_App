@@ -69,7 +69,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context),
       body: slotsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -135,7 +135,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -167,6 +167,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
         ),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
@@ -202,7 +203,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
     );
   }

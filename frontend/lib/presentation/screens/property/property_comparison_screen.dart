@@ -65,9 +65,9 @@ class _PropertyComparisonScreenState
     final propB = _mockProperty(widget.propertyBId);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -99,6 +99,7 @@ class _PropertyComparisonScreenState
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -134,7 +135,7 @@ class _PropertyComparisonScreenState
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -232,9 +233,9 @@ class _HeaderCell extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             address,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 2,
@@ -377,9 +378,9 @@ class _ComparisonTable extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
@@ -548,9 +549,9 @@ class _AiVerdictSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -565,10 +566,10 @@ class _AiVerdictSection extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'property.comparison.ai_verdict.title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -624,7 +625,7 @@ class _VerdictItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: const TextStyle(fontSize: 13, color: Color(0xFF334155)),
+        style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface),
         children: [
           TextSpan(
             text: '$label: ',

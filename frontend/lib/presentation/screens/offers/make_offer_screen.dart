@@ -81,9 +81,9 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
     final canSubmit = _agreed && _offerAmount > 0 && !isLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -113,6 +113,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -148,7 +149,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: SingleChildScrollView(
@@ -256,9 +257,9 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                             const SizedBox(height: 8),
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey.shade300),
+                                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                               ),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(10),
@@ -349,7 +350,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   // ── Agreement checkbox ────────────────────────────────────
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
                         color: _agreed ? const Color(0xFF2563EB) : Colors.grey.shade300,
@@ -450,9 +451,9 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -505,9 +506,9 @@ class _PropertyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -628,9 +629,9 @@ class _OfferAmountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(

@@ -139,7 +139,7 @@ class _SmartArrasContractScreenState
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -171,6 +171,7 @@ class _SmartArrasContractScreenState
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -206,7 +207,7 @@ class _SmartArrasContractScreenState
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: SingleChildScrollView(

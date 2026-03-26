@@ -17,9 +17,9 @@ class SolvencyPassportScreen extends ConsumerWidget {
     final async = ref.watch(mySolvencyProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -51,6 +51,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -91,7 +92,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: async.when(
