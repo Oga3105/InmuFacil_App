@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt, JWTError
 import os
+import firebase_admin
+from firebase_admin import credentials, auth as firebase_auth_sdk
 
 from backend.src.config.database import get_db
 from backend.src.models import User, UserType, DNIStatus
@@ -28,7 +30,8 @@ from backend.src.services.email_service import (
 )
 from backend.src.schemas.base import (
     UserCreate, UserResponse, Token, VerifyEmailRequest,
-    PasswordResetRequest, PasswordResetConfirm, ChangePassword
+    PasswordResetRequest, PasswordResetConfirm, ChangePassword,
+    GoogleAuthRequest, GoogleAuthResponse
 )
 import logging
 
@@ -36,6 +39,27 @@ logger = logging.getLogger("inmufacil.auth")
 
 # Create router
 router = APIRouter()
+
+# ============================================================================
+# Firebase Admin SDK — inicializacion lazy (@Shield)
+# ============================================================================
+
+def _get_firebase_app():
+    """Inicializa Firebase Admin SDK una sola vez (singleton)."""
+    if not firebase_admin._apps:
+        import json
+        creds_content = os.getenv("FIREBASE_CREDENTIALS_CONTENT")
+        creds_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
+        if creds_content:
+            cred = credentials.Certificate(json.loads(creds_content))
+        elif creds_path:
+            cred = credentials.Certificate(creds_path)
+        else:
+            raise RuntimeError(
+                "Firebase no configurado. Define FIREBASE_CREDENTIALS_CONTENT o FIREBASE_CREDENTIALS_PATH."
+            )
+        firebase_admin.initialize_app(cred)
+    return firebase_admin.get_app()
 
 # OAuth2 scheme for token authentication
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
@@ -388,3 +412,104 @@ async def change_password(
 
     logger.info(f"[AUTH] Password changed for: {current_user.email}")
     return {"message": "Contraseña actualizada"}
+
+
+# ============================================================================
+# Google OAuth Endpoint (@Shield @FrontendProxy)
+# ============================================================================
+
+@router.post(
+    "/google",
+    response_model=GoogleAuthResponse,
+    summary="Login / Registro con Google",
+    description="""Autentica al usuario usando un Firebase ID token obtenido tras
+    Google Sign-In en el cliente. Si el usuario no existe, se crea automaticamente.
+    Si el email ya existe con cuenta local, se vincula el google_id.
+
+    **Flujo:**
+    1. Cliente obtiene Firebase ID token via google_sign_in
+    2. POST /auth/google con {firebase_id_token}
+    3. Backend verifica token con Firebase Admin SDK (server-side)
+    4. Crea o vincula usuario en base de datos
+    5. Devuelve JWT propio de InmuFacil + flag is_new_user
+    """,
+    tags=["Auth"]
+)
+async def google_auth(
+    payload: GoogleAuthRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    @Shield: Verificacion de Firebase ID token server-side.
+    @FrontendProxy: Devuelve mismo contrato Token + is_new_user para onboarding.
+    """
+    # Paso 1: Verificar Firebase ID token server-side
+    try:
+        _get_firebase_app()
+        decoded = firebase_auth_sdk.verify_id_token(payload.firebase_id_token)
+    except firebase_admin.exceptions.FirebaseError as exc:
+        logger.warning(f"[SHIELD] Google auth: Firebase token invalido: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de Google invalido o expirado"
+        )
+
+    google_id: str = decoded["uid"]
+    email: str = decoded.get("email", "")
+    full_name: str = decoded.get("name", "") or email.split("@")[0]
+    email_verified: bool = decoded.get("email_verified", False)
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La cuenta de Google no tiene email asociado"
+        )
+
+    # Paso 2: Buscar usuario por google_id o por email
+    user = db.query(User).filter(User.google_id == google_id).first()
+    is_new_user = False
+
+    if user is None:
+        user = get_user_by_email(db, email)
+
+        if user is not None:
+            # Caso: cuenta local existente — vincular google_id
+            user.google_id = google_id
+            if email_verified:
+                user.email_verified = True
+            db.commit()
+            db.refresh(user)
+            logger.info(f"[AUTH] Google vinculado a cuenta existente: {email}")
+        else:
+            # Caso: usuario nuevo — crear cuenta
+            is_new_user = True
+            user_type_value = UserType(payload.user_type) if payload.user_type else UserType.PARTICULAR
+            new_user = User(
+                email=email,
+                hashed_password=None,
+                google_id=google_id,
+                full_name=full_name,
+                user_type=user_type_value,
+                dni_status=DNIStatus.SIN_VERIFICAR,
+                email_verified=email_verified,
+                dni_verified=False,
+                failed_upload_attempts=0
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user = new_user
+            logger.info(f"[AUTH] Nuevo usuario creado via Google: {email} (ID: {user.id})")
+
+    # Paso 3: Emitir JWT propio de InmuFacil
+    access_token = create_access_token(
+        data={"sub": user.email, "user_id": user.id},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    logger.info(f"[OK] Google auth exitoso: {user.email} (nuevo={is_new_user})")
+    return GoogleAuthResponse(
+        access_token=access_token,
+        token_type="bearer",
+        is_new_user=is_new_user
+    )

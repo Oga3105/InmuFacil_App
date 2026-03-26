@@ -40,6 +40,8 @@ import '../../presentation/screens/info/trust_dashboard_screen.dart';
 import '../../presentation/screens/settings/ai_consent_history_screen.dart';
 import '../../presentation/screens/notifications/notifications_page.dart';
 import '../../presentation/screens/lifestyle/lifestyle_questionnaire_screen.dart';
+import '../../presentation/screens/onboarding/gdpr_consent_screen.dart';
+import '../../presentation/screens/onboarding/user_type_selection_screen.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -88,6 +90,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 opacity: animation,
                 child: child,
               );
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
+      ),
+      // Onboarding Google OAuth (nuevos usuarios)
+      GoRoute(
+        path: '/onboarding/consent',
+        name: 'onboarding-consent',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const GdprConsentScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            transitionDuration: const Duration(milliseconds: 300),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/onboarding/user-type',
+        name: 'onboarding-user-type',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const UserTypeSelectionScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
             },
             transitionDuration: const Duration(milliseconds: 300),
           );

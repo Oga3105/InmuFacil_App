@@ -58,6 +58,27 @@ class UserInDB(UserBase):
     id: int
     hashed_password: str
     dni_status: str
+
+
+# ============================================================================
+# Google OAuth Schemas (@Shield)
+# ============================================================================
+
+class GoogleAuthRequest(BaseModel):
+    """Schema para autenticacion via Google. Recibe Firebase ID token del cliente."""
+    firebase_id_token: str = Field(..., min_length=10)
+    user_type: Optional[str] = Field(
+        None,
+        pattern="^(particular|profesional)$",
+        description="Requerido solo en el primer login (onboarding)"
+    )
+
+
+class GoogleAuthResponse(BaseModel):
+    """Respuesta del endpoint /auth/google."""
+    access_token: str
+    token_type: str = "bearer"
+    is_new_user: bool = False
     created_at: datetime
     updated_at: Optional[datetime] = None
 
