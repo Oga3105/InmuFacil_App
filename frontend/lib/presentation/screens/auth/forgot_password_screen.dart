@@ -144,23 +144,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildFormState() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
+        Text(
           'Recuperar Acceso',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           'Introduce tu email y te enviaremos un enlace para restablecer tu contrasena.',
           style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF64748B),
+            color: theme.colorScheme.onSurfaceVariant,
             height: 1.5,
           ),
         ),
@@ -172,18 +173,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           onSubmitted: (_) => _sendReset(),
           decoration: InputDecoration(
             hintText: 'ejemplo@correo.com',
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[200]!),
+              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -193,7 +194,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
             ),
             filled: true,
-            fillColor: Colors.white,
+            fillColor: theme.colorScheme.surfaceContainerLow,
           ),
         ),
         if (_errorMessage != null) ...[
@@ -256,6 +257,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildSuccessState() {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -264,8 +266,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Container(
             width: 80,
             height: 80,
-            decoration: const BoxDecoration(
-              color: Color(0xFFDCFCE7),
+            decoration: BoxDecoration(
+              color: const Color(0xFF16A34A).withOpacity(0.12),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -276,22 +278,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ),
         const SizedBox(height: 32),
-        const Text(
+        Text(
           'Enlace enviado',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1E293B),
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 16),
-        const Text(
+        Text(
           'Si el correo existe en nuestra base de datos, recibiras un enlace de recuperacion. Revisa tu bandeja de entrada y la carpeta de spam.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF64748B),
+            color: theme.colorScheme.onSurfaceVariant,
             height: 1.6,
           ),
         ),
