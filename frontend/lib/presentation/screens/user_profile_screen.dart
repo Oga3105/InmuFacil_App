@@ -132,7 +132,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     // Layout
     // Header -> Tabs -> Content
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // background-light
+      backgroundColor: Theme.of(context).colorScheme.surface, // background-light
       appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         child: Column(
@@ -310,11 +310,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         MouseRegion(
@@ -1202,7 +1202,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: const TextStyle(
                       color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),

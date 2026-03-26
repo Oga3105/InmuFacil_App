@@ -484,7 +484,7 @@ class _AmenitiesGrid extends StatelessWidget {
             color: selected ? Colors.white : Colors.grey.shade700,
             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           checkmarkColor: Colors.white,
           showCheckmark: false,
           shape: RoundedRectangleBorder(

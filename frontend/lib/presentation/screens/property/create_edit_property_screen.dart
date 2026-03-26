@@ -121,7 +121,7 @@ class _CreateEditPropertyScreenState
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, formState),
       body: Column(
         children: [
@@ -164,7 +164,7 @@ class _CreateEditPropertyScreenState
     final isEdit = formState.isEditMode;
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       // -- Leading: Cancel (x) ------------------------------------------------------
@@ -332,7 +332,7 @@ class _SessionExpiredScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

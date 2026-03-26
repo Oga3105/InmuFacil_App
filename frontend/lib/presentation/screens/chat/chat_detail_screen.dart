@@ -364,7 +364,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, conv),
       body: Column(
         children: [
@@ -489,12 +489,12 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final myPhoto = notifier.currentUserPhotoUrl;
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),

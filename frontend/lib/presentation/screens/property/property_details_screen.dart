@@ -57,9 +57,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
     // Show spinner while fetching from API (cache miss path)
     if (cachedProperty == null && directFetchAsync.isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -85,9 +85,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final isFavorite = favoriteIds.contains(property.id);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -183,7 +183,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: Stack(

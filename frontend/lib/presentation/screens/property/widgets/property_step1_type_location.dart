@@ -235,7 +235,7 @@ class _PropertyStep1TypeLocationState
                   color: selected ? Colors.white : Colors.grey.shade700,
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 ),
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                   side: BorderSide(
@@ -545,7 +545,7 @@ class _PropertyStep1TypeLocationState
               onPressed: _locating ? null : _goToMyLocation,
               tooltip: 'Mi ubicación',
               elevation: 2,
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               foregroundColor: Colors.black87,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               child: _locating
