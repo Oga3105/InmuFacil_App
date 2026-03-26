@@ -583,9 +583,9 @@ class _EmptyDetailPane extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 380),
           padding: const EdgeInsets.all(40),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

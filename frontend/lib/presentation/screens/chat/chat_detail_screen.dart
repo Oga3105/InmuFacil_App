@@ -738,7 +738,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
           ),
           child: Theme(
@@ -933,9 +933,9 @@ class _DateSeparator extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Text(
               _label(),
