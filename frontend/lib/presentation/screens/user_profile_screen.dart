@@ -672,6 +672,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     _buildTrustDashboardButton(),
                     const SizedBox(height: 10),
                     _buildAiConsentHistoryButton(),
+                    const SizedBox(height: 10),
+                    _buildLifestyleButton(),
                     const SizedBox(height: 24),
                     _buildPromoCard(),
                     const SizedBox(height: 24),
@@ -693,6 +695,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               _buildTrustDashboardButton(),
               const SizedBox(height: 10),
               _buildAiConsentHistoryButton(),
+              const SizedBox(height: 10),
+              _buildLifestyleButton(),
               const SizedBox(height: 24),
               _buildPromoCard(),
               const SizedBox(height: 24),
@@ -1070,7 +1074,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             child: Text('profile.solvency_buyers_only'.tr(), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
+                          Text(
                             'Completa el asistente para mostrar tu nivel de cualificacion',
                             style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4),
                           ),
@@ -1158,6 +1162,23 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF7C3AED),
           side: const BorderSide(color: Color(0xFFDDD6FE)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLifestyleButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => context.push('/lifestyle/questionnaire'),
+        icon: const Icon(Icons.explore_outlined, size: 16),
+        label: Text('profile.lifestyle_button'.tr()),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF16A34A),
+          side: const BorderSide(color: Color(0xFFBBF7D0)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
@@ -1538,7 +1559,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 '\u00BFTienes otra propiedad?',
                 style: TextStyle(
                   fontSize: 14,
@@ -2090,7 +2111,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -2329,7 +2350,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -2367,7 +2388,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
+                Icon(Icons.error_outline,
                     size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 const SizedBox(height: 12),
                 Text('profile.visits_error'.tr(),
@@ -2431,7 +2452,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           ),
                         ),
                         const SizedBox(height: 16),
-                        const Text(
+                        Text(
                           'Sin visitas programadas',
                           style: TextStyle(
                             fontSize: 15,
@@ -2628,7 +2649,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           // Actions Menu
           if (isUpcoming && v.status != 'cancelled' && v.status != 'rejected')
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurfaceVariant),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               itemBuilder: (_) => [
                 PopupMenuItem(
@@ -2767,7 +2788,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
@@ -2807,7 +2828,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.error_outline,
+                Icon(Icons.error_outline,
                     size: 40, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 const SizedBox(height: 12),
                 Text('${'common.error'.tr()}: $err',
@@ -2860,7 +2881,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Sin conversaciones activas',
                       style: TextStyle(
                         fontSize: 16,
@@ -3390,7 +3411,7 @@ class _SortButton<T> extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.sort, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            Icon(Icons.sort, size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 4),
             Text(
               options[value] ?? '',
@@ -3398,7 +3419,7 @@ class _SortButton<T> extends StatelessWidget {
                   TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(width: 4),
-            const Icon(Icons.expand_more,
+            Icon(Icons.expand_more,
                 size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ],
         ),
