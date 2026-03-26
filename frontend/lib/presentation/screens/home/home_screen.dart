@@ -278,7 +278,7 @@ class _MapSection extends ConsumerWidget {
                      ),
                      builder: (ctx) => SizedBox(
                        height: MediaQuery.of(context).size.height * 0.92,
-                       child: const _SearchPanel(),
+                       child: _SearchPanel(),
                      ),
                    );
                  },
@@ -605,7 +605,7 @@ class _SearchPanel extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 14, // text-sm
                 fontWeight: FontWeight.bold, // font-bold
-                color: theme.colorScheme.onSurfaceVariant, // text-slate-700
+                color: Theme.of(context).colorScheme.onSurfaceVariant, // text-slate-700
               ),
             ),
           ],

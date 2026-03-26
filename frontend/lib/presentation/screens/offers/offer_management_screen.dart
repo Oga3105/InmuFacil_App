@@ -78,7 +78,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Ofertas Recibidas',
                   style: TextStyle(
                     fontSize: 18,
@@ -136,7 +136,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.sort,
+                        Icon(Icons.sort,
                             size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Text(
@@ -145,7 +145,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                               fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.expand_more,
+                        Icon(Icons.expand_more,
                             size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ],
                     ),
@@ -169,7 +169,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline,
+                    Icon(Icons.error_outline,
                         size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(height: 12),
                     const Text('Error al cargar ofertas'),
@@ -405,7 +405,7 @@ class _PropertyHeaderCard extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined,
+                      Icon(Icons.location_on_outlined,
                           size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 2),
                       Expanded(
@@ -1240,7 +1240,7 @@ class _ClosingDateChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.event_outlined,
+        Icon(Icons.event_outlined,
             size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
@@ -1469,13 +1469,13 @@ class _SolvencyAcceptanceSectionState
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
-            error: (_, __) => const Text(
+            error: (_, __) => Text(
               'El comprador aun no tiene pasaporte de solvencia.',
               style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
-                return const Text(
+                return Text(
                   'El comprador aun no ha completado el pasaporte de solvencia.',
                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
@@ -1692,7 +1692,7 @@ class _TrustFooter extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'Todas las ofertas son legalmente vinculantes',
                   style: TextStyle(
@@ -1701,7 +1701,7 @@ class _TrustFooter extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   'InmuFacil asegura la identidad de cada comprador.',
                   style: TextStyle(
