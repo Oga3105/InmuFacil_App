@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/config/env_config.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -94,7 +95,7 @@ final _aiConsentHistoryProvider =
   if (token == null) return [];
 
   final dio = Dio(BaseOptions(
-    baseUrl: kApiBaseUrl,
+    baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));
@@ -157,7 +158,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context, dynamic authState) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -192,9 +193,10 @@ class AiConsentHistoryScreen extends ConsumerWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         GestureDetector(
           onTap: () => context.go('/'),
           child: Container(
@@ -361,9 +363,9 @@ class _ConsentCardState extends State<_ConsentCard> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),

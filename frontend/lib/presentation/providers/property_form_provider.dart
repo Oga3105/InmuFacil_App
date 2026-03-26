@@ -11,12 +11,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/config/env_config.dart';
 import '../../core/formatters/currency_input_formatter.dart';
 import '../../domain/entities/property_condition.dart';
 import '../../domain/entities/property_type.dart';
 import 'search_provider.dart' show searchProvider;
-
-const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
 
 /// Max photos per listing and max file size (5 MB)
 const int kMaxPhotos = 50;
@@ -312,7 +311,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
   @override
   PropertyFormState build() {
     _dio = Dio(BaseOptions(
-      baseUrl: _kApiBaseUrl,
+      baseUrl: EnvConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ));
@@ -1151,7 +1150,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
     if (raw == null) return null;
     final path = raw as String;
     if (path.startsWith('http')) return path;
-    final base = _kApiBaseUrl.replaceAll(RegExp(r'/api/v\d+/?$'), '');
+    final base = EnvConfig.apiBaseUrl.replaceAll(RegExp(r'/api/v\d+/?$'), '');
     return '$base/${path.startsWith('/') ? path.substring(1) : path}';
   }
 }

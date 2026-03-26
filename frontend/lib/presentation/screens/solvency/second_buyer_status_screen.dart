@@ -40,7 +40,7 @@ class _SecondBuyerStatusScreenState
     final statusAsync = ref.watch(solvency_prov.secondBuyerStatusProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context),
       body: statusAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -124,13 +124,14 @@ class _SecondBuyerStatusScreenState
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

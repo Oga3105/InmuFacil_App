@@ -8,12 +8,12 @@ import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../../core/config/env_config.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
-const _kBase  = 'http://localhost:8000/api/v1';
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ final _arrasHubProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kBase/arras/$offerId',
+      '$EnvConfig.apiBaseUrl/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return resp.data as Map<String, dynamic>;
@@ -152,7 +152,7 @@ class ArrasInterviewScreen extends ConsumerWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -192,7 +192,7 @@ class ArrasInterviewScreen extends ConsumerWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         Consumer(

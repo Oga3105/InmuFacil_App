@@ -10,12 +10,12 @@ import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../../core/config/env_config.dart';
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
 const _kRed   = Color(0xFFDC2626);
 const _kBg    = Color(0xFFF8FAFC);
-const _kBase  = 'http://localhost:8000/api/v1';
 
 // ── Arras data provider (auto-refresh while generating) ──────────────────────
 
@@ -27,7 +27,7 @@ final _arrasContractProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kBase/arras/$offerId',
+      '$EnvConfig.apiBaseUrl/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return resp.data as Map<String, dynamic>;
@@ -86,7 +86,7 @@ class _ArrasContractReviewScreenState
         await const FlutterSecureStorage().read(key: 'auth_token');
     if (token == null) return null;
     return Dio(BaseOptions(
-      baseUrl: _kBase,
+      baseUrl: EnvConfig.apiBaseUrl,
       headers: {'Authorization': 'Bearer $token'},
     ));
   }
@@ -483,9 +483,9 @@ class _ArrasContractReviewScreenState
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.04),
@@ -619,7 +619,7 @@ class _ArrasContractReviewScreenState
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -651,7 +651,7 @@ class _ArrasContractReviewScreenState
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         Consumer(
@@ -661,6 +661,7 @@ class _ArrasContractReviewScreenState
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (MediaQuery.sizeOf(context).width >= 650)
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(

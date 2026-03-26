@@ -114,20 +114,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
-  Widget _buildTrustBadgeSimple({
+  Widget _buildTrustBadgeSimple(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required Color bgColor,
     required String label,
     required String title,
   }) {
-    return Container( // Reuse same as Login
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 36, 
+            width: 36,
             height: 36,
             decoration: BoxDecoration(
               color: bgColor,
@@ -136,28 +137,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             child: Icon(
               icon,
               color: iconColor,
-              size: 20, 
+              size: 20,
             ),
           ),
-          const SizedBox(width: 12), 
+          const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 9, 
-                  fontWeight: FontWeight.w900, 
-                  color: Colors.grey[400], 
-                  letterSpacing: 1.2, 
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  letterSpacing: 1.2,
                 ),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 13, 
-                  fontWeight: FontWeight.bold, 
-                  color: Colors.grey[700], 
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],
@@ -354,7 +355,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     // 2. Form Panel (Left Side on Desktop)
     Widget formPanel = Container(
-      color: const Color(0xFFF5F5F7), // Light gray background
+      color: Theme.of(context).colorScheme.surface,
       child: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -367,7 +368,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                  elevation: 2,
                  shadowColor: Colors.black.withOpacity(0.05),
                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                 color: Colors.white,
+                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                  child: Padding(
                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
                    child: Form(
@@ -401,7 +402,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          'Crea tu cuenta',
                          textAlign: TextAlign.left,
                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                           color: const Color(0xFF1E293B),
+                           color: Theme.of(context).colorScheme.onSurface,
                            fontWeight: FontWeight.bold,
                            fontSize: 22,
                          ),
@@ -411,7 +412,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          'Únete a la red P2P más segura del sector inmobiliario.',
                          textAlign: TextAlign.left,
                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                           color: const Color(0xFF64748B),
+                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                            fontSize: 12,
                            height: 1.3,
                          ),
@@ -419,9 +420,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 20),
 
                        // Name Field
-                       const Text(
+                       Text(
                          'Nombre completo',
-                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -429,15 +430,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.next,
                          onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocusNode),
                          style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration('Ej: Juan Pérez'),
+                         decoration: _buildInputDecoration(context, 'Ej: Juan Pérez'),
                          validator: (value) => (value == null || value.length < 3) ? 'Mínimo 3 caracteres' : null,
                        ),
                        const SizedBox(height: 14),
 
                        // Email Field
-                       const Text(
+                       Text(
                          'Correo electrónico',
-                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -446,7 +447,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.next,
                          onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                           style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration('nombre@ejemplo.com'),
+                         decoration: _buildInputDecoration(context, 'nombre@ejemplo.com'),
                          validator: (value) {
                            if (value == null || value.isEmpty) return 'Requerido';
                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
@@ -457,9 +458,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 14),
 
                        // Password Field
-                       const Text(
+                       Text(
                          'Contraseña',
-                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
                         TextFormField(
@@ -469,7 +470,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.next,
                           onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                           style: const TextStyle(fontSize: 13),
-                          decoration: _buildInputDecoration('Mínimo 8 caracteres').copyWith(
+                          decoration: _buildInputDecoration(context, 'Mínimo 8 caracteres').copyWith(
                             suffixIcon: SizedBox(
                               width: 80,
                               child: Row(
@@ -505,9 +506,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        const SizedBox(height: 14),
 
                        // Confirm Password Field
-                       const Text(
+                       Text(
                          'Confirmar contraseña',
-                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF334155)),
+                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
                        TextFormField(
@@ -517,7 +518,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.done,
                          onFieldSubmitted: (_) => _handleRegister(),
                           style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration('Repite tu contraseña').copyWith(
+                         decoration: _buildInputDecoration(context, 'Repite tu contraseña').copyWith(
                            suffixIcon: IconButton(
                              icon: Icon(_isConfirmPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.grey[400], size: 18),
                              onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
@@ -675,7 +676,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F7), // Light gray background
+      backgroundColor: Theme.of(context).colorScheme.surface, // Light gray background
       body: Row(
         children: [
           // ON DESKTOP: Form on Left (flex 1), Branding on Right (flex 1)
@@ -697,25 +698,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String hint) {
+  InputDecoration _buildInputDecoration(BuildContext context, String hint) {
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.grey[200]!),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: BorderSide(color: Colors.grey[300]!),
+        borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: _glowBlueColor, width: 2),
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
     );
   }
 }

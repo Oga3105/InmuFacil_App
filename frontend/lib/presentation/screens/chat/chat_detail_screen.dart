@@ -364,7 +364,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, conv),
       body: Column(
         children: [
@@ -489,12 +489,12 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final myPhoto = notifier.currentUserPhotoUrl;
 
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -608,6 +608,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       ),
       actions: [
         // Inicio button — same style as offer_management_screen
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
@@ -737,7 +738,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             border: const Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
           ),
           child: Theme(
@@ -932,9 +933,9 @@ class _DateSeparator extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Text(
               _label(),

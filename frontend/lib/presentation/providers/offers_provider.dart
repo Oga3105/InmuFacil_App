@@ -2,9 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../core/config/env_config.dart';
 import 'chat_provider.dart';
-
-const String _kOffersApiBaseUrl = 'http://localhost:8000/api/v1';
 
 // --- Entity ---
 
@@ -105,7 +104,7 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
 
   @override
   Future<List<OfferData>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: _kOffersApiBaseUrl));
+    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -168,7 +167,7 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
 
   @override
   Future<List<OfferData>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: _kOffersApiBaseUrl));
+    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -211,7 +210,7 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
   /// Seller accepts the buyer's solvency passport to unlock the timeline.
   Future<void> acceptSolvency(String offerId) async {
     // Use full URL — solvency router has a different prefix than offers router
-    await _dio.post('${_kOffersApiBaseUrl}/solvency/offer/$offerId/accept');
+    await _dio.post('${EnvConfig.apiBaseUrl}/solvency/offer/$offerId/accept');
     await refresh();
   }
 }
@@ -247,7 +246,7 @@ class MakeOfferNotifier extends Notifier<OfferFormState> {
     try {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'auth_token');
-      final dio = Dio(BaseOptions(baseUrl: _kOffersApiBaseUrl));
+      final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
       if (token != null) {
         dio.options.headers['Authorization'] = 'Bearer $token';
       }
@@ -283,7 +282,7 @@ final feinConfirmedProvider = FutureProvider.autoDispose
   if (token == null) return false;
   try {
     final resp = await Dio().get(
-      '$_kOffersApiBaseUrl/fein/$offerId/status',
+      '$EnvConfig.apiBaseUrl/fein/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ??
@@ -301,7 +300,7 @@ final notariaApptStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await Dio().get(
-      '$_kOffersApiBaseUrl/notaria-appt/$offerId/status',
+      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']

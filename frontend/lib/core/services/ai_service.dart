@@ -3,10 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'ai_types.dart';
 import 'ai_rate_limiter_service.dart';
+import '../config/env_config.dart';
 
 export 'ai_types.dart';
-
-const String _kApiBaseUrl = 'http://localhost:8000/api/v1';
 
 class AiService {
   AiService._();
@@ -16,7 +15,7 @@ class AiService {
 
   Dio _buildDio() => Dio(
         BaseOptions(
-          baseUrl: _kApiBaseUrl,
+          baseUrl: EnvConfig.apiBaseUrl,
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 60),
         ),

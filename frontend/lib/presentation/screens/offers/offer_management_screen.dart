@@ -65,7 +65,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, ref),
       body: ListView(
         children: [
@@ -78,12 +78,12 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
             child: Row(
               children: [
-                const Text(
+                Text(
                   'Ofertas Recibidas',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E293B),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const Spacer(),
@@ -129,24 +129,24 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Colors.grey.shade300),
+                      color: Theme.of(context).colorScheme.surface,
+                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.sort,
-                            size: 14, color: Color(0xFF64748B)),
+                        Icon(Icons.sort,
+                            size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         const SizedBox(width: 4),
                         Text(
                           _sortLabels[_sortBy]!,
-                          style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF64748B)),
+                          style: TextStyle(
+                              fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.expand_more,
-                            size: 14, color: Color(0xFF64748B)),
+                        Icon(Icons.expand_more,
+                            size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ],
                     ),
                   ),
@@ -169,8 +169,8 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: Color(0xFF64748B)),
+                    Icon(Icons.error_outline,
+                        size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(height: 12),
                     const Text('Error al cargar ofertas'),
                     const SizedBox(height: 12),
@@ -235,12 +235,12 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
 
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       automaticallyImplyLeading: false,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -281,47 +281,44 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
         ),
       ),
       actions: [
-        GestureDetector(
-          onTap: () => context.go('/'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        Builder(builder: (context) {
+          final isMobile = MediaQuery.of(context).size.width < 650;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isMobile) ...[
+                GestureDetector(
+                  onTap: () => context.go('/'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                      ],
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
               ],
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                SizedBox(width: 6),
-                Text(
-                  'Inicio',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-          onPressed: () {},
-        ),
-        const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: const UserAvatarMenu(),
-        ),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+                onPressed: () {},
+              ),
+              const SizedBox(width: 4),
+              const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: UserAvatarMenu(),
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -344,9 +341,9 @@ class _PropertyHeaderCard extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -388,9 +385,9 @@ class _PropertyHeaderCard extends ConsumerWidget {
                       const SizedBox(width: 8),
                       Text(
                         'Ref. IF-${propertyId.padLeft(4, '0')}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: Color(0xFF64748B),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -398,27 +395,27 @@ class _PropertyHeaderCard extends ConsumerWidget {
                   const SizedBox(height: 6),
                   Text(
                     property?.title ?? 'Propiedad',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
-                      color: Color(0xFF1E293B),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined,
-                          size: 13, color: Color(0xFF64748B)),
+                      Icon(Icons.location_on_outlined,
+                          size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 2),
                       Expanded(
                         child: Text(
                           property != null
                               ? 'Precio de salida ${_formatPrice(property?.price)}'
                               : 'Precio de salida —',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -637,9 +634,9 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -683,10 +680,10 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                     children: [
                       Text(
                         offer.buyerName ?? 'Comprador',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
-                          color: Color(0xFF1E293B),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       if (dateStr.isNotEmpty) ...[
@@ -760,10 +757,10 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                         children: [
                           Text(
                             '\u20AC${_formatAmount(offer.amount)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
-                              color: Color(0xFF1E293B),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(width: 6),
@@ -1191,9 +1188,9 @@ class _ConditionChip extends StatelessWidget {
     final isCash = paymentTerm == 'cash';
     return Text(
       isCash ? 'Pago al\nContado' : 'Necesita\nHipoteca',
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 13,
-        color: Color(0xFF1E293B),
+        color: Theme.of(context).colorScheme.onSurface,
         fontWeight: FontWeight.w700,
         height: 1.3,
       ),
@@ -1243,14 +1240,14 @@ class _ClosingDateChip extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.event_outlined,
-            size: 14, color: Color(0xFF64748B)),
+        Icon(Icons.event_outlined,
+            size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 4),
         Text(
           _fmt(date),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
-            color: Color(0xFF1E293B),
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -1472,15 +1469,15 @@ class _SolvencyAcceptanceSectionState
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
-            error: (_, __) => const Text(
+            error: (_, __) => Text(
               'El comprador aun no tiene pasaporte de solvencia.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
-                return const Text(
+                return Text(
                   'El comprador aun no ha completado el pasaporte de solvencia.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
               }
               final level = passport.solvencyLevel ?? 'bronze';
@@ -1645,7 +1642,7 @@ class _SolvencyRow extends StatelessWidget {
             width: 220,
             child: Text(
               label,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
           Text(
@@ -1695,21 +1692,21 @@ class _TrustFooter extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'Todas las ofertas son legalmente vinculantes',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1E293B),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   'InmuFacil asegura la identidad de cada comprador.',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -1793,9 +1790,9 @@ class _FooterLink extends StatelessWidget {
       onTap: onTap,
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
-          color: Color(0xFF64748B),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           decoration: TextDecoration.underline,
         ),
       ),

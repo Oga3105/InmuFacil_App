@@ -12,8 +12,7 @@ import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
-
-const _kTimelineApiBase = 'http://localhost:8000/api/v1';
+import '../../../core/config/env_config.dart';
 
 final _arrasStatusProvider = FutureProvider.autoDispose
     .family<String, String>((ref, offerId) async {
@@ -23,7 +22,7 @@ final _arrasStatusProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kTimelineApiBase/arras/$offerId',
+      '$EnvConfig.apiBaseUrl/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
@@ -41,7 +40,7 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   final dio = Dio();
   try {
     final resp = await dio.get(
-      '$_kTimelineApiBase/tasacion/$offerId/status',
+      '$EnvConfig.apiBaseUrl/tasacion/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -58,7 +57,7 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await Dio().get(
-      '$_kTimelineApiBase/notaria-appt/$offerId/status',
+      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -141,7 +140,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
         : liveOffer.notariaApptStatus ?? 'pending';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, ref),
       body: Column(
         children: [
@@ -155,26 +154,26 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   child: _HeaderCards(offer: liveOffer),
                 ),
                 // ── Title ───────────────────────────────────────────────────
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 28, 20, 4),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
                   child: Text(
                     'Estado de la Transaccion',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
                     'Sigue el progreso de tu venta en tiempo real',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF64748B),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -266,54 +265,51 @@ class TransactionTimelineScreen extends ConsumerWidget {
           ),
         ),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
-        GestureDetector(
-          onTap: () => context.go('/'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        Builder(builder: (context) {
+          final isMobile = MediaQuery.of(context).size.width < 650;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isMobile) ...[
+                GestureDetector(
+                  onTap: () => context.go('/'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                      ],
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
               ],
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                SizedBox(width: 6),
-                Text(
-                  'Inicio',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-          onPressed: () {},
-        ),
-        const SizedBox(width: 8),
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: const UserAvatarMenu(),
-        ),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+                onPressed: () {},
+              ),
+              const SizedBox(width: 4),
+              const Padding(
+                padding: EdgeInsets.only(right: 12),
+                child: UserAvatarMenu(),
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -775,9 +771,9 @@ class _HeaderCards extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
@@ -801,10 +797,10 @@ class _HeaderCards extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       if (price != null) ...[
@@ -830,9 +826,9 @@ class _HeaderCards extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -852,10 +848,10 @@ class _HeaderCards extends StatelessWidget {
                 children: [
                   Text(
                     counterparty,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -996,10 +992,10 @@ class _DoneRow extends StatelessWidget {
               children: [
                 Text(
                   step.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 3),
@@ -1080,7 +1076,7 @@ class _ActiveRow extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFF2563EB), width: 1.5),
                 ),
@@ -1092,10 +1088,10 @@ class _ActiveRow extends StatelessWidget {
                         Expanded(
                           child: Text(
                             step.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF0F172A),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1195,7 +1191,7 @@ class _LockedRow extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFFCBD5E1), width: 2),
             ),
@@ -1276,11 +1272,11 @@ class _HelpFooter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          const Text(
+          Text(
             '¿Necesitas ayuda con este paso?',
             style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF64748B),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 6),
@@ -1807,15 +1803,15 @@ class _SellerSolvencySectionState
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
-            error: (_, __) => const Text(
+            error: (_, __) => Text(
               'El comprador aun no tiene pasaporte de solvencia.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
-                return const Text(
+                return Text(
                   'El comprador aun no ha completado el pasaporte de solvencia.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
               }
               final level = passport.solvencyLevel ?? 'bronze';
@@ -1974,8 +1970,8 @@ class _SolvencyRowCompact extends StatelessWidget {
             width: 210,
             child: Text(
               label,
-              style: const TextStyle(
-                  fontSize: 12, color: Color(0xFF64748B)),
+              style: TextStyle(
+                  fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
           Text(
@@ -2001,13 +1997,13 @@ class _BrandBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.verified_user_outlined,
-              size: 14, color: Color(0xFF64748B)),
+          Icon(Icons.verified_user_outlined,
+              size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
           const Expanded(
             child: Text(
@@ -2043,9 +2039,9 @@ class _FooterLink extends StatelessWidget {
       onTap: () {},
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
-          color: Color(0xFF64748B),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           decoration: TextDecoration.underline,
         ),
       ),

@@ -35,10 +35,10 @@ class TrustDashboardScreen extends ConsumerWidget {
     final solvencyAsync = ref.watch(solvency_prov.mySolvencyProvider);
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -69,6 +69,7 @@ class TrustDashboardScreen extends ConsumerWidget {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -100,7 +101,7 @@ class TrustDashboardScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+            icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
             onPressed: () {},
           ),
           const SizedBox(width: 4),
@@ -109,7 +110,7 @@ class TrustDashboardScreen extends ConsumerWidget {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: Column(
@@ -158,24 +159,24 @@ class TrustDashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.workspace_premium_outlined,
-                  size: 52, color: Colors.grey.shade400),
+                  size: 52, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Sin pasaporte de solvencia',
               style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: _kNavy),
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(height: 10),
             Text(
               'Completa el Pasaporte de Solvencia Consciente para obtener tu nivel de confianza.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+                  fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
             ),
             const SizedBox(height: 28),
             FilledButton.icon(
@@ -341,17 +342,17 @@ class _TrustFactorsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Factores de confianza',
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy),
+                fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 16),
           ...factors.map((f) => Padding(
@@ -364,12 +365,12 @@ class _TrustFactorsCard extends StatelessWidget {
                       size: 20,
                     ),
                     const SizedBox(width: 12),
-                    Icon(f.icon, color: Colors.grey.shade400, size: 18),
+                    Icon(f.icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18),
                     const SizedBox(width: 8),
                     Text(f.label,
                         style: TextStyle(
                             fontSize: 13,
-                            color: f.value ? Colors.grey.shade800 : Colors.grey.shade500)),
+                            color: f.value ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurfaceVariant)),
                   ],
                 ),
               )),
@@ -410,17 +411,17 @@ class _LevelExplainerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Escala de confianza',
             style: TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy),
+                fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 16),
           ...levels.map((l) {
@@ -447,13 +448,13 @@ class _LevelExplainerCard extends StatelessWidget {
                             Text(l.range,
                                 style: TextStyle(
                                     fontSize: 11,
-                                    color: Colors.grey.shade500)),
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ),
                         Text(l.description,
                             style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey.shade600)),
+                                color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                   ),
@@ -509,17 +510,17 @@ class _BenefitsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Ventajas de tu nivel ${config.label}',
-            style: const TextStyle(
-                fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy),
+            style: TextStyle(
+                fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
           const SizedBox(height: 14),
           ...benefits.map((b) => Padding(
@@ -531,7 +532,7 @@ class _BenefitsCard extends StatelessWidget {
                     Expanded(
                       child: Text(b,
                           style: TextStyle(
-                              fontSize: 13, color: Colors.grey.shade700)),
+                              fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
                     ),
                   ],
                 ),
@@ -557,19 +558,19 @@ class _ExpiryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isExpiringSoon ? Colors.red.shade50 : Colors.grey.shade50,
+        color: isExpiringSoon ? Colors.red.withOpacity(0.1) : Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isExpiringSoon
               ? Colors.red.shade200
-              : Colors.grey.shade200,
+              : Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.schedule_outlined,
-            color: isExpiringSoon ? Colors.red : Colors.grey.shade600,
+            color: isExpiringSoon ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -581,7 +582,7 @@ class _ExpiryCard extends StatelessWidget {
                       '(${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year}).',
               style: TextStyle(
                 fontSize: 13,
-                color: isExpiringSoon ? Colors.red.shade700 : Colors.grey.shade600,
+                color: isExpiringSoon ? Colors.red.shade700 : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

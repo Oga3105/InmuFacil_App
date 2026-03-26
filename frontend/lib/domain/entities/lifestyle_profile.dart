@@ -3,17 +3,52 @@ import 'dart:convert';
 /// V63 — Lifestyle Matcher: LifestyleProfile entity
 /// V63.1 — Ultra-matching engine additions (light, social, readiness weights)
 
-enum LifestylePace { vibrant_center, calm_peripheral }
+enum LifestylePace {
+  vibrant_center,
+  calm_peripheral,
+  residential_neighborhood,
+  cultural_zone,
+  rural,
+}
 
-enum WorkStyle { daily_office, home_office }
+enum WorkStyle {
+  daily_office,
+  home_office,
+  hybrid,
+  freelance,
+}
 
-enum MobilityStyle { public_transport, private_car }
+enum MobilityStyle {
+  public_transport,
+  private_car,
+  cycling,
+  walking,
+}
 
-enum SleepSensitivity { high_noise_sensitivity, deep_sleeper }
+enum SleepSensitivity {
+  high_noise_sensitivity,
+  deep_sleeper,
+  needs_darkness,
+  night_owl,
+}
 
-enum GreenNeeds { needs_green, prefers_services }
+enum GreenNeeds {
+  needs_green,
+  prefers_services,
+  near_water,
+  mountain_nature,
+  historic_center,
+}
 
-enum ProfileType { single, couple, family_children, family_pets, senior }
+enum ProfileType {
+  single,
+  couple,
+  family_children,
+  family_pets,
+  senior,
+  investor,
+  student,
+}
 
 class LifestyleProfile {
   const LifestyleProfile({
@@ -48,11 +83,16 @@ class LifestyleProfile {
   String get profileDescription => _computeDescription();
 
   String _computeProfileName() {
+    if (profileType == ProfileType.investor) return 'Inversor Estrategico';
+    if (profileType == ProfileType.student) return 'Estudiante Urbano';
     if (profileType == ProfileType.family_children) return 'Familia Activa';
+    if (pace == LifestylePace.rural) return 'Vida Rural Tranquila';
+    if (pace == LifestylePace.cultural_zone) return 'Explorador Cultural';
     if (pace == LifestylePace.calm_peripheral &&
         sleep == SleepSensitivity.high_noise_sensitivity) {
       return 'Refugio Silencioso';
     }
+    if (workStyle == WorkStyle.hybrid) return 'Profesional Hibrido';
     if (workStyle == WorkStyle.home_office &&
         mobility == MobilityStyle.public_transport) {
       return 'Urbano Conectado';

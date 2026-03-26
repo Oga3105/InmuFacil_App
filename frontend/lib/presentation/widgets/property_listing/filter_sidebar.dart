@@ -47,7 +47,8 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
     });
 
     final searchState = ref.watch(searchProvider);
-    const navyColor = Color(0xFF0F172A);
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
     const primaryBlue = Color(0xFF2563EB); // User Brand Blue
 
     return Container(
@@ -60,14 +61,14 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
@@ -75,7 +76,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: navyColor,
+                          color: onSurface,
                         ),
                       ),
                       // "Limpiar" removed per user request
@@ -88,16 +89,16 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     controller: _locationController,
                     decoration: InputDecoration(
                       hintText: 'Ciudad, zona...',
-                      hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                      hintStyle: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
                       prefixIcon: const Icon(Icons.location_on, size: 18, color: primaryBlue),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade200),
+                        borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey.shade200),
+                        borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -143,11 +144,11 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   children: [
                     Text(
                       '€${_formatPrice(searchState.priceRange.start)}',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: onSurface),
                     ),
                     Text(
                       '€${_formatPrice(searchState.priceRange.end)}',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: navyColor),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: onSurface),
                     ),
                   ],
                 ),
@@ -176,9 +177,9 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
                   ),
                   child: DropdownButton<int>(
                     value: searchState.minBedrooms > 0 ? searchState.minBedrooms : null,
@@ -210,15 +211,15 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   initialValue: searchState.propertyType,
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: theme.colorScheme.surface,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.grey.shade200),
+                      borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
                     ),
                   ),
                   items: PropertyType.values.map((type) {
@@ -274,20 +275,76 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const Divider(),
                 const SizedBox(height: 16),
 
+                // Lifestyle Filter Section
+                _buildSectionTitle('lifestyle.lifestyle_filter_title'.tr()),
+                const SizedBox(height: 8),
+                Text(
+                  'lifestyle.lifestyle_filter_description'.tr(),
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    const Icon(Icons.psychology_outlined, color: Color(0xFF2563EB), size: 20),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'lifestyle.lifestyle_filter_title'.tr(),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Transform.scale(
+                      scale: 0.8,
+                      alignment: Alignment.centerRight,
+                      child: Switch(
+                        value: searchState.useLifestyleFilter,
+                        onChanged: (_) => ref.read(searchProvider.notifier).toggleLifestyleFilter(),
+                        activeThumbColor: const Color(0xFF2563EB),
+                        activeTrackColor: const Color(0xFF2563EB).withOpacity(0.3),
+                      ),
+                    ),
+                  ],
+                ),
+                if (searchState.useLifestyleFilter) ...[
+                  const SizedBox(height: 4),
+                  InkWell(
+                    onTap: () => context.push('/lifestyle/questionnaire'),
+                    child: Text(
+                      'Editar mi perfil de estilo de vida →',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: const Color(0xFF2563EB).withOpacity(0.8),
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
+                const Divider(),
+                const SizedBox(height: 16),
+
                 // Verified Toggle
                 Row(
                   children: [
                     const Icon(Icons.verified_user, color: Color(0xFF16A34A), size: 20),
                     const SizedBox(width: 8),
-                    const Text(
-                      'Verificado InmuFácil',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                    const Flexible(
+                      child: Text(
+                        'Verificado InmuFácil',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const Spacer(),
-                    Switch(
-                      value: searchState.onlyVerified, 
-                      onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
-                      activeThumbColor: const Color(0xFF16A34A),
+                    Transform.scale(
+                      scale: 0.8,
+                      alignment: Alignment.centerRight,
+                      child: Switch(
+                        value: searchState.onlyVerified,
+                        onChanged: (val) => ref.read(searchProvider.notifier).toggleOnlyVerified(),
+                        activeThumbColor: const Color(0xFF16A34A),
+                      ),
                     ),
                   ],
                 ),
@@ -301,7 +358,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           Container(
             padding: const EdgeInsets.all(24),
              decoration: BoxDecoration(
-              color: navyColor,
+              color: theme.colorScheme.inverseSurface,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -350,12 +407,13 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
   }
 
   Widget _buildSectionTitle(String title) {
+    final onSurfaceVariant = Theme.of(context).colorScheme.onSurfaceVariant;
     return Text(
       title.toUpperCase(),
       style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.bold,
-        color: Colors.grey.shade500,
+        color: onSurfaceVariant,
         letterSpacing: 0.5,
       ),
     );
@@ -385,6 +443,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
   }
 
   Widget _buildRoomButton(BuildContext context, WidgetRef ref, String label, int value, bool isSelected) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => ref.read(searchProvider.notifier).updateMinBedrooms(value),
       child: Container(
@@ -395,7 +454,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade200,
+            color: isSelected ? const Color(0xFF2563EB) : theme.colorScheme.outlineVariant,
           ),
         ),
         child: Text(
@@ -403,7 +462,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
+            color: isSelected ? Colors.white : theme.colorScheme.onSurface,
           ),
         ),
       ),
@@ -431,10 +490,10 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           const SizedBox(width: 8),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

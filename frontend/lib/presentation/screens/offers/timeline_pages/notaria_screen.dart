@@ -8,12 +8,12 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
+import '../../../../core/config/env_config.dart';
 
 const _kBlue    = Color(0xFF2563EB);
 const _kGreen   = Color(0xFF16A34A);
 const _kOrange  = Color(0xFFEA580C);
 const _kBg      = Color(0xFFF8FAFC);
-const _kApiBase = 'http://localhost:8000/api/v1';
 const _storage  = FlutterSecureStorage();
 
 /// Pantalla de Notaria — comprador elige lugar, fecha y hora.
@@ -61,7 +61,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await Dio().get(
-        '$_kApiBase/notaria-appt/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -127,7 +127,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       final d = _selectedDate!;
       final t = _selectedTime!;
       await Dio().post(
-        '$_kApiBase/notaria-appt/${widget.offer.id}/schedule',
+        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/schedule',
         data: {
           'city': _cityCtrl.text.trim(),
           'appointment_date':
@@ -168,7 +168,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       backgroundColor: _kBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -203,9 +203,10 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(

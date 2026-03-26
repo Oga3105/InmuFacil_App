@@ -57,9 +57,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
     // Show spinner while fetching from API (cache miss path)
     if (cachedProperty == null && directFetchAsync.isLoading) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -85,9 +85,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final isFavorite = favoriteIds.contains(property.id);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -129,61 +129,93 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
           ),
         ),
         actions: [
-           Padding(
-             padding: const EdgeInsets.only(right: 24.0),
-             child: Row(
-               children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      // Calculate which page this property is on based on the
-                      // current filtered list and items-per-page setting.
-                      final allFiltered = ref.read(searchProvider).filteredProperties;
-                      final ipp = ref.read(searchProvider).itemsPerPage;
-                      final idx = allFiltered.indexWhere((p) => p.id == widget.propertyId);
-                      if (idx >= 0) {
-                        final page = (idx ~/ ipp) + 1;
-                        ref.read(searchProvider.notifier).setPage(page);
-                      }
-                      context.go('/search?highlight=${widget.propertyId}');
-                    },
-                    icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF2563EB)),
-                    label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          Builder(
+            builder: (context) {
+              final isMobile = MediaQuery.of(context).size.width < 650;
+              final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+              final avatarWidget = isAuthenticated
+                  ? const UserAvatarMenu()
+                  : InkWell(
+                      onTap: () => context.pushNamed('login'),
+                      borderRadius: BorderRadius.circular(20),
+                      child: _buildUserAvatar(ref, authenticated: false),
+                    );
+
+              if (isMobile) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PopupMenuButton<String>(
+                        icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurface),
+                        onSelected: (value) {
+                          if (value == 'list') {
+                            final allFiltered = ref.read(searchProvider).filteredProperties;
+                            final ipp = ref.read(searchProvider).itemsPerPage;
+                            final idx = allFiltered.indexWhere((p) => p.id == widget.propertyId);
+                            if (idx >= 0) {
+                              final page = (idx ~/ ipp) + 1;
+                              ref.read(searchProvider.notifier).setPage(page);
+                            }
+                            context.go('/search?highlight=${widget.propertyId}');
+                          } else if (value == 'publish') {
+                            context.push('/property/create');
+                          }
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
+                          PopupMenuItem(value: 'publish', child: Row(children: [Icon(Icons.add_home, size: 18), SizedBox(width: 8), Text('Publicar Gratis')])),
+                        ],
+                      ),
+                      avatarWidget,
+                      const SizedBox(width: 8),
+                    ],
+                  ),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 24.0),
+                child: Row(
+                  children: [
+                    TextButton.icon(
+                      onPressed: () {
+                        final allFiltered = ref.read(searchProvider).filteredProperties;
+                        final ipp = ref.read(searchProvider).itemsPerPage;
+                        final idx = allFiltered.indexWhere((p) => p.id == widget.propertyId);
+                        if (idx >= 0) {
+                          final page = (idx ~/ ipp) + 1;
+                          ref.read(searchProvider.notifier).setPage(page);
+                        }
+                        context.go('/search?highlight=${widget.propertyId}');
+                      },
+                      icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF2563EB)),
+                      label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  PremiumButton(
-                    label: 'Publicar Gratis',
-                    onPressed: () {},
-                    color: const Color(0xFF2563EB),
-                    fullWidth: false,
-                    fontSize: 14,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  ),
-                  const SizedBox(width: 12),
-                  // [AUTH STATE LOGIC] User icon - same as HomeScreen
-                  Builder(
-                    builder: (context) {
-                      final isAuthenticated = ref.watch(authProvider).isAuthenticated;
-                      if (isAuthenticated) {
-                        return const UserAvatarMenu();
-                      } else {
-                        return InkWell(
-                          onTap: () => context.pushNamed('login'),
-                          borderRadius: BorderRadius.circular(20),
-                          child: _buildUserAvatar(ref, authenticated: false),
-                        );
-                      }
-                    },
-                  ),
-               ],
-             ),
-           ),
+                    const SizedBox(width: 16),
+                    PremiumButton(
+                      label: 'Publicar Gratis',
+                      onPressed: () {},
+                      color: const Color(0xFF2563EB),
+                      fullWidth: false,
+                      fontSize: 14,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    ),
+                    const SizedBox(width: 12),
+                    avatarWidget,
+                  ],
+                ),
+              );
+            },
+          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: Stack(

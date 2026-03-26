@@ -8,13 +8,13 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
+import '../../../../core/config/env_config.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kBlue   = Color(0xFF2563EB);
 const _kGreen  = Color(0xFF16A34A);
 const _kOrange = Color(0xFFEA580C);
 const _kBg     = Color(0xFFF8FAFC);
-const _kApiBase = 'http://localhost:8000/api/v1';
 const _storage  = FlutterSecureStorage();
 
 class TasacionScreen extends ConsumerStatefulWidget {
@@ -70,7 +70,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await Dio().get(
-        '$_kApiBase/tasacion/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -117,7 +117,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       final dateStr = _isoDate(_buyerDate!);
       final timeStr = _isoTime(_buyerTime!);
       await Dio().post(
-        '$_kApiBase/tasacion/${widget.offer.id}/schedule',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/schedule',
         data: {'appointment_date': dateStr, 'appointment_time': timeStr, 'notes': _notesCtrl.text.trim()},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -142,7 +142,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await Dio().post(
-        '$_kApiBase/tasacion/${widget.offer.id}/accept',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -161,7 +161,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await Dio().post(
-        '$_kApiBase/tasacion/${widget.offer.id}/reject',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/reject',
         data: {
           'proposed_date': _isoDate(_rejectDate!),
           'proposed_time': _isoTime(_rejectTime!),
@@ -194,7 +194,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await Dio().post(
-        '$_kApiBase/tasacion/${widget.offer.id}/accept-counter',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept-counter',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -219,7 +219,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await Dio().post(
-        '$_kApiBase/tasacion/${widget.offer.id}/confirm-visit',
+        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/confirm-visit',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -848,7 +848,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       automaticallyImplyLeading: false,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: Padding(
         padding: const EdgeInsets.only(left: 8),
@@ -873,9 +873,10 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Colors.grey.shade200, height: 1),
+        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         GestureDetector(
           onTap: () => context.go('/'),
           child: Container(

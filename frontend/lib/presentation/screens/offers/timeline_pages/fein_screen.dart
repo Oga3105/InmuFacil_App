@@ -8,13 +8,13 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
+import '../../../../core/config/env_config.dart';
 
 const _kBlue  = Color(0xFF2563EB);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
 const _kNavy  = Color(0xFF001F3F);
 const _storage = FlutterSecureStorage();
-const String _kApiBase = 'http://localhost:8000/api/v1';
 
 /// Pagina de Formalizacion Bancaria (FEIN / FIPER).
 /// El comprador confirma que el banco ha emitido la FEIN.
@@ -50,7 +50,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       final token = await _storage.read(key: 'auth_token');
       if (token == null) return;
       final resp = await Dio().get(
-        '$_kApiBase/fein/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;
@@ -79,7 +79,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       final token = await _storage.read(key: 'auth_token');
       final dio   = Dio();
       await dio.post(
-        '$_kApiBase/fein/${widget.offer.id}/confirm',
+        '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/confirm',
         data: {
           'role': _isBuyer ? 'BUYER' : 'SELLER',
           'notes': 'Confirmacion de FEIN desde la app.',
@@ -109,7 +109,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       backgroundColor: _kBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -144,9 +144,10 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(

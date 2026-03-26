@@ -51,10 +51,10 @@ class InfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -89,9 +89,10 @@ class InfoScreen extends StatelessWidget {
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Colors.grey.shade200, height: 1),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(
@@ -173,7 +174,7 @@ class InfoScreen extends StatelessWidget {
           title: 'Terminos y Condiciones de Uso',
           sections: _termsSections,
           heroIcon: Icons.description_outlined,
-          heroColor: _kNavy,
+          heroColor: _kBlue,
         );
       case InfoPageType.legalNotice:
         return const _LegalTextScreen(
@@ -237,10 +238,10 @@ class _WhatIsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 28),
-        const Text(
+        Text(
           'Por que InmuFácil?',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
+              fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 16),
         ...features.map((f) => Padding(
@@ -358,15 +359,15 @@ class _HowItWorksScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text(
+        Text(
           'El proceso completo',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
+              fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 8),
         Text(
           'De la publicacion a las llaves, todo en una plataforma.',
-          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
         ...steps.asMap().entries.map((e) => Padding(
@@ -587,15 +588,15 @@ class _ContactScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text(
+        Text(
           'Estamos para ayudarte',
           style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
+              fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 8),
         Text(
           'Selecciona el canal que mejor te convenga.',
-          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
         _ContactOption(
@@ -619,16 +620,16 @@ class _ContactScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Informacion legal',
+              Text('Informacion legal',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14, color: _kNavy)),
+                      fontWeight: FontWeight.bold, fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
               const SizedBox(height: 12),
               _LegalLink(label: 'Politica de Privacidad',
                   route: InfoScreen.routeFor(InfoPageType.privacy)),
@@ -725,9 +726,9 @@ class _FaqScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text(
+        Text(
           'Preguntas frecuentes',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 20),
         ..._faqs.map((faq) => Padding(
@@ -755,10 +756,10 @@ class _FaqCardState extends State<_FaqCard> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _expanded ? _kBlue.withOpacity(0.3) : Colors.grey.shade200,
+          color: _expanded ? _kBlue.withOpacity(0.3) : Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
       child: InkWell(
@@ -776,11 +777,11 @@ class _FaqCardState extends State<_FaqCard> {
                         style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: _expanded ? _kBlue : _kNavy)),
+                            color: _expanded ? _kBlue : Theme.of(context).colorScheme.onSurface)),
                   ),
                   Icon(
                     _expanded ? Icons.expand_less : Icons.expand_more,
-                    color: _expanded ? _kBlue : Colors.grey.shade400,
+                    color: _expanded ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ],
               ),
@@ -789,7 +790,7 @@ class _FaqCardState extends State<_FaqCard> {
                 Text(widget.faq.a,
                     style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.5)),
               ],
             ],
@@ -876,14 +877,14 @@ class _LegalTextScreen extends StatelessWidget {
                     Text(
                       'Ultima actualizacion: Marzo 2026 · Version 1.0',
                       style: TextStyle(
-                          fontSize: 11, color: Colors.grey.shade600),
+                          fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       'Cifrado AES-256-GCM · RGPD · ISO 27001',
                       style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey.shade500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic),
                     ),
                   ],
@@ -904,29 +905,31 @@ class _LegalTextScreen extends StatelessWidget {
             ),
         const SizedBox(height: 20),
         // Footer note
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(Icons.info_outline,
-                  size: 16, color: Colors.grey.shade500),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Para cualquier consulta legal contacta con nosotros en legal@inmufacil.com',
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.grey.shade600,
-                      height: 1.4),
+        Builder(
+          builder: (context) => Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info_outline,
+                    size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Para cualquier consulta legal contacta con nosotros en legal@inmufacil.com',
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.4),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -951,9 +954,9 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
     final s = widget.section;
     final borderColor = s.highlight
         ? _kBlue.withValues(alpha: 0.35)
-        : (_expanded ? _kBlue.withValues(alpha: 0.25) : Colors.grey.shade200);
+        : (_expanded ? _kBlue.withValues(alpha: 0.25) : Theme.of(context).colorScheme.outlineVariant);
     final bgColor =
-        s.highlight ? _kBlue.withValues(alpha: 0.04) : Colors.white;
+        s.highlight ? _kBlue.withValues(alpha: 0.04) : Theme.of(context).colorScheme.surfaceContainerLowest;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
@@ -979,7 +982,7 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
                     decoration: BoxDecoration(
                       color: _expanded
                           ? _kBlue.withValues(alpha: 0.12)
-                          : Colors.grey.shade100,
+                          : Theme.of(context).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -988,13 +991,13 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
                           color:
-                              _expanded ? _kBlue : Colors.grey.shade600),
+                              _expanded ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Icon(s.icon,
                       size: 17,
-                      color: _expanded ? _kBlue : Colors.grey.shade500),
+                      color: _expanded ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -1002,13 +1005,13 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: _expanded ? _kBlue : _kNavy,
+                        color: _expanded ? _kBlue : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
                   Icon(
                     _expanded ? Icons.expand_less : Icons.expand_more,
-                    color: _expanded ? _kBlue : Colors.grey.shade400,
+                    color: _expanded ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant,
                     size: 20,
                   ),
                 ],
@@ -1021,7 +1024,7 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
                   s.body,
                   style: TextStyle(
                       fontSize: 12.5,
-                      color: Colors.grey.shade700,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       height: 1.65),
                 ),
               ],
@@ -1426,9 +1429,9 @@ class _FeatureCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1447,12 +1450,12 @@ class _FeatureCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 14, color: _kNavy)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
                 Text(body,
                     style: TextStyle(
-                        fontSize: 13, color: Colors.grey.shade600, height: 1.4)),
+                        fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.4)),
               ],
             ),
           ),
@@ -1511,7 +1514,7 @@ class _StepCard extends StatelessWidget {
               Container(
                 width: 2,
                 height: 40,
-                color: Colors.grey.shade200,
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
           ],
         ),
@@ -1523,15 +1526,15 @@ class _StepCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(step.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: _kNavy)),
+                        color: Theme.of(context).colorScheme.onSurface)),
                 const SizedBox(height: 4),
                 Text(step.body,
                     style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.4)),
                 const SizedBox(height: 12),
               ],
@@ -1567,9 +1570,9 @@ class _GuideSectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1597,7 +1600,7 @@ class _GuideSectionCard extends StatelessWidget {
                     Expanded(
                       child: Text(item,
                           style: TextStyle(
-                              fontSize: 13, color: Colors.grey.shade700)),
+                              fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
                     ),
                   ],
                 ),
@@ -1630,9 +1633,9 @@ class _ContactOption extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
@@ -1650,13 +1653,13 @@ class _ContactOption extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: _kNavy)),
+                        color: Theme.of(context).colorScheme.onSurface)),
                 Text(subtitle,
                     style: TextStyle(
-                        fontSize: 12, color: Colors.grey.shade500)),
+                        fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
               ],
             ),
           ),

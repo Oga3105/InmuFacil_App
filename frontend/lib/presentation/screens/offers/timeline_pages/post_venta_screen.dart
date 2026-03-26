@@ -14,8 +14,8 @@ import '../../../widgets/common/app_bar_back_button.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
+import '../../../../core/config/env_config.dart';
 
-const String _kApiBase = 'http://localhost:8000/api/v1';
 const _storage = FlutterSecureStorage();
 
 const _kBlue  = Color(0xFF2563EB);
@@ -71,7 +71,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await Dio().get(
-        '$_kApiBase/post-sale/${widget.offer.id}/status',
+        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -111,7 +111,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
       final file = MultipartFile.fromBytes(bytes, filename: filename);
       final formData = FormData.fromMap({'doc_type': docType, 'file': file});
       final resp = await Dio().post(
-        '$_kApiBase/post-sale/${widget.offer.id}/documents',
+        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/documents',
         data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -138,7 +138,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await Dio().post(
-        '$_kApiBase/post-sale/${widget.offer.id}/flag',
+        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/flag',
         data: {'doc_type': docType, 'flag': flag},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -162,7 +162,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
       backgroundColor: _kBg,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
@@ -188,6 +188,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(
@@ -893,7 +894,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final url =
-          '$_kApiBase/post-sale/${widget.offerId}/documents/${widget.docId}/download';
+          '$EnvConfig.apiBaseUrl/post-sale/${widget.offerId}/documents/${widget.docId}/download';
 
       final response = await Dio().get<List<int>>(
         url,

@@ -36,7 +36,7 @@ Adoptamos el siguiente stack tecnológico:
 - **SQLAlchemy 2.0** - Object-Relational Mapping
   - Soporte completo para async/await
   - Type hints para seguridad de tipos
-  - Migraciones con Alembic
+  - Migraciones via SQL raw (no Alembic — decision revisada en ADR 009)
   - Flexibilidad para consultas complejas
 
 ## Consecuencias
@@ -63,6 +63,11 @@ Adoptamos el siguiente stack tecnológico:
 
 3. **Node.js + Express**
    - Rechazado: Preferencia por Python para procesamiento de imágenes
+
+## Actualizaciones
+
+- **2026-03-22:** Corregido — las migraciones usan SQL raw, no Alembic (ver ADR 009 para decision de integridad de DB)
+- **2026-03-22:** Stack actualizado — Python 3.13, FastAPI 0.135.1, SQLAlchemy 2.0.48
 
 ## Referencias
 
