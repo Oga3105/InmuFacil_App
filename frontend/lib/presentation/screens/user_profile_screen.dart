@@ -139,7 +139,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           children: [
             // Header Profile Card (Full Width Container)
             Container(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               padding: const EdgeInsets.only(top: 24, bottom: 0),
               child: Center(
                 child: ConstrainedBox(
@@ -317,62 +317,64 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => context.go('/'),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
-                  Text(
-                    'Inicio',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+        Builder(builder: (context) {
+          final isMobile = MediaQuery.of(context).size.width < 650;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (!isMobile) ...[
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                        ],
+                      ),
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 16),
+              ],
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+                onPressed: () {},
               ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-            onPressed: () {}),
-        const SizedBox(width: 8),
-
-        // [UPDATED] Profile Menu with Logout
-        AnimatedBuilder(
-          animation: _tabController,
-          builder: (context, _) {
-            final activeTab = _tabController.index;
-            return UserAvatarMenu(
-              onTabSelected: (index) {
-                if (index != activeTab) {
-                  _tabController.animateTo(index);
-                }
-              },
-            );
-          },
-        ),
-        const SizedBox(width: 24),
+              const SizedBox(width: 8),
+              AnimatedBuilder(
+                animation: _tabController,
+                builder: (context, _) {
+                  final activeTab = _tabController.index;
+                  return UserAvatarMenu(
+                    onTabSelected: (index) {
+                      if (index != activeTab) {
+                        _tabController.animateTo(index);
+                      }
+                    },
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+            ],
+          );
+        }),
       ],
     );
   }
@@ -702,45 +704,42 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildPersonalInfoCard(User user) {
-    return Container(
-      padding: const EdgeInsets.all(32),
+    return Builder(builder: (context) {
+      final theme = Theme.of(context);
+      final isMobile = MediaQuery.of(context).size.width < 600;
+      return Container(
+      padding: EdgeInsets.all(isMobile ? 16 : 32),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('profile.personal_info_title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A))),
+                  color: theme.colorScheme.onSurface)),
           const SizedBox(height: 24),
 
           // [UPDATED] ReadOnly logic based on _isEditing
-          Row(
-            children: [
-              Expanded(
-                  child: _buildTextField(
-                      'Nombre Completo', _nameController, !_isEditing)),
-              const SizedBox(width: 24),
-              Expanded(
-                  child: _buildTextField(
-                      'Teléfono', _phoneController, !_isEditing)),
-            ],
-          ),
+          if (isMobile) ...[
+            _buildTextField('Nombre Completo', _nameController, !_isEditing),
+            const SizedBox(height: 16),
+            _buildTextField('Teléfono', _phoneController, !_isEditing),
+          ] else
+            Row(
+              children: [
+                Expanded(child: _buildTextField('Nombre Completo', _nameController, !_isEditing)),
+                const SizedBox(width: 24),
+                Expanded(child: _buildTextField('Teléfono', _phoneController, !_isEditing)),
+              ],
+            ),
           const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                  child: _buildTextField('Correo Electrónico (No editable)',
-                      TextEditingController(text: user.email), true)),
-              const SizedBox(width: 24),
-              const Expanded(child: SizedBox.shrink()),
-            ],
-          ),
+          _buildTextField('Correo Electrónico (No editable)',
+              TextEditingController(text: user.email), true),
 
           const SizedBox(height: 32),
           Align(
@@ -828,6 +827,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         ],
       ),
     );
+    }); // Builder
   }
 
   Widget _buildSecurityCard(User user) {
