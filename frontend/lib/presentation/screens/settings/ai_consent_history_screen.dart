@@ -196,6 +196,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         GestureDetector(
           onTap: () => context.go('/'),
           child: Container(

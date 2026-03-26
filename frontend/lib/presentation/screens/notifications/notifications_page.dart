@@ -89,6 +89,7 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                   )
                 : null,
           ) ?? const SizedBox.shrink(),
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(

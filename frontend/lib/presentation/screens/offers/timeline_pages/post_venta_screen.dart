@@ -188,6 +188,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           GestureDetector(
             onTap: () => context.go('/'),
             child: Container(

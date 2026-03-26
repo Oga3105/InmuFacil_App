@@ -296,6 +296,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

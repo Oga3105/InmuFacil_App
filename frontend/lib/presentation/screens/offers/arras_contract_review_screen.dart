@@ -661,6 +661,7 @@ class _ArrasContractReviewScreenState
             return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (MediaQuery.sizeOf(context).width >= 650)
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(

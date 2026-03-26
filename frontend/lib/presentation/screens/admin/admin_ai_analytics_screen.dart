@@ -112,6 +112,7 @@ class _AdminAiAnalyticsScreenState
             },
             tooltip: 'Actualizar',
           ),
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(

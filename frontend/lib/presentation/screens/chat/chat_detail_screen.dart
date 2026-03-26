@@ -608,6 +608,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       ),
       actions: [
         // Inicio button — same style as offer_management_screen
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

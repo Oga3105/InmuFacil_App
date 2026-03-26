@@ -113,6 +113,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
           ),
         ),
         actions: [
+          if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(

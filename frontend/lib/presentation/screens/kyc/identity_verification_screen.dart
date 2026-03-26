@@ -342,6 +342,7 @@ class _IdentityVerificationScreenState
       ),
       actions: [
         // Botón Inicio
+        if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
