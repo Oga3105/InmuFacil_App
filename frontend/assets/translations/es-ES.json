@@ -891,7 +891,7 @@
     },
     "how_it_works": {
       "title": "El proceso completo",
-      "subtitle": "De la publicación a las llaves, todo en una plataforma.",
+      "subtitle": "De la publicación a las llaves, todo en una plataforma. Sin intermediarios. 0% comisiones.",
       "steps": {
         "0": {
           "title": "Publica o busca tu propiedad",
@@ -922,12 +922,12 @@
           "body": "Solo para operaciones con hipoteca. El banco emite la Ficha Europea de Información Normalizada (FEIN). El comprador la confirma en la app para desbloquear la firma en notaría."
         },
         "7": {
-          "title": "Firma en Notaría",
-          "body": "InmuFácil muestra el checklist completo de documentos. Se agenda la cita notarial y se firma la escritura pública de compraventa."
+          "title": "Firma en Notaría y Entrega de Llaves",
+          "body": "InmuFácil muestra el checklist completo de documentos. Se agenda la cita notarial, se firma la escritura pública de compraventa y se realiza la entrega de llaves en el mismo acto."
         },
         "8": {
-          "title": "Post-Venta y Entrega de Llaves",
-          "body": "Tras la firma, el comprador accede a la guía de cambio de titularidad de suministros (luz, gas, agua). Se confirma la entrega de llaves y la operación queda cerrada."
+          "title": "Post-Venta",
+          "body": "Tras la firma, el comprador accede a la guía de cambio de titularidad de suministros (luz, gas, agua) y gestiona el registro de la propiedad. La operación queda cerrada en la plataforma."
         }
       }
     },
