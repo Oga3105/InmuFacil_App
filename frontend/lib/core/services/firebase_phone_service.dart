@@ -184,7 +184,7 @@ class FirebasePhoneService {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A5F),
+              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),

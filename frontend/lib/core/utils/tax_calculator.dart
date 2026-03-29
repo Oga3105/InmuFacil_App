@@ -79,7 +79,7 @@ TaxResult calculateBuyingCosts(int offerAmount, ComunidadAutonoma ccaa) {
     agencyFee: agencyFee,
     total: total,
     isForal: isForal,
-    ccaaName: ccaaDisplayName(ccaa),
+    ccaaName: ccaaDisplayName[ccaa] ?? 'Desconocida',
     itpRate: rate,
   );
 }

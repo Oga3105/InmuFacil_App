@@ -249,7 +249,7 @@ class _UrbanGrowthCard extends StatelessWidget {
   final UrbanGrowthResult result;
 
   Color get _projectedColor {
-    if (result.zoneType == 'mature') return const Color(0xFF2563EB);
+    if (result.zoneType == 'mature') return const Color(0xFF135BEC);
     return const Color(0xFF16A34A);
   }
 
@@ -273,7 +273,7 @@ class _UrbanGrowthCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.trending_up_rounded,
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -337,7 +337,7 @@ class _UrbanGrowthCard extends StatelessWidget {
                       Text(
                         '\u2022',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: const Color(0xFF2563EB),
+                          color: const Color(0xFF135BEC),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -401,7 +401,7 @@ class _ZoneTypeBadge extends StatelessWidget {
   Color get _color {
     switch (zoneType) {
       case 'mature':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       case 'emerging':
         return const Color(0xFF16A34A);
       case 'declining':

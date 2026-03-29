@@ -8,7 +8,7 @@ import 'legal_info_sheet.dart';
 // Colors (spec from task brief)
 // ---------------------------------------------------------------------------
 
-const _kBlue = Color(0xFF2563EB);
+const _kBlue = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 
 // ---------------------------------------------------------------------------

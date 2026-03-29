@@ -39,7 +39,7 @@ class SolvencyPassportCard extends StatelessWidget {
         children: [
           // Header bar
           Container(
-            color: const Color(0xFF2563EB),
+            color: const Color(0xFF135BEC),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
@@ -179,14 +179,14 @@ class SolvencyPassportCard extends StatelessWidget {
                     color: const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFF2563EB).withOpacity(0.2),
+                      color: const Color(0xFF135BEC).withOpacity(0.2),
                     ),
                   ),
                   child: Text(
                     '${'solvency_passport.seller_message_prefix'.tr()}'
                     ' ${_levelDisplayName(solvencyLevel)})',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                       height: 1.4,
                     ),
                   ),
@@ -202,7 +202,7 @@ class SolvencyPassportCard extends StatelessWidget {
   static Color _levelColor(String level) {
     switch (level.toLowerCase()) {
       case 'platinum':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       case 'gold':
         return const Color(0xFFF59E0B);
       case 'silver':

@@ -259,7 +259,7 @@ class _MarketPriceCard extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.analytics_outlined,
-                    color: const Color(0xFF2563EB), size: 20),
+                    color: const Color(0xFF135BEC), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'market_price.title'.tr(),
@@ -277,7 +277,7 @@ class _MarketPriceCard extends StatelessWidget {
                   '$formattedPrice EUR/m2',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2563EB),
+                    color: const Color(0xFF135BEC),
                   ),
                 ),
               ],

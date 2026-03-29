@@ -65,7 +65,7 @@ class RegistryLinkWidget extends StatelessWidget {
               children: [
                 Icon(
                   Icons.account_balance_outlined,
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   size: 22,
                 ),
                 const SizedBox(width: 8),
@@ -73,7 +73,7 @@ class RegistryLinkWidget extends StatelessWidget {
                   'Registro de la Propiedad',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF2563EB),
+                    color: const Color(0xFF135BEC),
                   ),
                 ),
               ],
@@ -95,7 +95,7 @@ class RegistryLinkWidget extends StatelessWidget {
                 icon: const Icon(Icons.open_in_new, size: 18),
                 label: const Text('Consultar en Registradores.org'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -150,7 +150,7 @@ class RegistryLinkWidget extends StatelessWidget {
                       onPressed: () => _copyToClipboard(context, cadastralRef!),
                       icon: const Icon(Icons.copy_outlined, size: 20),
                       tooltip: 'Copiar referencia catastral',
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                     ),
                   ],
                 ),

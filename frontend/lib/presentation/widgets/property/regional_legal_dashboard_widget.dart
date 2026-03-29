@@ -81,7 +81,7 @@ class RegionalLegalDashboardWidget extends StatelessWidget {
     final ccaaName = ccaaDisplayName[ccaa] ?? '';
     return Row(
       children: [
-        const Icon(Icons.gavel_rounded, size: 20, color: Color(0xFF2563EB)),
+        const Icon(Icons.gavel_rounded, size: 20, color: Color(0xFF135BEC)),
         const SizedBox(width: 8),
         Expanded(
           child: Column(

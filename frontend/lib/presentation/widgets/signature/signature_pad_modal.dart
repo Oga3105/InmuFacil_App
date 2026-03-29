@@ -149,7 +149,7 @@ class _SignaturePadSheetState extends State<_SignaturePadSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  const Icon(Icons.draw_outlined, color: Color(0xFF2563EB), size: 22),
+                  const Icon(Icons.draw_outlined, color: Color(0xFF135BEC), size: 22),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -253,7 +253,7 @@ class _SignaturePadSheetState extends State<_SignaturePadSheet> {
                               );
                             },
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: const Color(0xFF135BEC),
                       ),
                       child: Text('signature.confirm'.tr()),
                     ),

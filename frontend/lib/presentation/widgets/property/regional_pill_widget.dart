@@ -23,7 +23,7 @@ class RegionalPillWidget extends StatelessWidget {
         color: const Color(0xFFEFF6FF),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF2563EB).withValues(alpha: 0.3),
+          color: const Color(0xFF135BEC).withValues(alpha: 0.3),
         ),
       ),
       child: Row(
@@ -32,7 +32,7 @@ class RegionalPillWidget extends StatelessWidget {
           const Icon(
             Icons.location_city_outlined,
             size: 14,
-            color: Color(0xFF2563EB),
+            color: Color(0xFF135BEC),
           ),
           const SizedBox(width: 6),
           Text(
