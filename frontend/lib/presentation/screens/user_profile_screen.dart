@@ -353,11 +353,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 ),
                 const SizedBox(width: 16),
               ],
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 8),
               AnimatedBuilder(
                 animation: _tabController,
                 builder: (context, _) {

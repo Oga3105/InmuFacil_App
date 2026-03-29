@@ -174,11 +174,6 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 4),
           const UserAvatarMenu(),
           const SizedBox(width: 16),
         ],

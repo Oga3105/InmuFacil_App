@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import '../../providers/property_form_provider.dart';
-import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/user_avatar_menu.dart';
 import 'widgets/property_stepper_header.dart';
 import 'widgets/property_step1_type_location.dart';
 import 'widgets/property_step2_details_price.dart';
@@ -247,55 +247,9 @@ class _CreateEditPropertyScreenState
         const SizedBox(width: 8),
         _SaveDraftButton(),
         const SizedBox(width: 12),
-        _AvatarButton(onTap: () => _confirmCancel(context)),
+        const UserAvatarMenu(),
         const SizedBox(width: 12),
       ],
-    );
-  }
-}
-
-// ─── Avatar ──────────────────────────────────────────────────────────────────
-
-class _AvatarButton extends ConsumerWidget {
-  const _AvatarButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
-    final photoUrl = user?.profilePhotoUrl;
-    
-    return GestureDetector(
-      onTap: onTap,
-      child: Builder(
-        builder: (context) {
-          final ts = DateTime.now().millisecondsSinceEpoch;
-          return SizedBox(
-            width: 36,
-            height: 36,
-            child: ClipOval(
-              child: photoUrl != null
-                  ? Image.network(
-                      '$photoUrl?v=$ts',
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: Theme.of(context).colorScheme.primary,
-                        alignment: Alignment.center,
-                        child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 18),
-                      ),
-                    )
-                  : Container(
-                      color: Theme.of(context).colorScheme.primary,
-                      alignment: Alignment.center,
-                      child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 18),
-                    ),
-            ),
-          );
-        },
-      ),
     );
   }
 }

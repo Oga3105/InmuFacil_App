@@ -298,11 +298,6 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
-                onPressed: () {},
-              ),
-              const SizedBox(width: 4),
               const Padding(
                 padding: EdgeInsets.only(right: 12),
                 child: UserAvatarMenu(),

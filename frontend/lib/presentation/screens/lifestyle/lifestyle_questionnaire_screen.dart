@@ -247,29 +247,32 @@ class _LifestyleQuestionnaireScreenState
                           'Puedes explorar el cuestionario, pero necesitas una cuenta para guardar tus preferencias.',
                           style: TextStyle(color: Color(0xFFB45309), fontSize: 12, height: 1.4),
                         ),
-                        const SizedBox(height: 10),
-                        Row(
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
                           children: [
                             FilledButton(
                               onPressed: () => context.go('/login'),
                               style: FilledButton.styleFrom(
                                 backgroundColor: const Color(0xFF135BEC),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              child: const Text('Iniciar sesion', style: TextStyle(fontSize: 12)),
+                              child: const Text('Iniciar sesión', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                             ),
-                            const SizedBox(width: 8),
                             OutlinedButton(
                               onPressed: () => context.go('/register'),
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(color: Color(0xFF135BEC)),
-                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                side: const BorderSide(color: Color(0xFF135BEC), width: 1.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              child: const Text('Registrarse', style: TextStyle(fontSize: 12, color: Color(0xFF135BEC))),
+                              child: const Text('Registrarse', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF135BEC))),
                             ),
                           ],
                         ),

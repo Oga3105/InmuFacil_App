@@ -386,15 +386,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                onTap: () => context.go('/'),
                                child: Column(
                                  children: [
-                                     Icon(Icons.star, color: _glowBlueColor, size: 32),
-                                    const SizedBox(height: 8),
+                                   Image.asset(
+                                     'assets/images/logo_inmufacil.png',
+                                     height: 40,
+                                     fit: BoxFit.contain,
+                                   ),
+                                   const SizedBox(height: 6),
                                    Text('InmuFácil', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _tealBrandColor)),
                                  ],
                                ),
                              ),
                            ),
                          ),
-                         const SizedBox(height: 24),
+                         const SizedBox(height: 20),
                        ],
 
                        // Header (Left Aligned)
@@ -417,7 +421,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                            height: 1.3,
                          ),
                        ),
-                       const SizedBox(height: 20),
+                       const SizedBox(height: 16),
+
+                       // Google button FIRST
+                       const GoogleSignInButton(),
+                       const SizedBox(height: 14),
+
+                       // Divisor "o"
+                       Row(
+                         children: [
+                           Expanded(child: Divider(color: Colors.grey[300])),
+                           Padding(
+                             padding: const EdgeInsets.symmetric(horizontal: 12),
+                             child: Text(
+                               'auth.or_separator'.tr(),
+                               style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                             ),
+                           ),
+                           Expanded(child: Divider(color: Colors.grey[300])),
+                         ],
+                       ),
+                       const SizedBox(height: 14),
 
                        // Name Field
                        Text(
@@ -617,28 +641,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           },
                        ),
                        
-                       const SizedBox(height: 20),
-
-                       // Divisor "o"
-                       Row(
-                         children: [
-                           Expanded(child: Divider(color: Colors.grey[300])),
-                           Padding(
-                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                             child: Text(
-                               'auth.or_separator'.tr(),
-                               style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                             ),
-                           ),
-                           Expanded(child: Divider(color: Colors.grey[300])),
-                         ],
-                       ),
-
-                       const SizedBox(height: 16),
-
-                       // Boton Google
-                       const GoogleSignInButton(),
-
                        const SizedBox(height: 16),
 
                        // Login Link
