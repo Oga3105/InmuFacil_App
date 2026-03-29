@@ -895,7 +895,7 @@
       "steps": {
         "0": {
           "title": "Publica o busca tu propiedad",
-          "body": "El vendedor crea el anuncio con fotos, descripción y precio. El Certificado Energético (CEE) es obligatorio para recibir ofertas. El comprador busca con filtros y guarda favoritos."
+          "body": "El vendedor crea el anuncio con fotos, descripción y precio. El Certificado Energético (CEE) es obligatorio para recibir ofertas. El comprador busca con filtros, guarda favoritos y puede completar su perfil de estilo de vida para recibir recomendaciones personalizadas."
         },
         "1": {
           "title": "Solicita y gestiona visitas",
@@ -962,7 +962,7 @@
           "items": {
             "0": "Responde honestamente al cuestionario financiero",
             "1": "Conoce tu ratio de endeudamiento real (máximo recomendado 35%)",
-            "2": "Tu nivel de solvencia (Bronce/Plata/Oro) se muestra al vendedor de forma anonimizada",
+            "2": "Tu nivel de solvencia (Bronce/Plata/Oro) se muestra al vendedor de forma anónima",
             "3": "Caduca a los 90 días para mantener la información actualizada"
           }
         },
@@ -1006,7 +1006,7 @@
           "items": {
             "0": "Revisa el Pasaporte de Solvencia del comprador antes de aceptar",
             "1": "El nivel Oro indica máxima solvencia (pago al contado o hipoteca aprobada)",
-            "2": "Solo tú puedes ver este pasaporte y es completamente anonimizado",
+            "2": "Solo tú puedes ver este pasaporte y es completamente anónimo",
             "3": "Debes aceptar la solvencia para que el proceso avance"
           }
         },
@@ -1049,7 +1049,7 @@
         },
         "3": {
           "q": "Qué es el Pasaporte de Solvencia?",
-          "a": "Es un cuestionario financiero que el comprador completa voluntariamente. Ayuda al vendedor a valorar la solidez financiera del comprador antes de aceptar una oferta. Los datos son anonimizados y caduca a los 90 días."
+          "a": "Es un cuestionario financiero que el comprador completa voluntariamente. Ayuda al vendedor a valorar la solidez financiera del comprador antes de aceptar una oferta. Los datos son anónimos y caduca a los 90 días."
         },
         "4": {
           "q": "El Contrato de Arras generado es legal?",
@@ -1088,7 +1088,7 @@
           },
           "2": {
             "title": "Inteligencia Artificial y Biometría",
-            "body": "InmuFácil utiliza tecnologías de Inteligencia Artificial (IA) y biometría para los siguientes fines, requiriendo tu consentimiento explícito (Art. 9 RGPD para datos biométricos y Art. 22 RGPD para decisiones automatizadas):\n\n1. Verificación de identidad (Liveness Check / KYC): el sistema de IA analiza la captura facial del usuario y la compara con el documento de identidad aportado para confirmar que el usuario es quien dice ser y está físicamente presente (anti-spoofing). Este procesamiento se realiza de forma puntual durante el registro y no implica almacenamiento continuado de datos biométricos más allá del periodo KYC legalmente exigido.\n\n2. Generación de borradores de contratos (IA Generativa): la plataforma emplea modelos de Inteligencia Artificial para redactar borradores del Contrato de Arras a partir de los datos de la operación. Estos borradores son orientativos y no constituyen asesoramiento jurídico. La revisión y firma son responsabilidad exclusiva de las partes.\n\n3. Análisis de solvencia dinámica: los algoritmos de InmuFácil procesan los datos del Pasaporte de Solvencia para calcular índices de riesgo (stress_index) y nivel de solvencia (Bronce/Plata/Oro). Este análisis es informativo y no constituye una evaluación crediticia con efectos jurídicos.\n\nTienes derecho a oponerte al tratamiento automatizado y a solicitar intervención humana en cualquier decisión que te afecte significativamente."
+            "body": "InmuFácil utiliza tecnologías de Inteligencia Artificial (IA) y biometría para los siguientes fines, requiriendo tu consentimiento explícito (Art. 9 RGPD para datos biométricos y Art. 22 RGPD para decisiones automatizadas):\n\n1. Verificación de identidad (Liveness Check / KYC): el sistema de IA analiza la captura facial del usuario y la compara con el documento de identidad aportado para confirmar que el usuario es quien dice ser y está físicamente presente (anti-spoofing). Este procesamiento se realiza de forma puntual durante el registro y no implica almacenamiento continuado de datos biométricos más allá del periodo KYC legalmente exigido.\n\n2. Generación de borradores de contratos (IA Generativa): la plataforma emplea modelos de Inteligencia Artificial para redactar borradores del Contrato de Arras a partir de los datos de la operación. Estos borradores son orientativos y no constituyen asesoramiento jurídico. La revisión y firma son responsabilidad exclusiva de las partes.\n\n3. Análisis de solvencia dinámica: los algoritmos de InmuFácil procesan los datos del Pasaporte de Solvencia para calcular índices de riesgo (stress_index) y nivel de solvencia (Bronce/Plata/Oro). Este análisis es informativo y no constituye una evaluación crediticia con efectos jurídicos.\n\n4. Generación de descripciones de inmuebles: la IA puede asistir al vendedor generando automáticamente una descripción del inmueble a partir de los datos del anuncio (tipo, superficie, ubicación, características). El vendedor puede editar o reemplazar libremente el texto generado antes de publicar.\n\n5. Perfil de estilo de vida y recomendaciones personalizadas: InmuFácil ofrece al comprador un cuestionario opcional de estilo de vida. Las respuestas son procesadas por algoritmos de IA para asignar un perfil (ej. Equilibrado Familiar) y mostrar propiedades que encajen con sus preferencias vitales. Este tratamiento se basa en el consentimiento expreso del usuario y puede revocarse en cualquier momento desde el perfil.\n\nTienes derecho a oponerte al tratamiento automatizado y a solicitar intervención humana en cualquier decisión que te afecte significativamente."
           },
           "3": {
             "title": "Compromiso de no comercialización",
@@ -1133,11 +1133,11 @@
           },
           "2": {
             "title": "Proceso por pasos y Timeline de transacción",
-            "body": "InmuFácil estructura las transacciones en un Timeline de hitos secuenciales. Cada avance requiere la aceptación expresa de ambas partes:\n\n1. Publicación: el vendedor publica la propiedad con CEE obligatorio.\n2. Oferta: el comprador formaliza una oferta económica vinculada a su Pasaporte de Solvencia.\n3. Verificación de solvencia: el vendedor revisa y acepta o rechaza el pasaporte del comprador.\n4. Contrato de Arras: generación asistida del borrador + firma digital de ambas partes. Este hito tiene validez contractual conforme al Artículo 1454 del Código Civil español.\n5. Tasación e hipoteca: coordinación del proceso bancario.\n6. Escritura notarial: cierre de la operación ante notario.\n7. Entrega de llaves: confirmación final.\n\nLa aceptación de estos Términos implica el consentimiento para avanzar paso a paso por el Timeline, reconociendo que cada hito firmado tiene efectos contractuales propios."
+            "body": "InmuFácil estructura las transacciones en un Timeline de 9 hitos secuenciales. Cada avance requiere la aceptación expresa de ambas partes:\n\n1. Publicación: el vendedor publica la propiedad. El Certificado Energético (CEE) es obligatorio para recibir ofertas.\n2. Visitas: el comprador solicita visita; el vendedor gestiona su agenda de citas desde la plataforma.\n3. Oferta: el comprador formaliza una oferta económica vinculada a su Pasaporte de Solvencia.\n4. Verificación de solvencia: el vendedor revisa y acepta o rechaza el perfil financiero del comprador.\n5. Contrato de Arras: borrador generado por IA a partir de los datos acordados + firma digital de ambas partes. Hito con validez contractual conforme al Art. 1454 del Código Civil.\n6. Tasación: coordinación de la cita con tasador oficial, paso previo al proceso hipotecario.\n7. Formalización bancaria (FEIN): el banco emite la Ficha Europea de Información Normalizada. El comprador la confirma en la plataforma para desbloquear la firma notarial.\n8. Escritura notarial y entrega de llaves: firma de la escritura pública de compraventa ante notario. La entrega de llaves se realiza en el mismo acto notarial.\n9. Post-venta: guía de cambio de titularidad de suministros y registro de la propiedad.\n\nLa aceptación de estos Términos implica el consentimiento para avanzar paso a paso por el Timeline, reconociendo que cada hito firmado tiene efectos contractuales propios."
           },
           "3": {
             "title": "Inteligencia Artificial — Alcance y limitaciones",
-            "body": "InmuFácil incorpora sistemas de Inteligencia Artificial en los siguientes módulos:\n\n1. Generación de borradores del Contrato de Arras: la IA redacta automáticamente un borrador a partir de los parámetros de la operación acordados por las partes (precio, condiciones, plazos). Este borrador es ORIENTATIVO. InmuFácil no presta servicios jurídicos y RECOMIENDA EXPRESAMENTE la revisión del documento por un abogado o notario antes de su firma. La responsabilidad legal del contrato recae exclusivamente en las partes firmantes.\n\n2. Análisis de solvencia (IA): el motor de scoring analiza los datos del Pasaporte de Solvencia para generar indicadores informativos. Estos indicadores NO tienen la consideración de informe crediticio oficial ni sustituyen a la evaluación de una entidad financiera.\n\n3. Verificación KYC (Inteligencia Artificial + biometría): el proceso de prueba de vida es ejecutado por sistemas de IA. InmuFácil se reserva el derecho a realizar una revisión manual adicional ante casos dudosos."
+            "body": "InmuFácil incorpora sistemas de Inteligencia Artificial en los siguientes módulos. El usuario declara haber leído, comprendido y aceptado expresamente el uso de IA en cada uno de ellos. Esta aceptación queda registrada en base de datos con fecha, hora e identificador de sesión, conforme al Art. 22 RGPD.\n\n1. Generación de borradores del Contrato de Arras: la IA redacta automáticamente un borrador a partir de los parámetros de la operación acordados por las partes (precio, condiciones, plazos). Este borrador es ORIENTATIVO. InmuFácil no presta servicios jurídicos y RECOMIENDA EXPRESAMENTE la revisión del documento por un abogado o notario antes de su firma. La responsabilidad legal del contrato recae exclusivamente en las partes firmantes.\n\n2. Análisis de solvencia (IA): el motor de scoring analiza los datos del Pasaporte de Solvencia para generar indicadores informativos (nivel Bronce/Plata/Oro, stress_index). Estos indicadores NO tienen la consideración de informe crediticio oficial ni sustituyen a la evaluación de una entidad financiera.\n\n3. Verificación KYC (Inteligencia Artificial + biometría): el proceso de prueba de vida es ejecutado por sistemas de IA que comparan la captura facial con el documento de identidad. InmuFácil se reserva el derecho a realizar una revisión manual adicional ante casos dudosos.\n\n4. Generación de descripciones de inmuebles: la IA puede asistir al vendedor generando automáticamente una descripción del inmueble a partir de los datos del anuncio. El texto generado es orientativo y el vendedor es responsable de su revisión y veracidad antes de publicarlo.\n\n5. Perfil de estilo de vida y recomendaciones personalizadas: InmuFácil ofrece al comprador un cuestionario opcional que la IA utiliza para asignar un perfil y mostrar propiedades afines. Este tratamiento se basa en consentimiento expreso y puede revocarse en cualquier momento desde la configuración del perfil.\n\nEl usuario puede oponerse a cualquier tratamiento automatizado y solicitar intervención humana en cualquier decisión que le afecte significativamente, mediante solicitud a privacidad@inmufacil.com."
           },
           "4": {
             "title": "Obligaciones del vendedor",
@@ -1189,6 +1189,10 @@
             "body": "InmuFácil no se responsabiliza de los daños derivados del uso de la plataforma, de la inexactitud de la información publicada por terceros, ni del incumplimiento de obligaciones entre usuarios. Los enlaces a sitios externos no implican patrocinio ni responsabilidad sobre su contenido."
           },
           "5": {
+            "title": "Uso ilícito — Advertencia sobre el uso de datos",
+            "body": "InmuFácil advierte expresamente a compradores y vendedores que cualquier uso ilícito, fraudulento o abusivo de la plataforma conllevará el uso de los datos registrados (datos de identidad, actividad, comunicaciones y documentación aportada) como prueba ante las autoridades competentes y en el marco de los procedimientos legales que procedan.\n\nEsto incluye, sin carácter limitativo:\n• Suplantación de identidad o aportación de documentación falsificada en el proceso KYC.\n• Publicación de propiedades ficticias o con información fraudulenta.\n• Realización de ofertas sin intención real de compra con ánimo de perjudicar a terceros.\n• Cualquier conducta tipificada como delito en el Código Penal español o normativa aplicable.\n\nInmuFácil colaborará activamente con las Fuerzas y Cuerpos de Seguridad del Estado y con la autoridad judicial, aportando todos los registros disponibles cuando así lo requiera una resolución judicial o requerimiento de autoridad competente. El uso de la plataforma implica la aceptación expresa de esta advertencia."
+          },
+          "6": {
             "title": "Jurisdicción",
             "body": "Para cualquier controversia derivada del uso de esta plataforma, las partes se someten a los Juzgados y Tribunales de la ciudad de Sevilla, con renuncia expresa a cualquier otro fuero que pudiera corresponderles."
           }
