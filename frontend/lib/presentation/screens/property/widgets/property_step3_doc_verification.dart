@@ -25,7 +25,7 @@ class _PropertyStep3DocVerificationState
       SnackBar(
         content: Text('doc_verification.upload_coming_soon'.tr()),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF2563EB),
+        backgroundColor: const Color(0xFF135BEC),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -208,7 +208,7 @@ class _SectionCard extends StatelessWidget {
                   color: const Color(0xFFEFF6FF),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+                child: Icon(icon, color: const Color(0xFF135BEC), size: 20),
               ),
               const SizedBox(width: 12),
               Text(
@@ -306,8 +306,8 @@ class _DocumentRow extends StatelessWidget {
                   label: Text('doc_verification.select_file'.tr(),
                       style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF2563EB),
-                    side: const BorderSide(color: Color(0xFF2563EB)),
+                    foregroundColor: const Color(0xFF135BEC),
+                    side: const BorderSide(color: Color(0xFF135BEC)),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     shape: RoundedRectangleBorder(

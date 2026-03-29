@@ -12,11 +12,11 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 
-const _kBlue     = Color(0xFF2563EB);
+const _kBlue     = Color(0xFF135BEC);
 const _kGreen    = Color(0xFF16A34A);
 const _kOrange   = Color(0xFFEA580C);
 const _kRed      = Color(0xFFDC2626);
-const _kNavy     = Color(0xFF1E3A5F);
+const _kNavy     = Color(0xFF135BEC);
 const _kBg       = Color(0xFFF8FAFC);
 
 // ── Provider ─────────────────────────────────────────────────────────────────

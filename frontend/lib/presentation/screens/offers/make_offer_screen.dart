@@ -51,14 +51,16 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final formState = ref.watch(makeOfferProvider);
 
     ref.listen<OfferFormState>(makeOfferProvider, (prev, next) {
       if (next.status == OfferSubmitStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Oferta enviada correctamente'),
-            backgroundColor: Color(0xFF16A34A),
+          SnackBar(
+            content: const Text('Oferta enviada correctamente'),
+            backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
         ref.read(makeOfferProvider.notifier).reset();
@@ -67,7 +69,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage ?? 'Error al enviar oferta'),
-            backgroundColor: Colors.red,
+            backgroundColor: colorScheme.error,
           ),
         );
         ref.read(makeOfferProvider.notifier).reset();
@@ -99,12 +101,12 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
               children: [
                 Image.asset('assets/images/logo_inmufacil.png', height: 28),
                 const SizedBox(width: 8),
-                const Text.rich(
+                Text.rich(
                   TextSpan(
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: colorScheme.primary)),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                     ],
                   ),
                 ),
@@ -122,22 +124,22 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: colorScheme.primary.withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
+                    const SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -157,8 +159,8 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // ── Title header ───────────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.fromLTRB(24, 28, 24, 0),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 28, 24, 0),
               child: Column(
                 children: [
                   Text(
@@ -167,16 +169,16 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFF1E293B),
+                      color: colorScheme.onSurface,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
                     'Envía una propuesta vinculante al vendedor',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF64748B),
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -212,12 +214,12 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Forma de Pago',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF475569),
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -246,12 +248,12 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Fecha deseada de escritura',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF475569),
+                                color: colorScheme.onSurfaceVariant,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -289,8 +291,8 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: _closingDate != null
-                                                ? const Color(0xFF1E293B)
-                                                : Colors.grey.shade400,
+                                                ? colorScheme.onSurface
+                                                : colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                       ),
@@ -312,36 +314,36 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   const SizedBox(height: 20),
 
                   // ── Message to seller ─────────────────────────────────────
-                  const Text(
+                  Text(
                     'Mensaje al vendedor (opcional)',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF475569),
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _messageController,
                     maxLines: 4,
-                    style: const TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                    style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
                     decoration: InputDecoration(
                       hintText: 'Añade algún detalle que quieras comentar al propietario...',
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                      hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: colorScheme.surface,
                       contentPadding: const EdgeInsets.all(14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: const BorderSide(color: Color(0xFF2563EB)),
+                        borderSide: BorderSide(color: colorScheme.primary),
                       ),
                     ),
                   ),
@@ -353,19 +355,19 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: _agreed ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                        color: _agreed ? colorScheme.primary : colorScheme.outlineVariant,
                         width: _agreed ? 1.5 : 1,
                       ),
                     ),
                     child: CheckboxListTile(
                       value: _agreed,
                       onChanged: (v) => setState(() => _agreed = v ?? false),
-                      activeColor: const Color(0xFF2563EB),
+                      activeColor: colorScheme.primary,
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                      title: const Text(
+                      title: Text(
                         'Entiendo que esta oferta es un compromiso serio de compra y estoy dispuesto a formalizarla mediante contrato de arras.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF1E293B)),
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
                       ),
                     ),
                   ),
@@ -374,7 +376,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   // ── Total + Submit (dark block) ───────────────────────────
                   Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
+                      color: colorScheme.onSurface,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -384,22 +386,22 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 'OFERTA TOTAL',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF94A3B8),
+                                  color: colorScheme.surface.withOpacity(0.6),
                                   letterSpacing: 1.2,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 '${CurrencyInputFormatter.format(_offerAmount)} €',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: colorScheme.surface,
                                 ),
                               ),
                             ],
@@ -419,8 +421,8 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                                 }
                               : null,
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
-                            disabledBackgroundColor: const Color(0xFF2563EB).withValues(alpha: 0.5),
+                            backgroundColor: colorScheme.primary,
+                            disabledBackgroundColor: colorScheme.primary.withValues(alpha: 0.5),
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
@@ -455,17 +457,17 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.shield_outlined, size: 14, color: Color(0xFF16A34A)),
-                          SizedBox(width: 6),
+                          Icon(Icons.shield_outlined, size: 14, color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
+                          const SizedBox(width: 6),
                           Text(
                             'OFERTA PROTEGIDA POR INMUFÁCIL SECURE TECH',
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF475569),
+                              color: colorScheme.onSurfaceVariant,
                               letterSpacing: 0.5,
                             ),
                           ),
@@ -504,6 +506,8 @@ class _PropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
@@ -530,8 +534,8 @@ class _PropertyCard extends StatelessWidget {
               children: [
                 Text(
                   property.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFF1E293B)),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700, fontSize: 15, color: colorScheme.onSurface),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 3),
@@ -552,16 +556,16 @@ class _PropertyCard extends StatelessWidget {
                 RichText(
                   text: TextSpan(
                     children: [
-                      const TextSpan(
+                      TextSpan(
                         text: 'Precio de salida:  ',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                        style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                       ),
                       TextSpan(
                         text: property.formattedPrice,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E293B),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -578,15 +582,15 @@ class _PropertyCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7),
+                  color: isDark ? colorScheme.surfaceContainer : const Color(0xFFDCFCE7),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Text(
+                child: Text(
                   'DISPONIBLE',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF16A34A),
+                    color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -627,21 +631,23 @@ class _OfferAmountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         children: [
-          const Text(
+          Text(
             'TU PROPUESTA ECONÓMICA',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF94A3B8),
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 1.5,
             ),
           ),
@@ -650,12 +656,12 @@ class _OfferAmountCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 '€',
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w300,
-                  color: Color(0xFF94A3B8),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(width: 12),
@@ -666,18 +672,18 @@ class _OfferAmountCard extends StatelessWidget {
                   keyboardType: TextInputType.number,
                   inputFormatters: [CurrencyInputFormatter()],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF2563EB),
+                    color: colorScheme.primary,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '0',
                     hintStyle: TextStyle(
                       fontSize: 42,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFFCBD5E1),
+                      color: colorScheme.outlineVariant,
                     ),
                     isCollapsed: true,
                     constraints: BoxConstraints(minWidth: 80),
@@ -691,15 +697,15 @@ class _OfferAmountCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF3C7),
+                color: isDark ? colorScheme.surfaceContainer : const Color(0xFFFEF3C7),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: const Color(0xFFFDE68A)),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.warning_amber_rounded,
-                      size: 15, color: Color(0xFFF59E0B)),
+                  Icon(Icons.warning_amber_rounded,
+                      size: 15, color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFF59E0B)),
                   const SizedBox(width: 6),
                   Text(
                     'Tu oferta es un ${diffPct.abs().toStringAsFixed(0)}% inferior al precio de salida',
@@ -740,15 +746,16 @@ class _PaymentOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: () => onChanged(value),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         decoration: BoxDecoration(
-          color: _selected ? const Color(0xFFEFF6FF) : Colors.white,
+          color: _selected ? colorScheme.primaryContainer : colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: _selected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+            color: _selected ? colorScheme.primary : colorScheme.outlineVariant,
             width: _selected ? 1.5 : 1,
           ),
         ),
@@ -761,14 +768,14 @@ class _PaymentOption extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: _selected ? const Color(0xFF2563EB) : Colors.grey.shade400,
+                  color: _selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                   width: _selected ? 5 : 1.5,
                 ),
-                color: _selected ? const Color(0xFF2563EB) : Colors.white,
+                color: _selected ? colorScheme.primary : colorScheme.surface,
               ),
               child: _selected
-                  ? const Center(
-                      child: Icon(Icons.circle, size: 6, color: Colors.white),
+                  ? Center(
+                      child: Icon(Icons.circle, size: 6, color: colorScheme.onPrimary),
                     )
                   : null,
             ),
@@ -780,12 +787,12 @@ class _PaymentOption extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: _selected ? const Color(0xFF1E40AF) : const Color(0xFF1E293B),
+                      color: _selected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
                     )),
                 Text(sublabel,
                     style: TextStyle(
                       fontSize: 11,
-                      color: _selected ? const Color(0xFF3B82F6) : Colors.grey.shade500,
+                      color: _selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                     )),
               ],
             ),

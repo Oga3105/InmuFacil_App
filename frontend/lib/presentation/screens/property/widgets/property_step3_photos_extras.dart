@@ -78,8 +78,8 @@ class PropertyStep3PhotosExtras extends ConsumerWidget {
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: s.remainingPhotoSlots == 0
-                            ? const Color(0xFFDC2626)
-                            : Colors.grey.shade500,
+                            ? Theme.of(context).colorScheme.error
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -230,7 +230,7 @@ class _PhotoGridState extends State<_PhotoGrid> {
                         borderRadius: BorderRadius.circular(12),
                         border: isHovered
                             ? Border.all(
-                                color: const Color(0xFF2563EB), width: 2)
+                                color: const Color(0xFF135BEC), width: 2)
                             : null,
                       ),
                       child: _MediaTile(
@@ -266,7 +266,7 @@ class _AddPhotoTile extends StatelessWidget {
       child: CustomPaint(
         painter: _DashedBorderPainter(
           // border-primary/40  →  #2563EB at 40% opacity
-          color: const Color(0xFF2563EB).withOpacity(0.4),
+          color: const Color(0xFF135BEC).withOpacity(0.4),
           strokeWidth: 2,
           dashLength: 7,
           gapLength: 5,
@@ -275,7 +275,7 @@ class _AddPhotoTile extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             // bg-primary/5  →  #2563EB at 5% opacity
-            color: const Color(0xFF2563EB).withOpacity(0.05),
+            color: const Color(0xFF135BEC).withOpacity(0.05),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -284,14 +284,14 @@ class _AddPhotoTile extends StatelessWidget {
               // add_a_photo  →  Icons.add_a_photo (filled)
               const Icon(
                 Icons.add_a_photo,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF135BEC),
                 size: 32,
               ),
               const SizedBox(height: 8),
               Text(
                 'property_wizard.add_photos'.tr(),
                 style: const TextStyle(
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -472,27 +472,26 @@ class _AmenitiesGrid extends StatelessWidget {
         final (key, icon) = entry;
         final label = 'amenity.$key'.tr();
         final selected = _val(key);
+        final cs = Theme.of(context).colorScheme;
         return FilterChip(
           avatar: Icon(icon,
               size: 16,
-              color: selected ? Colors.white : Colors.grey.shade600),
+              color: selected ? cs.onPrimary : cs.onSurfaceVariant),
           label: Text(label, style: const TextStyle(fontSize: 13)),
           selected: selected,
           onSelected: (_) => notifier.toggleAmenity(key),
-          selectedColor: const Color(0xFF2563EB),
+          selectedColor: cs.primary,
           labelStyle: TextStyle(
-            color: selected ? Colors.white : Colors.grey.shade700,
+            color: selected ? cs.onPrimary : cs.onSurfaceVariant,
             fontWeight: selected ? FontWeight.bold : FontWeight.normal,
           ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          checkmarkColor: Colors.white,
+          backgroundColor: cs.surface,
+          checkmarkColor: cs.onPrimary,
           showCheckmark: false,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(
-              color: selected
-                  ? const Color(0xFF2563EB)
-                  : Colors.grey.shade300,
+              color: selected ? cs.primary : cs.outlineVariant,
             ),
           ),
         );
@@ -601,15 +600,15 @@ class _CeeSelectorWidget extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              const Icon(Icons.check_circle_outline,
-                  size: 14, color: Color(0xFF16A34A)),
+              Icon(Icons.check_circle_outline,
+                  size: 14, color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
               const SizedBox(width: 6),
               Text(
                 selected == 'EN_TRAMITE'
                     ? 'Certificado en tramite seleccionado'
                     : 'Calificacion $selected seleccionada',
-                style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF16A34A)),
+                style: TextStyle(
+                    fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
               ),
             ],
           ),
@@ -634,10 +633,11 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -657,18 +657,18 @@ class _SectionCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+                child: Icon(icon, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Color(0xFF1E293B),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -689,21 +689,21 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEE2E2),
+        color: cs.errorContainer,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFF87171)),
+        border: Border.all(color: cs.error),
       ),
       child: Row(
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFFDC2626), size: 18),
+          Icon(Icons.error_outline, color: cs.error, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(message,
-                style: const TextStyle(
-                    color: Color(0xFFDC2626), fontSize: 13)),
+                style: TextStyle(color: cs.error, fontSize: 13)),
           ),
         ],
       ),

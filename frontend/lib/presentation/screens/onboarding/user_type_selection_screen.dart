@@ -19,15 +19,12 @@ class _UserTypeSelectionScreenState
   String? _selectedType;
   bool _isSaving = false;
 
-  static const Color _teal = Color(0xFF2D5C5A);
-  static const Color _blue = Color(0xFF2563EB);
-
   Future<void> _handleContinue() async {
     if (_selectedType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('onboarding.user_type_required'.tr()),
-          backgroundColor: Colors.red[700],
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
       return;
@@ -55,7 +52,7 @@ class _UserTypeSelectionScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['error'] ?? 'Error al guardar el perfil'),
-          backgroundColor: Colors.red[700],
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -63,8 +60,11 @@ class _UserTypeSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final successColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: colorScheme.surfaceContainerLowest,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -74,28 +74,28 @@ class _UserTypeSelectionScreenState
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Center(
+                  Center(
                     child: CircleAvatar(
                       radius: 36,
-                      backgroundColor: Color(0xFFDBEAFE),
-                      child: Icon(Icons.person_outline, size: 36, color: _blue),
+                      backgroundColor: colorScheme.primary.withOpacity(0.12),
+                      child: Icon(Icons.person_outline, size: 36, color: colorScheme.primary),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     'onboarding.user_type_title'.tr(),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'onboarding.user_type_subtitle'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 32),
 
@@ -124,8 +124,8 @@ class _UserTypeSelectionScreenState
                   ElevatedButton(
                     onPressed: _isSaving ? null : _handleContinue,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _teal,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.secondary,
+                      foregroundColor: colorScheme.onSecondary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -175,26 +175,25 @@ class _UserTypeCard extends StatelessWidget {
     required this.onTap,
   });
 
-  static const Color _teal = Color(0xFF2D5C5A);
-
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFECFDF5) : Colors.white,
+          color: isSelected ? cs.secondaryContainer : cs.surface,
           border: Border.all(
-            color: isSelected ? _teal : Colors.grey.shade300,
+            color: isSelected ? cs.secondary : cs.outlineVariant,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(14),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _teal.withOpacity(0.12),
+                    color: cs.secondary.withOpacity(0.12),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -205,11 +204,10 @@ class _UserTypeCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 24,
-              backgroundColor:
-                  isSelected ? _teal : Colors.grey.shade100,
+              backgroundColor: isSelected ? cs.secondary : cs.surfaceContainerHighest,
               child: Icon(
                 icon,
-                color: isSelected ? Colors.white : Colors.grey[600],
+                color: isSelected ? cs.onSecondary : cs.onSurfaceVariant,
                 size: 24,
               ),
             ),
@@ -223,19 +221,19 @@ class _UserTypeCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? _teal : const Color(0xFF1E293B),
+                      color: isSelected ? cs.onSecondaryContainer : cs.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     description,
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
             if (isSelected)
-              const Icon(Icons.check_circle, color: _teal, size: 22),
+              Icon(Icons.check_circle, color: cs.secondary, size: 22),
           ],
         ),
       ),

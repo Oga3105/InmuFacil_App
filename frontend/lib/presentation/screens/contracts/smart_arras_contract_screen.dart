@@ -161,7 +161,7 @@ class _SmartArrasContractScreenState
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -180,11 +180,11 @@ class _SmartArrasContractScreenState
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -267,7 +267,7 @@ class _SmartArrasContractScreenState
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: _signatureDeadline != null
                         ? null
-                        : Colors.grey.shade500,
+                        : Theme.of(context).colorScheme.outline,
                   ),
                 ),
               ),
@@ -283,7 +283,7 @@ class _SmartArrasContractScreenState
               subtitle: Text(
                 'arras_contract.needs_mortgage_subtitle'.tr(),
                 style:
-                    theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    theme.textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               contentPadding: EdgeInsets.zero,
             ),
@@ -356,7 +356,7 @@ class _SmartArrasContractScreenState
                   child: ElevatedButton(
                     onPressed: _onGenerateContract,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: const Color(0xFF135BEC),
                       foregroundColor: Colors.white,
                     ),
                     child: Text('arras_contract.btn_generate'.tr()),
@@ -458,7 +458,7 @@ class SmartContractPreview extends StatelessWidget {
   final bool needsMortgage;
   final List<String> furnitureItems;
 
-  static const Color _blue = Color(0xFF2563EB);
+  static const Color _blue = Color(0xFF135BEC);
   static const Color _green = Color(0xFF16A34A);
 
   @override
@@ -470,16 +470,16 @@ class SmartContractPreview extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Theme.of(context).colorScheme.shadow.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -503,7 +503,7 @@ class SmartContractPreview extends StatelessWidget {
               'arras_contract.preview_subtitle'.tr(),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade500,
+                color: Theme.of(context).colorScheme.outline,
               ),
             ),
           ),
@@ -628,7 +628,7 @@ class SmartContractPreview extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontStyle: FontStyle.italic,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -641,7 +641,7 @@ class SmartContractPreview extends StatelessWidget {
               'arras_contract.preview_signature_notice'.tr(),
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade500,
+                color: Theme.of(context).colorScheme.outline,
                 fontSize: 11,
               ),
             ),
@@ -714,7 +714,7 @@ class _PreviewRow extends StatelessWidget {
           child: Text(
             title,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -726,7 +726,7 @@ class _PreviewRow extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: validated
                   ? const Color(0xFF16A34A)
-                  : Colors.grey.shade800,
+                  : Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),

@@ -50,6 +50,8 @@ class _VerificationStatusScreenState
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -67,16 +69,16 @@ class _VerificationStatusScreenState
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 32),
               const SizedBox(width: 8),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: colorScheme.primary)),
                     TextSpan(
                         text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
+                        style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -84,11 +86,11 @@ class _VerificationStatusScreenState
           ),
         ),
       ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       elevation: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
+        child: Container(color: colorScheme.outlineVariant, height: 1),
       ),
       actions: [
         // Botón Inicio
@@ -101,25 +103,25 @@ class _VerificationStatusScreenState
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    color: colorScheme.primary.withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
+                  const SizedBox(width: 6),
                   Text(
                     'Inicio',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
@@ -181,7 +183,7 @@ class _VerificationStatusScreenState
                 icon: const Icon(Icons.login),
                 label: const Text('Iniciar sesión'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                       horizontal: 24, vertical: 12),
@@ -220,9 +222,10 @@ class _VerificationStatusScreenState
   // ── NOT STARTED ───────────────────────────────────────────────────────
 
   Widget _buildNotStartedCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -247,12 +250,12 @@ class _VerificationStatusScreenState
                   size: 40, color: Colors.blue.shade400),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Verifica tu identidad',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -265,7 +268,7 @@ class _VerificationStatusScreenState
             PremiumButton(
               label: 'Iniciar verificacion',
               icon: Icons.arrow_forward,
-              color: const Color(0xFF2563EB),
+              color: colorScheme.primary,
               onPressed: () => context.push('/verify-identity'),
             ),
           ],
@@ -277,9 +280,10 @@ class _VerificationStatusScreenState
   // ── PENDING ──────────────────────────────────────────────────────────
 
   Widget _buildPendingCard(VerificationState state) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -336,12 +340,12 @@ class _VerificationStatusScreenState
 
             const SizedBox(height: 20),
 
-            const Text(
+            Text(
               'Estamos revisando tus documentos',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
@@ -380,10 +384,10 @@ class _VerificationStatusScreenState
                 ref.read(verificationProvider.notifier).reset();
                 context.go('/verify-identity');
               },
-              child: const Text(
+              child: Text(
                 'Volver a enviar documentos',
                 style: TextStyle(
-                  color: Color(0xFF94A3B8),
+                  color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
                   fontSize: 13,
                 ),
@@ -440,9 +444,12 @@ class _VerificationStatusScreenState
   // ── APPROVED ─────────────────────────────────────────────────────────
 
   Widget _buildApprovedCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -459,7 +466,7 @@ class _VerificationStatusScreenState
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            color: const Color(0xFF16A34A),
+            color: greenColor,
             child: const Center(
               child: Text(
                 'IDENTIDAD VERIFICADA',
@@ -490,11 +497,11 @@ class _VerificationStatusScreenState
                     children: [
                       Icon(Icons.shield,
                           size: 48, color: Colors.green.shade400),
-                      const Positioned(
+                      Positioned(
                         bottom: 20,
                         right: 18,
                         child: Icon(Icons.check_circle,
-                            size: 24, color: Color(0xFF16A34A)),
+                            size: 24, color: greenColor),
                       ),
                     ],
                   ),
@@ -522,12 +529,12 @@ class _VerificationStatusScreenState
 
                 const SizedBox(height: 16),
 
-                const Text(
+                Text(
                   'Tu identidad ha sido verificada correctamente.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
-                    color: Color(0xFF475569),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
 
@@ -536,7 +543,7 @@ class _VerificationStatusScreenState
                 PremiumButton(
                   label: 'Publicar Inmueble',
                   icon: Icons.add_home_outlined,
-                  color: const Color(0xFF16A34A),
+                  color: greenColor,
                   onPressed: () => context.go('/404-publish'),
                 ),
 
@@ -544,10 +551,10 @@ class _VerificationStatusScreenState
 
                 TextButton(
                   onPressed: () => context.go('/profile'),
-                  child: const Text(
+                  child: Text(
                     'Volver al perfil',
                     style: TextStyle(
-                      color: Color(0xFF64748B),
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -563,9 +570,10 @@ class _VerificationStatusScreenState
   // ── REJECTED ─────────────────────────────────────────────────────────
 
   Widget _buildRejectedCard(VerificationState state) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -582,7 +590,7 @@ class _VerificationStatusScreenState
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            color: const Color(0xFFDC2626),
+            color: colorScheme.error,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -619,12 +627,12 @@ class _VerificationStatusScreenState
 
                 const SizedBox(height: 20),
 
-                const Text(
+                Text(
                   'No pudimos verificar tu identidad',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
+                    color: colorScheme.onSurface,
                   ),
                 ),
 
@@ -684,7 +692,7 @@ class _VerificationStatusScreenState
                 PremiumButton(
                   label: 'Reintentar Verificación',
                   icon: Icons.refresh,
-                  color: const Color(0xFF2563EB),
+                  color: colorScheme.primary,
                   onPressed: () {
                     ref.read(verificationProvider.notifier).reset();
                     context.go('/verify-identity');
@@ -695,10 +703,10 @@ class _VerificationStatusScreenState
 
                 TextButton(
                   onPressed: () => context.go('/profile'),
-                  child: const Text(
+                  child: Text(
                     'Volver al perfil',
                     style: TextStyle(
-                      color: Color(0xFF64748B),
+                      color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

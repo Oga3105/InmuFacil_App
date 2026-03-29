@@ -11,7 +11,7 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
 
-const _kBlue  = Color(0xFF2563EB);
+const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
 
@@ -180,7 +180,7 @@ class ArrasInterviewScreen extends ConsumerWidget {
                 children: [
                   TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB))),
+                      style: TextStyle(color: Color(0xFF135BEC))),
                   TextSpan(
                       text: 'Fácil',
                       style: TextStyle(color: Color(0xFF16A34A))),
@@ -265,7 +265,7 @@ class _HeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF1E3A5F), Color(0xFF2563EB)],
+          colors: [Color(0xFF135BEC), Color(0xFF135BEC)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -478,7 +478,7 @@ class _RoleCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: isDone
-                              ? const Color(0xFF1E3A5F)
+                              ? const Color(0xFF135BEC)
                               : Colors.grey.shade600,
                         )),
                     if (isMyRole) ...[

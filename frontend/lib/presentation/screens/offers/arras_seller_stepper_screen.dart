@@ -12,7 +12,7 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 import 'arras_shared_widgets.dart';
 
-const _kBg   = Color(0xFFF8FAFC);
+// Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
 
 class ArrasSellerStepperScreen extends ConsumerStatefulWidget {
   const ArrasSellerStepperScreen({super.key, required this.offer});
@@ -140,8 +140,9 @@ class _ArrasSellerStepperScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: _buildAppBar(context, ref),
       body: Column(
         children: [
@@ -170,6 +171,8 @@ class _ArrasSellerStepperScreenState
   // ─── Step 1: Estado de la Vivienda ────────────────────────────────────────
 
   Widget _buildStep1() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -223,25 +226,25 @@ class _ArrasSellerStepperScreenState
             text:
                 'Un suministro cortado o una vivienda ocupada en el momento de la entrega son causas '
                 'de incumplimiento del contrato y pueden implicar devolver el doble de las arras.',
-            color: Colors.blue.shade700,
-            background: Colors.blue.shade50,
+            color: colorScheme.primary,
+            background: colorScheme.primaryContainer,
           ),
           const SizedBox(height: 16),
           ArrasInterviewCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Tu domicilio (vendedor)',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Necesario para identificarte en el contrato',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -255,14 +258,14 @@ class _ArrasSellerStepperScreenState
                         horizontal: 12, vertical: 12),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant)),
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant)),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide:
-                            const BorderSide(color: kArrasBlue, width: 2)),
+                            BorderSide(color: colorScheme.primary, width: 2)),
                   ),
                 ),
               ],
@@ -276,6 +279,8 @@ class _ArrasSellerStepperScreenState
   // ─── Step 2: Comunidad y Cargas ───────────────────────────────────────────
 
   Widget _buildStep2() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -285,7 +290,7 @@ class _ArrasSellerStepperScreenState
             icon: Icons.apartment_outlined,
             title: 'Comunidad y Cargas',
             subtitle: 'Paso 2 de 3 — Deudas y derramas',
-            color: const Color(0xFFD97706),
+            color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
           ),
           const SizedBox(height: 24),
           ArrasInterviewCard(
@@ -394,6 +399,9 @@ class _ArrasSellerStepperScreenState
   // ─── Step 3: Finanzas e Impuestos ─────────────────────────────────────────
 
   Widget _buildStep3() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -448,7 +456,7 @@ class _ArrasSellerStepperScreenState
                           color: kArrasBlue, size: 18),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -457,12 +465,12 @@ class _ArrasSellerStepperScreenState
                             style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: Color(0xFF1E3A5F)),
+                                color: colorScheme.onPrimaryContainer),
                           ),
                           Text(
                             'Cifrado de extremo a extremo — nunca visible al comprador',
                             style: TextStyle(
-                                fontSize: 11, color: Color(0xFF64748B)),
+                                fontSize: 11, color: colorScheme.onSurfaceVariant),
                           ),
                         ],
                       ),
@@ -509,12 +517,12 @@ class _ArrasSellerStepperScreenState
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
+                Text(
                   'Entidad bancaria',
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 6),
                 TextField(
@@ -542,20 +550,20 @@ class _ArrasSellerStepperScreenState
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.green.shade50,
+                    color: isDark ? colorScheme.surfaceContainer : const Color(0xFFF0FDF4),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.security_outlined,
-                          color: Colors.green.shade700, size: 14),
+                          color: kGreen, size: 14),
                       const SizedBox(width: 8),
-                      const Expanded(
+                      Expanded(
                         child: Text(
                           'Tu IBAN se almacena cifrado con AES-256. El numero completo y la '
                           'entidad bancaria apareceran en el contrato para el pago de las arras.',
                           style: TextStyle(
-                              fontSize: 11, color: Color(0xFF166534)),
+                              fontSize: 11, color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669)),
                         ),
                       ),
                     ],
@@ -569,17 +577,17 @@ class _ArrasSellerStepperScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Clausulas adicionales (opcional)',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Cualquier condicion especial que quieras incluir en el contrato',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -626,17 +634,19 @@ class _ArrasSellerStepperScreenState
           children: [
             Image.asset('assets/images/logo_inmufacil.png', height: 32),
             const SizedBox(width: 8),
-            const Text.rich(
+            Text.rich(
               TextSpan(
                 style:
-                    TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                 children: [
                   TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB))),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                   TextSpan(
                       text: 'Fácil',
-                      style: TextStyle(color: Color(0xFF16A34A))),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFF16A34A))),
                 ],
               ),
             ),

@@ -13,6 +13,7 @@ class PropertyConditionSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: PropertyCondition.values.map((condition) {
         final isSelected = selected == condition;
@@ -22,10 +23,10 @@ class PropertyConditionSelector extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             margin: const EdgeInsets.only(bottom: 8),
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+              color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                 width: isSelected ? 1.5 : 1,
               ),
             ),
@@ -38,10 +39,10 @@ class PropertyConditionSelector extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFCBD5E1),
+                      color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
                       width: isSelected ? 6 : 1.5,
                     ),
-                    color: isSelected ? const Color(0xFF2563EB) : Colors.white,
+                    color: isSelected ? colorScheme.primary : colorScheme.surface,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -54,14 +55,14 @@ class PropertyConditionSelector extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: isSelected ? const Color(0xFF1E40AF) : const Color(0xFF1E293B),
+                          color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurface,
                         ),
                       ),
                       Text(
                         condition.sublabel,
                         style: TextStyle(
                           fontSize: 12,
-                          color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFF64748B),
+                          color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],

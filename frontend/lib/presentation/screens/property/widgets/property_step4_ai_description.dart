@@ -18,7 +18,7 @@ class _PropertyStep4AiDescriptionState
   late final TextEditingController _descCtrl;
   final _descFocus = FocusNode();
 
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
 
   @override

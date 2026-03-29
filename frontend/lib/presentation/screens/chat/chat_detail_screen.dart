@@ -13,7 +13,9 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/visits/visit_cancel_dialog.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kNavy      = Color(0xFF1E3A5F);
+// _kNavy and _kNavyLight are used where context is unavailable (const constructors).
+// For dark mode support, widgets that use these should use colorScheme where possible.
+const _kNavy      = Color(0xFF135BEC);
 const _kNavyLight = Color(0xFFEEF3FA);
 const _kGold      = Color(0xFFB8860B);
 const _kGoldLight = Color(0xFFFFF8E1);
@@ -116,7 +118,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                 ),
               ),
               TextSpan(
@@ -259,7 +261,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                 ),
               ),
               TextSpan(
@@ -525,84 +527,91 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                     errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                   ),
                   const SizedBox(width: 8),
-                  const Text.rich(
-                    TextSpan(
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                      children: [
-                        TextSpan(
-                          text: 'Inmu',
-                          style: TextStyle(color: Color(0xFF2563EB)),
-                        ),
-                        TextSpan(
-                          text: 'Fácil',
-                          style: TextStyle(color: Color(0xFF16A34A)),
-                        ),
-                      ],
-                    ),
-                  ),
+                  Builder(builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    return Text.rich(
+                      TextSpan(
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                        children: [
+                          TextSpan(
+                            text: 'Inmu',
+                            style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                          ),
+                          TextSpan(
+                            text: 'Fácil',
+                            style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
           ),
           // Vertical divider
-          Container(
+          Builder(builder: (context) => Container(
             margin: const EdgeInsets.symmetric(horizontal: 12),
             height: 28,
             width: 1,
-            color: Colors.grey.shade300,
-          ),
+            color: Theme.of(context).colorScheme.outlineVariant,
+          )),
           // Other user avatar
-          CircleAvatar(
+          Builder(builder: (context) => CircleAvatar(
             radius: 17,
-            backgroundColor: const Color(0xFF1E3A5F),
+            backgroundColor: Theme.of(context).colorScheme.primary,
             backgroundImage: (otherPhoto?.isNotEmpty ?? false)
                 ? NetworkImage(otherPhoto!)
                 : null,
             child: (otherPhoto?.isNotEmpty ?? false)
                 ? null
-                : const Icon(Icons.person_rounded, size: 19, color: Colors.white),
-          ),
+                : Icon(Icons.person_rounded, size: 19, color: Theme.of(context).colorScheme.onPrimary),
+          )),
           const SizedBox(width: 8),
           // Other user name + presence dot
           Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  otherName.isEmpty ? 'Chat' : otherName,
-                  style: const TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+            child: Builder(builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final cs = Theme.of(context).colorScheme;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    otherName.isEmpty ? 'Chat' : otherName,
+                    style: TextStyle(
+                      color: cs.onSurface,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: otherOnline
-                            ? const Color(0xFF16A34A)
-                            : const Color(0xFFCBD5E1),
-                        shape: BoxShape.circle,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 7,
+                        height: 7,
+                        decoration: BoxDecoration(
+                          color: otherOnline
+                              ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                              : cs.outlineVariant,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      otherOnline ? 'En linea' : 'Desconectado',
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 11,
+                      const SizedBox(width: 4),
+                      Text(
+                        otherOnline ? 'En linea' : 'Desconectado',
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                    ],
+                  ),
+                ],
+              );
+            }),
           ),
         ],
       ),
@@ -613,42 +622,42 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
           onTap: () => context.go('/'),
-          child: Container(
+          child: Builder(builder: (context) => Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                SizedBox(width: 6),
+                Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
+                const SizedBox(width: 6),
                 Text(
                   'Inicio',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
                 ),
               ],
             ),
-          ),
+          )),
           ),
         ),
         const SizedBox(width: 12),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.grey),
+        Builder(builder: (context) => IconButton(
+          icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
           onPressed: () {},
-        ),
+        )),
         const SizedBox(width: 8),
         // Current user avatar with dropdown menu
         Padding(
@@ -993,7 +1002,7 @@ class _MessageBubble extends StatelessWidget {
           if (!isMine) ...[
             CircleAvatar(
               radius: 13,
-              backgroundColor: const Color(0xFF1E3A5F),
+              backgroundColor: const Color(0xFF135BEC),
               backgroundImage: (senderPhotoUrl?.isNotEmpty ?? false)
                   ? NetworkImage(senderPhotoUrl!)
                   : null,

@@ -57,23 +57,28 @@ class _PropertyStep2DetailsPriceState
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
         suffixIcon: suffixSymbol != null
-            ? Container(
-                width: 44,
-                margin: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Center(
-                  child: Text(
-                    suffixSymbol,
-                    style: const TextStyle(
-                      color: Color(0xFF2563EB),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
+            ? Builder(
+                builder: (context) {
+                  final cs = Theme.of(context).colorScheme;
+                  return Container(
+                    width: 44,
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: cs.primaryContainer,
+                      borderRadius: BorderRadius.circular(7),
                     ),
-                  ),
-                ),
+                    child: Center(
+                      child: Text(
+                        suffixSymbol,
+                        style: TextStyle(
+                          color: cs.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               )
             : null,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -191,25 +196,32 @@ class _PropertyStep2DetailsPriceState
                   ),
                 ),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.auto_awesome, color: Color(0xFF16A34A), size: 14),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'La descripcion comercial se genera con IA en el siguiente paso.',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF16A34A)),
-                        ),
+                Builder(
+                  builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
+                    final bgColor = isDark ? Theme.of(context).colorScheme.surfaceContainer : const Color(0xFFF0FDF4);
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: greenColor.withOpacity(0.3)),
                       ),
-                    ],
-                  ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.auto_awesome, color: greenColor, size: 14),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'La descripcion comercial se genera con IA en el siguiente paso.',
+                              style: TextStyle(fontSize: 12, color: greenColor),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -256,10 +268,11 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -279,18 +292,18 @@ class _SectionCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+                child: Icon(icon, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Color(0xFF1E293B),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -339,8 +352,8 @@ class _CounterRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -348,10 +361,10 @@ class _CounterRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const Spacer(),
@@ -363,9 +376,9 @@ class _CounterRow extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             child: Text(
               '$value',
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 16, fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E293B)),
+                  color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
           _CircleButton(
@@ -399,26 +412,27 @@ class _CircleButtonState extends State<_CircleButton> {
         widget.onPressed();
       },
       onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 120),
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: _pressed
-              ? const Color(0xFF2563EB)
-              : Colors.white,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: _pressed
-                ? const Color(0xFF2563EB)
-                : Colors.grey.shade300,
-          ),
-        ),
-        child: Icon(
-          widget.icon,
-          size: 16,
-          color: _pressed ? Colors.white : const Color(0xFF1E293B),
-        ),
+      child: Builder(
+        builder: (context) {
+          final cs = Theme.of(context).colorScheme;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: _pressed ? cs.primary : cs.surface,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _pressed ? cs.primary : cs.outlineVariant,
+              ),
+            ),
+            child: Icon(
+              widget.icon,
+              size: 16,
+              color: _pressed ? cs.onPrimary : cs.onSurface,
+            ),
+          );
+        },
       ),
     );
   }
@@ -429,24 +443,25 @@ class _ErrorBanner extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEE2E2),
+          color: cs.errorContainer,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFF87171)),
+          border: Border.all(color: cs.error),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: Color(0xFFDC2626), size: 18),
+            Icon(Icons.error_outline, color: cs.error, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(message,
-                  style: const TextStyle(
-                      color: Color(0xFFDC2626), fontSize: 13)),
+                  style: TextStyle(color: cs.error, fontSize: 13)),
             ),
           ],
         ),
       );
+  }
 }

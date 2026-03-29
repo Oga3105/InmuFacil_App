@@ -9,13 +9,13 @@ import '../../providers/auth_provider.dart';
 class GdprConsentScreen extends ConsumerWidget {
   const GdprConsentScreen({super.key});
 
-  static const Color _teal = Color(0xFF2D5C5A);
-  static const Color _blue = Color(0xFF2563EB);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final successColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: colorScheme.surfaceContainerLowest,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -26,11 +26,11 @@ class GdprConsentScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Icono shield
-                  const Center(
+                  Center(
                     child: CircleAvatar(
                       radius: 36,
-                      backgroundColor: Color(0xFFDCFCE7),
-                      child: Icon(Icons.shield_outlined, size: 36, color: Color(0xFF16A34A)),
+                      backgroundColor: successColor.withOpacity(0.12),
+                      child: Icon(Icons.shield_outlined, size: 36, color: successColor),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -39,17 +39,17 @@ class GdprConsentScreen extends ConsumerWidget {
                   Text(
                     'onboarding.gdpr_title'.tr(),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'onboarding.gdpr_subtitle'.tr(),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                   ),
                   const SizedBox(height: 32),
 
@@ -65,21 +65,21 @@ class GdprConsentScreen extends ConsumerWidget {
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                      style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                       children: [
                         TextSpan(text: 'onboarding.gdpr_terms_prefix'.tr()),
                         TextSpan(
                           text: 'onboarding.gdpr_terms_link'.tr(),
-                          style: const TextStyle(
-                            color: _blue,
+                          style: TextStyle(
+                            color: colorScheme.primary,
                             decoration: TextDecoration.underline,
                           ),
                         ),
                         const TextSpan(text: ' y la '),
                         TextSpan(
                           text: 'onboarding.gdpr_privacy_link'.tr(),
-                          style: const TextStyle(
-                            color: _blue,
+                          style: TextStyle(
+                            color: colorScheme.primary,
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -93,8 +93,8 @@ class GdprConsentScreen extends ConsumerWidget {
                   ElevatedButton(
                     onPressed: () => context.go('/onboarding/user-type'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _teal,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colorScheme.secondary,
+                      foregroundColor: colorScheme.onSecondary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -114,8 +114,8 @@ class GdprConsentScreen extends ConsumerWidget {
                       if (context.mounted) context.go('/login');
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.grey[600],
-                      side: BorderSide(color: Colors.grey[300]!),
+                      foregroundColor: colorScheme.onSurfaceVariant,
+                      side: BorderSide(color: colorScheme.outlineVariant),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -142,13 +142,16 @@ class _GdprItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final successColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Icon(Icons.check_circle_outline, size: 20, color: Color(0xFF16A34A)),
+        Icon(Icons.check_circle_outline, size: 20, color: successColor),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(text, style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4)),
+          child: Text(text, style: TextStyle(fontSize: 14, color: cs.onSurface, height: 1.4)),
         ),
       ],
     );

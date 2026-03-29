@@ -249,7 +249,7 @@ class _MapSection extends ConsumerWidget {
                   ref.read(searchProvider.notifier).clearError();
                   context.pushNamed('search');
                 },
-                color: const Color(0xFF2563EB),
+                color: theme.colorScheme.primary,
                 icon: Icons.list,
                 fullWidth: false,
               ),
@@ -286,7 +286,7 @@ class _MapSection extends ConsumerWidget {
                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                    child: Row(
                      children: [
-                       const Icon(Icons.search, color: Color(0xFF2563EB)),
+                       Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
                        const SizedBox(width: 12),
                        Expanded(
                          child: Text(
@@ -402,9 +402,9 @@ class _SearchPanel extends ConsumerWidget {
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
-                                children: const [
-                                  TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                                  TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                                children: [
+                                  TextSpan(text: 'Inmu', style: TextStyle(color: theme.colorScheme.primary)),
+                                  TextSpan(text: 'Fácil', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                                 ],
                               ),
                             ),
@@ -415,7 +415,7 @@ class _SearchPanel extends ConsumerWidget {
                           TextSpan(
                             children: [
                               TextSpan(text: 'home.tagline_part1'.tr(), style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
-                              TextSpan(text: 'home.tagline_part2'.tr(), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 14, fontWeight: FontWeight.bold)),
+                              TextSpan(text: 'home.tagline_part2'.tr(), style: TextStyle(color: theme.colorScheme.primary, fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -424,7 +424,7 @@ class _SearchPanel extends ConsumerWidget {
                         
                         // [HERO SECTION] - Specific Design Implementation (Step 16268)
                         // Title: "Sin intermediarios. 0% comisiones."
-                        Text.rich(
+                         Text.rich(
                           TextSpan(
                             style: theme.textTheme.displaySmall?.copyWith( 
                               fontSize: 52, // Increased size per green highlighter feedback
@@ -433,11 +433,11 @@ class _SearchPanel extends ConsumerWidget {
                               color: theme.colorScheme.onSurface, // Adapts to dark mode
                               letterSpacing: -1.0, // tracking-tight
                             ),
-                            children: const [
-                              TextSpan(text: 'Sin intermediarios.\n'),
+                            children: [
+                              const TextSpan(text: 'Sin intermediarios.\n'),
                               TextSpan(
                                 text: '0% comisiones.',
-                                style: TextStyle(color: Color(0xFF2563EB)), // text-primary #2563EB specified
+                                style: TextStyle(color: theme.colorScheme.primary), // text-primary #2563EB specified
                               ),
                             ],
                           ),
@@ -484,8 +484,8 @@ class _SearchPanel extends ConsumerWidget {
                                _buildTrustBadgeItem(
                                  context,
                                  icon: Icons.shield,
-                                 iconColor: const Color(0xFF16A34A),
-                                 bgColor: const Color(0xFF16A34A).withOpacity(0.12),
+                                 iconColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+                                 bgColor: (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)).withOpacity(0.12),
                                  label: 'GARANTÍA INMUFÁCIL',
                                  title: 'Tu venta tranquila',
                                ),
@@ -494,8 +494,8 @@ class _SearchPanel extends ConsumerWidget {
                                _buildTrustBadgeItem(
                                  context,
                                  icon: Icons.lock,
-                                 iconColor: const Color(0xFF2563EB),
-                                 bgColor: const Color(0xFF2563EB).withOpacity(0.12),
+                                 iconColor: theme.colorScheme.primary,
+                                 bgColor: theme.colorScheme.primary.withOpacity(0.12),
                                  label: 'P2P VERIFICADO',
                                  title: 'Tu compra segura',
                                ),
@@ -516,8 +516,8 @@ class _SearchPanel extends ConsumerWidget {
                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                              ),
                              style: OutlinedButton.styleFrom(
-                               foregroundColor: const Color(0xFF2563EB),
-                               side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                               foregroundColor: theme.colorScheme.primary,
+                               side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
                                padding: const EdgeInsets.symmetric(vertical: 16),
                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                              ),
@@ -543,9 +543,9 @@ class _SearchPanel extends ConsumerWidget {
   Widget _buildBenefitItem(BuildContext context, String text) {
     return Row(
       children: [
-        const Icon(
+        Icon(
           Icons.check_circle,
-          color: Color(0xFF2563EB), // Azul corporativo #2563EB specified
+          color: Theme.of(context).colorScheme.primary, // Azul corporativo
           size: 20,
         ),
         const SizedBox(width: 12), // gap-3
@@ -596,7 +596,7 @@ class _SearchPanel extends ConsumerWidget {
               style: TextStyle(
                 fontSize: 10, // text-[10px]
                 fontWeight: FontWeight.w900, // font-black
-                color: Colors.grey[400], // text-slate-400
+                color: Theme.of(context).colorScheme.onSurfaceVariant, // text-slate-400
                 letterSpacing: 1.5, // tracking-widest (approx)
               ),
             ),
@@ -705,8 +705,8 @@ class _FeatureItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const primaryColor = Color(0xFF2563EB); // Exact blue from reference
-    
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Row(
       children: [
         Container(
@@ -720,7 +720,7 @@ class _FeatureItem extends StatelessWidget {
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.check_circle,
             color: primaryColor,
             size: 24,
@@ -840,7 +840,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
             max: searchState.currentMaxPriceLimit,
             // No divisions - continuous slider for smooth visual feedback
             divisions: null,
-            activeColor: const Color(0xFF2563EB), // [BRAND COLOR] Updated
+            activeColor: theme.colorScheme.primary, // [BRAND COLOR] Updated
             labels: RangeLabels(
               _formatPrice(searchState.priceRange.start),
               _formatPrice(searchState.priceRange.end),
@@ -885,17 +885,17 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF2563EB).withOpacity(0.1) : theme.colorScheme.surface,
+                    color: isSelected ? theme.colorScheme.primary.withOpacity(0.1) : theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
                       width: isSelected ? 2 : 1,
                     ),
                   ),
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: isSelected ? const Color(0xFF2563EB) : Colors.grey[700],
+                      color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                     ),
                   ),
@@ -927,13 +927,13 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                 onSelected: (_) {
                    ref.read(searchProvider.notifier).toggleExtra(extra);
                 },
-                selectedColor: const Color(0xFF2563EB).withOpacity(0.1),
-                checkmarkColor: const Color(0xFF2563EB),
+                selectedColor: theme.colorScheme.primary.withOpacity(0.1),
+                checkmarkColor: theme.colorScheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 side: BorderSide(
-                  color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.outlineVariant,
                 ),
               );
             }).toList(),
@@ -951,7 +951,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                  ref.read(searchProvider.notifier).search();
               }
             },
-            color: const Color(0xFF2563EB),
+            color: theme.colorScheme.primary,
             icon: Icons.search, // Keep Lupita as requested
           ),
 
@@ -993,7 +993,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                     child: Text(
                       '${filteredProperties.length} ${'home.properties_today'.tr()}',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xFF2563EB),
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -1045,7 +1045,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: Text('common.cancel'.tr(), style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+            child: Builder(builder: (context) => Text('common.cancel'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))),
           ),
           ElevatedButton(
             onPressed: () {
@@ -1056,8 +1056,8 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
@@ -1111,11 +1111,11 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12),
             ),
@@ -1189,13 +1189,13 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
               ),
-              prefixIcon: const Icon(Icons.location_on, color: Color(0xFF2563EB)),
+              prefixIcon: Icon(Icons.location_on, color: Theme.of(context).colorScheme.primary),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12),
             ),
             onSubmitted: (value) {
@@ -1227,9 +1227,10 @@ class _TrustBadge extends StatelessWidget {
     
     // Determine colors based on icon type - exact colors from reference
     final bool isShield = icon == Icons.verified || icon == Icons.shield;
-    final Color iconColor = isShield 
-        ? const Color(0xFF16A34A) // Green for shield/verified
-        : const Color(0xFF2563EB); // Blue for security/lock
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color iconColor = isShield
+        ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+        : Theme.of(context).colorScheme.primary;
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1336,14 +1337,16 @@ class _MapNavigationBar extends ConsumerWidget {
           final isNarrow = constraints.maxWidth < 600;
 
           if (isNarrow) {
-            // Mobile: compact nav with logo text + hamburger + avatar
+            // Mobile: compact nav with logo image + text + hamburger + avatar
             return Row(
               children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 28),
+                const SizedBox(width: 8),
                 Text.rich(
                   TextSpan(
-                    children: const [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.w800, fontSize: 18)),
-                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A), fontWeight: FontWeight.w800, fontSize: 18)),
+                    children: [
+                      TextSpan(text: 'Inmu', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.w800, fontSize: 18)),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A), fontWeight: FontWeight.w800, fontSize: 18)),
                     ],
                   ),
                 ),
@@ -1450,22 +1453,22 @@ class _MapNavigationBar extends ConsumerWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             icon: Container(
                               padding: const EdgeInsets.all(12),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEFF6FF),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainerLowest,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
+                              child: Icon(Icons.home_work_outlined, color: Theme.of(context).colorScheme.primary, size: 28),
                             ),
                             title: const Text(
                               'Cuenta requerida',
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                             ),
-                            content: const Text(
+                            content: Builder(builder: (context) => Text(
                               'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-                            ),
+                              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            )),
                             actionsAlignment: MainAxisAlignment.center,
                             actions: [
                               TextButton(
@@ -1473,7 +1476,7 @@ class _MapNavigationBar extends ConsumerWidget {
                                 style: TextButton.styleFrom(
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
-                                child: Text('common.cancel'.tr(), style: const TextStyle(color: Color(0xFF64748B))),
+                                child: Text('common.cancel'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                               ),
                               FilledButton(
                                 onPressed: () {
@@ -1481,7 +1484,7 @@ class _MapNavigationBar extends ConsumerWidget {
                                   context.pushNamed('login');
                                 },
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2563EB),
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: Text('auth.login_button'.tr()),
@@ -1610,7 +1613,7 @@ class _MapNavigationBar extends ConsumerWidget {
                   PremiumButton(
                     label: 'Publicar propiedad',
                     onPressed: () => handleProtectedAction('/property/create'),
-                    color: const Color(0xFF2563EB),
+                    color: theme.colorScheme.primary,
                     fontSize: 13,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     fullWidth: false,
@@ -1663,8 +1666,8 @@ class _StatsCard extends ConsumerWidget {
     final bool isEmpty = count == 0;
     
     // COLORS: Red if empty, Blue if normal (per user request "rojo papelera")
-    final Color primaryColor = isEmpty ? Colors.red : const Color(0xFF2563EB);
-    final Color lightColor = isEmpty ? Colors.red.withOpacity(0.1) : const Color(0xFF2563EB).withOpacity(0.1);
+    final Color primaryColor = isEmpty ? theme.colorScheme.error : theme.colorScheme.primary;
+    final Color lightColor = isEmpty ? theme.colorScheme.error.withOpacity(0.1) : theme.colorScheme.primary.withOpacity(0.1);
     final IconData icon = isEmpty ? Icons.info_outline : Icons.hub_outlined;
 
     // Check if any filters are active (besides location which is default)
@@ -1677,7 +1680,7 @@ class _StatsCard extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -1714,14 +1717,14 @@ class _StatsCard extends ConsumerWidget {
                 '$count', // Dynamic Count
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isEmpty ? Colors.red : const Color(0xFF2563EB), // Official Blue if not empty
+                  color: isEmpty ? theme.colorScheme.error : theme.colorScheme.primary, // Official Blue if not empty
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 isEmpty ? '0 PROPIEDADES' : 'PROPIEDADES HOY',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: const Color(0xFF2563EB), // Always blue branding as requested
+                  color: theme.colorScheme.primary, // Always blue branding as requested
                   letterSpacing: 0.5,
                   fontWeight: FontWeight.bold,
                 ),
@@ -1738,7 +1741,7 @@ class _StatsCard extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(4),
                           child: LinearProgressIndicator(
                             value: 0.68,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: theme.colorScheme.surfaceContainerLowest,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               primaryColor,
                             ),
@@ -1751,7 +1754,7 @@ class _StatsCard extends ConsumerWidget {
                             Text(
                               'Verificadas esta semana',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: Colors.grey[600],
+                                color: theme.colorScheme.onSurfaceVariant,
                                 fontSize: 10,
                               ),
                             ),
@@ -1759,7 +1762,7 @@ class _StatsCard extends ConsumerWidget {
                             Text(
                               '+84',
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: const Color(0xFF16A34A),
+                                color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1891,7 +1894,7 @@ class _NotificationBell extends ConsumerWidget {
                 size: 22,
                 color: unreadCount > 0
                     ? const Color(kUrgencyGreen)
-                    : Colors.grey[600],
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             if (unreadCount > 0)

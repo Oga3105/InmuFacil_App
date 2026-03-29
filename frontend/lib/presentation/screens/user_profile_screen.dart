@@ -158,9 +158,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           controller: _tabController,
                           isScrollable: true,
                           tabAlignment: TabAlignment.start,
-                          labelColor: const Color(0xFF2563EB),
+                          labelColor: const Color(0xFF135BEC),
                           unselectedLabelColor: Colors.grey.shade500,
-                          indicatorColor: const Color(0xFF2563EB),
+                          indicatorColor: const Color(0xFF135BEC),
                           indicatorWeight: 3,
                           dividerColor: Colors.transparent,
                           labelStyle: const TextStyle(
@@ -299,7 +299,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
                         style: TextStyle(color: Color(0xFF16A34A))),
@@ -330,11 +330,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB),
+                        color: const Color(0xFF135BEC),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2563EB).withOpacity(0.25),
+                            color: const Color(0xFF135BEC).withOpacity(0.25),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -470,7 +470,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               height: 88,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF2563EB), // Official Blue
+                color: const Color(0xFF135BEC), // Official Blue
                 border: Border.all(color: Colors.white, width: 3),
                 boxShadow: [
                   BoxShadow(
@@ -502,12 +502,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   width: 30,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB),
+                    color: const Color(0xFF135BEC),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2563EB).withOpacity(0.3),
+                        color: const Color(0xFF135BEC).withOpacity(0.3),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
@@ -1041,19 +1041,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A5F).withOpacity(0.06),
+                  color: const Color(0xFF135BEC).withOpacity(0.06),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF1E3A5F).withOpacity(0.15)),
+                  border: Border.all(color: const Color(0xFF135BEC).withOpacity(0.15)),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1E3A5F).withOpacity(0.1),
+                        color: const Color(0xFF135BEC).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.shield_outlined, color: Color(0xFF1E3A5F), size: 24),
+                      child: const Icon(Icons.shield_outlined, color: Color(0xFF135BEC), size: 24),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
@@ -1062,13 +1062,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         children: [
                           const Text(
                             'Pasaporte de Solvencia',
-                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F), fontSize: 13),
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF135BEC), fontSize: 13),
                           ),
                           const SizedBox(height: 3),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF135BEC),
                               borderRadius: BorderRadius.all(Radius.circular(4)),
                             ),
                             child: Text('profile.solvency_buyers_only'.tr(), style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w600)),
@@ -1081,7 +1081,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         ],
                       ),
                     ),
-                    const Icon(Icons.chevron_right, color: Color(0xFF1E3A5F), size: 20),
+                    const Icon(Icons.chevron_right, color: Color(0xFF135BEC), size: 20),
                   ],
                 ),
               ),
@@ -1143,7 +1143,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         icon: const Icon(Icons.workspace_premium_outlined, size: 16),
         label: Text('profile.trust_level_button'.tr()),
         style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF1E3A5F),
+          foregroundColor: const Color(0xFF135BEC),
           side: const BorderSide(color: Color(0xFFCBD5E1)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1190,11 +1190,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF2563EB), // Official Blue
+        color: const Color(0xFF135BEC), // Official Blue
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-              color: const Color(0xFF2563EB).withOpacity(0.3),
+              color: const Color(0xFF135BEC).withOpacity(0.3),
               blurRadius: 10,
               offset: const Offset(0, 4)),
         ],
@@ -1218,10 +1218,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: ElevatedButton.icon(
               onPressed: () => context.push('/property/create'),
               icon: const Icon(Icons.add_circle_outline,
-                  color: Color(0xFF2563EB), size: 18),
+                  color: Color(0xFF135BEC), size: 18),
               label: Text('profile.promo_button'.tr(),
                   style: const TextStyle(
-                      color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                      color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1335,10 +1335,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => setState(() => _propertiesStatusFilter = value),
-      selectedColor: const Color(0xFF2563EB).withOpacity(0.15),
-      checkmarkColor: const Color(0xFF2563EB),
+      selectedColor: const Color(0xFF135BEC).withOpacity(0.15),
+      checkmarkColor: const Color(0xFF135BEC),
       labelStyle: TextStyle(
-        color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade700,
+        color: isSelected ? const Color(0xFF135BEC) : Colors.grey.shade700,
         fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
         fontSize: 12,
       ),
@@ -1438,7 +1438,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF135BEC),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1551,7 +1551,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     width: 16,
                     height: 16,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF135BEC),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.add, size: 12, color: Colors.white),
@@ -1572,7 +1572,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 'Publicar otro anuncio ahora',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1617,7 +1617,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             icon: const Icon(Icons.add_home_outlined, size: 18),
             label: Text('profile.publish_property'.tr()),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF135BEC),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -1632,7 +1632,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             ),
             child: Text('profile.see_drafts'.tr(),
                 style: const TextStyle(
-                    color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                    color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -1721,7 +1721,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
-                        const BorderSide(color: Color(0xFF2563EB), width: 2)),
+                        const BorderSide(color: Color(0xFF135BEC), width: 2)),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 suffixIcon: IconButton(
@@ -1774,7 +1774,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
-                              color: Color(0xFF2563EB), width: 2)),
+                              color: Color(0xFF135BEC), width: 2)),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       suffixIcon: SizedBox(
@@ -1786,7 +1786,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                               message: 'profile.generate_password'.tr(),
                               child: IconButton(
                                 icon: const Icon(Icons.auto_fix_high,
-                                    color: Color(0xFF2563EB), size: 18),
+                                    color: Color(0xFF135BEC), size: 18),
                                 onPressed: _generateSecurePassword,
                                 splashRadius: 18,
                               ),
@@ -1842,7 +1842,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
-                              color: Color(0xFF2563EB), width: 2)),
+                              color: Color(0xFF135BEC), width: 2)),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 12),
                       suffixIcon: IconButton(
@@ -1952,7 +1952,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF135BEC),
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -2033,7 +2033,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     } else {
       bgColor = Colors.blue.shade50;
       borderColor = Colors.blue.shade100;
-      iconColor = const Color(0xFF2563EB);
+      iconColor = const Color(0xFF135BEC);
       icon = Icons.shield;
       message =
           'Verifica tu identidad para mayor seguridad y destacar tus anuncios.';
@@ -2175,7 +2175,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           (m) => '${m[1]}.',
         );
     final directionColor = direction == 'Enviada'
-        ? const Color(0xFF2563EB)
+        ? const Color(0xFF135BEC)
         : const Color(0xFF16A34A);
 
     return Container(
@@ -2238,7 +2238,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   '$amount EUR',
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF135BEC),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -2272,8 +2272,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               extra: offer,
             ),
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFF2563EB),
-              side: const BorderSide(color: Color(0xFF2563EB)),
+              foregroundColor: const Color(0xFF135BEC),
+              side: const BorderSide(color: Color(0xFF135BEC)),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
@@ -2319,9 +2319,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       case 'countered':
         return const Color(0xFFD97706);
       case 'signing_pending':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       case 'signed':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       case 'completed':
         return const Color(0xFF16A34A);
       case 'rejected':
@@ -2336,7 +2336,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   // ── Visitas tab ─────────────────────────────────────────────────────────────
 
   Widget _buildVisitsTab() {
-    const kNavy = Color(0xFF1E3A5F);
+    const kNavy = Color(0xFF135BEC);
     const kNavyLight = Color(0xFFEEF3FA);
     final agendaAsync = ref.watch(myVisitsProvider);
     final chatVisitsAsync = ref.watch(chatVisitsProvider);
@@ -2506,13 +2506,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildVisitTile(MyVisit v) {
-    const kNavy = Color(0xFF1E3A5F);
+    const kNavy = Color(0xFF135BEC);
     final isUpcoming = v.startTime.isAfter(DateTime.now());
     final statusColor = _visitStatusColor(v.status);
     final statusLabel = _visitStatusLabel(v.status);
     final roleLabel = v.role == 'buyer' ? 'Comprador' : 'Vendedor';
     final roleColor =
-        v.role == 'buyer' ? const Color(0xFF2563EB) : const Color(0xFF16A34A);
+        v.role == 'buyer' ? const Color(0xFF135BEC) : const Color(0xFF16A34A);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -2655,7 +2655,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 PopupMenuItem(
                   value: 'reschedule',
                   child: Row(children: [
-                    const Icon(Icons.edit_calendar, size: 20, color: Color(0xFF2563EB)),
+                    const Icon(Icons.edit_calendar, size: 20, color: Color(0xFF135BEC)),
                     const SizedBox(width: 8),
                     Text('profile.visit_reschedule'.tr()),
                   ]),
@@ -2752,7 +2752,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       case 'rejected':
         return Colors.red;
       case 'completed':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       default:
         return const Color(0xFF64748B);
     }
@@ -2821,7 +2821,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         chatAsync.when(
           loading: () => const Center(
             heightFactor: 5,
-            child: CircularProgressIndicator(color: Color(0xFF1E3A5F)),
+            child: CircularProgressIndicator(color: Color(0xFF135BEC)),
           ),
           error: (err, _) => Center(
             heightFactor: 5,
@@ -2877,7 +2877,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       child: const Icon(
                         Icons.chat_bubble_outline_rounded,
                         size: 36,
-                        color: Color(0xFF1E3A5F),
+                        color: Color(0xFF135BEC),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -2913,7 +2913,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
   Widget _buildChatTile(ChatConversation conv) {
     final hasUnread = conv.unreadCount > 0;
-    const kNavy = Color(0xFF1E3A5F);
+    const kNavy = Color(0xFF135BEC);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -3153,8 +3153,8 @@ class _ProfileChatButtonState extends ConsumerState<_ProfileChatButton> {
           : const Icon(Icons.chat_bubble_outline, size: 16),
       label: Text('chat.title'.tr()),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF2563EB),
-        side: const BorderSide(color: Color(0xFF2563EB)),
+        foregroundColor: const Color(0xFF135BEC),
+        side: const BorderSide(color: Color(0xFF135BEC)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -3381,7 +3381,7 @@ class _SortButton<T> extends StatelessWidget {
                     Icons.check,
                     size: 15,
                     color: e.key == value
-                        ? const Color(0xFF1E3A5F)
+                        ? const Color(0xFF135BEC)
                         : Colors.transparent,
                   ),
                   const SizedBox(width: 8),
@@ -3392,7 +3392,7 @@ class _SortButton<T> extends StatelessWidget {
                       fontWeight:
                           e.key == value ? FontWeight.w700 : FontWeight.normal,
                       color: e.key == value
-                          ? const Color(0xFF1E3A5F)
+                          ? const Color(0xFF135BEC)
                           : const Color(0xFF334155),
                     ),
                   ),

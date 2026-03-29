@@ -195,9 +195,9 @@ class _PropertyStep1TypeLocationState
         if (s.step1Error != null) ...[
           const SizedBox(height: 12),
           _Banner(
-            color: const Color(0xFFFEE2E2),
-            borderColor: const Color(0xFFF87171),
-            iconColor: const Color(0xFFDC2626),
+            color: Theme.of(context).colorScheme.errorContainer,
+            borderColor: Theme.of(context).colorScheme.error,
+            iconColor: Theme.of(context).colorScheme.error,
             icon: Icons.error_outline,
             text: s.step1Error!,
           ),
@@ -229,10 +229,10 @@ class _PropertyStep1TypeLocationState
                     style: const TextStyle(fontSize: 13)),
                 selected: selected,
                 onSelected: (_) => notifier.selectType(type),
-                selectedColor: const Color(0xFF2563EB),
+                selectedColor: Theme.of(context).colorScheme.primary,
                 labelStyle: TextStyle(
                   fontSize: 13,
-                  color: selected ? Colors.white : Colors.grey.shade700,
+                  color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: selected ? FontWeight.bold : FontWeight.normal,
                 ),
                 backgroundColor: Theme.of(context).colorScheme.surface,
@@ -240,8 +240,8 @@ class _PropertyStep1TypeLocationState
                   borderRadius: BorderRadius.circular(8),
                   side: BorderSide(
                     color: selected
-                        ? const Color(0xFF2563EB)
-                        : Colors.grey.shade300,
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
                 showCheckmark: false,
@@ -419,9 +419,9 @@ class _PropertyStep1TypeLocationState
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade50,
+          color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -438,8 +438,8 @@ class _PropertyStep1TypeLocationState
                     : Icons.gps_not_fixed,
                 size: 16,
                 color: s.selectedLocation != null
-                    ? const Color(0xFF16A34A)
-                    : Colors.grey.shade400,
+                    ? (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             const SizedBox(width: 10),
             Expanded(
@@ -453,8 +453,8 @@ class _PropertyStep1TypeLocationState
                 style: TextStyle(
                   fontSize: 13,
                   color: s.selectedLocation != null && !s.isGeocodingAddress
-                      ? const Color(0xFF0F172A)
-                      : Colors.grey.shade500,
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -470,9 +470,9 @@ class _PropertyStep1TypeLocationState
       PropertyFormState s, PropertyFormNotifier notifier) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: SwitchListTile(
         contentPadding:
@@ -491,11 +491,11 @@ class _PropertyStep1TypeLocationState
           s.hideExactLocation
               ? Icons.location_off_outlined
               : Icons.location_on_outlined,
-          color: const Color(0xFF2563EB),
+          color: Theme.of(context).colorScheme.primary,
         ),
         value: s.hideExactLocation,
         onChanged: (_) => notifier.toggleHideExactLocation(),
-        activeColor: const Color(0xFF2563EB),
+        activeColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
@@ -527,8 +527,8 @@ class _PropertyStep1TypeLocationState
                   point: s.selectedLocation!,
                   width: 40,
                   height: 40,
-                  child: const Icon(Icons.location_pin,
-                      color: Color(0xFF2563EB), size: 40),
+                  child: Icon(Icons.location_pin,
+                      color: Theme.of(context).colorScheme.primary, size: 40),
                 ),
               ]),
           ],
@@ -549,12 +549,12 @@ class _PropertyStep1TypeLocationState
               foregroundColor: Colors.black87,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
               child: _locating
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Color(0xFF2563EB),
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     )
                   : const Icon(Icons.my_location, size: 20),
@@ -604,10 +604,11 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -627,18 +628,18 @@ class _SectionCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+                child: Icon(icon, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Color(0xFF1E293B),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],

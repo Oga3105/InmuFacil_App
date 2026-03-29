@@ -23,6 +23,13 @@ import '../../../core/utils/tax_calculator.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const Color _textPrimary = Color(0xFF1E293B);
+const Color _textSecondary = Color(0xFF64748B);
+const Color _textMuted = Color(0xFF94A3B8);
+const Color _blue = Color(0xFF135BEC);
+const Color _orange = Color(0xFFF59E0B);
+
 class PreOfferTaxSummaryScreen extends StatelessWidget {
   const PreOfferTaxSummaryScreen({
     super.key,
@@ -35,21 +42,15 @@ class PreOfferTaxSummaryScreen extends StatelessWidget {
   final String propertyId;
   final String postalCode;
 
-  static const _blue = Color(0xFF2563EB);
-  static const _green = Color(0xFF16A34A);
-  static const _orange = Color(0xFFF59E0B);
-  static const _surface = Color(0xFFF1F5F9);
-  static const _textPrimary = Color(0xFF1E293B);
-  static const _textSecondary = Color(0xFF64748B);
-  static const _textMuted = Color(0xFF94A3B8);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final ccaa = ccaaFromPostalCode(postalCode);
     final result = calculateBuyingCosts(offerAmount, ccaa);
 
     return Scaffold(
-      backgroundColor: _surface,
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
@@ -67,12 +68,12 @@ class PreOfferTaxSummaryScreen extends StatelessWidget {
               children: [
                 Image.asset('assets/images/logo_inmufacil.png', height: 28),
                 const SizedBox(width: 8),
-                const Text.rich(
+                Text.rich(
                   TextSpan(
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: colorScheme.primary)),
+                      TextSpan(text: 'Fácil', style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                     ],
                   ),
                 ),
@@ -90,22 +91,22 @@ class PreOfferTaxSummaryScreen extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: colorScheme.primary.withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
+                    const SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -154,42 +155,40 @@ class _OfferAmountHero extends StatelessWidget {
 
   final int offerAmount;
 
-  static const _textPrimary = Color(0xFF1E293B);
-  static const _textSecondary = Color(0xFF64748B);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
           Text(
             'pre_offer_tax.offer_amount_label'.tr(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF94A3B8),
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 1.5,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             '${CurrencyInputFormatter.format(offerAmount)} €',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF2563EB),
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             'pre_offer_tax.offer_subtitle'.tr(),
-            style: const TextStyle(fontSize: 12, color: _textSecondary),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -204,18 +203,15 @@ class _FiscalBreakdownCard extends StatelessWidget {
 
   final TaxResult result;
 
-  static const _textPrimary = Color(0xFF1E293B);
-  static const _textSecondary = Color(0xFF64748B);
-  static const _blue = Color(0xFF2563EB);
-  static const _orange = Color(0xFFF59E0B);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -224,25 +220,25 @@ class _FiscalBreakdownCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: colorScheme.primaryContainer,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
               border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
+                bottom: BorderSide(color: colorScheme.outlineVariant),
               ),
             ),
             child: Row(
               children: [
-                const Icon(Icons.calculate_outlined, size: 18, color: _blue),
+                Icon(Icons.calculate_outlined, size: 18, color: colorScheme.primary),
                 const SizedBox(width: 10),
                 Text(
                   'pre_offer_tax.header'.tr(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
-                    color: _textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const Spacer(),
@@ -344,27 +340,27 @@ class _FiscalBreakdownCard extends StatelessWidget {
                   children: [
                     Text(
                       'pre_offer_tax.total_label'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
-                        color: _textPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       'pre_offer_tax.total_sublabel'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: _textSecondary,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
                 Text(
                   '${CurrencyInputFormatter.format(result.total)} €',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: _textPrimary,
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -376,9 +372,9 @@ class _FiscalBreakdownCard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
             child: Text(
               'pre_offer_tax.notarial_disclaimer'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: _textMuted,
+                color: colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
               textAlign: TextAlign.center,
@@ -411,12 +407,10 @@ class _CostRow extends StatelessWidget {
   final bool isOptional;
   final String? dataSource;
 
-  static const _textPrimary = Color(0xFF1E293B);
-  static const _textSecondary = Color(0xFF64748B);
-  static const _textMuted = Color(0xFF94A3B8);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -438,10 +432,10 @@ class _CostRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: _textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   if (isOptional) ...[
@@ -450,7 +444,7 @@ class _CostRow extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF3C7),
+                        color: isDark ? colorScheme.surfaceContainer : const Color(0xFFFEF3C7),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -578,7 +572,7 @@ class _ActionButtons extends StatelessWidget {
 
   final VoidCallback onBack;
 
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
 
   @override
   Widget build(BuildContext context) {

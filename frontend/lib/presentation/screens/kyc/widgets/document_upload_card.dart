@@ -54,7 +54,7 @@ class DashedBorderPainter extends CustomPainter {
 
 /// L-shape corner mark painter
 class CornerMarkPainter extends CustomPainter {
-  CornerMarkPainter({this.color = const Color(0xFF3B82F6), this.length = 20, this.strokeWidth = 2.5});
+  CornerMarkPainter({this.color = const Color(0xFF135BEC), this.length = 20, this.strokeWidth = 2.5});
 
   final Color color;
   final double length;
@@ -106,24 +106,27 @@ class DocumentUploadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     final height = compact ? 200.0 : 220.0;
 
     return GestureDetector(
       onTap: onTap,
       child: CustomPaint(
         painter: _hasImage ? null : DashedBorderPainter(
-          color: const Color(0xFFCBD5E1),
+          color: colorScheme.outlineVariant,
           radius: 12,
         ),
         child: CustomPaint(
-          painter: _hasImage ? null : CornerMarkPainter(),
+          painter: _hasImage ? null : CornerMarkPainter(color: colorScheme.primary),
           child: Container(
             height: height,
             decoration: BoxDecoration(
-              color: _hasImage ? null : const Color(0xFFF8FAFC),
+              color: _hasImage ? null : colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(12),
               border: _hasImage
-                  ? Border.all(color: Colors.green.shade400, width: 2)
+                  ? Border.all(color: greenColor, width: 2)
                   : null,
             ),
             child: Stack(
@@ -142,13 +145,13 @@ class DocumentUploadCard extends StatelessWidget {
                       Icon(
                         Icons.camera_alt_outlined,
                         size: compact ? 36 : 48,
-                        color: const Color(0xFF3B82F6),
+                        color: colorScheme.primary,
                       ),
                       const SizedBox(height: 8),
                       Text(
                         title,
                         style: TextStyle(
-                          color: const Color(0xFF1E293B),
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           fontSize: compact ? 13 : 15,
                         ),
@@ -157,7 +160,7 @@ class DocumentUploadCard extends StatelessWidget {
                       Text(
                         'Toca para escanear',
                         style: TextStyle(
-                          color: Colors.grey.shade500,
+                          color: colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                       ),
@@ -173,11 +176,11 @@ class DocumentUploadCard extends StatelessWidget {
                     right: 8,
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                      child: Icon(Icons.check_circle, color: greenColor, size: 24),
                     ),
                   ),
               ],

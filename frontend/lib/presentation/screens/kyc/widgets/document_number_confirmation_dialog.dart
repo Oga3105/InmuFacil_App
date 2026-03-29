@@ -141,6 +141,8 @@ class _DocumentNumberConfirmationDialogState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -156,6 +158,7 @@ class _DocumentNumberConfirmationDialogState
   }
 
   Widget _buildTitle() {
+    final colorScheme = Theme.of(context).colorScheme;
     if (widget.isLoading) {
       return Text(
         '$_ns.title_loading'.tr(),
@@ -165,10 +168,10 @@ class _DocumentNumberConfirmationDialogState
     if (!widget.readable) {
       return Text(
         '$_ns.title_unreadable'.tr(),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w700,
-          color: Color(0xFFDC2626),
+          color: colorScheme.error,
         ),
       );
     }
@@ -187,20 +190,21 @@ class _DocumentNumberConfirmationDialogState
   }
 
   Widget _buildLoadingBody() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
           ),
           const SizedBox(height: 16),
           Text(
             '$_ns.loading_body'
                 .tr(namedArgs: {'doc_type': widget.documentTypeLabel}),
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
           ),
         ],
       ),
@@ -208,6 +212,7 @@ class _DocumentNumberConfirmationDialogState
   }
 
   Widget _buildUnreadableBody() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
@@ -216,16 +221,16 @@ class _DocumentNumberConfirmationDialogState
         children: [
           _alertBox(
             icon: Icons.warning_amber_rounded,
-            iconColor: const Color(0xFFDC2626),
-            bg: const Color(0xFFFEF2F2),
-            border: const Color(0xFFFECACA),
+            iconColor: colorScheme.error,
+            bg: colorScheme.errorContainer,
+            border: colorScheme.error.withOpacity(0.3),
             text: '$_ns.unreadable_body'.tr(),
-            textColor: const Color(0xFFB91C1C),
+            textColor: colorScheme.onErrorContainer,
           ),
           const SizedBox(height: 12),
           Text(
             '$_ns.unreadable_hint'.tr(),
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
         ],
       ),
@@ -233,6 +238,7 @@ class _DocumentNumberConfirmationDialogState
   }
 
   Widget _buildResultBody() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,23 +258,23 @@ class _DocumentNumberConfirmationDialogState
         Text(
           '$_ns.extracted_number_label'
               .tr(namedArgs: {'doc_type': widget.documentTypeLabel}),
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
         ),
         const SizedBox(height: 12),
         _docNumberBox(widget.docNumber ?? ''),
         const SizedBox(height: 12),
         Text(
           '$_ns.confirm_question'.tr(),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF1E293B),
+            color: colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           '$_ns.confirm_hint'.tr(),
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+          style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 12),
         ),
 
         // Manual entry — only on second attempt
@@ -291,15 +297,15 @@ class _DocumentNumberConfirmationDialogState
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
                   size: 18,
-                  color: const Color(0xFF2563EB),
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   _useManual
                       ? '$_ns.manual_toggle_close'.tr()
                       : '$_ns.manual_toggle_open'.tr(),
-                  style: const TextStyle(
-                    color: Color(0xFF2563EB),
+                  style: TextStyle(
+                    color: colorScheme.primary,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -329,9 +335,11 @@ class _DocumentNumberConfirmationDialogState
         ? result!.errorKey!.tr(namedArgs: result.errorArgs ?? {})
         : null;
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final borderColor = isCif || (hasError && !isCif)
-        ? const Color(0xFFDC2626)
-        : const Color(0xFF2563EB);
+        ? colorScheme.error
+        : colorScheme.primary;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -350,8 +358,8 @@ class _DocumentNumberConfirmationDialogState
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: isCif
-                  ? const BorderSide(color: Color(0xFFDC2626))
-                  : BorderSide(color: Colors.grey.shade400),
+                  ? BorderSide(color: colorScheme.error)
+                  : BorderSide(color: colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -360,8 +368,8 @@ class _DocumentNumberConfirmationDialogState
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             suffixIcon: result?.isValid == true
-                ? const Icon(Icons.check_circle,
-                    color: Color(0xFF16A34A), size: 20)
+                ? Icon(Icons.check_circle,
+                    color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A), size: 20)
                 : null,
           ),
           style: const TextStyle(fontWeight: FontWeight.w700, letterSpacing: 2),
@@ -386,6 +394,8 @@ class _DocumentNumberConfirmationDialogState
   // -------------------------------------------------------------------------
 
   List<Widget> _buildActions(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (widget.isLoading) return [];
 
     if (!widget.readable) {
@@ -398,7 +408,7 @@ class _DocumentNumberConfirmationDialogState
               widget.onReupload();
             },
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: colorScheme.primary,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -439,8 +449,8 @@ class _DocumentNumberConfirmationDialogState
               }
             : null,
         style: FilledButton.styleFrom(
-          backgroundColor: const Color(0xFF16A34A),
-          disabledBackgroundColor: Colors.grey.shade300,
+          backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+          disabledBackgroundColor: colorScheme.onSurface.withOpacity(0.12),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -458,21 +468,22 @@ class _DocumentNumberConfirmationDialogState
   // -------------------------------------------------------------------------
 
   Widget _docNumberBox(String number) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2563EB), width: 2),
+        border: Border.all(color: colorScheme.primary, width: 2),
       ),
       child: Text(
         number,
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 26,
           fontWeight: FontWeight.w800,
-          color: Color(0xFF1E3A8A),
+          color: colorScheme.onPrimaryContainer,
           letterSpacing: 3,
         ),
       ),

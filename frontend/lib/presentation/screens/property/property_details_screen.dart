@@ -84,10 +84,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final favoriteIds = ref.watch(favoritesProvider);
     final isFavorite = favoriteIds.contains(property.id);
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
@@ -118,7 +120,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     TextSpan(
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                       children: [
-                        TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                        TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                         TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                       ],
                     ),
@@ -148,7 +150,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       PopupMenuButton<String>(
-                        icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurface),
+                        icon: Icon(Icons.more_vert, color: colorScheme.onSurface),
                         onSelected: (value) {
                           if (value == 'list') {
                             final allFiltered = ref.read(searchProvider).filteredProperties;
@@ -190,8 +192,8 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         }
                         context.go('/search?highlight=${widget.propertyId}');
                       },
-                      icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF2563EB)),
-                      label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                      icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF135BEC)),
+                      label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
                       style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -200,7 +202,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     PremiumButton(
                       label: 'Publicar Gratis',
                       onPressed: () {},
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                       fullWidth: false,
                       fontSize: 14,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -215,7 +217,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
+          child: Container(color: colorScheme.outlineVariant, height: 1),
         ),
       ),
       body: Stack(
@@ -329,7 +331,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       // Title & Price (Mobile Order)
                       Text(
                         property.formattedPriceFull, // Full price with thousands separator
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
+                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface),
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -350,7 +352,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         _EnergyCertBadge(rating: property.energyCertification!),
                       ],
                       const SizedBox(height: 24),
-                      Divider(color: Colors.grey[200]),
+                      Divider(color: Theme.of(context).colorScheme.outlineVariant),
                       const SizedBox(height: 24),
                       _DescriptionSection(property: property),
                       const SizedBox(height: 32),
@@ -399,10 +401,11 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
   Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {
     if (!authenticated) {
+      final cs = Theme.of(context).colorScheme;
       return CircleAvatar(
         radius: 18,
-        backgroundColor: Colors.grey[200],
-        child: Icon(Icons.person, color: Colors.grey[600], size: 20),
+        backgroundColor: cs.surfaceContainerHighest,
+        child: Icon(Icons.person, color: cs.onSurfaceVariant, size: 20),
       );
     }
     final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
@@ -415,7 +418,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const CircleAvatar(
             radius: 18,
-            backgroundColor: Color(0xFF2563EB),
+            backgroundColor: Color(0xFF135BEC),
             child: Icon(Icons.person, color: Colors.white, size: 20),
           ),
         ),
@@ -423,7 +426,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     }
     return const CircleAvatar(
       radius: 18,
-      backgroundColor: Color(0xFF2563EB),
+      backgroundColor: Color(0xFF135BEC),
       child: Icon(Icons.person, color: Colors.white, size: 20),
     );
   }
@@ -511,8 +514,8 @@ class _HeroImageSectionState extends State<_HeroImageSection>
             borderRadius: widget.isMobile ? BorderRadius.zero : BorderRadius.circular(16),
             child: images.isEmpty
                 ? Container(
-                    color: Colors.grey[200],
-                    child: const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 48)),
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.image_not_supported, color: Theme.of(context).colorScheme.outline, size: 48),
                   )
                 : GestureDetector(
                     onTap: () => _openFullscreen(context, _currentIndex),
@@ -525,8 +528,8 @@ class _HeroImageSectionState extends State<_HeroImageSection>
                         fit: BoxFit.cover,
                         width: double.infinity,
                         errorBuilder: (_, __, ___) => Container(
-                          color: Colors.grey[200],
-                          child: const Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 48)),
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          child: Icon(Icons.broken_image, color: Theme.of(context).colorScheme.outline, size: 48),
                         ),
                       ),
                     ),
@@ -809,25 +812,26 @@ class _LocationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Ubicación aproximada', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+            Text('Ubicación aproximada', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.blue[100]!),
+                border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.shield_outlined, size: 14, color: Color(0xFF135bec)),
-                  SizedBox(width: 4),
-                  Text('UBICACIÓN PROTEGIDA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF135bec))),
+                  Icon(Icons.shield_outlined, size: 14, color: colorScheme.primary),
+                  const SizedBox(width: 4),
+                  Text('UBICACIÓN PROTEGIDA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
                 ],
               ),
             ),
@@ -838,7 +842,7 @@ class _LocationSection extends StatelessWidget {
           height: 300,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -877,13 +881,13 @@ class _LocationSection extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                     decoration: BoxDecoration(
-                       color: Colors.white.withOpacity(0.95),
+                       color: colorScheme.surface.withValues(alpha: 0.95),
                        borderRadius: BorderRadius.circular(8),
                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                     ),
-                    child: const Text(
+                    child: Text(
                       'Por seguridad y privacidad, no mostramos la ubicación exacta hasta que la visita sea confirmada.',
-                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Color(0xFF64748b)),
+                      style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -908,12 +912,14 @@ class _SummaryCard extends ConsumerWidget {
         currentUserId != null &&
         property.ownerId == currentUserId;
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: colorScheme.surfaceContainerLow),
         boxShadow: [
           BoxShadow(color: Colors.blue.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
         ],
@@ -928,7 +934,7 @@ class _SummaryCard extends ConsumerWidget {
             children: [
               Text(
                 property.formattedPriceFull,
-                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF0f172a)),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
               ),
               const SizedBox(width: 8),
               const Text(
@@ -965,7 +971,7 @@ class _SummaryCard extends ConsumerWidget {
             large: true,
           ),
           const SizedBox(height: 24),
-          Divider(color: Colors.grey[100]),
+          Divider(color: colorScheme.surfaceContainerLow),
           const SizedBox(height: 16),
           _PropertyStatsGrid(property: property),
           if (property.energyCertification != null) ...[
@@ -1221,7 +1227,7 @@ class _ActionBar extends StatelessWidget {
             color: const Color(0xFFEFF6FF),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+          child: Icon(icon, color: const Color(0xFF135BEC), size: 28),
         ),
         title: Text(title, textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
@@ -1240,7 +1246,7 @@ class _ActionBar extends StatelessWidget {
           FilledButton(
             onPressed: onCta,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(cta),
@@ -1286,7 +1292,7 @@ class _ActionBar extends StatelessWidget {
                     icon: const Icon(Icons.gavel_rounded, size: 20),
                     label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: const Color(0xFF135BEC),
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -1304,8 +1310,8 @@ class _ActionBar extends StatelessWidget {
               icon: const Icon(Icons.list_alt_outlined, size: 20),
               label: const Text('Gestionar Ofertas', style: TextStyle(fontWeight: FontWeight.w600)),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF2563EB),
-                side: const BorderSide(color: Color(0xFF2563EB)),
+                foregroundColor: const Color(0xFF135BEC),
+                side: const BorderSide(color: Color(0xFF135BEC)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -1358,7 +1364,7 @@ class _ActionBar extends StatelessWidget {
                     icon: const Icon(Icons.gavel_rounded),
                     label: const Text('Hacer Oferta'),
                     style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
+                      backgroundColor: const Color(0xFF135BEC),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1382,8 +1388,8 @@ class _ActionBar extends StatelessWidget {
                 icon: const Icon(Icons.list_alt_outlined),
                 label: const Text('Gestionar Ofertas'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
+                  foregroundColor: const Color(0xFF135BEC),
+                  side: const BorderSide(color: Color(0xFF135BEC)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -1495,7 +1501,7 @@ class _NavigationArrowState extends State<_NavigationArrow> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: _isHovered ? const Color(0xFF135bec) : Colors.white.withOpacity(0.9), // Brand Blue on hover
+            color: _isHovered ? const Color(0xFF135bec) : Theme.of(context).colorScheme.surface.withValues(alpha: 0.9), // Brand Blue on hover
             shape: BoxShape.circle,
             boxShadow: [
                BoxShadow(
@@ -1505,13 +1511,13 @@ class _NavigationArrowState extends State<_NavigationArrow> {
                ),
             ],
             border: Border.all(
-              color: _isHovered ? const Color(0xFF135bec) : Colors.grey.shade200, 
+              color: _isHovered ? const Color(0xFF135bec) : Theme.of(context).colorScheme.outlineVariant,
               width: 1,
             ),
           ),
           child: Icon(
-            widget.icon, 
-            color: _isHovered ? Colors.white : const Color(0xFF0f172a), 
+            widget.icon,
+            color: _isHovered ? Colors.white : Theme.of(context).colorScheme.onSurface,
             size: isSmall ? 24 : 32,
           ),
         ),
@@ -1602,7 +1608,7 @@ class _SellerMetricsCard extends ConsumerWidget {
   final String propertyId;
   final String? status;
 
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
 
   String get _badgeLabel {
@@ -1628,12 +1634,14 @@ class _SellerMetricsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final analyticsAsync = ref.watch(propertyAnalyticsProvider(propertyId));
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -1774,7 +1782,7 @@ class _MetricDivider extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: 1,
         height: 50,
-        color: const Color(0xFFE2E8F0),
+        color: Theme.of(context).colorScheme.outlineVariant,
       );
 }
 
@@ -1790,10 +1798,12 @@ class _OwnerCard extends StatelessWidget {
     final isVerified = property.ownerIsVerified;
     final photoUrl = property.ownerPhotoUrl;
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color(0xFFf8fafc),
+        color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.transparent),
       ),
@@ -1813,13 +1823,13 @@ class _OwnerCard extends StatelessWidget {
                           height: 40,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFF2563EB),
+                            color: const Color(0xFF135BEC),
                             alignment: Alignment.center,
                             child: const Icon(Icons.person, color: Colors.white, size: 20),
                           ),
                         )
                       : Container(
-                          color: const Color(0xFF2563EB),
+                          color: const Color(0xFF135BEC),
                           alignment: Alignment.center,
                           child: const Icon(Icons.person, color: Colors.white, size: 20),
                         ),
@@ -2000,7 +2010,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
                 Navigator.pop(context);
                 context.push('/property/${widget.propertyId}/offer');
               },
-              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2563EB)),
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
               child: const Text('Hacer Oferta'),
             ),
           ],
@@ -2035,8 +2045,8 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF2563EB),
-        side: const BorderSide(color: Color(0xFF2563EB)),
+        foregroundColor: const Color(0xFF135BEC),
+        side: const BorderSide(color: Color(0xFF135BEC)),
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),

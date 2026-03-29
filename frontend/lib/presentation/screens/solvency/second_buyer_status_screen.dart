@@ -106,17 +106,17 @@ class _SecondBuyerStatusScreenState
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 32),
               const SizedBox(width: 8),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Color(0xFF4ADE80) : Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -141,17 +141,17 @@ class _SecondBuyerStatusScreenState
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
+                  const SizedBox(width: 6),
                   Text('Inicio',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
                           fontSize: 14)),
                 ],
@@ -181,9 +181,10 @@ class _SecondBuyerStatusScreenState
   // ── PENDING ────────────────────────────────────────────────────────────
 
   Widget _buildPendingCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -235,20 +236,20 @@ class _SecondBuyerStatusScreenState
                   size: 40, color: Colors.orange.shade400),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Estamos verificando al segundo titular',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Nuestro sistema de IA está comparando el rostro con el documento oficial. Esto puede tardar unos minutos.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+              style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
             ),
             const SizedBox(height: 28),
             _buildProgressSteps(step: 1),
@@ -274,9 +275,12 @@ class _SecondBuyerStatusScreenState
 
   Widget _buildApprovedCard() {
     _pollTimer?.cancel();
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -292,7 +296,7 @@ class _SecondBuyerStatusScreenState
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
-            color: const Color(0xFF16A34A),
+            color: greenColor,
             child: const Center(
               child: Text(
                 '2° TITULAR VERIFICADO',
@@ -331,20 +335,19 @@ class _SecondBuyerStatusScreenState
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Identidad confirmada',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'El segundo titular ha superado la verificación biométrica. Podéis continuar con el proceso de compraventa.',
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                 ),
                 const SizedBox(height: 28),
                 _buildProgressSteps(step: 3),
@@ -354,7 +357,7 @@ class _SecondBuyerStatusScreenState
                   icon: const Icon(Icons.arrow_forward),
                   label: const Text('Continuar'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF16A34A),
+                    backgroundColor: greenColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 28, vertical: 12),
@@ -374,9 +377,10 @@ class _SecondBuyerStatusScreenState
 
   Widget _buildRejectedCard(String? reason) {
     _pollTimer?.cancel();
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -420,13 +424,13 @@ class _SecondBuyerStatusScreenState
                       size: 44, color: Colors.red.shade400),
                 ),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'No se pudo verificar la identidad',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1E293B),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 if (reason != null) ...[
@@ -450,8 +454,7 @@ class _SecondBuyerStatusScreenState
                 Text(
                   'Asegúrate de que las imágenes sean nítidas y que el rostro sea claramente visible.',
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                 ),
                 const SizedBox(height: 28),
                 ElevatedButton.icon(
@@ -460,8 +463,8 @@ class _SecondBuyerStatusScreenState
                   icon: const Icon(Icons.refresh),
                   label: const Text('Intentar de nuevo'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
-                    foregroundColor: Colors.white,
+                    backgroundColor: colorScheme.onSurface,
+                    foregroundColor: colorScheme.surface,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(

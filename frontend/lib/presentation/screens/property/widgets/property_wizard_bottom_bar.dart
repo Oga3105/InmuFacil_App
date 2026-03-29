@@ -12,10 +12,10 @@ class PropertyWizardBottomBar extends ConsumerWidget {
 
   final VoidCallback onSubmit;
 
-  static const _blue = Color(0xFF2563EB);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final formState = ref.watch(propertyFormProvider);
     final notifier = ref.read(propertyFormProvider.notifier);
     final currentStep = formState.currentStep;
@@ -25,7 +25,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -45,7 +45,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
               icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 14),
               label: Text('property_wizard.back'.tr()),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.grey.shade700,
+                foregroundColor: colorScheme.onSurfaceVariant,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             )
@@ -64,8 +64,8 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                     }
                   },
             style: FilledButton.styleFrom(
-              backgroundColor: isLastStep ? const Color(0xFF16A34A) : _blue,
-              disabledBackgroundColor: isLastStep ? const Color(0xFF16A34A) : _blue,
+              backgroundColor: isLastStep ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)) : colorScheme.primary,
+              disabledBackgroundColor: isLastStep ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)) : colorScheme.primary,
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

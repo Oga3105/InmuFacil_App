@@ -12,10 +12,7 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 
-const _kBlue  = Color(0xFF2563EB);
-const _kGreen = Color(0xFF16A34A);
-const _kRed   = Color(0xFFDC2626);
-const _kBg    = Color(0xFFF8FAFC);
+// Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
 
 // ── Arras data provider (auto-refresh while generating) ──────────────────────
 
@@ -137,10 +134,11 @@ class _ArrasContractReviewScreenState
       await dio.post('/arras/${widget.offer.id}/contract/accept');
       ref.invalidate(_arrasContractProvider(widget.offer.id));
       if (mounted) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Has aceptado el contrato.'),
-            backgroundColor: _kGreen,
+          SnackBar(
+            content: const Text('Has aceptado el contrato.'),
+            backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
       }
@@ -195,12 +193,15 @@ class _ArrasContractReviewScreenState
     final currentUser = ref.watch(authProvider).user;
     final isBuyer = currentUser?.id == widget.offer.buyerId;
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: _buildAppBar(context, ref),
       body: arrasAsync.when(
         loading: () =>
-            const Center(child: CircularProgressIndicator(color: _kBlue)),
+            Center(child: CircularProgressIndicator(color: colorScheme.primary)),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (data) {
           if (data == null) {
@@ -247,6 +248,7 @@ class _ArrasContractReviewScreenState
   // ─── Views ────────────────────────────────────────────────────────────────
 
   Widget _buildErrorView(String message) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -256,33 +258,33 @@ class _ArrasContractReviewScreenState
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _kRed.withValues(alpha: 0.08),
+                color: colorScheme.error.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.error_outline, color: _kRed, size: 56),
+              child: Icon(Icons.error_outline, color: colorScheme.error, size: 56),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Error al generar el contrato',
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F)),
+                  color: colorScheme.onSurface),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+                color: colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _kRed.withValues(alpha: 0.2)),
+                border: Border.all(color: colorScheme.error.withValues(alpha: 0.2)),
               ),
               child: Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF991B1B),
+                    color: colorScheme.onErrorContainer,
                     height: 1.5),
               ),
             ),
@@ -290,16 +292,16 @@ class _ArrasContractReviewScreenState
             FilledButton.icon(
               onPressed: _actionLoading ? null : _regenerateContract,
               icon: _actionLoading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                          color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.refresh_outlined),
               label: const Text('Reintentar generacion'),
               style: FilledButton.styleFrom(
-                backgroundColor: _kBlue,
-                disabledBackgroundColor: Colors.grey.shade300,
+                backgroundColor: colorScheme.primary,
+                disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(
@@ -310,7 +312,7 @@ class _ArrasContractReviewScreenState
             Text(
               'Si el problema persiste, espera unos minutos antes de reintentar.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -319,6 +321,7 @@ class _ArrasContractReviewScreenState
   }
 
   Widget _buildGeneratingView() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -328,18 +331,18 @@ class _ArrasContractReviewScreenState
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _kBlue.withValues(alpha: 0.08),
+                color: colorScheme.primary.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: const CircularProgressIndicator(color: _kBlue),
+              child: CircularProgressIndicator(color: colorScheme.primary),
             ),
             const SizedBox(height: 28),
-            const Text(
+            Text(
               'Generando contrato con IA',
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F)),
+                  color: colorScheme.onSurface),
             ),
             const SizedBox(height: 12),
             Text(
@@ -349,26 +352,26 @@ class _ArrasContractReviewScreenState
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5),
             ),
             const SizedBox(height: 24),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
                   Icon(Icons.auto_awesome_outlined,
-                      color: Colors.blue.shade700),
+                      color: colorScheme.primary),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'La pagina se actualizara automaticamente cuando el contrato este listo.',
                       style: TextStyle(
-                          fontSize: 13, color: Color(0xFF1E40AF)),
+                          fontSize: 13, color: colorScheme.onPrimaryContainer),
                     ),
                   ),
                 ],
@@ -381,6 +384,9 @@ class _ArrasContractReviewScreenState
   }
 
   Widget _buildFullyAcceptedView() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -390,19 +396,19 @@ class _ArrasContractReviewScreenState
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: _kGreen.withValues(alpha: 0.1),
+                color: kGreen.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child:
-                  const Icon(Icons.check_circle, color: _kGreen, size: 56),
+                  Icon(Icons.check_circle, color: kGreen, size: 56),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'Contrato firmado',
               style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F)),
+                  color: colorScheme.onSurface),
             ),
             const SizedBox(height: 12),
             Text(
@@ -411,7 +417,7 @@ class _ArrasContractReviewScreenState
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5),
             ),
             const SizedBox(height: 32),
@@ -420,7 +426,7 @@ class _ArrasContractReviewScreenState
               icon: const Icon(Icons.arrow_back_outlined),
               label: const Text('Volver al timeline'),
               style: FilledButton.styleFrom(
-                backgroundColor: _kBlue,
+                backgroundColor: colorScheme.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(
@@ -488,7 +494,7 @@ class _ArrasContractReviewScreenState
                 border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
+                    color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -496,10 +502,10 @@ class _ArrasContractReviewScreenState
               ),
               child: SelectableText(
                 contractText,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   height: 1.7,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontFamily: 'monospace',
                 ),
               ),
@@ -545,18 +551,18 @@ class _ArrasContractReviewScreenState
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Solicitar cambios en el contrato',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F)),
+                  color: Theme.of(ctx).colorScheme.onSurface),
             ),
             const SizedBox(height: 8),
             Text(
               'Explica que cambios necesitas. Ambas partes deberan volver a confirmar '
               'sus entrevistas y el contrato se regenerara.',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -568,11 +574,11 @@ class _ArrasContractReviewScreenState
                     'Ej: Necesito incluir la clausula de entrega de llaves en el plazo...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: Theme.of(ctx).colorScheme.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _kBlue, width: 2),
+                  borderSide: BorderSide(color: Theme.of(ctx).colorScheme.primary, width: 2),
                 ),
               ),
             ),
@@ -600,7 +606,7 @@ class _ArrasContractReviewScreenState
                       _rejectContract(notes);
                     },
                     style: FilledButton.styleFrom(
-                      backgroundColor: _kRed,
+                      backgroundColor: Theme.of(ctx).colorScheme.error,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
@@ -632,17 +638,19 @@ class _ArrasContractReviewScreenState
           children: [
             Image.asset('assets/images/logo_inmufacil.png', height: 32),
             const SizedBox(width: 8),
-            const Text.rich(
+            Text.rich(
               TextSpan(
                 style:
-                    TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                 children: [
                   TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB))),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                   TextSpan(
                       text: 'Fácil',
-                      style: TextStyle(color: Color(0xFF16A34A))),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFF16A34A))),
                 ],
               ),
             ),
@@ -669,25 +677,25 @@ class _ArrasContractReviewScreenState
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB),
+                        color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                          SizedBox(width: 6),
+                          Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
+                          const SizedBox(width: 6),
                           Text(
                             'Inicio',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -727,7 +735,7 @@ class _ContractStatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF1E3A5F),
+      color: Theme.of(context).colorScheme.onPrimaryContainer,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         children: [
@@ -738,7 +746,7 @@ class _ContractStatusBanner extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white12,
+                color: Colors.white.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -762,18 +770,20 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Row(
       children: [
         Icon(
           accepted ? Icons.check_circle : Icons.radio_button_unchecked,
-          color: accepted ? _kGreen : Colors.white38,
+          color: accepted ? kGreen : Colors.white.withValues(alpha: 0.38),
           size: 16,
         ),
         const SizedBox(width: 6),
         Text(
           label,
           style: TextStyle(
-            color: accepted ? Colors.white : Colors.white54,
+            color: accepted ? Colors.white : Colors.white.withValues(alpha: 0.54),
             fontSize: 12,
             fontWeight: accepted ? FontWeight.bold : FontWeight.normal,
           ),
@@ -796,9 +806,14 @@ class _RejectionNotesBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isMine ? Colors.orange.shade700 : _kRed;
-    final bg =
-        isMine ? Colors.orange.shade50 : const Color(0xFFFEF2F2);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isMine
+        ? (isDark ? const Color(0xFFFBBF24) : Colors.orange.shade700)
+        : colorScheme.error;
+    final bg = isMine
+        ? (isDark ? colorScheme.surfaceContainer : Colors.orange.shade50)
+        : colorScheme.errorContainer;
     return Container(
       color: bg,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -840,20 +855,23 @@ class _ContractActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: Row(
         children: [
           Expanded(
             child: OutlinedButton.icon(
               onPressed: loading ? null : onReject,
-              icon: const Icon(Icons.edit_outlined, color: _kRed),
-              label: const Text('Solicitar cambios',
-                  style: TextStyle(color: _kRed)),
+              icon: Icon(Icons.edit_outlined, color: colorScheme.error),
+              label: Text('Solicitar cambios',
+                  style: TextStyle(color: colorScheme.error)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                    color: loading ? Colors.grey.shade200 : _kRed),
+                    color: loading ? colorScheme.outlineVariant : colorScheme.error),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -865,16 +883,16 @@ class _ContractActionBar extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: loading ? null : onAccept,
               icon: loading
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
+                          color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.check_circle_outline),
               label: const Text('Aceptar contrato'),
               style: FilledButton.styleFrom(
-                backgroundColor: _kGreen,
-                disabledBackgroundColor: Colors.grey.shade300,
+                backgroundColor: kGreen,
+                disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -894,25 +912,28 @@ class _WaitingBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _kGreen.withValues(alpha: 0.08),
+          color: kGreen.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kGreen.withValues(alpha: 0.3)),
+          border: Border.all(color: kGreen.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.check_circle, color: _kGreen, size: 20),
+            Icon(Icons.check_circle, color: kGreen, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
-                    color: _kGreen,
+                style: TextStyle(
+                    color: kGreen,
                     fontWeight: FontWeight.w500,
                     fontSize: 13),
               ),
@@ -938,22 +959,25 @@ class _EquityAnalysisBanner extends StatelessWidget {
           '/offers/${offer.id}/arras/equity',
           extra: offer,
         ),
-        child: Container(
-          color: const Color(0xFFF0F9FF),
+        child: Builder(
+          builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            return Container(
+          color: cs.primaryContainer,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: _kBlue.withValues(alpha: 0.1),
+                  color: cs.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.analytics_outlined,
-                    color: _kBlue, size: 20),
+                child: Icon(Icons.analytics_outlined,
+                    color: cs.primary, size: 20),
               ),
               const SizedBox(width: 14),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -962,21 +986,23 @@ class _EquityAnalysisBanner extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E3A5F),
+                        color: cs.onPrimaryContainer,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'IA analiza cada clausula desde tu perspectiva',
                       style: TextStyle(
-                          fontSize: 12, color: Color(0xFF64748B)),
+                          fontSize: 12, color: cs.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: _kBlue, size: 20),
+              Icon(Icons.chevron_right, color: cs.primary, size: 20),
             ],
           ),
+        );
+          },
         ),
       ),
     );

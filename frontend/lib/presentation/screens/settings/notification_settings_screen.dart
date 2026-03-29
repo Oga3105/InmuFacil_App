@@ -44,7 +44,7 @@ class NotificationSettingsScreen extends ConsumerWidget {
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -63,11 +63,11 @@ class NotificationSettingsScreen extends ConsumerWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -180,7 +180,7 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label,
         style: theme.textTheme.labelLarge?.copyWith(
-          color: const Color(0xFF2563EB),
+          color: const Color(0xFF135BEC),
           fontWeight: FontWeight.w600,
           letterSpacing: 0.4,
         ),
@@ -217,7 +217,7 @@ class _ToggleTile extends StatelessWidget {
       ),
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFF2563EB),
+      activeColor: const Color(0xFF135BEC),
     );
   }
 }

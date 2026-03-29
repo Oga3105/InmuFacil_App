@@ -166,6 +166,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -213,7 +215,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                                 'de identidad en transacciones P2P.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.grey.shade500, fontSize: 11),
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11),
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -231,6 +233,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── AppBar ─────────────────────────────────────────────────────────────────
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -255,16 +259,16 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 32),
               const SizedBox(width: 8),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
+                        style: TextStyle(color: isDark ? Color(0xFF4ADE80) : Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -273,13 +277,13 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
+                child: Text(
                   'Verificar Identidad',
                   style: TextStyle(
-                    color: Color(0xFF2563EB),
+                    color: colorScheme.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -304,25 +308,25 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    color: colorScheme.primary.withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
+                  const SizedBox(width: 6),
                   Text(
                     'Inicio',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -342,9 +346,10 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── Personal data card (extra, not in verify-identity) ────────────────────
 
   Widget _buildPersonalDataCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -365,19 +370,18 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Datos del 2.º Comprador',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E293B),
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Introduce los datos del segundo titular de la compra.',
-                      style:
-                          TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                     ),
                   ],
                 ),
@@ -386,27 +390,27 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFBFDBFE)),
+                  border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.person_add_alt_1_outlined,
-                        size: 16, color: Colors.blue.shade700),
+                        size: 16, color: colorScheme.primary),
                     const SizedBox(width: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Co-titular',
                             style: TextStyle(
-                                color: Colors.blue.shade700,
+                                color: colorScheme.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700)),
                         Text('AES-256 Encrypted',
                             style: TextStyle(
-                                color: Colors.blue.shade400,
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500)),
                       ],
@@ -445,9 +449,11 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── Main card (idéntico a verify-identity) ────────────────────────────────
 
   Widget _buildMainCard(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -470,19 +476,19 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Verifica tu Identidad',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Confirmación de seguridad para transacciones P2P seguras.',
                         style: TextStyle(
-                            color: Colors.grey.shade500, fontSize: 13),
+                            color: colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                     ],
                   ),
@@ -491,27 +497,27 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFBFDBFE)),
+                    border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.verified_user_outlined,
-                          size: 16, color: Colors.blue.shade700),
+                          size: 16, color: colorScheme.primary),
                       const SizedBox(width: 8),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('verified_user',
                               style: TextStyle(
-                                  color: Colors.blue.shade700,
+                                  color: colorScheme.primary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
                           Text('AES-256 Encrypted',
                               style: TextStyle(
-                                  color: Colors.blue.shade400,
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500)),
                         ],
@@ -728,9 +734,9 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     onPressed: _canSubmit() ? _submit : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _canSubmit()
-                          ? const Color(0xFF0F172A)
-                          : Colors.grey.shade300,
-                      foregroundColor: Colors.white,
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                      foregroundColor: colorScheme.surface,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -765,7 +771,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
         value: completed / 4.0,
         minHeight: 4,
         backgroundColor: const Color(0xFFE2E8F0),
-        valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+        valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -773,23 +779,24 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── Section label ──────────────────────────────────────────────────────────
 
   Widget _buildSectionLabel(String number, String text, {bool locked = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: locked ? Colors.grey.shade300 : const Color(0xFF2563EB),
+            color: locked ? colorScheme.onSurfaceVariant.withValues(alpha: 0.3) : colorScheme.primary,
             shape: BoxShape.circle,
           ),
           child: Center(
             child: locked
                 ? Icon(Icons.lock_outline,
-                    size: 13, color: Colors.grey.shade500)
+                    size: 13, color: colorScheme.onSurfaceVariant)
                 : Text(
                     number,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: colorScheme.onPrimary,
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
@@ -802,7 +809,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: locked ? Colors.grey.shade400 : const Color(0xFF1E293B),
+            color: locked ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
           ),
         ),
       ],
@@ -829,6 +836,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   }
 
   Widget _buildDocTypeChip(String label, IconData icon, String type) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = _documentType == type;
     return Expanded(
       child: GestureDetector(
@@ -836,13 +844,10 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color:
-                isSelected ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
+            color: isSelected ? colorScheme.primaryContainer : colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: isSelected
-                  ? const Color(0xFF2563EB)
-                  : const Color(0xFFE2E8F0),
+              color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -850,9 +855,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon,
-                  color: isSelected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF94A3B8),
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                   size: 18),
               const SizedBox(width: 6),
               Text(
@@ -860,9 +863,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF64748B),
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -875,14 +876,16 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── Selfie section ─────────────────────────────────────────────────────────
 
   Widget _buildSelfieSection() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasSelfie = _hasSelfie;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -895,9 +898,9 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: colorScheme.surface,
                 border: Border.all(
-                  color: hasSelfie ? Colors.green : const Color(0xFFCBD5E1),
+                  color: hasSelfie ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)) : colorScheme.outlineVariant,
                   width: hasSelfie ? 3 : 2,
                 ),
                 image: hasSelfie
@@ -926,19 +929,19 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          const Text(
+          Text(
             'Centra tu rostro',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             'Iluminación uniforme, sin accesorios',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+            style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11),
           ),
           const SizedBox(height: 12),
           if (_selfiePicking)
@@ -950,10 +953,13 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             OutlinedButton.icon(
               onPressed: _openCamera,
               style: OutlinedButton.styleFrom(
-                foregroundColor:
-                    hasSelfie ? Colors.green : const Color(0xFF2563EB),
+                foregroundColor: hasSelfie
+                    ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                    : colorScheme.primary,
                 side: BorderSide(
-                    color: hasSelfie ? Colors.green : const Color(0xFF2563EB)),
+                    color: hasSelfie
+                        ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                        : colorScheme.primary),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
                 padding:
@@ -976,6 +982,9 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
   // ── Success state ──────────────────────────────────────────────────────────
 
   Widget _buildSuccess() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -986,27 +995,27 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
               width: 88,
               height: 88,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF4),
+                color: isDark ? colorScheme.surfaceContainer : const Color(0xFFF0FDF4),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFF16A34A), width: 2),
+                border: Border.all(color: greenColor, width: 2),
               ),
-              child: const Icon(Icons.verified_user_outlined,
-                  size: 44, color: Color(0xFF16A34A)),
+              child: Icon(Icons.verified_user_outlined,
+                  size: 44, color: greenColor),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Identidad Verificada',
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E293B),
+                color: colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'La identidad del segundo comprador ha sido verificada y sus datos guardados de forma segura (AES-256).',
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+              style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -1015,7 +1024,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
               child: FilledButton(
                 onPressed: () => context.pop(),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF16A34A),
+                  backgroundColor: greenColor,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
@@ -1047,20 +1056,20 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon, size: 20, color: const Color(0xFF64748B)),
+        prefixIcon: Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: Theme.of(context).colorScheme.surfaceContainerLowest,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+          borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),

@@ -58,7 +58,7 @@ class _CreateEditPropertyScreenState
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFDC2626),
+              backgroundColor: Theme.of(ctx).colorScheme.error,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -93,7 +93,7 @@ class _CreateEditPropertyScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(next.errorMessage!),
-            backgroundColor: const Color(0xFFDC2626),
+            backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 6),
             action: SnackBarAction(
@@ -184,18 +184,24 @@ class _CreateEditPropertyScreenState
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 28),
               const SizedBox(width: 8),
-              const Text.rich(
-                TextSpan(
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                  children: [
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final cs = Theme.of(context).colorScheme;
+                  return Text.rich(
                     TextSpan(
-                        text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
-                    TextSpan(
-                        text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
-                  ],
-                ),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      children: [
+                        TextSpan(
+                            text: 'Inmu',
+                            style: TextStyle(color: cs.primary)),
+                        TextSpan(
+                            text: 'Fácil',
+                            style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
+                      ],
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -208,28 +214,33 @@ class _CreateEditPropertyScreenState
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
             onTap: () => context.go('/'),
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+            child: Builder(
+              builder: (context) {
+                final cs = Theme.of(context).colorScheme;
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: cs.primary,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.primary.withOpacity(0.25),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                  SizedBox(width: 5),
-                  Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
-                ],
-              ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.home_rounded, size: 16, color: cs.onPrimary),
+                      const SizedBox(width: 5),
+                      Text('Inicio', style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ),
@@ -271,15 +282,15 @@ class _AvatarButton extends ConsumerWidget {
                       height: 36,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
-                        color: const Color(0xFF2563EB),
+                        color: Theme.of(context).colorScheme.primary,
                         alignment: Alignment.center,
-                        child: const Icon(Icons.person, color: Colors.white, size: 18),
+                        child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 18),
                       ),
                     )
                   : Container(
-                      color: const Color(0xFF2563EB),
+                      color: Theme.of(context).colorScheme.primary,
                       alignment: Alignment.center,
-                      child: const Icon(Icons.person, color: Colors.white, size: 18),
+                      child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 18),
                     ),
             ),
           );
@@ -338,7 +349,7 @@ class _SessionExpiredScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.lock_outline, size: 64, color: Color(0xFF2563EB)),
+            Icon(Icons.lock_outline, size: 64, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
             Text('property_wizard.session_expired_title'.tr(),
                 style:
@@ -347,13 +358,13 @@ class _SessionExpiredScreen extends ConsumerWidget {
             Text(
               'property_wizard.session_expired_message'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: () => context.go('/login'),
               style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB)),
+                  backgroundColor: Theme.of(context).colorScheme.primary),
               child: Text('property_wizard.login'.tr()),
             ),
           ],

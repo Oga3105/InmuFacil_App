@@ -207,6 +207,8 @@ class _IdentityVerificationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final state = ref.watch(verificationProvider);
     final notifier = ref.read(verificationProvider.notifier);
     return PopScope(
@@ -275,6 +277,8 @@ class _IdentityVerificationScreenState
   // AppBar (mismo estilo que UserProfileScreen)
   // ──────────────────────────────────────────────
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
       leading: Padding(
@@ -300,16 +304,16 @@ class _IdentityVerificationScreenState
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 32),
               const SizedBox(width: 8),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: colorScheme.primary)),
                     TextSpan(
                         text: 'Fácil',
-                        style: TextStyle(color: Color(0xFF16A34A))),
+                        style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -318,13 +322,13 @@ class _IdentityVerificationScreenState
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
+                child: Text(
                   'Verificar Identidad',
                   style: TextStyle(
-                    color: Color(0xFF2563EB),
+                    color: colorScheme.primary,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -351,25 +355,25 @@ class _IdentityVerificationScreenState
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    color: colorScheme.primary.withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
+                  const SizedBox(width: 6),
                   Text(
                     'Inicio',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -391,9 +395,10 @@ class _IdentityVerificationScreenState
   // ──────────────────────────────────────────────
   Widget _buildMainCard(
       BuildContext context, VerificationState state, VerificationNotifier notifier) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -416,12 +421,12 @@ class _IdentityVerificationScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Verifica tu Identidad',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -438,9 +443,9 @@ class _IdentityVerificationScreenState
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFF6FF),
+                    color: colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFBFDBFE)),
+                    border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -719,9 +724,9 @@ class _IdentityVerificationScreenState
                         : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _canSubmit(state)
-                          ? const Color(0xFF0F172A)
-                          : Colors.grey.shade300,
-                      foregroundColor: Colors.white,
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurface.withOpacity(0.12),
+                      foregroundColor: colorScheme.surface,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20, vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -758,9 +763,9 @@ class _IdentityVerificationScreenState
       child: LinearProgressIndicator(
         value: progress,
         minHeight: 4,
-        backgroundColor: const Color(0xFFE2E8F0),
+        backgroundColor: Theme.of(context).colorScheme.outlineVariant,
         valueColor:
-            const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+            AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
       ),
     );
   }
@@ -770,11 +775,13 @@ class _IdentityVerificationScreenState
   // ──────────────────────────────────────────────
   Widget _buildSectionLabel(String number, String text,
       {bool locked = false, bool confirmed = false}) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final Color bgColor = locked
-        ? Colors.grey.shade300
+        ? colorScheme.onSurface.withOpacity(0.12)
         : confirmed
-            ? const Color(0xFF16A34A)
-            : const Color(0xFF2563EB);
+            ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+            : colorScheme.primary;
 
     return Row(
       children: [
@@ -806,7 +813,7 @@ class _IdentityVerificationScreenState
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: locked ? Colors.grey.shade400 : const Color(0xFF1E293B),
+            color: locked ? colorScheme.onSurfaceVariant : colorScheme.onSurface,
           ),
         ),
         if (confirmed) ...[
@@ -814,14 +821,14 @@ class _IdentityVerificationScreenState
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: const Color(0xFFDCFCE7),
+              color: isDark ? colorScheme.surfaceContainer : const Color(0xFFF0FDF4),
               borderRadius: BorderRadius.circular(6),
-              border: Border.all(color: const Color(0xFF86EFAC)),
+              border: Border.all(color: (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)).withOpacity(0.4)),
             ),
-            child: const Text(
+            child: Text(
               'Numero verificado',
               style: TextStyle(
-                color: Color(0xFF16A34A),
+                color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
               ),
@@ -861,6 +868,7 @@ class _IdentityVerificationScreenState
 
   Widget _buildDocTypeChip(String label, IconData icon, DocumentType type,
       DocumentType? selected, VerificationNotifier notifier) {
+    final colorScheme = Theme.of(context).colorScheme;
     final isSelected = selected == type;
     return Expanded(
       child: GestureDetector(
@@ -869,13 +877,13 @@ class _IdentityVerificationScreenState
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFFEFF6FF)
-                : const Color(0xFFF8FAFC),
+                ? colorScheme.primaryContainer
+                : colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: isSelected
-                  ? const Color(0xFF2563EB)
-                  : const Color(0xFFE2E8F0),
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -884,8 +892,8 @@ class _IdentityVerificationScreenState
             children: [
               Icon(icon,
                   color: isSelected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF94A3B8),
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                   size: 18),
               const SizedBox(width: 6),
               Text(
@@ -895,8 +903,8 @@ class _IdentityVerificationScreenState
                   fontWeight:
                       isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
-                      ? const Color(0xFF2563EB)
-                      : const Color(0xFF64748B),
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -912,13 +920,16 @@ class _IdentityVerificationScreenState
   Widget _buildSelfieSection(
       VerificationState state, VerificationNotifier notifier) {
     final hasSelfie = state.hasSelfie;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -932,11 +943,11 @@ class _IdentityVerificationScreenState
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: hasSelfie
-                      ? Colors.green
-                      : const Color(0xFFCBD5E1),
+                      ? greenColor
+                      : colorScheme.outlineVariant,
                   width: hasSelfie ? 3 : 2,
                 ),
                 image: hasSelfie
@@ -973,10 +984,10 @@ class _IdentityVerificationScreenState
           const SizedBox(height: 10),
           Text(
             'Centra tu rostro',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
@@ -996,12 +1007,12 @@ class _IdentityVerificationScreenState
               onPressed: () => _openCamera(notifier),
               style: OutlinedButton.styleFrom(
                 foregroundColor: hasSelfie
-                    ? Colors.green
-                    : const Color(0xFF2563EB),
+                    ? greenColor
+                    : colorScheme.primary,
                 side: BorderSide(
                     color: hasSelfie
-                        ? Colors.green
-                        : const Color(0xFF2563EB)),
+                        ? greenColor
+                        : colorScheme.primary),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.symmetric(
@@ -1025,15 +1036,16 @@ class _IdentityVerificationScreenState
   // Footer link
   // ──────────────────────────────────────────────
   Widget _footerLink(String text) {
+    final colorScheme = Theme.of(context).colorScheme;
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: Text(
         text,
-        style: const TextStyle(
-          color: Color(0xFF2563EB),
+        style: TextStyle(
+          color: colorScheme.primary,
           fontSize: 12,
           decoration: TextDecoration.underline,
-          decorationColor: Color(0xFF2563EB),
+          decorationColor: colorScheme.primary,
         ),
       ),
     );

@@ -104,7 +104,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                                     : Icons.check,
                                 size: 16,
                                 color: s == _sortBy
-                                    ? const Color(0xFF1E3A5F)
+                                    ? const Color(0xFF135BEC)
                                     : Colors.transparent,
                               ),
                               const SizedBox(width: 8),
@@ -116,7 +116,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                                       ? FontWeight.w700
                                       : FontWeight.normal,
                                   color: s == _sortBy
-                                      ? const Color(0xFF1E3A5F)
+                                      ? const Color(0xFF135BEC)
                                       : const Color(0xFF334155),
                                 ),
                               ),
@@ -269,7 +269,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
                         style: TextStyle(color: Color(0xFF16A34A))),
@@ -292,7 +292,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Row(
@@ -571,7 +571,7 @@ class _StatCell extends StatelessWidget {
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
-              color: Color(0xFF2563EB),
+              color: Color(0xFF135BEC),
             ),
           ),
         ],
@@ -665,7 +665,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                       ? Text(
                           buyerInitial,
                           style: const TextStyle(
-                            color: Color(0xFF2563EB),
+                            color: Color(0xFF135BEC),
                             fontWeight: FontWeight.w800,
                             fontSize: 18,
                           ),
@@ -854,7 +854,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                                 : 'Leer mensaje completo',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF135BEC),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -864,7 +864,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                                 ? Icons.keyboard_arrow_up
                                 : Icons.keyboard_arrow_down,
                             size: 14,
-                            color: const Color(0xFF2563EB),
+                            color: const Color(0xFF135BEC),
                           ),
                         ],
                       ),
@@ -976,7 +976,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               TextSpan(
                 text: 'Contra',
                 style: TextStyle(
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1066,7 +1066,7 @@ class _ActionButtonsRow extends StatelessWidget {
         FilledButton(
           onPressed: onAccept,
           style: FilledButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: const Color(0xFF135BEC),
             shape: _shape,
             padding: _pad,
             tapTargetSize: _tts,
@@ -1291,7 +1291,7 @@ class _StatusBadge extends StatelessWidget {
       case 'pending':
         return {
           'bg': const Color(0xFFEFF6FF),
-          'fg': const Color(0xFF2563EB),
+          'fg': const Color(0xFF135BEC),
           'label': 'PENDIENTE',
         };
       case 'accepted':
@@ -1534,7 +1534,7 @@ class _SolvencyAcceptanceSectionState
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB),
+                              color: const Color(0xFF135BEC),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(
@@ -1682,7 +1682,7 @@ class _TrustFooter extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
+              color: const Color(0xFF135BEC),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.verified_user,
@@ -1720,7 +1720,7 @@ class _TrustFooter extends StatelessWidget {
               textAlign: TextAlign.right,
               style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF135BEC),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -1750,7 +1750,7 @@ class _PageFooter extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.shield_rounded,
-                  size: 14, color: Color(0xFF2563EB)),
+                  size: 14, color: Color(0xFF135BEC)),
               const SizedBox(width: 4),
               const Expanded(
                 child: Text(
@@ -1841,8 +1841,8 @@ class _ChatButtonSmallState extends ConsumerState<_ChatButtonSmall> {
       label: const Text('Chat',
           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF2563EB),
-        side: const BorderSide(color: Color(0xFF2563EB)),
+        foregroundColor: const Color(0xFF135BEC),
+        side: const BorderSide(color: Color(0xFF135BEC)),
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8))),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
