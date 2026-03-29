@@ -292,88 +292,54 @@ class _HowItWorksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final steps = [
-      _Step(
-        number: '1',
-        title: 'info.how_it_works.steps.0.title'.tr(),
-        body: 'info.how_it_works.steps.0.body'.tr(),
-        icon: Icons.add_home_outlined,
-        color: _kBlue,
-      ),
-      _Step(
-        number: '2',
-        title: 'info.how_it_works.steps.1.title'.tr(),
-        body: 'info.how_it_works.steps.1.body'.tr(),
-        icon: Icons.calendar_month_outlined,
-        color: _kGreen,
-      ),
-      _Step(
-        number: '3',
-        title: 'info.how_it_works.steps.2.title'.tr(),
-        body: 'info.how_it_works.steps.2.body'.tr(),
-        icon: Icons.payments_outlined,
-        color: Colors.purple,
-      ),
-      _Step(
-        number: '4',
-        title: 'info.how_it_works.steps.3.title'.tr(),
-        body: 'info.how_it_works.steps.3.body'.tr(),
-        icon: Icons.verified_user_outlined,
-        color: _kBlue,
-      ),
-      _Step(
-        number: '5',
-        title: 'info.how_it_works.steps.4.title'.tr(),
-        body: 'info.how_it_works.steps.4.body'.tr(),
-        icon: Icons.draw_outlined,
-        color: Colors.orange,
-      ),
-      _Step(
-        number: '6',
-        title: 'info.how_it_works.steps.5.title'.tr(),
-        body: 'info.how_it_works.steps.5.body'.tr(),
-        icon: Icons.assessment_outlined,
-        color: Colors.deepPurple,
-      ),
-      _Step(
-        number: '7',
-        title: 'info.how_it_works.steps.6.title'.tr(),
-        body: 'info.how_it_works.steps.6.body'.tr(),
-        icon: Icons.account_balance_outlined,
-        color: _kBlue,
-      ),
-      _Step(
-        number: '8',
-        title: 'info.how_it_works.steps.7.title'.tr(),
-        body: 'info.how_it_works.steps.7.body'.tr(),
-        icon: Icons.gavel_outlined,
-        color: _kGreen,
-      ),
-      _Step(
-        number: '9',
-        title: 'info.how_it_works.steps.8.title'.tr(),
-        body: 'info.how_it_works.steps.8.body'.tr(),
-        icon: Icons.vpn_key_outlined,
-        color: Colors.amber,
-      ),
+      _Step(number: '1', title: 'info.how_it_works.steps.0.title'.tr(), body: 'info.how_it_works.steps.0.body'.tr(), icon: Icons.add_home_outlined),
+      _Step(number: '2', title: 'info.how_it_works.steps.1.title'.tr(), body: 'info.how_it_works.steps.1.body'.tr(), icon: Icons.search_outlined),
+      _Step(number: '3', title: 'info.how_it_works.steps.2.title'.tr(), body: 'info.how_it_works.steps.2.body'.tr(), icon: Icons.verified_user_outlined),
+      _Step(number: '4', title: 'info.how_it_works.steps.3.title'.tr(), body: 'info.how_it_works.steps.3.body'.tr(), icon: Icons.handshake_outlined),
+      _Step(number: '5', title: 'info.how_it_works.steps.4.title'.tr(), body: 'info.how_it_works.steps.4.body'.tr(), icon: Icons.draw_outlined),
+      _Step(number: '6', title: 'info.how_it_works.steps.5.title'.tr(), body: 'info.how_it_works.steps.5.body'.tr(), icon: Icons.assessment_outlined),
+      _Step(number: '7', title: 'info.how_it_works.steps.6.title'.tr(), body: 'info.how_it_works.steps.6.body'.tr(), icon: Icons.account_balance_outlined),
+      _Step(number: '8', title: 'info.how_it_works.steps.7.title'.tr(), body: 'info.how_it_works.steps.7.body'.tr(), icon: Icons.vpn_key_outlined),
+      _Step(number: '9', title: 'info.how_it_works.steps.8.title'.tr(), body: 'info.how_it_works.steps.8.body'.tr(), icon: Icons.assignment_turned_in_outlined),
     ];
 
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          'info.how_it_works.title'.tr(),
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'info.how_it_works.subtitle'.tr(),
-          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _kBlue.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _kBlue.withValues(alpha: 0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.route_outlined, color: _kBlue, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'info.how_it_works.title'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kBlue),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'info.how_it_works.subtitle'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kBlue),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 24),
-        ...steps.asMap().entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: _StepCard(step: e.value, isLast: e.key == steps.length - 1),
+        ...steps.map((s) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _StepCard(step: s),
             )),
       ],
     );
@@ -1233,77 +1199,84 @@ class _Step {
     required this.title,
     required this.body,
     required this.icon,
-    required this.color,
   });
 
   final String number;
   final String title;
   final String body;
   final IconData icon;
-  final Color color;
 }
 
 class _StepCard extends StatelessWidget {
-  const _StepCard({required this.step, required this.isLast});
+  const _StepCard({required this.step});
 
   final _Step step;
-  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: step.color,
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                step.number,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Step number badge
+          Container(
+            width: 28,
+            height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: _kBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              step.number,
+              style: const TextStyle(
+                color: _kBlue,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
             ),
-            if (!isLast)
-              Container(
-                width: 2,
-                height: 40,
-                color: Theme.of(context).colorScheme.outlineVariant,
-              ),
-          ],
-        ),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 6),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(step.title,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Theme.of(context).colorScheme.onSurface)),
-                const SizedBox(height: 4),
-                Text(step.body,
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        height: 1.4)),
-                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(step.icon, color: _kBlue, size: 16),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        step.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: _kBlue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  step.body,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
