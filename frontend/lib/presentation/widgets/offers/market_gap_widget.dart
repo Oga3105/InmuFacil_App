@@ -274,7 +274,7 @@ class _MarketGapCard extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.bar_chart_outlined,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   size: 20,
                 ),
                 const SizedBox(width: 8),
@@ -313,7 +313,7 @@ class _MarketGapCard extends StatelessWidget {
                     '${result.gapPct!.toStringAsFixed(1)}%',
                     style: theme.textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                     ),
                   ),
                 ],
@@ -416,7 +416,7 @@ class _PriceBarComparison extends StatelessWidget {
         _BarRow(
           label: 'market_gap.asking_price_label'.tr(),
           fraction: askingFraction,
-          color: const Color(0xFF2563EB),
+          color: const Color(0xFF135BEC),
           priceLabel: '$askingPrice EUR',
           theme: theme,
         ),

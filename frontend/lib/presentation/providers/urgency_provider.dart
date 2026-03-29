@@ -6,7 +6,7 @@ import 'offers_provider.dart';
 // ─── Urgency colours (shared with UI) ────────────────────────────────────────
 
 const kUrgencyGreen = 0xFF16A34A;
-const kUrgencyBlue = 0xFF2563EB;
+const kUrgencyBlue = 0xFF135BEC;
 
 // ─── Model ────────────────────────────────────────────────────────────────────
 

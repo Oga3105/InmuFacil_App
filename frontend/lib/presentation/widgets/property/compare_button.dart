@@ -16,7 +16,7 @@ class CompareButton extends ConsumerWidget {
 
   final String propertyId;
 
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
 
   @override

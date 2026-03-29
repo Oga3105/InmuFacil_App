@@ -69,7 +69,7 @@ class _FileDropZoneState extends State<FileDropZone> {
 
   @override
   Widget build(BuildContext context) {
-    final accent = const Color(0xFF2563EB);
+    final accent = const Color(0xFF135BEC);
     return Container(
       height: 52,
       decoration: BoxDecoration(

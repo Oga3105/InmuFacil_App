@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // Colors
 // ---------------------------------------------------------------------------
 
-const _kBlue = Color(0xFF2563EB);
+const _kBlue = Color(0xFF135BEC);
 const _kOrange = Color(0xFFF59E0B);
 const _kRed = Color(0xFFEF4444);
 

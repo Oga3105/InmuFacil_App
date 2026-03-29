@@ -207,8 +207,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                     if (mapState.cityBoundaryPolygon.isNotEmpty)
                       Polygon(
                         points: mapState.cityBoundaryPolygon,
-                        color: const Color(0xFF2563EB).withOpacity(0.15), 
-                        borderColor: const Color(0xFF2563EB),
+                        color: const Color(0xFF135BEC).withOpacity(0.15), 
+                        borderColor: const Color(0xFF135BEC),
                         borderStrokeWidth: 2,
                         label: searchState.location.isNotEmpty ? searchState.location : 'Zona',
                         labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
@@ -490,10 +490,10 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
               child: showPrice 
                   ? _CompactPriceMarker(
                       price: property.formattedPrice,
-                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF2563EB), // Green if active
+                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF135BEC), // Green if active
                     )
                   : _GpsPinMarker(
-                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF2563EB),
+                      color: isActive ? const Color(0xFF16A34A) : const Color(0xFF135BEC),
                     ),
             ),
           ),
@@ -568,7 +568,7 @@ class _MapToolButton extends StatelessWidget {
 class _CompactPriceMarker extends StatelessWidget {
   const _CompactPriceMarker({
     required this.price,
-    this.color = const Color(0xFF2563EB),
+    this.color = const Color(0xFF135BEC),
   });
   final String price;
   final Color color;
@@ -642,7 +642,7 @@ class _TrianglePainter extends CustomPainter {
 }
 
 class _GpsPinMarker extends StatelessWidget {
-  const _GpsPinMarker({this.color = const Color(0xFF2563EB)});
+  const _GpsPinMarker({this.color = const Color(0xFF135BEC)});
   final Color color;
 
   @override

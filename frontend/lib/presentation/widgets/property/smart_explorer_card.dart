@@ -94,7 +94,7 @@ class SmartExplorerCard extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Text(_formatPrice(priceEur), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+                      Text(_formatPrice(priceEur), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
                       const Spacer(),
                       Text('${surfaceM2.toStringAsFixed(0)} m\u00b2', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
                     ],
@@ -142,7 +142,7 @@ class _MatchBadge extends StatelessWidget {
 
   Color get _color {
     if (score >= 80) return const Color(0xFF16A34A);
-    if (score >= 60) return const Color(0xFF2563EB);
+    if (score >= 60) return const Color(0xFF135BEC);
     return const Color(0xFFF59E0B);
   }
 

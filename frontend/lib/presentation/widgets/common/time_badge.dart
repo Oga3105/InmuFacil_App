@@ -97,8 +97,8 @@ class PropertyTimeBadge extends StatelessWidget {
         prefix: 'NUEVO:',
         bgColor: Color(0xFFEFF6FF),
         borderColor: Color(0xFFBFDBFE),
-        iconColor: Color(0xFF2563EB),
-        textColor: Color(0xFF1D4ED8),
+        iconColor: Color(0xFF135BEC),
+        textColor: Color(0xFF135BEC),
       );
     } else if (diff.inDays < 8) {
       return const _BadgeStyle(

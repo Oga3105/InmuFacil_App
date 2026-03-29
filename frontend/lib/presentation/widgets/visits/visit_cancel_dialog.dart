@@ -31,7 +31,7 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
       title: const Text.rich(
         TextSpan(
           children: [
-            TextSpan(text: 'Anular ', style: TextStyle(color: Color(0xFF2563EB))),
+            TextSpan(text: 'Anular ', style: TextStyle(color: Color(0xFF135BEC))),
             TextSpan(text: 'visita', style: TextStyle(color: Color(0xFF16A34A))),
           ],
         ),
@@ -53,7 +53,7 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
                   leading: Radio<String>(
                     value: reason,
                     groupValue: _selectedReason,
-                    activeColor: const Color(0xFF2563EB),
+                    activeColor: const Color(0xFF135BEC),
                     onChanged: (val) {
                       setState(() => _selectedReason = val);
                     },

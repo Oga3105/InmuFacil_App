@@ -14,6 +14,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primaryColor,
+      primary: primaryColor,
       brightness: Brightness.light,
     );
     return ThemeData(
@@ -41,6 +42,7 @@ class AppTheme {
   static ThemeData get darkTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primaryColor,
+      primary: primaryColor,
       brightness: Brightness.dark,
     );
     return ThemeData(

@@ -241,7 +241,7 @@ class _ComfortCard extends StatelessWidget {
       case 'A':
         return const Color(0xFF16A34A);
       case 'B':
-        return const Color(0xFF2563EB);
+        return const Color(0xFF135BEC);
       case 'C':
         return const Color(0xFFF59E0B);
       default:
@@ -271,7 +271,7 @@ class _ComfortCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.self_improvement_rounded,
-                    color: Color(0xFF2563EB), size: 20),
+                    color: Color(0xFF135BEC), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -411,10 +411,10 @@ class _RadarPainter extends CustomPainter {
 
     // Data polygon
     final dataPaint = Paint()
-      ..color = const Color(0xFF2563EB).withOpacity(0.20)
+      ..color = const Color(0xFF135BEC).withOpacity(0.20)
       ..style = PaintingStyle.fill;
     final dataStrokePaint = Paint()
-      ..color = const Color(0xFF2563EB)
+      ..color = const Color(0xFF135BEC)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
@@ -474,7 +474,7 @@ class _DimensionRow extends StatelessWidget {
 
   Color get _barColor {
     if (dimension.score >= 75) return const Color(0xFF16A34A);
-    if (dimension.score >= 50) return const Color(0xFF2563EB);
+    if (dimension.score >= 50) return const Color(0xFF135BEC);
     if (dimension.score >= 30) return const Color(0xFFF59E0B);
     return const Color(0xFFEF4444);
   }

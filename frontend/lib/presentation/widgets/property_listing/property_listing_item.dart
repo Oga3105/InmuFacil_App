@@ -17,7 +17,7 @@ class PropertyListingItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isFavorite = ref.watch(favoritesProvider).contains(property.id);
-    const brandBlue = Color(0xFF2563EB);
+    const brandBlue = Color(0xFF135BEC);
     const successGreen = Color(0xFF16A34A);
     final onSurface = theme.colorScheme.onSurface;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
@@ -364,7 +364,7 @@ class PropertyListingItem extends ConsumerWidget {
             color: Color(0xFFEFF6FF),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 28),
+          child: Icon(icon, color: const Color(0xFF135BEC), size: 28),
         ),
         title: Text(title, textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
@@ -383,7 +383,7 @@ class PropertyListingItem extends ConsumerWidget {
           FilledButton(
             onPressed: onCta,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(cta),

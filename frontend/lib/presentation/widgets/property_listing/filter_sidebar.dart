@@ -49,7 +49,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
     final searchState = ref.watch(searchProvider);
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
-    const primaryBlue = Color(0xFF2563EB); // User Brand Blue
+    const primaryBlue = Color(0xFF135BEC); // User Brand Blue
 
     return Container(
       width: 300,
@@ -285,12 +285,12 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.psychology_outlined, color: Color(0xFF2563EB), size: 20),
+                    const Icon(Icons.psychology_outlined, color: Color(0xFF135BEC), size: 20),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
                         'lifestyle.lifestyle_filter_title'.tr(),
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF135BEC)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -300,8 +300,8 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                       child: Switch(
                         value: searchState.useLifestyleFilter,
                         onChanged: (_) => ref.read(searchProvider.notifier).toggleLifestyleFilter(),
-                        activeThumbColor: const Color(0xFF2563EB),
-                        activeTrackColor: const Color(0xFF2563EB).withOpacity(0.3),
+                        activeThumbColor: const Color(0xFF135BEC),
+                        activeTrackColor: const Color(0xFF135BEC).withOpacity(0.3),
                       ),
                     ),
                   ],
@@ -314,7 +314,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                       'Editar mi perfil de estilo de vida →',
                       style: TextStyle(
                         fontSize: 11,
-                        color: const Color(0xFF2563EB).withOpacity(0.8),
+                        color: const Color(0xFF135BEC).withOpacity(0.8),
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -435,7 +435,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF2563EB)),
+          borderSide: const BorderSide(color: Color(0xFF135BEC)),
         ),
       ),
       style: const TextStyle(fontSize: 13),
@@ -451,10 +451,10 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
         height: 36,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+          color: isSelected ? const Color(0xFF135BEC) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : theme.colorScheme.outlineVariant,
+            color: isSelected ? const Color(0xFF135BEC) : theme.colorScheme.outlineVariant,
           ),
         ),
         child: Text(
@@ -482,7 +482,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
               onChanged: isDeadLink 
                 ? (val) => context.push('/404') 
                 : (val) => ref.read(searchProvider.notifier).toggleExtra(label),
-              activeColor: const Color(0xFF2563EB),
+              activeColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               side: BorderSide(color: Colors.grey.shade300, width: 1.5),
             ),

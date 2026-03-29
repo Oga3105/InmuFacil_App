@@ -43,7 +43,7 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
   String? _error;
 
   static const _navy = Color(0xFF0F172A);
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
   static const _bgBlue = Color(0xFFEFF6FF);
 
   Future<void> _onAccept() async {

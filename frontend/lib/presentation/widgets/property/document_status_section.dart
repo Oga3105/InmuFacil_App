@@ -44,7 +44,7 @@ class DocumentStatusSection extends StatelessWidget {
                 ),
                 child: const Icon(
                   Icons.verified_outlined,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   size: 18,
                 ),
               ),

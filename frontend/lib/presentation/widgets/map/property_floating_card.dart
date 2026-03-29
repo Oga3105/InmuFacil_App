@@ -76,7 +76,7 @@ class PropertyFloatingCard extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB), // primary
+                    color: const Color(0xFF135BEC), // primary
                     borderRadius: BorderRadius.circular(6),
                     boxShadow: const [
                        BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
@@ -155,7 +155,7 @@ class PropertyFloatingCard extends ConsumerWidget {
                 Text(
                   property.formattedPrice,
                   style: const TextStyle(
-                    color: Color(0xFF2563EB), // primary
+                    color: Color(0xFF135BEC), // primary
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: -0.5,

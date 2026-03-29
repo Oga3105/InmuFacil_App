@@ -205,7 +205,7 @@ class _PriceValidatorCard extends StatelessWidget {
             Row(
               children: [
                 Icon(Icons.balance_outlined,
-                    color: const Color(0xFF2563EB), size: 20),
+                    color: const Color(0xFF135BEC), size: 20),
                 const SizedBox(width: 8),
                 Text(
                   'price_validator.title'.tr(),

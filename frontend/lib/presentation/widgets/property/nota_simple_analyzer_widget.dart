@@ -72,7 +72,7 @@ const _mockResult = _NotaSimpleResult(
 // Colors
 // ---------------------------------------------------------------------------
 
-const _kBlue = Color(0xFF2563EB);
+const _kBlue = Color(0xFF135BEC);
 const _kOrange = Color(0xFFF59E0B);
 const _kRed = Color(0xFFEF4444);
 const _kGreen = Color(0xFF16A34A);

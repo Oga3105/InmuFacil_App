@@ -228,7 +228,7 @@ class UserAvatarMenu extends ConsumerWidget {
         child: _NavItem(
           icon: Icons.shopping_bag_outlined,
           label: 'Guia del Comprador',
-          accentColor: const Color(0xFF2563EB),
+          accentColor: const Color(0xFF135BEC),
         ),
       ),
     );
