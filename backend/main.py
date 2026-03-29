@@ -79,18 +79,22 @@ app = FastAPI(
 
 # Allowed origins - NO WILDCARDS for security
 ALLOWED_ORIGINS = [
-    "http://localhost:3000",      # Local development
-    "http://localhost:8080",      # Alternative local port
-    "http://127.0.0.1:3000",      # Local IP
-    "http://127.0.0.1:8080",      # Alternative local IP
-    "http://localhost:8001",      # Flutter Web custom port
-    "http://127.0.0.1:8001",      # Flutter Web custom port IP
-    "http://localhost:5000",      # Flutter Web fallback
-    "http://localhost:5500",      # VS Code Live Server
+    # Production
+    "https://www.inmufacil.com",
+    "https://inmufacil.com",
+    # Local development
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8080",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:5000",
+    "http://localhost:5500",
     "http://127.0.0.1:5500",
-    "http://localhost:4200",      # Angular/Flutter Web dev
-    "http://localhost:9000",      # Flutter Web alt
-    "http://localhost:1",         # Flutter Web auto-assigned
+    "http://localhost:4200",
+    "http://localhost:9000",
+    "http://localhost:1",
     "http://127.0.0.1:1",
 ]
 
@@ -313,6 +317,7 @@ async def health_check():
 
 from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides, nota_simple, urban_growth, solvency_passport, market_gap, neighborhood_twins, comfort_index, signature_verification, notifications_email, ai_consent
 from backend.src.routes import notifications as notifications_router
+from backend.src.routes import lifestyle
 
 from fastapi import APIRouter
 
@@ -363,6 +368,7 @@ api_v1_router.include_router(comfort_index.router)          # V62 - Invisible Co
 api_v1_router.include_router(signature_verification.router) # V61 - Biometric Signature Verification
 api_v1_router.include_router(notifications_email.router)    # V52 - Email Notification Templates
 api_v1_router.include_router(ai_consent.router)             # GDPR - AI Consent Logging (Art. 6.1.a)
+api_v1_router.include_router(lifestyle.router)               # Lifestyle Profile (DB-persisted per user)
 
 # Include V1 Router in App
 app.include_router(api_v1_router)
