@@ -475,13 +475,30 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                       address: p.address,
                                       priceEur: p.price.round(),
                                       surfaceM2: p.squareMeters,
+                                      bedrooms: p.bedrooms,
+                                      bathrooms: p.bathrooms,
+                                      description: p.description,
                                       imageUrl: p.imageUrl,
+                                      imageCount: p.images.length,
+                                      isVerified: p.isVerified,
                                       postalCode: RegExp(r'\b(\d{5})\b').firstMatch(p.address)?.group(1),
                                       onTap: () {
                                         context.pushNamed(
                                           'property-details',
                                           pathParameters: {'id': p.id},
                                         );
+                                      },
+                                      onContactTap: () {
+                                        final auth = ref.read(authProvider);
+                                        if (!auth.isAuthenticated) {
+                                          context.pushNamed('login');
+                                          return;
+                                        }
+                                        final dniStatus = (auth.user?.dniStatus ?? '').toUpperCase();
+                                        if (dniStatus != 'VALIDADO') {
+                                          context.push('/verify-identity');
+                                          return;
+                                        }
                                       },
                                     ),
                                   ),

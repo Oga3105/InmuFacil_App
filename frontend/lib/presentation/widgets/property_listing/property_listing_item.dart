@@ -37,27 +37,6 @@ class PropertyListingItem extends ConsumerWidget {
             );
           },
         ),
-        if (property.price > 500000)
-          Positioned(
-            top: 16,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                'TOP CHOICE',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: onSurface,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ),
         Positioned(
           top: 16,
           right: 16,
@@ -85,27 +64,28 @@ class PropertyListingItem extends ConsumerWidget {
             ),
           ),
         ),
-        Positioned(
-          bottom: 16,
-          left: 16,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.camera_alt, color: Colors.white, size: 12),
-                SizedBox(width: 4),
-                Text(
-                  '1',
-                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                ),
-              ],
+        if (property.images.isNotEmpty)
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.6),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.camera_alt, color: Colors.white, size: 12),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${property.images.length}',
+                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
 
@@ -136,7 +116,7 @@ class PropertyListingItem extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        property.address,
+                        _obfuscateAddress(property.address),
                         style: TextStyle(
                           fontSize: 13,
                           color: onSurfaceVariant,
@@ -156,14 +136,6 @@ class PropertyListingItem extends ConsumerWidget {
                         fontSize: isMobile ? 18 : 22,
                         fontWeight: FontWeight.w900,
                         color: onSurface,
-                      ),
-                    ),
-                    Text(
-                      '${(property.price / (property.squareMeters > 0 ? property.squareMeters : 1)).toStringAsFixed(0)} €/m²',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.outline,
                       ),
                     ),
                   ],
@@ -195,16 +167,17 @@ class PropertyListingItem extends ConsumerWidget {
 
             // Description Snippet
             const SizedBox(height: 16),
-            Text(
-              'Magnífica oportunidad en ${property.address}. Vivienda luminosa con excelentes calidades, lista para entrar a vivir. Zona consolidada con todos los servicios.',
-              style: TextStyle(
-                fontSize: 13,
-                color: onSurfaceVariant,
-                height: 1.5,
+            if (property.description.isNotEmpty)
+              Text(
+                property.description,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: onSurfaceVariant,
+                  height: 1.5,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
 
             // Time Badge
             const SizedBox(height: 12),
@@ -327,6 +300,17 @@ class PropertyListingItem extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  static String _obfuscateAddress(String address) {
+    if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
+      return 'Ubicación protegida';
+    }
+    final parts = address.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+    if (parts.length >= 2) {
+      return parts.sublist(1).join(', ');
+    }
+    return address;
   }
 
   Widget _buildStat(IconData icon, String label, Color textColor, Color iconColor) {
