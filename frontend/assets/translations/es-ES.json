@@ -1034,6 +1034,7 @@
     },
     "faq": {
       "title": "Preguntas frecuentes",
+      "subtitle": "Encuentra respuestas a las dudas más comunes sobre InmuFácil.",
       "items": {
         "0": {
           "q": "Es gratuito usar InmuFácil?",

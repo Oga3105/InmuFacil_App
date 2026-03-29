@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -127,20 +126,13 @@ class InfoScreen extends StatelessWidget {
               ),
             ),
           ),
-          Consumer(
-            builder: (context, ref, _) {
-              final isAuthenticated =
-                  ref.watch(authProvider).isAuthenticated;
-              if (!isAuthenticated) return const SizedBox.shrink();
-              return const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: 12),
-                  UserAvatarMenu(),
-                  SizedBox(width: 16),
-                ],
-              );
-            },
+          const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 12),
+              UserAvatarMenu(),
+              SizedBox(width: 16),
+            ],
           ),
         ],
       ),
@@ -595,15 +587,35 @@ class _ContactScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          'info.contact.title'.tr(),
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'info.contact.subtitle'.tr(),
-          style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _kBlue.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _kBlue.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.support_agent_outlined, color: _kBlue, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'info.contact.title'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kBlue),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'info.contact.subtitle'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kBlue),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 24),
         _ContactOption(
@@ -722,9 +734,35 @@ class _FaqScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        Text(
-          'info.faq.title'.tr(),
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: _kBlue.withOpacity(0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _kBlue.withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.quiz_outlined, color: _kBlue, size: 28),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'info.faq.title'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kBlue),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'info.faq.subtitle'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kBlue),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 20),
         ..._faqs.map((faq) => Padding(
