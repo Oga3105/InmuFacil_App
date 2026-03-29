@@ -253,28 +253,68 @@ class _WhatIsScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: _kGreen.withOpacity(0.07),
+            color: _kGreen.withValues(alpha: 0.07),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _kGreen.withOpacity(0.3)),
+            border: Border.all(color: _kGreen.withValues(alpha: 0.3)),
           ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'info.what_is.savings_title'.tr(),
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _kGreen),
-                textAlign: TextAlign.center,
+              Row(
+                children: [
+                  const Icon(Icons.savings_outlined, color: _kGreen, size: 22),
+                  const SizedBox(width: 10),
+                  Text(
+                    'info.what_is.savings_title'.tr(),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _kGreen),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
                 'info.what_is.savings_body'.tr(),
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontSize: 13,
-                    color: _kGreen.withOpacity(0.8),
-                    height: 1.4),
+                style: TextStyle(fontSize: 12, color: _kGreen.withValues(alpha: 0.8)),
+              ),
+              const SizedBox(height: 14),
+              // Commission table
+              Table(
+                border: TableBorder.all(color: _kGreen.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                columnWidths: const {
+                  0: FlexColumnWidth(1.4),
+                  1: FlexColumnWidth(1.3),
+                  2: FlexColumnWidth(1.3),
+                },
+                children: [
+                  // Header
+                  TableRow(
+                    decoration: BoxDecoration(color: _kGreen.withValues(alpha: 0.12)),
+                    children: [
+                      _tableCell('Concepto', bold: true),
+                      _tableCell('Vendedor', bold: true),
+                      _tableCell('Comprador', bold: true),
+                    ],
+                  ),
+                  TableRow(children: [
+                    _tableCell('Porcentaje'),
+                    _tableCell('5%\n(rango 3%–7%)'),
+                    _tableCell('3%\n(rango 0%–5%)'),
+                  ]),
+                  TableRow(children: [
+                    _tableCell('Mínimo fijo'),
+                    _tableCell('7.260€ – 9.000€'),
+                    _tableCell('3.000€ – 4.500€'),
+                  ]),
+                  TableRow(children: [
+                    _tableCell('Tarifa online'),
+                    _tableCell('4.000€ – 8.000€'),
+                    _tableCell('Variable'),
+                  ]),
+                  TableRow(children: [
+                    _tableCell('Financiera'),
+                    _tableCell('N/A'),
+                    _tableCell('3.000€ – 6.000€'),
+                  ]),
+                ],
               ),
             ],
           ),
@@ -1144,6 +1184,21 @@ final _legalNoticeSections = [
 // ============================================================================
 // Reusable sub-widgets
 // ============================================================================
+
+Widget _tableCell(String text, {bool bold = false}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: 11,
+        fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+        color: _kGreen,
+        height: 1.4,
+      ),
+    ),
+  );
+}
 
 class _FeatureCard extends StatelessWidget {
   const _FeatureCard({required this.icon, required this.title, required this.body});

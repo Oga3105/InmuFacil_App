@@ -865,7 +865,7 @@
       "hero_title": "InmuFácil",
       "hero_subtitle": "La plataforma P2P de compraventa inmobiliaria sin comisiones de agencia.",
       "savings_title": "0 EUR en comisiones de agencia",
-      "savings_body": "El ahorro medio en una operación de 250.000 EUR es de 7.500 EUR (3% agencia)",
+      "savings_body": "Lo que pagarías con una agencia tradicional:",
       "features": {
         "0": {
           "title": "Sin intermediarios",
@@ -877,7 +877,7 @@
         },
         "2": {
           "title": "Seguridad jurídica",
-          "body": "Verificación de identidad KYC, Contrato de Arras digital y notaría integrada."
+          "body": "Verificación de identidad KYC, Contrato de Arras digital generado por IA y firma electrónica de documentos."
         },
         "3": {
           "title": "Solvencia consciente",
