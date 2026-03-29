@@ -7,10 +7,10 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 
-const _kBlue  = Color(0xFF2563EB);
+const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
-const _kNavy  = Color(0xFF2563EB);
+const _kNavy  = Color(0xFF135BEC);
 
 // Nivel de confianza
 enum _TrustLevel { bronze, silver, gold }
@@ -361,7 +361,7 @@ class _TrustFactorsCard extends StatelessWidget {
                   children: [
                     Icon(
                       f.value ? Icons.check_circle : Icons.cancel,
-                      color: f.value ? _kGreen : Colors.red.shade400,
+                      color: f.value ? _kGreen : Theme.of(context).colorScheme.error,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -558,11 +558,11 @@ class _ExpiryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isExpiringSoon ? Colors.red.withOpacity(0.1) : Theme.of(context).colorScheme.surfaceContainerLowest,
+        color: isExpiringSoon ? Theme.of(context).colorScheme.errorContainer : Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isExpiringSoon
-              ? Colors.red.shade200
+              ? Theme.of(context).colorScheme.error.withOpacity(0.4)
               : Theme.of(context).colorScheme.outlineVariant,
         ),
       ),
@@ -570,7 +570,7 @@ class _ExpiryCard extends StatelessWidget {
         children: [
           Icon(
             Icons.schedule_outlined,
-            color: isExpiringSoon ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
+            color: isExpiringSoon ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurfaceVariant,
             size: 20,
           ),
           const SizedBox(width: 12),
@@ -582,7 +582,7 @@ class _ExpiryCard extends StatelessWidget {
                       '(${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year}).',
               style: TextStyle(
                 fontSize: 13,
-                color: isExpiringSoon ? Colors.red.shade700 : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isExpiringSoon ? Theme.of(context).colorScheme.onErrorContainer : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

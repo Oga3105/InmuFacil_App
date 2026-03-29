@@ -125,7 +125,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
     final historyAsync = ref.watch(_aiConsentHistoryProvider);
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, authState),
       body: historyAsync.when(
         loading: () =>
@@ -179,7 +179,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
                 children: [
                   TextSpan(
                     text: 'Inmu',
-                    style: TextStyle(color: Color(0xFF2563EB)),
+                    style: TextStyle(color: Color(0xFF135BEC)),
                   ),
                   TextSpan(
                     text: 'Fácil',
@@ -202,11 +202,11 @@ class AiConsentHistoryScreen extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB),
+              color: const Color(0xFF135BEC),
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                  color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -251,8 +251,9 @@ class _PageHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,12 +275,12 @@ class _PageHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Historial de Consentimientos IA',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: _kNavy,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     Text(
@@ -287,7 +288,7 @@ class _PageHeader extends StatelessWidget {
                           ? 'Sin registros todavía'
                           : '$count consentimiento${count != 1 ? 's' : ''} '
                               'registrado${count != 1 ? 's' : ''}',
-                      style: const TextStyle(fontSize: 13, color: _kSlate),
+                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
@@ -402,22 +403,22 @@ class _ConsentCardState extends State<_ConsentCard> {
                         children: [
                           Text(
                             e.actionLabel,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: _kNavy,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Row(
                             children: [
-                              const Icon(Icons.schedule_outlined,
-                                  size: 11, color: _kSlate),
+                              Icon(Icons.schedule_outlined,
+                                  size: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                               const SizedBox(width: 3),
                               Text(
                                 dateLabel,
-                                style: const TextStyle(
-                                    fontSize: 11, color: _kSlate),
+                                style: TextStyle(
+                                    fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                               ),
                             ],
                           ),

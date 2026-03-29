@@ -29,7 +29,7 @@ class PropertyComparisonScreen extends ConsumerStatefulWidget {
 
 class _PropertyComparisonScreenState
     extends ConsumerState<PropertyComparisonScreen> {
-  static const _blue = Color(0xFF2563EB);
+  static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
   static const _labelGrey = Color(0xFF64748B);
   static const _dividerGrey = Color(0xFFE2E8F0);
@@ -89,7 +89,7 @@ class _PropertyComparisonScreenState
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -108,11 +108,11 @@ class _PropertyComparisonScreenState
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -175,7 +175,7 @@ class _HeaderRow extends StatelessWidget {
           child: _HeaderCell(
             label: 'A',
             address: propA['address'] as String? ?? '',
-            color: const Color(0xFF2563EB),
+            color: const Color(0xFF135BEC),
           ),
         ),
         const SizedBox(width: 8),
@@ -561,7 +561,7 @@ class _AiVerdictSection extends StatelessWidget {
               const Icon(
                 Icons.auto_awesome,
                 size: 18,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF135BEC),
               ),
               const SizedBox(width: 8),
               Text(

@@ -131,7 +131,7 @@ class SmartBidRiskScreen extends StatelessWidget {
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -150,11 +150,11 @@ class SmartBidRiskScreen extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -217,7 +217,7 @@ class SmartBidRiskScreen extends StatelessWidget {
             FilledButton(
               onPressed: () => context.pop(),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF135BEC),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -292,7 +292,7 @@ class _PriceComparisonHero extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF135BEC),
                       ),
                     ),
                   ],
@@ -385,7 +385,7 @@ class _RiskGaugeCard extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.show_chart_rounded,
-                  size: 18, color: Color(0xFF2563EB)),
+                  size: 18, color: Color(0xFF135BEC)),
               const SizedBox(width: 8),
               Text(
                 'smart_bid_risk.gauge_title'.tr(),

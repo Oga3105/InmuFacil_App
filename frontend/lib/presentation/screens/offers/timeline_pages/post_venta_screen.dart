@@ -18,10 +18,10 @@ import '../../../../core/config/env_config.dart';
 
 const _storage = FlutterSecureStorage();
 
-const _kBlue  = Color(0xFF2563EB);
+const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
-const _kNavy  = Color(0xFF1E3A5F);
+const _kNavy  = Color(0xFF135BEC);
 
 /// Possible delivery statuses for a post-sale document.
 /// null       = seller has not acted yet
@@ -179,7 +179,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
                 TextSpan(
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
-                    TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                   ],
                 ),
@@ -194,11 +194,11 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF135BEC),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

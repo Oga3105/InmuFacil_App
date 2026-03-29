@@ -148,7 +148,7 @@ class _Header extends StatelessWidget {
             children: [
               TextSpan(
                 text: 'Inmu',
-                style: TextStyle(color: Color(0xFF2563EB)), // Blue
+                style: TextStyle(color: Color(0xFF135BEC)), // Blue
               ),
               TextSpan(
                 text: 'Fácil',

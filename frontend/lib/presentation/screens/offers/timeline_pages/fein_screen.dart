@@ -10,7 +10,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
 
-const _kBlue  = Color(0xFF2563EB);
+const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
 const _kNavy  = Color(0xFF001F3F);
@@ -130,7 +130,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   children: [
                     TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB)),
+                      style: TextStyle(color: Color(0xFF135BEC)),
                     ),
                     TextSpan(
                       text: 'Fácil',
@@ -153,11 +153,11 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF135BEC),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),

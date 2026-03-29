@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kBlue  = Color(0xFF2563EB);
+const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 const _kBg    = Color(0xFFF8FAFC);
-const _kNavy  = Color(0xFF1E3A5F);
+const _kNavy  = Color(0xFF135BEC);
 
 // ============================================================================
 // Generic Info Screen — receives page type as enum
@@ -75,7 +76,7 @@ class InfoScreen extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB)),
+                      style: TextStyle(color: Color(0xFF135BEC)),
                     ),
                     TextSpan(
                       text: 'Fácil',
@@ -99,11 +100,11 @@ class InfoScreen extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF135BEC),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -163,22 +164,22 @@ class InfoScreen extends StatelessWidget {
       case InfoPageType.faq:
         return _FaqScreen();
       case InfoPageType.privacy:
-        return const _LegalTextScreen(
-          title: 'Politica de Privacidad',
+        return _LegalTextScreen(
+          title: 'info.legal.privacy.title'.tr(),
           sections: _privacySections,
           heroIcon: Icons.privacy_tip_outlined,
           heroColor: _kBlue,
         );
       case InfoPageType.terms:
-        return const _LegalTextScreen(
-          title: 'Terminos y Condiciones de Uso',
+        return _LegalTextScreen(
+          title: 'info.legal.terms.title'.tr(),
           sections: _termsSections,
           heroIcon: Icons.description_outlined,
           heroColor: _kBlue,
         );
       case InfoPageType.legalNotice:
-        return const _LegalTextScreen(
-          title: 'Aviso Legal',
+        return _LegalTextScreen(
+          title: 'info.legal.legal_notice.title'.tr(),
           sections: _legalNoticeSections,
           heroIcon: Icons.gavel_outlined,
           heroColor: _kGreen,
@@ -194,12 +195,12 @@ class InfoScreen extends StatelessWidget {
 class _WhatIsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const features = [
-      ('Sin intermediarios', 'Conectamos directamente a compradores y vendedores particulares, eliminando las comisiones de las agencias.', Icons.handshake_outlined),
-      ('Proceso guiado', 'Desde la visita hasta la firma notarial, te acompanamos en cada paso con herramientas legales y financieras.', Icons.route_outlined),
-      ('Seguridad juridica', 'Verificacion de identidad KYC, Contrato de Arras digital y notaria integrada.', Icons.security_outlined),
-      ('Solvencia consciente', 'Cuestionario financiero para que compradores conozcan su situacion real antes de ofertar.', Icons.assessment_outlined),
-      ('Transparencia total', 'Historial de ofertas y negociacion completamente visible para ambas partes.', Icons.visibility_outlined),
+    final features = [
+      ('info.what_is.features.0.title'.tr(), 'info.what_is.features.0.body'.tr(), Icons.handshake_outlined),
+      ('info.what_is.features.1.title'.tr(), 'info.what_is.features.1.body'.tr(), Icons.route_outlined),
+      ('info.what_is.features.2.title'.tr(), 'info.what_is.features.2.body'.tr(), Icons.security_outlined),
+      ('info.what_is.features.3.title'.tr(), 'info.what_is.features.3.body'.tr(), Icons.assessment_outlined),
+      ('info.what_is.features.4.title'.tr(), 'info.what_is.features.4.body'.tr(), Icons.visibility_outlined),
     ];
 
     return ListView(
@@ -220,16 +221,16 @@ class _WhatIsScreen extends StatelessWidget {
             children: [
               const Icon(Icons.home_work_outlined, color: Colors.white, size: 52),
               const SizedBox(height: 16),
-              const Text(
-                'InmuFácil',
-                style: TextStyle(
+              Text(
+                'info.what_is.hero_title'.tr(),
+                style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
-                'La plataforma P2P de compraventa inmobiliaria sin comisiones de agencia.',
+                'info.what_is.hero_subtitle'.tr(),
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                     color: Colors.white70, fontSize: 14, height: 1.5),
@@ -239,7 +240,7 @@ class _WhatIsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         Text(
-          'Por que InmuFácil?',
+          'info.what_is.title'.tr(),
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
@@ -258,9 +259,9 @@ class _WhatIsScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Text(
-                '0 EUR en comisiones de agencia',
-                style: TextStyle(
+              Text(
+                'info.what_is.savings_title'.tr(),
+                style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: _kGreen),
@@ -268,7 +269,7 @@ class _WhatIsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'El ahorro medio en una operacion de 250.000 EUR es de 7.500 EUR (3% agencia)',
+                'info.what_is.savings_body'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 13,
@@ -290,67 +291,67 @@ class _WhatIsScreen extends StatelessWidget {
 class _HowItWorksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const steps = [
+    final steps = [
       _Step(
         number: '1',
-        title: 'Publica o busca tu propiedad',
-        body: 'El vendedor crea el anuncio con fotos, descripcion y precio. El Certificado Energetico (CEE) es obligatorio para recibir ofertas. El comprador busca con filtros y guarda favoritos.',
+        title: 'info.how_it_works.steps.0.title'.tr(),
+        body: 'info.how_it_works.steps.0.body'.tr(),
         icon: Icons.add_home_outlined,
         color: _kBlue,
       ),
       _Step(
         number: '2',
-        title: 'Solicita y gestiona visitas',
-        body: 'El comprador solicita visita. El vendedor configura sus ventanas horarias y confirma las citas. Toda la agenda se gestiona desde la app.',
+        title: 'info.how_it_works.steps.1.title'.tr(),
+        body: 'info.how_it_works.steps.1.body'.tr(),
         icon: Icons.calendar_month_outlined,
         color: _kGreen,
       ),
       _Step(
         number: '3',
-        title: 'Oferta con Pasaporte de Solvencia',
-        body: 'El comprador adjunta su Pasaporte de Solvencia (nivel Bronce, Plata u Oro) a la oferta. El vendedor puede aceptar, rechazar o contraofertarla directamente.',
+        title: 'info.how_it_works.steps.2.title'.tr(),
+        body: 'info.how_it_works.steps.2.body'.tr(),
         icon: Icons.payments_outlined,
         color: Colors.purple,
       ),
       _Step(
         number: '4',
-        title: 'Verificacion de Solvencia',
-        body: 'El vendedor revisa el Pasaporte de Solvencia del comprador y decide si acepta el perfil financiero. Si hay un segundo titular, se verifica su identidad de forma independiente.',
+        title: 'info.how_it_works.steps.3.title'.tr(),
+        body: 'info.how_it_works.steps.3.body'.tr(),
         icon: Icons.verified_user_outlined,
         color: _kBlue,
       ),
       _Step(
         number: '5',
-        title: 'Contrato de Arras',
-        body: 'Ambas partes completan una entrevista guiada. La IA genera el borrador del contrato de arras con los datos reales de la operacion. Ambas partes lo firman digitalmente.',
+        title: 'info.how_it_works.steps.4.title'.tr(),
+        body: 'info.how_it_works.steps.4.body'.tr(),
         icon: Icons.draw_outlined,
         color: Colors.orange,
       ),
       _Step(
         number: '6',
-        title: 'Tasacion de la Vivienda',
-        body: 'Se coordina la cita con el tasador oficial. El informe de tasacion es el paso previo necesario para que el banco procese la hipoteca.',
+        title: 'info.how_it_works.steps.5.title'.tr(),
+        body: 'info.how_it_works.steps.5.body'.tr(),
         icon: Icons.assessment_outlined,
         color: Colors.deepPurple,
       ),
       _Step(
         number: '7',
-        title: 'Formalizacion Bancaria — FEIN',
-        body: 'Solo para operaciones con hipoteca. El banco emite la Ficha Europea de Informacion Normalizada (FEIN). El comprador la confirma en la app para desbloquear la firma en notaria.',
+        title: 'info.how_it_works.steps.6.title'.tr(),
+        body: 'info.how_it_works.steps.6.body'.tr(),
         icon: Icons.account_balance_outlined,
         color: _kBlue,
       ),
       _Step(
         number: '8',
-        title: 'Firma en Notaria',
-        body: 'InmuFacil muestra el checklist completo de documentos. Se agenda la cita notarial y se firma la escritura publica de compraventa.',
+        title: 'info.how_it_works.steps.7.title'.tr(),
+        body: 'info.how_it_works.steps.7.body'.tr(),
         icon: Icons.gavel_outlined,
         color: _kGreen,
       ),
       _Step(
         number: '9',
-        title: 'Post-Venta y Entrega de Llaves',
-        body: 'Tras la firma, el comprador accede a la guia de cambio de titularidad de suministros (luz, gas, agua). Se confirma la entrega de llaves y la operacion queda cerrada.',
+        title: 'info.how_it_works.steps.8.title'.tr(),
+        body: 'info.how_it_works.steps.8.body'.tr(),
         icon: Icons.vpn_key_outlined,
         color: Colors.amber,
       ),
@@ -360,13 +361,13 @@ class _HowItWorksScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'El proceso completo',
+          'info.how_it_works.title'.tr(),
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 8),
         Text(
-          'De la publicacion a las llaves, todo en una plataforma.',
+          'info.how_it_works.subtitle'.tr(),
           style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
@@ -386,50 +387,50 @@ class _HowItWorksScreen extends StatelessWidget {
 class _BuyerGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const sections = [
+    final sections = [
       _GuideSection(
         icon: Icons.search_outlined,
         color: _kBlue,
-        title: 'Busca tu propiedad ideal',
+        title: 'info.buyer_guide.sections.0.title'.tr(),
         items: [
-          'Usa los filtros de precio, superficie, habitaciones y ubicacion',
-          'Guarda tus favoritos para comparar despues',
-          'Activa alertas para recibir nuevos anuncios que coincidan con tu busqueda',
+          'info.buyer_guide.sections.0.items.0'.tr(),
+          'info.buyer_guide.sections.0.items.1'.tr(),
+          'info.buyer_guide.sections.0.items.2'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.assessment_outlined,
         color: Colors.purple,
-        title: 'Completa tu Pasaporte de Solvencia',
+        title: 'info.buyer_guide.sections.1.title'.tr(),
         items: [
-          'Responde honestamente al cuestionario financiero',
-          'Conoce tu ratio de endeudamiento real (maximo recomendado 35%)',
-          'Tu nivel de solvencia (Bronce/Plata/Oro) se muestra al vendedor de forma anonimizada',
-          'Caduca a los 90 dias para mantener la informacion actualizada',
+          'info.buyer_guide.sections.1.items.0'.tr(),
+          'info.buyer_guide.sections.1.items.1'.tr(),
+          'info.buyer_guide.sections.1.items.2'.tr(),
+          'info.buyer_guide.sections.1.items.3'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.payments_outlined,
         color: _kGreen,
-        title: 'Haz tu oferta',
+        title: 'info.buyer_guide.sections.2.title'.tr(),
         items: [
-          'Las ofertas son formales y quedan registradas',
-          'Puedes incluir condiciones (sujeto a hipoteca, libre de cargas, etc.)',
-          'El vendedor puede aceptar, rechazar o contraofertarte',
-          'Un chat privado se abre automaticamente cuando la oferta es aceptada',
+          'info.buyer_guide.sections.2.items.0'.tr(),
+          'info.buyer_guide.sections.2.items.1'.tr(),
+          'info.buyer_guide.sections.2.items.2'.tr(),
+          'info.buyer_guide.sections.2.items.3'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.euro_outlined,
         color: Colors.orange,
-        title: 'Costes que debes prever',
+        title: 'info.buyer_guide.sections.3.title'.tr(),
         items: [
-          'ITP (segunda mano): 6-10% segun comunidad autonoma',
-          'IVA (obra nueva): 10%',
-          'Notaria: 600-1.200 EUR aprox.',
-          'Registro de la Propiedad: 400-700 EUR aprox.',
-          'Gestoria: 300-600 EUR aprox.',
-          'Total estimado: 10-15% sobre el precio de compra',
+          'info.buyer_guide.sections.3.items.0'.tr(),
+          'info.buyer_guide.sections.3.items.1'.tr(),
+          'info.buyer_guide.sections.3.items.2'.tr(),
+          'info.buyer_guide.sections.3.items.3'.tr(),
+          'info.buyer_guide.sections.3.items.4'.tr(),
+          'info.buyer_guide.sections.3.items.5'.tr(),
         ],
       ),
     ];
@@ -451,16 +452,16 @@ class _BuyerGuideScreen extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Guia del Comprador',
-                        style: TextStyle(
+                  children: [
+                    Text('info.buyer_guide.title'.tr(),
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: _kBlue)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Todo lo que necesitas saber para comprar sin agencias.',
-                      style: TextStyle(fontSize: 13, color: _kBlue),
+                      'info.buyer_guide.subtitle'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kBlue),
                     ),
                   ],
                 ),
@@ -485,51 +486,51 @@ class _BuyerGuideScreen extends StatelessWidget {
 class _SellerGuideScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const sections = [
+    final sections = [
       _GuideSection(
         icon: Icons.add_home_outlined,
         color: _kGreen,
-        title: 'Publica tu propiedad',
+        title: 'info.seller_guide.sections.0.title'.tr(),
         items: [
-          'Completa todos los campos del asistente de publicacion',
-          'Sube al menos 5 fotos de calidad (recomendadas 10+)',
-          'El Certificado Energetico (CEE) es obligatorio para recibir ofertas',
-          'Configura tus ventanas horarias de visitas',
+          'info.seller_guide.sections.0.items.0'.tr(),
+          'info.seller_guide.sections.0.items.1'.tr(),
+          'info.seller_guide.sections.0.items.2'.tr(),
+          'info.seller_guide.sections.0.items.3'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.verified_user_outlined,
         color: _kBlue,
-        title: 'Gestiona la solvencia',
+        title: 'info.seller_guide.sections.1.title'.tr(),
         items: [
-          'Revisa el Pasaporte de Solvencia del comprador antes de aceptar',
-          'El nivel Oro indica maxima solvencia (pago al contado o hipoteca aprobada)',
-          'Solo tu puedes ver este pasaporte y es completamente anonimizado',
-          'Debes aceptar la solvencia para que el proceso avance',
+          'info.seller_guide.sections.1.items.0'.tr(),
+          'info.seller_guide.sections.1.items.1'.tr(),
+          'info.seller_guide.sections.1.items.2'.tr(),
+          'info.seller_guide.sections.1.items.3'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.description_outlined,
         color: Colors.purple,
-        title: 'Documentacion necesaria',
+        title: 'info.seller_guide.sections.2.title'.tr(),
         items: [
-          'Escritura de propiedad',
-          'Ultimo recibo IBI pagado',
-          'Certificado de no deber a la comunidad',
-          'Certificado Energetico (CEE) — obligatorio',
-          'Nota simple del Registro (no mas de 3 meses)',
-          'Si hay hipoteca: certificado de saldo pendiente',
+          'info.seller_guide.sections.2.items.0'.tr(),
+          'info.seller_guide.sections.2.items.1'.tr(),
+          'info.seller_guide.sections.2.items.2'.tr(),
+          'info.seller_guide.sections.2.items.3'.tr(),
+          'info.seller_guide.sections.2.items.4'.tr(),
+          'info.seller_guide.sections.2.items.5'.tr(),
         ],
       ),
       _GuideSection(
         icon: Icons.euro_outlined,
         color: Colors.orange,
-        title: 'Costes del vendedor',
+        title: 'info.seller_guide.sections.3.title'.tr(),
         items: [
-          'Plusvalia municipal: variable segun ayuntamiento y anos de tenencia',
-          'IRPF por ganancia patrimonial: 19-28% sobre la ganancia',
-          'Cancelacion registral de hipoteca (si aplica): 400-800 EUR',
-          'Notaria: parte proporcional (normalmente asumida por el comprador)',
+          'info.seller_guide.sections.3.items.0'.tr(),
+          'info.seller_guide.sections.3.items.1'.tr(),
+          'info.seller_guide.sections.3.items.2'.tr(),
+          'info.seller_guide.sections.3.items.3'.tr(),
         ],
       ),
     ];
@@ -551,16 +552,16 @@ class _SellerGuideScreen extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Guia del Vendedor',
-                        style: TextStyle(
+                  children: [
+                    Text('info.seller_guide.title'.tr(),
+                        style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: _kGreen)),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Vende tu propiedad sin pagar comisiones de agencia.',
-                      style: TextStyle(fontSize: 13, color: _kGreen),
+                      'info.seller_guide.subtitle'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kGreen),
                     ),
                   ],
                 ),
@@ -589,31 +590,31 @@ class _ContactScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'Estamos para ayudarte',
+          'info.contact.title'.tr(),
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 8),
         Text(
-          'Selecciona el canal que mejor te convenga.',
+          'info.contact.subtitle'.tr(),
           style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 24),
         _ContactOption(
           icon: Icons.email_outlined,
           color: _kBlue,
-          title: 'Correo electronico',
-          subtitle: 'soporte@inmufacil.com',
-          actionLabel: 'Enviar email',
+          title: 'info.contact.email_title'.tr(),
+          subtitle: 'info.contact.email_subtitle'.tr(),
+          actionLabel: 'info.contact.email_action'.tr(),
           onTap: () {},
         ),
         const SizedBox(height: 12),
         _ContactOption(
           icon: Icons.help_outline,
           color: Colors.purple,
-          title: 'Centro de ayuda',
-          subtitle: 'Consulta nuestras guias y tutoriales',
-          actionLabel: 'Ver ayuda',
+          title: 'info.contact.help_title'.tr(),
+          subtitle: 'info.contact.help_subtitle'.tr(),
+          actionLabel: 'info.contact.help_action'.tr(),
           onTap: () => context.push(InfoScreen.routeFor(InfoPageType.faq)),
         ),
         const SizedBox(height: 28),
@@ -627,15 +628,15 @@ class _ContactScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Informacion legal',
+              Text('info.contact.legal_info'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
               const SizedBox(height: 12),
-              _LegalLink(label: 'Politica de Privacidad',
+              _LegalLink(label: 'info.contact.privacy'.tr(),
                   route: InfoScreen.routeFor(InfoPageType.privacy)),
-              _LegalLink(label: 'Terminos de Uso',
+              _LegalLink(label: 'info.contact.terms'.tr(),
                   route: InfoScreen.routeFor(InfoPageType.terms)),
-              _LegalLink(label: 'Aviso Legal',
+              _LegalLink(label: 'info.contact.legal_notice'.tr(),
                   route: InfoScreen.routeFor(InfoPageType.legalNotice)),
             ],
           ),
@@ -675,49 +676,38 @@ class _LegalLink extends StatelessWidget {
 // ============================================================================
 
 class _FaqScreen extends StatelessWidget {
-  static const _faqs = [
+  static final _faqs = [
     _FaqItem(
-      q: 'Es gratuito usar InmuFacil?',
-      a: 'Si, publicar propiedades y enviar ofertas es completamente gratuito. '
-          'Algunas funcionalidades premium como servicios de tasacion o asesoria legal pueden tener coste.',
+      q: 'info.faq.items.0.q'.tr(),
+      a: 'info.faq.items.0.a'.tr(),
     ),
     _FaqItem(
-      q: 'Necesito un agente inmobiliario?',
-      a: 'No. InmuFacil esta disenado para conectar directamente a compradores y vendedores. '
-          'La plataforma guia el proceso con herramientas legales y financieras integradas.',
+      q: 'info.faq.items.1.q'.tr(),
+      a: 'info.faq.items.1.a'.tr(),
     ),
     _FaqItem(
-      q: 'Es obligatorio el Certificado Energetico (CEE)?',
-      a: 'Si. La ley espanola obliga a disponer del CEE para vender una propiedad. '
-          'Ademas, InmuFacil bloquea la recepcion de ofertas hasta que el CEE este subido.',
+      q: 'info.faq.items.2.q'.tr(),
+      a: 'info.faq.items.2.a'.tr(),
     ),
     _FaqItem(
-      q: 'Que es el Pasaporte de Solvencia?',
-      a: 'Es un cuestionario financiero que el comprador completa voluntariamente. '
-          'Ayuda al vendedor a valorar la solidez financiera del comprador antes de aceptar una oferta. '
-          'Los datos son anonimizados y caduca a los 90 dias.',
+      q: 'info.faq.items.3.q'.tr(),
+      a: 'info.faq.items.3.a'.tr(),
     ),
     _FaqItem(
-      q: 'El Contrato de Arras generado es legal?',
-      a: 'El contrato generado por InmuFacil es un borrador orientativo. '
-          'Recomendamos que sea revisado por un abogado antes de la firma. '
-          'InmuFacil no presta servicios juridicos.',
+      q: 'info.faq.items.4.q'.tr(),
+      a: 'info.faq.items.4.a'.tr(),
     ),
     _FaqItem(
-      q: 'Como se verifican los usuarios?',
-      a: 'InmuFacil usa un proceso KYC (Know Your Customer) con verificacion de DNI/NIE '
-          'mediante fotografia y reconocimiento de documentos. Los usuarios verificados '
-          'tienen mayor credibilidad en la plataforma.',
+      q: 'info.faq.items.5.q'.tr(),
+      a: 'info.faq.items.5.a'.tr(),
     ),
     _FaqItem(
-      q: 'Que ocurre si una de las partes se echa atras?',
-      a: 'Segun las condiciones del Contrato de Arras: si el comprador desiste, '
-          'pierde las arras entregadas. Si el vendedor desiste, debe devolver el doble de las arras.',
+      q: 'info.faq.items.6.q'.tr(),
+      a: 'info.faq.items.6.a'.tr(),
     ),
     _FaqItem(
-      q: 'InmuFacil guarda mis datos?',
-      a: 'Tus datos se tratan conforme al RGPD. Puedes ejercer tu derecho al olvido '
-          'solicitando la eliminacion de tu cuenta. Los documentos sensibles se cifran en reposo.',
+      q: 'info.faq.items.7.q'.tr(),
+      a: 'info.faq.items.7.a'.tr(),
     ),
   ];
 
@@ -727,7 +717,7 @@ class _FaqScreen extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       children: [
         Text(
-          'Preguntas frecuentes',
+          'info.faq.title'.tr(),
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 20),
@@ -875,13 +865,13 @@ class _LegalTextScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Ultima actualizacion: Marzo 2026 · Version 1.0',
+                      'info.legal.common.updated_at'.tr(),
                       style: TextStyle(
                           fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Cifrado AES-256-GCM · RGPD · ISO 27001',
+                      'info.legal.common.security_badge'.tr(),
                       style: TextStyle(
                           fontSize: 10,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -921,7 +911,7 @@ class _LegalTextScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Para cualquier consulta legal contacta con nosotros en legal@inmufacil.com',
+                    'info.legal.common.footer_contact'.tr(),
                     style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -1038,378 +1028,150 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
 
 // ── Privacy Policy Sections ────────────────────────────────────────────────
 
-const _privacySections = [
+final _privacySections = [
   _LegalSection(
-    title: 'Responsable del tratamiento',
+    title: 'info.legal.privacy.sections.0.title'.tr(),
     icon: Icons.business_outlined,
-    body:
-        'InmuFacil, S.L. (en tramite de constitucion), con domicilio en Sevilla, '
-        'Espana. Correo electronico de proteccion de datos: privacidad@inmufacil.com. '
-        'InmuFacil actua como Responsable del Tratamiento conforme al Reglamento (UE) '
-        '2016/679 (RGPD) y la Ley Organica 3/2018 (LOPDGDD).',
+    body: 'info.legal.privacy.sections.0.body'.tr(),
   ),
   _LegalSection(
-    title: 'Datos que recopilamos',
+    title: 'info.legal.privacy.sections.1.title'.tr(),
     icon: Icons.folder_outlined,
-    body:
-        'Recopilamos los siguientes datos necesarios para prestar el servicio:\n\n'
-        '• Datos identificativos: nombre completo, DNI/NIE, fecha de nacimiento, '
-        'nacionalidad, correo electronico y telefono.\n'
-        '• Datos de identidad biometrica: fotografia del documento de identidad y '
-        'captura de "prueba de vida" (liveness check) para verificacion KYC.\n'
-        '• Datos de la propiedad: direccion, titularidad, precio, documentacion '
-        'registral (Nota Simple, CEE, IBI).\n'
-        '• Datos financieros (voluntarios): cuestionario del Pasaporte de Solvencia '
-        'incluyendo metodo de pago, ratio de endeudamiento, ingresos netos mensuales '
-        'y ahorros disponibles.\n'
-        '• Datos de navegacion: logs de acceso, direccion IP, tipo de dispositivo '
-        'y cookies tecnicas.\n\n'
-        'Todos los datos sensibles (DNI, biometria, datos financieros) se almacenan '
-        'cifrados con AES-256-GCM en reposo y se transmiten bajo HTTPS/TLS 1.3.',
+    body: 'info.legal.privacy.sections.1.body'.tr(),
   ),
   _LegalSection(
-    title: 'Inteligencia Artificial y Biometria',
+    title: 'info.legal.privacy.sections.2.title'.tr(),
     icon: Icons.smart_toy_outlined,
     highlight: true,
-    body:
-        'InmuFacil utiliza tecnologias de Inteligencia Artificial (IA) y biometria '
-        'para los siguientes fines, requiriendo tu consentimiento explicito (Art. 9 RGPD '
-        'para datos biometricos y Art. 22 RGPD para decisiones automatizadas):\n\n'
-        '1. Verificacion de identidad (Liveness Check / KYC): el sistema de IA '
-        'analiza la captura facial del usuario y la compara con el documento de '
-        'identidad aportado para confirmar que el usuario es quien dice ser y esta '
-        'fisicamente presente (anti-spoofing). Este procesamiento se realiza de forma '
-        'puntual durante el registro y no implica almacenamiento continuado de '
-        'datos biometricos mas alla del periodo KYC legalmente exigido.\n\n'
-        '2. Generacion de borradores de contratos (IA Generativa): la plataforma '
-        'emplea modelos de Inteligencia Artificial para redactar borradores del '
-        'Contrato de Arras a partir de los datos de la operacion. Estos borradores '
-        'son orientativos y no constituyen asesoramiento juridico. La revision y '
-        'firma son responsabilidad exclusiva de las partes.\n\n'
-        '3. Analisis de solvencia dinamica: los algoritmos de InmuFacil procesan '
-        'los datos del Pasaporte de Solvencia para calcular indices de riesgo '
-        '(stress_index) y nivel de solvencia (Bronce/Plata/Oro). Este analisis '
-        'es informativo y no constituye una evaluacion crediticia con efectos juridicos.\n\n'
-        'Tienes derecho a oponerte al tratamiento automatizado y a solicitar '
-        'intervencion humana en cualquier decision que te afecte significativamente.',
+    body: 'info.legal.privacy.sections.2.body'.tr(),
   ),
   _LegalSection(
-    title: 'Compromiso de no comercializacion',
+    title: 'info.legal.privacy.sections.3.title'.tr(),
     icon: Icons.block_outlined,
     highlight: true,
-    body:
-        'InmuFacil NO vende, cede, alquila ni comercializa los datos personales '
-        'de sus usuarios a terceros con fines publicitarios o comerciales.\n\n'
-        'Los datos unicamente se comparten con:\n'
-        '• Proveedores tecnicos imprescindibles (hosting, KYC, firma digital) '
-        'vinculados contractualmente como Encargados del Tratamiento bajo '
-        'clausulas de confidencialidad RGPD.\n'
-        '• La otra parte de la transaccion (comprador/vendedor), exclusivamente '
-        'los datos necesarios para formalizar la operacion acordada.\n'
-        '• Autoridades competentes cuando exista obligacion legal.\n\n'
-        'InmuFacil no utiliza tus datos con fines de publicidad comportamental, '
-        'perfilado comercial ni monetizacion de datos. El modelo de negocio de '
-        'la plataforma se basa en comisiones por transaccion completada, '
-        'no en la explotacion de datos.',
+    body: 'info.legal.privacy.sections.3.body'.tr(),
   ),
   _LegalSection(
-    title: 'Base juridica del tratamiento',
+    title: 'info.legal.privacy.sections.4.title'.tr(),
     icon: Icons.gavel_outlined,
-    body:
-        '• Ejecucion del contrato (Art. 6.1.b RGPD): registro, gestion de '
-        'ofertas, generacion de documentos.\n'
-        '• Consentimiento explicito (Art. 6.1.a / Art. 9.2.a RGPD): tratamiento '
-        'biometrico (KYC liveness), IA generativa, analisis de solvencia '
-        'y comunicaciones comerciales opcionales.\n'
-        '• Obligacion legal (Art. 6.1.c RGPD): conservacion de documentos '
-        'conforme a Ley 10/2010 de blanqueo de capitales y normativa fiscal.\n'
-        '• Interes legitimo (Art. 6.1.f RGPD): prevencion de fraude, seguridad '
-        'de la plataforma y mejora del servicio.',
+    body: 'info.legal.privacy.sections.4.body'.tr(),
   ),
   _LegalSection(
-    title: 'Conservacion de datos',
+    title: 'info.legal.privacy.sections.5.title'.tr(),
     icon: Icons.schedule_outlined,
-    body:
-        '• Datos de cuenta: mientras la cuenta permanezca activa + 5 anos tras '
-        'la cancelacion (obligacion fiscal).\n'
-        '• Pasaporte de Solvencia: eliminacion automatica a los 90 dias de su creacion.\n'
-        '• Datos biometricos KYC: eliminados en un plazo maximo de 6 meses tras '
-        'completar la verificacion, salvo obligacion legal que exija mayor plazo.\n'
-        '• Datos de la transaccion (Arras, escrituras): 15 anos conforme al '
-        'Codigo Civil para contratos de compraventa.\n'
-        '• Logs de seguridad: 12 meses.',
+    body: 'info.legal.privacy.sections.5.body'.tr(),
   ),
   _LegalSection(
-    title: 'Seguridad tecnica',
+    title: 'info.legal.privacy.sections.6.title'.tr(),
     icon: Icons.security_outlined,
-    body:
-        'InmuFacil implementa las siguientes medidas tecnicas y organizativas '
-        'conforme al Articulo 32 RGPD e ISO/IEC 27001:\n\n'
-        '• Cifrado en reposo: AES-256-GCM para todos los datos sensibles '
-        '(PII, biometria, datos financieros).\n'
-        '• Cifrado en transito: HTTPS/TLS 1.3 en todas las comunicaciones.\n'
-        '• Autenticacion: JWT con rotacion de tokens y expiracion controlada.\n'
-        '• Control de acceso: RBAC (Control de Acceso Basado en Roles) que '
-        'garantiza que cada usuario accede exclusivamente a sus propios datos.\n'
-        '• Auditoria: logs de acceso a datos sensibles con marca temporal '
-        'conforme a PCI DSS.\n'
-        '• Vigilancia proactiva: defensa activa contra tecnicas MITRE ATT&CK '
-        '(fuerza bruta, phishing, inyeccion SQL).',
+    body: 'info.legal.privacy.sections.6.body'.tr(),
   ),
   _LegalSection(
-    title: 'Tus derechos RGPD',
+    title: 'info.legal.privacy.sections.7.title'.tr(),
     icon: Icons.shield_outlined,
-    body:
-        'Puedes ejercer los siguientes derechos en privacidad@inmufacil.com '
-        'adjuntando copia de tu DNI/NIE:\n\n'
-        '• Derecho de acceso: conocer que datos tratamos sobre ti.\n'
-        '• Derecho de rectificacion: corregir datos inexactos.\n'
-        '• Derecho de supresion ("derecho al olvido"): eliminacion tecnica '
-        'de todos tus datos personales cuando no exista obligacion legal '
-        'de conservacion. InmuFacil garantiza la viabilidad tecnica de '
-        'este derecho mediante el borrado seguro de registros cifrados.\n'
-        '• Derecho de portabilidad: recibir tus datos en formato estructurado.\n'
-        '• Derecho de oposicion y limitacion: especialmente frente a '
-        'decisiones automatizadas por IA (Art. 22 RGPD).\n\n'
-        'Si no queda satisfecho/a con nuestra respuesta, puedes reclamar '
-        'ante la Agencia Espanola de Proteccion de Datos (www.aepd.es).',
+    body: 'info.legal.privacy.sections.7.body'.tr(),
   ),
   _LegalSection(
-    title: 'Transferencias internacionales',
+    title: 'info.legal.privacy.sections.8.title'.tr(),
     icon: Icons.public_outlined,
-    body:
-        'InmuFacil no realiza transferencias internacionales de datos fuera '
-        'del Espacio Economico Europeo (EEE) de forma sistematica. '
-        'En caso de que algun proveedor tecnico se localice fuera del EEE, '
-        'se aplicaran las Clausulas Contractuales Tipo aprobadas por la '
-        'Comision Europea como garantia de nivel de proteccion adecuado.',
+    body: 'info.legal.privacy.sections.8.body'.tr(),
   ),
   _LegalSection(
-    title: 'Uso de cookies',
+    title: 'info.legal.privacy.sections.9.title'.tr(),
     icon: Icons.cookie_outlined,
-    body:
-        'InmuFacil utiliza unicamente cookies tecnicas estrictamente necesarias '
-        'para el funcionamiento de la plataforma (sesion, autenticacion). '
-        'No se utilizan cookies de seguimiento publicitario ni de terceros '
-        'con fines comerciales. Puedes gestionar las cookies desde la '
-        'configuracion de tu navegador.',
+    body: 'info.legal.privacy.sections.9.body'.tr(),
   ),
 ];
 
 // ── Terms & Conditions Sections ───────────────────────────────────────────
 
-const _termsSections = [
+final _termsSections = [
   _LegalSection(
-    title: 'Objeto y naturaleza P2P de InmuFacil',
+    title: 'info.legal.terms.sections.0.title'.tr(),
     icon: Icons.handshake_outlined,
-    body:
-        'InmuFacil es una plataforma tecnologica P2P (peer-to-peer) de '
-        'intermediacion inmobiliaria que conecta directamente a compradores '
-        'y vendedores particulares de inmuebles ubicados en Espana.\n\n'
-        'InmuFacil NO actua como agente inmobiliario, NO cobra comision '
-        'de agencia a ninguna de las partes y NO es parte en la transaccion '
-        'de compraventa. Su funcion es proporcionar herramientas tecnologicas, '
-        'documentacion orientativa y un entorno seguro para que las partes '
-        'negocien y formalicen su operacion de forma autonoma.',
+    body: 'info.legal.terms.sections.0.body'.tr(),
   ),
   _LegalSection(
-    title: 'Aceptacion y capacidad legal',
+    title: 'info.legal.terms.sections.1.title'.tr(),
     icon: Icons.verified_outlined,
-    body:
-        'El uso de la plataforma implica la aceptacion plena de estos Terminos '
-        'y Condiciones, la Politica de Privacidad y el Aviso Legal.\n\n'
-        'Para registrarse es necesario ser mayor de 18 anos y tener plena '
-        'capacidad juridica para contratar. Los menores de 18 anos tienen '
-        'prohibido el acceso a la plataforma.',
+    body: 'info.legal.terms.sections.1.body'.tr(),
   ),
   _LegalSection(
-    title: 'Proceso por pasos y Timeline de transaccion',
+    title: 'info.legal.terms.sections.2.title'.tr(),
     icon: Icons.timeline_outlined,
     highlight: true,
-    body:
-        'InmuFacil estructura las transacciones en un Timeline de hitos '
-        'secuenciales. Cada avance requiere la aceptacion expresa de ambas '
-        'partes:\n\n'
-        '1. Publicacion: el vendedor publica la propiedad con CEE obligatorio.\n'
-        '2. Oferta: el comprador formaliza una oferta economica vinculada a '
-        'su Pasaporte de Solvencia.\n'
-        '3. Verificacion de solvencia: el vendedor revisa y acepta o rechaza '
-        'el pasaporte del comprador.\n'
-        '4. Contrato de Arras: generacion asistida del borrador + firma digital '
-        'de ambas partes. Este hito tiene validez contractual conforme al '
-        'Articulo 1454 del Codigo Civil espanol.\n'
-        '5. Tasacion e hipoteca: coordinacion del proceso bancario.\n'
-        '6. Escritura notarial: cierre de la operacion ante notario.\n'
-        '7. Entrega de llaves: confirmacion final.\n\n'
-        'La aceptacion de estos Terminos implica el consentimiento para '
-        'avanzar paso a paso por el Timeline, reconociendo que cada hito '
-        'firmado tiene efectos contractuales propios.',
+    body: 'info.legal.terms.sections.2.body'.tr(),
   ),
   _LegalSection(
-    title: 'Inteligencia Artificial — Alcance y limitaciones',
+    title: 'info.legal.terms.sections.3.title'.tr(),
     icon: Icons.smart_toy_outlined,
     highlight: true,
-    body:
-        'InmuFacil incorpora sistemas de Inteligencia Artificial en los '
-        'siguientes modulos:\n\n'
-        '1. Generacion de borradores del Contrato de Arras: la IA redacta '
-        'automaticamente un borrador a partir de los parametros de la '
-        'operacion acordados por las partes (precio, condiciones, plazos). '
-        'Este borrador es ORIENTATIVO. InmuFacil no presta servicios '
-        'juridicos y RECOMIENDA EXPRESAMENTE la revision del documento por '
-        'un abogado o notario antes de su firma. La responsabilidad legal '
-        'del contrato recae exclusivamente en las partes firmantes.\n\n'
-        '2. Analisis de solvencia (IA): el motor de scoring analiza los '
-        'datos del Pasaporte de Solvencia para generar indicadores '
-        'informativos. Estos indicadores NO tienen la consideracion de '
-        'informe crediticio oficial ni sustituyen a la evaluacion de '
-        'una entidad financiera.\n\n'
-        '3. Verificacion KYC (Inteligencia Artificial + biometria): el '
-        'proceso de prueba de vida es ejecutado por sistemas de IA. '
-        'InmuFacil se reserva el derecho a realizar una revision manual '
-        'adicional ante casos dudosos.',
+    body: 'info.legal.terms.sections.3.body'.tr(),
   ),
   _LegalSection(
-    title: 'Obligaciones del vendedor',
+    title: 'info.legal.terms.sections.4.title'.tr(),
     icon: Icons.home_outlined,
-    body:
-        '• Publicar informacion veraz y actualizada sobre la propiedad.\n'
-        '• Aportar el Certificado Energetico (CEE) vigente (obligatorio por Ley).\n'
-        '• Disponer de Nota Simple del Registro de la Propiedad no anterior '
-        'a 3 meses al inicio de las arras.\n'
-        '• Acreditar estar al corriente de pagos: IBI, comunidad de propietarios '
-        'y suministros.\n'
-        '• Informar de cargas hipotecarias o servidumbres sobre la propiedad.\n'
-        '• No publicar la misma propiedad simultaneamente en otras plataformas '
-        'una vez firmado el Contrato de Arras.',
+    body: 'info.legal.terms.sections.4.body'.tr(),
   ),
   _LegalSection(
-    title: 'Obligaciones del comprador',
+    title: 'info.legal.terms.sections.5.title'.tr(),
     icon: Icons.person_outlined,
-    body:
-        '• Completar el Pasaporte de Solvencia con informacion veraz.\n'
-        '• Realizar la verificacion de identidad KYC para poder hacer ofertas.\n'
-        '• Formular ofertas con intension real de compra.\n'
-        '• Disponer de los fondos o financiacion necesaria antes de firmar las arras.\n'
-        '• En caso de compra conjunta (multi-comprador), el segundo titular '
-        'debe completar su propia verificacion de identidad en la plataforma.',
+    body: 'info.legal.terms.sections.5.body'.tr(),
   ),
   _LegalSection(
-    title: 'Contrato de Arras — Efectos y responsabilidad',
+    title: 'info.legal.terms.sections.6.title'.tr(),
     icon: Icons.draw_outlined,
-    body:
-        'El Contrato de Arras generado por InmuFacil es un borrador de arras '
-        'penitenciales (Art. 1454 Cc) que incluye:\n\n'
-        '• Identificacion de las partes y la propiedad.\n'
-        '• Precio final acordado y cantidad de arras a entregar.\n'
-        '• Plazo maximo para escritura notarial.\n'
-        '• Condiciones resolutivas pactadas (sujeto a hipoteca, etc.).\n\n'
-        'IMPORTANTE: si el comprador desiste, pierde las arras entregadas. '
-        'Si el vendedor desiste, esta obligado a devolver el doble. '
-        'InmuFacil NO asume responsabilidad alguna por el incumplimiento '
-        'de ninguna de las partes ni por errores en la informacion '
-        'aportada que afecten a la validez del contrato.',
+    body: 'info.legal.terms.sections.6.body'.tr(),
   ),
   _LegalSection(
-    title: 'Exencion de responsabilidad',
+    title: 'info.legal.terms.sections.7.title'.tr(),
     icon: Icons.warning_amber_outlined,
-    body:
-        'InmuFacil no garantiza:\n'
-        '• El estado fisico, juridico o urbanistico de las propiedades publicadas.\n'
-        '• La veracidad de la informacion aportada por los usuarios.\n'
-        '• La disponibilidad continua e ininterrumpida de la plataforma.\n'
-        '• Los resultados economicos de ninguna operacion.\n\n'
-        'InmuFacil no sera responsable por danos directos, indirectos o '
-        'consecuentes derivados del uso de la plataforma, incluyendo '
-        'danos derivados de decisiones tomadas en base a los analisis de IA.',
+    body: 'info.legal.terms.sections.7.body'.tr(),
   ),
   _LegalSection(
-    title: 'Uso aceptable y suspension de cuentas',
+    title: 'info.legal.terms.sections.8.title'.tr(),
     icon: Icons.block_outlined,
-    body:
-        'Esta expresamente prohibido:\n'
-        '• Publicar propiedades ficticias o con precio inflado artificialmente.\n'
-        '• Usar datos de identidad de terceros o documentos falsificados en el KYC.\n'
-        '• Realizar ofertas sin intencion real de compra.\n'
-        '• Intentar extraer, copiar o redistribuir datos de otros usuarios.\n'
-        '• Cualquier uso fraudulento, abusivo o contrario a la normativa.\n\n'
-        'InmuFacil se reserva el derecho a suspender o cancelar cuentas '
-        'que incumplan estas condiciones, sin perjuicio de las acciones '
-        'legales que correspondan.',
+    body: 'info.legal.terms.sections.8.body'.tr(),
   ),
   _LegalSection(
-    title: 'Modificacion de terminos y ley aplicable',
+    title: 'info.legal.terms.sections.9.title'.tr(),
     icon: Icons.edit_note_outlined,
-    body:
-        'InmuFacil puede modificar estos Terminos notificando a los usuarios '
-        'con al menos 30 dias de antelacion. El uso continuado de la '
-        'plataforma tras la notificacion implica la aceptacion de los '
-        'nuevos terminos.\n\n'
-        'Estos Terminos se rigen por la legislacion espanola. Para cualquier '
-        'controversia, las partes se someten a los Juzgados y Tribunales '
-        'de Sevilla, con renuncia a cualquier otro fuero.',
+    body: 'info.legal.terms.sections.9.body'.tr(),
   ),
 ];
 
 // ── Legal Notice Sections ─────────────────────────────────────────────────
 
-const _legalNoticeSections = [
+final _legalNoticeSections = [
   _LegalSection(
-    title: 'Identificacion del titular',
+    title: 'info.legal.legal_notice.sections.0.title'.tr(),
     icon: Icons.business_outlined,
-    body:
-        'InmuFacil, S.L. — en tramite de constitucion.\n'
-        'Domicilio: Sevilla, Espana.\n'
-        'Email de contacto: legal@inmufacil.com\n'
-        'Responsable de contenidos: equipo InmuFacil.',
+    body: 'info.legal.legal_notice.sections.0.body'.tr(),
   ),
   _LegalSection(
-    title: 'Actividad',
+    title: 'info.legal.legal_notice.sections.1.title'.tr(),
     icon: Icons.domain_outlined,
-    body:
-        'Prestacion de servicios de plataforma tecnologica P2P para la '
-        'intermediacion inmobiliaria entre particulares. InmuFacil no ejerce '
-        'actividades reservadas a agentes inmobiliarios colegiados ni presta '
-        'servicios de intermediacion financiera o de inversion.',
+    body: 'info.legal.legal_notice.sections.1.body'.tr(),
   ),
   _LegalSection(
-    title: 'Normativa aplicable',
+    title: 'info.legal.legal_notice.sections.2.title'.tr(),
     icon: Icons.gavel_outlined,
-    body:
-        'Este sitio se rige por la legislacion espanola, conforme a:\n'
-        '• Ley 34/2002, de servicios de la sociedad de la informacion (LSSICE).\n'
-        '• Ley Organica 3/2018 (LOPDGDD) y Reglamento (UE) 2016/679 (RGPD).\n'
-        '• Ley 29/1994 de Arrendamientos Urbanos (cuando aplique).\n'
-        '• Real Decreto 7/2019 de medidas urgentes en materia de vivienda.\n'
-        '• Reglamento (UE) 2024/1689 de IA (AI Act) — cumplimiento proactivo.',
+    body: 'info.legal.legal_notice.sections.2.body'.tr(),
   ),
   _LegalSection(
-    title: 'Propiedad intelectual',
+    title: 'info.legal.legal_notice.sections.3.title'.tr(),
     icon: Icons.copyright_outlined,
-    body:
-        'Todos los contenidos, disenos, codigos fuente y marcas de InmuFacil '
-        'estan protegidos por derechos de propiedad intelectual e industrial. '
-        'Queda prohibida su reproduccion, distribucion o comunicacion publica '
-        'sin autorizacion expresa y por escrito de InmuFacil.',
+    body: 'info.legal.legal_notice.sections.3.body'.tr(),
   ),
   _LegalSection(
-    title: 'Exencion de responsabilidad',
+    title: 'info.legal.legal_notice.sections.4.title'.tr(),
     icon: Icons.warning_amber_outlined,
-    body:
-        'InmuFacil no se responsabiliza de los danos derivados del uso de '
-        'la plataforma, de la inexactitud de la informacion publicada por '
-        'terceros, ni del incumplimiento de obligaciones entre usuarios. '
-        'Los enlaces a sitios externos no implican patrocinio ni responsabilidad '
-        'sobre su contenido.',
+    body: 'info.legal.legal_notice.sections.4.body'.tr(),
   ),
   _LegalSection(
-    title: 'Jurisdiccion',
+    title: 'info.legal.legal_notice.sections.5.title'.tr(),
     icon: Icons.account_balance_outlined,
-    body:
-        'Para cualquier controversia derivada del uso de esta plataforma, '
-        'las partes se someten a los Juzgados y Tribunales de la ciudad '
-        'de Sevilla, con renuncia expresa a cualquier otro fuero que '
-        'pudiera corresponderles.',
+    body: 'info.legal.legal_notice.sections.5.body'.tr(),
   ),
 ];
 

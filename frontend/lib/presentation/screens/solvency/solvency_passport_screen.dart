@@ -6,7 +6,9 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kNavy  = Color(0xFF2563EB);
+// Note: _kNavy and _kGreen are used for gradients and level colors which are context-independent.
+// For context-dependent usage, colorScheme.primary is preferred.
+const _kNavy  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
 
 class SolvencyPassportScreen extends ConsumerWidget {
@@ -41,7 +43,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -146,7 +148,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               Text(
                 'Completa el asistente para obtener tu nivel de solvencia y mostrar a los vendedores que eres un comprador serio.',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
+                style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -292,7 +294,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'Ratio de endeudamiento: ${((passport.debtRatio ?? 0) * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                     ),
                   ],
@@ -355,7 +357,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
 
               Text(
                 'Este pasaporte es visible de forma anonima para los vendedores de las propiedades a las que hayas hecho una oferta.',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade500, height: 1.5),
+                style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -376,20 +378,21 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _kNavy),
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: colorScheme.primary),
           ),
           const SizedBox(height: 12),
           child,
@@ -407,18 +410,21 @@ class _CheckRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenColor = isDark ? const Color(0xFF4ADE80) : _kGreen;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
           Icon(
             ok ? Icons.check_circle_rounded : Icons.cancel_rounded,
-            color: ok ? _kGreen : Colors.grey.shade400,
+            color: ok ? greenColor : colorScheme.onSurfaceVariant,
             size: 18,
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(label, style: TextStyle(fontSize: 13, color: ok ? const Color(0xFF1E293B) : Colors.grey.shade500)),
+            child: Text(label, style: TextStyle(fontSize: 13, color: ok ? colorScheme.onSurface : colorScheme.onSurfaceVariant)),
           ),
         ],
       ),

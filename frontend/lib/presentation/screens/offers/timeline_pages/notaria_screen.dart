@@ -10,7 +10,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
 
-const _kBlue    = Color(0xFF2563EB);
+const _kBlue    = Color(0xFF135BEC);
 const _kGreen   = Color(0xFF16A34A);
 const _kOrange  = Color(0xFFEA580C);
 const _kBg      = Color(0xFFF8FAFC);
@@ -189,7 +189,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                   children: [
                     TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB)),
+                      style: TextStyle(color: Color(0xFF135BEC)),
                     ),
                     TextSpan(
                       text: 'Fácil',
@@ -212,11 +212,11 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF135BEC),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -358,7 +358,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1E3A5F))),
+                  color: Color(0xFF135BEC))),
           const SizedBox(height: 16),
           // City field
           TextField(
@@ -529,7 +529,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             Icon(Icons.event_outlined, color: _kBlue, size: 20),
             SizedBox(width: 8),
             Text('Cita notarial propuesta por el comprador',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E3A5F))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 12),
           if (_savedCity != null)
@@ -679,7 +679,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
         const Text(
           'Documentos para la firma',
           style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F)),
+              fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC)),
         ),
         const SizedBox(height: 16),
         _DocsSection(title: 'Comprador', icon: Icons.person_outline, docs: buyerDocs),
@@ -721,7 +721,7 @@ class _DatePickerRow extends StatelessWidget {
             Expanded(
               child: Text(value,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF1E3A5F))),
+                      fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF135BEC))),
             ),
             Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
           ],
@@ -747,7 +747,7 @@ class _DetailRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text('$label: ', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
           Expanded(child: Text(value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1E3A5F)))),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF135BEC)))),
         ],
       ),
     );
@@ -779,7 +779,7 @@ class _DocsSection extends StatelessWidget {
               const SizedBox(width: 8),
               Text(title,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E3A5F))),
+                      fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
             ],
           ),
           const SizedBox(height: 12),

@@ -11,7 +11,7 @@ import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kBlue   = Color(0xFF2563EB);
+const _kBlue   = Color(0xFF135BEC);
 const _kGreen  = Color(0xFF16A34A);
 const _kOrange = Color(0xFFEA580C);
 const _kBg     = Color(0xFFF8FAFC);
@@ -483,7 +483,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
             SizedBox(width: 8),
             Text('El comprador propone esta cita',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1E3A5F))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 14),
           if (_buyerDate != null && _buyerTime != null)
@@ -637,7 +637,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
             SizedBox(width: 8),
             Text('El vendedor propone otra fecha',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1E3A5F))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 6),
           Text('La fecha que propusiste no le viene bien. Ha sugerido una alternativa.',
@@ -771,7 +771,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
                 SizedBox(width: 8),
                 Text('Confirmar visita del tasador',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F))),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
               ]),
               const SizedBox(height: 8),
               Text('Pulsa el boton una vez el tasador haya visitado la vivienda y realizado la inspeccion.',
@@ -864,7 +864,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             const Text.rich(TextSpan(
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
               children: [
-                TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                 TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
               ],
             )),
@@ -1013,7 +1013,7 @@ class _TaskCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F))),
+          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
           const SizedBox(height: 4),
           Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
           const SizedBox(height: 16),
@@ -1049,7 +1049,7 @@ class _DateTimeRow extends StatelessWidget {
             Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
             const Spacer(),
             Text(value,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF1E3A5F))),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF135BEC))),
             const SizedBox(width: 8),
             Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
           ],
@@ -1077,7 +1077,7 @@ class _ChecklistCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1E3A5F))),
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
           const SizedBox(height: 12),
           ...items.map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),

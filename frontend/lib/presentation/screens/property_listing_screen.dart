@@ -66,9 +66,10 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
     // When there is no active location (e.g. after reset to show all available),
     // bypass the geographic filter and show everything the backend loaded.
     final geoFiltered = ref.watch(filteredByMapPropertiesProvider);
+    final lifestyleSorted = ref.watch(lifestyleSortedPropertiesProvider);
     var allFilteredProperties = searchState.location.isNotEmpty
         ? geoFiltered
-        : searchState.filteredProperties;
+        : lifestyleSorted;
 
     // Apply local Favorites Filter if active
     if (searchState.onlyFavorites) {
@@ -144,14 +145,19 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                 children: [
                   Image.asset('assets/images/logo_inmufacil.png', height: 32),
                   const SizedBox(width: 8),
-                  const Text.rich(
-                    TextSpan(
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                      children: [
-                        TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                        TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
-                      ],
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text.rich(
+                        TextSpan(
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                          children: [
+                            TextSpan(text: 'Inmu', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                            TextSpan(text: 'Fácil', style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -192,9 +198,9 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                   value: 'favorites',
                   child: Row(children: [
                     Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border,
-                        color: searchState.onlyFavorites ? Colors.red : null),
+                        color: searchState.onlyFavorites ? theme.colorScheme.error : null),
                     const SizedBox(width: 8),
-                    Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : null)),
+                    Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : null)),
                   ]),
                 ),
                 if (!isDesktop)
@@ -204,7 +210,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                   ),
                 PopupMenuItem(
                   value: 'publish',
-                  child: Row(children: [const Icon(Icons.add_home_outlined, color: Color(0xFF2563EB)), const SizedBox(width: 8), const Text('Publicar propiedad', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))]),
+                  child: Builder(builder: (context) => Row(children: [Icon(Icons.add_home_outlined, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), Text('Publicar propiedad', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))])),
                 ),
               ],
             ),
@@ -237,22 +243,22 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                             icon: Container(
                               padding: const EdgeInsets.all(12),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEFF6FF),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surfaceContainerLowest,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.home_work_outlined, color: Color(0xFF2563EB), size: 28),
+                              child: Icon(Icons.home_work_outlined, color: Theme.of(context).colorScheme.primary, size: 28),
                             ),
                             title: const Text(
                               'Cuenta requerida',
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                             ),
-                            content: const Text(
+                            content: Builder(builder: (context) => Text(
                               'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
-                            ),
+                              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                            )),
                             actionsAlignment: MainAxisAlignment.center,
                             actions: [
                               TextButton(
@@ -260,7 +266,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                 style: TextButton.styleFrom(
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
-                                child: const Text('Cancelar', style: TextStyle(color: Color(0xFF64748B))),
+                                child: Text('Cancelar', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                               ),
                               FilledButton(
                                 onPressed: () {
@@ -268,7 +274,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                   context.pushNamed('login');
                                 },
                                 style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2563EB),
+                                  backgroundColor: Theme.of(context).colorScheme.primary,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),
                                 child: const Text('Iniciar sesión'),
@@ -294,10 +300,10 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                   // Favorites Toggle
                   TextButton.icon(
                     onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(),
-                    icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? Colors.red : theme.colorScheme.onSurfaceVariant, size: 20),
-                    label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? Colors.red : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, size: 20),
+                    label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                     style: TextButton.styleFrom(
-                      backgroundColor: searchState.onlyFavorites ? Colors.red.withOpacity(0.05) : null,
+                      backgroundColor: searchState.onlyFavorites ? theme.colorScheme.error.withOpacity(0.05) : null,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -305,7 +311,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                   PremiumButton(
                     label: 'Publicar propiedad',
                     onPressed: () => handleProtectedAction('/property/create'),
-                    color: const Color(0xFF2563EB),
+                    color: theme.colorScheme.primary,
                     fontSize: 13,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     fullWidth: false,
@@ -347,8 +353,8 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                           icon: const Icon(Icons.filter_list, size: 18),
                           label: const Text('Filtros y búsqueda'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF2563EB),
-                            side: const BorderSide(color: Color(0xFF2563EB)),
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                            side: BorderSide(color: Theme.of(context).colorScheme.primary),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           ),
@@ -374,6 +380,33 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                     Expanded(
                       child: Column(
                         children: [
+                          if (searchState.useLifestyleFilter)
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.fromLTRB(0, 8, 0, 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerLowest,
+                                border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.psychology_outlined, color: theme.colorScheme.primary, size: 18),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Resultados ordenados por compatibilidad con tu estilo de vida',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: theme.colorScheme.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           if (searchState.isLoading)
                              const Center(child: Padding(padding: EdgeInsets.all(40), child: CircularProgressIndicator()))
                           else if (paginatedProperties.isEmpty)
@@ -394,7 +427,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                             borderRadius: BorderRadius.circular(16),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: const Color(0xFF2563EB).withOpacity(0.25),
+                                                color: theme.colorScheme.primary.withOpacity(0.25),
                                                 blurRadius: 16,
                                                 spreadRadius: 2,
                                               ),
@@ -429,7 +462,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                             borderRadius: BorderRadius.circular(16),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: const Color(0xFF2563EB).withOpacity(0.25),
+                                                color: theme.colorScheme.primary.withOpacity(0.25),
                                                 blurRadius: 16,
                                                 spreadRadius: 2,
                                               ),
@@ -495,12 +528,12 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                    // Breadcrumbs (Mocked for now as we only have single string location)
                    Row(
                      children: [
-                       Text('España', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
-                       Icon(Icons.chevron_right, size: 14, color: Colors.grey.shade400),
-                       Text('Búsqueda', style: TextStyle(fontSize: 12, color: Colors.grey.shade400)),
-                       Icon(Icons.chevron_right, size: 14, color: Colors.grey.shade400),
-                       Text(searchState.location.isNotEmpty ? searchState.location : 'Todo', 
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600),),
+                       Text('España', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                       Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                       Text('Búsqueda', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                       Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
+                       Text(searchState.location.isNotEmpty ? searchState.location : 'Todo',
+                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant),),
                      ],
                    ),
                    const SizedBox(height: 8),
@@ -514,7 +547,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                        const SizedBox(width: 12),
                        Text(
                          '$count resultados',
-                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w300, color: Colors.grey.shade400),
+                         style: TextStyle(fontSize: 24, fontWeight: FontWeight.w300, color: theme.colorScheme.onSurfaceVariant),
                        ),
                      ],
                    ),
@@ -533,7 +566,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                      decoration: BoxDecoration(
                        color: theme.colorScheme.surface,
                        borderRadius: BorderRadius.circular(8),
-                       border: Border.all(color: Colors.grey.shade200),
+                       border: Border.all(color: theme.colorScheme.outlineVariant),
                      ),
                       child: Row(
                         children: [
@@ -559,22 +592,22 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   }
 
   Widget _buildViewButton(IconData icon, String label, bool isActive, VoidCallback onTap) {
-    const primaryBlue = Color(0xFF2563EB);
+    final colorScheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(6),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? primaryBlue.withOpacity(0.05) : Colors.transparent,
+          color: isActive ? colorScheme.primary.withOpacity(0.05) : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18, color: isActive ? primaryBlue : Colors.grey.shade400),
+            Icon(icon, size: 18, color: isActive ? colorScheme.primary : colorScheme.onSurfaceVariant),
             if (isActive) ...[
               const SizedBox(width: 8),
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: primaryBlue)),
+              Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.primary)),
             ],
           ],
         ),
@@ -634,9 +667,9 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               ),
             );
           } else if (pageNum == 4 && currentPage > 5) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
-              child: Text('...', style: TextStyle(color: Colors.grey)),
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Builder(builder: (context) => Text('...', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))),
             );
           }
           return const SizedBox.shrink();
@@ -653,23 +686,23 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   }
 
   Widget _buildPageBtn(IconData? icon, String? text, bool isActive, {bool enabled = true}) {
-    const primaryBlue = Color(0xFF2563EB);
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: 40,
       height: 40,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isActive ? primaryBlue : Colors.transparent,
+        color: isActive ? colorScheme.primary : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
-        border: isActive ? null : Border.all(color: Colors.grey.shade200),
+        border: isActive ? null : Border.all(color: colorScheme.outlineVariant),
       ),
-      child: icon != null 
-        ? Icon(icon, color: enabled ? Colors.grey.shade600 : Colors.grey.shade300, size: 20)
+      child: icon != null
+        ? Icon(icon, color: enabled ? colorScheme.onSurfaceVariant : colorScheme.outlineVariant, size: 20)
         : Text(
-            text!, 
+            text!,
             style: TextStyle(
-              fontWeight: FontWeight.bold, 
-              color: isActive ? Colors.white : Colors.grey.shade600,
+              fontWeight: FontWeight.bold,
+              color: isActive ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
             ),
           ),
     );
@@ -695,26 +728,32 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               value: e.key,
               child: Row(
                 children: [
-                  Icon(
-                    Icons.check,
-                    size: 15,
-                    color: e.key == searchState.sortBy
-                        ? const Color(0xFF1E3A5F)
-                        : Colors.transparent,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    e.value,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: e.key == searchState.sortBy
-                          ? FontWeight.w700
-                          : FontWeight.normal,
+                  Builder(builder: (context) {
+                    final cs = Theme.of(context).colorScheme;
+                    return Icon(
+                      Icons.check,
+                      size: 15,
                       color: e.key == searchState.sortBy
-                          ? const Color(0xFF1E3A5F)
-                          : const Color(0xFF334155),
-                    ),
-                  ),
+                          ? cs.onPrimaryContainer
+                          : Colors.transparent,
+                    );
+                  }),
+                  const SizedBox(width: 8),
+                  Builder(builder: (context) {
+                    final cs = Theme.of(context).colorScheme;
+                    return Text(
+                      e.value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: e.key == searchState.sortBy
+                            ? FontWeight.w700
+                            : FontWeight.normal,
+                        color: e.key == searchState.sortBy
+                            ? cs.onPrimaryContainer
+                            : cs.onSurface,
+                      ),
+                    );
+                  }),
                 ],
               ),
             ),
@@ -764,41 +803,41 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   }
   
   Widget _buildSimpleFooter() {
-     return const Column(
+     return Column(
        children: [
-         Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Colors.grey, fontSize: 12)),
+         Builder(builder: (context) => Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12))),
        ],
      );
   }
 
   Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {
     if (!authenticated) {
-      return CircleAvatar(
+      return Builder(builder: (context) => CircleAvatar(
         radius: 18,
-        backgroundColor: Colors.grey[200],
-        child: Icon(Icons.person, color: Colors.grey[600], size: 20),
-      );
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+        child: Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+      ));
     }
     final photoUrl = ref.watch(authProvider).user?.profilePhotoUrl;
     if (photoUrl != null) {
-      return ClipOval(
+      return Builder(builder: (context) => ClipOval(
         child: Image.network(
           '$photoUrl?v=${DateTime.now().millisecondsSinceEpoch}',
           width: 36,
           height: 36,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const CircleAvatar(
+          errorBuilder: (_, __, ___) => CircleAvatar(
             radius: 18,
-            backgroundColor: Color(0xFF2563EB),
-            child: Icon(Icons.person, color: Colors.white, size: 20),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 20),
           ),
         ),
-      );
+      ));
     }
-    return const CircleAvatar(
+    return Builder(builder: (context) => CircleAvatar(
       radius: 18,
-      backgroundColor: Color(0xFF2563EB),
-      child: Icon(Icons.person, color: Colors.white, size: 20),
-    );
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      child: Icon(Icons.person, color: Theme.of(context).colorScheme.onPrimary, size: 20),
+    ));
   }
 }

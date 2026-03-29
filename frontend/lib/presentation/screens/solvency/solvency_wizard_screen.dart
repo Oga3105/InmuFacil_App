@@ -7,7 +7,7 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-const _kNavy     = Color(0xFF2563EB);
+const _kNavy     = Color(0xFF135BEC);
 const _kGold     = Color(0xFFB8860B);
 const _kGoldBg   = Color(0xFFFFF8E1);
 const _kGreen    = Color(0xFF16A34A);
@@ -133,7 +133,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -228,7 +228,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
           ),
           // Bottom nav
           Container(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
@@ -641,7 +641,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surfaceContainer
+                      : const Color(0xFFF0FDF4),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFF86EFAC)),
                 ),
@@ -745,13 +747,14 @@ class _WizardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2)),
         ],
@@ -1071,10 +1074,10 @@ class _BuyerTypeCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: selected ? _kNavy.withOpacity(0.06) : Colors.white,
+          color: selected ? _kNavy.withOpacity(0.06) : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? _kNavy : Colors.grey.shade200,
+            color: selected ? _kNavy : Theme.of(context).colorScheme.outlineVariant,
             width: selected ? 2 : 1,
           ),
         ),
@@ -1083,10 +1086,10 @@ class _BuyerTypeCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: selected ? _kNavy.withOpacity(0.1) : Colors.grey.shade100,
+                color: selected ? _kNavy.withOpacity(0.1) : Theme.of(context).colorScheme.surfaceContainerLowest,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: selected ? _kNavy : Colors.grey.shade400, size: 24),
+              child: Icon(icon, color: selected ? _kNavy : Theme.of(context).colorScheme.onSurfaceVariant, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1098,13 +1101,13 @@ class _BuyerTypeCard extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: selected ? _kNavy : Colors.grey.shade700,
+                      color: selected ? _kNavy : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ],
               ),

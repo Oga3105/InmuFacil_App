@@ -8,7 +8,7 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
 // ── Palette (Navy Blue & Gold) ────────────────────────────────────────────────
-const _kNavy      = Color(0xFF1E3A5F);
+const _kNavy      = Color(0xFF135BEC);
 const _kNavyLight = Color(0xFFEEF3FA);
 const _kGold      = Color(0xFFB8860B);
 const _kGoldLight = Color(0xFFFFF8E1);
@@ -101,7 +101,7 @@ class _NarrowLayout extends StatelessWidget {
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -120,11 +120,11 @@ class _NarrowLayout extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -165,11 +165,12 @@ class _InboxPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         // Header (web pane only)
         Container(
-          color: Colors.white,
+          color: colorScheme.surface,
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +198,7 @@ class _InboxPane extends StatelessWidget {
                     size: 20,
                   ),
                   filled: true,
-                  fillColor: const Color(0xFFF1F5F9),
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,
@@ -209,7 +210,7 @@ class _InboxPane extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(height: 1, color: Color(0xFFE2E8F0)),
+        Divider(height: 1, color: colorScheme.outlineVariant),
 
         // List
         Expanded(
@@ -228,7 +229,7 @@ class _InboxPane extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 4),
                   itemCount: conversations.length,
                   separatorBuilder: (_, __) =>
-                      const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                      Divider(height: 1, color: colorScheme.surfaceContainerHighest),
                   itemBuilder: (context, index) {
                     final conv = conversations[index];
                     return _ConversationTile(
@@ -245,7 +246,7 @@ class _InboxPane extends StatelessWidget {
         // Bottom security badge
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          color: Colors.white,
+          color: colorScheme.surface,
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -281,10 +282,11 @@ class _ConversationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final hasUnread = conversation.unreadCount > 0;
 
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       child: InkWell(
         onTap: onTap,
         splashColor: _kNavy.withValues(alpha: 0.05),
@@ -318,7 +320,7 @@ class _ConversationTile extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFF16A34A),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 2),
+                          border: Border.all(color: colorScheme.surface, width: 2),
                         ),
                       ),
                     ),
@@ -349,7 +351,7 @@ class _ConversationTile extends StatelessWidget {
                                             ? FontWeight.w700
                                             : FontWeight.w600,
                                         fontSize: 14,
-                                        color: const Color(0xFF1E293B),
+                                        color: colorScheme.onSurface,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -365,9 +367,9 @@ class _ConversationTile extends StatelessWidget {
                               // Property title
                               Text(
                                 conversation.propertyTitle,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: Color(0xFF94A3B8),
+                                  color: colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -387,7 +389,7 @@ class _ConversationTile extends StatelessWidget {
                                 fontSize: 11,
                                 color: hasUnread
                                     ? _kNavy
-                                    : const Color(0xFF94A3B8),
+                                    : colorScheme.onSurfaceVariant,
                                 fontWeight: hasUnread
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -408,8 +410,8 @@ class _ConversationTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           color: hasUnread
-                              ? const Color(0xFF334155)
-                              : const Color(0xFF94A3B8),
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurfaceVariant,
                           fontWeight: hasUnread
                               ? FontWeight.w500
                               : FontWeight.normal,
@@ -543,22 +545,22 @@ class _EmptyListState extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               'Sin conversaciones activas',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Cuando el vendedor active el chat en una oferta, aparecera aqui.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF94A3B8),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -577,7 +579,7 @@ class _EmptyDetailPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF8FAFC),
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 380),
@@ -604,22 +606,22 @@ class _EmptyDetailPane extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Tus Conversaciones Seguras',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              const Text(
+              Text(
                 'Selecciona un chat para ver los mensajes. Todas las comunicaciones en InmuFacil estan protegidas por encriptacion avanzada para tu seguridad.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),

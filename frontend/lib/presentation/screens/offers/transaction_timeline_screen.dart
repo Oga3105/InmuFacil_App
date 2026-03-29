@@ -254,7 +254,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   children: [
                     TextSpan(
                         text: 'Inmu',
-                        style: TextStyle(color: Color(0xFF2563EB))),
+                        style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
                         style: TextStyle(color: Color(0xFF16A34A))),
@@ -283,7 +283,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB),
+                      color: const Color(0xFF135BEC),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Row(
@@ -810,7 +810,7 @@ class _HeaderCards extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF2563EB),
+                            color: Color(0xFF135BEC),
                           ),
                         ),
                       ],
@@ -868,7 +868,7 @@ class _HeaderCards extends StatelessWidget {
                                 ? counterparty[0].toUpperCase()
                                 : '?',
                             style: const TextStyle(
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF135BEC),
                               fontWeight: FontWeight.w800,
                               fontSize: 13,
                             ),
@@ -1018,13 +1018,13 @@ class _DoneRow extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(step.ctaIcon ?? Icons.arrow_forward,
-                            size: 14, color: const Color(0xFF2563EB)),
+                            size: 14, color: const Color(0xFF135BEC)),
                         const SizedBox(width: 4),
                         Text(
                           step.ctaLabel!,
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF2563EB),
+                            color: Color(0xFF135BEC),
                             fontWeight: FontWeight.w600,
                             decoration: TextDecoration.underline,
                           ),
@@ -1061,7 +1061,7 @@ class _ActiveRow extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: const BoxDecoration(
-                color: Color(0xFF2563EB),
+                color: Color(0xFF135BEC),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.edit_document,
@@ -1078,7 +1078,7 @@ class _ActiveRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF2563EB), width: 1.5),
+                  border: Border.all(color: const Color(0xFF135BEC), width: 1.5),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1109,7 +1109,7 @@ class _ActiveRow extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF135BEC),
                               letterSpacing: 0.4,
                             ),
                           ),
@@ -1122,7 +1122,7 @@ class _ActiveRow extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF135BEC),
                       ),
                     ),
                     if (step.description != null) ...[
@@ -1151,7 +1151,7 @@ class _ActiveRow extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
+                            backgroundColor: const Color(0xFF135BEC),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
@@ -1284,7 +1284,7 @@ class _HelpFooter extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.chat_bubble_outline,
-                  size: 15, color: Color(0xFF2563EB)),
+                  size: 15, color: Color(0xFF135BEC)),
               const SizedBox(width: 6),
               GestureDetector(
                 onTap: () {},
@@ -1293,9 +1293,9 @@ class _HelpFooter extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF135BEC),
                     decoration: TextDecoration.underline,
-                    decorationColor: Color(0xFF2563EB),
+                    decorationColor: Color(0xFF135BEC),
                   ),
                 ),
               ),
@@ -1428,7 +1428,7 @@ class _BuyerCounterOfferActionsState
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
@@ -1472,7 +1472,7 @@ class _BuyerCounterOfferActionsState
               TextSpan(
                 text: 'Hacer ',
                 style: TextStyle(
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1616,7 +1616,7 @@ class _BuyerCounterOfferActionsState
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF135BEC),
               minimumSize: const Size(0, 36),
               padding: const EdgeInsets.symmetric(horizontal: 8),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -1868,7 +1868,7 @@ class _SellerSolvencySectionState
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB),
+                              color: const Color(0xFF135BEC),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text(

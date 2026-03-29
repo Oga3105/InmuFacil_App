@@ -226,7 +226,7 @@ class _PreviewSummaryCard extends StatelessWidget {
         border: Border.all(color: Colors.grey[100]!),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF2563EB).withValues(alpha: 0.05),
+            color: const Color(0xFF135BEC).withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -343,7 +343,7 @@ class _PreviewMortgageCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.account_balance_outlined,
-                color: Color(0xFF2563EB), size: 20),
+                color: Color(0xFF135BEC), size: 20),
           ),
           const SizedBox(width: 14),
           Column(
@@ -354,7 +354,7 @@ class _PreviewMortgageCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF135BEC),
                   letterSpacing: 0.8,
                 ),
               ),
@@ -500,7 +500,7 @@ class _PreviewDescriptionSection extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               alignment: Alignment.centerLeft,
-              foregroundColor: const Color(0xFF2563EB),
+              foregroundColor: const Color(0xFF135BEC),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
@@ -552,14 +552,14 @@ class _PreviewLocationSection extends StatelessWidget {
               child: const Row(
                 children: [
                   Icon(Icons.shield_outlined,
-                      size: 14, color: Color(0xFF2563EB)),
+                      size: 14, color: Color(0xFF135BEC)),
                   SizedBox(width: 4),
                   Text(
                     'UBICACI\u00D3N PROTEGIDA',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF135BEC),
                     ),
                   ),
                 ],
@@ -597,8 +597,8 @@ class _PreviewLocationSection extends StatelessWidget {
                           point: loc,
                           radius: 200,
                           useRadiusInMeter: true,
-                          color: const Color(0xFF2563EB).withValues(alpha: 0.2),
-                          borderColor: const Color(0xFF2563EB),
+                          color: const Color(0xFF135BEC).withValues(alpha: 0.2),
+                          borderColor: const Color(0xFF135BEC),
                           borderStrokeWidth: 2,
                         ),
                       ],

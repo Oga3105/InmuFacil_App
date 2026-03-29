@@ -157,7 +157,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                 TextSpan(
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   children: [
-                    TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                    TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                   ],
                 ),
@@ -176,11 +176,11 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
               margin: const EdgeInsets.symmetric(vertical: 8),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF135BEC),
                 borderRadius: BorderRadius.circular(10),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.25),
+                    color: const Color(0xFF135BEC).withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -286,7 +286,7 @@ class _PropertyCard extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 17,
-                    color: Color(0xFF2563EB),
+                    color: Color(0xFF135BEC),
                   ),
                 ),
                 if (property.address.isNotEmpty) ...[
@@ -396,7 +396,7 @@ class _DateTimeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.calendar_month_outlined,
-                    size: 18, color: Color(0xFF2563EB)),
+                    size: 18, color: Color(0xFF135BEC)),
               ),
               const SizedBox(width: 10),
               const Text(
@@ -541,14 +541,14 @@ class _SlotsPanel extends StatelessWidget {
                   duration: const Duration(milliseconds: 150),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF2563EB)
+                        ? const Color(0xFF135BEC)
                         : isAvailable
                             ? Colors.white
                             : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF2563EB)
+                          ? const Color(0xFF135BEC)
                           : Colors.grey.shade300,
                     ),
                   ),
@@ -634,7 +634,7 @@ class _NotesField extends StatelessWidget {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide:
-                    const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                    const BorderSide(color: Color(0xFF135BEC), width: 1.5),
               ),
             ),
           ),
@@ -663,7 +663,7 @@ class _TrustBanner extends StatelessWidget {
       child: Row(
         children: [
           const Icon(Icons.shield_outlined,
-              size: 22, color: Color(0xFF2563EB)),
+              size: 22, color: Color(0xFF135BEC)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -792,7 +792,7 @@ class _BottomBar extends StatelessWidget {
             FilledButton(
               onPressed: canConfirm ? onConfirm : null,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF135BEC),
                 disabledBackgroundColor: Colors.grey.shade300,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -948,7 +948,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
             Border? border;
 
             if (isSelected) {
-              bg = const Color(0xFF2563EB);
+              bg = const Color(0xFF135BEC);
               textColor = Colors.white;
               weight = FontWeight.w700;
             } else if (isAvailable && !isPast) {

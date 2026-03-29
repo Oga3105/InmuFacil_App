@@ -8,16 +8,13 @@ class PropertyStepperHeader extends ConsumerWidget {
 
   static const _steps = ['Ubicacion', 'Detalles', 'Fotos', 'Documentos', 'Descripcion', 'Publicar'];
 
-  static const _blue = Color(0xFF2563EB);
-  static const _slate200 = Color(0xFFE2E8F0);
-  static const _slate400 = Color(0xFF94A3B8);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentStep = ref.watch(propertyFormProvider.select((s) => s.currentStep));
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Row(
         children: List.generate(_steps.length * 2 - 1, (i) {
@@ -28,7 +25,7 @@ class PropertyStepperHeader extends ConsumerWidget {
             return Expanded(
               child: Container(
                 height: 2,
-                color: completed ? _blue : _slate200,
+                color: completed ? colorScheme.primary : colorScheme.outlineVariant,
               ),
             );
           }
@@ -58,17 +55,14 @@ class _StepCircle extends StatelessWidget {
   final bool isActive;
   final bool isCompleted;
 
-  static const _blue = Color(0xFF2563EB);
-  static const _slate200 = Color(0xFFE2E8F0);
-  static const _slate400 = Color(0xFF94A3B8);
-
   @override
   Widget build(BuildContext context) {
-    final circleColor = (isActive || isCompleted) ? _blue : Colors.transparent;
-    final borderColor = (isActive || isCompleted) ? _blue : _slate200;
-    final numberColor = (isActive || isCompleted) ? Colors.white : _slate400;
+    final colorScheme = Theme.of(context).colorScheme;
+    final circleColor = (isActive || isCompleted) ? colorScheme.primary : Colors.transparent;
+    final borderColor = (isActive || isCompleted) ? colorScheme.primary : colorScheme.outlineVariant;
+    final numberColor = (isActive || isCompleted) ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
     final labelWeight = isActive ? FontWeight.bold : FontWeight.normal;
-    final labelColor = isActive ? _blue : (isCompleted ? _blue : _slate400);
+    final labelColor = isActive ? colorScheme.primary : (isCompleted ? colorScheme.primary : colorScheme.onSurfaceVariant);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -84,7 +78,7 @@ class _StepCircle extends StatelessWidget {
           ),
           child: Center(
             child: isCompleted
-                ? const Icon(Icons.check, color: Colors.white, size: 18)
+                ? Icon(Icons.check, color: colorScheme.onPrimary, size: 18)
                 : Text(
                     '${index + 1}',
                     style: TextStyle(

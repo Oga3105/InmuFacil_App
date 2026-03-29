@@ -8,7 +8,7 @@ import '../../providers/auth_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
-const _blue = Color(0xFF2563EB);
+const _blue = Color(0xFF135BEC);
 const _amber = Color(0xFFF59E0B);
 const _green = Color(0xFF16A34A);
 const _red = Color(0xFFDC2626);
@@ -90,14 +90,20 @@ class _AdminAiAnalyticsScreenState
               children: [
                 Image.asset('assets/images/logo_inmufacil.png', height: 28),
                 const SizedBox(width: 8),
-                const Text.rich(
-                  TextSpan(
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                    children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
-                      TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
-                    ],
-                  ),
+                Builder(
+                builder: (context) {
+                  final cs = Theme.of(context).colorScheme;
+                  final dark = Theme.of(context).brightness == Brightness.dark;
+                  return Text.rich(
+                    TextSpan(
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                      children: [
+                        TextSpan(text: 'Inmu', style: TextStyle(color: cs.primary)),
+                        TextSpan(text: 'Fácil', style: TextStyle(color: dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
+                      ],
+                    ),
+                  );
+                },
                 ),
               ],
             ),
@@ -105,7 +111,7 @@ class _AdminAiAnalyticsScreenState
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF2563EB)),
+            icon: Icon(Icons.refresh_rounded, color: Theme.of(context).colorScheme.primary),
             onPressed: () {
               setState(() => _isLoading = true);
               _loadMetrics();
@@ -121,22 +127,22 @@ class _AdminAiAnalyticsScreenState
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: Theme.of(context).colorScheme.primary,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Icon(Icons.home_rounded, size: 16, color: Theme.of(context).colorScheme.onPrimary),
+                    const SizedBox(width: 5),
+                    Text('Inicio', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -177,24 +183,25 @@ class _AdminAiAnalyticsScreenState
   }
 
   Widget _buildAccessRestricted() {
-    return const Center(
+    final colorScheme = Theme.of(context).colorScheme;
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_outline_rounded, size: 64, color: Color(0xFF94A3B8)),
-          SizedBox(height: 16),
+          Icon(Icons.lock_outline_rounded, size: 64, color: colorScheme.onSurfaceVariant),
+          const SizedBox(height: 16),
           Text(
             'Acceso restringido',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+              color: colorScheme.onSurface,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             'Esta seccion es exclusiva para administradores.',
-            style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+            style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -202,6 +209,7 @@ class _AdminAiAnalyticsScreenState
   }
 
   Widget _buildResilienceCard() {
+    final colorScheme = Theme.of(context).colorScheme;
     final percent = (_resilienceRatio * 100).toStringAsFixed(1);
     final Color gaugeColor;
     if (_resilienceRatio >= 0.9) {
@@ -243,19 +251,19 @@ class _AdminAiAnalyticsScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Ratio de Resiliencia',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Llamadas exitosas sobre el total. '
                   '${_logs.isEmpty ? "Sin datos registrados." : "Basado en ${_logs.length} llamadas (30d)."}',
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                 ),
               ],
             ),

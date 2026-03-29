@@ -12,9 +12,7 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 import 'arras_shared_widgets.dart';
 
-const _kBlue  = Color(0xFF2563EB);
-const _kGreen = Color(0xFF16A34A);
-const _kBg    = Color(0xFFF8FAFC);
+// Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
 
 class ArrasBuyerStepperScreen extends ConsumerStatefulWidget {
   const ArrasBuyerStepperScreen({super.key, required this.offer});
@@ -140,9 +138,11 @@ class _ArrasBuyerStepperScreenState
       await dio.post('/arras/$offerId/buyer/confirm');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Entrevista enviada. Esperando al vendedor.'),
-            backgroundColor: _kGreen,
+          SnackBar(
+            content: const Text('Entrevista enviada. Esperando al vendedor.'),
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF4ADE80)
+                : const Color(0xFF16A34A),
           ),
         );
         context.pop();
@@ -160,8 +160,9 @@ class _ArrasBuyerStepperScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: _buildAppBar(context, ref),
       body: Column(
         children: [
@@ -190,6 +191,9 @@ class _ArrasBuyerStepperScreenState
   // ─── Step 1 ───────────────────────────────────────────────────────────────
 
   Widget _buildStep1() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -199,7 +203,7 @@ class _ArrasBuyerStepperScreenState
             icon: Icons.location_city_outlined,
             title: 'Logistica y Notaria',
             subtitle: 'Paso 1 de 3 — Plazos y preferencias de firma',
-            color: _kBlue,
+            color: colorScheme.primary,
           ),
           const SizedBox(height: 24),
           ArrasInterviewCard(
@@ -211,22 +215,22 @@ class _ArrasBuyerStepperScreenState
                   children: [
                     Text(
                       '$_depositPct%',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: _kBlue),
+                          color: colorScheme.primary),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _kBlue.withValues(alpha: 0.1),
+                        color: colorScheme.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '${CurrencyInputFormatter.format(widget.offer.amount * _depositPct ~/ 100)} EUR',
-                        style: const TextStyle(
-                            color: _kBlue,
+                        style: TextStyle(
+                            color: colorScheme.primary,
                             fontWeight: FontWeight.bold,
                             fontSize: 13),
                       ),
@@ -235,15 +239,15 @@ class _ArrasBuyerStepperScreenState
                 ),
                 Text(
                   'Porcentaje de arras (sobre ${CurrencyInputFormatter.format(widget.offer.amount)} EUR)',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 Slider(
                   value: _depositPct.toDouble(),
                   min: 5,
                   max: 20,
                   divisions: 15,
-                  activeColor: _kBlue,
-                  inactiveColor: Colors.grey.shade200,
+                  activeColor: colorScheme.primary,
+                  inactiveColor: colorScheme.outlineVariant,
                   onChanged: (v) => setState(() => _depositPct = v.round()),
                 ),
                 Row(
@@ -251,10 +255,10 @@ class _ArrasBuyerStepperScreenState
                   children: [
                     Text('5%',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade400)),
+                            fontSize: 11, color: colorScheme.onSurfaceVariant)),
                     Text('20%',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade400)),
+                            fontSize: 11, color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ],
@@ -270,22 +274,22 @@ class _ArrasBuyerStepperScreenState
                   children: [
                     Text(
                       '$_deadlineDays dias',
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: _kBlue),
+                          color: colorScheme.primary),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: _kGreen.withValues(alpha: 0.1),
+                        color: kGreen.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '~${(_deadlineDays / 30).toStringAsFixed(1)} meses',
-                        style: const TextStyle(
-                            color: _kGreen,
+                        style: TextStyle(
+                            color: kGreen,
                             fontWeight: FontWeight.bold,
                             fontSize: 13),
                       ),
@@ -294,15 +298,15 @@ class _ArrasBuyerStepperScreenState
                 ),
                 Text(
                   'Plazo maximo para firmar en notaria',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 Slider(
                   value: _deadlineDays.toDouble(),
                   min: 15,
                   max: 180,
                   divisions: 11,
-                  activeColor: _kBlue,
-                  inactiveColor: Colors.grey.shade200,
+                  activeColor: colorScheme.primary,
+                  inactiveColor: colorScheme.outlineVariant,
                   onChanged: (v) => setState(() => _deadlineDays = v.round()),
                 ),
                 Row(
@@ -310,10 +314,10 @@ class _ArrasBuyerStepperScreenState
                   children: [
                     Text('15 dias',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade400)),
+                            fontSize: 11, color: colorScheme.onSurfaceVariant)),
                     Text('180 dias',
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade400)),
+                            fontSize: 11, color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ],
@@ -324,12 +328,12 @@ class _ArrasBuyerStepperScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Notaria preferida (opcional)',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -337,27 +341,27 @@ class _ArrasBuyerStepperScreenState
                   decoration: InputDecoration(
                     hintText: 'Ej: Notaria de Madrid — Lopez y Asociados',
                     prefixIcon:
-                        const Icon(Icons.gavel_outlined, color: _kBlue),
+                        Icon(Icons.gavel_outlined, color: colorScheme.primary),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10)),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: _kBlue, width: 2),
+                          BorderSide(color: colorScheme.primary, width: 2),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
+                Text(
                   'Fecha maxima de firma (opcional)',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
@@ -374,19 +378,19 @@ class _ArrasBuyerStepperScreenState
                       setState(() => _maxSigningDate = picked);
                     }
                   },
-                  icon: const Icon(Icons.calendar_today_outlined,
-                      color: _kBlue),
+                  icon: Icon(Icons.calendar_today_outlined,
+                      color: colorScheme.primary),
                   label: Text(
                     _maxSigningDate == null
                         ? 'Seleccionar fecha'
                         : '${_maxSigningDate!.day}/${_maxSigningDate!.month}/${_maxSigningDate!.year}',
                     style: TextStyle(
                         color: _maxSigningDate == null
-                            ? Colors.grey.shade600
-                            : _kBlue),
+                            ? colorScheme.onSurfaceVariant
+                            : colorScheme.primary),
                   ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(color: colorScheme.outlineVariant),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     padding: const EdgeInsets.symmetric(
@@ -401,17 +405,17 @@ class _ArrasBuyerStepperScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Datos identificativos del inmueble',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Necesarios para la validez legal del contrato',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 16),
                 _LabeledField(
@@ -453,6 +457,7 @@ class _ArrasBuyerStepperScreenState
   // ─── Step 2 ───────────────────────────────────────────────────────────────
 
   Widget _buildStep2() {
+    final colorScheme = Theme.of(context).colorScheme;
     const reasons = [
       ('work', 'Motivos laborales'),
       ('mortgage_delay', 'Retraso en hipoteca'),
@@ -499,12 +504,12 @@ class _ArrasBuyerStepperScreenState
                 ),
                 if (_extensionAllowed) ...[
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Causas admitidas:',
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E3A5F)),
+                        color: colorScheme.onPrimaryContainer),
                   ),
                   const SizedBox(height: 8),
                   ...reasons.map((r) => CheckboxListTile(
@@ -513,7 +518,7 @@ class _ArrasBuyerStepperScreenState
                         title: Text(r.$2,
                             style: const TextStyle(fontSize: 13)),
                         value: _extensionReasons.contains(r.$1),
-                        activeColor: _kBlue,
+                        activeColor: colorScheme.primary,
                         onChanged: (v) => setState(() {
                           if (v == true) {
                             _extensionReasons.add(r.$1);
@@ -560,6 +565,7 @@ class _ArrasBuyerStepperScreenState
   // ─── Step 3 ───────────────────────────────────────────────────────────────
 
   Widget _buildStep3() {
+    final colorScheme = Theme.of(context).colorScheme;
     const methods = [
       ('cash', 'Pago al contado', Icons.payments_outlined),
       ('mortgage_approved', 'Hipoteca aprobada', Icons.check_circle_outline),
@@ -611,17 +617,17 @@ class _ArrasBuyerStepperScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Metodo de financiacion',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Selecciona como tienes previsto pagar',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 ...methods.map((m) => ArrasMethodTile(
@@ -639,17 +645,17 @@ class _ArrasBuyerStepperScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Clausulas adicionales (opcional)',
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: Color(0xFF1E3A5F)),
+                      color: colorScheme.onPrimaryContainer),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Cualquier condicion especial que quieras incluir en el contrato',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -659,15 +665,15 @@ class _ArrasBuyerStepperScreenState
                     hintText: 'Ej: La vivienda debe entregarse vacia...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: _kBlue, width: 2),
+                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
                     ),
                   ),
                 ),
@@ -696,17 +702,19 @@ class _ArrasBuyerStepperScreenState
           children: [
             Image.asset('assets/images/logo_inmufacil.png', height: 32),
             const SizedBox(width: 8),
-            const Text.rich(
+            Text.rich(
               TextSpan(
                 style:
-                    TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                 children: [
                   TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Color(0xFF2563EB))),
+                      style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                   TextSpan(
                       text: 'Fácil',
-                      style: TextStyle(color: Color(0xFF16A34A))),
+                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF4ADE80)
+                          : const Color(0xFF16A34A))),
                 ],
               ),
             ),
@@ -756,15 +764,16 @@ class _LabeledField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 13,
-              color: Color(0xFF1E3A5F)),
+              color: colorScheme.onPrimaryContainer),
         ),
         const SizedBox(height: 6),
         TextField(
@@ -772,18 +781,18 @@ class _LabeledField extends StatelessWidget {
           textCapitalization: caps,
           decoration: InputDecoration(
             hintText: hint,
-            prefixIcon: Icon(icon, color: _kBlue, size: 18),
+            prefixIcon: Icon(icon, color: colorScheme.primary, size: 18),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300)),
+                borderSide: BorderSide(color: colorScheme.outlineVariant)),
             enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300)),
+                borderSide: BorderSide(color: colorScheme.outlineVariant)),
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _kBlue, width: 2)),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2)),
           ),
         ),
       ],
