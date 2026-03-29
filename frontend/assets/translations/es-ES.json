@@ -839,7 +839,8 @@
     "profile_investor": "Inversor/a",
     "profile_student": "Estudiante",
     "lifestyle_filter_title": "Mi estilo de vida",
-    "lifestyle_filter_description": "Mostrar inmuebles que encajan con tu perfil"
+    "lifestyle_filter_description": "Mostrar inmuebles que encajan con tu perfil",
+    "profile_match_hint": "Encaja con tu perfil de {}"
   },
   "smart_explorer": {
     "header": "Hemos encontrado tu zona ideal fuera de tu búsqueda habitual",

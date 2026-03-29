@@ -69,35 +69,11 @@ class PropertyFloatingCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              // Destacado Tag
-              Positioned(
-                top: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF135BEC), // primary
-                    borderRadius: BorderRadius.circular(6),
-                    boxShadow: const [
-                       BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1)),
-                    ],
-                  ),
-                  child: const Text(
-                    'DESTACADO',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
               // Verified Tag
               if (property.isVerified)
                 Positioned(
                   top: 12,
-                  left: 95, // Positioned after DESTACADO
+                  left: 12,
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: const BoxDecoration(

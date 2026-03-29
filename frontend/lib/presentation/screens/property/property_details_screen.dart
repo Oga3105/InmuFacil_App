@@ -22,6 +22,17 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/property/document_status_section.dart';
 import '../../widgets/property/comfort_radar_chart.dart';
 
+String _obfuscateAddress(String address) {
+  if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
+    return 'Ubicación protegida';
+  }
+  final parts = address.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+  if (parts.length >= 2) {
+    return parts.sublist(1).join(', ');
+  }
+  return address;
+}
+
 class PropertyDetailsScreen extends ConsumerStatefulWidget {
 
   const PropertyDetailsScreen({super.key, required this.propertyId});
@@ -398,6 +409,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final match = RegExp(r'\b(\d{5})\b').firstMatch(address);
     return match?.group(1) ?? '';
   }
+
 
   Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {
     if (!authenticated) {
@@ -948,22 +960,20 @@ class _SummaryCard extends ConsumerWidget {
             property.title,
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.3),
           ),
-          if (!property.hideExactLocation) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    property.address.isNotEmpty ? property.address : 'Dirección no disponible',
-                    style: const TextStyle(color: Color(0xFF64748b)),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  _obfuscateAddress(property.address),
+                  style: const TextStyle(color: Color(0xFF64748b)),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           PropertyTimeBadge(
             createdAt: property.createdAt,
