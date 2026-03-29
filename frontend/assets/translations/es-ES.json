@@ -42,9 +42,9 @@
     "confirm_password_hint": "Repite tu contraseña",
     "passwords_mismatch": "Las contraseñas no coinciden",
     "accept_terms_prefix": "Acepto los ",
-    "terms_link": "Terminos y Condiciones",
+    "terms_link": "Términos y Condiciones",
     "and_the": " y la ",
-    "privacy_link": "Politica de Privacidad",
+    "privacy_link": "Política de Privacidad",
     "create_account_button": "Crear Cuenta",
     "login_link": "Inicia sesión",
     "accept_terms_required": "Debes aceptar los Términos y Condiciones",
@@ -196,7 +196,7 @@
     "monthly_mortgage_estimate": "Cuota est.",
     "compare": {
       "add": "Comparar",
-      "in_comparison": "En comparacion"
+      "in_comparison": "En comparación"
     },
     "comparison": {
       "title": "Comparar Inmuebles",
@@ -205,7 +205,7 @@
         "price": "Precio total",
         "price_m2": "Precio/m2",
         "surface": "Superficie",
-        "year": "Ano de construccion",
+        "year": "Año de construcción",
         "floor": "Planta",
         "elevator": "Ascensor",
         "condition": "Estado",
@@ -214,15 +214,15 @@
         "ici_air": "ICI: Aire",
         "ici_activity": "ICI: Actividad",
         "mortgage": "Cuota hipotecaria est.",
-        "escrituracion": "Gastos escrituracion est."
+        "escrituracion": "Gastos escrituración est."
       },
       "ai_verdict": {
-        "title": "Analisis de InmuFacil",
+        "title": "Analisis de InmuFácil",
         "property_a": "Propiedad A",
-        "property_a_body": "Mejor relacion precio/superficie en la zona. Menor cuota hipotecaria estimada.",
+        "property_a_body": "Mejor relación precio/superficie en la zona. Menor cuota hipotecaria estimada.",
         "property_b": "Propiedad B",
-        "property_b_body": "Construccion mas reciente. Menor necesidad de reforma prevista.",
-        "recommendation": "Recomendacion: Basada en tu perfil de estilo de vida, valoramos la Propiedad A por su eficiencia economica y la Propiedad B por su modernidad. Ambas son opciones solidas segun tus preferencias declaradas.",
+        "property_b_body": "Construcción más reciente. Menor necesidad de reforma prevista.",
+        "recommendation": "Recomendación: Basada en tu perfil de estilo de vida, valoramos la Propiedad A por su eficiencia economica y la Propiedad B por su modernidad. Ambas son opciones solidas segun tus preferencias declaradas.",
         "disclaimer": "Analisis generado por IA. Consulte con un profesional antes de tomar decisiones."
       }
     }
@@ -365,7 +365,7 @@
     "no_active_conversations": "Sin conversaciones activas",
     "no_active_conversations_hint": "Cuando el vendedor active el chat en una oferta, aparecera aqui.",
     "secure_conversations_title": "Tus Conversaciones Seguras",
-    "secure_conversations_body": "Selecciona un chat para ver los mensajes. Todas las comunicaciones en InmuFacil estan protegidas por encriptacion avanzada para tu seguridad.",
+    "secure_conversations_body": "Selecciona un chat para ver los mensajes. Todas las comunicaciones en InmuFácil estan protegidas por encriptación avanzada para tu seguridad.",
     "p2p_protection_label": "PROTECCION P2P",
     "legal_validity_label": "VALIDEZ LEGAL",
     "kyc_verified_label": "KYC VERIFICADO",
@@ -377,7 +377,7 @@
     "cancel_error": "Error al anular. Intentalo de nuevo.",
     "request_docs_title_part1": "Solicitar",
     "request_docs_title_part2": " documentos",
-    "request_docs_body": "Se enviara una solicitud de documentacion al otro participante.",
+    "request_docs_body": "Se enviara una solicitud de documentación al otro participante.",
     "request_docs_button": "Solicitar",
     "offer_proposal_title_part1": "Propuesta de ",
     "offer_proposal_title_part2": "oferta",
@@ -393,13 +393,13 @@
     "action_visit_rejected": "Visita Rechazada",
     "action_offer_proposal": "Propuesta de Oferta",
     "action_docs_request": "Solicitud de Documentos",
-    "action_generic": "Accion",
+    "action_generic": "Acción",
     "buyer_no_passport": "El comprador aun no ha completado su Pasaporte de Solvencia.",
     "qualified_candidate": "Candidato Cualificado — Nivel {level}",
     "passport_details_hint": "Toca para ver detalles del pasaporte",
     "accept_solvency_button": "Aceptar Solvencia y Proceder a Borrador de Arras",
-    "solvency_draft_wip": "Funcion de Borrador de Arras disponible en Hito 12.",
-    "pre_approval": "Preaprobacion bancaria",
+    "solvency_draft_wip": "Función de Borrador de Arras disponible en Hito 12.",
+    "pre_approval": "Preaprobación bancaria",
     "knows_extra_costs": "Conoce los gastos",
     "has_initial_savings": "Tiene ahorros iniciales",
     "payment_cash": "Pago al contado",
@@ -460,7 +460,7 @@
     "photo_error_delete": "Error al eliminar la foto",
     "solvency_passport_title": "Pasaporte de Solvencia",
     "solvency_buyers_only": "Solo compradores",
-    "solvency_complete_hint": "Completa el asistente para mostrar tu nivel de cualificacion",
+    "solvency_complete_hint": "Completa el asistente para mostrar tu nivel de cualificación",
     "solvency_passport_label": "PASAPORTE DE SOLVENCIA",
     "solvency_level": "Nivel {level}",
     "trust_level_button": "Ver nivel de confianza",
@@ -480,7 +480,7 @@
     "filter_draft": "Borradores",
     "filter_unpublished": "No publicadas",
     "delete_property_title": "Eliminar propiedad",
-    "delete_property_confirm": "Esta accion no se puede deshacer. La propiedad sera eliminada permanentemente.",
+    "delete_property_confirm": "Esta acción no se puede deshacer. La propiedad sera eliminada permanentemente.",
     "no_properties_title": "No tienes propiedades activas",
     "no_properties_quote": "\"Empieza hoy mismo tu proceso de venta directa sin intermediarios.\"",
     "publish_property": "Publicar propiedad",
@@ -637,7 +637,7 @@
     "step_purchase_type": "Tipo de Compra",
     "step_disclaimer": "Aviso Legal",
     "step_awareness": "Conciencia Financiera",
-    "step_declaration": "Declaracion",
+    "step_declaration": "Declaración",
     "step_dna": "ADN Financiero",
     "prev_button": "Anterior",
     "continue_button": "Continuar",
@@ -647,17 +647,17 @@
     "page0_subtitle": "Para personalizar tu pasaporte necesitamos saber cuantos titulares participan en la compra.",
     "buyer_solo_title": "Solo yo",
     "buyer_solo_subtitle": "Compra individual. Solo tu figura como titular.",
-    "buyer_joint_title": "Con alguien mas",
+    "buyer_joint_title": "Con alguien más",
     "buyer_joint_subtitle": "Compra conjunta: pareja, familiar u otro cotitular.",
-    "joint_info": "Perfecto. En los siguientes pasos introduce los datos financieros SUMADOS de ambos titulares. Mas adelante solicitaremos la verificacion de identidad del segundo titular.",
+    "joint_info": "Perfecto. En los siguientes pasos introduce los datos financieros SUMADOS de ambos titulares. Más adelante solicitaremos la verificación de identidad del segundo titular.",
     "disclaimer_title": "Aviso de Responsabilidad Civil",
     "disclaimer_read_before": "Lee atentamente antes de continuar",
     "disclaimer_text": "Este Pasaporte de Solvencia es una declaración voluntaria y veraz de tu situación financiera. La información que proporciones no es verificada por InmuFácil y su uso indebido puede acarrear responsabilidad civil.\n\nInmuFácil actúa como plataforma neutral. La decisión final de aceptar o rechazar una oferta basándose en este pasaporte corresponde exclusivamente a cada vendedor.\n\nTus datos son procesados conforme al RGPD/LOPD y se eliminarán automáticamente a los 90 días.",
     "disclaimer_accept": "He leído y acepto los términos de responsabilidad. Declaro que la información que voy a proporcionar es veraz.",
     "awareness_title": "Conciencia Financiera",
     "awareness_subtitle": "El \"Abogado del Diablo\" — seamos honestos",
-    "costs_question_solo": "¿Conoces los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)",
-    "costs_question_joint": "¿Habeis tenido en cuenta los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)",
+    "costs_question_solo": "¿Conoces los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoría, registro...)",
+    "costs_question_joint": "¿Habeis tenido en cuenta los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoría, registro...)",
     "costs_hint": "Generalmente un 10-15% adicional sobre el precio de compra.",
     "debt_ratio_title": "Ratio de endeudamiento mensual",
     "debt_ratio_subtitle": "Deudas mensuales totales ÷ ingresos netos mensuales",
@@ -672,7 +672,7 @@
     "payment_question": "¿Cómo planeas financiar la compra?",
     "payment_cash": "Pago al contado",
     "payment_mortgage_approved": "Hipoteca aprobada",
-    "payment_mortgage_pending": "Hipoteca en tramitacion",
+    "payment_mortgage_pending": "Hipoteca en tramitación",
     "payment_savings_plus_mortgage": "Ahorros + hipoteca",
     "payment_house_to_sell": "Venta de vivienda actual",
     "payment_bridge_mortgage": "Hipoteca puente",
@@ -681,8 +681,8 @@
     "savings_question_solo": "¿Dispones de ahorros iniciales para la entrada y gastos?",
     "savings_question_joint": "¿Disponeis de ahorros iniciales para la entrada y gastos?",
     "savings_hint": "Habitualmente entre un 20-30% del precio de la propiedad.",
-    "preapproval_question_solo": "¿Tienes una preaprobacion hipotecaria de un banco?",
-    "preapproval_question_joint": "¿Teneis una preaprobacion hipotecaria de un banco?",
+    "preapproval_question_solo": "¿Tienes una preaprobación hipotecaria de un banco?",
+    "preapproval_question_joint": "¿Teneis una preaprobación hipotecaria de un banco?",
     "preapproval_hint": "Un documento oficial que confirma que el banco te prestaria el dinero.",
     "dna_title": "ADN Financiero",
     "dna_subtitle": "Calculo personalizado de viabilidad — opcional y privado",
@@ -696,15 +696,15 @@
     "debt_label_solo": "Deudas mensuales actuales",
     "debt_label_joint": "Deudas mensuales actuales (total compradores)",
     "debt_hint": "ej. 300 (prestamos, tarjetas...)",
-    "dna_skip_hint": "Si prefieres no rellenar estos campos ahora, puedes hacerlo mas adelante actualizando tu pasaporte.",
-    "level_estimate": "Estimacion: ",
+    "dna_skip_hint": "Si prefieres no rellenar estos campos ahora, puedes hacerlo más adelante actualizando tu pasaporte.",
+    "level_estimate": "Estimación: ",
     "level_label": "Nivel {level}",
     "level_gold": "Oro",
     "level_silver": "Plata",
     "level_bronze": "Bronce",
     "level_gold_desc": "Perfil financiero solido. Destaca frente a otros compradores.",
-    "level_silver_desc": "Buen perfil. Puedes mejorar con preaprobacion hipotecaria o menor endeudamiento.",
-    "level_bronze_desc": "Perfil basico. Completar el ADN Financiero puede mejorar tu puntuacion."
+    "level_silver_desc": "Buen perfil. Puedes mejorar con preaprobación hipotecaria o menor endeudamiento.",
+    "level_bronze_desc": "Perfil básico. Completar el ADN Financiero puede mejorar tu puntuación."
   },
   "second_buyer": {
     "card_title": "Datos del 2.º Comprador",
@@ -741,7 +741,7 @@
   },
   "nota_simple": {
     "upload_button": "Subir Nota Simple (PDF/imagen)",
-    "upload_unavailable": "Funcion de carga disponible proxima version",
+    "upload_unavailable": "Función de carga disponible próxima versión",
     "summary_title": "Resumen Registral",
     "titular_label": "Titular registral",
     "surface_registered": "Superficie registral",
@@ -755,19 +755,19 @@
     "charge_risk_estandar": "RIESGO ESTANDAR",
     "charge_risk_informativo": "INFORMATIVO",
     "invalid_document_title": "Documento no valido",
-    "download_guide_unavailable": "Descarga disponible en proxima version",
+    "download_guide_unavailable": "Descarga disponible en próxima versión",
     "encumbrance_resolution_title": "Hoja de Ruta de Seguridad Legal",
-    "encumbrance_disclaimer": "Este plan de accion es una guia informativa generada por IA y no sustituye el asesoramiento de un abogado o notario",
-    "download_guide_button": "Descargar Guia de Resolucion PDF",
+    "encumbrance_disclaimer": "Este plan de acción es una guia informativa generada por IA y no sustituye el asesoramiento de un abogado o notario",
+    "download_guide_button": "Descargar Guia de Resolución PDF",
     "judicial_risk_badge": "RIESGO ALTO",
     "financiera_risk_badge": "RIESGO ESTANDAR",
     "administrativa_risk_badge": "INFORMATIVO",
-    "judicial_buyer_action": "Solicite al vendedor copia del auto judicial y verifique si el embargo esta cancelado o activo. No firme hasta tener certificado de cancelacion.",
-    "judicial_seller_action": "Aporte documentacion del juzgado que acredite el estado del procedimiento. Si el embargo es activo, debe cancelarse con cargo al precio de venta.",
-    "financiera_buyer_action": "Negocie la subrogacion o solicite al vendedor cancelacion previa al acto notarial. Solicite certificado de deuda pendiente al banco.",
-    "financiera_seller_action": "Coordine con su entidad bancaria la cancelacion registral de la hipoteca, ya sea por pago o por subrogacion del comprador.",
-    "administrativa_buyer_action": "Verifique el alcance de la carga administrativa con el ayuntamiento o administracion competente antes de formalizar la compra.",
-    "administrativa_seller_action": "Aclare con la administracion si la carga es transmisible o debe cancelarse antes de la venta.",
+    "judicial_buyer_action": "Solicite al vendedor copia del auto judicial y verifique si el embargo esta cancelado o activo. No firme hasta tener certificado de cancelación.",
+    "judicial_seller_action": "Aporte documentación del juzgado que acredite el estado del procedimiento. Si el embargo es activo, debe cancelarse con cargo al precio de venta.",
+    "financiera_buyer_action": "Negocie la subrogación o solicite al vendedor cancelación previa al acto notarial. Solicite certificado de deuda pendiente al banco.",
+    "financiera_seller_action": "Coordine con su entidad bancaria la cancelación registral de la hipoteca, ya sea por pago o por subrogación del comprador.",
+    "administrativa_buyer_action": "Verifique el alcance de la carga administrativa con el ayuntamiento o administración competente antes de formalizar la compra.",
+    "administrativa_seller_action": "Aclare con la administración si la carga es transmisible o debe cancelarse antes de la venta.",
     "no_charges": "Sin cargas registrales detectadas"
   },
   "smart_bid_risk": {
@@ -849,13 +849,350 @@
   },
   "discovery": {
     "twin_zones": {
-      "header": "Zonas Recomendadas en tu Busqueda",
+      "header": "Zonas Recomendadas en tu Búsqueda",
       "ai_label": "Sugerencia IA",
-      "tooltip_template": "Esta zona ofrece un {pct}% mas de {advantage} por el mismo precio"
+      "tooltip_template": "Esta zona ofrece un {pct}% más de {advantage} por el mismo precio"
     },
     "twins": {
       "header_bottom": "Inmuebles en Zonas con Perfil Similar",
       "match_score": "{score}% compatibilidad"
+    }
+  },
+  "info": {
+    "what_is": {
+      "title": "Por qué InmuFácil?",
+      "hero_title": "InmuFácil",
+      "hero_subtitle": "La plataforma P2P de compraventa inmobiliaria sin comisiones de agencia.",
+      "savings_title": "0 EUR en comisiones de agencia",
+      "savings_body": "El ahorro medio en una operación de 250.000 EUR es de 7.500 EUR (3% agencia)",
+      "features": {
+        "0": {
+          "title": "Sin intermediarios",
+          "body": "Conectamos directamente a compradores y vendedores particulares, eliminando las comisiones de las agencias."
+        },
+        "1": {
+          "title": "Proceso guiado",
+          "body": "Desde la visita hasta la firma notarial, te acompañamos en cada paso con herramientas legales y financieras."
+        },
+        "2": {
+          "title": "Seguridad jurídica",
+          "body": "Verificación de identidad KYC, Contrato de Arras digital y notaría integrada."
+        },
+        "3": {
+          "title": "Solvencia consciente",
+          "body": "Cuestionario financiero para que compradores conozcan su situación real antes de ofertar."
+        },
+        "4": {
+          "title": "Transparencia total",
+          "body": "Historial de ofertas y negociación completamente visible para ambas partes."
+        }
+      }
+    },
+    "how_it_works": {
+      "title": "El proceso completo",
+      "subtitle": "De la publicación a las llaves, todo en una plataforma.",
+      "steps": {
+        "0": {
+          "title": "Publica o busca tu propiedad",
+          "body": "El vendedor crea el anuncio con fotos, descripción y precio. El Certificado Energético (CEE) es obligatorio para recibir ofertas. El comprador busca con filtros y guarda favoritos."
+        },
+        "1": {
+          "title": "Solicita y gestiona visitas",
+          "body": "El comprador solicita visita. El vendedor configura sus ventanas horarias y confirma las citas. Toda la agenda se gestiona desde la app."
+        },
+        "2": {
+          "title": "Oferta con Pasaporte de Solvencia",
+          "body": "El comprador adjunta su Pasaporte de Solvencia (nivel Bronce, Plata u Oro) a la oferta. El vendedor puede aceptar, rechazar o contraofertarla directamente."
+        },
+        "3": {
+          "title": "Verificación de Solvencia",
+          "body": "El vendedor revisa el Pasaporte de Solvencia del comprador y decide si acepta el perfil financiero. Si hay un segundo titular, se verifica su identidad de forma independiente."
+        },
+        "4": {
+          "title": "Contrato de Arras",
+          "body": "Ambas partes completan una entrevista guiada. La IA genera el borrador del contrato de arras con los datos reales de la operación. Ambas partes lo firman digitalmente."
+        },
+        "5": {
+          "title": "Tasación de la Vivienda",
+          "body": "Se coordina la cita con el tasador oficial. El informe de tasación es el paso previo necesario para que el banco procese la hipoteca."
+        },
+        "6": {
+          "title": "Formalización Bancaria — FEIN",
+          "body": "Solo para operaciones con hipoteca. El banco emite la Ficha Europea de Información Normalizada (FEIN). El comprador la confirma en la app para desbloquear la firma en notaría."
+        },
+        "7": {
+          "title": "Firma en Notaría",
+          "body": "InmuFácil muestra el checklist completo de documentos. Se agenda la cita notarial y se firma la escritura pública de compraventa."
+        },
+        "8": {
+          "title": "Post-Venta y Entrega de Llaves",
+          "body": "Tras la firma, el comprador accede a la guía de cambio de titularidad de suministros (luz, gas, agua). Se confirma la entrega de llaves y la operación queda cerrada."
+        }
+      }
+    },
+    "contact": {
+      "title": "Estamos para ayudarte",
+      "subtitle": "Selecciona el canal que mejor te convenga.",
+      "email_title": "Correo electrónico",
+      "email_subtitle": "soporte@inmufacil.com",
+      "email_action": "Enviar email",
+      "help_title": "Centro de ayuda",
+      "help_subtitle": "Consulta nuestras guías y tutoriales",
+      "help_action": "Ver ayuda",
+      "legal_info": "Información legal",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Uso",
+      "legal_notice": "Aviso Legal"
+    },
+    "buyer_guide": {
+      "title": "Guía del Comprador",
+      "subtitle": "Todo lo que necesitas saber para comprar sin agencias.",
+      "sections": {
+        "0": {
+          "title": "Busca tu propiedad ideal",
+          "items": {
+            "0": "Usa los filtros de precio, superficie, habitaciones y ubicación",
+            "1": "Guarda tus favoritos para comparar después",
+            "2": "Activa alertas para recibir nuevos anuncios que coincidan con tu búsqueda"
+          }
+        },
+        "1": {
+          "title": "Completa tu Pasaporte de Solvencia",
+          "items": {
+            "0": "Responde honestamente al cuestionario financiero",
+            "1": "Conoce tu ratio de endeudamiento real (máximo recomendado 35%)",
+            "2": "Tu nivel de solvencia (Bronce/Plata/Oro) se muestra al vendedor de forma anonimizada",
+            "3": "Caduca a los 90 días para mantener la información actualizada"
+          }
+        },
+        "2": {
+          "title": "Haz tu oferta",
+          "items": {
+            "0": "Las ofertas son formales y quedan registradas",
+            "1": "Puedes incluir condiciones (sujeto a hipoteca, libre de cargas, etc.)",
+            "2": "El vendedor puede aceptar, rechazar o contraofertarte",
+            "3": "Un chat privado se abre automáticamente cuando la oferta es aceptada"
+          }
+        },
+        "3": {
+          "title": "Costes que debes prever",
+          "items": {
+            "0": "ITP (segunda mano): 6-10% según comunidad autónoma",
+            "1": "IVA (obra nueva): 10%",
+            "2": "Notaría: 600-1.200 EUR aprox.",
+            "3": "Registro de la Propiedad: 400-700 EUR aprox.",
+            "4": "Gestoría: 300-600 EUR aprox.",
+            "5": "Total estimado: 10-15% sobre el precio de compra"
+          }
+        }
+      }
+    },
+    "seller_guide": {
+      "title": "Guía del Vendedor",
+      "subtitle": "Vende tu propiedad sin pagar comisiones de agencia.",
+      "sections": {
+        "0": {
+          "title": "Publica tu propiedad",
+          "items": {
+            "0": "Completa todos los campos del asistente de publicación",
+            "1": "Sube al menos 5 fotos de calidad (recomendadas 10+)",
+            "2": "El Certificado Energético (CEE) es obligatorio para recibir ofertas",
+            "3": "Configura tus ventanas horarias de visitas"
+          }
+        },
+        "1": {
+          "title": "Gestiona la solvencia",
+          "items": {
+            "0": "Revisa el Pasaporte de Solvencia del comprador antes de aceptar",
+            "1": "El nivel Oro indica máxima solvencia (pago al contado o hipoteca aprobada)",
+            "2": "Solo tú puedes ver este pasaporte y es completamente anonimizado",
+            "3": "Debes aceptar la solvencia para que el proceso avance"
+          }
+        },
+        "2": {
+          "title": "Documentación necesaria",
+          "items": {
+            "0": "Escritura de propiedad",
+            "1": "Último recibo IBI pagado",
+            "2": "Certificado de no deber a la comunidad",
+            "3": "Certificado Energético (CEE) — obligatorio",
+            "4": "Nota simple del Registro (no más de 3 meses)",
+            "5": "Si hay hipoteca: certificado de saldo pendiente"
+          }
+        },
+        "3": {
+          "title": "Costes del vendedor",
+          "items": {
+            "0": "Plusvalía municipal: variable según ayuntamiento y años de tenencia",
+            "1": "IRPF por ganancia patrimonial: 19-28% sobre la ganancia",
+            "2": "Cancelación registral de hipoteca (si aplica): 400-800 EUR",
+            "3": "Notaría: parte proporcional (normalmente asumida por el comprador)"
+          }
+        }
+      }
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "items": {
+        "0": {
+          "q": "Es gratuito usar InmuFácil?",
+          "a": "Sí, publicar propiedades y enviar ofertas es completamente gratuito. Algunas funcionalidades premium como servicios de tasación o asesoría legal pueden tener coste."
+        },
+        "1": {
+          "q": "Necesito un agente inmobiliario?",
+          "a": "No. InmuFácil está diseñado para conectar directamente a compradores y vendedores. La plataforma guía el proceso con herramientas legales y financieras integradas."
+        },
+        "2": {
+          "q": "Es obligatorio el Certificado Energético (CEE)?",
+          "a": "Sí. La ley española obliga a disponer del CEE para vender una propiedad. Además, InmuFácil bloquea la recepción de ofertas hasta que el CEE esté subido."
+        },
+        "3": {
+          "q": "Qué es el Pasaporte de Solvencia?",
+          "a": "Es un cuestionario financiero que el comprador completa voluntariamente. Ayuda al vendedor a valorar la solidez financiera del comprador antes de aceptar una oferta. Los datos son anonimizados y caduca a los 90 días."
+        },
+        "4": {
+          "q": "El Contrato de Arras generado es legal?",
+          "a": "El contrato generado por InmuFácil es un borrador orientativo. Recomendamos que sea revisado por un abogado antes de la firma. InmuFácil no presta servicios jurídicos."
+        },
+        "5": {
+          "q": "Cómo se verifican los usuarios?",
+          "a": "InmuFácil usa un proceso KYC (Know Your Customer) con verificación de DNI/NIE mediante fotografía y reconocimiento de documentos. Los usuarios verificados tienen mayor credibilidad en la plataforma."
+        },
+        "6": {
+          "q": "Qué ocurre si una de las partes se echa atrás?",
+          "a": "Según las condiciones del Contrato de Arras: si el comprador desiste, pierde las arras entregadas. Si el vendedor desiste, debe devolver el doble de las arras."
+        },
+        "7": {
+          "q": "InmuFácil guarda mis datos?",
+          "a": "Tus datos se tratan conforme al RGPD. Puedes ejercer tu derecho al olvido solicitando la eliminación de tu cuenta. Los documentos sensibles se cifran en reposo."
+        }
+      }
+    },
+    "legal": {
+      "common": {
+        "updated_at": "Última actualización: Marzo 2026 · Versión 1.0",
+        "security_badge": "Cifrado AES-256-GCM · RGPD · ISO 27001",
+        "footer_contact": "Para cualquier consulta legal contacta con nosotros en legal@inmufacil.com"
+      },
+      "privacy": {
+        "title": "Política de Privacidad",
+        "sections": {
+          "0": {
+            "title": "Responsable del tratamiento",
+            "body": "InmuFácil, S.L. (en trámite de constitución), con domicilio en Sevilla, España. Correo electrónico de protección de datos: privacidad@inmufacil.com. InmuFácil actúa como Responsable del Tratamiento conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD)."
+          },
+          "1": {
+            "title": "Datos que recopilamos",
+            "body": "Recopilamos los siguientes datos necesarios para prestar el servicio:\n\n• Datos identificativos: nombre completo, DNI/NIE, fecha de nacimiento, nacionalidad, correo electrónico y teléfono.\n• Datos de identidad biométrica: fotografía del documento de identidad y captura de \"prueba de vida\" (liveness check) para verificación KYC.\n• Datos de la propiedad: dirección, titularidad, precio, documentación registral (Nota Simple, CEE, IBI).\n• Datos financieros (voluntarios): cuestionario del Pasaporte de Solvencia incluyendo método de pago, ratio de endeudamiento, ingresos netos mensuales y ahorros disponibles.\n• Datos de navegación: logs de acceso, dirección IP, tipo de dispositivo y cookies técnicas.\n\nTodos los datos sensibles (DNI, biometría, datos financieros) se almacenan cifrados con AES-256-GCM en reposo y se transmiten bajo HTTPS/TLS 1.3."
+          },
+          "2": {
+            "title": "Inteligencia Artificial y Biometría",
+            "body": "InmuFácil utiliza tecnologías de Inteligencia Artificial (IA) y biometría para los siguientes fines, requiriendo tu consentimiento explícito (Art. 9 RGPD para datos biométricos y Art. 22 RGPD para decisiones automatizadas):\n\n1. Verificación de identidad (Liveness Check / KYC): el sistema de IA analiza la captura facial del usuario y la compara con el documento de identidad aportado para confirmar que el usuario es quien dice ser y está físicamente presente (anti-spoofing). Este procesamiento se realiza de forma puntual durante el registro y no implica almacenamiento continuado de datos biométricos más allá del periodo KYC legalmente exigido.\n\n2. Generación de borradores de contratos (IA Generativa): la plataforma emplea modelos de Inteligencia Artificial para redactar borradores del Contrato de Arras a partir de los datos de la operación. Estos borradores son orientativos y no constituyen asesoramiento jurídico. La revisión y firma son responsabilidad exclusiva de las partes.\n\n3. Análisis de solvencia dinámica: los algoritmos de InmuFácil procesan los datos del Pasaporte de Solvencia para calcular índices de riesgo (stress_index) y nivel de solvencia (Bronce/Plata/Oro). Este análisis es informativo y no constituye una evaluación crediticia con efectos jurídicos.\n\nTienes derecho a oponerte al tratamiento automatizado y a solicitar intervención humana en cualquier decisión que te afecte significativamente."
+          },
+          "3": {
+            "title": "Compromiso de no comercialización",
+            "body": "InmuFácil NO vende, cede, alquila ni comercializa los datos personales de sus usuarios a terceros con fines publicitarios o comerciales.\n\nLos datos únicamente se comparten con:\n• Proveedores técnicos imprescindibles (hosting, KYC, firma digital) vinculados contractualmente como Encargados del Tratamiento bajo cláusulas de confidencialidad RGPD.\n• La otra parte de la transacción (comprador/vendedor), exclusivamente los datos necesarios para formalizar la operación acordada.\n• Autoridades competentes cuando exista obligación legal.\n\nInmuFácil no utiliza tus datos con fines de publicidad comportamental, perfilado comercial ni monetización de datos. El modelo de negocio de la plataforma se basa en comisiones por transacción completada, no en la explotación de datos."
+          },
+          "4": {
+            "title": "Base jurídica del tratamiento",
+            "body": "• Ejecución del contrato (Art. 6.1.b RGPD): registro, gestión de ofertas, generación de documentos.\n• Consentimiento explícito (Art. 6.1.a / Art. 9.2.a RGPD): tratamiento biométrico (KYC liveness), IA generativa, análisis de solvencia y comunicaciones comerciales opcionales.\n• Obligación legal (Art. 6.1.c RGPD): conservación de documentos conforme a Ley 10/2010 de blanqueo de capitales y normativa fiscal.\n• Interés legítimo (Art. 6.1.f RGPD): prevención de fraude, seguridad de la plataforma y mejora del servicio."
+          },
+          "5": {
+            "title": "Conservación de datos",
+            "body": "• Datos de cuenta: mientras la cuenta permanezca activa + 5 años tras la cancelación (obligación fiscal).\n• Pasaporte de Solvencia: eliminación automática a los 90 días de su creación.\n• Datos biométricos KYC: eliminados en un plazo máximo de 6 meses tras completar la verificación, salvo obligación legal que exija mayor plazo.\n• Datos de la transacción (Arras, escrituras): 15 años conforme al Código Civil para contratos de compraventa.\n• Logs de seguridad: 12 meses."
+          },
+          "6": {
+            "title": "Seguridad técnica",
+            "body": "InmuFácil implementa las siguientes medidas técnicas y organizativas conforme al Artículo 32 RGPD e ISO/IEC 27001:\n\n• Cifrado en reposo: AES-256-GCM para todos los datos sensibles (PII, biometría, datos financieros).\n• Cifrado en tránsito: HTTPS/TLS 1.3 en todas las comunicaciones.\n• Autenticación: JWT con rotación de tokens y expiración controlada.\n• Control de acceso: RBAC (Control de Acceso Basado en Roles) que garantiza que cada usuario accede exclusivamente a sus propios datos.\n• Auditoría: logs de acceso a datos sensibles con marca temporal conforme a PCI DSS.\n• Vigilancia proactiva: defensa activa contra técnicas MITRE ATT&CK (fuerza bruta, phishing, inyección SQL)."
+          },
+          "7": {
+            "title": "Tus derechos RGPD",
+            "body": "Puedes ejercer los siguientes derechos en privacidad@inmufacil.com adjuntando copia de tu DNI/NIE:\n\n• Derecho de acceso: conocer qué datos tratamos sobre ti.\n• Derecho de rectificación: corregir datos inexactos.\n• Derecho de supresión (\"derecho al olvido\"): eliminación técnica de todos tus datos personales cuando no exista obligación legal de conservación. InmuFácil garantiza la viabilidad técnica de este derecho mediante el borrado seguro de registros cifrados.\n• Derecho de portabilidad: recibir tus datos en formato estructurado.\n• Derecho de oposición y limitación: especialmente frente a decisiones automatizadas por IA (Art. 22 RGPD).\n\nSi no quedas satisfecho/a con nuestra respuesta, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es)."
+          },
+          "8": {
+            "title": "Transferencias internacionales",
+            "body": "InmuFácil no realiza transferencias internacionales de datos fuera del Espacio Económico Europeo (EEE) de forma sistemática. En caso de que algún proveedor técnico se localice fuera del EEE, se aplicarán las Cláusulas Contractuales Tipo aprobadas por la Comisión Europea como garantía de nivel de protección adecuado."
+          },
+          "9": {
+            "title": "Uso de cookies",
+            "body": "InmuFácil utiliza únicamente cookies técnicas estrictamente necesarias para el funcionamiento de la plataforma (sesión, autenticación). No se utilizan cookies de seguimiento publicitario ni de terceros con fines comerciales. Puedes gestionar las cookies desde la configuración de tu navegador."
+          }
+        }
+      },
+      "terms": {
+        "title": "Términos y Condiciones de Uso",
+        "sections": {
+          "0": {
+            "title": "Objeto y naturaleza P2P de InmuFácil",
+            "body": "InmuFácil es una plataforma tecnológica P2P (peer-to-peer) de intermediación inmobiliaria que conecta directamente a compradores y vendedores particulares de inmuebles ubicados en España.\n\nInmuFácil NO actúa como agente inmobiliario, NO cobra comisión de agencia a ninguna de las partes y NO es parte en la transacción de compraventa. Su función es proporcionar herramientas tecnológicas, documentación orientativa y un entorno seguro para que las partes negocien y formalicen su operación de forma autónoma."
+          },
+          "1": {
+            "title": "Aceptación y capacidad legal",
+            "body": "El uso de la plataforma implica la aceptación plena de estos Términos y Condiciones, la Política de Privacidad y el Aviso Legal.\n\nPara registrarse es necesario ser mayor de 18 años y tener plena capacidad jurídica para contratar. Los menores de 18 años tienen prohibido el acceso a la plataforma."
+          },
+          "2": {
+            "title": "Proceso por pasos y Timeline de transacción",
+            "body": "InmuFácil estructura las transacciones en un Timeline de hitos secuenciales. Cada avance requiere la aceptación expresa de ambas partes:\n\n1. Publicación: el vendedor publica la propiedad con CEE obligatorio.\n2. Oferta: el comprador formaliza una oferta económica vinculada a su Pasaporte de Solvencia.\n3. Verificación de solvencia: el vendedor revisa y acepta o rechaza el pasaporte del comprador.\n4. Contrato de Arras: generación asistida del borrador + firma digital de ambas partes. Este hito tiene validez contractual conforme al Artículo 1454 del Código Civil español.\n5. Tasación e hipoteca: coordinación del proceso bancario.\n6. Escritura notarial: cierre de la operación ante notario.\n7. Entrega de llaves: confirmación final.\n\nLa aceptación de estos Términos implica el consentimiento para avanzar paso a paso por el Timeline, reconociendo que cada hito firmado tiene efectos contractuales propios."
+          },
+          "3": {
+            "title": "Inteligencia Artificial — Alcance y limitaciones",
+            "body": "InmuFácil incorpora sistemas de Inteligencia Artificial en los siguientes módulos:\n\n1. Generación de borradores del Contrato de Arras: la IA redacta automáticamente un borrador a partir de los parámetros de la operación acordados por las partes (precio, condiciones, plazos). Este borrador es ORIENTATIVO. InmuFácil no presta servicios jurídicos y RECOMIENDA EXPRESAMENTE la revisión del documento por un abogado o notario antes de su firma. La responsabilidad legal del contrato recae exclusivamente en las partes firmantes.\n\n2. Análisis de solvencia (IA): el motor de scoring analiza los datos del Pasaporte de Solvencia para generar indicadores informativos. Estos indicadores NO tienen la consideración de informe crediticio oficial ni sustituyen a la evaluación de una entidad financiera.\n\n3. Verificación KYC (Inteligencia Artificial + biometría): el proceso de prueba de vida es ejecutado por sistemas de IA. InmuFácil se reserva el derecho a realizar una revisión manual adicional ante casos dudosos."
+          },
+          "4": {
+            "title": "Obligaciones del vendedor",
+            "body": "• Publicar información veraz y actualizada sobre la propiedad.\n• Aportar el Certificado Energético (CEE) vigente (obligatorio por Ley).\n• Disponer de Nota Simple del Registro de la Propiedad no anterior a 3 meses al inicio de las arras.\n• Acreditar estar al corriente de pagos: IBI, comunidad de propietarios y suministros.\n• Informar de cargas hipotecarias o servidumbres sobre la propiedad.\n• No publicar la misma propiedad simultáneamente en otras plataformas una vez firmado el Contrato de Arras."
+          },
+          "5": {
+            "title": "Obligaciones del comprador",
+            "body": "• Completar el Pasaporte de Solvencia con información veraz.\n• Realizar la verificación de identidad KYC para poder hacer ofertas.\n• Formular ofertas con intención real de compra.\n• Disponer de los fondos o financiación necesaria antes de firmar las arras.\n• En caso de compra conjunta (multi-comprador), el segundo titular debe completar su propia verificación de identidad en la plataforma."
+          },
+          "6": {
+            "title": "Contrato de Arras — Efectos y responsabilidad",
+            "body": "El Contrato de Arras generado por InmuFácil es un borrador de arras penitenciales (Art. 1454 Cc) que incluye:\n\n• Identificación de las partes y la propiedad.\n• Precio final acordado y cantidad de arras a entregar.\n• Plazo máximo para escritura notarial.\n• Condiciones resolutivas pactadas (sujeto a hipoteca, etc.).\n\nIMPORTANTE: si el comprador desiste, pierde las arras entregadas. Si el vendedor desiste, está obligado a devolver el doble. InmuFácil NO asume responsabilidad alguna por el incumplimiento de ninguna de las partes ni por errores en la información aportada que afecten a la validez del contrato."
+          },
+          "7": {
+            "title": "Exención de responsabilidad",
+            "body": "InmuFácil no garantiza:\n• El estado físico, jurídico o urbanístico de las propiedades publicadas.\n• La veracidad de la información aportada por los usuarios.\n• La disponibilidad continua e ininterrumpida de la plataforma.\n• Los resultados económicos de ninguna operación.\n\nInmuFácil no será responsable por daños directos, indirectos o consecuentes derivados del uso de la plataforma, incluyendo daños derivados de decisiones tomadas en base a los análisis de IA."
+          },
+          "8": {
+            "title": "Uso aceptable y suspensión de cuentas",
+            "body": "Está expresamente prohibido:\n• Publicar propiedades ficticias o con precio inflado artificialmente.\n• Usar datos de identidad de terceros o documentos falsificados en el KYC.\n• Realizar ofertas sin intención real de compra.\n• Intentar extraer, copiar o redistribuir datos de otros usuarios.\n• Cualquier uso fraudulento, abusivo o contrario a la normativa.\n\nInmuFácil se reserva el derecho a suspender o cancelar cuentas que incumplan estas condiciones, sin perjuicio de las acciones legales que correspondan."
+          },
+          "9": {
+            "title": "Modificación de términos y ley aplicable",
+            "body": "InmuFácil puede modificar estos Términos notificando a los usuarios con al menos 30 días de antelación. El uso continuado de la plataforma tras la notificación implica la aceptación de los nuevos términos.\n\nEstos Términos se rigen por la legislación española. Para cualquier controversia, las partes se someten a los Juzgados y Tribunales de Sevilla, con renuncia a cualquier otro fuero."
+          }
+        }
+      },
+      "legal_notice": {
+        "title": "Aviso Legal",
+        "sections": {
+          "0": {
+            "title": "Identificación del titular",
+            "body": "InmuFácil, S.L. — en trámite de constitución.\nDomicilio: Sevilla, España.\nEmail de contacto: legal@inmufacil.com\nResponsable de contenidos: equipo InmuFácil."
+          },
+          "1": {
+            "title": "Actividad",
+            "body": "Prestación de servicios de plataforma tecnológica P2P para la intermediación inmobiliaria entre particulares. InmuFácil no ejerce actividades reservadas a agentes inmobiliarios colegiados ni presta servicios de intermediación financiera o de inversión."
+          },
+          "2": {
+            "title": "Normativa aplicable",
+            "body": "Este sitio se rige por la legislación española, conforme a:\n• Ley 34/2002, de servicios de la sociedad de la información (LSSICE).\n• Ley Orgánica 3/2018 (LOPDGDD) y Reglamento (UE) 2016/679 (RGPD).\n• Ley 29/1994 de Arrendamientos Urbanos (cuando aplique).\n• Real Decreto 7/2019 de medidas urgentes en materia de vivienda.\n• Reglamento (UE) 2024/1689 de IA (AI Act) — cumplimiento proactivo."
+          },
+          "3": {
+            "title": "Propiedad intelectual",
+            "body": "Todos los contenidos, diseños, códigos fuente y marcas de InmuFácil están protegidos por derechos de propiedad intelectual e industrial. Queda prohibida su reproducción, distribución o comunicación pública sin autorización expresa y por escrito de InmuFácil."
+          },
+          "4": {
+            "title": "Exención de responsabilidad",
+            "body": "InmuFácil no se responsabiliza de los daños derivados del uso de la plataforma, de la inexactitud de la información publicada por terceros, ni del incumplimiento de obligaciones entre usuarios. Los enlaces a sitios externos no implican patrocinio ni responsabilidad sobre su contenido."
+          },
+          "5": {
+            "title": "Jurisdicción",
+            "body": "Para cualquier controversia derivada del uso de esta plataforma, las partes se someten a los Juzgados y Tribunales de la ciudad de Sevilla, con renuncia expresa a cualquier otro fuero que pudiera corresponderles."
+          }
+        }
+      }
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:inmufacil_frontend/domain/entities/lifestyle_profile.dart';
+import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/lifestyle_provider.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/app_bar_back_button.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/user_avatar_menu.dart';
@@ -31,6 +32,11 @@ class _LifestyleQuestionnaireScreenState
   }
 
   void _save() async {
+    final authState = ref.read(authProvider);
+    if (authState.user == null) {
+      _showLoginRequiredDialog();
+      return;
+    }
     await ref.read(lifestyleProfileProvider.notifier).updateProfile(_draft);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -45,9 +51,50 @@ class _LifestyleQuestionnaireScreenState
     context.pop();
   }
 
+  void _showLoginRequiredDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.lock_outline_rounded, color: Color(0xFF135BEC)),
+            SizedBox(width: 10),
+            Text('Acceso requerido', style: TextStyle(fontSize: 18)),
+          ],
+        ),
+        content: const Text(
+          'Inicia sesion o registrate para guardar tu perfil de estilo de vida y obtener recomendaciones personalizadas.',
+          style: TextStyle(height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.go('/login');
+            },
+            child: const Text('Iniciar sesion'),
+          ),
+          FilledButton.tonal(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.go('/register');
+            },
+            child: const Text('Registrarse'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isAuthenticated = ref.watch(authProvider).user != null;
 
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +120,7 @@ class _LifestyleQuestionnaireScreenState
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
-                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF2563EB))),
+                      TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -92,11 +139,11 @@ class _LifestyleQuestionnaireScreenState
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
+                  color: const Color(0xFF135BEC),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.25),
+                      color: const Color(0xFF135BEC).withOpacity(0.25),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -131,7 +178,7 @@ class _LifestyleQuestionnaireScreenState
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF1E3A8A), Color(0xFF2563EB)],
+                colors: [Color(0xFF1E3A8A), Color(0xFF135BEC)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -168,6 +215,70 @@ class _LifestyleQuestionnaireScreenState
               ],
             ),
           ),
+
+          // ── Anonymous user banner ──────────────────────────────────────────
+          if (!isAuthenticated)
+            Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7ED),
+                border: Border.all(color: const Color(0xFFFB923C)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline_rounded, color: Color(0xFFEA580C), size: 22),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Inicia sesion para guardar tu perfil',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF9A3412),
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Puedes explorar el cuestionario, pero necesitas una cuenta para guardar tus preferencias.',
+                          style: TextStyle(color: Color(0xFFB45309), fontSize: 12, height: 1.4),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            FilledButton(
+                              onPressed: () => context.go('/login'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFF135BEC),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text('Iniciar sesion', style: TextStyle(fontSize: 12)),
+                            ),
+                            const SizedBox(width: 8),
+                            OutlinedButton(
+                              onPressed: () => context.go('/register'),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFF135BEC)),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: const Text('Registrarse', style: TextStyle(fontSize: 12, color: Color(0xFF135BEC))),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
           // ── Question 1: Ritmo de vida ───────────────────────────────────────
           _QuestionCard(
@@ -253,7 +364,7 @@ class _LifestyleQuestionnaireScreenState
               value: _draft.naturalLightWeight,
               startLabel: 'lifestyle.light_slider_start'.tr(),
               endLabel: 'lifestyle.light_slider_end'.tr(),
-              activeColor: const Color(0xFF2563EB),
+              activeColor: const Color(0xFF135BEC),
               onChanged: (v) => setState(() {
                 _draft = _draft.copyWith(naturalLightWeight: v);
               }),
@@ -307,7 +418,7 @@ class _LifestyleQuestionnaireScreenState
             child: ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF135BEC),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -385,7 +496,7 @@ class _MultiOptionSelector<T> extends StatelessWidget {
     required this.value,
     required this.options,
     required this.onChanged,
-    this.accentColor = const Color(0xFF2563EB),
+    this.accentColor = const Color(0xFF135BEC),
   });
 
   final T value;

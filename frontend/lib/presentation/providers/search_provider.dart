@@ -656,6 +656,20 @@ int _lifestyleScore(Property prop, LifestyleProfile profile) {
   return score;
 }
 
+/// Lifestyle-sorted properties for the listing screen (no geo/viewport filter).
+/// Used when there is no active location search, so the viewport does not
+/// eliminate results — only the sort order changes.
+final lifestyleSortedPropertiesProvider = Provider<List<Property>>((ref) {
+  final searchState = ref.watch(searchProvider);
+  final properties = searchState.filteredProperties;
+  if (properties.isEmpty) return [];
+  if (!searchState.useLifestyleFilter) return properties;
+  final profile = ref.watch(lifestyleProfileProvider);
+  final sorted = List<Property>.from(properties);
+  sorted.sort((a, b) => _lifestyleScore(b, profile).compareTo(_lifestyleScore(a, profile)));
+  return sorted;
+});
+
 /// Ray-casting algorithm to determine if a point is within a polygon
 bool _isPointInPolygon(LatLng point, List<LatLng> polygon) {
   int intersectCount = 0;
