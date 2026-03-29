@@ -100,11 +100,6 @@ class TrustDashboardScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 8),
-          IconButton(
-            icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            onPressed: () {},
-          ),
-          const SizedBox(width: 4),
           const UserAvatarMenu(),
           const SizedBox(width: 16),
         ],

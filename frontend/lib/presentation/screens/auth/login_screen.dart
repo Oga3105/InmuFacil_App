@@ -310,7 +310,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
                          color: Theme.of(context).colorScheme.surfaceContainerLowest,
                          child: Padding(
-                           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 28),
                            child: Form(
                              key: _formKey,
                              child: Column(
@@ -328,19 +328,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                            children: [
                                              Image.asset(
                                                'assets/images/logo_inmufacil.png',
-                                               height: 50,
+                                               height: 40,
                                                fit: BoxFit.contain,
                                              ),
-                                             const SizedBox(height: 8),
-                                             Text('InmuFácil', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: _tealBrandColor)),
+                                             const SizedBox(height: 6),
+                                             Text('InmuFácil', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _tealBrandColor)),
                                            ],
                                          ),
                                        ),
                                      ),
                                    ),
-                                   const SizedBox(height: 32),
+                                   const SizedBox(height: 20),
                                  ],
-    
+
                                  // Header
                                  Text(
                                    'Bienvenido de nuevo',
@@ -350,7 +350,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      fontWeight: FontWeight.bold,
                                    ),
                                  ),
-                                 const SizedBox(height: 8),
+                                 const SizedBox(height: 6),
                                  Text(
                                    'Accede a tu panel seguro de InmuFácil.',
                                    textAlign: TextAlign.center,
@@ -358,8 +358,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                    ),
                                  ),
-                                 const SizedBox(height: 40),
-    
+                                 const SizedBox(height: 16),
+
+                                 // Google button FIRST
+                                 const GoogleSignInButton(),
+                                 const SizedBox(height: 14),
+
+                                 // Divisor "o"
+                                 Row(
+                                   children: [
+                                     Expanded(child: Divider(color: Colors.grey[300])),
+                                     Padding(
+                                       padding: const EdgeInsets.symmetric(horizontal: 12),
+                                       child: Text(
+                                         'auth.or_separator'.tr(),
+                                         style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                                       ),
+                                     ),
+                                     Expanded(child: Divider(color: Colors.grey[300])),
+                                   ],
+                                 ),
+                                 const SizedBox(height: 14),
+
                                  // Email Field
                                  Text(
                                    'CORREO ELECTRÓNICO',
@@ -370,7 +390,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                    ),
                                  ),
-                                 const SizedBox(height: 8),
+                                 const SizedBox(height: 6),
                                  TextFormField(
                                    controller: _emailController,
                                    textInputAction: TextInputAction.next,
@@ -378,7 +398,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    decoration: InputDecoration(
                                      hintText: 'ejemplo@correo.com',
                                      hintStyle: TextStyle(color: Colors.grey[400]),
-                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                      border: OutlineInputBorder(
                                        borderRadius: BorderRadius.circular(12),
                                        borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
@@ -398,7 +418,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      if (value == null || value.isEmpty) {
                                        return 'Por favor ingresa tu correo';
                                      }
-                                     // Strict Email Regex Validation
                                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                                      if (!emailRegex.hasMatch(value)) {
                                        return 'Ingresa un correo válido';
@@ -406,8 +425,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      return null;
                                    },
                                  ),
-                                 const SizedBox(height: 24),
-    
+                                 const SizedBox(height: 16),
+
                                  // Password Field
                                  Row(
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -439,7 +458,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      ),
                                    ],
                                  ),
-                                 const SizedBox(height: 8),
+                                 const SizedBox(height: 6),
                                  TextFormField(
                                    controller: _passwordController,
                                    focusNode: _passwordFocusNode,
@@ -449,7 +468,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    decoration: InputDecoration(
                                      hintText: '••••••••',
                                      hintStyle: TextStyle(color: Colors.grey[400]),
-                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                      suffixIcon: IconButton(
                                        icon: Icon(
                                          _isPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -480,32 +499,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                      return null;
                                    },
                                  ),
-                                 
-                                 const SizedBox(height: 24),
-    
-                                 // Keep Session Checkbox (Static for now)
-                                 Row(
-                                   children: [
-                                     SizedBox(
-                                       width: 24,
-                                       height: 24,
-                                       child: Checkbox(
-                                         value: false, 
-                                         onChanged: (v) {},
-                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                                         activeColor: _glowBlueColor,
-                                       ),
-                                     ),
-                                     const SizedBox(width: 8),
-                                     Text(
-                                       'Mantener sesión iniciada',
-                                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                                     ),
-                                   ],
-                                 ),
-    
-                                 const SizedBox(height: 32),
-    
+
+                                 const SizedBox(height: 20),
+
                                  // Login Button (Premium Glow Style)
                                  Consumer(
                                     builder: (context, ref, child) {
@@ -527,13 +523,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: _glowBlueColor,
                                             foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(vertical: 18),
+                                            padding: const EdgeInsets.symmetric(vertical: 16),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(12),
                                             ),
-                                            elevation: 0, // Shadow handling by Container
+                                            elevation: 0,
                                           ),
-                                          child: isLoading 
+                                          child: isLoading
                                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                                             : const Text(
                                                 'Entrar',
@@ -547,30 +543,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       );
                                     },
                                  ),
-                                 
-                                  const SizedBox(height: 20),
 
-                                 // Divisor "o"
-                                 Row(
-                                   children: [
-                                     Expanded(child: Divider(color: Colors.grey[300])),
-                                     Padding(
-                                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                                       child: Text(
-                                         'auth.or_separator'.tr(),
-                                         style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                                       ),
-                                     ),
-                                     Expanded(child: Divider(color: Colors.grey[300])),
-                                   ],
-                                 ),
-
-                                 const SizedBox(height: 16),
-
-                                 // Boton Google
-                                 const GoogleSignInButton(),
-
-                                 const SizedBox(height: 8),
+                                 const SizedBox(height: 10),
 
                                  // Link: Continuar sin cuenta
                                  Center(
@@ -589,7 +563,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    ),
                                  ),
 
-                                 const SizedBox(height: 16),
+                                 const SizedBox(height: 8),
 
                                  // Register Link
                                  Row(
@@ -597,7 +571,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    children: [
                                      Text(
                                        '¿No tienes cuenta?',
-                                       style: TextStyle(color: Colors.grey[600]),
+                                       style: TextStyle(color: Colors.grey[600], fontSize: 13),
                                      ),
                                      TextButton(
                                        onPressed: () => context.go('/register'),
@@ -622,33 +596,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                          ),
                       ),
                     ),
-                    
-                    const SizedBox(height: 32),
-                    
-                    // Trust Badges (Moved Outside & Styled)
-                    Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        _buildTrustBadgeSimple(
-                           context,
-                           icon: Icons.shield,
-                           iconColor: const Color(0xFF16A34A),
-                           bgColor: const Color(0xFFDCFCE7),
-                           label: 'GARANTÍA INMUFÁCIL',
-                           title: 'Tu venta tranquila',
-                         ),
-                         _buildTrustBadgeSimple(
-                           context,
-                           icon: Icons.lock,
-                           iconColor: const Color(0xFF2563EB),
-                           bgColor: const Color(0xFFDBEAFE),
-                           label: 'P2P VERIFICADO',
-                           title: 'Tu compra segura',
-                         ),
-                      ],
-                    ),
+
+                    // Trust Badges (Desktop only)
+                    if (isDesktop) ...[
+                      const SizedBox(height: 32),
+                      Wrap(
+                        spacing: 16,
+                        runSpacing: 16,
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _buildTrustBadgeSimple(
+                             context,
+                             icon: Icons.shield,
+                             iconColor: const Color(0xFF16A34A),
+                             bgColor: const Color(0xFFDCFCE7),
+                             label: 'GARANTÍA INMUFÁCIL',
+                             title: 'Tu venta tranquila',
+                           ),
+                           _buildTrustBadgeSimple(
+                             context,
+                             icon: Icons.lock,
+                             iconColor: const Color(0xFF2563EB),
+                             bgColor: const Color(0xFFDBEAFE),
+                             label: 'P2P VERIFICADO',
+                             title: 'Tu compra segura',
+                           ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -654,11 +654,6 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
           ),
         ),
         const SizedBox(width: 12),
-        Builder(builder: (context) => IconButton(
-          icon: Icon(Icons.notifications_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          onPressed: () {},
-        )),
-        const SizedBox(width: 8),
         // Current user avatar with dropdown menu
         Padding(
           padding: const EdgeInsets.only(right: 16),

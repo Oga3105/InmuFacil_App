@@ -1391,8 +1391,6 @@ class _MapNavigationBar extends ConsumerWidget {
                   ],
                 ),
                 if (isAuthenticated) ...[
-                  _NotificationBell(),
-                  const SizedBox(width: 4),
                   const UserAvatarMenu(),
                 ] else
                   InkWell(
@@ -1619,12 +1617,6 @@ class _MapNavigationBar extends ConsumerWidget {
                     fullWidth: false,
                   ),
                   const SizedBox(width: 12),
-
-                  // Campana de notificaciones — visible solo cuando autenticado
-                  if (isAuthenticated)
-                    _NotificationBell(),
-                  if (isAuthenticated)
-                    const SizedBox(width: 8),
 
                   // [AUTH STATE LOGIC]
                   if (isAuthenticated)
