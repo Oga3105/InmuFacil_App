@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
-import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/config/env_config.dart';
@@ -121,12 +120,11 @@ class AiConsentHistoryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
     final historyAsync = ref.watch(_aiConsentHistoryProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
-      appBar: _buildAppBar(context, authState),
+      appBar: _buildAppBar(context),
       body: historyAsync.when(
         loading: () =>
             const Center(child: CircularProgressIndicator(color: _kPurple)),
@@ -155,7 +153,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, dynamic authState) {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -229,15 +227,14 @@ class AiConsentHistoryScreen extends ConsumerWidget {
             ),
           ),
         ),
-        if (authState.isAuthenticated)
-          const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(width: 12),
-              UserAvatarMenu(),
-              SizedBox(width: 16),
-            ],
-          ),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(width: 12),
+            UserAvatarMenu(),
+            SizedBox(width: 16),
+          ],
+        ),
       ],
     );
   }
@@ -254,48 +251,51 @@ class _PageHeader extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       color: colorScheme.surface,
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEDE9FE),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.privacy_tip_outlined,
-                    color: _kPurple, size: 22),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Historial de Consentimientos IA',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
+          // Framed header
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _kPurple.withOpacity(0.07),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _kPurple.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.privacy_tip_outlined, color: _kPurple, size: 28),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Historial de Consentimientos IA',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kPurple),
                       ),
-                    ),
-                    Text(
-                      count == 0
-                          ? 'Sin registros todavía'
-                          : '$count consentimiento${count != 1 ? 's' : ''} '
-                              'registrado${count != 1 ? 's' : ''}',
-                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        'Registro de consentimientos explícitos para el tratamiento de datos por IA (Art. 15 RGPD).',
+                        style: TextStyle(fontSize: 13, color: _kPurple.withOpacity(0.85)),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          // Count badge
+          Text(
+            count == 0
+                ? 'Sin registros todavía'
+                : '$count consentimiento${count != 1 ? 's' : ''} registrado${count != 1 ? 's' : ''}',
+            style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 12),
+          // GDPR info panel
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -306,26 +306,19 @@ class _PageHeader extends StatelessWidget {
             child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline,
-                    size: 14, color: Color(0xFF92400E)),
+                Icon(Icons.info_outline, size: 14, color: Color(0xFF92400E)),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Este historial es tu registro de consentimientos explícitos otorgados para el '
-                    'tratamiento de datos por sistemas de IA. '
                     'Base jurídica: Art. 6.1.a RGPD / Art. 7 LOPDGDD. '
                     'Derecho de acceso: Art. 15 RGPD.',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF92400E),
-                      height: 1.5,
-                    ),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF92400E), height: 1.5),
                   ),
                 ),
               ],
             ),
           ),
-          if (count > 0) const SizedBox(height: 4),
+          const SizedBox(height: 4),
         ],
       ),
     );
