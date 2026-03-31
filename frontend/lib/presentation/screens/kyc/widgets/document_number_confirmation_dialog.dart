@@ -232,6 +232,45 @@ class _DocumentNumberConfirmationDialogState
             '$_ns.unreadable_hint'.tr(),
             style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
           ),
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: () => setState(() {
+              _useManual = !_useManual;
+              if (!_useManual) {
+                _manualController.clear();
+                _validationResult = null;
+              }
+            }),
+            child: Row(
+              children: [
+                Icon(
+                  _useManual
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  size: 18,
+                  color: colorScheme.primary,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  _useManual
+                      ? '$_ns.manual_toggle_close'.tr()
+                      : '$_ns.manual_toggle_open'.tr(),
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_useManual) ...[
+            const SizedBox(height: 12),
+            _buildManualField(),
+          ],
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -399,6 +438,46 @@ class _DocumentNumberConfirmationDialogState
     if (widget.isLoading) return [];
 
     if (!widget.readable) {
+      if (_useManual) {
+        return [
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).pop();
+              widget.onReupload();
+            },
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: colorScheme.outlineVariant),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            ),
+            icon: const Icon(Icons.upload_file, size: 16),
+            label: Text('$_ns.btn_reupload'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
+          FilledButton(
+            onPressed: _canConfirm
+                ? () {
+                    Navigator.of(context).pop();
+                    widget.onConfirm(_confirmedNumber);
+                  }
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor:
+                  isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
+              disabledBackgroundColor:
+                  colorScheme.onSurface.withOpacity(0.12),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            child: Text('$_ns.btn_confirm'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ];
+      }
       return [
         SizedBox(
           width: double.infinity,

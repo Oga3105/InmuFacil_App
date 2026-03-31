@@ -174,7 +174,7 @@ def extract_doc_number_from_image(
         raw, _model = call_with_fallback(
             client,
             contents=contents,
-            preferred_model="gemini-2.0-flash-lite",
+            preferred_model="gemini-2.0-flash",
             model_chain=GEMINI_KYC_MODEL_CHAIN,
         )
     except Exception as e:

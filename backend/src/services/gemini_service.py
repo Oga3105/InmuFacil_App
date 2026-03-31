@@ -32,10 +32,10 @@ GEMINI_MODEL_CHAIN: list[str] = [
     "gemini-1.5-flash",
 ]
 
-# KYC/OCR chain — starts lighter (cost optimization), still multimodal
+# KYC/OCR chain — flash for accuracy, lite as fallback
 GEMINI_KYC_MODEL_CHAIN: list[str] = [
-    "gemini-2.0-flash-lite",
     "gemini-2.0-flash",
+    "gemini-2.5-flash",
     "gemini-1.5-flash",
 ]
 
