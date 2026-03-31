@@ -50,7 +50,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // Without this, only context.go() updates the URL (GoRouter 17.x default).
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  final notifier = ref.watch(routerNotifierProvider.notifier);
+  final notifier = ref.read(routerNotifierProvider.notifier);
 
   return GoRouter(
     initialLocation: '/',
