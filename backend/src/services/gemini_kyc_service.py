@@ -13,13 +13,18 @@ The caller (background task in routes/kyc.py) then writes the result
 to the DB and updates User.dni_status.
 """
 
-import base64
 import json
 import logging
 import os
 import re
 from dataclasses import dataclass, field
 from typing import Optional
+
+from backend.src.services.gemini_service import (
+    GEMINI_KYC_MODEL_CHAIN,
+    call_with_fallback,
+    get_client,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -83,14 +88,20 @@ y baja la puntuación de confianza acordemente.
 
 _OCR_PROMPT = """
 Eres un sistema OCR especializado en documentos de identidad españoles.
-Se te proporciona la imagen del FRENTE (o página de datos) de un documento de identidad.
+Se te proporcionan una o dos imágenes: el FRENTE y opcionalmente el REVERSO del documento.
 
-Tu UNICA tarea es extraer el número del documento con la máxima precisión.
+Tu ÚNICA tarea es extraer el número del documento con la máxima precisión.
+Usa AMBAS imágenes si están disponibles: el REVERSO contiene la Zona de Lectura Automática (MRZ)
+que suele ser más fiable para extraer el número.
 
 Formatos válidos según tipo:
 - DNI/NIF: 8 dígitos seguidos de una letra mayúscula (ej: 12345678Z)
 - NIE: letra X, Y o Z + 7 dígitos + letra mayúscula (ej: X1234567L)
 - Pasaporte español: 3 letras + 6 dígitos (ej: PAA123456)
+
+Para DNI/NIE, en el REVERSO la MRZ tiene dos líneas de 30 caracteres; el número está
+en la primera línea (posiciones 1-9) o segunda línea (posiciones 1-9). Úsalo como fuente
+principal si el FRENTE no es claro.
 
 Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional:
 
@@ -99,7 +110,7 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional:
   "readable": true
 }
 
-Si la imagen no es legible o no puedes extraer el número con confianza, responde:
+Si no puedes extraer el número con confianza de ninguna imagen, responde:
 
 {
   "doc_number": null,
@@ -110,55 +121,67 @@ Si la imagen no es legible o no puedes extraer el número con confianza, respond
 
 def extract_doc_number_from_image(
     front_path: str,
+    back_path: Optional[str] = None,
     document_type: str = "dni",
 ) -> dict:
     """
     Lightweight synchronous OCR call to Gemini to extract only the document number.
+    Accepts both front and back images; the back MRZ improves accuracy for DNI/NIE.
     Used for the pre-selfie confirmation step.
     Returns: {"doc_number": str|None, "readable": bool}
     Never raises — errors return {"doc_number": None, "readable": False}.
     """
     try:
-        from google import genai
         from google.genai import types
     except ImportError:
         logger.error("google-genai not installed.")
         return {"doc_number": None, "readable": False}
 
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
-        logger.error("GEMINI_API_KEY not set")
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        logger.error("Gemini client init failed: %s", e)
         return {"doc_number": None, "readable": False}
 
     if not front_path or not os.path.exists(front_path):
         return {"doc_number": None, "readable": False}
 
+    contents: list = [_OCR_PROMPT]
+
+    # Always include front
     try:
         mime = _infer_mime(front_path)
         with open(front_path, "rb") as f:
-            data = f.read()
+            front_data = f.read()
+        contents.append(f"[Imagen: FRENTE del {document_type.upper()}]")
+        contents.append(types.Part.from_bytes(data=front_data, mime_type=mime))
     except Exception as e:
         logger.warning("Could not read front image for OCR: %s", e)
         return {"doc_number": None, "readable": False}
 
-    contents = [
-        _OCR_PROMPT,
-        f"[Imagen: FRENTE del {document_type.upper()}]",
-        types.Part.from_bytes(data=data, mime_type=mime),
-    ]
+    # Include back if available (MRZ is more reliable for number extraction)
+    if back_path and os.path.exists(back_path):
+        try:
+            back_mime = _infer_mime(back_path)
+            with open(back_path, "rb") as f:
+                back_data = f.read()
+            contents.append(f"[Imagen: REVERSO del {document_type.upper()} — contiene MRZ]")
+            contents.append(types.Part.from_bytes(data=back_data, mime_type=back_mime))
+        except Exception as e:
+            logger.warning("Could not read back image for OCR (non-fatal): %s", e)
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+        raw, _model = call_with_fallback(
+            client,
             contents=contents,
+            preferred_model="gemini-2.0-flash-lite",
+            model_chain=GEMINI_KYC_MODEL_CHAIN,
         )
-        raw = response.text or ""
     except Exception as e:
         err_str = str(e)
         is_quota = "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "quota" in err_str.lower()
         if is_quota:
-            logger.warning("Gemini quota exceeded during OCR extraction.")
+            logger.warning("Gemini quota exceeded during OCR extraction (all models).")
         else:
             logger.error("Gemini OCR error: %s", e)
         return {"doc_number": None, "readable": False}
@@ -194,7 +217,6 @@ def verify_identity_with_gemini(
     as a rejected result with the error description in `reason`.
     """
     try:
-        from google import genai
         from google.genai import types
     except ImportError:
         logger.error("google-genai not installed. Run: pip install google-genai")
@@ -204,16 +226,15 @@ def verify_identity_with_gemini(
             reason="Servicio de IA no disponible (paquete no instalado).",
         )
 
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
-        logger.error("GEMINI_API_KEY not set in environment")
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        logger.error("Gemini client init failed: %s", e)
         return GeminiKYCResult(
             approved=False,
             confidence=0.0,
-            reason="API key de Gemini no configurada.",
+            reason=str(e),
         )
-
-    client = genai.Client(api_key=api_key)
 
     # Build contents list
     contents: list = [_SYSTEM_PROMPT]
@@ -239,34 +260,21 @@ def verify_identity_with_gemini(
         )
 
     try:
-        response = client.models.generate_content(
-            model="gemini-2.0-flash-lite",
+        raw, _model = call_with_fallback(
+            client,
             contents=contents,
+            preferred_model="gemini-2.0-flash-lite",
+            model_chain=GEMINI_KYC_MODEL_CHAIN,
         )
-        raw = response.text or ""
     except Exception as e:
-        logger.error("Gemini API error: %s", e)
+        logger.error("Gemini API error (all models exhausted): %s", e)
         err_str = str(e)
         is_quota = (
             "429" in err_str
             or "RESOURCE_EXHAUSTED" in err_str
             or "quota" in err_str.lower()
         )
-        is_model_not_found = (
-            "NOT_FOUND" in err_str
-            or ("404" in err_str and "NOT_FOUND" in err_str)
-        )
         if is_quota:
-            return GeminiKYCResult(
-                approved=False,
-                confidence=0.0,
-                reason="__QUOTA_EXCEEDED__",
-            )
-        if is_model_not_found:
-            logger.critical(
-                "Gemini model not found. Check the model name in gemini_kyc_service.py. "
-                "Error: %s", e
-            )
             return GeminiKYCResult(
                 approved=False,
                 confidence=0.0,

@@ -17,6 +17,8 @@ import re
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Nota Simple"])
 logger = logging.getLogger(__name__)
 
@@ -130,7 +132,6 @@ async def analyze_nota_simple(
     If the discrepancy exceeds 5%, raises a surface alert.
     """
     try:
-        from google import genai  # type: ignore[import]
         from google.genai import types as genai_types  # type: ignore[import]
     except ImportError:
         raise HTTPException(
@@ -138,12 +139,10 @@ async def analyze_nota_simple(
             detail="Servicio de IA no disponible. Contacta con soporte.",
         )
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     # Validate base64 payload (basic check before sending to API)
     try:
@@ -157,17 +156,16 @@ async def analyze_nota_simple(
     prompt_text = _EXTRACTION_PROMPT.format(address=request.property_address)
 
     try:
-        client = genai.Client(api_key=api_key)
-
         image_part = genai_types.Part.from_bytes(
             data=raw_bytes,
             mime_type="image/jpeg",
         )
         text_part = genai_types.Part.from_text(text=prompt_text)
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
+        raw_text, _ = call_with_fallback(
+            client,
             contents=[genai_types.Content(parts=[image_part, text_part])],
+            preferred_model="gemini-2.0-flash",
         )
     except HTTPException:
         raise
@@ -180,7 +178,6 @@ async def analyze_nota_simple(
         )
 
     # Parse JSON from Gemini response
-    raw_text = (response.text or "").strip()
     extracted = _parse_json_from_response(raw_text)
 
     if extracted is None:

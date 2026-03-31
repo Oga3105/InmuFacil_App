@@ -31,6 +31,7 @@ import io
 from backend.src.config.database import get_db, SessionLocal
 from backend.src.models import User, PropertyOffer, Property
 from backend.src.models.arras_interview import ArrasInterview
+from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.crypto import encrypt_data, decrypt_data
 from backend.src.utils.security import get_current_active_user
 
@@ -429,14 +430,11 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
             db.commit()
             return
 
-        from google import genai as google_genai
-        client = google_genai.Client(api_key=api_key)
-        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        response = client.models.generate_content(
-            model=model_id,
-            contents=prompt,
+        client = get_client(api_key)
+        preferred_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        contract_text, _ = call_with_fallback(
+            client, contents=prompt, preferred_model=preferred_model
         )
-        contract_text = response.text
 
         record.contract_text = contract_text
         record.contract_status = "ready"
@@ -906,14 +904,11 @@ TEXTO DEL CONTRATO (primeras 3000 palabras):
 """
 
     try:
-        from google import genai as google_genai
-        client = google_genai.Client(api_key=api_key)
-        model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-        response = client.models.generate_content(
-            model=model_id,
-            contents=prompt,
+        client = get_client(api_key)
+        preferred_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        raw, _ = call_with_fallback(
+            client, contents=prompt, preferred_model=preferred_model
         )
-        raw = response.text.strip()
         # Strip markdown code fences if present
         if raw.startswith("```"):
             raw = raw.split("```")[1]

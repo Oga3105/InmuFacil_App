@@ -13,6 +13,8 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Neighborhood Twins"])
 logger = logging.getLogger(__name__)
 
@@ -58,13 +60,9 @@ async def get_neighborhood_twins(body: NeighborhoodTwinsRequest) -> Neighborhood
     Encuentra barrios gemelos al codigo postal dado, filtrados por perfil de lifestyle.
     """
     try:
-        from google import genai
-    except ImportError:
-        raise HTTPException(status_code=503, detail="Servicio de IA no disponible.")
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(status_code=503, detail="Servicio de IA no configurado.")
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     lifestyle_context = ""
     if body.lifestyle_pace:
@@ -106,9 +104,7 @@ Responde SOLO con JSON valido:
 }}"""
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(model="gemini-2.5-flash", contents=[prompt])
-        raw = (response.text or "").strip()
+        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
         if raw.startswith("```"):
             lines = raw.splitlines()

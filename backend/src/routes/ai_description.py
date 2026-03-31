@@ -1,5 +1,5 @@
 """
-AI Description Route — Generacion de descripcion comercial con Gemini 2.5 Flash.
+AI Description Route — Generacion de descripcion comercial con Gemini.
 
 Endpoints:
   POST /properties/generate-description   Genera descripcion persuasiva para un inmueble
@@ -10,16 +10,35 @@ import json
 import logging
 import os
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from backend.src.models import User
+from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/properties", tags=["AI Description"])
 logger = logging.getLogger(__name__)
+
+# Validate that google-genai is importable at startup so errors are caught early
+_genai_available = False
+try:
+    from google import genai as _genai_check  # noqa: F401
+    _genai_available = True
+except Exception as _e:
+    logger.error(
+        "google-genai package not importable — AI description will be unavailable. "
+        "Rebuild the backend Docker image: docker-compose build --no-cache backend. "
+        "Error: %s", _e
+    )
+
+# Keep types import available for multimodal content building
+try:
+    from google.genai import types as _genai_types  # noqa: F401
+except Exception:
+    _genai_types = None  # type: ignore[assignment]
 
 
 class DescriptionResponse(BaseModel):
@@ -34,24 +53,27 @@ async def generate_property_description(
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Genera una descripcion comercial profesional para un inmueble usando Gemini 2.5 Flash.
+    Genera una descripcion comercial profesional para un inmueble usando Gemini 2.0 Flash.
     Acepta datos tecnicos del inmueble como JSON y hasta 5 imagenes para analisis multimodal.
     """
+    if not _genai_available:
+        raise HTTPException(
+            status_code=503,
+            detail="Servicio de IA no disponible. El servidor necesita ser reiniciado con la imagen actualizada.",
+        )
+
     try:
-        from google import genai
         from google.genai import types as genai_types
-    except ImportError:
+    except Exception:
         raise HTTPException(
             status_code=503,
             detail="Servicio de IA no disponible. Contacta con soporte.",
         )
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     try:
         data = json.loads(property_data)
@@ -132,8 +154,6 @@ INSTRUCCIONES DE REDACCION:
 Genera UNICAMENTE el texto de la descripcion."""
 
     try:
-        client = genai.Client(api_key=api_key)
-
         contents: list = [prompt]
 
         # Attach up to 5 images for multimodal analysis
@@ -147,12 +167,11 @@ Genera UNICAMENTE el texto de la descripcion."""
                     )
                 )
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
+        description, _model_used = call_with_fallback(
+            client,
             contents=contents,
+            preferred_model="gemini-2.0-flash",
         )
-
-        description = (response.text or "").strip()
         if not description:
             raise HTTPException(
                 status_code=503,

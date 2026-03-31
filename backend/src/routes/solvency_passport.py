@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from backend.src.models import User
+from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Solvency Passport AI"])
@@ -124,7 +125,6 @@ async def analyze_solvency(
         )
 
     try:
-        from google import genai
         from google.genai import types as genai_types
     except ImportError:
         raise HTTPException(
@@ -132,12 +132,10 @@ async def analyze_solvency(
             detail="Servicio de IA no disponible. Contacta con soporte.",
         )
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     # Decode and validate base64 document
     try:
@@ -181,8 +179,6 @@ Formato de respuesta obligatorio:
 }}"""
 
     try:
-        client = genai.Client(api_key=api_key)
-
         # Determine MIME type — treat as image/jpeg by default for document scans
         # PDFs are also supported by Gemini Vision as application/pdf
         if len(doc_bytes) >= 4 and doc_bytes[:4] == b"%PDF":
@@ -195,12 +191,9 @@ Formato de respuesta obligatorio:
             genai_types.Part.from_bytes(data=doc_bytes, mime_type=mime_type),
         ]
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=contents,
+        raw, _ = call_with_fallback(
+            client, contents=contents, preferred_model="gemini-2.5-flash"
         )
-
-        raw = (response.text or "").strip()
         if raw.startswith("```"):
             lines = raw.splitlines()
             raw = "\n".join(

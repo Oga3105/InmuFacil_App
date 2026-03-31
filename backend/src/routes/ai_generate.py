@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from backend.src.models import User
+from backend.src.services.gemini_service import GEMINI_MODEL_CHAIN, call_with_fallback, get_client
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["AI"])
@@ -55,47 +56,24 @@ async def generate_content(
     The prompt is never written to logs to protect user privacy.
     """
     try:
-        from google import genai  # type: ignore[import]
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no disponible. Contacta con soporte.",
-        )
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
-
-    model_id = MODEL_MAP.get(request.model_preference, MODEL_MAP["flash"])
+    preferred_model = MODEL_MAP.get(request.model_preference, MODEL_MAP["flash"])
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model=model_id,
+        content, model_used = call_with_fallback(
+            client,
             contents=request.prompt,
+            preferred_model=preferred_model,
+            model_chain=GEMINI_MODEL_CHAIN,
         )
-        return GenerateResponse(
-            content=(response.text or "").strip(),
-            model_used=model_id,
-        )
+        return GenerateResponse(content=content, model_used=model_used)
     except HTTPException:
         raise
     except Exception as exc:
-        error_repr = repr(exc)
-        if "429" in error_repr or "RESOURCE_EXHAUSTED" in error_repr:
-            # Log only the model name — never the prompt content
-            logger.warning(
-                "[AI] Modelo %s agotado. Conmutando al siguiente.",
-                model_id,
-            )
-            raise HTTPException(
-                status_code=429,
-                detail="Cuota del modelo agotada. Intentando con el siguiente.",
-            )
-        logger.error("[AI] Error en generate_content: %s", error_repr)
+        logger.error("[AI] Error en generate_content (all models exhausted): %s", repr(exc))
         raise HTTPException(
             status_code=503,
             detail="Error al generar contenido con IA. Intentalo de nuevo.",
