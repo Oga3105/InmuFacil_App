@@ -840,12 +840,16 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         await _dio.put('/properties/${state.editingPropertyId}', data: body);
         propertyId = state.editingPropertyId!;
 
-        // Delete marked remote images
+        // Delete marked remote images.
+        // Property data is already saved above — failures here are non-fatal.
         for (final item in state.mediaItems) {
           if (item.markedForDeletion && item.remoteMediaId != null) {
             try {
               await _dio.delete('/properties/media/${item.remoteMediaId}');
-            } catch (_) {}
+            } catch (_) {
+              // 404 = already deleted; network/server errors are silently
+              // ignored because the property record was saved successfully.
+            }
           }
         }
       } else {

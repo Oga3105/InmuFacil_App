@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -309,7 +311,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                   children: [
                     _SummaryCard(property: property),
                     const SizedBox(height: 24),
-                    _MortgageCard(),
+                    _MortgageCard(price: property.price),
                   ],
                 ),
               ),
@@ -1883,8 +1885,36 @@ class _OwnerCard extends StatelessWidget {
 }
 
 class _MortgageCard extends StatelessWidget {
+  const _MortgageCard({required this.price});
+  final double price;
+
+  int _computeMonthly() {
+    if (price <= 0) return 0;
+    const double ltvRatio = 0.80;
+    const double annualRate = 0.035;
+    const int years = 30;
+    final double loan = price * ltvRatio;
+    final double r = annualRate / 12;
+    final int n = years * 12;
+    final double factor = pow(1 + r, n).toDouble();
+    return (loan * r * factor / (factor - 1)).round();
+  }
+
+  String _fmt(int value) {
+    final s = value.toString();
+    final buf = StringBuffer();
+    for (int i = 0; i < s.length; i++) {
+      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
+      buf.write(s[i]);
+    }
+    return buf.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final int monthly = _computeMonthly();
+    final int loanAmount = (price * 0.80).round();
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1892,71 +1922,83 @@ class _MortgageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF135bec).withOpacity(0.1)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: const Color(0xFF135bec).withOpacity(0.08),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.support_agent_outlined,
-              color: Color(0xFF135bec),
-              size: 22,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF135bec).withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.account_balance_outlined,
+                  color: Color(0xFF135bec),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Text(
+                'ESTIMACIÓN DE HIPOTECA',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF135bec),
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'TU HIPOTECA IDEAL',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF135bec),
-                    letterSpacing: 1,
-                  ),
+          const SizedBox(height: 16),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '~${_fmt(monthly)} €',
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0f172a),
                 ),
-                SizedBox(height: 4),
-                Text(
-                  'Asesores a tu lado',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0f172a),
-                  ),
+              ),
+              const SizedBox(width: 6),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '/mes',
+                  style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                 ),
-                SizedBox(height: 6),
-                Text(
-                  'Pronto podrás conectar con especialistas financieros que te ayudarán a encontrar la mejor hipoteca para esta propiedad.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
+          const SizedBox(height: 8),
+          Text(
+            'Financiación 80%  ·  ${_fmt(loanAmount)} €',
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Plazo 30 años  ·  TAE 3,5%',
+            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
+          const SizedBox(height: 12),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFF135bec).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6),
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
             ),
             child: const Text(
-              'PRÓXIMAMENTE',
+              'Cálculo orientativo. Sin vinculación bancaria.',
               style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF135bec),
-                letterSpacing: 0.5,
+                fontSize: 11,
+                color: Color(0xFF94A3B8),
+                fontStyle: FontStyle.italic,
               ),
             ),
           ),
