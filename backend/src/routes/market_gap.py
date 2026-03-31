@@ -14,6 +14,8 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Market Gap Analyzer"])
 logger = logging.getLogger(__name__)
 
@@ -81,19 +83,9 @@ async def get_market_gap(body: MarketGapRequest) -> MarketGapResponse:
     rather than extrapolating unreliable data.
     """
     try:
-        from google import genai
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no disponible. Contacta con soporte.",
-        )
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     prompt = f"""Eres un analista de datos inmobiliarios especializado en el mercado espanol.
 
@@ -125,12 +117,7 @@ Formato de respuesta obligatorio:
 }}"""
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[prompt],
-        )
-        raw = (response.text or "").strip()
+        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
         if raw.startswith("```"):
             lines = raw.splitlines()

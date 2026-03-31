@@ -13,6 +13,8 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Comfort Index"])
 logger = logging.getLogger(__name__)
 
@@ -95,19 +97,9 @@ async def get_comfort_index(body: ComfortIndexRequest) -> ComfortIndexResponse:
     y confort termico. Cada dimension tiene score (0-100) y factores detectados.
     """
     try:
-        from google import genai
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no disponible. Contacta con soporte.",
-        )
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     floor_info = f"Planta: {body.floor}" if body.floor is not None else "Planta: desconocida"
     orientation_info = f"Orientacion: {body.orientation}" if body.orientation else "Orientacion: desconocida"
@@ -148,12 +140,7 @@ Formato obligatorio:
 }}"""
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[prompt],
-        )
-        raw = (response.text or "").strip()
+        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
         if raw.startswith("```"):
             lines = raw.splitlines()

@@ -13,6 +13,8 @@ from typing import Dict
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Legal Guides"])
 logger = logging.getLogger(__name__)
 
@@ -131,19 +133,9 @@ async def generate_legal_guide(request: LegalGuideRequest) -> LegalGuideResponse
     logger.info("[LegalGuides] Cache MISS for key: %s — calling Gemini", cache_key)
 
     try:
-        from google import genai
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no disponible. Contacta con soporte.",
-        )
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     prompt_template = _GUIDE_PROMPTS[guide_type]
     prompt = (
@@ -153,12 +145,9 @@ async def generate_legal_guide(request: LegalGuideRequest) -> LegalGuideResponse
     )
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
+        content, _ = call_with_fallback(
+            client, contents=prompt, preferred_model="gemini-2.5-flash"
         )
-        content = (response.text or "").strip()
         if not content:
             raise HTTPException(
                 status_code=503,

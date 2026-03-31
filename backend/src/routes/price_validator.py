@@ -13,6 +13,8 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from backend.src.services.gemini_service import call_with_fallback, get_client
+
 router = APIRouter(prefix="/ai", tags=["Price Validator"])
 logger = logging.getLogger(__name__)
 
@@ -42,19 +44,9 @@ async def validate_price(body: PriceValidationRequest) -> PriceValidationRespons
     y al contexto del mercado de la zona usando Gemini Flash.
     """
     try:
-        from google import genai
-    except ImportError:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no disponible. Contacta con soporte.",
-        )
-
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise HTTPException(
-            status_code=503,
-            detail="Servicio de IA no configurado.",
-        )
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
     pct_diff = ((body.offer_price - body.asking_price) / body.asking_price) * 100
 
@@ -94,12 +86,7 @@ Formato de respuesta obligatorio:
 }}"""
 
     try:
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[prompt],
-        )
-        raw = (response.text or "").strip()
+        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
         # Strip markdown fences if present
         if raw.startswith("```"):
