@@ -42,6 +42,7 @@ import '../../presentation/screens/notifications/notifications_page.dart';
 import '../../presentation/screens/lifestyle/lifestyle_questionnaire_screen.dart';
 import '../../presentation/screens/onboarding/gdpr_consent_screen.dart';
 import '../../presentation/screens/onboarding/user_type_selection_screen.dart';
+import 'router_notifier.dart';
 
 /// GoRouter configuration provider
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -49,9 +50,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // Without this, only context.go() updates the URL (GoRouter 17.x default).
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
+  final notifier = ref.watch(routerNotifierProvider.notifier);
+
   return GoRouter(
     initialLocation: '/',
     debugLogDiagnostics: true,
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
     routes: [
       // Home/Landing Screen
       GoRoute(
