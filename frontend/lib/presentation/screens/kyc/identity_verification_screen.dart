@@ -37,8 +37,11 @@ class _IdentityVerificationScreenState
     final isSecondAttempt = state.docReadAttempts > 0;
     final docLabel = _docTypeLabel(state.selectedDocumentType);
 
-    // Show loading dialog immediately
+    // Show loading dialog. Track whether it was actually pushed so we only pop
+    // exactly that dialog (avoids popping the wrong route on fast responses).
+    bool loadingDialogShown = false;
     if (mounted) {
+      loadingDialogShown = true;
       DocumentNumberConfirmationDialog.show(
         context: context,
         isLoading: true,
@@ -56,8 +59,8 @@ class _IdentityVerificationScreenState
     // Call backend OCR
     final result = await notifier.extractDocNumber();
 
-    // Close loading dialog
-    if (mounted) Navigator.of(context, rootNavigator: true).pop();
+    // Close loading dialog only if we opened it
+    if (loadingDialogShown && mounted) Navigator.of(context, rootNavigator: true).pop();
     if (!mounted) return;
 
     // Handle network/auth error (result is null)
@@ -76,7 +79,7 @@ class _IdentityVerificationScreenState
     final currentState = ref.read(verificationProvider);
 
     if (!readable || docNumber == null) {
-      // Unreadable — show error dialog
+      // Unreadable — show error dialog with manual entry fallback
       await DocumentNumberConfirmationDialog.show(
         context: context,
         isLoading: false,
@@ -85,7 +88,10 @@ class _IdentityVerificationScreenState
         isSecondAttempt: isSecondAttempt,
         documentType: currentState.selectedDocumentType,
         documentTypeLabel: docLabel,
-        onConfirm: (_) {},
+        onConfirm: (confirmedNumber) {
+          notifier.confirmDocumentNumber(confirmedNumber);
+          _showSnackBar('Numero de documento confirmado correctamente.');
+        },
         onReject: () {},
         onReupload: () {
           notifier.resetDocumentImages();
