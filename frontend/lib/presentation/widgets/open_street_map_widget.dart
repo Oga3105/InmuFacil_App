@@ -23,6 +23,7 @@ class OpenStreetMapWidget extends ConsumerStatefulWidget {
 
 class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
   final MapController _mapController = MapController();
+  bool _mapReady = false; // True only after FlutterMap signals onMapReady
   LatLng? _previousCenter; // Track previous center to detect changes
   bool? _previousIsFallback; // Track previous fallback state
   String? _previousGeoJson; // Track GeoJSON changes
@@ -51,7 +52,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 1. Handle Center Change
       // Updated to also trigger if fallback status changes (e.g. initial load vs detected 'no location')
-      if (searchState.mapCenter != null && 
+      if (_mapReady &&
+          searchState.mapCenter != null &&
           (searchState.mapCenter != _previousCenter || searchState.isUsingFallbackLocation != _previousIsFallback)) {
         
         _previousCenter = searchState.mapCenter;
@@ -175,6 +177,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                   final bounds = _mapController.camera.visibleBounds;
                   ref.read(mapStateProvider.notifier).setVisibleBounds(bounds);
                 },
+                onMapReady: () => setState(() => _mapReady = true),
                 initialCenter: searchState.mapCenter ?? _spainFallback,
                 initialZoom: 6.2,
                 minZoom: 5,
