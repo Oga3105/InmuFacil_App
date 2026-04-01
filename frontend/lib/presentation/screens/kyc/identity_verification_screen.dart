@@ -2,8 +2,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/services/ai_consent_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/verification_provider.dart';
+import '../../widgets/ai/ai_consent_dialog.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import 'widgets/camera_capture_dialog.dart';
@@ -21,6 +23,26 @@ class IdentityVerificationScreen extends ConsumerStatefulWidget {
 class _IdentityVerificationScreenState
     extends ConsumerState<IdentityVerificationScreen> {
 
+  @override
+  void initState() {
+    super.initState();
+    // Show AI consent dialog on page entry, before the user does anything.
+    // If they decline, navigate back immediately.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _requestAiConsent());
+  }
+
+  Future<void> _requestAiConsent() async {
+    if (!mounted) return;
+    final accepted = await AiConsentDialog.show(
+      context: context,
+      config: AiConsentConfig.kycVerification,
+    );
+    if (!mounted) return;
+    if (!accepted) {
+      context.pop();
+    }
+  }
+
   /// Called after each document image pick. Triggers OCR when both are ready.
   Future<void> _onDocumentImagePicked(VerificationNotifier notifier) async {
     final state = ref.read(verificationProvider);
@@ -36,6 +58,7 @@ class _IdentityVerificationScreenState
     final state = ref.read(verificationProvider);
     final isSecondAttempt = state.docReadAttempts > 0;
     final docLabel = _docTypeLabel(state.selectedDocumentType);
+
 
     // Show loading dialog. Track whether it was actually pushed so we only pop
     // exactly that dialog (avoids popping the wrong route on fast responses).
@@ -63,12 +86,27 @@ class _IdentityVerificationScreenState
     if (loadingDialogShown && mounted) Navigator.of(context, rootNavigator: true).pop();
     if (!mounted) return;
 
-    // Handle network/auth error (result is null)
+    // Handle network/auth error (result is null).
+    // Still show the dialog in unreadable mode so the user can enter the
+    // document number manually and continue without being blocked.
     if (result == null) {
-      _showSnackBar(
-        ref.read(verificationProvider).errorMessage ??
-            'Error al conectar. Intenta de nuevo.',
-        isError: true,
+      final currentState = ref.read(verificationProvider);
+      await DocumentNumberConfirmationDialog.show(
+        context: context,
+        isLoading: false,
+        docNumber: null,
+        readable: false,
+        isSecondAttempt: isSecondAttempt,
+        documentType: currentState.selectedDocumentType,
+        documentTypeLabel: docLabel,
+        onConfirm: (confirmedNumber) {
+          notifier.confirmDocumentNumber(confirmedNumber);
+          _showSnackBar('Numero de documento confirmado correctamente.');
+        },
+        onReject: () {},
+        onReupload: () {
+          notifier.resetDocumentImages();
+        },
       );
       return;
     }
@@ -321,23 +359,6 @@ class _IdentityVerificationScreenState
                         text: 'Fácil',
                         style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                   ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Verificar Identidad',
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
                 ),
               ),
             ],
