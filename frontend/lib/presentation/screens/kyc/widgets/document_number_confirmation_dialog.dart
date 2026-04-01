@@ -153,6 +153,7 @@ class _DocumentNumberConfirmationDialogState
         child: SingleChildScrollView(child: _buildContent()),
       ),
       actions: _buildActions(context),
+      actionsAlignment: MainAxisAlignment.center,
       actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
     );
   }
