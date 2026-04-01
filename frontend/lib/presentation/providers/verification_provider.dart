@@ -279,30 +279,59 @@ class VerificationNotifier extends Notifier<VerificationState> {
     }
   }
 
-  /// Calls the backend to extract the document number from the front image.
+  /// Calls the backend to extract the document number from the front (and back) images.
+  /// Sending the back image improves accuracy: Spanish DNI/NIE have an MRZ on the back
+  /// that is more reliably OCR-readable than the printed number on the front.
   /// Returns the result map: {"doc_number": String?, "readable": bool}
   /// or null if the request failed unexpectedly.
   Future<Map<String, dynamic>?> extractDocNumber() async {
     state = state.copyWith(isExtractingDocNumber: true, errorMessage: null);
     try {
       await _ensureAuth();
-      final docType = state.selectedDocumentType?.name ?? 'dni';
+
+      // Capture current state once after the async _ensureAuth to avoid TOCTOU
+      final currentState = state;
+      final docType = currentState.selectedDocumentType?.name ?? 'dni';
       final formData = FormData.fromMap({'document_type': docType});
 
-      if (kIsWeb && state.frontXFile != null) {
-        final bytes = await state.frontXFile!.readAsBytes();
+      if (kIsWeb) {
+        final frontXFile = currentState.frontXFile;
+        if (frontXFile == null) {
+          state = state.copyWith(isExtractingDocNumber: false);
+          return null;
+        }
+        final frontBytes = await frontXFile.readAsBytes();
         formData.files.add(MapEntry(
           'front',
-          MultipartFile.fromBytes(bytes, filename: 'front.jpg'),
+          MultipartFile.fromBytes(frontBytes, filename: 'front.jpg'),
         ));
-      } else if (!kIsWeb && state.frontImage != null) {
-        formData.files.add(MapEntry(
-          'front',
-          await MultipartFile.fromFile(state.frontImage!.path, filename: 'front.jpg'),
-        ));
+        // Also send back for MRZ-based OCR
+        final backXFile = currentState.backXFile;
+        if (backXFile != null) {
+          final backBytes = await backXFile.readAsBytes();
+          formData.files.add(MapEntry(
+            'back',
+            MultipartFile.fromBytes(backBytes, filename: 'back.jpg'),
+          ));
+        }
       } else {
-        state = state.copyWith(isExtractingDocNumber: false);
-        return null;
+        final frontImage = currentState.frontImage;
+        if (frontImage == null) {
+          state = state.copyWith(isExtractingDocNumber: false);
+          return null;
+        }
+        formData.files.add(MapEntry(
+          'front',
+          await MultipartFile.fromFile(frontImage.path, filename: 'front.jpg'),
+        ));
+        // Also send back for MRZ-based OCR
+        final backImage = currentState.backImage;
+        if (backImage != null) {
+          formData.files.add(MapEntry(
+            'back',
+            await MultipartFile.fromFile(backImage.path, filename: 'back.jpg'),
+          ));
+        }
       }
 
       final response = await _dio.post('/kyc/extract-doc-number', data: formData);
@@ -372,6 +401,10 @@ class VerificationNotifier extends Notifier<VerificationState> {
       final docType = state.selectedDocumentType?.name ?? 'dni';
       final formData = FormData.fromMap({
         'document_type': docType,
+        // Send the user-confirmed document number so the backend can perform
+        // a synchronous duplicate check before any AI processing starts.
+        if (state.documentNumberConfirmed && state.extractedDocNumber != null)
+          'confirmed_doc_number': state.extractedDocNumber!,
       });
 
       if (kIsWeb) {
@@ -389,11 +422,17 @@ class VerificationNotifier extends Notifier<VerificationState> {
             MultipartFile.fromBytes(bytes, filename: 'back.jpg'),
           ));
         }
+        // selfieXFile may be null when selfie was captured via camera (setSelfieFromBytes)
         if (state.selfieXFile != null) {
           final bytes = await state.selfieXFile!.readAsBytes();
           formData.files.add(MapEntry(
             'selfie',
             MultipartFile.fromBytes(bytes, filename: 'selfie.jpg'),
+          ));
+        } else if (state.selfieBytes != null) {
+          formData.files.add(MapEntry(
+            'selfie',
+            MultipartFile.fromBytes(state.selfieBytes!, filename: 'selfie.jpg'),
           ));
         }
       } else {

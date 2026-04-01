@@ -109,6 +109,31 @@ def _run_gemini_verification(
             db.commit()
             return
 
+        # @Shield — If Gemini approves but cannot extract the document number,
+        # we CANNOT perform the duplicate check. Approving without a doc_number
+        # would leave dni_hmac=NULL and allow two users to share the same
+        # physical document. Mark as pendiente for manual admin review instead.
+        if result.approved and not result.doc_number:
+            logger.warning(
+                "[SHIELD] Gemini approved user %s but returned no doc_number — "
+                "leaving as pendiente for manual review to prevent ghost validations.",
+                user_id,
+            )
+            records = (
+                db.query(KYCVerification)
+                .filter(KYCVerification.user_id == user_id, KYCVerification.status == "pending")
+                .all()
+            )
+            for rec in records:
+                rec.status = "pendiente"
+                rec.rejection_reason = None
+            user = db.query(User).filter(User.id == user_id).first()
+            if user:
+                user.dni_status = "SIN_VERIFICAR"
+                user.rejection_reason = None
+            db.commit()
+            return
+
         new_status = "validado" if result.approved else "rechazado"
         new_dni_status = "VALIDADO" if result.approved else "RECHAZADO"
 
@@ -207,38 +232,64 @@ def _run_gemini_verification(
 @router.post("/extract-doc-number")
 async def extract_document_number(
     front: UploadFile = File(...),
+    back: Optional[UploadFile] = File(None),
     document_type: str = Form("dni"),
     current_user: User = Depends(get_current_active_user),
 ):
     """
-    Extrae el numero del documento de identidad de la imagen del frente.
+    Extrae el numero del documento de identidad.
+    Acepta frente (obligatorio) y reverso (opcional, mejora precision OCR via MRZ).
     Llamada sincrona, sin escritura en BD.
     Rate limit: 3 llamadas por usuario cada 15 minutos.
     """
     _check_ocr_rate_limit(current_user.id)
 
     try:
-        img_bytes = await front.read()
+        front_bytes = await front.read()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error leyendo imagen: {e}")
+        raise HTTPException(status_code=500, detail=f"Error leyendo imagen del frente: {e}")
 
-    ext = os.path.splitext(front.filename or "front.jpg")[1].lower() or ".jpg"
-    fd, tmp_path = tempfile.mkstemp(suffix=ext, prefix=f"ocr_{current_user.id}_")
-    try:
-        os.write(fd, img_bytes)
-        os.close(fd)
-        result = extract_doc_number_from_image(front_path=tmp_path, document_type=document_type)
-    finally:
+    back_bytes: Optional[bytes] = None
+    if back is not None:
         try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
+            back_bytes = await back.read()
+        except Exception:
+            back_bytes = None
+
+    front_ext = os.path.splitext(front.filename or "front.jpg")[1].lower() or ".jpg"
+    fd, front_tmp = tempfile.mkstemp(suffix=front_ext, prefix=f"ocr_{current_user.id}_front_")
+    tmp_files = [front_tmp]
+
+    back_tmp: Optional[str] = None
+    try:
+        os.write(fd, front_bytes)
+        os.close(fd)
+
+        if back_bytes:
+            back_ext = os.path.splitext((back.filename if back else None) or "back.jpg")[1].lower() or ".jpg"
+            fd2, back_tmp = tempfile.mkstemp(suffix=back_ext, prefix=f"ocr_{current_user.id}_back_")
+            os.write(fd2, back_bytes)
+            os.close(fd2)
+            tmp_files.append(back_tmp)
+
+        result = extract_doc_number_from_image(
+            front_path=front_tmp,
+            back_path=back_tmp,
+            document_type=document_type,
+        )
+    finally:
+        for p in tmp_files:
+            try:
+                os.unlink(p)
+            except OSError:
+                pass
 
     logger.info(
-        "[OCR] User %s extraction — readable=%s document_type=%s",
+        "[OCR] User %s extraction — readable=%s document_type=%s has_back=%s",
         current_user.id,
         result.get("readable"),
         document_type,
+        back_tmp is not None,
     )
     return result
 
@@ -250,10 +301,40 @@ async def upload_kyc_document(
     back: UploadFile = File(None),
     selfie: UploadFile = File(None),
     document_type: str = Form("dni"),
+    confirmed_doc_number: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
     """Subir documentos KYC (frente, reverso, selfie). La IA verifica automáticamente."""
+    # @Shield — Synchronous duplicate check using the user-confirmed document number.
+    # This fires BEFORE any background AI task, catching duplicates immediately
+    # even when the OCR path was skipped (manual entry fallback).
+    if confirmed_doc_number and confirmed_doc_number.strip():
+        from backend.src.utils.crypto import compute_dni_hmac
+        try:
+            candidate_hmac = compute_dni_hmac(confirmed_doc_number.strip())
+            existing = (
+                db.query(User)
+                .filter(User.dni_hmac == candidate_hmac, User.id != current_user.id)
+                .first()
+            )
+            if existing:
+                logger.warning(
+                    "[SHIELD] Upload blocked: user_id=%s submitted confirmed_doc_number "
+                    "already linked to user_id=%s", current_user.id, existing.id
+                )
+                raise HTTPException(
+                    status_code=409,
+                    detail=(
+                        "Este documento de identidad ya esta vinculado a otra cuenta. "
+                        "Si crees que es un error, contacta con soporte."
+                    ),
+                )
+        except HTTPException:
+            raise
+        except Exception as hmac_exc:
+            logger.error("[SHIELD] HMAC pre-check failed for user_id=%s: %s", current_user.id, hmac_exc)
+
     files = {"front": front, "back": back, "selfie": selfie}
     uploaded = {k: v for k, v in files.items() if v is not None}
 
