@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'ai_types.dart';
 import 'ai_rate_limiter_service.dart';
 import '../config/env_config.dart';
+import '../network/auth_interceptor.dart';
 
 export 'ai_types.dart';
 
@@ -13,13 +14,17 @@ class AiService {
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  Dio _buildDio() => Dio(
-        BaseOptions(
-          baseUrl: EnvConfig.apiBaseUrl,
-          connectTimeout: const Duration(seconds: 15),
-          receiveTimeout: const Duration(seconds: 60),
-        ),
-      );
+  Dio _buildDio() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: EnvConfig.apiBaseUrl,
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 60),
+      ),
+    );
+    dio.interceptors.add(AuthInterceptor());
+    return dio;
+  }
 
   // Prioritized list of models to attempt in order
   static const List<AiModelPriority> _defaultPriority = [

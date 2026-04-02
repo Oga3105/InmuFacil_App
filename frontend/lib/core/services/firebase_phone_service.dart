@@ -32,6 +32,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // ignore: depend_on_referenced_packages
 import 'package:firebase_auth/firebase_auth.dart';
 import '../config/env_config.dart';
+import '../../core/network/dio_factory.dart';
 
 class FirebasePhoneService {
   FirebasePhoneService._();
@@ -126,7 +127,7 @@ class FirebasePhoneService {
   /// POST /chat/verify-phone with the Firebase ID token.
   Future<bool> _notifyBackend(String idToken) async {
     final token = await _storage.read(key: 'auth_token');
-    final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    final dio = buildAuthDio();
     if (token != null) dio.options.headers['Authorization'] = 'Bearer $token';
     final resp = await dio.post('/chat/verify-phone', data: {'firebase_id_token': idToken});
     return resp.data['is_phone_verified'] == true;

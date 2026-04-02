@@ -360,18 +360,32 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Logout
+  /// Logout (user-initiated — also signs out of Google).
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
     _dio.options.headers.remove('Authorization');
     await _googleSignIn.signOut().catchError((_) {});
-    // Invalidate user-scoped providers so stale data is not shown on next login
     ref.invalidate(myPropertiesProvider);
     ref.invalidate(sentOffersProvider);
     ref.invalidate(receivedOffersProvider);
     ref.invalidate(chatListProvider);
-    // Start fresh state (user is null by default)
     state = AuthState(isLoading: false);
+  }
+
+  /// Force-logout triggered by a 401 session-expiry event.
+  ///
+  /// The [AuthInterceptor] has already deleted the token from secure storage
+  /// before calling this. We only need to clear the in-memory state and
+  /// invalidate user-scoped providers. Google sign-out is attempted silently
+  /// but not awaited so it never blocks the UI redirect.
+  void forceLogout() {
+    _dio.options.headers.remove('Authorization');
+    ref.invalidate(myPropertiesProvider);
+    ref.invalidate(sentOffersProvider);
+    ref.invalidate(receivedOffersProvider);
+    ref.invalidate(chatListProvider);
+    state = AuthState(isLoading: false);
+    _googleSignIn.signOut().catchError((_) {});
   }
 }
 

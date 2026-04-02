@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/config/env_config.dart';
+import '../../core/network/dio_factory.dart';
 
 // ============================================================================
 // Models
@@ -160,7 +161,7 @@ final mySolvencyProvider = FutureProvider.autoDispose<SolvencyPassport?>((ref) a
   final token = await _getToken();
   if (token == null) return null;
 
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '${EnvConfig.apiBaseUrl}/solvency/me',
@@ -179,7 +180,7 @@ final propertyViabilityProvider = FutureProvider.autoDispose.family<PropertyViab
   final token = await _getToken();
   if (token == null) return null;
 
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '${EnvConfig.apiBaseUrl}/solvency/viability/$propertyId',
@@ -197,7 +198,7 @@ final buyerPassportProvider = FutureProvider.autoDispose.family<AnonymisedPasspo
   final token = await _getToken();
   if (token == null) return null;
 
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '${EnvConfig.apiBaseUrl}/solvency/offer/$offerId/buyer',
@@ -236,7 +237,7 @@ class SolvencyNotifier extends AsyncNotifier<SolvencyPassport?> {
     if (token == null) throw Exception('Not authenticated');
 
     state = const AsyncLoading();
-    final dio = Dio();
+    final dio = buildAuthDio();
     final resp = await dio.post(
       '${EnvConfig.apiBaseUrl}/solvency/me',
       data: {
@@ -293,7 +294,7 @@ class SecondBuyerNotifier extends Notifier<SecondBuyerState> {
 
     state = const SecondBuyerState(submitting: true);
     try {
-      final dio = Dio();
+      final dio = buildAuthDio();
       final formData = FormData.fromMap({
         'full_name': fullName,
         'email': email,
@@ -346,7 +347,7 @@ final secondBuyerStatusProvider =
     FutureProvider.autoDispose<SecondBuyerVerificationStatus?>((ref) async {
   final token = await _getToken();
   if (token == null) return null;
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '${EnvConfig.apiBaseUrl}/solvency/second-buyer/status',

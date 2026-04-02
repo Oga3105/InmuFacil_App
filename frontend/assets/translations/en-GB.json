@@ -52,7 +52,8 @@
     "security_guaranteed": "Security Guaranteed Between Individuals",
     "p2p_verified_label": "VERIFIED P2P",
     "no_commissions_label": "NO COMMISSIONS",
-    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH"
+    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH",
+    "session_expired": "Your session has expired. Please sign in again."
   },
   "home": {
     "welcome": "Welcome to InmuFácil",
@@ -615,5 +616,16 @@
     "saved_snackbar": "Profile saved",
     "lifestyle_filter_title": "My lifestyle",
     "lifestyle_filter_description": "Show properties that match your profile"
+  },
+  "comfort": {
+    "title": "Comfort Index",
+    "overall_score": "Overall score: {0}/100",
+    "low_data": "Insufficient data to calculate the comfort index for this location.",
+    "error": "Could not calculate the comfort index.",
+    "dim_noise": "Noise",
+    "dim_light": "Light",
+    "dim_air": "Air quality",
+    "dim_connectivity": "Connectivity",
+    "dim_thermal": "Thermal comfort"
   }
 }

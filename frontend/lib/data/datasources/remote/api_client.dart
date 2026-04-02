@@ -1,9 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../core/config/env_config.dart';
+import '../../../core/network/auth_interceptor.dart';
 
-/// Dio HTTP client with JWT authentication interceptor
-/// Managed by @Shield for security compliance
+/// Dio HTTP client with JWT authentication interceptor.
+/// Managed by @Shield for security compliance.
+///
+/// On 401 responses the [AuthInterceptor] deletes the stored token and fires
+/// [sessionExpiredStream] — the app-level listener in [InmuFacilApp] handles
+/// the redirect to /login and shows a snackbar.
 class ApiClient {
 
   ApiClient() {
@@ -12,47 +17,14 @@ class ApiClient {
         baseUrl: EnvConfig.apiBaseUrl,
         connectTimeout: Duration(milliseconds: EnvConfig.apiTimeout),
         receiveTimeout: Duration(milliseconds: EnvConfig.apiTimeout),
-        headers: {
+        headers: const {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
       ),
     );
+    _dio.interceptors.add(AuthInterceptor());
 
-    _setupInterceptors();
-  }
-  late final Dio _dio;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  
-  static const String _tokenKey = 'auth_token';
-
-  void _setupInterceptors() {
-    // JWT Authentication Interceptor
-    _dio.interceptors.add(
-      InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          // Add JWT token to all requests except login/register
-          if (!options.path.contains('/auth/login') && 
-              !options.path.contains('/auth/register')) {
-            final token = await _storage.read(key: _tokenKey);
-            if (token != null) {
-              options.headers['Authorization'] = 'Bearer $token';
-            }
-          }
-          return handler.next(options);
-        },
-        onError: (error, handler) async {
-          // Handle 401 Unauthorized - token expired
-          if (error.response?.statusCode == 401) {
-            await _storage.delete(key: _tokenKey);
-            // TODO: Navigate to login screen
-          }
-          return handler.next(error);
-        },
-      ),
-    );
-
-    // Logging Interceptor (Development only)
     if (EnvConfig.enableLogging) {
       _dio.interceptors.add(
         LogInterceptor(
@@ -66,21 +38,16 @@ class ApiClient {
     }
   }
 
-  /// Save JWT token to secure storage
-  Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
-  }
+  late final Dio _dio;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  static const String _tokenKey = 'auth_token';
 
-  /// Get current JWT token
-  Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
-  }
+  Future<void> saveToken(String token) async =>
+      _storage.write(key: _tokenKey, value: token);
 
-  /// Delete JWT token (logout)
-  Future<void> deleteToken() async {
-    await _storage.delete(key: _tokenKey);
-  }
+  Future<String?> getToken() async => _storage.read(key: _tokenKey);
 
-  /// Get configured Dio instance
+  Future<void> deleteToken() async => _storage.delete(key: _tokenKey);
+
   Dio get client => _dio;
 }

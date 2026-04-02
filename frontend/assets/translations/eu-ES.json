@@ -52,7 +52,8 @@
     "security_guaranteed": "Segurtasuna Bermatua Partikularren Artean",
     "p2p_verified_label": "P2P EGIAZTATUA",
     "no_commissions_label": "KOMISIORIK GABE",
-    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH"
+    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH",
+    "session_expired": "Zure saioa iraungitu da. Mesedez, hasi saioa berriro."
   },
   "home": {
     "welcome": "Ongi etorri InmuFácil-era",
@@ -447,5 +448,16 @@
     "saved_snackbar": "Profila gordeta",
     "lifestyle_filter_title": "Nire bizi-estiloa",
     "lifestyle_filter_description": "Nire profilearekin bat datozen etxebizitzak erakutsi"
+  },
+  "comfort": {
+    "title": "Erosotasun indizea",
+    "overall_score": "Puntuazio orokorra: {0}/100",
+    "low_data": "Ez dago datu nahikorik kokapen honetarako erosotasun indizea kalkulatzeko.",
+    "error": "Ezin izan da erosotasun indizea kalkulatu.",
+    "dim_noise": "Zarata",
+    "dim_light": "Argia",
+    "dim_air": "Airearen kalitatea",
+    "dim_connectivity": "Konektagarritasuna",
+    "dim_thermal": "Erosotasun termikoa"
   }
 }

@@ -12,10 +12,12 @@ import 'package:latlong2/latlong.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/env_config.dart';
+import '../../core/network/auth_interceptor.dart';
 import '../../core/formatters/currency_input_formatter.dart';
 import '../../domain/entities/property_condition.dart';
 import '../../domain/entities/property_type.dart';
 import 'search_provider.dart' show searchProvider;
+import '../../core/network/dio_factory.dart';
 
 /// Max photos per listing and max file size (5 MB)
 const int kMaxPhotos = 50;
@@ -315,6 +317,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ));
+    _dio.interceptors.add(AuthInterceptor());
     return const PropertyFormState();
   }
 
@@ -397,7 +400,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
     state = state.copyWith(isGeocodingAddress: true);
     try {
-      final dio = Dio();
+      final dio = buildAuthDio();
       final resp = await dio.get(
         'https://nominatim.openstreetmap.org/search',
         queryParameters: {
@@ -429,7 +432,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
   Future<void> _reverseGeocode(LatLng location) async {
     state = state.copyWith(isGeocodingAddress: true);
     try {
-      final dio = Dio();
+      final dio = buildAuthDio();
       final resp = await dio.get(
         'https://nominatim.openstreetmap.org/reverse',
         queryParameters: {

@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../core/config/env_config.dart';
+import '../../core/network/dio_factory.dart';
 
 // ── Trust badge levels ────────────────────────────────────────────────────────
 
@@ -95,7 +96,7 @@ class ChatListNotifier extends AsyncNotifier<List<ChatConversation>> {
 
   @override
   Future<List<ChatConversation>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    _dio = buildAuthDio();
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -305,7 +306,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
 
   @override
   Future<List<ChatMessage>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    _dio = buildAuthDio();
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'auth_token');
     if (token != null) {

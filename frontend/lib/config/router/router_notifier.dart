@@ -59,7 +59,7 @@ class RouterNotifier extends Notifier<void> with ChangeNotifier {
 
   /// Called by GoRouter on every navigation event.
   ///
-  /// Returns `/404` when an unauthenticated user tries to access a protected
+  /// Returns `/login` when an unauthenticated user tries to access a protected
   /// route. Returns `null` (no redirect) in all other cases.
   String? redirect(BuildContext context, GoRouterState state) {
     final authState = ref.read(authProvider);
@@ -68,7 +68,7 @@ class RouterNotifier extends Notifier<void> with ChangeNotifier {
     if (authState.isLoading) return null;
 
     if (!authState.isAuthenticated && !_isPublicRoute(state)) {
-      return '/404';
+      return '/login';
     }
 
     return null;

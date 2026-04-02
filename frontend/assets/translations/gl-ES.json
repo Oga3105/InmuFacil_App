@@ -14,7 +14,8 @@
     "forgot_password": "Esqueceches o contrasinal?",
     "no_account": "Non tes conta?",
     "have_account": "Xa tes conta?",
-    "logout": "Pechar sesión"
+    "logout": "Pechar sesión",
+    "session_expired": "A túa sesión expirou. Por favor, inicia sesión de novo."
   },
   "home": {
     "welcome": "Benvido a InmuFácil",
@@ -367,5 +368,16 @@
     "saved_snackbar": "Perfil gardado",
     "lifestyle_filter_title": "O meu estilo de vida",
     "lifestyle_filter_description": "Mostrar inmobles que encaixan co teu perfil"
+  },
+  "comfort": {
+    "title": "Índice de confort",
+    "overall_score": "Puntuación global: {0}/100",
+    "low_data": "Datos insuficientes para calcular o índice de confort nesta localización.",
+    "error": "Non se puido calcular o índice de confort.",
+    "dim_noise": "Ruído",
+    "dim_light": "Luminosidade",
+    "dim_air": "Calidade do aire",
+    "dim_connectivity": "Conectividade",
+    "dim_thermal": "Confort térmico"
   }
 }

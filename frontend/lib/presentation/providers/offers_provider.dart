@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../core/config/env_config.dart';
 import 'chat_provider.dart';
+import '../../core/network/dio_factory.dart';
 
 // --- Entity ---
 
@@ -104,7 +105,7 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
 
   @override
   Future<List<OfferData>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    _dio = buildAuthDio();
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -167,7 +168,7 @@ class ReceivedOffersNotifier extends AsyncNotifier<List<OfferData>> {
 
   @override
   Future<List<OfferData>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    _dio = buildAuthDio();
     final token = await _storage.read(key: 'auth_token');
     if (token == null) return [];
     _dio.options.headers['Authorization'] = 'Bearer $token';
@@ -246,7 +247,7 @@ class MakeOfferNotifier extends Notifier<OfferFormState> {
     try {
       const storage = FlutterSecureStorage();
       final token = await storage.read(key: 'auth_token');
-      final dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+      final dio = buildAuthDio();
       if (token != null) {
         dio.options.headers['Authorization'] = 'Bearer $token';
       }
@@ -281,7 +282,7 @@ final feinConfirmedProvider = FutureProvider.autoDispose
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return false;
   try {
-    final resp = await Dio().get(
+    final resp = await buildAuthDio().get(
       '$EnvConfig.apiBaseUrl/fein/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
@@ -299,7 +300,7 @@ final notariaApptStatusProvider = FutureProvider.autoDispose
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return 'pending';
   try {
-    final resp = await Dio().get(
+    final resp = await buildAuthDio().get(
       '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );

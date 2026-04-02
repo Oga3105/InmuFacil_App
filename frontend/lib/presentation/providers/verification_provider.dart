@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/config/env_config.dart';
+import '../../core/network/auth_interceptor.dart';
 
 enum VerificationStep { documentType, documentScan, selfie, review }
 enum DocumentType { dni, nie, pasaporte }
@@ -150,6 +151,7 @@ class VerificationNotifier extends Notifier<VerificationState> {
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 30),
     ));
+    _dio.interceptors.add(AuthInterceptor());
     return VerificationState();
   }
 

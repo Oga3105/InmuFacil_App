@@ -15,6 +15,7 @@ import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -70,7 +71,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
   Future<void> _loadStatus() async {
     try {
       final token = await _storage.read(key: 'auth_token');
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -110,7 +111,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
       final token = await _storage.read(key: 'auth_token');
       final file = MultipartFile.fromBytes(bytes, filename: filename);
       final formData = FormData.fromMap({'doc_type': docType, 'file': file});
-      final resp = await Dio().post(
+      final resp = await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/documents',
         data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -137,7 +138,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
   Future<void> _flagDocument(String docType, String flag) async {
     try {
       final token = await _storage.read(key: 'auth_token');
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/flag',
         data: {'doc_type': docType, 'flag': flag},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -896,7 +897,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
       final url =
           '$EnvConfig.apiBaseUrl/post-sale/${widget.offerId}/documents/${widget.docId}/download';
 
-      final response = await Dio().get<List<int>>(
+      final response = await buildAuthDio().get<List<int>>(
         url,
         options: Options(
           responseType: ResponseType.bytes,

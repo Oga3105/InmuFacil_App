@@ -11,6 +11,7 @@ import '../../providers/offers_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
+import '../../../core/network/dio_factory.dart';
 
 const _kBlue     = Color(0xFF135BEC);
 const _kGreen    = Color(0xFF16A34A);
@@ -25,7 +26,7 @@ final _equityProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>?, String>((ref, offerId) async {
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return null;
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '$EnvConfig.apiBaseUrl/arras/$offerId/equity',

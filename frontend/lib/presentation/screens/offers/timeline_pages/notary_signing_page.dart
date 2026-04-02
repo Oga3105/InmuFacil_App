@@ -9,6 +9,7 @@ import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 
 const _notaryStorage = FlutterSecureStorage();
 
@@ -51,7 +52,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
   Future<void> _loadStatus() async {
     try {
       final token = await _notaryStorage.read(key: 'auth_token');
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -80,7 +81,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     try {
       final token = await _notaryStorage.read(key: 'auth_token');
       final headers = {'Authorization': 'Bearer $token'};
-      final dio = Dio();
+      final dio = buildAuthDio();
 
       // Confirma firma en notaria — este es el paso crítico que abre Post-Venta.
       await dio.post(

@@ -56,7 +56,8 @@
     "google_sign_in_button": "Continue with Google",
     "or_separator": "or",
     "google_error_cancelled": "Google sign-in cancelled",
-    "google_error_generic": "Error authenticating with Google"
+    "google_error_generic": "Error authenticating with Google",
+    "session_expired": "Your session has expired. Please sign in again."
   },
   "onboarding": {
     "gdpr_title": "Before you continue",
@@ -639,5 +640,16 @@
     "saved_snackbar": "Profile saved",
     "lifestyle_filter_title": "My lifestyle",
     "lifestyle_filter_description": "Show properties that match your profile"
+  },
+  "comfort": {
+    "title": "Comfort Index",
+    "overall_score": "Overall score: {0}/100",
+    "low_data": "Insufficient data to calculate the comfort index for this location.",
+    "error": "Could not calculate the comfort index.",
+    "dim_noise": "Noise",
+    "dim_light": "Light",
+    "dim_air": "Air quality",
+    "dim_connectivity": "Connectivity",
+    "dim_thermal": "Thermal comfort"
   }
 }

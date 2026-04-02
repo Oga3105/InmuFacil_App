@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../../core/config/env_config.dart';
+import '../../../core/network/dio_factory.dart';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -80,7 +81,7 @@ final _marketGapProvider =
     FutureProvider.autoDispose.family<MarketGapResult, _MarketGapArgs>(
   (ref, args) async {
     final token = await _storage.read(key: 'auth_token');
-    final dio = Dio();
+    final dio = buildAuthDio();
     final resp = await dio.post(
       '${EnvConfig.apiBaseUrl}/ai/market-gap',
       data: {

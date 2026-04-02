@@ -11,6 +11,7 @@ import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
 import 'arras_shared_widgets.dart';
+import '../../../../core/network/dio_factory.dart';
 
 // Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
 
@@ -66,10 +67,8 @@ class _ArrasSellerStepperScreenState
   Future<Dio?> _buildDio() async {
     final token = await const FlutterSecureStorage().read(key: 'auth_token');
     if (token == null) return null;
-    return Dio(BaseOptions(
-      baseUrl: EnvConfig.apiBaseUrl,
-      headers: {'Authorization': 'Bearer $token'},
-    ));
+    final dio = buildAuthDio();
+    return dio;
   }
 
   void _nextPage() => _pageCtrl.nextPage(

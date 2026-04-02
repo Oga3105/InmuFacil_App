@@ -6,6 +6,7 @@ import '../../core/config/env_config.dart';
 import '../../data/models/notification_model.dart';
 import 'auth_provider.dart';
 import 'urgency_provider.dart';
+import '../../core/network/dio_factory.dart';
 
 // ─── Dio helpers (reusa el patron existente del proyecto) ─────────────────────
 
@@ -14,7 +15,7 @@ Future<String?> _getToken() async {
   return storage.read(key: 'auth_token');
 }
 
-Dio _buildDio() => Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+Dio _buildDio() => buildAuthDio();
 
 // ─── Provider principal: historial de notificaciones ──────────────────────────
 

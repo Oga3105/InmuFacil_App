@@ -9,6 +9,7 @@ import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kBlue   = Color(0xFF135BEC);
@@ -69,7 +70,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   Future<void> _loadStatus() async {
     try {
       final token = await _storage.read(key: 'auth_token');
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -116,7 +117,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       final token = await _storage.read(key: 'auth_token');
       final dateStr = _isoDate(_buyerDate!);
       final timeStr = _isoTime(_buyerTime!);
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/schedule',
         data: {'appointment_date': dateStr, 'appointment_time': timeStr, 'notes': _notesCtrl.text.trim()},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
@@ -141,7 +142,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     _setLoading(true);
     try {
       final token = await _storage.read(key: 'auth_token');
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -160,7 +161,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     _setLoading(true);
     try {
       final token = await _storage.read(key: 'auth_token');
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/reject',
         data: {
           'proposed_date': _isoDate(_rejectDate!),
@@ -193,7 +194,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     _setLoading(true);
     try {
       final token = await _storage.read(key: 'auth_token');
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept-counter',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -218,7 +219,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     _setLoading(true);
     try {
       final token = await _storage.read(key: 'auth_token');
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/confirm-visit',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

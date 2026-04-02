@@ -5,9 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-import '../../../core/config/env_config.dart';
+import '../../../core/network/dio_factory.dart';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -94,19 +92,17 @@ class _ComfortArgs {
   int get hashCode => Object.hash(postalCode, address);
 }
 
-const _storage = FlutterSecureStorage();
-
 final _comfortIndexProvider =
     FutureProvider.autoDispose.family<ComfortIndexResult, _ComfortArgs>(
   (ref, args) async {
-    final token = await _storage.read(key: 'auth_token');
-    final dio = Dio();
+    final cancelToken = CancelToken();
+    ref.onDispose(cancelToken.cancel);
+
+    final dio = buildAuthDio();
     final resp = await dio.post(
-      '${EnvConfig.apiBaseUrl}/ai/comfort-index',
+      '/ai/comfort-index',
       data: {'postal_code': args.postalCode, 'address': args.address},
-      options: token != null
-          ? Options(headers: {'Authorization': 'Bearer $token'})
-          : null,
+      cancelToken: cancelToken,
     );
     return ComfortIndexResult.fromJson(resp.data as Map<String, dynamic>);
   },

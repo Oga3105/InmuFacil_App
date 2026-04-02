@@ -56,7 +56,8 @@
     "google_sign_in_button": "Continuar con Google",
     "or_separator": "o",
     "google_error_cancelled": "Inicio de sesión con Google cancelado",
-    "google_error_generic": "Error al autenticar con Google"
+    "google_error_generic": "Error al autenticar con Google",
+    "session_expired": "Tu sesión ha expirado. Por favor, inicia sesión de nuevo."
   },
   "onboarding": {
     "gdpr_title": "Antes de continuar",
@@ -1200,5 +1201,16 @@
         }
       }
     }
+  },
+  "comfort": {
+    "title": "Índice de Confort",
+    "overall_score": "Puntuación global: {0}/100",
+    "low_data": "Datos insuficientes para calcular el índice de confort en esta ubicación.",
+    "error": "No se pudo calcular el índice de confort.",
+    "dim_noise": "Ruido",
+    "dim_light": "Luminosidad",
+    "dim_air": "Calidad del aire",
+    "dim_connectivity": "Conectividad",
+    "dim_thermal": "Confort térmico"
   }
 }

@@ -9,6 +9,7 @@ import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 const _kBlue    = Color(0xFF135BEC);
 const _kGreen   = Color(0xFF16A34A);
 const _kBg      = Color(0xFFF8FAFC);
@@ -43,7 +44,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
     try {
       final token = await _kStorage.read(key: 'auth_token');
       if (token == null) return;
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -64,7 +65,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
     setState(() { _isLoading = true; _errorMessage = null; });
     try {
       final token = await _kStorage.read(key: 'auth_token');
-      final resp = await Dio().post(
+      final resp = await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/confirm',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

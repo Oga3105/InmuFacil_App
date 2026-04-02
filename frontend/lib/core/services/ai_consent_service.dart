@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../config/env_config.dart';
+import '../network/auth_interceptor.dart';
 import '../../presentation/providers/auth_provider.dart';
 
 /// Configuration object describing a single AI action that requires consent.
@@ -70,7 +71,7 @@ class AiConsentService {
     baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
-  ));
+  ))..interceptors.add(AuthInterceptor());
 
   Future<String?> _token() => _storage.read(key: 'auth_token');
 

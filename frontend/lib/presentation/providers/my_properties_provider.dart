@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/config/env_config.dart';
 import '../../domain/entities/property.dart';
 import '../../domain/entities/property_type.dart';
+import '../../core/network/dio_factory.dart';
 
 final myPropertiesProvider =
     AsyncNotifierProvider<MyPropertiesNotifier, List<Property>>(
@@ -18,7 +19,7 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
 
   @override
   Future<List<Property>> build() async {
-    _dio = Dio(BaseOptions(baseUrl: EnvConfig.apiBaseUrl));
+    _dio = buildAuthDio();
     final token = await _storage.read(key: 'auth_token');
     if (token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $token';

@@ -9,6 +9,7 @@ import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 
 const _kBlue    = Color(0xFF135BEC);
 const _kGreen   = Color(0xFF16A34A);
@@ -60,7 +61,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   Future<void> _loadStatus() async {
     try {
       final token = await _storage.read(key: 'auth_token');
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -126,7 +127,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       final token = await _storage.read(key: 'auth_token');
       final d = _selectedDate!;
       final t = _selectedTime!;
-      await Dio().post(
+      await buildAuthDio().post(
         '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/schedule',
         data: {
           'city': _cityCtrl.text.trim(),

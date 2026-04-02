@@ -9,6 +9,7 @@ import '../../../providers/offers_provider.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
+import '../../../../core/network/dio_factory.dart';
 
 const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
@@ -49,7 +50,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       if (token == null) return;
-      final resp = await Dio().get(
+      final resp = await buildAuthDio().get(
         '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -77,7 +78,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
 
     try {
       final token = await _storage.read(key: 'auth_token');
-      final dio   = Dio();
+      final dio   = buildAuthDio();
       await dio.post(
         '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/confirm',
         data: {

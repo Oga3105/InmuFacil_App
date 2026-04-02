@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/config/env_config.dart';
+import '../../../core/network/auth_interceptor.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 
@@ -97,7 +98,7 @@ final _aiConsentHistoryProvider =
     baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
-  ));
+  ))..interceptors.add(AuthInterceptor());
 
   final response = await dio.get(
     '/ai-consent/me',

@@ -13,13 +13,14 @@ import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../../core/config/env_config.dart';
+import '../../../core/network/dio_factory.dart';
 
 final _arrasStatusProvider = FutureProvider.autoDispose
     .family<String, String>((ref, offerId) async {
   final token =
       await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return 'none';
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '$EnvConfig.apiBaseUrl/arras/$offerId',
@@ -37,7 +38,7 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   final token =
       await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return 'pending';
-  final dio = Dio();
+  final dio = buildAuthDio();
   try {
     final resp = await dio.get(
       '$EnvConfig.apiBaseUrl/tasacion/$offerId/status',
@@ -56,7 +57,7 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   final token = await const FlutterSecureStorage().read(key: 'auth_token');
   if (token == null) return 'pending';
   try {
-    final resp = await Dio().get(
+    final resp = await buildAuthDio().get(
       '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );

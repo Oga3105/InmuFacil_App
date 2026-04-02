@@ -52,7 +52,8 @@
     "security_guaranteed": "Sécurité Garantie entre Particuliers",
     "p2p_verified_label": "P2P VÉRIFIÉ",
     "no_commissions_label": "SANS COMMISSIONS",
-    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH"
+    "copyright_secure": "© 2026 INMUFÁCIL SECURE-TECH",
+    "session_expired": "Votre session a expiré. Veuillez vous reconnecter."
   },
   "home": {
     "welcome": "Bienvenue sur InmuFácil",
@@ -501,5 +502,16 @@
     "saved_snackbar": "Profil enregistré",
     "lifestyle_filter_title": "Mon style de vie",
     "lifestyle_filter_description": "Afficher les biens correspondant à mon profil"
+  },
+  "comfort": {
+    "title": "Indice de confort",
+    "overall_score": "Score global : {0}/100",
+    "low_data": "Données insuffisantes pour calculer l'indice de confort.",
+    "error": "Impossible de calculer l'indice de confort.",
+    "dim_noise": "Bruit",
+    "dim_light": "Luminosité",
+    "dim_air": "Qualité de l'air",
+    "dim_connectivity": "Connectivité",
+    "dim_thermal": "Confort thermique"
   }
 }
