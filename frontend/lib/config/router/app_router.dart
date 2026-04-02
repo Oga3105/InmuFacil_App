@@ -173,7 +173,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'search',
         builder: (context, state) {
           final highlightId = state.uri.queryParameters['highlight'];
-          return PropertyListingScreen(highlightId: highlightId);
+          final fromMap = state.uri.queryParameters['fromMap'] == 'true';
+          return PropertyListingScreen(highlightId: highlightId, fromMap: fromMap);
         },
       ),
       

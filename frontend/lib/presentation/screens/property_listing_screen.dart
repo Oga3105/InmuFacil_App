@@ -14,11 +14,15 @@ import '../widgets/common/app_bar_back_button.dart';
 import '../widgets/common/user_avatar_menu.dart';
 
 class PropertyListingScreen extends ConsumerStatefulWidget {
-  const PropertyListingScreen({super.key, this.highlightId});
+  const PropertyListingScreen({super.key, this.highlightId, this.fromMap = false});
 
   /// If set, the listing will auto-scroll to the item with this property id
   /// and briefly highlight it. Set when navigating back from property details.
   final String? highlightId;
+
+  /// When true, the listing respects the current map viewport bounds even if
+  /// no explicit location search is active (user arrived via "Ver inmuebles").
+  final bool fromMap;
 
   @override
   ConsumerState<PropertyListingScreen> createState() => _PropertyListingScreenState();
@@ -67,7 +71,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
     // bypass the geographic filter and show everything the backend loaded.
     final geoFiltered = ref.watch(filteredByMapPropertiesProvider);
     final lifestyleSorted = ref.watch(lifestyleSortedPropertiesProvider);
-    var allFilteredProperties = searchState.location.isNotEmpty
+    var allFilteredProperties = (searchState.location.isNotEmpty || widget.fromMap)
         ? geoFiltered
         : lifestyleSorted;
 

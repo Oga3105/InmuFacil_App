@@ -247,7 +247,7 @@ class _MapSection extends ConsumerWidget {
                 label: 'Ver $propertyCount Inmuebles',
                 onPressed: () {
                   ref.read(searchProvider.notifier).clearError();
-                  context.pushNamed('search');
+                  context.pushNamed('search', queryParameters: {'fromMap': 'true'});
                 },
                 color: theme.colorScheme.primary,
                 icon: Icons.list,
