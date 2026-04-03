@@ -357,7 +357,8 @@ class AuthNotifier extends Notifier<AuthState> {
       );
       return false;
     } catch (e, st) {
-      debugPrint('[GoogleSignIn] Error inesperado: $e\n$st');
+      // ignore: avoid_print
+      print('[GoogleSignIn] Error inesperado: $e\n$st');
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Error inesperado con Google Sign-In: $e',

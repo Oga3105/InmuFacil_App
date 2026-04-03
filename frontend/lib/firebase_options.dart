@@ -34,8 +34,6 @@ class DefaultFirebaseOptions {
     projectId: 'inmufacil',
     authDomain: 'inmufacil.firebaseapp.com',
     storageBucket: 'inmufacil.firebasestorage.app',
-    // Web OAuth Client ID (Firebase Console → Authentication → Google → Web SDK config)
-    clientId: '849495548519-58blbnuu0rsgan6bb8tn6hdfu9dkk916.apps.googleusercontent.com',
   );
 
 }
