@@ -357,19 +357,20 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           // Promo Banner
           Container(
             padding: const EdgeInsets.all(24),
-             decoration: BoxDecoration(
-              color: theme.colorScheme.inverseSurface,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Vende directo.',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -377,24 +378,24 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   'Sin comisiones, sin intermediarios. Todo legal, todo seguro.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade400,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () => context.push('/404'),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Text(
                         'Saber más',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: primaryBlue,
+                          color: theme.colorScheme.primary,
                         ),
                       ),
-                      SizedBox(width: 4),
-                       Icon(Icons.arrow_forward, size: 14, color: primaryBlue),
+                      const SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, size: 14, color: theme.colorScheme.primary),
                     ],
                   ),
                 ),
@@ -484,7 +485,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 : (val) => ref.read(searchProvider.notifier).toggleExtra(label),
               activeColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+              side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5),
             ),
           ),
           const SizedBox(width: 8),

@@ -24,12 +24,14 @@ class PropertyTimeBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (createdAt == null) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     final now = DateTime.now();
     final diff = now.difference(createdAt!);
-    final style = _getBadgeStyle(diff);
+    final style = _getBadgeStyle(diff, isDark, colorScheme);
     final timeText = _formatDuration(diff);
 
-    // Show "updated" subtitle only if updatedAt is meaningfully later than createdAt
     final showUpdated =
         updatedAt != null && updatedAt!.difference(createdAt!).inMinutes > 60;
     final updatedText =
@@ -91,38 +93,38 @@ class PropertyTimeBadge extends StatelessWidget {
     );
   }
 
-  _BadgeStyle _getBadgeStyle(Duration diff) {
+  _BadgeStyle _getBadgeStyle(Duration diff, bool isDark, ColorScheme cs) {
     if (diff.inHours < 24) {
-      return const _BadgeStyle(
+      return _BadgeStyle(
         prefix: 'NUEVO:',
-        bgColor: Color(0xFFEFF6FF),
-        borderColor: Color(0xFFBFDBFE),
-        iconColor: Color(0xFF135BEC),
-        textColor: Color(0xFF135BEC),
+        bgColor: isDark ? const Color(0xFF0A1628) : const Color(0xFFEFF6FF),
+        borderColor: isDark ? const Color(0xFF1E3A6E) : const Color(0xFFBFDBFE),
+        iconColor: cs.primary,
+        textColor: cs.primary,
       );
     } else if (diff.inDays < 8) {
-      return const _BadgeStyle(
+      return _BadgeStyle(
         prefix: 'RECIENTE:',
-        bgColor: Color(0xFFF0FDF4),
-        borderColor: Color(0xFFBBF7D0),
-        iconColor: Color(0xFF16A34A),
-        textColor: Color(0xFF15803D),
+        bgColor: isDark ? const Color(0xFF052E16) : const Color(0xFFF0FDF4),
+        borderColor: isDark ? const Color(0xFF166534) : const Color(0xFFBBF7D0),
+        iconColor: const Color(0xFF16A34A),
+        textColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF15803D),
       );
     } else if (diff.inDays < 31) {
-      return const _BadgeStyle(
+      return _BadgeStyle(
         prefix: null,
-        bgColor: Color(0xFFFFF7ED),
-        borderColor: Color(0xFFFED7AA),
-        iconColor: Color(0xFFEA580C),
-        textColor: Color(0xFFC2410C),
+        bgColor: isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED),
+        borderColor: isDark ? const Color(0xFF92400E) : const Color(0xFFFED7AA),
+        iconColor: isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C),
+        textColor: isDark ? const Color(0xFFFB923C) : const Color(0xFFC2410C),
       );
     } else {
-      return const _BadgeStyle(
+      return _BadgeStyle(
         prefix: null,
-        bgColor: Color(0xFFF9FAFB),
-        borderColor: Color(0xFFE5E7EB),
-        iconColor: Color(0xFF9CA3AF),
-        textColor: Color(0xFF6B7280),
+        bgColor: cs.surfaceContainerHighest,
+        borderColor: cs.outlineVariant,
+        iconColor: cs.onSurfaceVariant,
+        textColor: cs.onSurfaceVariant,
       );
     }
   }

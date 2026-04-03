@@ -21,7 +21,6 @@ const _storage = FlutterSecureStorage();
 
 const _kBlue  = Color(0xFF135BEC);
 const _kGreen = Color(0xFF16A34A);
-const _kBg    = Color(0xFFF8FAFC);
 const _kNavy  = Color(0xFF135BEC);
 
 /// Possible delivery statuses for a post-sale document.
@@ -160,7 +159,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     final isSeller = currentUser?.id != widget.offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -516,10 +515,10 @@ class _SellerDocCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _borderColor,
+          color: _borderColor(context),
         ),
       ),
       child: Column(
@@ -542,16 +541,16 @@ class _SellerDocCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(doc.label,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
-                            color: _kNavy)),
+                            color: Theme.of(context).colorScheme.onSurface)),
                     Text(doc.subtitle,
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
-              _statusIcon,
+              _statusIcon(context),
             ],
           ),
           // Action area
@@ -564,20 +563,22 @@ class _SellerDocCard extends StatelessWidget {
     );
   }
 
-  Color get _borderColor {
+  Color _borderColor(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     switch (status) {
       case 'uploaded':
         return _kGreen.withOpacity(0.4);
       case 'in_person':
         return _kBlue.withOpacity(0.3);
       case 'not_applicable':
-        return Colors.grey.shade300;
+        return colorScheme.outlineVariant;
       default:
-        return Colors.grey.shade200;
+        return colorScheme.outlineVariant;
     }
   }
 
-  Widget get _statusIcon {
+  Widget _statusIcon(BuildContext context) {
+    final onSurfaceVariant = Theme.of(context).colorScheme.onSurfaceVariant;
     switch (status) {
       case 'uploaded':
         return const Icon(Icons.check_circle, color: _kGreen, size: 24);
@@ -588,9 +589,9 @@ class _SellerDocCard extends StatelessWidget {
       case 'in_person':
         return Icon(Icons.handshake_outlined, color: _kBlue, size: 22);
       case 'not_applicable':
-        return Icon(Icons.block_outlined, color: Colors.grey.shade400, size: 22);
+        return Icon(Icons.block_outlined, color: onSurfaceVariant, size: 22);
       default:
-        return Icon(Icons.hourglass_empty, color: Colors.grey.shade400, size: 20);
+        return Icon(Icons.hourglass_empty, color: onSurfaceVariant, size: 20);
     }
   }
 
@@ -621,7 +622,7 @@ class _SellerDocCard extends StatelessWidget {
       return _StatusChip(
         icon: Icons.block_outlined,
         label: doc.noApplicaLabel,
-        color: Colors.grey.shade600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         onReset: onReset,
       );
     }
@@ -649,7 +650,7 @@ class _SellerDocCard extends StatelessWidget {
             _ActionButton(
               icon: Icons.block_outlined,
               label: 'No aplica',
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               onTap: () => onFlag('not_applicable'),
             ),
           ],
@@ -689,7 +690,7 @@ class _StatusChip extends StatelessWidget {
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
               onTap: onReset,
-              child: Icon(Icons.edit_outlined, size: 16, color: Colors.grey.shade400),
+              child: Icon(Icons.edit_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
       ],
@@ -759,11 +760,12 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
   Widget build(BuildContext context) {
     final statusBadge = _buildStatusBadge();
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         children: [
@@ -788,12 +790,12 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(widget.transfer.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 14,
-                                color: _kNavy)),
+                                color: colorScheme.onSurface)),
                         Text(widget.transfer.subtitle,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant)),
                         if (statusBadge != null) ...[
                           const SizedBox(height: 4),
                           statusBadge,
@@ -802,7 +804,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
                     ),
                   ),
                   Icon(_expanded ? Icons.expand_less : Icons.expand_more,
-                      color: Colors.grey.shade400),
+                      color: colorScheme.onSurfaceVariant),
                 ],
               ),
             ),
@@ -813,7 +815,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Divider(color: Colors.grey.shade200),
+                  Divider(color: colorScheme.outlineVariant),
                   const SizedBox(height: 8),
                   ...widget.transfer.steps.asMap().entries.map(
                     (e) => Padding(
@@ -838,7 +840,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(e.value,
-                                style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                                style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant)),
                           ),
                         ],
                       ),
@@ -872,10 +874,10 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
         ]);
       case 'not_applicable':
         return Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.block_outlined, color: Colors.grey.shade500, size: 13),
+          Icon(Icons.block_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 13),
           const SizedBox(width: 4),
           Text('No aplica para esta vivienda',
-              style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+              style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]);
       default:
         return Row(mainAxisSize: MainAxisSize.min, children: [
@@ -948,7 +950,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
       return _StatusChip(
         icon: Icons.block_outlined,
         label: 'No aplica para esta vivienda',
-        color: Colors.grey.shade600,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
         onReset: widget.canInteract ? widget.onReset : null,
       );
     }
@@ -965,16 +967,16 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
           : TextButton.icon(
               onPressed: canDownload ? () => _triggerDownload(context) : null,
               icon: Icon(Icons.download_outlined, size: 16,
-                  color: canDownload ? _kBlue : Colors.grey.shade400),
+                  color: canDownload ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant),
               label: Text(
                 'Descargar',
                 style: TextStyle(
-                    color: canDownload ? _kBlue : Colors.grey.shade400,
+                    color: canDownload ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13),
               ),
               style: TextButton.styleFrom(
-                foregroundColor: canDownload ? _kBlue : Colors.grey.shade400,
-                disabledForegroundColor: Colors.grey.shade400,
+                foregroundColor: canDownload ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant,
+                disabledForegroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
     );
@@ -998,7 +1000,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
               _ActionButton(
                 icon: Icons.block_outlined,
                 label: 'No aplica',
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 onTap: () => widget.onFlag!('not_applicable'),
               ),
             ],

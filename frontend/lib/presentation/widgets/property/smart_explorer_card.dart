@@ -53,14 +53,16 @@ class SmartExplorerCard extends ConsumerWidget {
     final isFavorite = ref.watch(favoritesProvider).contains(propertyId);
     const successGreen = Color(0xFF16A34A);
     const brandBlue = Color(0xFF135BEC);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 350,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: colorScheme.surfaceContainer,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.07),
@@ -95,13 +97,13 @@ class SmartExplorerCard extends ConsumerWidget {
                     children: [
                       _OverlayButton(
                         icon: Icons.share_outlined,
-                        color: const Color(0xFF64748B),
+                        color: colorScheme.onSurfaceVariant,
                         onPressed: () {},
                       ),
                       const SizedBox(width: 6),
                       _OverlayButton(
                         icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey.shade400,
+                        color: isFavorite ? Colors.red : colorScheme.onSurfaceVariant,
                         onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(propertyId),
                       ),
                     ],
@@ -140,7 +142,7 @@ class SmartExplorerCard extends ConsumerWidget {
                         Container(
                           padding: const EdgeInsets.all(5),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
+                            color: colorScheme.surface.withOpacity(0.92),
                             shape: BoxShape.circle,
                             boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
                           ),
@@ -150,12 +152,12 @@ class SmartExplorerCard extends ConsumerWidget {
                       ],
                       Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.9),
+                          color: colorScheme.surface.withOpacity(0.92),
                           shape: BoxShape.circle,
                           boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.chat_bubble_outline, color: brandBlue),
+                          icon: Icon(Icons.chat_bubble_outline, color: colorScheme.primary),
                           onPressed: onContactTap,
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.all(7),
@@ -271,7 +273,7 @@ class _OverlayButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: Theme.of(context).colorScheme.surface.withOpacity(0.92),
         shape: BoxShape.circle,
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4)],
       ),
@@ -291,11 +293,12 @@ class _PlaceholderImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: 160,
       width: double.infinity,
-      color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.home_outlined, size: 48, color: Color(0xFFCBD5E1)),
+      color: colorScheme.surfaceContainerHighest,
+      child: Icon(Icons.home_outlined, size: 48, color: colorScheme.outlineVariant),
     );
   }
 }

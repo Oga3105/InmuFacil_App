@@ -9,7 +9,6 @@ import '../../widgets/common/user_avatar_menu.dart';
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kNavy     = Color(0xFF135BEC);
 const _kGold     = Color(0xFFB8860B);
-const _kGoldBg   = Color(0xFFFFF8E1);
 const _kGreen    = Color(0xFF16A34A);
 const _kAmber    = Color(0xFFD97706);
 
@@ -366,14 +365,16 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                 subtitle: 'Lee atentamente antes de continuar',
               ),
               const SizedBox(height: 24),
-              Container(
+              Builder(builder: (context) {
+                final cs = Theme.of(context).colorScheme;
+                return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: _kGoldBg,
-                  border: Border.all(color: _kGold.withOpacity(0.4)),
+                  color: cs.tertiaryContainer,
+                  border: Border.all(color: cs.tertiary.withOpacity(0.4)),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
+                child: Text(
                   'Este Pasaporte de Solvencia es una declaración voluntaria y veraz de tu situación '
                   'financiera. La información que proporciones no es verificada por InmuFácil y '
                   'su uso indebido puede acarrear responsabilidad civil.\n\n'
@@ -382,9 +383,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   'a cada vendedor.\n\n'
                   'Tus datos son procesados conforme al RGPD/LOPD y se eliminarán '
                   'automáticamente a los 90 días.',
-                  style: TextStyle(fontSize: 14, height: 1.6, color: Color(0xFF78350F)),
+                  style: TextStyle(fontSize: 14, height: 1.6, color: cs.onTertiaryContainer),
                 ),
-              ),
+              );
+              }),
               const SizedBox(height: 24),
               GestureDetector(
                 onTap: () => setState(() => _termsAccepted = !_termsAccepted),
@@ -502,25 +504,28 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     ),
                     const SizedBox(height: 8),
                     if (_debtRatio > 0.35)
-                      Container(
+                      Builder(builder: (context) {
+                        final cs = Theme.of(context).colorScheme;
+                        return Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
+                          color: cs.tertiaryContainer,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: Colors.orange.shade700, size: 16),
+                            Icon(Icons.warning_amber_rounded, color: cs.tertiary, size: 16),
                             const SizedBox(width: 8),
-                            const Expanded(
+                            Expanded(
                               child: Text(
                                 'Los bancos generalmente no conceden hipotecas si superas el 35%.',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+                                style: TextStyle(fontSize: 12, color: cs.onTertiaryContainer),
                               ),
                             ),
                           ],
                         ),
-                      ),
+                      );
+                      }),
                   ],
                 ),
               ),
@@ -636,20 +641,18 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(context).colorScheme.surfaceContainer
-                      : const Color(0xFFF0FDF4),
+                  color: Theme.of(context).colorScheme.secondaryContainer,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF86EFAC)),
+                  border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.4)),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.lock_outline, color: Color(0xFF16A34A), size: 18),
-                    SizedBox(width: 10),
+                    Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.secondary, size: 18),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Estos datos se cifran con AES-256. El vendedor NUNCA ve tus ingresos ni deudas — solo recibe el resultado de viabilidad (Verde/Ambar/Rojo).',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF166534), height: 1.4),
+                        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSecondaryContainer, height: 1.4),
                       ),
                     ),
                   ],
@@ -828,25 +831,26 @@ class _ChoiceBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: selected ? selectedColor.withOpacity(0.1) : Colors.grey.shade50,
-          border: Border.all(color: selected ? selectedColor : Colors.grey.shade300, width: selected ? 2 : 1),
+          color: selected ? selectedColor.withOpacity(0.1) : colorScheme.surfaceContainerHighest,
+          border: Border.all(color: selected ? selectedColor : colorScheme.outlineVariant, width: selected ? 2 : 1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: selected ? selectedColor : Colors.grey.shade400, size: 18),
+            Icon(icon, color: selected ? selectedColor : colorScheme.onSurfaceVariant, size: 18),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                color: selected ? selectedColor : Colors.grey.shade600,
+                color: selected ? selectedColor : colorScheme.onSurface,
                 fontWeight: selected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -957,6 +961,8 @@ class _SolvencyPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (levelKey, score) = level;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final Color bgColor;
     final Color borderColor;
@@ -967,22 +973,22 @@ class _SolvencyPreviewCard extends StatelessWidget {
 
     switch (levelKey) {
       case 'gold':
-        bgColor = const Color(0xFFFFFBEB);
-        borderColor = const Color(0xFFFCD34D);
+        bgColor = isDark ? const Color(0xFF2D2000) : const Color(0xFFFFFBEB);
+        borderColor = isDark ? const Color(0xFF92700A) : const Color(0xFFFCD34D);
         iconColor = _kGold;
         icon = Icons.emoji_events_outlined;
         levelLabel = 'Oro';
         description = 'Perfil financiero solido. Destaca frente a otros compradores.';
       case 'silver':
-        bgColor = const Color(0xFFF8FAFC);
-        borderColor = const Color(0xFF94A3B8);
-        iconColor = const Color(0xFF64748B);
+        bgColor = colorScheme.surfaceContainerHighest;
+        borderColor = colorScheme.outlineVariant;
+        iconColor = colorScheme.onSurfaceVariant;
         icon = Icons.verified_outlined;
         levelLabel = 'Plata';
         description = 'Buen perfil. Puedes mejorar con preaprobacion hipotecaria o menor endeudamiento.';
       default:
-        bgColor = const Color(0xFFFFF7ED);
-        borderColor = const Color(0xFFFDBA74);
+        bgColor = isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED);
+        borderColor = isDark ? const Color(0xFF92400E) : const Color(0xFFFDBA74);
         iconColor = _kAmber;
         icon = Icons.shield_outlined;
         levelLabel = 'Bronce';
@@ -1015,7 +1021,7 @@ class _SolvencyPreviewCard extends StatelessWidget {
                   children: [
                     Text(
                       'Estimacion: ',
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                     ),
                     Text(
                       'Nivel $levelLabel',
@@ -1028,14 +1034,14 @@ class _SolvencyPreviewCard extends StatelessWidget {
                     const Spacer(),
                     Text(
                       '$score/7 pts',
-                      style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                      style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
                 const SizedBox(height: 3),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
               ],
             ),

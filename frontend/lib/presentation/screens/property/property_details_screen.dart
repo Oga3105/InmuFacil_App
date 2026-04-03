@@ -573,7 +573,7 @@ class _HeroImageSectionState extends State<_HeroImageSection>
             right: 16,
             child: Row(
               children: [
-                _CircleButton(icon: Icons.share_outlined, color: const Color(0xFF0f172a), onPressed: () {}),
+                _CircleButton(icon: Icons.share_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, onPressed: () {}),
                 const SizedBox(width: 8),
                 AnimatedBuilder(
                   animation: _heartScale,
@@ -583,7 +583,7 @@ class _HeroImageSectionState extends State<_HeroImageSection>
                   ),
                   child: _CircleButton(
                     icon: widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: widget.isFavorite ? Colors.red : Colors.grey.shade400,
+                    color: widget.isFavorite ? Colors.red : Theme.of(context).colorScheme.onSurfaceVariant,
                     onPressed: _onToggleFavorite,
                   ),
                 ),
@@ -748,13 +748,13 @@ class _CircleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell( // Added InkWell for interactivity
+    return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         width: 40, height: 40,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.92),
           shape: BoxShape.circle,
           boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
         ),
@@ -785,16 +785,16 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Sobre esta propiedad',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0f172a)),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 12),
         Text(
           text,
           maxLines: _expanded ? null : _previewLines,
           overflow: _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 16, height: 1.6, color: Color(0xFF475569)),
+          style: TextStyle(fontSize: 16, height: 1.6, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 8),
         TextButton(
@@ -951,26 +951,26 @@ class _SummaryCard extends ConsumerWidget {
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'I.V.A incluido',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF94a3b8)),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
             property.title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.3),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.3, color: colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.location_on, size: 16, color: Color(0xFF94a3b8)),
+              Icon(Icons.location_on, size: 16, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
                   _obfuscateAddress(property.address),
-                  style: const TextStyle(color: Color(0xFF64748b)),
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -1038,6 +1038,8 @@ class _PropertyViabilityCard extends ConsumerWidget {
       data: (viability) {
         if (viability == null) return const SizedBox.shrink();
 
+        final cs = Theme.of(context).colorScheme;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         Color bg;
         Color border;
         Color textColor;
@@ -1045,27 +1047,27 @@ class _PropertyViabilityCard extends ConsumerWidget {
 
         switch (viability.verdict) {
           case 'green':
-            bg = const Color(0xFFF0FDF4);
-            border = const Color(0xFF86EFAC);
-            textColor = const Color(0xFF166534);
+            bg = isDark ? const Color(0xFF052E16) : const Color(0xFFF0FDF4);
+            border = isDark ? const Color(0xFF166534) : const Color(0xFF86EFAC);
+            textColor = isDark ? const Color(0xFF4ADE80) : const Color(0xFF166534);
             icon = Icons.check_circle_outline;
             break;
           case 'amber':
-            bg = const Color(0xFFFFFBEB);
-            border = const Color(0xFFFBBF24);
-            textColor = const Color(0xFF92400E);
+            bg = isDark ? const Color(0xFF2A1500) : const Color(0xFFFFFBEB);
+            border = isDark ? const Color(0xFF92400E) : const Color(0xFFFBBF24);
+            textColor = isDark ? const Color(0xFFFB923C) : const Color(0xFF92400E);
             icon = Icons.warning_amber_outlined;
             break;
           case 'red':
-            bg = const Color(0xFFFFF1F2);
-            border = const Color(0xFFFCA5A5);
-            textColor = const Color(0xFF991B1B);
+            bg = cs.errorContainer;
+            border = cs.error.withOpacity(0.4);
+            textColor = cs.onErrorContainer;
             icon = Icons.cancel_outlined;
             break;
           default: // insufficient_data
-            bg = const Color(0xFFF8FAFC);
-            border = const Color(0xFFCBD5E1);
-            textColor = const Color(0xFF475569);
+            bg = cs.surfaceContainerHighest;
+            border = cs.outlineVariant;
+            textColor = cs.onSurfaceVariant;
             icon = Icons.info_outline;
         }
 
@@ -1233,18 +1235,25 @@ class _ActionBar extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        icon: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: const Color(0xFF135BEC), size: 28),
+        icon: Builder(
+          builder: (ctx) {
+            final cs = Theme.of(ctx).colorScheme;
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: cs.onPrimaryContainer, size: 28),
+            );
+          },
         ),
         title: Text(title, textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-        content: Text(message, textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
+        content: Builder(
+          builder: (ctx) => Text(message, textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+        ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
@@ -1252,13 +1261,14 @@ class _ActionBar extends StatelessWidget {
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF64748B))),
+            child: Builder(
+              builder: (ctx) => Text('Cancelar',
+                style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+            ),
           ),
           FilledButton(
             onPressed: onCta,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(cta),
@@ -1290,9 +1300,7 @@ class _ActionBar extends StatelessWidget {
                     icon: const Icon(Icons.calendar_month_outlined, size: 20),
                     label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0f172a),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -1336,11 +1344,12 @@ class _ActionBar extends StatelessWidget {
     }
 
     // Mobile: horizontal row in a styled bar
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        color: cs.surface,
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -1440,7 +1449,7 @@ class _OwnerVisitsToggleState extends State<_OwnerVisitsToggle> {
       title: const Text('Permitir visitas', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
       subtitle: Text(
         _allowVisits ? 'Los interesados pueden solicitar visita' : 'Visitas desactivadas',
-        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
       value: _allowVisits,
       onChanged: (v) async {
@@ -1598,14 +1607,15 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: const Color(0xFF94a3b8), size: 24),
+        Icon(icon, color: colorScheme.onSurfaceVariant, size: 24),
         const SizedBox(height: 6),
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0f172a)),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: colorScheme.onSurface),
           textAlign: TextAlign.center,
         ),
       ],
@@ -1673,19 +1683,19 @@ class _SellerMetricsCard extends ConsumerWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.bar_chart_outlined, color: _blue, size: 18),
+                child: Icon(Icons.bar_chart_outlined, color: colorScheme.onPrimaryContainer, size: 18),
               ),
               const SizedBox(width: 10),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Rendimiento del Anuncio',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
-                    color: Color(0xFF0F172A),
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -1782,7 +1792,7 @@ class _MetricCell extends StatelessWidget {
             ),
             Text(
               label,
-              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+              style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -1854,27 +1864,27 @@ class _OwnerCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0f172a))),
+                Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
                 const SizedBox(height: 2),
                 if (isVerified)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.green[50],
+                      color: const Color(0xFF16A34A).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.green[100]!),
+                      border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.verified, size: 10, color: Colors.green[600]),
-                        const SizedBox(width: 4),
-                        Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.green[600], letterSpacing: 0.5)),
+                        Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
+                        SizedBox(width: 4),
+                        Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
                       ],
                     ),
                   )
                 else
-                  Text('Identidad pendiente de verificar', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                  Text('Identidad pendiente de verificar', style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -1914,13 +1924,14 @@ class _MortgageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final int monthly = _computeMonthly();
     final int loanAmount = (price * 0.80).round();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF135bec).withOpacity(0.04),
+        color: colorScheme.primaryContainer.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF135bec).withOpacity(0.1)),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1931,22 +1942,22 @@ class _MortgageCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF135bec).withOpacity(0.08),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.account_balance_outlined,
-                  color: Color(0xFF135bec),
+                  color: colorScheme.onPrimaryContainer,
                   size: 22,
                 ),
               ),
               const SizedBox(width: 14),
-              const Text(
+              Text(
                 'ESTIMACIÓN DE HIPOTECA',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF135bec),
+                  color: colorScheme.primary,
                   letterSpacing: 1,
                 ),
               ),
@@ -1958,18 +1969,18 @@ class _MortgageCard extends StatelessWidget {
             children: [
               Text(
                 '~${_fmt(monthly)} €',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0f172a),
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 6),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 4),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   '/mes',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
+                  style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                 ),
               ),
             ],
@@ -1977,27 +1988,27 @@ class _MortgageCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Financiación 80%  ·  ${_fmt(loanAmount)} €',
-            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 2),
-          const Text(
+          Text(
             'Plazo 30 años  ·  TAE 3,5%',
-            style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+            style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
-            child: const Text(
+            child: Text(
               'Cálculo orientativo. Sin vinculación bancaria.',
               style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF94A3B8),
+                color: colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),

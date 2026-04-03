@@ -116,8 +116,8 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                                       ? FontWeight.w700
                                       : FontWeight.normal,
                                   color: s == _sortBy
-                                      ? const Color(0xFF135BEC)
-                                      : const Color(0xFF334155),
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             ],
@@ -196,12 +196,12 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.inbox_outlined,
-                            size: 64, color: Colors.grey.shade300),
+                            size: 64, color: Theme.of(context).colorScheme.outlineVariant),
                         const SizedBox(height: 16),
                         Text(
                           'No has recibido ofertas aun',
                           style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontSize: 16,
                           ),
                         ),
@@ -499,16 +499,23 @@ class _PropertyHeaderCard extends ConsumerWidget {
     }
   }
 
-  Widget _imagePlaceholder() => Container(
-        width: 80,
-        height: 80,
-        decoration: BoxDecoration(
-          color: const Color(0xFFEEF6EE),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: const Icon(Icons.home_outlined,
-            color: Color(0xFF86EFAC), size: 36),
-      );
+  Widget _imagePlaceholder() {
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(Icons.home_outlined,
+              color: colorScheme.secondary, size: 36),
+        );
+      },
+    );
+  }
 }
 
 class _StatusBadgeSmall extends StatelessWidget {
@@ -546,6 +553,7 @@ class _StatCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Column(
@@ -553,10 +561,10 @@ class _StatCell extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF94A3B8),
+              color: colorScheme.onSurfaceVariant,
               letterSpacing: 0.6,
             ),
           ),
@@ -578,7 +586,7 @@ class _StatCell extends StatelessWidget {
 class _StatDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(width: 1, height: 28, color: Colors.grey.shade200);
+    return Container(width: 1, height: 28, color: Theme.of(context).colorScheme.outlineVariant);
   }
 }
 
@@ -652,7 +660,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                 // Buyer avatar
                 CircleAvatar(
                   radius: 24,
-                  backgroundColor: const Color(0xFFDBEAFE),
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                   backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
                       ? NetworkImage(photoUrl)
                       : null,
@@ -685,9 +693,9 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                         const SizedBox(height: 2),
                         Text(
                           'Recibida el $dateStr',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF94A3B8),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -721,7 +729,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           ),
 
           Divider(
-              height: 1, thickness: 1, color: Colors.grey.shade100),
+              height: 1, thickness: 1, color: Theme.of(context).colorScheme.outlineVariant),
 
           // ---- Middle section: amount + conditions + date ----
           Padding(
@@ -736,12 +744,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'CANTIDAD OFRECIDA',
                         style: TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF94A3B8),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -773,12 +781,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'CONDICIONES',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF94A3B8),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -795,12 +803,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'FECHA CIERRE',
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF94A3B8),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             letterSpacing: 0.5,
                           ),
                         ),
@@ -818,7 +826,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           if (offer.conditions != null &&
               offer.conditions!.isNotEmpty) ...[
             Divider(
-                height: 1, thickness: 1, color: Colors.grey.shade100),
+                height: 1, thickness: 1, color: Theme.of(context).colorScheme.outlineVariant),
              Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
               child: MouseRegion(
@@ -833,9 +841,9 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                         _messageExpanded
                             ? offer.conditions!
                             : _truncate(offer.conditions!, 120),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF475569),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontStyle: FontStyle.italic,
                           height: 1.5,
                         ),
@@ -1084,8 +1092,8 @@ class _ActionButtonsRow extends StatelessWidget {
         OutlinedButton(
           onPressed: onReject,
           style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF94A3B8),
-            side: const BorderSide(color: Color(0xFFCBD5E1)),
+            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+            side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
             shape: _shape,
             padding: _pad,
             tapTargetSize: _tts,
@@ -1108,12 +1116,13 @@ class _BuyerVerifiedBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFF86EFAC)),
+        border: Border.all(color: colorScheme.secondary),
       ),
       child: const Row(
         mainAxisSize: MainAxisSize.min,
@@ -1432,13 +1441,14 @@ class _SolvencyAcceptanceSectionState
     final passportAsync =
         ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF86EFAC)),
+        border: Border.all(color: colorScheme.secondary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1487,7 +1497,7 @@ class _SolvencyAcceptanceSectionState
                 'silver' => (
                   'Plata',
                   const Color(0xFF64748B),
-                  const Color(0xFFF8FAFC),
+                  colorScheme.surfaceContainerHighest,
                   Icons.verified_outlined
                 ),
                 _ => (
@@ -1663,13 +1673,14 @@ class _TrustFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
+        color: colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -1747,12 +1758,12 @@ class _PageFooter extends StatelessWidget {
               const Icon(Icons.shield_rounded,
                   size: 14, color: Color(0xFF135BEC)),
               const SizedBox(width: 4),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'InmuFacil Secure-Tech  \u00B7  \u00A9 2023 InmuFacil S.L. Todos los derechos reservados. Sistema de transacciones seguras bajo protocolo AES-256',
                   style: TextStyle(
                     fontSize: 10,
-                    color: Color(0xFF94A3B8),
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 2,

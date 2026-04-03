@@ -58,11 +58,14 @@ class _PropertyStep4AiDescriptionState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Description card ───────────────────────────────────────────────
-          Container(
+          Builder(builder: (context) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colorScheme.outlineVariant),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.06),
@@ -83,20 +86,20 @@ class _PropertyStep4AiDescriptionState
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
+                        color: colorScheme.primaryContainer,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.description_outlined,
-                          color: _blue, size: 20),
+                      child: Icon(Icons.description_outlined,
+                          color: colorScheme.primary, size: 20),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Descripcion del inmueble',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: Color(0xFF1E293B),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -169,33 +172,33 @@ class _PropertyStep4AiDescriptionState
                   maxLines: 12,
                   maxLength: 10000,
                   enabled: !isGenerating,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF1E293B),
+                    color: colorScheme.onSurface,
                     height: 1.6,
                   ),
                   decoration: InputDecoration(
                     hintText:
                         'Escribe aqui un borrador o pulsa "Generar con IA" para obtener una descripcion comercial profesional. El texto generado es totalmente editable.',
                     hintStyle: TextStyle(
-                        color: Colors.grey.shade400, fontSize: 13),
+                        color: colorScheme.onSurfaceVariant, fontSize: 13),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          BorderSide(color: Colors.grey.shade300),
+                          BorderSide(color: colorScheme.outlineVariant),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide:
-                          const BorderSide(color: _blue, width: 1.5),
+                          BorderSide(color: colorScheme.primary, width: 1.5),
                     ),
                     contentPadding: const EdgeInsets.all(16),
                     filled: isGenerating,
                     fillColor: isGenerating
-                        ? Colors.grey.shade50
+                        ? colorScheme.surfaceContainerHighest
                         : null,
                   ),
                   onChanged: notifier.setDescription,
@@ -210,14 +213,15 @@ class _PropertyStep4AiDescriptionState
                       style: TextStyle(
                         fontSize: 11,
                         color: s.descriptionText.length < 20
-                            ? const Color(0xFFDC2626)
-                            : Colors.grey.shade500,
+                            ? colorScheme.error
+                            : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
               ],
             ),
-          ),
+          );
+          }),
 
           // ── Error banner ───────────────────────────────────────────────────
           if (s.step4Error != null) ...[
@@ -238,26 +242,29 @@ class _ErrorBanner extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFEE2E2),
+          color: colorScheme.errorContainer,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFF87171)),
+          border: Border.all(color: colorScheme.error.withOpacity(0.5)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.error_outline,
-                color: Color(0xFFDC2626), size: 18),
+            Icon(Icons.error_outline,
+                color: colorScheme.onErrorContainer, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
                 message,
-                style: const TextStyle(
-                    color: Color(0xFFDC2626), fontSize: 13),
+                style: TextStyle(
+                    color: colorScheme.onErrorContainer, fontSize: 13),
               ),
             ),
           ],
         ),
       );
+  }
 }

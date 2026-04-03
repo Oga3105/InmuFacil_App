@@ -113,47 +113,54 @@ class _MobilePreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Price
-                Text(
-                  price > 0
-                      ? '${CurrencyInputFormatter.format(price)} €'
-                      : '— €',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Title
-                Text(
-                  s.titleText.isNotEmpty ? s.titleText : 'Sin titulo',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                    color: Color(0xFF0F172A),
-                  ),
-                ),
-                if (s.addressText.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Row(
+                Builder(builder: (context) {
+                  final cs = Theme.of(context).colorScheme;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on,
-                          size: 16, color: Color(0xFF94A3B8)),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          s.addressText,
-                          style: const TextStyle(
-                              fontSize: 13, color: Color(0xFF64748B)),
+                      Text(
+                        price > 0
+                            ? '${CurrencyInputFormatter.format(price)} €'
+                            : '— €',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: cs.onSurface,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        s.titleText.isNotEmpty ? s.titleText : 'Sin titulo',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          height: 1.2,
+                          color: cs.onSurface,
+                        ),
+                      ),
+                      if (s.addressText.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.location_on,
+                                size: 16, color: cs.onSurfaceVariant),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                s.addressText,
+                                style: TextStyle(
+                                    fontSize: 13, color: cs.onSurfaceVariant),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ),
-                ],
+                  );
+                }),
                 const SizedBox(height: 20),
                 _StatsGrid(s: s),
-                Divider(color: Colors.grey[200], height: 40),
+                Builder(builder: (context) => Divider(color: Theme.of(context).colorScheme.outlineVariant, height: 40)),
                 _PreviewDescriptionSection(s: s),
                 const SizedBox(height: 32),
                 _PreviewLocationSection(location: s.selectedLocation),
@@ -171,10 +178,11 @@ class _MobilePreview extends StatelessWidget {
 class _PreviewBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -183,23 +191,23 @@ class _PreviewBanner extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF16A34A),
+              color: colorScheme.primary,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: const Text(
+            child: Text(
               'Vista previa',
               style: TextStyle(
-                color: Colors.white,
+                color: colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
                 fontSize: 11,
               ),
             ),
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
               'Asi veran los compradores tu anuncio. Revisa antes de publicar.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF166534)),
+              style: TextStyle(fontSize: 12, color: colorScheme.onPrimaryContainer),
             ),
           ),
         ],
@@ -218,12 +226,13 @@ class _PreviewSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final price = CurrencyInputFormatter.parse(s.priceText) ?? 0;
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF135BEC).withValues(alpha: 0.05),
@@ -244,19 +253,19 @@ class _PreviewSummaryCard extends StatelessWidget {
                 price > 0
                     ? '${CurrencyInputFormatter.format(price)} €'
                     : '— €',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF0F172A),
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'I.V.A incluido',
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF94A3B8)),
+                    color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -264,11 +273,11 @@ class _PreviewSummaryCard extends StatelessWidget {
           // Title
           Text(
             s.titleText.isNotEmpty ? s.titleText : 'Sin titulo',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               height: 1.3,
-              color: Color(0xFF0F172A),
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -276,19 +285,19 @@ class _PreviewSummaryCard extends StatelessWidget {
           if (s.addressText.isNotEmpty)
             Row(
               children: [
-                const Icon(Icons.location_on,
-                    size: 16, color: Color(0xFF94A3B8)),
+                Icon(Icons.location_on,
+                    size: 16, color: colorScheme.onSurfaceVariant),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     s.addressText,
-                    style: const TextStyle(color: Color(0xFF64748B)),
+                    style: TextStyle(color: colorScheme.onSurfaceVariant),
                   ),
                 ),
               ],
             ),
           const SizedBox(height: 24),
-          Divider(color: Colors.grey[100]),
+          Divider(color: colorScheme.outlineVariant),
           const SizedBox(height: 16),
           // Stats grid
           _StatsGrid(s: s),
@@ -319,12 +328,13 @@ class _PreviewMortgageCard extends StatelessWidget {
     final monthly = _monthlyEstimate;
     if (monthly == null) return const SizedBox.shrink();
 
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -339,7 +349,7 @@ class _PreviewMortgageCard extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(Icons.account_balance_outlined,
@@ -359,14 +369,14 @@ class _PreviewMortgageCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              Builder(builder: (context) => Text(
                 'Desde ${CurrencyInputFormatter.format(monthly)}\u20AC / mes',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ),
+              )),
             ],
           ),
         ],
@@ -442,17 +452,18 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: const Color(0xFF94A3B8), size: 24),
+        Icon(icon, color: colorScheme.onSurfaceVariant, size: 24),
         const SizedBox(height: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 13,
-            color: Color(0xFF0F172A),
+            color: colorScheme.onSurface,
           ),
           textAlign: TextAlign.center,
         ),
@@ -472,27 +483,30 @@ class _PreviewDescriptionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Builder(builder: (context) => Text(
           'Sobre esta propiedad',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
-        ),
+        )),
         const SizedBox(height: 12),
-        Text(
-          s.descriptionText.isNotEmpty
-              ? s.descriptionText
-              : 'Sin descripcion. Vuelve al paso anterior para generar una descripcion comercial.',
-          style: TextStyle(
-            fontSize: 16,
-            height: 1.6,
-            color: s.descriptionText.isNotEmpty
-                ? const Color(0xFF475569)
-                : Colors.grey.shade400,
-          ),
-        ),
+        Builder(builder: (context) {
+          final cs = Theme.of(context).colorScheme;
+          return Text(
+            s.descriptionText.isNotEmpty
+                ? s.descriptionText
+                : 'Sin descripcion. Vuelve al paso anterior para generar una descripcion comercial.',
+            style: TextStyle(
+              fontSize: 16,
+              height: 1.6,
+              color: s.descriptionText.isNotEmpty
+                  ? cs.onSurface
+                  : cs.onSurfaceVariant,
+            ),
+          );
+        }),
         if (s.descriptionText.isNotEmpty) ...[
           const SizedBox(height: 8),
           TextButton(
@@ -533,46 +547,49 @@ class _PreviewLocationSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Builder(builder: (context) => Text(
               'Ubicaci\u00F3n aproximada',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0F172A),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-            ),
-            Container(
+            )),
+            Builder(builder: (context) {
+              final cs = Theme.of(context).colorScheme;
+              return Container(
               padding: const EdgeInsets.symmetric(
                   horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: cs.primaryContainer,
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: Colors.blue[100]!),
+                border: Border.all(color: cs.primary.withOpacity(0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Icon(Icons.shield_outlined,
-                      size: 14, color: Color(0xFF135BEC)),
-                  SizedBox(width: 4),
+                      size: 14, color: cs.primary),
+                  const SizedBox(width: 4),
                   Text(
                     'UBICACI\u00D3N PROTEGIDA',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF135BEC),
+                      color: cs.primary,
                     ),
                   ),
                 ],
               ),
-            ),
+            );
+            }),
           ],
         ),
         const SizedBox(height: 16),
-        Container(
+        Builder(builder: (context) => Container(
           height: 300,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
@@ -613,19 +630,19 @@ class _PreviewLocationSection extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         vertical: 8, horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.95),
+                      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(8),
                       boxShadow: const [
                         BoxShadow(
                             color: Colors.black12, blurRadius: 4),
                       ],
                     ),
-                    child: const Text(
+                    child: Text(
                       'Por seguridad y privacidad, no mostramos la ubicaci\u00F3n exacta hasta que la visita sea confirmada.',
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
-                        color: Color(0xFF64748B),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -634,7 +651,7 @@ class _PreviewLocationSection extends StatelessWidget {
               ],
             ),
           ),
-        ),
+        )),
       ],
     );
   }
