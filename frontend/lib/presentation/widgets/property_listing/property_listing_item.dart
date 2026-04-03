@@ -42,7 +42,7 @@ class PropertyListingItem extends ConsumerWidget {
           right: 16,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
+              color: theme.colorScheme.surface.withOpacity(0.9),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -55,7 +55,7 @@ class PropertyListingItem extends ConsumerWidget {
             child: IconButton(
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : Colors.grey.shade400,
+                color: isFavorite ? Colors.red : theme.colorScheme.onSurfaceVariant,
               ),
               onPressed: () => ref.read(favoritesProvider.notifier).toggleFavorite(property.id),
               constraints: const BoxConstraints(),
@@ -342,18 +342,25 @@ class PropertyListingItem extends ConsumerWidget {
       context: context,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        icon: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: const BoxDecoration(
-            color: Color(0xFFEFF6FF),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: const Color(0xFF135BEC), size: 28),
+        icon: Builder(
+          builder: (ctx) {
+            final cs = Theme.of(ctx).colorScheme;
+            return Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: cs.primary, size: 28),
+            );
+          },
         ),
         title: Text(title, textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-        content: Text(message, textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF64748B))),
+        content: Builder(
+          builder: (ctx) => Text(message, textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+        ),
         actionsAlignment: MainAxisAlignment.center,
         actions: [
           TextButton(
@@ -361,13 +368,14 @@ class PropertyListingItem extends ConsumerWidget {
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Cancelar',
-                style: TextStyle(color: Color(0xFF64748B))),
+            child: Builder(
+              builder: (ctx) => Text('Cancelar',
+                style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+            ),
           ),
           FilledButton(
             onPressed: onCta,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Text(cta),

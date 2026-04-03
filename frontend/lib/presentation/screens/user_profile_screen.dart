@@ -561,24 +561,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               Wrap(
                 spacing: 12,
                 children: [
-                  // Dynamic User Type
-                  _buildHeaderBadge(
-                      user.userType == 'agent'
-                          ? 'Agente Inmobiliario'
-                          : 'Propietario Particular',
-                      Colors.blue.shade50,
-                      Colors.blue.shade700),
-                  const SizedBox(width: 8),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.calendar_today,
-                          size: 14, color: Colors.grey),
+                      Icon(Icons.calendar_today,
+                          size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Text(
                           'Miembro desde ${user.createdAt?.year.toString() ?? '—'}',
                           style: TextStyle(
-                              color: Colors.grey.shade600, fontSize: 12)),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
                     ],
                   ),
                   const SizedBox(width: 16),
@@ -3328,7 +3320,7 @@ class _GestionarMenu extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(

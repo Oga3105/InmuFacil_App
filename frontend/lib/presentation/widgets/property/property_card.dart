@@ -83,7 +83,7 @@ class PropertyCard extends StatelessWidget {
                   // Address
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+                      Icon(Icons.location_on_outlined, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -91,7 +91,7 @@ class PropertyCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.grey[600],
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -118,21 +118,31 @@ class PropertyCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder() {
-    return Container(
-      color: Colors.grey[300],
-      child: const Center(
-        child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
-      ),
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Container(
+          color: colorScheme.surfaceContainerHighest,
+          child: Center(
+            child: Icon(Icons.image_not_supported, size: 48, color: colorScheme.onSurfaceVariant),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildFeature(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey[700]),
-        const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontWeight: FontWeight.w500)),
-      ],
+    return Builder(
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return Row(
+          children: [
+            Icon(icon, size: 18, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 4),
+            Text(text, style: TextStyle(fontWeight: FontWeight.w500, color: colorScheme.onSurface)),
+          ],
+        );
+      },
     );
   }
 }
