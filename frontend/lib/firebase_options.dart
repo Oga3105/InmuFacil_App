@@ -29,10 +29,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyBhiczYPaQ0J6jgdQcmbJ1ot1q6rTT51WM',
-    authDomain: 'inmufacil.firebaseapp.com',
-    projectId: 'inmufacil',
-    storageBucket: 'inmufacil.firebasestorage.app',
-    messagingSenderId: '849495548519',
     appId: '1:849495548519:web:474e1c80818fc8ca1deac2',
+    messagingSenderId: '849495548519',
+    projectId: 'inmufacil',
+    authDomain: 'inmufacil.firebaseapp.com',
+    storageBucket: 'inmufacil.firebasestorage.app',
+    // Web OAuth Client ID (Firebase Console → Authentication → Google → Web SDK config)
+    clientId: '849495548519-58blbnuu0rsgan6bb8tn6hdfu9dkk916.apps.googleusercontent.com',
   );
+
 }

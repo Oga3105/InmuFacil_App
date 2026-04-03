@@ -38,7 +38,12 @@ class AuthState {
 
 class AuthNotifier extends Notifier<AuthState> {
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  // clientId OBLIGATORIO en Flutter Web (google_sign_in v6+).
+  // Valor leido desde .env → GOOGLE_WEB_CLIENT_ID
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: EnvConfig.googleWebClientId,
+    scopes: ['email', 'profile'],
+  );
   final Dio _dio = Dio(BaseOptions(
     baseUrl: EnvConfig.apiBaseUrl,
     connectTimeout: const Duration(seconds: 10),
@@ -351,10 +356,11 @@ class AuthNotifier extends Notifier<AuthState> {
         errorMessage: msg is String ? msg : 'Error al autenticar con Google',
       );
       return false;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[GoogleSignIn] Error inesperado: $e\n$st');
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Error inesperado con Google Sign-In',
+        errorMessage: 'Error inesperado con Google Sign-In: $e',
       );
       return false;
     }

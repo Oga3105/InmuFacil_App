@@ -45,4 +45,14 @@ class EnvConfig {
       return '';
     }
   }
+
+  /// Google OAuth Web Client ID (requerido por google_sign_in en Flutter Web)
+  static String get googleWebClientId {
+    try {
+      return dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+    } catch (e) {
+      debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. No Google Client ID.');
+      return '';
+    }
+  }
 }
