@@ -87,10 +87,12 @@ class _AppBarCloseButtonState extends State<AppBarCloseButton> {
   bool _hovered = false;
 
   static const _red = Color(0xFFDC2626);
-  static const _dark = Color(0xFF0F172A);
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = _hovered
+        ? Colors.white
+        : Theme.of(context).colorScheme.onSurface;
     return Tooltip(
       message: widget.tooltip,
       child: MouseRegion(
@@ -124,7 +126,7 @@ class _AppBarCloseButtonState extends State<AppBarCloseButton> {
             child: Icon(
               Icons.close_rounded,
               size: 18,
-              color: _hovered ? Colors.white : _dark,
+              color: iconColor,
             ),
           ),
         ),

@@ -853,10 +853,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           // [UPDATED] Password Change Section
           AnimatedSize(
             duration: const Duration(milliseconds: 300),
-            child: Container(
+            child: Builder(builder: (context) => Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8)),
               child: _isChangingPassword
                   ? _buildChangePasswordForm()
@@ -871,7 +871,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             Text(
                                 'profile.password_update_hint'.tr(),
                                 style: TextStyle(
-                                    color: Colors.grey.shade500, fontSize: 12)),
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
                           ],
                         ),
                         const Spacer(),
@@ -885,12 +885,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text('profile.change_password'.tr(),
-                              style: const TextStyle(color: Colors.black87)),
+                          child: Text('profile.change_password'.tr()),
                         ),
                       ],
                     ),
-            ),
+            )),
           ),
 
           const SizedBox(height: 16),
@@ -900,23 +899,23 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             children: [
               // 50% Suspension
               Expanded(
-                child: Container(
+                child: Builder(builder: (context) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Colors.orange.shade50,
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
                       borderRadius: BorderRadius.circular(8)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('profile.suspend_account'.tr(),
-                          style: const TextStyle(
+                      Builder(builder: (ctx) => Text('profile.suspend_account'.tr(),
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Colors.orange)),
+                              color: Theme.of(ctx).colorScheme.onTertiaryContainer))),
                       const SizedBox(height: 4),
-                      Text('profile.suspend_hint'.tr(),
+                      Builder(builder: (ctx) => Text('profile.suspend_hint'.tr(),
                           style: TextStyle(
-                              color: Colors.orange.shade300, fontSize: 12)),
+                              color: Theme.of(ctx).colorScheme.onTertiaryContainer.withOpacity(0.7), fontSize: 12))),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
@@ -942,28 +941,28 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       ),
                     ],
                   ),
-                ),
+                )),
               ),
               const SizedBox(width: 16),
               // 50% Deletion
               Expanded(
-                child: Container(
+                child: Builder(builder: (context) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: Theme.of(context).colorScheme.errorContainer,
                       borderRadius: BorderRadius.circular(8)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('profile.delete_account'.tr(),
-                          style: const TextStyle(
+                      Builder(builder: (ctx) => Text('profile.delete_account'.tr(),
+                          style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Colors.red)),
+                              color: Theme.of(ctx).colorScheme.onErrorContainer))),
                       const SizedBox(height: 4),
-                      Text('profile.delete_hint'.tr(),
+                      Builder(builder: (ctx) => Text('profile.delete_hint'.tr(),
                           style: TextStyle(
-                              color: Colors.red.shade300, fontSize: 12)),
+                              color: Theme.of(ctx).colorScheme.onErrorContainer.withOpacity(0.7), fontSize: 12))),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
@@ -984,7 +983,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                       ),
                     ],
                   ),
-                ),
+                )),
               ),
             ],
           ),
@@ -1502,14 +1501,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     );
   }
 
-  Widget _thumbPlaceholder() => Container(
-        width: 80,
-        height: 70,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
+  Widget _thumbPlaceholder() => Builder(
+        builder: (context) => Container(
+          width: 80,
+          height: 70,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(Icons.home_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 28),
         ),
-        child: Icon(Icons.home_outlined, color: Colors.grey.shade400, size: 28),
       );
 
   String _formatPrice(double price) {
@@ -1526,7 +1527,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
@@ -1541,7 +1542,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 alignment: Alignment.topRight,
                 children: [
                   Icon(Icons.home_work_outlined,
-                      size: 36, color: Colors.grey.shade400),
+                      size: 36, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   Container(
                     width: 16,
                     height: 16,
@@ -1590,12 +1591,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
+          Builder(builder: (ctx) => Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-                color: Colors.grey.shade100, shape: BoxShape.circle),
-            child: const Icon(Icons.home, size: 32, color: Colors.grey),
-          ),
+                color: Theme.of(ctx).colorScheme.surfaceContainerHighest, shape: BoxShape.circle),
+            child: Icon(Icons.home, size: 32, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
+          )),
           const SizedBox(height: 16),
           Text('profile.no_properties_title'.tr(),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -1703,16 +1704,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             TextFormField(
               controller: _currentPasswordController,
               obscureText: !_isCurrentPasswordVisible,
-              style: const TextStyle(color: Colors.black87),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade200)),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                 enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey.shade200)),
+                    borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide:
@@ -1753,19 +1754,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   TextFormField(
                     controller: _newPasswordController,
                     obscureText: !_isNewPasswordVisible,
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       hintText: 'Mínimo 8 caracteres',
                       hintStyle:
-                          TextStyle(color: Colors.grey[400], fontSize: 12),
+                          TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade200)),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade200)),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
@@ -1821,19 +1822,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
-                    style: const TextStyle(color: Colors.black87),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                       hintText: 'Repite tu contraseña',
                       hintStyle:
-                          TextStyle(color: Colors.grey[400], fontSize: 12),
+                          TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade200)),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                       enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade200)),
+                          borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: const BorderSide(
@@ -1980,10 +1981,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           readOnly: readOnly,
           obscureText: isPassword,
           style: TextStyle(
-              color: readOnly ? Colors.grey.shade500 : Colors.black87),
+              color: readOnly ? Theme.of(context).colorScheme.onSurfaceVariant : Theme.of(context).colorScheme.onSurface),
           decoration: InputDecoration(
             filled: true,
-            fillColor: readOnly ? Colors.grey.shade50 : Colors.white,
+            fillColor: readOnly ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
             prefixIcon: readOnly ? null : null,
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -2000,35 +2001,40 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildVerificationBanner(String? dniStatus) {
+    final colorScheme = Theme.of(context).colorScheme;
     final Color bgColor;
     final Color borderColor;
     final Color iconColor;
+    final Color textColor;
     final IconData icon;
     final String message;
     final String buttonLabel;
     final String destination;
 
     if (dniStatus?.toLowerCase() == 'pendiente') {
-      bgColor = Colors.orange.shade50;
-      borderColor = Colors.orange.shade200;
-      iconColor = Colors.orange.shade700;
+      bgColor = colorScheme.tertiaryContainer;
+      borderColor = colorScheme.tertiary.withOpacity(0.4);
+      iconColor = colorScheme.onTertiaryContainer;
+      textColor = colorScheme.onTertiaryContainer;
       icon = Icons.hourglass_top;
       message =
           'Tu verificación está en curso. Te notificaremos cuando esté lista.';
       buttonLabel = 'Ver Estado';
       destination = '/verification-status';
     } else if (dniStatus?.toLowerCase() == 'rechazado') {
-      bgColor = Colors.red.shade50;
-      borderColor = Colors.red.shade200;
-      iconColor = Colors.red.shade700;
+      bgColor = colorScheme.errorContainer;
+      borderColor = colorScheme.error.withOpacity(0.4);
+      iconColor = colorScheme.onErrorContainer;
+      textColor = colorScheme.onErrorContainer;
       icon = Icons.cancel_outlined;
       message = 'Tu verificación fue rechazada. Puedes volver a intentarlo.';
       buttonLabel = 'Reintentar';
       destination = '/verify-identity';
     } else {
-      bgColor = Colors.blue.shade50;
-      borderColor = Colors.blue.shade100;
-      iconColor = const Color(0xFF135BEC);
+      bgColor = colorScheme.primaryContainer;
+      borderColor = colorScheme.primary.withOpacity(0.4);
+      iconColor = colorScheme.onPrimaryContainer;
+      textColor = colorScheme.onPrimaryContainer;
       icon = Icons.shield;
       message =
           'Verifica tu identidad para mayor seguridad y destacar tus anuncios.';
@@ -2050,7 +2056,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           const SizedBox(width: 16),
           Expanded(
             child:
-                Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+                Text(message, style: TextStyle(color: textColor)),
           ),
           OutlinedButton(
             onPressed: () => context.push(destination),
@@ -3249,14 +3255,14 @@ class _GestionarMenu extends StatelessWidget {
       },
       offset: const Offset(0, 48),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.surface,
       elevation: 8,
       itemBuilder: (_) => [
         PopupMenuItem(
           value: 'view',
           child: Row(
             children: [
-              const Icon(Icons.house_outlined, size: 18, color: Color(0xFF475569)),
+              Icon(Icons.house_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 12),
               Text('chat.view_property'.tr(),
                   style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
@@ -3267,8 +3273,8 @@ class _GestionarMenu extends StatelessWidget {
           value: 'offers',
           child: Row(
             children: [
-              const Icon(Icons.handshake_outlined,
-                  size: 18, color: Color(0xFF475569)),
+              Icon(Icons.handshake_outlined,
+                  size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 12),
               Text('profile.tab_offers'.tr(),
                   style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
@@ -3279,7 +3285,7 @@ class _GestionarMenu extends StatelessWidget {
           value: 'edit',
           child: Row(
             children: [
-              const Icon(Icons.edit_outlined, size: 18, color: Color(0xFF475569)),
+              Icon(Icons.edit_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 12),
               Text('common.edit'.tr(),
                   style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
@@ -3295,7 +3301,7 @@ class _GestionarMenu extends StatelessWidget {
                     ? Icons.visibility_off_outlined
                     : Icons.visibility_outlined,
                 size: 18,
-                color: const Color(0xFF475569),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 12),
               Text(

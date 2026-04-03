@@ -13,12 +13,8 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/visits/visit_cancel_dialog.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
-// _kNavy and _kNavyLight are used where context is unavailable (const constructors).
-// For dark mode support, widgets that use these should use colorScheme where possible.
 const _kNavy      = Color(0xFF135BEC);
-const _kNavyLight = Color(0xFFEEF3FA);
 const _kGold      = Color(0xFFB8860B);
-const _kGoldLight = Color(0xFFFFF8E1);
 
 class ChatDetailScreen extends ConsumerStatefulWidget {
   const ChatDetailScreen({super.key, required this.offerId});
@@ -698,20 +694,21 @@ class _SellerSolvencyBanner extends ConsumerWidget {
       data: (passport) {
         if (passport == null) {
           // Buyer has not submitted a passport yet
+          final cs = Theme.of(context).colorScheme;
           return Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFFBEB),
-              border: Border(bottom: BorderSide(color: Color(0xFFFDE68A))),
+            decoration: BoxDecoration(
+              color: cs.tertiaryContainer,
+              border: Border(bottom: BorderSide(color: cs.tertiary.withOpacity(0.4))),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                const Icon(Icons.shield_outlined, color: Color(0xFFB45309), size: 18),
+                Icon(Icons.shield_outlined, color: cs.onTertiaryContainer, size: 18),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'El comprador aun no ha completado su Pasaporte de Solvencia.',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF78350F)),
+                    style: TextStyle(fontSize: 12, color: cs.onTertiaryContainer),
                   ),
                 ),
               ],
@@ -839,18 +836,19 @@ class _SolvencyChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: const Color(0xFFEEF3FA),
+        color: colorScheme.primaryContainer,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: _kNavy),
+          Icon(icon, size: 13, color: colorScheme.primary),
           const SizedBox(width: 5),
-          Text(label, style: const TextStyle(fontSize: 11, color: _kNavy, fontWeight: FontWeight.w500)),
+          Text(label, style: TextStyle(fontSize: 11, color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -865,13 +863,14 @@ class _PropertyBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Material(
-      color: Colors.white,
+      color: colorScheme.surface,
       child: InkWell(
         onTap: onTap,
         child: Container(
-          decoration: const BoxDecoration(
-            border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
@@ -880,10 +879,10 @@ class _PropertyBanner extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: _kNavyLight,
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(Icons.home_outlined, color: _kNavy, size: 22),
+                child: Icon(Icons.home_outlined, color: colorScheme.primary, size: 22),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -892,25 +891,25 @@ class _PropertyBanner extends StatelessWidget {
                   children: [
                     Text(
                       'REFERENCIA: ${conversation.propertyTitle.toUpperCase()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
-                        color: Color(0xFF64748B),
+                        color: colorScheme.onSurfaceVariant,
                         letterSpacing: 0.5,
                       ),
                     ),
                     Text(
                       'chat.active_offer'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: _kNavy,
+                        color: colorScheme.primary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 18),
+              Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant, size: 18),
             ],
           ),
         ),
@@ -932,7 +931,7 @@ class _DateSeparator extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
-          const Expanded(child: Divider(color: Color(0xFFCBD5E1), height: 1)),
+          Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant, height: 1)),
           const SizedBox(width: 12),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -943,15 +942,15 @@ class _DateSeparator extends StatelessWidget {
             ),
             child: Text(
               _label(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF64748B),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(child: Divider(color: Color(0xFFCBD5E1), height: 1)),
+          Expanded(child: Divider(color: Theme.of(context).colorScheme.outlineVariant, height: 1)),
         ],
       ),
     );
@@ -1015,7 +1014,7 @@ class _MessageBubble extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isMine ? _kNavy : Colors.white,
+                color: isMine ? _kNavy : Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: isMine
                     ? const BorderRadius.only(
                         topLeft: Radius.circular(16),
@@ -1046,7 +1045,7 @@ class _MessageBubble extends StatelessWidget {
                   Text(
                     message.message,
                     style: TextStyle(
-                      color: isMine ? Colors.white : const Color(0xFF1E293B),
+                      color: isMine ? Colors.white : Theme.of(context).colorScheme.onSurface,
                       fontSize: 14,
                       height: 1.4,
                     ),
@@ -1061,7 +1060,7 @@ class _MessageBubble extends StatelessWidget {
                           fontSize: 10,
                           color: isMine
                               ? Colors.white.withValues(alpha: 0.65)
-                              : const Color(0xFF94A3B8),
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       if (isMine) ...[
@@ -1186,48 +1185,53 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     }
   }
 
-  (IconData, String, Color, Color) get _config => switch (_actionType) {
-        'visit_request' => (
-            Icons.calendar_month_outlined,
-            'Solicitud de Visita',
-            _kNavy,
-            _kNavyLight,
-          ),
-        'visit_accepted' => (
-            Icons.check_circle_outline,
-            'Visita Confirmada',
-            const Color(0xFF16A34A),
-            const Color(0xFFDCFCE7),
-          ),
-        'visit_rejected' => (
-            Icons.cancel_outlined,
-            'Visita Rechazada',
-            Colors.red,
-            const Color(0xFFFEF2F2),
-          ),
-        'offer_proposal' => (
-            Icons.monetization_on_outlined,
-            'Propuesta de Oferta',
-            _kGold,
-            _kGoldLight,
-          ),
-        'docs_request' => (
-            Icons.folder_outlined,
-            'Solicitud de Documentos',
-            const Color(0xFF7C3AED),
-            const Color(0xFFF5F3FF),
-          ),
-        _ => (
-            Icons.info_outline,
-            'Accion',
-            _kNavy,
-            _kNavyLight,
-          ),
-      };
+  (IconData, String, Color, Color) _getConfig(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return switch (_actionType) {
+      'visit_request' => (
+          Icons.calendar_month_outlined,
+          'Solicitud de Visita',
+          cs.primary,
+          cs.primaryContainer,
+        ),
+      'visit_accepted' => (
+          Icons.check_circle_outline,
+          'Visita Confirmada',
+          const Color(0xFF16A34A),
+          Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF052E16)
+              : const Color(0xFFF0FDF4),
+        ),
+      'visit_rejected' => (
+          Icons.cancel_outlined,
+          'Visita Rechazada',
+          cs.error,
+          cs.errorContainer,
+        ),
+      'offer_proposal' => (
+          Icons.monetization_on_outlined,
+          'Propuesta de Oferta',
+          _kGold,
+          cs.tertiaryContainer,
+        ),
+      'docs_request' => (
+          Icons.folder_outlined,
+          'Solicitud de Documentos',
+          const Color(0xFF7C3AED),
+          cs.surfaceContainerHighest,
+        ),
+      _ => (
+          Icons.info_outline,
+          'Accion',
+          cs.primary,
+          cs.primaryContainer,
+        ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, label, color, bg) = _config;
+    final (icon, label, color, bg) = _getConfig(context);
     final meta = widget.message.metadata ?? {};
     final amount = meta['amount'] != null
         ? '\u20AC${(meta['amount'] as num).toStringAsFixed(0)}'
@@ -1474,10 +1478,11 @@ class _QuickActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Buyer can request a visit only when none is pending/accepted
     final showVisita = isBuyer && visitStatus != 'pending' && visitStatus != 'accepted';
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -1564,17 +1569,18 @@ class _EncryptionNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      color: Colors.white,
+      color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(vertical: 5),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.lock_outline, size: 11, color: Color(0xFF94A3B8)),
-          SizedBox(width: 4),
+          Icon(Icons.lock_outline, size: 11, color: colorScheme.onSurfaceVariant),
+          const SizedBox(width: 4),
           Text(
             'Tus mensajes estan protegidos por cifrado de extremo a extremo.',
-            style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+            style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -1597,10 +1603,11 @@ class _InputBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(top: BorderSide(color: colorScheme.outlineVariant)),
       ),
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 12),
       child: Row(
@@ -1611,9 +1618,9 @@ class _InputBar extends StatelessWidget {
               controller: controller,
               decoration: InputDecoration(
                 hintText: 'chat.message_hint'.tr(),
-                hintStyle: const TextStyle(color: Color(0xFF94A3B8)),
+                hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
                 filled: true,
-                fillColor: const Color(0xFFF1F5F9),
+                fillColor: colorScheme.surfaceContainerHighest,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,

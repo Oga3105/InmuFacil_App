@@ -297,28 +297,31 @@ class _PageHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           // GDPR info panel
-          Container(
+          Builder(builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            return Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFFBEB),
+              color: cs.tertiaryContainer,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFFCD34D)),
+              border: Border.all(color: cs.tertiary.withOpacity(0.4)),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 14, color: Color(0xFF92400E)),
-                SizedBox(width: 8),
+                Icon(Icons.info_outline, size: 14, color: cs.onTertiaryContainer),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Base jurídica: Art. 6.1.a RGPD / Art. 7 LOPDGDD. '
                     'Derecho de acceso: Art. 15 RGPD.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF92400E), height: 1.5),
+                    style: TextStyle(fontSize: 11, color: cs.onTertiaryContainer, height: 1.5),
                   ),
                 ),
               ],
             ),
-          ),
+          );
+          }),
           const SizedBox(height: 4),
         ],
       ),
@@ -486,11 +489,11 @@ class _ConsentCardState extends State<_ConsentCard> {
                       ),
                     ],
                     const SizedBox(height: 12),
-                    Container(
+                    Builder(builder: (context) => Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: _kBg,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Wrap(
@@ -508,7 +511,7 @@ class _ConsentCardState extends State<_ConsentCard> {
                                 text: 'IP: ${e.ipAddress}'),
                         ],
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),
@@ -551,14 +554,14 @@ class _DetailRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              Builder(builder: (context) => Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: _kNavy,
+                  color: Theme.of(context).colorScheme.onSurface,
                   height: 1.5,
                 ),
-              ),
+              )),
             ],
           ),
         ),
@@ -609,14 +612,14 @@ class _EmptyState extends StatelessWidget {
                   color: _kPurple, size: 38),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Builder(builder: (context) => Text(
               'Sin registros de consentimiento',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: _kNavy,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-            ),
+            )),
             const SizedBox(height: 10),
             const Text(
               'Cuando uses funciones de IA (descripción de inmueble, '
@@ -663,14 +666,14 @@ class _ErrorState extends StatelessWidget {
             const Icon(Icons.cloud_off_outlined,
                 color: Color(0xFFDC2626), size: 44),
             const SizedBox(height: 16),
-            const Text(
+            Builder(builder: (context) => Text(
               'No se pudo cargar el historial',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: _kNavy,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-            ),
+            )),
             const SizedBox(height: 8),
             Text(
               message,

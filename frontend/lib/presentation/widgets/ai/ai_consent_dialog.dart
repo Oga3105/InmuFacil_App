@@ -42,7 +42,6 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
   bool _loading = false;
   String? _error;
 
-  static const _navy = Color(0xFF0F172A);
   static const _blue = Color(0xFF135BEC);
   static const _bgBlue = Color(0xFFEFF6FF);
 
@@ -95,15 +94,15 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                         color: _blue, size: 20),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
+                  Expanded(
+                    child: Builder(builder: (context) => Text(
                       'Consentimiento para uso de IA',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: _navy,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    ),
+                    )),
                   ),
                 ],
               ),
@@ -142,12 +141,14 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
               const SizedBox(height: 16),
 
               // Texto legal
-              Container(
+              Builder(builder: (context) {
+                final cs = Theme.of(context).colorScheme;
+                return Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFFBEB),
+                  color: cs.tertiaryContainer,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFFCD34D)),
+                  border: Border.all(color: cs.tertiary.withOpacity(0.4)),
                 ),
                 child: Text(
                   'AVISO: InmuFácil enviara los datos indicados a ${config.aiProvider}, '
@@ -157,13 +158,14 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                   'con fecha, hora e IP de sesion. Puedes consultar tu historial en '
                   'Perfil > Historial de Consentimientos IA.\n'
                   'Base juridica: Art. 6.1.a RGPD / Art. 7 LOPDGDD.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF92400E),
+                    color: cs.onTertiaryContainer,
                     height: 1.5,
                   ),
                 ),
-              ),
+              );
+              }),
 
               // Error
               if (_error != null) ...[
@@ -276,14 +278,14 @@ class _InfoRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              Builder(builder: (context) => Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF1E293B),
+                  color: Theme.of(context).colorScheme.onSurface,
                   height: 1.4,
                 ),
-              ),
+              )),
             ],
           ),
         ),

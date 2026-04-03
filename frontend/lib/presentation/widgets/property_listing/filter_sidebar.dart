@@ -364,12 +364,12 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Vende directo.',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: theme.colorScheme.onInverseSurface,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -377,7 +377,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   'Sin comisiones, sin intermediarios. Todo legal, todo seguro.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade400,
+                    color: theme.colorScheme.onInverseSurface,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -484,7 +484,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 : (val) => ref.read(searchProvider.notifier).toggleExtra(label),
               activeColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-              side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+              side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5),
             ),
           ),
           const SizedBox(width: 8),

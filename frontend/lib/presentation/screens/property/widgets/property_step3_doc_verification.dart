@@ -98,22 +98,22 @@ class _PropertyStep3DocVerificationState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFFBEB),
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: const Color(0xFFF59E0B).withOpacity(0.4)),
+                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4)),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.info_outline,
-                            color: Color(0xFFF59E0B), size: 16),
+                        Icon(Icons.info_outline,
+                            color: Theme.of(context).colorScheme.tertiary, size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '${'doc_verification.cedula_ccaa_required'.tr()} ${ccaaDisplayName[ccaa] ?? ''}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF92400E),
+                              color: Theme.of(context).colorScheme.onTertiaryContainer,
                             ),
                           ),
                         ),
@@ -136,32 +136,35 @@ class _PropertyStep3DocVerificationState
             ),
           ],
           const SizedBox(height: 16),
-          Container(
+          Builder(builder: (context) {
+            final colorScheme = Theme.of(context).colorScheme;
+            return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
+              color: colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: const Color(0xFF16A34A).withOpacity(0.3)),
+                  color: colorScheme.primary.withOpacity(0.3)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.check_circle_outline,
-                    color: Color(0xFF16A34A), size: 20),
+                Icon(Icons.check_circle_outline,
+                    color: colorScheme.primary, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'doc_verification.mvp_info'.tr(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF166534),
+                      color: colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ),
               ],
             ),
-          ),
+          );
+          }),
           const SizedBox(height: 24),
         ],
       ),
@@ -182,11 +185,13 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -205,18 +210,18 @@ class _SectionCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(icon, color: const Color(0xFF135BEC), size: 20),
+                child: Icon(icon, color: colorScheme.primary, size: 20),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
-                  color: Color(0xFF1E293B),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -248,14 +253,15 @@ class _DocumentRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: isUploaded ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC),
+        color: isUploaded ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isUploaded
-              ? const Color(0xFF16A34A).withOpacity(0.4)
-              : const Color(0xFFE2E8F0),
+              ? colorScheme.primary.withOpacity(0.4)
+              : colorScheme.outlineVariant,
         ),
       ),
       padding: const EdgeInsets.all(14),
@@ -268,8 +274,8 @@ class _DocumentRow extends StatelessWidget {
                 icon,
                 size: 20,
                 color: isUploaded
-                    ? const Color(0xFF16A34A)
-                    : const Color(0xFF64748B),
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -282,23 +288,23 @@ class _DocumentRow extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                         color: isUploaded
-                            ? const Color(0xFF166534)
-                            : const Color(0xFF1E293B),
+                            ? colorScheme.onPrimaryContainer
+                            : colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF64748B),
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
                 ),
               ),
               if (isUploaded)
-                const Icon(Icons.check_circle,
-                    color: Color(0xFF16A34A), size: 20)
+                Icon(Icons.check_circle,
+                    color: colorScheme.primary, size: 20)
               else
                 OutlinedButton.icon(
                   onPressed: onTap,
@@ -306,8 +312,8 @@ class _DocumentRow extends StatelessWidget {
                   label: Text('doc_verification.select_file'.tr(),
                       style: const TextStyle(fontSize: 12)),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF135BEC),
-                    side: const BorderSide(color: Color(0xFF135BEC)),
+                    foregroundColor: colorScheme.primary,
+                    side: BorderSide(color: colorScheme.primary),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     shape: RoundedRectangleBorder(
@@ -321,13 +327,13 @@ class _DocumentRow extends StatelessWidget {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.schedule,
-                    size: 12, color: Color(0xFFF59E0B)),
+                Icon(Icons.schedule,
+                    size: 12, color: colorScheme.tertiary),
                 const SizedBox(width: 4),
                 Text(
                   warningText!,
-                  style: const TextStyle(
-                      fontSize: 11, color: Color(0xFF92400E)),
+                  style: TextStyle(
+                      fontSize: 11, color: colorScheme.onTertiaryContainer),
                 ),
               ],
             ),
