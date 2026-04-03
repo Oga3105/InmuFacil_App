@@ -49,7 +49,7 @@ def _get_firebase_app():
     if not firebase_admin._apps:
         import json
         creds_content = os.getenv("FIREBASE_CREDENTIALS_CONTENT")
-        creds_path = os.getenv("FIREBASE_CREDENTIALS_PATH")
+        creds_path = os.getenv("FIREBASE_CREDENTIALS_PATH") or os.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
         if creds_content:
             cred = credentials.Certificate(json.loads(creds_content))
         elif creds_path:
