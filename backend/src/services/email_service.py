@@ -1,199 +1,305 @@
 """
-@Shield - Email Service (MFA Token Generation & Verification)
+@Shield - Email Service
 
-Implements Multi-Factor Authentication via email verification.
-Generates secure 6-digit codes with expiration.
-
-Token Consumption Tracking: ~500 tokens for email service
+Generacion de tokens MFA, validacion y envio SMTP real via IONOS (aiosmtplib).
 """
 
+import os
 import secrets
 import string
 from datetime import datetime, timedelta
-from typing import Optional, Tuple
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from typing import Tuple
 import logging
+
+import aiosmtplib
 
 logger = logging.getLogger("inmufacil.email")
 
+# ── Configuracion SMTP desde variables de entorno ─────────────────────────────
+
+MAIL_USERNAME  = os.getenv("MAIL_USERNAME",  "admin@inmufacil.com")
+MAIL_PASSWORD  = os.getenv("MAIL_PASSWORD",  "")
+MAIL_FROM      = os.getenv("MAIL_FROM",      "no-reply@inmufacil.com")
+MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "InmuFacil")
+MAIL_SERVER    = os.getenv("MAIL_SERVER",    "smtp.ionos.es")
+MAIL_PORT      = int(os.getenv("MAIL_PORT",  "587"))
+
+FRONTEND_BASE_URL = os.getenv("API_BASE_URL", "https://www.inmufacil.com").replace("/api/v1", "")
+
 
 # ============================================================================
-# @Shield - MFA Token Generation
+# Token Generation & Validation
 # ============================================================================
 
 def generate_verification_token() -> str:
-    """
-    Generate a secure 6-digit verification code.
-    
-    Returns:
-        6-digit numeric string
-        
-    Security Notes:
-    - Uses secrets module for cryptographically secure random
-    - 6 digits = 1,000,000 possible combinations
-    - Combined with expiration (15 min) prevents brute force
-    
-    Example:
-        >>> token = generate_verification_token()
-        >>> # Returns: "123456" (random)
-    """
-    # Generate 6-digit code using secrets (cryptographically secure)
-    digits = string.digits
-    token = ''.join(secrets.choice(digits) for _ in range(6))
-    
-    logger.info(f"🔑 Generated MFA token (not logging actual value)")
+    """Codigo de 6 digitos criptograficamente seguro."""
+    token = ''.join(secrets.choice(string.digits) for _ in range(6))
+    logger.info("[AUTH] Token MFA generado")
     return token
 
 
 def get_token_expiration() -> datetime:
-    """
-    Get expiration timestamp for verification token.
-    
-    Returns:
-        Datetime 15 minutes from now
-        
-    Security Notes:
-    - 15-minute expiration window
-    - Balances security vs user experience
-    """
+    """Expiracion: 15 minutos desde ahora (UTC)."""
     return datetime.utcnow() + timedelta(minutes=15)
 
-
-# ============================================================================
-# @Shield - Token Validation
-# ============================================================================
 
 def verify_token(
     provided_token: str,
     stored_token: str,
-    expiration: datetime
+    expiration: datetime,
 ) -> Tuple[bool, str]:
-    """
-    Verify MFA token with timing and expiration checks.
-    
-    Args:
-        provided_token: Token provided by user
-        stored_token: Token stored in database
-        expiration: Token expiration timestamp
-        
-    Returns:
-        Tuple of (is_valid, error_message)
-        
-    Security Notes:
-    - Constant-time comparison to prevent timing attacks
-    - Checks expiration before validation
-    - Tokens are single-use (should be cleared after verification)
-    """
-    # Check if token has expired
+    """Valida token con comparacion en tiempo constante y chequeo de expiracion."""
     if datetime.utcnow() > expiration:
-        logger.warning("⏰ Token verification failed: expired")
-        return False, "Verification code has expired. Please request a new one."
-    
-    # Constant-time comparison to prevent timing attacks
+        logger.warning("[AUTH] Token expirado")
+        return False, "El codigo ha expirado. Solicita uno nuevo."
+
     if not secrets.compare_digest(provided_token, stored_token):
-        logger.warning("[ERROR] Token verification failed: mismatch")
-        return False, "Invalid verification code. Please check and try again."
-    
-    logger.info("[OK] Token verified successfully")
+        logger.warning("[AUTH] Token invalido")
+        return False, "Codigo incorrecto. Revisa el email e intentalo de nuevo."
+
+    logger.info("[AUTH] Token verificado correctamente")
     return True, ""
 
 
-# ============================================================================
-# @Watcher - Rate Limiting for Token Requests
-# ============================================================================
+# ── Rate limiting en memoria (sustituir por Redis en produccion) ───────────────
 
-# In-memory storage for rate limiting (use Redis in production)
-_token_request_tracker = {}
+_token_request_tracker: dict[str, list[datetime]] = {}
 
-def can_request_token(email: str, max_requests: int = 5, window_minutes: int = 60) -> Tuple[bool, str]:
-    """
-    Check if user can request another verification token.
-    
-    Args:
-        email: User's email address
-        max_requests: Maximum requests allowed in window
-        window_minutes: Time window in minutes
-        
-    Returns:
-        Tuple of (can_request, error_message)
-        
-    Security Notes:
-    - Prevents token flooding attacks
-    - Default: 5 requests per hour
-    - Tracks by email address
-    
-    @Watcher: Rate limiting for security
-    """
+
+def can_request_token(
+    email: str,
+    max_requests: int = 5,
+    window_minutes: int = 60,
+) -> Tuple[bool, str]:
+    """Limita a 5 peticiones por hora por email."""
     now = datetime.utcnow()
-    
-    if email not in _token_request_tracker:
-        _token_request_tracker[email] = []
-    
-    # Clean old requests outside the window
     cutoff = now - timedelta(minutes=window_minutes)
+
+    _token_request_tracker.setdefault(email, [])
     _token_request_tracker[email] = [
-        req_time for req_time in _token_request_tracker[email]
-        if req_time > cutoff
+        t for t in _token_request_tracker[email] if t > cutoff
     ]
-    
-    # Check if limit exceeded
+
     if len(_token_request_tracker[email]) >= max_requests:
-        logger.warning(f"[BLOCKED] Rate limit exceeded for email: {email}")
-        return False, f"Too many verification requests. Please try again in {window_minutes} minutes."
-    
-    # Record this request
+        logger.warning(f"[RATE-LIMIT] {email} supero el limite de tokens")
+        return False, f"Demasiados intentos. Espera {window_minutes} minutos."
+
     _token_request_tracker[email].append(now)
     return True, ""
 
 
 # ============================================================================
-# @Shield - Email Sending (Placeholder)
+# SMTP — Envio real via IONOS (aiosmtplib)
 # ============================================================================
 
+def _build_password_reset_html(token: str) -> str:
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar contrasena - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Cabecera azul -->
+          <tr>
+            <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;
+                         letter-spacing:-0.5px;">InmuFacil</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+                Plataforma inmobiliaria entre particulares
+              </p>
+            </td>
+          </tr>
+
+          <!-- Cuerpo -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+                Recupera tu contrasena
+              </h2>
+              <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.6;">
+                Hemos recibido una solicitud para restablecer la contrasena de tu cuenta.
+                Introduce el siguiente codigo de verificacion en la aplicacion:
+              </p>
+
+              <!-- Codigo -->
+              <div style="background:#EFF6FF;border:2px dashed #93C5FD;border-radius:12px;
+                          padding:28px;text-align:center;margin-bottom:28px;">
+                <p style="margin:0 0 6px;color:#3B82F6;font-size:12px;font-weight:700;
+                           letter-spacing:2px;text-transform:uppercase;">
+                  Codigo de verificacion
+                </p>
+                <p style="margin:0;color:#1E3A8A;font-size:42px;font-weight:900;
+                           letter-spacing:12px;font-family:monospace;">
+                  {token}
+                </p>
+                <p style="margin:10px 0 0;color:#64748B;font-size:12px;">
+                  Valido durante <strong>15 minutos</strong>
+                </p>
+              </div>
+
+              <p style="margin:0;color:#64748B;font-size:13px;line-height:1.6;">
+                Si no solicitaste este cambio, puedes ignorar este mensaje.
+                Tu contrasena actual seguira siendo la misma.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                       padding:24px 40px;text-align:center;">
+              <p style="margin:0;color:#94A3B8;font-size:12px;">
+                InmuFacil &copy; 2025 &middot; Compraventa inmobiliaria entre particulares<br>
+                Este es un mensaje automatico. No respondas a este correo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+def _build_welcome_html(token: str) -> str:
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifica tu cuenta - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Cabecera -->
+          <tr>
+            <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+                Bienvenido a la plataforma inmobiliaria entre particulares
+              </p>
+            </td>
+          </tr>
+
+          <!-- Cuerpo -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+                Verifica tu direccion de correo
+              </h2>
+              <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.6;">
+                Para activar tu cuenta introduce el siguiente codigo en la aplicacion:
+              </p>
+
+              <!-- Codigo -->
+              <div style="background:#F0FDF4;border:2px dashed #86EFAC;border-radius:12px;
+                          padding:28px;text-align:center;margin-bottom:28px;">
+                <p style="margin:0 0 6px;color:#16A34A;font-size:12px;font-weight:700;
+                           letter-spacing:2px;text-transform:uppercase;">
+                  Codigo de verificacion
+                </p>
+                <p style="margin:0;color:#14532D;font-size:42px;font-weight:900;
+                           letter-spacing:12px;font-family:monospace;">
+                  {token}
+                </p>
+                <p style="margin:10px 0 0;color:#64748B;font-size:12px;">
+                  Valido durante <strong>15 minutos</strong>
+                </p>
+              </div>
+
+              <p style="margin:0;color:#64748B;font-size:13px;line-height:1.6;">
+                Si no has creado esta cuenta, ignora este mensaje.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                       padding:24px 40px;text-align:center;">
+              <p style="margin:0;color:#94A3B8;font-size:12px;">
+                InmuFacil &copy; 2025 &middot; Este es un mensaje automatico.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def _send_email(to: str, subject: str, html_body: str) -> bool:
+    """Envia un email HTML via SMTP IONOS con STARTTLS."""
+    if not MAIL_PASSWORD:
+        logger.error("[SMTP] MAIL_PASSWORD no configurado en .env")
+        return False
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = f"{MAIL_FROM_NAME} <{MAIL_FROM}>"
+    msg["To"]      = to
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=MAIL_SERVER,
+            port=MAIL_PORT,
+            username=MAIL_USERNAME,
+            password=MAIL_PASSWORD,
+            start_tls=True,
+        )
+        logger.info(f"[SMTP] Email enviado a {to} — asunto: {subject!r}")
+        return True
+    except aiosmtplib.SMTPException as exc:
+        logger.error(f"[SMTP] Error al enviar a {to}: {exc}")
+        return False
+    except Exception as exc:
+        logger.error(f"[SMTP] Error inesperado al enviar a {to}: {exc}")
+        return False
+
+
 async def send_verification_email(email: str, token: str) -> bool:
-    """
-    Send verification email with MFA token.
-    
-    Args:
-        email: Recipient email address
-        token: 6-digit verification code
-        
-    Returns:
-        True if email sent successfully
-        
-    Security Notes:
-    - Token is sent via secure email (TLS)
-    - Email content should not expose sensitive user data
-    - Implement actual SMTP or email service integration
-    
-    TODO: Implement actual email sending
-    - Option 1: SMTP (Gmail, SendGrid, etc.)
-    - Option 2: Email service API (AWS SES, Mailgun, etc.)
-    """
-    # Placeholder implementation
-    logger.info(f"📧 Sending verification email to {email}")
-    logger.info(f"📧 [DEV MODE] Verification code: {token}")
-    
-    # TODO: Implement actual email sending
-    # Example with SMTP:
-    # import smtplib
-    # from email.mime.text import MIMEText
-    # ...
-    
-    # For now, just log (in production, this would send real email)
-    email_body = f"""
-    Welcome to InmuFácil!
-    
-    Your verification code is: {token}
-    
-    This code will expire in 15 minutes.
-    
-    If you didn't request this code, please ignore this email.
-    
-    Best regards,
-    InmuFácil Team
-    """
-    
-    logger.debug(f"Email body prepared for {email}")
-    
-    # Return True for development (would return actual send status in production)
-    return True
+    """Envia el email de verificacion de cuenta (registro)."""
+    html = _build_welcome_html(token)
+    return await _send_email(
+        to=email,
+        subject="Verifica tu cuenta en InmuFacil",
+        html_body=html,
+    )
+
+
+async def send_password_reset_email(email: str, token: str) -> bool:
+    """Envia el email de recuperacion de contrasena."""
+    html = _build_password_reset_html(token)
+    return await _send_email(
+        to=email,
+        subject="Recupera tu contrasena en InmuFacil",
+        html_body=html,
+    )

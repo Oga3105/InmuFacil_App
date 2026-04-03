@@ -25,8 +25,8 @@ from backend.src.models import User, UserType, DNIStatus
 from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
 from backend.src.utils.security import verify_password, get_password_hash, create_access_token
 from backend.src.services.email_service import (
-    generate_verification_token, get_token_expiration, 
-    send_verification_email, verify_token
+    generate_verification_token, get_token_expiration,
+    send_verification_email, send_password_reset_email, verify_token
 )
 from backend.src.schemas.base import (
     UserCreate, UserResponse, Token, VerifyEmailRequest,
@@ -346,8 +346,8 @@ async def request_password_reset(
     db.commit()
     
     # Send Email
-    await send_verification_email(user.email, token)
-    
+    await send_password_reset_email(user.email, token)
+
     logger.info(f"[AUTH] Password reset requested for: {user.email}")
     return {"message": "Verification code sent to email"}
 
