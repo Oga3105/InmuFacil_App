@@ -22,6 +22,8 @@ class PropertyModel {
     required this.bedrooms,
     required this.bathrooms,
     this.floor,
+    this.constructionYear,
+    this.orientation,
     required this.squareMeters,
     required this.images,
     required this.isVerified,
@@ -95,6 +97,8 @@ class PropertyModel {
       bedrooms: _parseInt(features['bedrooms']) ?? 0,
       bathrooms: _parseInt(features['bathrooms']) ?? 0,
       floor: features['floor']?.toString(),
+      constructionYear: _parseInt(json['construction_year']),
+      orientation: json['orientation'] as String?,
       squareMeters: (json['surface_area'] ?? 0.0).toDouble(),
       images: imageUrls,
       isVerified: json['is_verified'] as bool? ?? true,
@@ -120,6 +124,8 @@ class PropertyModel {
   final int bedrooms;
   final int bathrooms;
   final String? floor;
+  final int? constructionYear;
+  final String? orientation;
   final double squareMeters;
   final List<String> images;
   final bool isVerified;

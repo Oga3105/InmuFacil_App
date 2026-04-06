@@ -77,19 +77,31 @@ class ComfortIndexResult {
 // ---------------------------------------------------------------------------
 
 class _ComfortArgs {
-  const _ComfortArgs({required this.postalCode, required this.address});
+  const _ComfortArgs({
+    required this.postalCode,
+    required this.address,
+    this.floor,
+    this.orientation,
+    this.buildingYear,
+  });
 
   final String postalCode;
   final String address;
+  final String? floor;
+  final String? orientation;
+  final int? buildingYear;
 
   @override
   bool operator ==(Object other) =>
       other is _ComfortArgs &&
       other.postalCode == postalCode &&
-      other.address == address;
+      other.address == address &&
+      other.floor == floor &&
+      other.orientation == orientation &&
+      other.buildingYear == buildingYear;
 
   @override
-  int get hashCode => Object.hash(postalCode, address);
+  int get hashCode => Object.hash(postalCode, address, floor, orientation, buildingYear);
 }
 
 final _comfortIndexProvider =
@@ -101,7 +113,13 @@ final _comfortIndexProvider =
     final dio = buildAuthDio();
     final resp = await dio.post(
       '/ai/comfort-index',
-      data: {'postal_code': args.postalCode, 'address': args.address},
+      data: {
+        'postal_code': args.postalCode,
+        'address': args.address,
+        if (args.floor != null) 'floor': int.tryParse(args.floor!),
+        if (args.orientation != null) 'orientation': args.orientation,
+        if (args.buildingYear != null) 'building_year': args.buildingYear,
+      },
       cancelToken: cancelToken,
     );
     return ComfortIndexResult.fromJson(resp.data as Map<String, dynamic>);
@@ -117,22 +135,32 @@ class ComfortRadarChart extends ConsumerWidget {
     super.key,
     required this.postalCode,
     required this.address,
+    this.floor,
+    this.orientation,
+    this.buildingYear,
   });
 
   final String postalCode;
   final String address;
+  final String? floor;
+  final String? orientation;
+  final int? buildingYear;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final args = _ComfortArgs(postalCode: postalCode, address: address);
+    final args = _ComfortArgs(
+      postalCode: postalCode,
+      address: address,
+      floor: floor,
+      orientation: orientation,
+      buildingYear: buildingYear,
+    );
     final asyncValue = ref.watch(_comfortIndexProvider(args));
 
     return asyncValue.when(
       loading: () => const _ComfortLoading(),
       error: (_, __) => const _ComfortError(),
-      data: (result) => result.lowData
-          ? const _ComfortLowData()
-          : _ComfortCard(result: result),
+      data: (result) => _ComfortCard(result: result),
     );
   }
 }
@@ -304,6 +332,30 @@ class _ComfortCard extends StatelessWidget {
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: Colors.grey.shade500),
             ),
+
+            if (result.lowData) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 14, color: Colors.amber.shade700),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        'comfort.low_data_banner'.tr(),
+                        style: TextStyle(fontSize: 11, color: Colors.amber.shade800),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             const SizedBox(height: 16),
 

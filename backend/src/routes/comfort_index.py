@@ -157,9 +157,6 @@ Formato obligatorio:
             )
             return _LOW_DATA_RESPONSE
 
-        if bool(data.get("low_data", False)):
-            return _LOW_DATA_RESPONSE
-
         def _parse_dim(key: str) -> ComfortDimension:
             d = data.get(key) or {}
             score = max(0, min(100, int(d.get("score") or 50)))

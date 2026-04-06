@@ -1206,6 +1206,7 @@
     "title": "Índice de Confort",
     "overall_score": "Puntuación global: {0}/100",
     "low_data": "Datos insuficientes para calcular el índice de confort en esta ubicación.",
+    "low_data_banner": "Estimación con datos limitados — puede ser menos precisa.",
     "error": "No se pudo calcular el índice de confort.",
     "dim_noise": "Ruido",
     "dim_light": "Luminosidad",

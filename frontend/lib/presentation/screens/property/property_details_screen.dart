@@ -375,6 +375,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ComfortRadarChart(
                           postalCode: _extractPostalCode(property.address),
                           address: property.address,
+                          floor: property.floor,
+                          orientation: property.orientation,
+                          buildingYear: property.constructionYear,
                         ),
                       ],
                       const SizedBox(height: 32),
@@ -1007,7 +1010,13 @@ class _SummaryCard extends ConsumerWidget {
             if (postalCode.isEmpty) return const SizedBox.shrink();
             return Column(
               children: [
-                ComfortRadarChart(postalCode: postalCode, address: property.address),
+                ComfortRadarChart(
+                  postalCode: postalCode,
+                  address: property.address,
+                  floor: property.floor,
+                  orientation: property.orientation,
+                  buildingYear: property.constructionYear,
+                ),
                 const SizedBox(height: 16),
               ],
             );
