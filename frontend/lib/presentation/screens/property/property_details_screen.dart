@@ -370,15 +370,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       _DescriptionSection(property: property),
                       const SizedBox(height: 32),
                       _LocationSection(location: property.location), // Passing location
-                      if (_extractPostalCode(property.address).isNotEmpty) ...[
+                      ...[
                         const SizedBox(height: 32),
-                        ComfortRadarChart(
-                          postalCode: _extractPostalCode(property.address),
-                          address: property.address,
-                          floor: property.floor,
-                          orientation: property.orientation,
-                          buildingYear: property.constructionYear,
-                        ),
+                        ComfortRadarChart(propertyId: property.id),
                       ],
                       const SizedBox(height: 32),
                       _OwnerCard(property: property),
@@ -1004,23 +998,12 @@ class _SummaryCard extends ConsumerWidget {
             const SizedBox(height: 16),
           ],
           // Comfort Radar Chart — zona analysis
-          Builder(builder: (context) {
-            final match = RegExp(r'\b(\d{5})\b').firstMatch(property.address);
-            final postalCode = match?.group(1) ?? '';
-            if (postalCode.isEmpty) return const SizedBox.shrink();
-            return Column(
-              children: [
-                ComfortRadarChart(
-                  postalCode: postalCode,
-                  address: property.address,
-                  floor: property.floor,
-                  orientation: property.orientation,
-                  buildingYear: property.constructionYear,
-                ),
-                const SizedBox(height: 16),
-              ],
-            );
-          }),
+          Column(
+            children: [
+              ComfortRadarChart(propertyId: property.id),
+              const SizedBox(height: 16),
+            ],
+          ),
           // Action buttons
           _ActionBar(property: property, ref: ref, context: context, vertical: true),
         ],

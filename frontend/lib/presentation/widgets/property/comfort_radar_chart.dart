@@ -32,6 +32,7 @@ class ComfortDimension {
 
 class ComfortIndexResult {
   const ComfortIndexResult({
+    required this.status,
     required this.overallScore,
     required this.grade,
     required this.noiseDimension,
@@ -41,8 +42,10 @@ class ComfortIndexResult {
     required this.thermalDimension,
     required this.lowData,
     required this.disclaimer,
+    this.cached = false,
   });
 
+  final String status; // "ok" | "no_consent" | "low_data"
   final int overallScore;
   final String grade;
   final ComfortDimension noiseDimension;
@@ -52,74 +55,42 @@ class ComfortIndexResult {
   final ComfortDimension thermalDimension;
   final bool lowData;
   final String disclaimer;
+  final bool cached;
 
-  factory ComfortIndexResult.fromJson(Map<String, dynamic> j) =>
-      ComfortIndexResult(
-        overallScore: (j['overall_score'] as int?) ?? 0,
-        grade: j['grade'] as String? ?? 'D',
-        noiseDimension: ComfortDimension.fromJson(
-            j['noise_dimension'] as Map<String, dynamic>? ?? {}),
-        lightDimension: ComfortDimension.fromJson(
-            j['light_dimension'] as Map<String, dynamic>? ?? {}),
-        airDimension: ComfortDimension.fromJson(
-            j['air_dimension'] as Map<String, dynamic>? ?? {}),
-        connectivityDimension: ComfortDimension.fromJson(
-            j['connectivity_dimension'] as Map<String, dynamic>? ?? {}),
-        thermalDimension: ComfortDimension.fromJson(
-            j['thermal_dimension'] as Map<String, dynamic>? ?? {}),
-        lowData: j['low_data'] as bool? ?? true,
-        disclaimer: j['disclaimer'] as String? ?? '',
-      );
+  bool get noConsent => status == 'no_consent';
+
+  factory ComfortIndexResult.fromJson(Map<String, dynamic> j) {
+    ComfortDimension _dim(String key) => ComfortDimension.fromJson(
+        j[key] as Map<String, dynamic>? ?? {});
+    return ComfortIndexResult(
+      status: j['status'] as String? ?? 'ok',
+      overallScore: (j['overall_score'] as int?) ?? 0,
+      grade: j['grade'] as String? ?? 'D',
+      noiseDimension: _dim('noise_dimension'),
+      lightDimension: _dim('light_dimension'),
+      airDimension: _dim('air_dimension'),
+      connectivityDimension: _dim('connectivity_dimension'),
+      thermalDimension: _dim('thermal_dimension'),
+      lowData: j['low_data'] as bool? ?? true,
+      disclaimer: j['disclaimer'] as String? ?? '',
+      cached: j['cached'] as bool? ?? false,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Provider
 // ---------------------------------------------------------------------------
 
-class _ComfortArgs {
-  const _ComfortArgs({
-    required this.postalCode,
-    required this.address,
-    this.floor,
-    this.orientation,
-    this.buildingYear,
-  });
-
-  final String postalCode;
-  final String address;
-  final String? floor;
-  final String? orientation;
-  final int? buildingYear;
-
-  @override
-  bool operator ==(Object other) =>
-      other is _ComfortArgs &&
-      other.postalCode == postalCode &&
-      other.address == address &&
-      other.floor == floor &&
-      other.orientation == orientation &&
-      other.buildingYear == buildingYear;
-
-  @override
-  int get hashCode => Object.hash(postalCode, address, floor, orientation, buildingYear);
-}
-
 final _comfortIndexProvider =
-    FutureProvider.autoDispose.family<ComfortIndexResult, _ComfortArgs>(
-  (ref, args) async {
+    FutureProvider.autoDispose.family<ComfortIndexResult, String>(
+  (ref, propertyId) async {
     final cancelToken = CancelToken();
     ref.onDispose(cancelToken.cancel);
 
     final dio = buildAuthDio();
-    final resp = await dio.post(
-      '/ai/comfort-index',
-      data: {
-        'postal_code': args.postalCode,
-        'address': args.address,
-        if (args.floor != null) 'floor': int.tryParse(args.floor!),
-        if (args.orientation != null) 'orientation': args.orientation,
-        if (args.buildingYear != null) 'building_year': args.buildingYear,
-      },
+    final resp = await dio.get(
+      '/properties/$propertyId/comfort-index',
       cancelToken: cancelToken,
     );
     return ComfortIndexResult.fromJson(resp.data as Map<String, dynamic>);
@@ -133,40 +104,30 @@ final _comfortIndexProvider =
 class ComfortRadarChart extends ConsumerWidget {
   const ComfortRadarChart({
     super.key,
-    required this.postalCode,
-    required this.address,
-    this.floor,
-    this.orientation,
-    this.buildingYear,
+    required this.propertyId,
   });
 
-  final String postalCode;
-  final String address;
-  final String? floor;
-  final String? orientation;
-  final int? buildingYear;
+  final String propertyId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final args = _ComfortArgs(
-      postalCode: postalCode,
-      address: address,
-      floor: floor,
-      orientation: orientation,
-      buildingYear: buildingYear,
-    );
-    final asyncValue = ref.watch(_comfortIndexProvider(args));
+    final asyncValue = ref.watch(_comfortIndexProvider(propertyId));
 
     return asyncValue.when(
       loading: () => const _ComfortLoading(),
       error: (_, __) => const _ComfortError(),
-      data: (result) => _ComfortCard(result: result),
+      data: (result) {
+        if (result.noConsent) {
+          return _ComfortNoConsent(propertyId: propertyId);
+        }
+        return _ComfortCard(result: result);
+      },
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Loading / Error / LowData states
+// Loading / Error states
 // ---------------------------------------------------------------------------
 
 class _ComfortLoading extends StatelessWidget {
@@ -220,27 +181,122 @@ class _ComfortError extends StatelessWidget {
   }
 }
 
-class _ComfortLowData extends StatelessWidget {
-  const _ComfortLowData();
+// ---------------------------------------------------------------------------
+// No-consent CTA (buyer side)
+// ---------------------------------------------------------------------------
+
+class _ComfortNoConsent extends ConsumerStatefulWidget {
+  const _ComfortNoConsent({required this.propertyId});
+
+  final String propertyId;
+
+  @override
+  ConsumerState<_ComfortNoConsent> createState() => _ComfortNoConsentState();
+}
+
+class _ComfortNoConsentState extends ConsumerState<_ComfortNoConsent> {
+  bool _sending = false;
+  bool _sent = false;
+  String? _message;
+
+  Future<void> _requestComfort() async {
+    setState(() => _sending = true);
+    try {
+      final dio = buildAuthDio();
+      final resp = await dio.post(
+        '/properties/${widget.propertyId}/request-comfort',
+      );
+      final sent = resp.data['sent'] as bool? ?? false;
+      setState(() {
+        _sent = sent;
+        _message = resp.data['message'] as String?;
+      });
+    } catch (_) {
+      setState(() {
+        _message = 'comfort.request_error'.tr();
+      });
+    } finally {
+      setState(() => _sending = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
-      color: Colors.grey.shade100,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.info_outline, color: Colors.grey.shade500, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'comfort.low_data'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .bodySmall
-                    ?.copyWith(color: Colors.grey.shade600),
+            Row(
+              children: [
+                const Icon(Icons.self_improvement_rounded,
+                    color: Color(0xFF135BEC), size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'comfort.title'.tr(),
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'comfort.no_consent_info'.tr(),
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: Colors.grey.shade600),
+                  ),
+                  if (_message != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      _message!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: _sent
+                            ? const Color(0xFF16A34A)
+                            : Colors.red.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  if (!_sent) ...[
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _sending ? null : _requestComfort,
+                        icon: _sending
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.send_outlined, size: 16),
+                        label: Text('comfort.request_btn'.tr()),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF135BEC),
+                          side: const BorderSide(color: Color(0xFF135BEC)),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],
@@ -332,6 +388,20 @@ class _ComfortCard extends StatelessWidget {
               style: theme.textTheme.bodySmall
                   ?.copyWith(color: Colors.grey.shade500),
             ),
+
+            if (result.cached) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.cached, size: 12, color: Colors.grey.shade400),
+                  const SizedBox(width: 4),
+                  Text(
+                    'comfort.cached'.tr(),
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+                  ),
+                ],
+              ),
+            ],
 
             if (result.lowData) ...[
               const SizedBox(height: 8),

@@ -32,6 +32,12 @@ class Property(Base):
     longitude      = Column(Float, nullable=True)
     hide_exact_location = Column(Boolean, default=False)
 
+    # AI Comfort Index — GDPR consent and result cache
+    ai_comfort_consent = Column(Boolean, default=False, nullable=False)
+    ai_comfort_consent_date = Column(DateTime(timezone=True), nullable=True)
+    ai_comfort_data_cache = Column(Text, nullable=True)   # JSON string with ComfortIndexResponse
+    ai_comfort_cache_expires_at = Column(DateTime(timezone=True), nullable=True)
+
     status = Column(Enum(PropertyStatus), default=PropertyStatus.PUBLISHED)
     hide_when_reserved = Column(Boolean, default=False) # Hito 8: Visibility Config
     allow_visits = Column(Boolean, default=True, nullable=False)

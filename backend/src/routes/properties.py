@@ -336,9 +336,14 @@ async def update_property(
         parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
                               core_data.get('city'), core_data.get('postal_code')] if p]
         core_data['location'] = ', '.join(parts) or 'Sin dirección'
+    from datetime import datetime, timezone as _tz
     for key, value in core_data.items():
         setattr(property, key, value)
-        
+
+    # Stamp consent date when seller enables AI comfort consent for the first time
+    if core_data.get('ai_comfort_consent') is True and not property.ai_comfort_consent_date:
+        property.ai_comfort_consent_date = datetime.now(_tz.utc)
+
     # Update Satellites (Create if not exists, Update if exists)
     
     # Features

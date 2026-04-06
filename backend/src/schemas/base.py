@@ -231,6 +231,7 @@ class PropertyBase(BaseModel):
     longitude: Optional[float] = None
     hide_exact_location: bool = False
     allow_visits: bool = True
+    ai_comfort_consent: bool = False
 
     property_type: PropertyType = PropertyType.PISO
     operation_type: OperationType = OperationType.VENTA
@@ -273,6 +274,7 @@ class PropertyDraftCreate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     hide_exact_location: bool = False
+    ai_comfort_consent: bool = False
     features: Optional[PropertyFeaturesSchema] = None
 
     class Config:
@@ -311,6 +313,9 @@ class PropertyResponse(PropertyBase):
     # Computed fields
     gross_yield: Optional[float] = None
     price_m2: Optional[float] = None
+
+    # AI Comfort Index consent flag (exposed so frontend knows whether to show CTA)
+    ai_comfort_consent: bool = False
 
     # Owner info (populated from the ORM relationship)
     owner_name: Optional[str] = None
