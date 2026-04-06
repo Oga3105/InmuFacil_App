@@ -437,6 +437,7 @@ async def change_password(
 )
 async def google_auth(
     payload: GoogleAuthRequest,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """
@@ -487,9 +488,28 @@ async def google_auth(
             db.refresh(user)
             logger.info(f"[AUTH] Google vinculado a cuenta existente: {email}")
         else:
-            # Caso: usuario nuevo — crear cuenta
+            # Caso: usuario nuevo — validar anti-agencia antes de crear
             is_new_user = True
             user_type_value = UserType(payload.user_type) if payload.user_type else UserType.PARTICULAR
+            is_valid, reason = await validate_user_is_not_agency(
+                email=email,
+                full_name=full_name,
+                user_type=user_type_value.value
+            )
+            if not is_valid:
+                client_ip = request.client.host if request.client else "unknown"
+                log_blocked_attempt(
+                    email=email,
+                    full_name=full_name,
+                    reason=reason,
+                    ip_address=client_ip,
+                    country="ES"
+                )
+                logger.warning(f"[SHIELD] Google auth bloqueado: {reason} | Email: {email}")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Registro no permitido: {reason}"
+                )
             new_user = User(
                 email=email,
                 hashed_password=None,
