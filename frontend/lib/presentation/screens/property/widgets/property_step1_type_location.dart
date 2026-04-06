@@ -267,6 +267,8 @@ class _PropertyStep1TypeLocationState
           ..._buildGpsSection(s),
           const SizedBox(height: 12),
           _buildHideLocationToggle(s, notifier),
+          const SizedBox(height: 8),
+          _buildAiComfortConsentToggle(s, notifier),
         ],
       ),
     );
@@ -495,6 +497,42 @@ class _PropertyStep1TypeLocationState
         ),
         value: s.hideExactLocation,
         onChanged: (_) => notifier.toggleHideExactLocation(),
+        activeColor: Theme.of(context).colorScheme.primary,
+      ),
+    );
+  }
+
+  // ── Toggle consentimiento IA ──────────────────────────────────────────────
+
+  Widget _buildAiComfortConsentToggle(
+      PropertyFormState s, PropertyFormNotifier notifier) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: SwitchListTile(
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        title: Text(
+          'property_wizard.ai_comfort_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+        subtitle: Text(
+          s.aiComfortConsent
+              ? 'property_wizard.ai_comfort_on'.tr()
+              : 'property_wizard.ai_comfort_off'.tr(),
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+        secondary: Icon(
+          Icons.self_improvement_rounded,
+          color: s.aiComfortConsent
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey.shade400,
+        ),
+        value: s.aiComfortConsent,
+        onChanged: (_) => notifier.toggleAiComfortConsent(),
         activeColor: Theme.of(context).colorScheme.primary,
       ),
     );

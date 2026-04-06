@@ -89,6 +89,7 @@ class PropertyFormState {
     this.selectedLocation,
     this.floorText = '',
     this.hideExactLocation = true,
+    this.aiComfortConsent = false,
     // Structured address
     this.streetText = '',
     this.streetNumberText = '',
@@ -140,6 +141,7 @@ class PropertyFormState {
   final LatLng? selectedLocation;
   final String floorText;
   final bool hideExactLocation;
+  final bool aiComfortConsent;
   // Structured address
   final String streetText;
   final String streetNumberText;
@@ -200,6 +202,7 @@ class PropertyFormState {
     bool clearSelectedLocation = false,
     String? floorText,
     bool? hideExactLocation,
+    bool? aiComfortConsent,
     String? streetText,
     String? streetNumberText,
     String? cityText,
@@ -255,6 +258,7 @@ class PropertyFormState {
           : (selectedLocation ?? this.selectedLocation),
       floorText: floorText ?? this.floorText,
       hideExactLocation: hideExactLocation ?? this.hideExactLocation,
+      aiComfortConsent: aiComfortConsent ?? this.aiComfortConsent,
       streetText: streetText ?? this.streetText,
       streetNumberText: streetNumberText ?? this.streetNumberText,
       cityText: cityText ?? this.cityText,
@@ -375,6 +379,10 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
   void toggleHideExactLocation() {
     state = state.copyWith(hideExactLocation: !state.hideExactLocation);
+  }
+
+  void toggleAiComfortConsent() {
+    state = state.copyWith(aiComfortConsent: !state.aiComfortConsent);
   }
 
   void setStreet(String v) => state = state.copyWith(streetText: v, clearStep1Error: true);
@@ -692,6 +700,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         selectedLocation: location,
         floorText: (data['floor'] ?? features['floor'] ?? '') as String? ?? '',
         hideExactLocation: (data['hide_exact_location'] as bool?) ?? false,
+        aiComfortConsent: (data['ai_comfort_consent'] as bool?) ?? false,
         streetText: data['street'] as String? ?? '',
         streetNumberText: data['street_number'] as String? ?? '',
         cityText: data['city'] as String? ?? '',
@@ -957,6 +966,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         if (state.provinceText.isNotEmpty) 'province': state.provinceText,
         if (state.postalCodeText.isNotEmpty) 'postal_code': state.postalCodeText,
         'hide_exact_location': state.hideExactLocation,
+        'ai_comfort_consent': state.aiComfortConsent,
         if (state.selectedLocation != null) 'latitude': state.selectedLocation!.latitude,
         if (state.selectedLocation != null) 'longitude': state.selectedLocation!.longitude,
       };
@@ -1042,6 +1052,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'price': price,
       'surface_area': surface,
       'hide_exact_location': state.hideExactLocation,
+      'ai_comfort_consent': state.aiComfortConsent,
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
       'allow_visits': state.allowVisits,
