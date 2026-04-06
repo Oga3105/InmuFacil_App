@@ -1,45 +1,57 @@
 """
-Invisible Comfort Index — Analiza factores de confort no visibles para una propiedad.
+Comfort Index — Analiza factores de confort invisible para una propiedad.
 
 Endpoints:
-  POST /ai/comfort-index   Devuelve puntuacion y factores de confort por dimensiones
+  GET  /properties/{property_id}/comfort-index
+       Cache-aside: devuelve cache si existe y no expiró, o llama a Gemini si
+       el vendedor dio consentimiento. Si no hay consentimiento, devuelve
+       estado 'no_consent' para que el comprador pueda solicitarlo.
+
+  POST /properties/{property_id}/request-comfort
+       El comprador solicita al vendedor que active el análisis de confort.
+       Envía email al vendedor via IONOS y devuelve confirmación.
 """
 from __future__ import annotations
 
 import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy.orm import Session, joinedload
 
+from backend.src.config.database import get_db
+from backend.src.models import Property, User
+from backend.src.models.ai_consent import AIConsentLog
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.services.email_service import send_comfort_request_email
+from backend.src.utils.security import get_current_active_user
 
-router = APIRouter(prefix="/ai", tags=["Comfort Index"])
+router = APIRouter(tags=["Comfort Index"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_DAYS = 30
+_DISCLAIMER = (
+    "Indice estimado por IA a partir de datos publicos y caracteristicas declaradas. "
+    "No sustituye una inspeccion tecnica profesional."
+)
+
 
 # ---------------------------------------------------------------------------
 # Schemas
 # ---------------------------------------------------------------------------
 
-
-class ComfortIndexRequest(BaseModel):
-    postal_code: str
-    address: str
-    floor: int | None = None
-    orientation: str | None = None  # "N", "S", "E", "O", "NE", etc.
-    building_year: int | None = None
-
-
 class ComfortDimension(BaseModel):
-    score: int  # 0-100
+    score: int
     label: str
     factors: list[str]
 
 
 class ComfortIndexResponse(BaseModel):
-    overall_score: int  # 0-100
-    grade: str  # "A+" | "A" | "B" | "C" | "D"
+    status: str  # "ok" | "no_consent" | "low_data"
+    overall_score: int
+    grade: str
     noise_dimension: ComfortDimension
     light_dimension: ComfortDimension
     air_dimension: ComfortDimension
@@ -47,27 +59,32 @@ class ComfortIndexResponse(BaseModel):
     thermal_dimension: ComfortDimension
     low_data: bool
     disclaimer: str
+    cached: bool = False
+
+
+class ComfortRequestResponse(BaseModel):
+    sent: bool
+    message: str
 
 
 # ---------------------------------------------------------------------------
-# Constants
+# Helpers
 # ---------------------------------------------------------------------------
 
-_DISCLAIMER = (
-    "Indice estimado por IA a partir de datos publicos y caracteristicas declaradas. "
-    "No sustituye una inspeccion tecnica profesional."
-)
+_EMPTY_DIM = ComfortDimension(score=0, label="Sin datos", factors=[])
 
-_LOW_DATA_RESPONSE = ComfortIndexResponse(
+_NO_CONSENT_RESPONSE = ComfortIndexResponse(
+    status="no_consent",
     overall_score=0,
     grade="D",
-    noise_dimension=ComfortDimension(score=0, label="Sin datos", factors=[]),
-    light_dimension=ComfortDimension(score=0, label="Sin datos", factors=[]),
-    air_dimension=ComfortDimension(score=0, label="Sin datos", factors=[]),
-    connectivity_dimension=ComfortDimension(score=0, label="Sin datos", factors=[]),
-    thermal_dimension=ComfortDimension(score=0, label="Sin datos", factors=[]),
+    noise_dimension=_EMPTY_DIM,
+    light_dimension=_EMPTY_DIM,
+    air_dimension=_EMPTY_DIM,
+    connectivity_dimension=_EMPTY_DIM,
+    thermal_dimension=_EMPTY_DIM,
     low_data=True,
     disclaimer=_DISCLAIMER,
+    cached=False,
 )
 
 
@@ -83,33 +100,45 @@ def _score_to_grade(score: int) -> str:
     return "D"
 
 
-# ---------------------------------------------------------------------------
-# Endpoint
-# ---------------------------------------------------------------------------
+def _cache_is_valid(prop: Property) -> bool:
+    if not prop.ai_comfort_data_cache or not prop.ai_comfort_cache_expires_at:
+        return False
+    expires = prop.ai_comfort_cache_expires_at
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) < expires
 
 
-@router.post("/comfort-index", response_model=ComfortIndexResponse)
-async def get_comfort_index(body: ComfortIndexRequest) -> ComfortIndexResponse:
-    """
-    Analiza el confort invisible de una propiedad usando Gemini.
-
-    Evalua 5 dimensiones: ruido, luz natural, calidad del aire, conectividad,
-    y confort termico. Cada dimension tiene score (0-100) y factores detectados.
-    """
+def _parse_cached(prop: Property) -> ComfortIndexResponse | None:
     try:
-        client = get_client()
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        data = json.loads(prop.ai_comfort_data_cache)
+        return ComfortIndexResponse(**data, cached=True, status="ok")
+    except Exception:
+        return None
 
-    floor_info = f"Planta: {body.floor}" if body.floor is not None else "Planta: desconocida"
-    orientation_info = f"Orientacion: {body.orientation}" if body.orientation else "Orientacion: desconocida"
-    year_info = f"Ano de construccion: {body.building_year}" if body.building_year else "Ano: desconocido"
+
+def _call_gemini(prop: Property) -> ComfortIndexResponse:
+    """Call Gemini and return a parsed ComfortIndexResponse. Raises on failure."""
+    client = get_client()
+
+    features = prop.features
+    floor_info = f"Planta: {prop.floor}" if prop.floor else "Planta: desconocida"
+    orientation_info = (
+        f"Orientacion: {features.orientation.value if features and features.orientation else 'desconocida'}"
+    )
+    year_info = (
+        f"Ano de construccion: {features.construction_year}"
+        if features and features.construction_year
+        else "Ano: desconocido"
+    )
+    postal_code = prop.postal_code or ""
+    address = prop.location or prop.street or ""
 
     prompt = f"""Eres un experto en confort habitacional y bienestar residencial en el mercado espanol.
 
 Analiza el confort invisible para la siguiente propiedad:
-- Codigo postal: {body.postal_code}
-- Direccion: {body.address}
+- Codigo postal: {postal_code}
+- Direccion: {address}
 - {floor_info}
 - {orientation_info}
 - {year_info}
@@ -124,7 +153,7 @@ Evalua exactamente estas 5 dimensiones con puntuaciones de 0 a 100:
 REGLAS CRITICAS:
 1. Score 0-100 donde 100 es perfecto y 0 es inaceptable.
 2. Cada dimension incluye 2-4 factores CONCRETOS y verificables que justifican la puntuacion.
-3. El label de cada dimension debe ser una frase corta que resume el estado (ej: "Zona tranquila", "Ruidoso de noche").
+3. El label de cada dimension debe ser una frase corta que resume el estado.
 4. Si no tienes datos suficientes para una dimension, asigna score=50 y low_data=true.
 5. Responde EXCLUSIVAMENTE con un objeto JSON valido sin markdown ni texto extra.
 
@@ -139,54 +168,159 @@ Formato obligatorio:
   "thermal": {{"score": <int>, "label": "<texto>", "factors": ["<f1>", "<f2>"]}}
 }}"""
 
+    raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
+
+    if raw.startswith("```"):
+        lines = raw.splitlines()
+        raw = "\n".join(line for line in lines if not line.startswith("```")).strip()
+
+    data = json.loads(raw)
+
+    def _parse_dim(key: str) -> ComfortDimension:
+        d = data.get(key) or {}
+        score = max(0, min(100, int(d.get("score") or 50)))
+        label = str(d.get("label") or "")
+        factors = [str(f) for f in (d.get("factors") or [])]
+        return ComfortDimension(score=score, label=label, factors=factors)
+
+    overall_score = max(0, min(100, int(data.get("overall_score") or 50)))
+    low_data = bool(data.get("low_data", False))
+
+    return ComfortIndexResponse(
+        status="ok",
+        overall_score=overall_score,
+        grade=_score_to_grade(overall_score),
+        noise_dimension=_parse_dim("noise"),
+        light_dimension=_parse_dim("light"),
+        air_dimension=_parse_dim("air"),
+        connectivity_dimension=_parse_dim("connectivity"),
+        thermal_dimension=_parse_dim("thermal"),
+        low_data=low_data,
+        disclaimer=_DISCLAIMER,
+        cached=False,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/properties/{property_id}/comfort-index", response_model=ComfortIndexResponse)
+async def get_comfort_index(
+    property_id: int,
+    db: Session = Depends(get_db),
+) -> ComfortIndexResponse:
+    """
+    Cache-aside comfort index for a property.
+
+    - If seller gave GDPR consent AND cache is valid: return cached result.
+    - If seller gave GDPR consent AND cache is expired/missing: call Gemini, save, return.
+    - If seller has NOT given consent: return status='no_consent'.
+    """
+    prop = (
+        db.query(Property)
+        .options(joinedload(Property.features))
+        .filter(Property.id == property_id)
+        .first()
+    )
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if not prop.ai_comfort_consent:
+        return _NO_CONSENT_RESPONSE
+
+    # Return cached result if still valid
+    if _cache_is_valid(prop):
+        cached = _parse_cached(prop)
+        if cached:
+            return cached
+
+    # Call Gemini
     try:
-        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
-
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            raw = "\n".join(
-                line for line in lines if not line.startswith("```")
-            ).strip()
-
-        try:
-            data = json.loads(raw)
-        except (json.JSONDecodeError, ValueError):
-            logger.warning(
-                "comfort_index: JSON parse failed for postal_code=%s",
-                body.postal_code,
-            )
-            return _LOW_DATA_RESPONSE
-
-        def _parse_dim(key: str) -> ComfortDimension:
-            d = data.get(key) or {}
-            score = max(0, min(100, int(d.get("score") or 50)))
-            label = str(d.get("label") or "")
-            factors = [str(f) for f in (d.get("factors") or [])]
-            return ComfortDimension(score=score, label=label, factors=factors)
-
-        overall_score = max(0, min(100, int(data.get("overall_score") or 50)))
-
+        result = _call_gemini(prop)
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.warning("comfort_index: JSON parse failed for property_id=%s: %s", property_id, e)
+        # Return low_data fallback but still save nothing
         return ComfortIndexResponse(
-            overall_score=overall_score,
-            grade=_score_to_grade(overall_score),
-            noise_dimension=_parse_dim("noise"),
-            light_dimension=_parse_dim("light"),
-            air_dimension=_parse_dim("air"),
-            connectivity_dimension=_parse_dim("connectivity"),
-            thermal_dimension=_parse_dim("thermal"),
-            low_data=False,
+            status="low_data",
+            overall_score=0,
+            grade="D",
+            noise_dimension=_EMPTY_DIM,
+            light_dimension=_EMPTY_DIM,
+            air_dimension=_EMPTY_DIM,
+            connectivity_dimension=_EMPTY_DIM,
+            thermal_dimension=_EMPTY_DIM,
+            low_data=True,
             disclaimer=_DISCLAIMER,
         )
+    except Exception as e:
+        logger.error("comfort_index: unexpected error property_id=%s: %s", property_id, e)
+        raise HTTPException(status_code=500, detail=f"Error inesperado: {e}")
 
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error(
-            "comfort_index: unexpected error postal_code=%s: %s",
-            body.postal_code,
-            exc,
+    # Persist cache (exclude 'cached' field from stored JSON)
+    cache_payload = result.model_dump(exclude={"cached", "status"})
+    prop.ai_comfort_data_cache = json.dumps(cache_payload)
+    prop.ai_comfort_cache_expires_at = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+    db.commit()
+
+    return result
+
+
+@router.post("/properties/{property_id}/request-comfort", response_model=ComfortRequestResponse)
+async def request_comfort_from_seller(
+    property_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+) -> ComfortRequestResponse:
+    """
+    Buyer requests the seller to activate the AI comfort analysis.
+    Sends an IONOS email to the property owner and logs the intent.
+    """
+    prop = db.query(Property).filter(Property.id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    seller = db.query(User).filter(User.id == prop.owner_id).first()
+    if not seller:
+        raise HTTPException(status_code=404, detail="Seller not found")
+
+    if prop.ai_comfort_consent:
+        return ComfortRequestResponse(
+            sent=False,
+            message="El vendedor ya tiene el análisis de confort activado.",
         )
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error inesperado al calcular el indice de confort: {exc}",
-        )
+
+    # Log buyer intent for GDPR traceability
+    log_entry = AIConsentLog(
+        user_id=current_user.id,
+        action_type="comfort_index_request",
+        action_label="Solicitud de informe de confort al vendedor",
+        data_categories='["property_id", "buyer_identity"]',
+        purpose="Notificar al vendedor para que active el análisis de confort IA",
+        ai_provider="Google Gemini",
+        consent_text_version="v1.0",
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        property_id=str(property_id),
+    )
+    db.add(log_entry)
+    db.commit()
+
+    sent = await send_comfort_request_email(
+        seller_email=seller.email,
+        seller_name=seller.full_name,
+        property_title=prop.title or f"Propiedad #{property_id}",
+        buyer_name=current_user.full_name,
+    )
+
+    return ComfortRequestResponse(
+        sent=sent,
+        message=(
+            "Hemos notificado al vendedor. Si activa el análisis, verás el informe aquí pronto."
+            if sent
+            else "No se pudo enviar el email al vendedor. Inténtalo más tarde."
+        ),
+    )

@@ -303,3 +303,102 @@ async def send_password_reset_email(email: str, token: str) -> bool:
         subject="Recupera tu contrasena en InmuFacil",
         html_body=html,
     )
+
+
+def _build_comfort_request_html(seller_name: str, property_title: str, buyer_name: str) -> str:
+    property_link = f"{FRONTEND_BASE_URL}/dashboard/my-properties"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitud de informe de confort - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Cabecera -->
+          <tr>
+            <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+                Plataforma inmobiliaria entre particulares
+              </p>
+            </td>
+          </tr>
+
+          <!-- Cuerpo -->
+          <tr>
+            <td style="padding:40px 40px 32px;">
+              <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+                Un comprador solicita el Indice de Confort de tu propiedad
+              </h2>
+              <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+                Hola <strong>{seller_name}</strong>,
+              </p>
+              <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+                <strong>{buyer_name}</strong> esta interesado en tu propiedad
+                <strong>"{property_title}"</strong> y ha solicitado que actives el
+                <strong>Indice de Confort con IA</strong>.
+              </p>
+              <p style="margin:0 0 28px;color:#475569;font-size:15px;line-height:1.6;">
+                Este informe analiza factores como ruido, luz natural, calidad del aire,
+                conectividad y confort termico de la zona, y puede aumentar el interes
+                de los compradores en tu propiedad.
+              </p>
+
+              <!-- CTA -->
+              <div style="text-align:center;margin-bottom:28px;">
+                <a href="{property_link}"
+                   style="display:inline-block;background:#135BEC;color:#ffffff;
+                          text-decoration:none;padding:14px 32px;border-radius:10px;
+                          font-size:15px;font-weight:700;">
+                  Activar Indice de Confort
+                </a>
+              </div>
+
+              <p style="margin:0;color:#64748B;font-size:13px;line-height:1.6;">
+                Para activarlo, entra en tu anuncio, edita la propiedad y activa la opcion
+                <em>"Generar informe de confort con IA"</em> en el paso 1 del formulario.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                       padding:24px 40px;text-align:center;">
+              <p style="margin:0;color:#94A3B8;font-size:12px;">
+                InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_comfort_request_email(
+    seller_email: str,
+    seller_name: str,
+    property_title: str,
+    buyer_name: str,
+) -> bool:
+    """Notifica al vendedor que un comprador solicita el Indice de Confort."""
+    html = _build_comfort_request_html(seller_name, property_title, buyer_name)
+    return await _send_email(
+        to=seller_email,
+        subject=f"Un comprador solicita el Indice de Confort de '{property_title}'",
+        html_body=html,
+    )
