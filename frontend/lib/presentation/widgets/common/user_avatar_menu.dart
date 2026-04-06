@@ -254,7 +254,6 @@ class UserAvatarMenu extends ConsumerWidget {
     );
 
     items.add(const PopupMenuDivider());
-
     items.add(
       PopupMenuItem<_MenuValue>(
         value: _LogoutValue(),

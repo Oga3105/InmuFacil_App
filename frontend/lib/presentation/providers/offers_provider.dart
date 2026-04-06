@@ -76,6 +76,7 @@ class OfferData {
   /// True when the seller has explicitly validated the buyer's solvency passport.
   final bool sellerSolvencyAccepted;
 
+
   /// True when buyer declared joint purchase (is_multi_buyer) but the second
   /// buyer has not yet submitted and verified their identity data.
   final bool secondBuyerPending;
