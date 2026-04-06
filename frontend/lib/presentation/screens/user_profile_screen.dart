@@ -2138,14 +2138,17 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFF),
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
             ),
-            child: const Center(
+            child: Center(
               child: Text(
                 'No hay ofertas todavia.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 14,
+                ),
               ),
             ),
           )
