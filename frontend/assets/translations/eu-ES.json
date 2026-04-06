@@ -220,6 +220,9 @@
     "hide_location_title": "Gutxi gorabeherako kokapena bakarrik erakutsi",
     "hide_location_on": "Erosleak eremua ikusiko du, helbide zehatza ez.",
     "hide_location_off": "Erosleak helbide osoa ikusiko du mapan.",
+    "ai_comfort_title": "IA erosotasun txostena sortu",
+    "ai_comfort_on": "IA erabiliz aztertuko da inguruaren erosotasuna (zarata, argia, airea, etab.).",
+    "ai_comfort_off": "Aktibatu aukera hau erosleei inguruaren erosotasun indizea erakusteko.",
     "map_label": "Kokapena mapan *",
     "details_card": "Xehetasunak eta Prezioa",
     "price_label": "Salmenta prezioa",
@@ -458,6 +461,11 @@
     "dim_light": "Argia",
     "dim_air": "Airearen kalitatea",
     "dim_connectivity": "Konektagarritasuna",
-    "dim_thermal": "Erosotasun termikoa"
+    "dim_thermal": "Erosotasun termikoa",
+    "cached": "Cacheko emaitza",
+    "low_data_banner": "Datu mugatuetan oinarritutako estimazioa — zehaztasun gutxiago izan dezake.",
+    "no_consent_info": "Saltzaileak oraindik ez du aktibatu IA erosotasun analisia. Eska diezaiokezu eta aktibatzeko mezu elektronikoa jasoko du.",
+    "request_btn": "Txostena eskatu saltzaileari",
+    "request_error": "Ezin izan da eskaera bidali. Saiatu berriro geroago."
   }
 }

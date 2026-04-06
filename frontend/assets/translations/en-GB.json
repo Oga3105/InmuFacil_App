@@ -220,6 +220,9 @@
     "hide_location_title": "Show approximate location only",
     "hide_location_on": "Buyers will see the area, not the exact address.",
     "hide_location_off": "Buyers will see the full address on the map.",
+    "ai_comfort_title": "Generate AI comfort report",
+    "ai_comfort_on": "The area will be analysed for comfort factors (noise, light, air, etc.) using AI.",
+    "ai_comfort_off": "Enable this option to show buyers the comfort index for your area.",
     "map_label": "Map location *",
     "details_card": "Details & Price",
     "price_label": "Sale price",
@@ -626,6 +629,11 @@
     "dim_light": "Light",
     "dim_air": "Air quality",
     "dim_connectivity": "Connectivity",
-    "dim_thermal": "Thermal comfort"
+    "dim_thermal": "Thermal comfort",
+    "cached": "Cached result",
+    "low_data_banner": "Estimate based on limited data — may be less accurate.",
+    "no_consent_info": "The seller has not yet enabled the AI comfort analysis for this property. You can request it and they will receive an email to activate it.",
+    "request_btn": "Request report from seller",
+    "request_error": "Could not send the request. Please try again later."
   }
 }

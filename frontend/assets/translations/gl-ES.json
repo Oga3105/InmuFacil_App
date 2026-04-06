@@ -140,6 +140,9 @@
     "hide_location_title": "Mostrar só localización aproximada",
     "hide_location_on": "Os compradores verán a zona, non o enderezo exacto.",
     "hide_location_off": "Os compradores verán o enderezo completo no mapa.",
+    "ai_comfort_title": "Xerar informe de confort con IA",
+    "ai_comfort_on": "Analizarase o confort da zona (ruído, luz, aire, etc.) mediante IA.",
+    "ai_comfort_off": "Activa esta opción para amosar aos compradores o índice de confort da zona.",
     "map_label": "Localización no mapa *",
     "details_card": "Detalles e Prezo",
     "price_label": "Prezo de venda",
@@ -378,6 +381,11 @@
     "dim_light": "Luminosidade",
     "dim_air": "Calidade do aire",
     "dim_connectivity": "Conectividade",
-    "dim_thermal": "Confort térmico"
+    "dim_thermal": "Confort térmico",
+    "cached": "Resultado en caché",
+    "low_data_banner": "Estimación con datos limitados — pode ser menos precisa.",
+    "no_consent_info": "O vendedor aínda non activou a análise de confort IA para esta propiedade. Podes solicitarllo e recibirá un correo para activalo.",
+    "request_btn": "Solicitar informe ao vendedor",
+    "request_error": "Non se puido enviar a solicitude. Téntao de novo máis tarde."
   }
 }

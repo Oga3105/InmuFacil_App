@@ -220,6 +220,9 @@
     "hide_location_title": "Mostrar només la ubicació aproximada",
     "hide_location_on": "Els compradors veuran la zona, no l'adreça exacta.",
     "hide_location_off": "Els compradors veuran l'adreça completa al mapa.",
+    "ai_comfort_title": "Generar informe de confort amb IA",
+    "ai_comfort_on": "Es analitzarà el confort de la zona (soroll, llum, aire, etc.) mitjançant IA.",
+    "ai_comfort_off": "Activa aquesta opció per mostrar als compradors l'índex de confort de la zona.",
     "map_label": "Ubicació al mapa *",
     "details_card": "Detalls i Preu",
     "price_label": "Preu de venda",
@@ -512,6 +515,11 @@
     "dim_light": "Lluminositat",
     "dim_air": "Qualitat de l'aire",
     "dim_connectivity": "Connectivitat",
-    "dim_thermal": "Confort tèrmic"
+    "dim_thermal": "Confort tèrmic",
+    "cached": "Resultat en memòria cau",
+    "low_data_banner": "Estimació amb dades limitades — pot ser menys precisa.",
+    "no_consent_info": "El venedor encara no ha activat l'anàlisi de confort IA per a aquesta propietat. Pots sol·licitar-ho i rebrà un correu per activar-ho.",
+    "request_btn": "Sol·licitar informe al venedor",
+    "request_error": "No s'ha pogut enviar la sol·licitud. Torna-ho a intentar més tard."
   }
 }
