@@ -30,6 +30,7 @@ Thumbs.db
 *.pem
 *.key
 secrets/
+firebase-key.json
 curl_res.json
 brain/
 keys.txt

@@ -447,6 +447,12 @@ async def google_auth(
     try:
         _get_firebase_app()
         decoded = firebase_auth_sdk.verify_id_token(payload.firebase_id_token)
+    except (RuntimeError, FileNotFoundError, ValueError, IOError) as exc:
+        logger.error(f"[SHIELD] Google auth: Firebase no configurado correctamente: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Autenticacion con Google no disponible temporalmente"
+        )
     except firebase_admin.exceptions.FirebaseError as exc:
         logger.warning(f"[SHIELD] Google auth: Firebase token invalido: {exc}")
         raise HTTPException(
@@ -511,5 +517,7 @@ async def google_auth(
     return GoogleAuthResponse(
         access_token=access_token,
         token_type="bearer",
-        is_new_user=is_new_user
+        is_new_user=is_new_user,
+        created_at=user.created_at,
+        updated_at=user.updated_at
     )
