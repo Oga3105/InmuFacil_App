@@ -7,10 +7,11 @@ REMOTE_PATH="/opt/inmufacil/frontend/build/TFM"
 echo "Preparing production environment..."
 # Backup local .env and inject production config for the build
 cp .env .env.local_backup
-cat > .env << 'ENVEOF'
+cat > .env << ENVEOF
 API_BASE_URL=https://www.inmufacil.com/api/v1
 API_TIMEOUT=30000
 ENABLE_LOGGING=false
+GOOGLE_WEB_CLIENT_ID=$(grep GOOGLE_WEB_CLIENT_ID .env.local_backup | cut -d= -f2-)
 ENVEOF
 
 echo "Building Flutter web..."

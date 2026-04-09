@@ -324,3 +324,73 @@ async def request_comfort_from_seller(
             else "No se pudo enviar el email al vendedor. Inténtalo más tarde."
         ),
     )
+
+
+# ---------------------------------------------------------------------------
+# Legacy compatibility endpoint (for Flutter web builds prior to cache-aside)
+# POST /ai/comfort-index — kept so the old production build doesn't break
+# ---------------------------------------------------------------------------
+
+class _LegacyComfortRequest(BaseModel):
+    postal_code: str
+    address: str
+    floor: int | None = None
+    orientation: str | None = None
+    building_year: int | None = None
+
+
+@router.post("/ai/comfort-index")
+async def legacy_comfort_index(body: _LegacyComfortRequest) -> dict:
+    """
+    Backward-compatible endpoint for Flutter web builds compiled before the
+    cache-aside refactor. Calls Gemini directly without caching.
+    Remove once the new Flutter build is deployed to production.
+    """
+    try:
+        client = get_client()
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+    floor_info = f"Planta: {body.floor}" if body.floor is not None else "Planta: desconocida"
+    orientation_info = f"Orientacion: {body.orientation}" if body.orientation else "Orientacion: desconocida"
+    year_info = f"Ano de construccion: {body.building_year}" if body.building_year else "Ano: desconocido"
+
+    prompt = f"""Eres un experto en confort habitacional en el mercado espanol.
+Analiza el confort invisible para:
+- Codigo postal: {body.postal_code}
+- Direccion: {body.address}
+- {floor_info} / {orientation_info} / {year_info}
+
+Evalua 5 dimensiones (0-100): ruido, luz, aire, conectividad, termico.
+Responde EXCLUSIVAMENTE con JSON valido:
+{{"overall_score":<int>,"low_data":<bool>,"noise":{{"score":<int>,"label":"<txt>","factors":["<f>"]}},"light":{{"score":<int>,"label":"<txt>","factors":["<f>"]}},"air":{{"score":<int>,"label":"<txt>","factors":["<f>"]}},"connectivity":{{"score":<int>,"label":"<txt>","factors":["<f>"]}},"thermal":{{"score":<int>,"label":"<txt>","factors":["<f>"]}}}}"""
+
+    try:
+        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
+        if raw.startswith("```"):
+            raw = "\n".join(l for l in raw.splitlines() if not l.startswith("```")).strip()
+        data = json.loads(raw)
+
+        def _dim(key: str) -> dict:
+            d = data.get(key) or {}
+            return {"score": max(0, min(100, int(d.get("score") or 50))),
+                    "label": str(d.get("label") or ""),
+                    "factors": [str(f) for f in (d.get("factors") or [])]}
+
+        overall = max(0, min(100, int(data.get("overall_score") or 50)))
+        return {
+            "overall_score": overall,
+            "grade": _score_to_grade(overall),
+            "noise_dimension": _dim("noise"),
+            "light_dimension": _dim("light"),
+            "air_dimension": _dim("air"),
+            "connectivity_dimension": _dim("connectivity"),
+            "thermal_dimension": _dim("thermal"),
+            "low_data": bool(data.get("low_data", False)),
+            "disclaimer": _DISCLAIMER,
+        }
+    except (json.JSONDecodeError, ValueError):
+        raise HTTPException(status_code=502, detail="Error procesando respuesta de IA")
+    except Exception as exc:
+        logger.error("legacy_comfort_index error: %s", exc)
+        raise HTTPException(status_code=500, detail=str(exc))
