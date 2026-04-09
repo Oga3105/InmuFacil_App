@@ -1700,7 +1700,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Theme.of(context).colorScheme.outlineVariant)),
@@ -1750,7 +1750,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       hintText: 'Mínimo 8 caracteres',
                       hintStyle:
                           TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
@@ -1818,7 +1818,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       hintText: 'Repite tu contraseña',
                       hintStyle:
                           TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
