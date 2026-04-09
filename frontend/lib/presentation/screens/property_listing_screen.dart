@@ -177,8 +177,6 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               onSelected: (value) {
                 switch (value) {
-                  case 'sell':
-                    handleProtectedAction('/property/create');
                   case 'how':
                     context.push('/info/how-it-works');
                   case 'favorites':
@@ -190,10 +188,6 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                 }
               },
               itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: 'sell',
-                  child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Vender')]),
-                ),
                 PopupMenuItem(
                   value: 'how',
                   child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')]),
@@ -236,63 +230,6 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               padding: const EdgeInsets.only(right: 24.0),
               child: Row(
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      if (isAuthenticated) {
-                        context.push('/property/create');
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            icon: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.home_work_outlined, color: Theme.of(context).colorScheme.primary, size: 28),
-                            ),
-                            title: const Text(
-                              'Cuenta requerida',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                            ),
-                            content: Builder(builder: (context) => Text(
-                              'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                            )),
-                            actionsAlignment: MainAxisAlignment.center,
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('Cancelar', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                              ),
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  context.pushNamed('login');
-                                },
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: const Text('Iniciar sesión'),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Vender', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
-                  ),
                   TextButton(
                     onPressed: () => context.push('/info/how-it-works'),
                     style: TextButton.styleFrom(
@@ -835,7 +772,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
     if (!authenticated) {
       return Builder(builder: (context) => CircleAvatar(
         radius: 18,
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
       ));
     }
