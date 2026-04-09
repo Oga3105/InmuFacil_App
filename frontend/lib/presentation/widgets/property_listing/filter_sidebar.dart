@@ -306,20 +306,18 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     ),
                   ],
                 ),
-                if (searchState.useLifestyleFilter) ...[
-                  const SizedBox(height: 4),
-                  InkWell(
-                    onTap: () => context.push('/lifestyle/questionnaire'),
-                    child: Text(
-                      'Editar mi perfil de estilo de vida →',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: const Color(0xFF135BEC).withOpacity(0.8),
-                        decoration: TextDecoration.underline,
-                      ),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: () => context.push('/lifestyle/questionnaire'),
+                  child: const Text(
+                    'Editar mi perfil de estilo de vida →',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF135BEC),
+                      decoration: TextDecoration.underline,
                     ),
                   ),
-                ],
+                ),
 
                 const SizedBox(height: 24),
                 const Divider(),
@@ -358,19 +356,18 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: theme.colorScheme.inverseSurface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: theme.colorScheme.outlineVariant),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Vende directo.',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -378,24 +375,24 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   'Sin comisiones, sin intermediarios. Todo legal, todo seguro.',
                   style: TextStyle(
                     fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: Colors.grey.shade400,
                   ),
                 ),
                 const SizedBox(height: 16),
                 InkWell(
-                  onTap: () => context.push('/404'),
-                  child: Row(
+                  onTap: () => context.push('/info/how-it-works'),
+                  child: const Row(
                     children: [
                       Text(
                         'Saber más',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
+                          color: primaryBlue,
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, size: 14, color: theme.colorScheme.primary),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, size: 14, color: primaryBlue),
                     ],
                   ),
                 ),
