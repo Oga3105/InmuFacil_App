@@ -142,13 +142,12 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
 
               // Texto legal
               Builder(builder: (context) {
-                final cs = Theme.of(context).colorScheme;
                 return Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: cs.tertiaryContainer,
+                  color: const Color(0xFFFEF3C7),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: cs.tertiary.withOpacity(0.4)),
+                  border: Border.all(color: const Color(0xFFFBBF24)),
                 ),
                 child: Text(
                   'AVISO: InmuFácil enviara los datos indicados a ${config.aiProvider}, '
@@ -158,9 +157,9 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                   'con fecha, hora e IP de sesion. Puedes consultar tu historial en '
                   'Perfil > Historial de Consentimientos IA.\n'
                   'Base juridica: Art. 6.1.a RGPD / Art. 7 LOPDGDD.',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
-                    color: cs.onTertiaryContainer,
+                    color: Color(0xFF92400E),
                     height: 1.5,
                   ),
                 ),

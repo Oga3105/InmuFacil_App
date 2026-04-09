@@ -310,14 +310,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: cs.tertiaryContainer,
+              color: const Color(0xFFFEF3C7),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Text(
+            child: const Text(
               'El enlace caduca en 1 hora.',
               style: TextStyle(
                 fontSize: 12,
-                color: cs.onTertiaryContainer,
+                color: Color(0xFF92400E),
                 fontWeight: FontWeight.w500,
               ),
             ),

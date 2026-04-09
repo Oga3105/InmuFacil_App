@@ -298,24 +298,23 @@ class _PageHeader extends StatelessWidget {
           const SizedBox(height: 12),
           // GDPR info panel
           Builder(builder: (context) {
-            final cs = Theme.of(context).colorScheme;
             return Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: cs.tertiaryContainer,
+              color: const Color(0xFFEFF6FF),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: cs.tertiary.withOpacity(0.4)),
+              border: Border.all(color: const Color(0xFF93C5FD)),
             ),
-            child: Row(
+            child: const Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 14, color: cs.onTertiaryContainer),
-                const SizedBox(width: 8),
+                Icon(Icons.info_outline, size: 14, color: Color(0xFF1D4ED8)),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Base jurídica: Art. 6.1.a RGPD / Art. 7 LOPDGDD. '
                     'Derecho de acceso: Art. 15 RGPD.',
-                    style: TextStyle(fontSize: 11, color: cs.onTertiaryContainer, height: 1.5),
+                    style: TextStyle(fontSize: 11, color: Color(0xFF1E40AF), height: 1.5),
                   ),
                 ),
               ],

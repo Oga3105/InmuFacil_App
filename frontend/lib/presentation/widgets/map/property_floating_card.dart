@@ -226,8 +226,8 @@ class PropertyFloatingCard extends ConsumerWidget {
         label = 'Publicado';
         break;
       case 'draft':
-        bg = colorScheme.tertiaryContainer;
-        fg = colorScheme.onTertiaryContainer;
+        bg = const Color(0xFFFEF3C7);
+        fg = const Color(0xFF92400E);
         icon = Icons.edit_note;
         label = 'Borrador';
         break;

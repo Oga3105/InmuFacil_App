@@ -366,15 +366,14 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               ),
               const SizedBox(height: 24),
               Builder(builder: (context) {
-                final cs = Theme.of(context).colorScheme;
                 return Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: cs.tertiaryContainer,
-                  border: Border.all(color: cs.tertiary.withOpacity(0.4)),
+                  color: const Color(0xFFEFF6FF),
+                  border: Border.all(color: const Color(0xFF93C5FD)),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
+                child: const Text(
                   'Este Pasaporte de Solvencia es una declaración voluntaria y veraz de tu situación '
                   'financiera. La información que proporciones no es verificada por InmuFácil y '
                   'su uso indebido puede acarrear responsabilidad civil.\n\n'
@@ -383,7 +382,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   'a cada vendedor.\n\n'
                   'Tus datos son procesados conforme al RGPD/LOPD y se eliminarán '
                   'automáticamente a los 90 días.',
-                  style: TextStyle(fontSize: 14, height: 1.6, color: cs.onTertiaryContainer),
+                  style: TextStyle(fontSize: 14, height: 1.6, color: Color(0xFF1E40AF)),
                 ),
               );
               }),
@@ -505,21 +504,20 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     const SizedBox(height: 8),
                     if (_debtRatio > 0.35)
                       Builder(builder: (context) {
-                        final cs = Theme.of(context).colorScheme;
                         return Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: cs.tertiaryContainer,
+                          color: const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: cs.tertiary, size: 16),
-                            const SizedBox(width: 8),
+                            Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 16),
+                            SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Los bancos generalmente no conceden hipotecas si superas el 35%.',
-                                style: TextStyle(fontSize: 12, color: cs.onTertiaryContainer),
+                                style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
                               ),
                             ),
                           ],
