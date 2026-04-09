@@ -16,9 +16,9 @@ class AiRateLimitOverlay extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF2F2),
+        color: const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFFCA5A5)),
+        border: Border.all(color: const Color(0xFFFBBF24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -26,7 +26,7 @@ class AiRateLimitOverlay extends StatelessWidget {
           const Icon(
             Icons.block_outlined,
             size: 40,
-            color: Color(0xFFEF4444),
+            color: Color(0xFFD97706),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -34,7 +34,7 @@ class AiRateLimitOverlay extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF991B1B),
+              color: Color(0xFF92400E),
             ),
             textAlign: TextAlign.center,
           ),
@@ -42,7 +42,7 @@ class AiRateLimitOverlay extends StatelessWidget {
           Text(
             'Para proteger la integridad de la plataforma, el uso de IA para '
             '${category.name} se restablecera en 24 horas.',
-            style: const TextStyle(fontSize: 13, color: Color(0xFF7F1D1D)),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF92400E)),
             textAlign: TextAlign.center,
           ),
         ],

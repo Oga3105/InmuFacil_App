@@ -17,6 +17,7 @@ import '../../core/formatters/currency_input_formatter.dart';
 import '../../domain/entities/property_condition.dart';
 import '../../domain/entities/property_type.dart';
 import 'search_provider.dart' show searchProvider;
+import 'my_properties_provider.dart';
 import '../../core/network/dio_factory.dart';
 
 /// Max photos per listing and max file size (5 MB)
@@ -988,6 +989,9 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         status: PropertyFormStatus.success,
         successPropertyId: propertyId,
       );
+
+      // Refresh the seller's property list so the draft appears immediately
+      ref.invalidate(myPropertiesProvider);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

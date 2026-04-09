@@ -694,21 +694,20 @@ class _SellerSolvencyBanner extends ConsumerWidget {
       data: (passport) {
         if (passport == null) {
           // Buyer has not submitted a passport yet
-          final cs = Theme.of(context).colorScheme;
           return Container(
             decoration: BoxDecoration(
-              color: cs.tertiaryContainer,
-              border: Border(bottom: BorderSide(color: cs.tertiary.withOpacity(0.4))),
+              color: const Color(0xFFEFF6FF),
+              border: const Border(bottom: BorderSide(color: Color(0xFF93C5FD))),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                Icon(Icons.shield_outlined, color: cs.onTertiaryContainer, size: 18),
+                const Icon(Icons.shield_outlined, color: Color(0xFF1D4ED8), size: 18),
                 const SizedBox(width: 10),
-                Expanded(
+                const Expanded(
                   child: Text(
                     'El comprador aun no ha completado su Pasaporte de Solvencia.',
-                    style: TextStyle(fontSize: 12, color: cs.onTertiaryContainer),
+                    style: TextStyle(fontSize: 12, color: Color(0xFF1D4ED8)),
                   ),
                 ),
               ],
@@ -1212,7 +1211,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
           Icons.monetization_on_outlined,
           'Propuesta de Oferta',
           _kGold,
-          cs.tertiaryContainer,
+          const Color(0xFFFFF7ED),
         ),
       'docs_request' => (
           Icons.folder_outlined,

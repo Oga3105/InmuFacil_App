@@ -98,22 +98,21 @@ class _PropertyStep3DocVerificationState
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      color: const Color(0xFFEFF6FF),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.tertiary.withOpacity(0.4)),
+                      border: Border.all(color: const Color(0xFF93C5FD)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.info_outline,
-                            color: Theme.of(context).colorScheme.tertiary, size: 16),
+                        const Icon(Icons.info_outline,
+                            color: Color(0xFF3B82F6), size: 16),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             '${'doc_verification.cedula_ccaa_required'.tr()} ${ccaaDisplayName[ccaa] ?? ''}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 12,
-                              color: Theme.of(context).colorScheme.onTertiaryContainer,
+                              color: Color(0xFF1E40AF),
                             ),
                           ),
                         ),

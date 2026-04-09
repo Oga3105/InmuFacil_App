@@ -894,20 +894,20 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 child: Builder(builder: (context) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      color: const Color(0xFFFFF7ED),
                       borderRadius: BorderRadius.circular(8)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Builder(builder: (ctx) => Text('profile.suspend_account'.tr(),
-                          style: TextStyle(
+                      Text('profile.suspend_account'.tr(),
+                          style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Theme.of(ctx).colorScheme.onTertiaryContainer))),
+                              color: Color(0xFF9A3412))),
                       const SizedBox(height: 4),
-                      Builder(builder: (ctx) => Text('profile.suspend_hint'.tr(),
-                          style: TextStyle(
-                              color: Theme.of(ctx).colorScheme.onTertiaryContainer.withOpacity(0.7), fontSize: 12))),
+                      Text('profile.suspend_hint'.tr(),
+                          style: const TextStyle(
+                              color: Color(0xFFB45309), fontSize: 12)),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
@@ -1613,7 +1613,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           ),
           const SizedBox(height: 8),
           TextButton(
-            onPressed: () {},
+            onPressed: () => setState(() => _propertiesStatusFilter = 'draft'),
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -2004,10 +2004,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     final String destination;
 
     if (dniStatus?.toLowerCase() == 'pendiente') {
-      bgColor = colorScheme.tertiaryContainer;
-      borderColor = colorScheme.tertiary.withOpacity(0.4);
-      iconColor = colorScheme.onTertiaryContainer;
-      textColor = colorScheme.onTertiaryContainer;
+      bgColor = const Color(0xFFFEF3C7);
+      borderColor = const Color(0xFFF59E0B).withOpacity(0.6);
+      iconColor = const Color(0xFF92400E);
+      textColor = const Color(0xFF92400E);
       icon = Icons.hourglass_top;
       message =
           'Tu verificación está en curso. Te notificaremos cuando esté lista.';
