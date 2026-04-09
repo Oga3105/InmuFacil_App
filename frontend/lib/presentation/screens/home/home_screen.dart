@@ -1409,7 +1409,7 @@ class _MapNavigationBar extends ConsumerWidget {
             );
           }
 
-          // Desktop: existing full nav
+          // Desktop: full nav
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: ConstrainedBox(
@@ -1417,96 +1417,7 @@ class _MapNavigationBar extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      ref.read(searchProvider.notifier).clearError();
-                      // If nothing is visible on the map, reset bounds so the
-                      // listing shows all available properties instead of 0.
-                      final visible = ref.read(filteredByMapPropertiesProvider);
-                      if (visible.isEmpty) {
-                        ref.read(searchProvider.notifier).reset();
-                      }
-                      context.go('/search');
-                    },
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Comprar',
-                      style: navTextStyle,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  TextButton(
-                    onPressed: () {
-                      ref.read(searchProvider.notifier).clearError();
-                      if (isAuthenticated) {
-                        context.push('/property/create');
-                      } else {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            icon: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceContainerLowest,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.home_work_outlined, color: Theme.of(context).colorScheme.primary, size: 28),
-                            ),
-                            title: const Text(
-                              'Cuenta requerida',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                            ),
-                            content: Builder(builder: (context) => Text(
-                              'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                            )),
-                            actionsAlignment: MainAxisAlignment.center,
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('common.cancel'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                              ),
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  context.pushNamed('login');
-                                },
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.primary,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                child: Text('auth.login_button'.tr()),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      'Vender',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
+                  // --- Info links ---
                   TextButton(
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
@@ -1519,11 +1430,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     ),
                     child: Text(
                       'Cómo funciona',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
-                      ),
+                      style: navTextStyle,
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -1535,19 +1442,19 @@ class _MapNavigationBar extends ConsumerWidget {
                     itemBuilder: (_) => [
                       PopupMenuItem(
                         value: 'what-is',
-                        child: Text('Que es InmuFácil',
+                        child: Text('Qué es InmuFácil',
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
                       PopupMenuItem(
                         value: 'buyer-guide',
-                        child: Text('Guia del Comprador',
+                        child: Text('Guía del Comprador',
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
                       PopupMenuItem(
                         value: 'seller-guide',
-                        child: Text('Guia del Vendedor',
+                        child: Text('Guía del Vendedor',
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
@@ -1574,12 +1481,8 @@ class _MapNavigationBar extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Guias',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
-                            ),
+                            'Guías',
+                            style: navTextStyle,
                           ),
                           Icon(Icons.arrow_drop_down,
                               size: 18, color: theme.colorScheme.onSurfaceVariant),
@@ -1600,17 +1503,92 @@ class _MapNavigationBar extends ConsumerWidget {
                     ),
                     child: Text(
                       'Contacto',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                      style: navTextStyle,
+                    ),
+                  ),
+
+                  // --- Separator ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: SizedBox(
+                      height: 20,
+                      child: VerticalDivider(
+                        color: theme.colorScheme.outlineVariant,
+                        thickness: 1,
+                        width: 1,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+
+                  // --- Action buttons ---
                   PremiumButton(
-                    label: 'Publicar propiedad',
-                    onPressed: () => handleProtectedAction('/property/create'),
+                    label: 'Comprar',
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      final visible = ref.read(filteredByMapPropertiesProvider);
+                      if (visible.isEmpty) ref.read(searchProvider.notifier).reset();
+                      context.go('/search');
+                    },
+                    color: theme.colorScheme.primary,
+                    fontSize: 13,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    fullWidth: false,
+                  ),
+                  const SizedBox(width: 8),
+                  PremiumButton(
+                    label: 'Vender',
+                    onPressed: () {
+                      ref.read(searchProvider.notifier).clearError();
+                      if (isAuthenticated) {
+                        context.push('/property/create');
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            icon: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surfaceContainerLowest,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.home_work_outlined, color: theme.colorScheme.primary, size: 28),
+                            ),
+                            title: const Text(
+                              'Cuenta requerida',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                            ),
+                            content: Builder(builder: (context) => Text(
+                              'Para publicar y vender una propiedad necesitas una cuenta en InmuFácil. Es gratis y solo toma unos minutos.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 14, color: theme.colorScheme.onSurfaceVariant),
+                            )),
+                            actionsAlignment: MainAxisAlignment.center,
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('common.cancel'.tr(), style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
+                              ),
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  context.pushNamed('login');
+                                },
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: theme.colorScheme.primary,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                child: Text('auth.login_button'.tr()),
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    },
                     color: theme.colorScheme.primary,
                     fontSize: 13,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
