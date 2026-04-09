@@ -848,8 +848,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: Builder(builder: (context) => Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8)),
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
               child: _isChangingPassword
                   ? _buildChangePasswordForm()
                   : Row(
