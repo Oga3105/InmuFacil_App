@@ -663,8 +663,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     _buildLifestyleButton(),
                     const SizedBox(height: 24),
                     _buildPromoCard(),
-                    const SizedBox(height: 24),
-                    _buildEmptyStateCard(small: true),
                   ],
                 ),
               ),
@@ -686,8 +684,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               _buildLifestyleButton(),
               const SizedBox(height: 24),
               _buildPromoCard(),
-              const SizedBox(height: 24),
-              _buildEmptyStateCard(small: true),
             ],
           ),
       ],
@@ -1189,11 +1185,19 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('profile.promo_title'.tr(),
-              style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white)),
+          Row(
+            children: [
+              const Icon(Icons.home_outlined, color: Colors.white, size: 22),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('profile.promo_title'.tr(),
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white)),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(
             'profile.promo_body'.tr(),
@@ -1204,7 +1208,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => context.push('/property/create'),
-              icon: const Icon(Icons.add_circle_outline,
+              icon: const Icon(Icons.add_home_outlined,
                   color: Color(0xFF135BEC), size: 18),
               label: Text('profile.promo_button'.tr(),
                   style: const TextStyle(
@@ -1215,6 +1219,22 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8)),
               ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+              onPressed: () => setState(() => _propertiesStatusFilter = 'draft'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white70,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text('profile.see_drafts'.tr(),
+                  style: const TextStyle(
+                      color: Colors.white70, fontWeight: FontWeight.w600)),
             ),
           ),
         ],
