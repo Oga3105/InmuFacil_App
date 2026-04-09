@@ -356,7 +356,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: theme.colorScheme.inverseSurface,
+              color: primaryBlue,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
