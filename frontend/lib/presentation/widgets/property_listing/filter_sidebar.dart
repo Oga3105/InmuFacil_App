@@ -388,11 +388,11 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: primaryBlue,
+                          color: Colors.white,
                         ),
                       ),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, size: 14, color: primaryBlue),
+                      Icon(Icons.arrow_forward, size: 14, color: Colors.white),
                     ],
                   ),
                 ),
