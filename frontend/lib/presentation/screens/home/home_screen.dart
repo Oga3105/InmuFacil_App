@@ -15,6 +15,7 @@ import '../../providers/notifications_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/urgency_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../widgets/common/demo_banner.dart';
 import '../info/info_screen.dart';
 
 /// Home/Landing Screen with Google Maps Integration
@@ -233,7 +234,13 @@ class _MapSection extends ConsumerWidget {
           top: 0,
           left: 0,
           right: 0,
-          child: _MapNavigationBar(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _MapNavigationBar(),
+              const DemoBanner(),
+            ],
+          ),
         ),
 
         // Conditional "Ver Inmuebles" Button

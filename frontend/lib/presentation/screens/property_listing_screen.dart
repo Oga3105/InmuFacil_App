@@ -12,6 +12,7 @@ import '../../domain/entities/property_type.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common/app_bar_back_button.dart';
 import '../widgets/common/user_avatar_menu.dart';
+import '../widgets/common/demo_banner.dart';
 
 class PropertyListingScreen extends ConsumerStatefulWidget {
   const PropertyListingScreen({super.key, this.highlightId, this.fromMap = false});
@@ -271,9 +272,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
             ),
           ],
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(29),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DemoBanner(),
+            ],
+          ),
         ),
       ),
       body: SingleChildScrollView(

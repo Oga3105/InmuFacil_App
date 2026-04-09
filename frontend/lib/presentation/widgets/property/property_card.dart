@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/property.dart';
+import '../common/demo_banner.dart';
 
 class PropertyCard extends StatelessWidget {
 
@@ -38,6 +39,13 @@ class PropertyCard extends StatelessWidget {
                   else
                     _buildPlaceholder(),
                     
+                  // Demo Badge (Top Left)
+                  const Positioned(
+                    top: 12,
+                    left: 12,
+                    child: DemoBadge(),
+                  ),
+
                   // Price Badge (Top Right)
                   Positioned(
                     top: 12,
