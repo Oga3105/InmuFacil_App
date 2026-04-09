@@ -21,6 +21,7 @@ import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../widgets/common/demo_banner.dart';
 import '../../widgets/property/document_status_section.dart';
 import '../../widgets/property/comfort_radar_chart.dart';
 
@@ -228,9 +229,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
             },
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(color: colorScheme.outlineVariant, height: 1),
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(29),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [DemoBanner()],
+          ),
         ),
       ),
       body: Stack(
