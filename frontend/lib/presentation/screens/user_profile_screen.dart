@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:inmufacil_frontend/presentation/providers/auth_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/chat_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/my_properties_provider.dart';
+import 'package:inmufacil_frontend/presentation/providers/property_analytics_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/offers_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/solvency_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/visits_provider.dart';
@@ -1436,7 +1437,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               ),
             ),
             const SizedBox(width: 12),
-            // Price + views
+            // Price + analytics (views + favorites)
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -1449,21 +1450,62 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.visibility_outlined,
-                        size: 13, color: Color(0xFF94A3B8)),
-                    SizedBox(width: 3),
-                    Text(
-                      '— vistas',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Color(0xFF94A3B8),
+                ref
+                    .watch(propertyAnalyticsProvider(p.id.toString()))
+                    .when(
+                      data: (a) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.visibility_outlined,
+                            size: 13,
+                            color: Color(0xFF94A3B8),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${a?.views ?? 0} vistas',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.favorite_border,
+                            size: 13,
+                            color: Color(0xFF94A3B8),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            '${a?.favorites ?? 0}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      loading: () => const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 10,
+                            height: 10,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 1.5,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      error: (_, __) => const Text(
+                        '— vistas',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFF94A3B8),
+                        ),
                       ),
                     ),
-                  ],
-                ),
               ],
             ),
             const SizedBox(width: 12),
