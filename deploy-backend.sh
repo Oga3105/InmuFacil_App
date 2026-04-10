@@ -50,7 +50,7 @@ echo "  Pedira la clave SSH hasta 4 veces (mkdir, rsync, .env opcional, docker)"
 echo ""
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
-  "mkdir -p $REMOTE_APP_DIR/backend $REMOTE_APP_DIR/migrations"
+  "mkdir -p $REMOTE_APP_DIR/backend"
 
 # Subir solo lo que el Dockerfile necesita para construir la imagen:
 #   backend/   — codigo FastAPI
@@ -62,9 +62,6 @@ scp -o StrictHostKeyChecking=accept-new \
 
 scp -o StrictHostKeyChecking=accept-new \
   -r backend "$SERVER:$REMOTE_APP_DIR/"
-
-scp -o StrictHostKeyChecking=accept-new \
-  -r migrations "$SERVER:$REMOTE_APP_DIR/"
 
 echo "  Codigo sincronizado."
 
