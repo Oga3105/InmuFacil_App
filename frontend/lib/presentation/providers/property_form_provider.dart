@@ -727,7 +727,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         hasExterior: (features['has_exterior'] as bool?) ?? false,
         hasAccessibility: (features['has_accessibility'] as bool?) ?? false,
         allowVisits: (data['allow_visits'] as bool?) ?? true,
-        energyCertification: data['energy_certification'] as String?,
+        energyCertification: (data['legal'] as Map<String, dynamic>?)?['energy_certification'] as String?,
         propertyCondition: _parseCondition(features['conservation_state'] ?? data['conservation_state']),
       );
     } on DioException catch (e) {

@@ -101,7 +101,7 @@ class PropertyModel {
       orientation: json['orientation'] as String?,
       squareMeters: (json['surface_area'] ?? 0.0).toDouble(),
       images: imageUrls,
-      isVerified: json['is_verified'] as bool? ?? true,
+      isVerified: json['owner_is_verified'] as bool? ?? false,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
       updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
       ownerId: (json['seller_id'] ?? json['owner_id'])?.toString(),
