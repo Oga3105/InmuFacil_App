@@ -321,6 +321,13 @@
     "nota_simple_warning": "Puedes solicitarla online en el Registro de la Propiedad",
     "dni_title": "DNI / NIE del Propietario",
     "dni_subtitle": "Documento de identidad válido del vendedor",
+    "dni_verified_subtitle": "Tu identidad está verificada",
+    "dni_verify_button": "Verificar identidad",
+    "regional_doc_title": "Documentación regional",
+    "cedula_ccaa_required": "Requerido en tu Comunidad Autónoma:",
+    "cedula_title": "Cédula de Habitabilidad",
+    "cedula_subtitle": "Obligatoria en algunas comunidades autónomas",
+    "request_coming_soon": "Próximamente podrás solicitarlo desde aquí",
     "mvp_info": "En esta fase MVP los documentos son informativos. La verificación completa estará disponible próximamente.",
     "upload_coming_soon": "Subida de archivos próximamente disponible"
   },

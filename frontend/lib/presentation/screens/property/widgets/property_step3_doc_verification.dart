@@ -1,43 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/ccaa_utils.dart';
+import '../../../providers/auth_provider.dart';
 import '../../../providers/property_form_provider.dart';
 
-class PropertyStep3DocVerification extends ConsumerStatefulWidget {
+class PropertyStep3DocVerification extends ConsumerWidget {
   const PropertyStep3DocVerification({super.key});
 
   @override
-  ConsumerState<PropertyStep3DocVerification> createState() =>
-      _PropertyStep3DocVerificationState();
-}
-
-class _PropertyStep3DocVerificationState
-    extends ConsumerState<PropertyStep3DocVerification> {
-  bool _ceeUploaded = false;
-  bool _notaSimpleUploaded = false;
-  bool _dniUploaded = false;
-  bool _cedulaUploaded = false;
-
-  void _showUploadSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('doc_verification.upload_coming_soon'.tr()),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF135BEC),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final postalCode = ref.watch(
       propertyFormProvider.select((s) => s.postalCodeText),
     );
     final ccaa = ccaaFromPostalCode(postalCode);
     final requiresCedula = ccaaRequiereCedula(ccaa);
+    final dniStatus = ref.watch(
+      authProvider.select((s) => s.user?.dniStatus),
+    );
+    final isIdentityVerified = dniStatus == 'validado';
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -49,38 +32,25 @@ class _PropertyStep3DocVerificationState
             title: 'doc_verification.mandatory_docs_title'.tr(),
             child: Column(
               children: [
-                _DocumentRow(
+                // CEE — coming soon
+                _ComingSoonDocRow(
                   icon: Icons.energy_savings_leaf_outlined,
                   title: 'doc_verification.cee_title'.tr(),
                   subtitle: 'doc_verification.cee_subtitle'.tr(),
-                  isUploaded: _ceeUploaded,
-                  onTap: () {
-                    setState(() => _ceeUploaded = !_ceeUploaded);
-                    if (!_ceeUploaded) _showUploadSnackBar(context);
-                  },
                 ),
                 const SizedBox(height: 12),
-                _DocumentRow(
+                // Nota Simple — coming soon
+                _ComingSoonDocRow(
                   icon: Icons.description_outlined,
                   title: 'doc_verification.nota_simple_title'.tr(),
                   subtitle: 'doc_verification.nota_simple_subtitle'.tr(),
-                  isUploaded: _notaSimpleUploaded,
                   warningText: 'doc_verification.nota_simple_warning'.tr(),
-                  onTap: () {
-                    setState(() => _notaSimpleUploaded = !_notaSimpleUploaded);
-                    if (!_notaSimpleUploaded) _showUploadSnackBar(context);
-                  },
                 ),
                 const SizedBox(height: 12),
-                _DocumentRow(
-                  icon: Icons.badge_outlined,
-                  title: 'doc_verification.dni_title'.tr(),
-                  subtitle: 'doc_verification.dni_subtitle'.tr(),
-                  isUploaded: _dniUploaded,
-                  onTap: () {
-                    setState(() => _dniUploaded = !_dniUploaded);
-                    if (!_dniUploaded) _showUploadSnackBar(context);
-                  },
+                // DNI — real KYC check
+                _DniDocRow(
+                  isVerified: isIdentityVerified,
+                  onVerify: () => context.go('/verify-identity'),
                 ),
               ],
             ),
@@ -119,16 +89,11 @@ class _PropertyStep3DocVerificationState
                       ],
                     ),
                   ),
-                  _DocumentRow(
+                  // Cedula — coming soon
+                  _ComingSoonDocRow(
                     icon: Icons.apartment_outlined,
                     title: 'doc_verification.cedula_title'.tr(),
                     subtitle: 'doc_verification.cedula_subtitle'.tr(),
-                    isUploaded: _cedulaUploaded,
-                    onTap: () {
-                      setState(
-                          () => _cedulaUploaded = !_cedulaUploaded);
-                      if (!_cedulaUploaded) _showUploadSnackBar(context);
-                    },
                   ),
                 ],
               ),
@@ -138,31 +103,31 @@ class _PropertyStep3DocVerificationState
           Builder(builder: (context) {
             final colorScheme = Theme.of(context).colorScheme;
             return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: colorScheme.primary.withOpacity(0.3)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.check_circle_outline,
-                    color: colorScheme.primary, size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'doc_verification.mvp_info'.tr(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: colorScheme.onPrimaryContainer,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                    color: colorScheme.primary.withOpacity(0.3)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.check_circle_outline,
+                      color: colorScheme.primary, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'doc_verification.mvp_info'.tr(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: colorScheme.onPrimaryContainer,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
+                ],
+              ),
+            );
           }),
           const SizedBox(height: 24),
         ],
@@ -170,6 +135,8 @@ class _PropertyStep3DocVerificationState
     );
   }
 }
+
+// ── Section card ─────────────────────────────────────────────────────────────
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
@@ -233,21 +200,21 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _DocumentRow extends StatelessWidget {
-  const _DocumentRow({
+// ── Coming-soon document row ──────────────────────────────────────────────────
+
+/// Document row for CEE, Nota Simple, and Cedula.
+/// The upload is not yet available; shows a "Proximamente" request button.
+class _ComingSoonDocRow extends StatelessWidget {
+  const _ComingSoonDocRow({
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.isUploaded,
-    required this.onTap,
     this.warningText,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool isUploaded;
-  final VoidCallback onTap;
   final String? warningText;
 
   @override
@@ -255,27 +222,18 @@ class _DocumentRow extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: isUploaded ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isUploaded
-              ? colorScheme.primary.withOpacity(0.4)
-              : colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isUploaded
-                    ? colorScheme.primary
-                    : colorScheme.onSurfaceVariant,
-              ),
+              Icon(icon, size: 20, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 10),
               Expanded(
                 child: Column(
@@ -286,9 +244,7 @@ class _DocumentRow extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
-                        color: isUploaded
-                            ? colorScheme.onPrimaryContainer
-                            : colorScheme.onSurface,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     Text(
@@ -301,33 +257,13 @@ class _DocumentRow extends StatelessWidget {
                   ],
                 ),
               ),
-              if (isUploaded)
-                Icon(Icons.check_circle,
-                    color: colorScheme.primary, size: 20)
-              else
-                OutlinedButton.icon(
-                  onPressed: onTap,
-                  icon: const Icon(Icons.upload_file, size: 14),
-                  label: Text('doc_verification.select_file'.tr(),
-                      style: const TextStyle(fontSize: 12)),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: colorScheme.primary,
-                    side: BorderSide(color: colorScheme.primary),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ),
             ],
           ),
           if (warningText != null) ...[
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.schedule,
-                    size: 12, color: colorScheme.tertiary),
+                Icon(Icons.schedule, size: 12, color: colorScheme.tertiary),
                 const SizedBox(width: 4),
                 Text(
                   warningText!,
@@ -335,6 +271,128 @@ class _DocumentRow extends StatelessWidget {
                       fontSize: 11, color: colorScheme.onTertiaryContainer),
                 ),
               ],
+            ),
+          ],
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: null, // disabled — coming soon
+              icon: const Icon(Icons.send_outlined, size: 14),
+              label: Text(
+                'doc_verification.request_coming_soon'.tr(),
+                style: const TextStyle(fontSize: 12),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: colorScheme.onSurfaceVariant,
+                side: BorderSide(color: colorScheme.outlineVariant),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── DNI document row ──────────────────────────────────────────────────────────
+
+/// Document row for DNI/NIE.
+/// Shows KYC verification status and routes to /verify-identity if needed.
+class _DniDocRow extends StatelessWidget {
+  const _DniDocRow({
+    required this.isVerified,
+    required this.onVerify,
+  });
+
+  final bool isVerified;
+  final VoidCallback onVerify;
+
+  static const _green = Color(0xFF16A34A);
+  static const _greenBg = Color(0xFFF0FDF4);
+  static const _greenBorder = Color(0xFFBBF7D0);
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: isVerified ? _greenBg : colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isVerified ? _greenBorder : colorScheme.outlineVariant,
+        ),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.badge_outlined,
+                size: 20,
+                color: isVerified ? _green : colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'doc_verification.dni_title'.tr(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                        color:
+                            isVerified ? _green : colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      isVerified
+                          ? 'doc_verification.dni_verified_subtitle'.tr()
+                          : 'doc_verification.dni_subtitle'.tr(),
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isVerified
+                            ? _green
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isVerified)
+                const Icon(Icons.verified_user,
+                    color: _green, size: 22),
+            ],
+          ),
+          if (!isVerified) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: onVerify,
+                icon: const Icon(Icons.shield_outlined, size: 14),
+                label: Text(
+                  'doc_verification.dni_verify_button'.tr(),
+                  style: const TextStyle(fontSize: 12),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: colorScheme.primary,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
             ),
           ],
         ],

@@ -40,6 +40,20 @@ class AiConsentConfig {
     aiProvider: 'Google Gemini (Google LLC)',
   );
 
+  static const aiComfortReport = AiConsentConfig(
+    actionType: 'ai_comfort_report',
+    actionLabel: 'Generacion de informe de confort ambiental con IA',
+    dataCategories: [
+      'Coordenadas GPS del inmueble (latitud y longitud)',
+      'Codigo postal y municipio',
+      'Tipo de inmueble',
+    ],
+    purpose:
+        'Analizar datos ambientales y de entorno (ruido, calidad del aire, zonas verdes, etc.) '
+        'de la ubicacion del inmueble para generar un informe de confort destinado a compradores.',
+    aiProvider: 'Google Gemini (Google LLC)',
+  );
+
   static const kycVerification = AiConsentConfig(
     actionType: 'kyc_identity_verification',
     actionLabel: 'Verificacion de identidad con IA',
