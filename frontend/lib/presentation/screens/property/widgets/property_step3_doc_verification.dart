@@ -341,12 +341,12 @@ class _DocRow extends StatelessWidget {
                   color: _blueIcon,
                 ),
                 const SizedBox(width: 6),
-                // Coming-soon button (disabled, compact)
-                const _InlineButton(
+                // Coming-soon button (disabled, informative)
+                _InlineButton(
                   onPressed: null,
                   icon: Icons.pending_outlined,
-                  label: 'Próximamente',
-                  color: Color(0xFF94A3B8),
+                  label: 'doc_verification.request_coming_soon'.tr(),
+                  color: const Color(0xFF94A3B8),
                   isDisabled: true,
                 ),
               ],
@@ -464,18 +464,24 @@ class _InlineButton extends StatelessWidget {
     final borderColor =
         isDisabled ? const Color(0xFFCBD5E1) : color.withValues(alpha: 0.6);
 
+    // Active buttons match the AppBar button size (h:14 v:10, font 13).
+    // Disabled "Proximamente" keeps compact padding with smaller font.
+    final padding = isDisabled
+        ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+        : const EdgeInsets.symmetric(horizontal: 14, vertical: 10);
+    final fontSize = isDisabled ? 11.0 : 13.0;
+    final iconSize = isDisabled ? 13.0 : 15.0;
+
     return OutlinedButton.icon(
       onPressed: onPressed,
-      icon: Icon(icon, size: 13),
-      label: Text(label, style: const TextStyle(fontSize: 11)),
+      icon: Icon(icon, size: iconSize),
+      label: Text(label, style: TextStyle(fontSize: fontSize)),
       style: OutlinedButton.styleFrom(
         foregroundColor: effectiveColor,
         side: BorderSide(color: borderColor),
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+        padding: padding,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         visualDensity: VisualDensity.compact,
-        minimumSize: Size.zero,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
     );
   }
