@@ -69,15 +69,7 @@
     "gdpr_decline_button": "I decline — exit",
     "gdpr_terms_prefix": "By continuing you accept the ",
     "gdpr_terms_link": "Terms and Conditions",
-    "gdpr_privacy_link": "Privacy Policy",
-    "user_type_title": "How will you use InmuFácil?",
-    "user_type_subtitle": "Choose the profile that best describes you.",
-    "user_type_particular": "Individual",
-    "user_type_particular_desc": "I buy or sell my home without intermediaries.",
-    "user_type_profesional": "Professional",
-    "user_type_profesional_desc": "I am a real estate professional.",
-    "user_type_continue": "Continue",
-    "user_type_required": "Select a profile type to continue"
+    "gdpr_privacy_link": "Privacy Policy"
   },
   "home": {
     "welcome": "Welcome to InmuFácil",
