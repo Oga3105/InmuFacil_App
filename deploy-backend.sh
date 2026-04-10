@@ -93,14 +93,14 @@ echo ""
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "cd $REMOTE_APP_DIR && \
-   docker-compose -f docker-compose.prod.yml build backend"
+   docker compose -f docker-compose.prod.yml build backend"
 
 echo ""
 echo "[5/5] Reiniciando contenedor del backend (BD intacta)..."
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "cd $REMOTE_APP_DIR && \
-   docker-compose -f docker-compose.prod.yml up -d --no-deps backend && \
+   docker compose -f docker-compose.prod.yml up -d --no-deps backend && \
    echo '' && \
    echo '--- Estado de contenedores ---' && \
    docker ps --filter name=inmufacil --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
