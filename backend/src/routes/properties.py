@@ -322,11 +322,19 @@ async def update_property_status(
     prop = verify_property_ownership(db, property_id, current_user.id)
     prop.status = PropertyStatus(body.status)
     db.commit()
-    # Re-query with eager owner join so Pydantic serialization never triggers
-    # a lazy load on an expired session object (SQLAlchemy 2.0 behaviour).
+    # Re-query with all eager joins — PropertyResponse serializes features,
+    # legal, financial, environment and media; omitting any of them causes a
+    # lazy-load attempt on an expired SQLAlchemy 2.0 session → 500.
     prop = (
         db.query(Property)
-        .options(joinedload(Property.owner))
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
         .filter(Property.id == property_id)
         .first()
     )
