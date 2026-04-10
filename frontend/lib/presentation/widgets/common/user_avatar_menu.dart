@@ -66,6 +66,8 @@ class UserAvatarMenu extends ConsumerWidget {
     // ── Build menu items ─────────────────────────────────────────────────────
 
     final List<PopupMenuEntry<_MenuValue>> items = [];
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color navItemColor = isDark ? Colors.white : actionBlue;
 
     // 1. Urgent actions — shown at top, styled green
     if (hasUrgency) {
@@ -142,7 +144,7 @@ class UserAvatarMenu extends ConsumerWidget {
         child: _NavItem(
           icon: Icons.person_outline,
           label: 'Mi Perfil',
-          accentColor: actionBlue,
+          accentColor: navItemColor,
         ),
       ),
     );
@@ -154,7 +156,7 @@ class UserAvatarMenu extends ConsumerWidget {
           child: _NavItem(
             icon: Icons.home_work_outlined,
             label: 'Mis Propiedades',
-            accentColor: actionBlue,
+            accentColor: navItemColor,
           ),
         ),
       );
@@ -166,7 +168,7 @@ class UserAvatarMenu extends ConsumerWidget {
           child: _NavItem(
             icon: Icons.handshake_outlined,
             label: 'Mis Ofertas',
-            accentColor: actionBlue,
+            accentColor: navItemColor,
           ),
         ),
       );
@@ -178,7 +180,7 @@ class UserAvatarMenu extends ConsumerWidget {
           child: _NavItem(
             icon: Icons.calendar_month_outlined,
             label: 'Mis Visitas',
-            accentColor: actionBlue,
+            accentColor: navItemColor,
           ),
         ),
       );
@@ -190,7 +192,7 @@ class UserAvatarMenu extends ConsumerWidget {
           child: _NavItem(
             icon: Icons.chat_bubble_outline,
             label: 'Mensajes',
-            accentColor: actionBlue,
+            accentColor: navItemColor,
           ),
         ),
       );
@@ -409,7 +411,7 @@ class _NavItem extends StatelessWidget {
         const SizedBox(width: 10),
         Text(
           label,
-          style: TextStyle(fontSize: 14, color: accentColor),
+          style: TextStyle(fontSize: 14, color: accentColor, fontWeight: FontWeight.w500),
         ),
       ],
     );

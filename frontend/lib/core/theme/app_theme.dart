@@ -44,20 +44,29 @@ class AppTheme {
       seedColor: primaryColor,
       primary: primaryColor,
       brightness: Brightness.dark,
+    ).copyWith(
+      surface: const Color(0xFF1C3F73), // Navy brillante para tarjetas
+      surfaceDim: const Color(0xFF1C3F73),
+      surfaceBright: const Color(0xFF234983),
+      surfaceContainerLowest: const Color(0xFF1C3F73),
+      surfaceContainerLow: const Color(0xFF1C3F73),
+      surfaceContainer: const Color(0xFF1C3F73),
+      surfaceContainerHigh: const Color(0xFF234983),
+      surfaceContainerHighest: const Color(0xFF234983),
     );
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: const Color(0xFF0E2242), // Fondo de la app
       appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
-        backgroundColor: colorScheme.surface,
+        backgroundColor: const Color(0xFF0E2242),
         foregroundColor: colorScheme.onSurface,
         surfaceTintColor: Colors.transparent,
       ),
-      cardTheme: CardThemeData(
-        color: colorScheme.surface,
+      cardTheme: const CardThemeData(
+        color: Color(0xFF1C3F73),
         elevation: 0,
       ),
       dividerTheme: DividerThemeData(
