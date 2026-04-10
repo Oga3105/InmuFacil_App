@@ -2,54 +2,38 @@
 # =============================================================================
 # deploy-frontend.sh — Despliegue de Flutter Web a produccion
 #
-# Uso desde la raiz del proyecto:
-#   bash deploy-frontend.sh
+# Uso:
+#   & "C:\Program Files\Git\bin\bash.exe" deploy-frontend.sh
 #
 # Que hace:
-#   1. Construye el .env de produccion desde el .env local (sobrescribiendo
-#      ENABLE_LOGGING y API_BASE_URL con valores de produccion).
+#   1. Construye el .env de produccion desde el .env local.
 #   2. Compila Flutter web en modo release con base-href /TFM/.
 #   3. Restaura el .env local original.
-#   4. Sube el build al servidor via SCP.
-#   5. Ajusta permisos y recarga nginx (una sola sesion SSH).
-#
-# Prerequisitos:
-#   - flutter en PATH
-#   - ssh y scp disponibles (Git Bash / WSL en Windows)
-#   - frontend/.env con GOOGLE_WEB_CLIENT_ID relleno
+#   4. Crea el directorio remoto si no existe (pide clave SSH - 1 vez).
+#   5. Sube el build al servidor via SCP (pide clave SSH - 2 vez).
+#   6. Ajusta permisos y recarga nginx (pide clave SSH - 3 vez).
 # =============================================================================
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Configuracion
-# ---------------------------------------------------------------------------
 SERVER="root@87.106.247.84"
 REMOTE_PATH="/opt/inmufacil/frontend/build/TFM"
 FRONTEND_DIR="frontend"
 ENV_FILE="$FRONTEND_DIR/.env"
 ENV_BACKUP="$FRONTEND_DIR/.env.deploy_backup"
 
-# SSH multiplexing: pide la clave una sola vez, reutiliza la conexion 5 min
-SSH_CTL="/tmp/inmufacil-frontend-deploy-$$"
-SSH_OPTS="-o ControlMaster=auto -o ControlPath=$SSH_CTL -o ControlPersist=300 -o StrictHostKeyChecking=accept-new"
-
 # ---------------------------------------------------------------------------
-# Limpieza garantizada al salir (error o exito)
+# Restaurar .env local si algo falla a mitad
 # ---------------------------------------------------------------------------
 cleanup() {
-  # Restaurar .env local si el backup existe
   if [ -f "$ENV_BACKUP" ]; then
     mv "$ENV_BACKUP" "$ENV_FILE"
     echo "[cleanup] .env local restaurado."
   fi
-  # Cerrar socket SSH multiplexado
-  ssh $SSH_OPTS -O exit "$SERVER" 2>/dev/null || true
-  rm -f "$SSH_CTL"
 }
 trap cleanup EXIT
 
 # ---------------------------------------------------------------------------
-# Comprobaciones previas
+# Cabecera
 # ---------------------------------------------------------------------------
 echo ""
 echo "============================================"
@@ -59,7 +43,7 @@ echo "============================================"
 echo ""
 
 if [ ! -f "$ENV_FILE" ]; then
-  echo "ERROR: No se encuentra $ENV_FILE. Crea el archivo antes de desplegar."
+  echo "ERROR: No se encuentra $ENV_FILE."
   exit 1
 fi
 
@@ -69,21 +53,17 @@ if ! command -v flutter &>/dev/null; then
 fi
 
 # ---------------------------------------------------------------------------
-# PASO 1 — Construir .env de produccion
+# PASO 1 — .env de produccion
 # ---------------------------------------------------------------------------
 echo "[1/5] Preparando entorno de produccion..."
 
-# Leer GOOGLE_WEB_CLIENT_ID del .env local actual
 GCID=$(grep "^GOOGLE_WEB_CLIENT_ID=" "$ENV_FILE" | cut -d= -f2- || echo "")
 if [ -z "$GCID" ]; then
-  echo "ADVERTENCIA: GOOGLE_WEB_CLIENT_ID no encontrado en $ENV_FILE."
-  echo "  La build se generara sin Google OAuth."
+  echo "  ADVERTENCIA: GOOGLE_WEB_CLIENT_ID no encontrado en $ENV_FILE."
 fi
 
-# Hacer backup del .env local
 cp "$ENV_FILE" "$ENV_BACKUP"
 
-# Escribir .env de produccion (baked-in en build/web/assets/.env)
 cat > "$ENV_FILE" << PROD_ENV
 API_BASE_URL=https://inmufacil.com/api/v1
 API_TIMEOUT=30000
@@ -101,9 +81,10 @@ echo ""
 echo "[2/5] Compilando Flutter web (modo release)..."
 (
   cd "$FRONTEND_DIR"
-  flutter build web --release --base-href /TFM/
+  # MSYS_NO_PATHCONV=1 evita que Git Bash convierta /TFM/ a ruta Windows
+  MSYS_NO_PATHCONV=1 flutter build web --release --base-href /TFM/
 )
-echo "  Build completado: $FRONTEND_DIR/build/web/"
+echo "  Build completado."
 
 # ---------------------------------------------------------------------------
 # PASO 3 — Restaurar .env local
@@ -113,28 +94,27 @@ mv "$ENV_BACKUP" "$ENV_FILE"
 echo "  .env local restaurado."
 
 # ---------------------------------------------------------------------------
-# PASO 4 — Subir build al servidor
+# PASO 4 — Crear directorio remoto si no existe (clave SSH: 1/3)
 # ---------------------------------------------------------------------------
 echo ""
 echo "[4/5] Subiendo build al servidor..."
-echo "  (Se pedira la contrasena SSH del servidor)"
+echo "  Pedira la clave SSH hasta 3 veces (mkdir, scp, permisos+nginx)"
 echo ""
 
-# Abrir sesion SSH multiplexada (primera vez pide contrasena)
-ssh $SSH_OPTS "$SERVER" "mkdir -p $REMOTE_PATH"
+ssh -o StrictHostKeyChecking=accept-new "$SERVER" "mkdir -p $REMOTE_PATH"
 
-# Subir todos los archivos del build
-scp -o "ControlPath=$SSH_CTL" -o "ControlMaster=no" \
+# SCP del build completo (clave SSH: 2/3)
+scp -o StrictHostKeyChecking=accept-new \
   -r "$FRONTEND_DIR/build/web/"* "$SERVER:$REMOTE_PATH/"
 
 echo "  Archivos subidos."
 
 # ---------------------------------------------------------------------------
-# PASO 5 — Permisos + recarga nginx
+# PASO 5 — Permisos + recarga nginx (clave SSH: 3/3)
 # ---------------------------------------------------------------------------
 echo "[5/5] Ajustando permisos y recargando nginx..."
 
-ssh -o "ControlPath=$SSH_CTL" -o "ControlMaster=no" "$SERVER" \
+ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "find $REMOTE_PATH -type d -exec chmod 755 {} \; && \
    find $REMOTE_PATH -type f -exec chmod 644 {} \; && \
    docker exec inmufacil_proxy nginx -s reload"
