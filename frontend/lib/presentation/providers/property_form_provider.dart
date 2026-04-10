@@ -1000,7 +1000,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
             backgroundColor: Color(0xFFCA8A04),
           ),
         );
-        context.go('/profile');
+        context.go('/profile?tab=1');
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {

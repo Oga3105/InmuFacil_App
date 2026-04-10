@@ -222,9 +222,24 @@ async def create_property(
         
     # Calculate Metrics
     calculate_metrics(new_property)
-    
+
     db.commit()
-    db.refresh(new_property)
+    # Re-query with eager joins — SQLAlchemy 2.0 expires all attributes after
+    # commit; returning the bare instance causes Pydantic to lazy-load every
+    # relationship during serialization, which fails on an expired session object.
+    new_property = (
+        db.query(Property)
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
+        .filter(Property.id == new_property.id)
+        .first()
+    )
     return new_property
 
 
@@ -274,7 +289,23 @@ async def create_draft_property(
         features = PropertyFeatures(**draft_data.features.model_dump(), property_id=new_property.id)
         db.add(features)
     db.commit()
-    db.refresh(new_property)
+    # Re-query with eager joins — same pattern as PATCH /status.
+    # SQLAlchemy 2.0 expires all attributes after commit; returning the bare
+    # instance would force Pydantic to lazy-load every relationship during
+    # serialization, which fails on an expired session object.
+    new_property = (
+        db.query(Property)
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
+        .filter(Property.id == new_property.id)
+        .first()
+    )
     return new_property
 
 
