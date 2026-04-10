@@ -659,5 +659,25 @@
     "no_consent_info": "The seller has not yet enabled the AI comfort analysis for this property. You can request it and they will receive an email to activate it.",
     "request_btn": "Request report from seller",
     "request_error": "Could not send the request. Please try again later."
+  },
+  "doc_verification": {
+    "mandatory_docs_title": "Mandatory Documentation",
+    "cee_title": "Energy Efficiency Certificate",
+    "cee_subtitle": "Legally required for sale",
+    "select_file": "Select file",
+    "nota_simple_title": "Property Registry Note",
+    "nota_simple_subtitle": "Certifies ownership and encumbrances",
+    "nota_simple_warning": "You can request it online at the Property Registry",
+    "dni_title": "Owner ID / NIE",
+    "dni_subtitle": "Valid identity document of the seller",
+    "dni_verified_subtitle": "Your identity is verified",
+    "dni_verify_button": "Verify identity",
+    "regional_doc_title": "Regional Documentation",
+    "cedula_ccaa_required": "Required in your Autonomous Community:",
+    "cedula_title": "Certificate of Habitation",
+    "cedula_subtitle": "Mandatory in some autonomous communities",
+    "request_coming_soon": "Coming soon — you will be able to request it from here",
+    "mvp_info": "In this MVP phase, documents are informational. Full verification will be available soon.",
+    "upload_coming_soon": "File upload coming soon"
   }
 }

@@ -387,5 +387,25 @@
     "no_consent_info": "O vendedor aínda non activou a análise de confort IA para esta propiedade. Podes solicitarllo e recibirá un correo para activalo.",
     "request_btn": "Solicitar informe ao vendedor",
     "request_error": "Non se puido enviar a solicitude. Téntao de novo máis tarde."
+  },
+  "doc_verification": {
+    "mandatory_docs_title": "Documentación obrigatoria",
+    "cee_title": "Certificado de Eficiencia Enerxética",
+    "cee_subtitle": "Requirido legalmente para a venda",
+    "select_file": "Seleccionar ficheiro",
+    "nota_simple_title": "Nota Simple do Rexistro",
+    "nota_simple_subtitle": "Acredita a titularidade e cargas do inmoble",
+    "nota_simple_warning": "Podes solicitala en liña no Rexistro da Propiedade",
+    "dni_title": "DNI / NIE do Propietario",
+    "dni_subtitle": "Documento de identidade válido do vendedor",
+    "dni_verified_subtitle": "A túa identidade está verificada",
+    "dni_verify_button": "Verificar identidade",
+    "regional_doc_title": "Documentación rexional",
+    "cedula_ccaa_required": "Requirido na túa Comunidade Autónoma:",
+    "cedula_title": "Cédula de Habitabilidade",
+    "cedula_subtitle": "Obrigatoria nalgunhas comunidades autónomas",
+    "request_coming_soon": "En breve poderás solicitalo desde aquí",
+    "mvp_info": "Nesta fase MVP os documentos son informativos. A verificación completa estará dispoñible en breve.",
+    "upload_coming_soon": "Subida de ficheiros en breve dispoñible"
   }
 }
