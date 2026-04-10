@@ -24,7 +24,7 @@ class UserBase(BaseModel):
     """Base user schema."""
     email: EmailStr
     full_name: str = Field(..., min_length=3, max_length=100)
-    user_type: str = Field(default="particular", pattern="^(particular|profesional)$")
+    user_type: str = Field(default="particular", pattern="^(particular|tercero|admin|provider|financiero)$")
 
 
 class UserCreate(UserBase):
@@ -67,11 +67,6 @@ class UserInDB(UserBase):
 class GoogleAuthRequest(BaseModel):
     """Schema para autenticacion via Google. Recibe Firebase ID token del cliente."""
     firebase_id_token: str = Field(..., min_length=10)
-    user_type: Optional[str] = Field(
-        None,
-        pattern="^(particular|profesional)$",
-        description="Requerido solo en el primer login (onboarding)"
-    )
 
 
 class GoogleAuthResponse(BaseModel):

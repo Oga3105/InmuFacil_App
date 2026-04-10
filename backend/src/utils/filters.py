@@ -150,60 +150,45 @@ def check_professional_keywords(full_name: str) -> Tuple[bool, list]:
 async def validate_user_is_not_agency(
     email: str,
     full_name: str,
-    user_type: str = "particular"
 ) -> Tuple[bool, str]:
     """
-    Comprehensive validation to detect real estate agency registrations.
-    
+    Validates that the registering user is not a real estate agency.
+
+    All new users register as 'particular' by design (ADR-021). The role
+    'tercero' is assigned exclusively by superadmin via invitation token, so
+    the user_type parameter has been removed from this check.
+
     Args:
         email: User's email address
         full_name: User's full name
-        user_type: User type (particular/profesional)
-        
+
     Returns:
         Tuple of (is_valid, rejection_reason)
         - is_valid: True if user is allowed, False if blocked
         - rejection_reason: Empty string if valid, reason if blocked
-        
+
     @Shield: Async validation for non-blocking UX
-    @Shield: False positive prevention with multi-factor detection
+    @Shield: False positive prevention — blocks only on email domain match
     @Watcher: Logs all detection attempts for pattern analysis
-    
-    Security Notes:
-    - Uses multiple detection methods to reduce false positives
-    - Blocks only when confidence is high
-    - Sanitizes all inputs per OWASP standards
     """
-    
+
     # @Shield: Input sanitization (OWASP)
     email = email.strip().lower()
     full_name = full_name.strip()
-    
-    # Check 1: Email domain detection
+
+    # Check 1: Email domain detection (hard block — agency domain = agency)
     is_agency_domain, matched_domain = check_email_domain(email)
-    
-    # Check 2: Professional keywords in name
-    has_keywords, matched_keywords = check_professional_keywords(full_name)
-    
-    # @Shield: Multi-factor detection to prevent false positives
-    # Block only if BOTH conditions are met OR domain is clearly an agency
-    
     if is_agency_domain:
         reason = f"Email domain '{matched_domain}' belongs to a known real estate agency"
         logger.warning(f"[BLOCKED] BLOCKED: {reason} | Email: {email}")
         return False, reason
-    
-    if has_keywords and user_type == "profesional":
-        # If user explicitly selected "profesional" AND has keywords, likely an agency
-        reason = f"Professional account with agency keywords: {', '.join(matched_keywords)}"
-        logger.warning(f"[BLOCKED] BLOCKED: {reason} | Name: {full_name}")
-        return False, reason
-    
-    # @Shield: Allow registration if not clearly an agency
-    # Single keyword in name is not enough to block (could be false positive)
+
+    # Check 2: Professional keywords in name — log only, do not block.
+    # Without a user_type signal, a keyword alone is insufficient evidence.
+    has_keywords, matched_keywords = check_professional_keywords(full_name)
     if has_keywords:
         logger.info(f"[WARNING]  WARNING: Keywords detected but not blocking (single factor): {matched_keywords}")
-    
+
     return True, ""
 
 

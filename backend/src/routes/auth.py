@@ -146,7 +146,6 @@ async def register(
     is_valid, reason = await validate_user_is_not_agency(
         email=user_data.email,
         full_name=user_data.full_name,
-        user_type=user_data.user_type
     )
     
     if not is_valid:
@@ -181,12 +180,12 @@ async def register(
     verification_token = generate_verification_token()
     token_expires = get_token_expiration() # 15 min
 
-    # Step 5: Create new user
+    # Step 5: Create new user (always particular — ADR-021)
     new_user = User(
         email=user_data.email,
         hashed_password=hashed_password,
         full_name=user_data.full_name,
-        user_type=UserType(user_data.user_type),
+        user_type=UserType.PARTICULAR,
         dni_status=DNIStatus.SIN_VERIFICAR,
         email_verified=False,
         verification_token=verification_token,
@@ -488,13 +487,12 @@ async def google_auth(
             db.refresh(user)
             logger.info(f"[AUTH] Google vinculado a cuenta existente: {email}")
         else:
-            # Caso: usuario nuevo — validar anti-agencia antes de crear
+            # Caso: usuario nuevo — validar anti-agencia antes de crear (ADR-021)
+            # user_type siempre PARTICULAR; el rol tercero se asigna via token de invitacion
             is_new_user = True
-            user_type_value = UserType(payload.user_type) if payload.user_type else UserType.PARTICULAR
             is_valid, reason = await validate_user_is_not_agency(
                 email=email,
                 full_name=full_name,
-                user_type=user_type_value.value
             )
             if not is_valid:
                 client_ip = request.client.host if request.client else "unknown"
@@ -515,7 +513,7 @@ async def google_auth(
                 hashed_password=None,
                 google_id=google_id,
                 full_name=full_name,
-                user_type=user_type_value,
+                user_type=UserType.PARTICULAR,
                 dni_status=DNIStatus.SIN_VERIFICAR,
                 email_verified=email_verified,
                 dni_verified=False,

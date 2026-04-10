@@ -91,7 +91,7 @@ class GdprConsentScreen extends ConsumerWidget {
 
                   // Boton aceptar
                   ElevatedButton(
-                    onPressed: () => context.go('/onboarding/user-type'),
+                    onPressed: () => context.go('/'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: colorScheme.secondary,
                       foregroundColor: colorScheme.onSecondary,
