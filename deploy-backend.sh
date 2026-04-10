@@ -49,27 +49,22 @@ echo "[2/5] Sincronizando codigo del backend al servidor..."
 echo "  Pedira la clave SSH hasta 4 veces (mkdir, rsync, .env opcional, docker)"
 echo ""
 
-ssh -o StrictHostKeyChecking=accept-new "$SERVER" "mkdir -p $REMOTE_APP_DIR"
+ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
+  "mkdir -p $REMOTE_APP_DIR/backend $REMOTE_APP_DIR/migrations"
 
-# rsync incremental: solo sube lo que cambio desde el ultimo deploy
-rsync -avz --progress \
-  --exclude '.git' \
-  --exclude '.venv' \
-  --exclude '__pycache__' \
-  --exclude '*.pyc' \
-  --exclude '*.pyo' \
-  --exclude '*.dump' \
-  --exclude '*.log' \
-  --exclude 'frontend/' \
-  --exclude 'uploads/' \
-  --exclude '.env' \
-  --exclude '.env.*' \
-  --exclude 'backup_*.sql' \
-  --exclude 'fix_*.sql' \
-  --exclude '.agents/' \
-  --exclude 'docs/' \
-  -e "ssh -o StrictHostKeyChecking=accept-new" \
-  . "$SERVER:$REMOTE_APP_DIR/"
+# Subir solo lo que el Dockerfile necesita para construir la imagen:
+#   backend/   — codigo FastAPI
+#   requirements.txt — dependencias Python
+#   docker-compose.prod.yml — definicion de servicios
+#   migrations/ — scripts SQL de referencia
+scp -o StrictHostKeyChecking=accept-new \
+  requirements.txt docker-compose.prod.yml "$SERVER:$REMOTE_APP_DIR/"
+
+scp -o StrictHostKeyChecking=accept-new \
+  -r backend "$SERVER:$REMOTE_APP_DIR/"
+
+scp -o StrictHostKeyChecking=accept-new \
+  -r migrations "$SERVER:$REMOTE_APP_DIR/"
 
 echo "  Codigo sincronizado."
 
