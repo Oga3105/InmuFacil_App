@@ -521,5 +521,25 @@
     "no_consent_info": "Le vendeur n'a pas encore activé l'analyse de confort IA pour ce bien. Vous pouvez le lui demander et il recevra un e-mail pour l'activer.",
     "request_btn": "Demander le rapport au vendeur",
     "request_error": "Impossible d'envoyer la demande. Veuillez réessayer plus tard."
+  },
+  "doc_verification": {
+    "mandatory_docs_title": "Documentation obligatoire",
+    "cee_title": "Diagnostic de Performance Energétique",
+    "cee_subtitle": "Requis légalement pour la vente",
+    "select_file": "Sélectionner un fichier",
+    "nota_simple_title": "Extrait du Registre Foncier",
+    "nota_simple_subtitle": "Certifie la propriété et les charges du bien",
+    "nota_simple_warning": "Vous pouvez le demander en ligne au Registre de la Propriété",
+    "dni_title": "Pièce d'identité du Propriétaire",
+    "dni_subtitle": "Document d'identité valide du vendeur",
+    "dni_verified_subtitle": "Votre identité est vérifiée",
+    "dni_verify_button": "Vérifier l'identité",
+    "regional_doc_title": "Documentation régionale",
+    "cedula_ccaa_required": "Requis dans votre Communauté Autonome :",
+    "cedula_title": "Certificat d'Habitabilité",
+    "cedula_subtitle": "Obligatoire dans certaines communautés autonomes",
+    "request_coming_soon": "Bientôt, vous pourrez le demander depuis ici",
+    "mvp_info": "Dans cette phase MVP, les documents sont informatifs. La vérification complète sera disponible prochainement.",
+    "upload_coming_soon": "Téléchargement de fichiers bientôt disponible"
   }
 }

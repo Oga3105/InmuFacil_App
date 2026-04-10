@@ -467,5 +467,25 @@
     "no_consent_info": "Saltzaileak oraindik ez du aktibatu IA erosotasun analisia. Eska diezaiokezu eta aktibatzeko mezu elektronikoa jasoko du.",
     "request_btn": "Txostena eskatu saltzaileari",
     "request_error": "Ezin izan da eskaera bidali. Saiatu berriro geroago."
+  },
+  "doc_verification": {
+    "mandatory_docs_title": "Dokumentazio derrigorrezkoa",
+    "cee_title": "Energia Efizientziaren Ziurtagiria",
+    "cee_subtitle": "Legezko baldintza salmenta egiteko",
+    "select_file": "Hautatu fitxategia",
+    "nota_simple_title": "Erregistroko Nota Sinplea",
+    "nota_simple_subtitle": "Jabetza eta kargak egiaztatzen ditu",
+    "nota_simple_warning": "Erregistro Nagusian sarean eskatu dezakezu",
+    "dni_title": "Jabearen NAN / AIZ",
+    "dni_subtitle": "Saltzailearen identitate agiri balioduna",
+    "dni_verified_subtitle": "Zure identitatea egiaztatuta dago",
+    "dni_verify_button": "Identitatea egiaztatu",
+    "regional_doc_title": "Eskualdeko dokumentazioa",
+    "cedula_ccaa_required": "Zure Autonomia Erkidegoan beharrezkoa:",
+    "cedula_title": "Bizitokitasun Ziurtagiria",
+    "cedula_subtitle": "Derrigorrezkoa autonomia erkidego batzuetan",
+    "request_coming_soon": "Laster hemen eskatu ahal izango duzu",
+    "mvp_info": "MVP fase honetan dokumentuak informatiboak dira. Egiaztapen osoa laster eskuragarri egongo da.",
+    "upload_coming_soon": "Fitxategiak igotzea laster erabilgarri"
   }
 }

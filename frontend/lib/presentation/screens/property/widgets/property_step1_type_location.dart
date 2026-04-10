@@ -6,9 +6,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:easy_localization/easy_localization.dart';
+import '../../../../core/services/ai_consent_service.dart';
 import '../../../../domain/entities/property_type.dart';
 import '../../../providers/property_form_provider.dart';
 import '../../../providers/search_provider.dart'; // for locationServiceProvider
+import '../../../widgets/ai/ai_consent_dialog.dart';
 
 class PropertyStep1TypeLocation extends ConsumerStatefulWidget {
   const PropertyStep1TypeLocation({super.key});
@@ -532,7 +534,21 @@ class _PropertyStep1TypeLocationState
               : Colors.grey.shade400,
         ),
         value: s.aiComfortConsent,
-        onChanged: (_) => notifier.toggleAiComfortConsent(),
+        onChanged: (newValue) async {
+          if (newValue) {
+            // Show GDPR consent dialog before enabling
+            final accepted = await AiConsentDialog.show(
+              context: context,
+              config: AiConsentConfig.aiComfortReport,
+            );
+            if (accepted) {
+              notifier.toggleAiComfortConsent();
+            }
+          } else {
+            // Disable without requiring dialog
+            notifier.toggleAiComfortConsent();
+          }
+        },
         activeColor: Theme.of(context).colorScheme.primary,
       ),
     );

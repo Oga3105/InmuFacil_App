@@ -521,5 +521,25 @@
     "no_consent_info": "El venedor encara no ha activat l'anàlisi de confort IA per a aquesta propietat. Pots sol·licitar-ho i rebrà un correu per activar-ho.",
     "request_btn": "Sol·licitar informe al venedor",
     "request_error": "No s'ha pogut enviar la sol·licitud. Torna-ho a intentar més tard."
+  },
+  "doc_verification": {
+    "mandatory_docs_title": "Documentació obligatòria",
+    "cee_title": "Certificat d'Eficiència Energètica",
+    "cee_subtitle": "Requerit legalment per a la venda",
+    "select_file": "Seleccionar fitxer",
+    "nota_simple_title": "Nota Simple del Registre",
+    "nota_simple_subtitle": "Acredita la titularitat i les càrregues de l'immoble",
+    "nota_simple_warning": "Pots sol·licitar-la en línia al Registre de la Propietat",
+    "dni_title": "DNI / NIE del Propietari",
+    "dni_subtitle": "Document d'identitat vàlid del venedor",
+    "dni_verified_subtitle": "La teva identitat està verificada",
+    "dni_verify_button": "Verificar identitat",
+    "regional_doc_title": "Documentació regional",
+    "cedula_ccaa_required": "Requerit a la teva Comunitat Autònoma:",
+    "cedula_title": "Cèdula d'Habitabilitat",
+    "cedula_subtitle": "Obligatòria en algunes comunitats autònomes",
+    "request_coming_soon": "Aviat podràs sol·licitar-ho des d'aquí",
+    "mvp_info": "En aquesta fase MVP els documents són informatius. La verificació completa estarà disponible aviat.",
+    "upload_coming_soon": "Pujada de fitxers aviat disponible"
   }
 }
