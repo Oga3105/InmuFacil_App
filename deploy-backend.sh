@@ -77,7 +77,11 @@ if [[ "$update_env" =~ ^[sS]$ ]]; then
   else
     scp -o StrictHostKeyChecking=accept-new \
       .env "$SERVER:$REMOTE_APP_DIR/.env"
-    echo "  .env del servidor actualizado."
+    # En Docker, el host de la BD es el nombre del servicio ("db"), no localhost.
+    # Parcheamos DATABASE_URL para reemplazar localhost:<cualquier-puerto> por db:5432.
+    ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
+      "sed -i 's|localhost:[0-9]*|db:5432|g' $REMOTE_APP_DIR/.env"
+    echo "  .env del servidor actualizado (DATABASE_URL parcheado para Docker)."
   fi
 else
   echo "  .env del servidor mantenido sin cambios."
