@@ -12,11 +12,14 @@ import os
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
 from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/properties", tags=["AI Description"])
@@ -50,12 +53,17 @@ class DescriptionResponse(BaseModel):
 async def generate_property_description(
     property_data: str = Form(...),
     images: List[UploadFile] = File(default=[]),
+    http_request: Request = None,
     current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
 ):
     """
     Genera una descripcion comercial profesional para un inmueble usando Gemini 2.0 Flash.
     Acepta datos tecnicos del inmueble como JSON y hasta 5 imagenes para analisis multimodal.
     """
+    ip = http_request.client.host if (http_request and http_request.client) else "unknown"
+    await check_ai_rate_limit(current_user.id, "property_desc", db, ip)
+
     if not _genai_available:
         raise HTTPException(
             status_code=503,

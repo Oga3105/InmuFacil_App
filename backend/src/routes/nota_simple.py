@@ -14,10 +14,15 @@ import logging
 import os
 import re
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Nota Simple"])
 logger = logging.getLogger(__name__)
@@ -121,6 +126,9 @@ Inmueble de referencia para validacion cruzada: {address}
 @router.post("/analyze-nota-simple", response_model=NotaSimpleResponse)
 async def analyze_nota_simple(
     request: NotaSimpleRequest,
+    http_request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
 ) -> NotaSimpleResponse:
     """
     Analyze a Nota Simple registry document using Gemini Flash Vision.
@@ -131,6 +139,9 @@ async def analyze_nota_simple(
     Cross-checks extracted surface against the advertised property surface.
     If the discrepancy exceeds 5%, raises a surface alert.
     """
+    ip = http_request.client.host if http_request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "nota_simple", db, ip)
+
     try:
         from google.genai import types as genai_types  # type: ignore[import]
     except ImportError:

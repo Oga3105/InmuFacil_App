@@ -18,4 +18,5 @@ from .favorites import PropertyFavorite
 from .arras_interview import ArrasInterview
 from .property_view_log import PropertyViewLog
 from .ai_consent import AIConsentLog
+from .ai_usage_log import AiUsageLog
 from .lifestyle import UserLifestyleProfile

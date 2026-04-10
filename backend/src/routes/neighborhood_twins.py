@@ -10,10 +10,15 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Neighborhood Twins"])
 logger = logging.getLogger(__name__)
@@ -55,10 +60,18 @@ _DISCLAIMER = (
 
 
 @router.post("/neighborhood-twins", response_model=NeighborhoodTwinsResponse)
-async def get_neighborhood_twins(body: NeighborhoodTwinsRequest) -> NeighborhoodTwinsResponse:
+async def get_neighborhood_twins(
+    body: NeighborhoodTwinsRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> NeighborhoodTwinsResponse:
     """
     Encuentra barrios gemelos al codigo postal dado, filtrados por perfil de lifestyle.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "neighborhood_twins", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:

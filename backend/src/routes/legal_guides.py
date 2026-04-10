@@ -10,10 +10,15 @@ import logging
 import os
 from typing import Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Legal Guides"])
 logger = logging.getLogger(__name__)
@@ -107,11 +112,19 @@ class LegalGuideResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 @router.post("/legal-guide", response_model=LegalGuideResponse)
-async def generate_legal_guide(request: LegalGuideRequest) -> LegalGuideResponse:
+async def generate_legal_guide(
+    request: LegalGuideRequest,
+    http_request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> LegalGuideResponse:
     """
     Genera una guia legal orientativa para la CCAA y tipo de guia solicitados.
     Resultados cacheados en memoria para evitar llamadas repetidas a la IA.
     """
+    ip = http_request.client.host if http_request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "legal_guide", db, ip)
+
     ccaa = request.ccaa.strip()
     guide_type = request.guide_type.strip()
 

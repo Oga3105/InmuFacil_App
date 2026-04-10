@@ -10,10 +10,15 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Market Price Analytics"])
 logger = logging.getLogger(__name__)
@@ -45,12 +50,20 @@ _LOW_DENSITY_RESPONSE = MarketPriceResponse(
 
 
 @router.post("/market-price", response_model=MarketPriceResponse)
-async def get_market_price(body: MarketPriceRequest) -> MarketPriceResponse:
+async def get_market_price(
+    body: MarketPriceRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> MarketPriceResponse:
     """
     Estima el precio por metro cuadrado para una zona postal usando Gemini Flash.
     Si la muestra es insuficiente (sample_size < 5) o el analisis falla, devuelve
     low_density=True y nunca extrapola datos ficticios.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "market_price", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:

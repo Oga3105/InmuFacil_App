@@ -22,7 +22,7 @@ import os
 from datetime import datetime, timezone
 from typing import Optional, List
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -32,6 +32,7 @@ from backend.src.config.database import get_db, SessionLocal
 from backend.src.models import User, PropertyOffer, Property
 from backend.src.models.arras_interview import ArrasInterview
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.crypto import encrypt_data, decrypt_data
 from backend.src.utils.security import get_current_active_user
 
@@ -741,6 +742,7 @@ async def reject_contract(
 async def regenerate_contract(
     offer_id: int,
     background_tasks: BackgroundTasks,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user),
 ):
@@ -748,6 +750,9 @@ async def regenerate_contract(
     Re-triggers Gemini contract generation.
     Allowed when contract_status is 'error' and both interviews are confirmed.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "arras_contract", db, ip)
+
     offer, _ = _get_offer_and_role(offer_id, current_user, db)
     record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
     if not record:

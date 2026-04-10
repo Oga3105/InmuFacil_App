@@ -12,11 +12,14 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
 from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Solvency Passport AI"])
@@ -106,7 +109,9 @@ def _compute_max_offer_capacity(
 @router.post("/analyze-solvency", response_model=SolvencyResponse)
 async def analyze_solvency(
     body: SolvencyRequest,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
 ) -> SolvencyResponse:
     """
     Analyzes a base64-encoded income or employment document with Gemini Flash Vision.
@@ -118,6 +123,9 @@ async def analyze_solvency(
 
     Returns solvency level, max offer capacity, and a disclaimer for the buyer.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "solvency_check", db, ip)
+
     if body.document_type not in _VALID_DOC_TYPES:
         raise HTTPException(
             status_code=422,

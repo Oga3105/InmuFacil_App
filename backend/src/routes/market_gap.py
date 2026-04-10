@@ -11,10 +11,15 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Market Gap Analyzer"])
 logger = logging.getLogger(__name__)
@@ -74,7 +79,12 @@ def _compute_offer_analysis(
 
 
 @router.post("/market-gap", response_model=MarketGapResponse)
-async def get_market_gap(body: MarketGapRequest) -> MarketGapResponse:
+async def get_market_gap(
+    body: MarketGapRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> MarketGapResponse:
     """
     Estimates the real transaction closing price per m2 for a postal code using
     Gemini Flash, then calculates the negotiation gap against the asking price.
@@ -82,6 +92,9 @@ async def get_market_gap(body: MarketGapRequest) -> MarketGapResponse:
     Truth clause: if sample_size < 10, returns low_data=True with null gap values
     rather than extrapolating unreliable data.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "market_gap", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:

@@ -402,3 +402,197 @@ async def send_comfort_request_email(
         subject=f"Un comprador solicita el Indice de Confort de '{property_title}'",
         html_body=html,
     )
+
+
+# ============================================================================
+# AI Abuse Alert
+# ============================================================================
+
+_ALERT_DESTINATION = "alerta@inmufacil.com"
+
+_ALERT_TYPE_LABELS: dict[str, str] = {
+    "feature_limit": "Limite de feature alcanzado",
+    "global_limit":  "Limite diario global alcanzado",
+    "burst":         "Patron de llamadas rapidas detectado (posible bot/ataque)",
+}
+
+_ALERT_TYPE_COLORS: dict[str, str] = {
+    "feature_limit": "#F59E0B",  # amber
+    "global_limit":  "#EF4444",  # red
+    "burst":         "#7C3AED",  # purple
+}
+
+
+def _build_ai_abuse_alert_html(
+    user_id: int,
+    feature: str,
+    count: int,
+    limit: int,
+    ip: str,
+    alert_type: str,
+    timestamp: str,
+) -> str:
+    label = _ALERT_TYPE_LABELS.get(alert_type, alert_type)
+    color = _ALERT_TYPE_COLORS.get(alert_type, "#EF4444")
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerta de uso de IA - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="560" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Cabecera -->
+          <tr>
+            <td style="background:{color};padding:28px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:800;">
+                ALERTA DE USO DE IA
+              </h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.9);font-size:13px;">
+                InmuFacil — Sistema de Seguridad
+              </p>
+            </td>
+          </tr>
+
+          <!-- Tipo de alerta -->
+          <tr>
+            <td style="padding:28px 40px 0;">
+              <div style="background:#FEF3C7;border-left:4px solid {color};
+                          border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+                <p style="margin:0;font-size:15px;font-weight:700;color:#92400E;">
+                  {label}
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Detalles del evento -->
+          <tr>
+            <td style="padding:0 40px 28px;">
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;">
+                <tr style="background:#F8FAFC;">
+                  <td style="padding:10px 16px;font-size:12px;font-weight:700;
+                             color:#64748B;text-transform:uppercase;width:40%;">
+                    Campo
+                  </td>
+                  <td style="padding:10px 16px;font-size:12px;font-weight:700;
+                             color:#64748B;text-transform:uppercase;">
+                    Valor
+                  </td>
+                </tr>
+                <tr style="border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">User ID</td>
+                  <td style="padding:12px 16px;color:#0F172A;font-size:14px;
+                             font-weight:600;font-family:monospace;">{user_id}</td>
+                </tr>
+                <tr style="background:#F8FAFC;border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">Feature</td>
+                  <td style="padding:12px 16px;color:#0F172A;font-size:14px;
+                             font-weight:600;font-family:monospace;">{feature}</td>
+                </tr>
+                <tr style="border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">Llamadas</td>
+                  <td style="padding:12px 16px;color:#DC2626;font-size:14px;
+                             font-weight:700;">{count} / {limit}</td>
+                </tr>
+                <tr style="background:#F8FAFC;border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">IP</td>
+                  <td style="padding:12px 16px;color:#0F172A;font-size:14px;
+                             font-family:monospace;">{ip}</td>
+                </tr>
+                <tr style="border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">Timestamp</td>
+                  <td style="padding:12px 16px;color:#0F172A;font-size:14px;">{timestamp}</td>
+                </tr>
+                <tr style="background:#F8FAFC;border-top:1px solid #E2E8F0;">
+                  <td style="padding:12px 16px;color:#475569;font-size:14px;">Tipo</td>
+                  <td style="padding:12px 16px;font-size:14px;">
+                    <span style="background:{color};color:#fff;border-radius:6px;
+                                 padding:3px 10px;font-size:12px;font-weight:700;">
+                      {alert_type.upper()}
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Acciones recomendadas -->
+          <tr>
+            <td style="padding:0 40px 28px;">
+              <p style="margin:0 0 10px;color:#475569;font-size:13px;font-weight:700;">
+                Acciones recomendadas:
+              </p>
+              <ul style="margin:0;padding-left:20px;color:#64748B;font-size:13px;line-height:1.8;">
+                <li>Verificar en la BD si el usuario tiene patron de abuso sistematico</li>
+                <li>Revisar logs de uvicorn para este user_id y rango horario</li>
+                <li>Considerar suspension temporal si el patron persiste</li>
+              </ul>
+            </td>
+          </tr>
+
+          <!-- Pie -->
+          <tr>
+            <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                       padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#94A3B8;font-size:11px;">
+                InmuFacil &copy; 2025 &middot; Sistema de Alertas de Seguridad IA<br>
+                Este es un mensaje automatico. No respondas a este correo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_ai_abuse_alert_email(
+    user_id: int,
+    feature: str,
+    count: int,
+    limit: int,
+    ip: str,
+    alert_type: str,
+) -> bool:
+    """
+    Envia alerta de abuso/limite de IA a alerta@inmufacil.com.
+
+    Parametros:
+        user_id:    ID del usuario que provoco el evento.
+        feature:    Clave de la feature afectada (ej. 'market_price').
+        count:      Numero de llamadas realizadas.
+        limit:      Limite configurado que fue igualado o superado.
+        ip:         IP de la ultima request del usuario.
+        alert_type: 'feature_limit' | 'global_limit' | 'burst'
+    """
+    from datetime import datetime, timezone
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    label = _ALERT_TYPE_LABELS.get(alert_type, alert_type)
+    html = _build_ai_abuse_alert_html(
+        user_id=user_id,
+        feature=feature,
+        count=count,
+        limit=limit,
+        ip=ip,
+        alert_type=alert_type,
+        timestamp=timestamp,
+    )
+    return await _send_email(
+        to=_ALERT_DESTINATION,
+        subject=f"[InmuFacil ALERTA IA] {label} — user_id={user_id} feature={feature}",
+        html_body=html,
+    )

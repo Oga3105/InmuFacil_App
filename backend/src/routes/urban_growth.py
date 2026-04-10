@@ -11,10 +11,15 @@ import logging
 import math
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Urban Growth Index"])
 logger = logging.getLogger(__name__)
@@ -88,7 +93,12 @@ def _compound_projection(base_rate: float, bonus: float, years: int = 5) -> floa
 
 
 @router.post("/urban-growth", response_model=UrbanGrowthResponse)
-async def get_urban_growth(body: UrbanGrowthRequest) -> UrbanGrowthResponse:
+async def get_urban_growth(
+    body: UrbanGrowthRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> UrbanGrowthResponse:
     """
     Estima el potencial de revalorizacion a 5 anos para una zona usando Gemini.
 
@@ -98,6 +108,9 @@ async def get_urban_growth(body: UrbanGrowthRequest) -> UrbanGrowthResponse:
     - Para zonas maduras: proyeccion = base_growth_rate * 5 (alineado con IPC).
     - Para zonas emergentes: usa formula compuesta con neighborhood_bonus.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "urban_growth", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:

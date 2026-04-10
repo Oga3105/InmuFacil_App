@@ -26,6 +26,7 @@ from backend.src.models import Property, User
 from backend.src.models.ai_consent import AIConsentLog
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.services.email_service import send_comfort_request_email
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(tags=["Comfort Index"])
@@ -208,7 +209,9 @@ Formato obligatorio:
 @router.get("/properties/{property_id}/comfort-index", response_model=ComfortIndexResponse)
 async def get_comfort_index(
     property_id: int,
+    request: Request,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
 ) -> ComfortIndexResponse:
     """
     Cache-aside comfort index for a property.
@@ -228,6 +231,11 @@ async def get_comfort_index(
 
     if not prop.ai_comfort_consent:
         return _NO_CONSENT_RESPONSE
+
+    # Rate limit only when we will actually call Gemini (cache miss)
+    if not _cache_is_valid(prop):
+        ip = request.client.host if request.client else "unknown"
+        await check_ai_rate_limit(current_user.id, "comfort_index", db, ip)
 
     # Return cached result if still valid
     if _cache_is_valid(prop):
@@ -340,12 +348,20 @@ class _LegacyComfortRequest(BaseModel):
 
 
 @router.post("/ai/comfort-index")
-async def legacy_comfort_index(body: _LegacyComfortRequest) -> dict:
+async def legacy_comfort_index(
+    body: _LegacyComfortRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> dict:
     """
     Backward-compatible endpoint for Flutter web builds compiled before the
     cache-aside refactor. Calls Gemini directly without caching.
     Remove once the new Flutter build is deployed to production.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "comfort_index", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:

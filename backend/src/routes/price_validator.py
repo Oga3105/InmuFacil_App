@@ -10,10 +10,15 @@ import json
 import logging
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from backend.src.config.database import get_db
+from backend.src.models import User
 from backend.src.services.gemini_service import call_with_fallback, get_client
+from backend.src.utils.ai_rate_limit import check_ai_rate_limit
+from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Price Validator"])
 logger = logging.getLogger(__name__)
@@ -38,11 +43,19 @@ class PriceValidationResponse(BaseModel):
 
 
 @router.post("/validate-price", response_model=PriceValidationResponse)
-async def validate_price(body: PriceValidationRequest) -> PriceValidationResponse:
+async def validate_price(
+    body: PriceValidationRequest,
+    request: Request,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> PriceValidationResponse:
     """
     Analiza si una oferta de compra es justa en relacion al precio de venta
     y al contexto del mercado de la zona usando Gemini Flash.
     """
+    ip = request.client.host if request.client else "unknown"
+    await check_ai_rate_limit(current_user.id, "price_validator", db, ip)
+
     try:
         client = get_client()
     except RuntimeError as e:
