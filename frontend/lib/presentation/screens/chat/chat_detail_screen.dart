@@ -1219,11 +1219,19 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
           const Color(0xFF7C3AED),
           cs.surfaceContainerHighest,
         ),
+      'visit_cancelled' => (
+          Icons.event_busy_outlined,
+          'Visita Cancelada',
+          const Color(0xFFD97706),
+          const Color(0xFFFFF7ED),
+        ),
       _ => (
           Icons.info_outline,
-          'Accion',
-          cs.primary,
-          cs.primaryContainer,
+          _actionType.isNotEmpty
+              ? _actionType.replaceAll('_', ' ')
+              : 'Accion',
+          cs.onSurfaceVariant,
+          cs.surfaceContainerHighest,
         ),
     };
   }
@@ -1236,6 +1244,8 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
         ? '\u20AC${(meta['amount'] as num).toStringAsFixed(0)}'
         : null;
     final date = meta['date'] as String?;
+    final reason = meta['reason'] as String?;
+    final notes = meta['notes'] as String?;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -1308,7 +1318,7 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                     ],
                   ),
                   // Details
-                  if (amount != null || date != null) ...[
+                  if (amount != null || date != null || reason != null || notes != null) ...[
                     const SizedBox(height: 10),
                     if (amount != null)
                       Text(
@@ -1330,6 +1340,34 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: color,
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (reason != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.info_outline, size: 14, color: color),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              reason,
+                              style: TextStyle(fontSize: 12, color: color),
+                            ),
+                          ),
+                        ],
+                      ),
+                    if (notes != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.notes_outlined, size: 14, color: color),
+                          const SizedBox(width: 4),
+                          Flexible(
+                            child: Text(
+                              notes,
+                              style: TextStyle(fontSize: 12, color: color),
                             ),
                           ),
                         ],
