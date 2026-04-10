@@ -7,16 +7,27 @@
 #
 # Que hace:
 #   1. Avisa si hay cambios sin commitear (no bloquea, pero advierte).
-#   2. Crea el directorio remoto si no existe (clave SSH: 1/4).
-#   3. Sincroniza el codigo del backend via rsync incremental (clave SSH: 2/4).
-#   4. Pregunta si actualizar el .env del servidor (clave SSH: 3/4 - opcional).
-#   5. Reconstruye SOLO la imagen Docker del backend (clave SSH: 4/4).
+#   2. Crea el directorio remoto si no existe.
+#   3. Sincroniza el codigo del backend via scp.
+#   4. (Opcional) Actualiza el .env del servidor parcheando valores de produccion.
+#   5. Reconstruye SOLO la imagen Docker del backend.
 #   6. Reinicia SOLO el contenedor backend. La BD NO se toca.
+#   7. Reconecta nginx a la red del backend si es necesario.
+#
+# IMPORTANTE — Pregunta sobre el .env:
+#   Responde N (no) salvo que hayas anadido nuevas variables de entorno al
+#   proyecto. El .env del servidor esta configurado para produccion y NO debe
+#   sobreescribirse con el .env local (que apunta a localhost).
+#   Si respondes S, el script parchea automaticamente DATABASE_URL para Docker.
 # =============================================================================
 set -euo pipefail
 
 SERVER="root@87.106.247.84"
 REMOTE_APP_DIR="/opt/inmufacil/app"
+# Nombre de BD en produccion (distinto al local "inmufacil_db")
+PROD_DB_NAME="inmufacil_prod"
+# Red Docker compartida entre backend, postgres y nginx
+DOCKER_NETWORK="app_inmufacil_net"
 
 echo ""
 echo "============================================"
@@ -43,20 +54,14 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# PASO 2 — Crear directorio remoto + rsync del codigo (clave SSH: 1 y 2)
+# PASO 2 — Sincronizar codigo al servidor
 # ---------------------------------------------------------------------------
 echo "[2/5] Sincronizando codigo del backend al servidor..."
-echo "  Pedira la clave SSH hasta 4 veces (mkdir, rsync, .env opcional, docker)"
 echo ""
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "mkdir -p $REMOTE_APP_DIR/backend"
 
-# Subir solo lo que el Dockerfile necesita para construir la imagen:
-#   backend/   — codigo FastAPI
-#   requirements.txt — dependencias Python
-#   docker-compose.prod.yml — definicion de servicios
-#   migrations/ — scripts SQL de referencia
 scp -o StrictHostKeyChecking=accept-new \
   requirements.txt docker-compose.prod.yml "$SERVER:$REMOTE_APP_DIR/"
 
@@ -66,9 +71,12 @@ scp -o StrictHostKeyChecking=accept-new \
 echo "  Codigo sincronizado."
 
 # ---------------------------------------------------------------------------
-# PASO 3 — Actualizacion del .env en el servidor (opcional, clave SSH: 3)
+# PASO 3 — Actualizacion del .env (RESPONDE N EN CONDICIONES NORMALES)
 # ---------------------------------------------------------------------------
 echo ""
+echo "  AVISO: El .env del servidor esta configurado para produccion."
+echo "  Responde S solo si has anadido nuevas variables al proyecto."
+echo "  En ese caso el script parcheara automaticamente DATABASE_URL."
 read -rp "[3/5] Actualizar el .env del servidor con el .env local? (s/N): " update_env
 if [[ "$update_env" =~ ^[sS]$ ]]; then
   if [ ! -f ".env" ]; then
@@ -77,19 +85,23 @@ if [[ "$update_env" =~ ^[sS]$ ]]; then
   else
     scp -o StrictHostKeyChecking=accept-new \
       .env "$SERVER:$REMOTE_APP_DIR/.env"
-    # En Docker, el host de la BD es el nombre del servicio ("db"), no localhost.
-    # Parcheamos DATABASE_URL para reemplazar localhost:<cualquier-puerto> por db:5432.
+    # Parche 1: host de BD local -> nombre de servicio Docker
+    # Parche 2: nombre de BD local -> nombre de BD de produccion
     ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
-      "sed -i 's|localhost:[0-9]*|db:5432|g' $REMOTE_APP_DIR/.env"
-    echo "  .env del servidor actualizado (DATABASE_URL parcheado para Docker)."
+      "sed -i 's|localhost:[0-9]*|db:5432|g' $REMOTE_APP_DIR/.env && \
+       sed -i 's|/inmufacil_db|/$PROD_DB_NAME|g' $REMOTE_APP_DIR/.env"
+    echo "  .env actualizado. DATABASE_URL parcheada para Docker + produccion."
+    echo "  Verifica que el resultado es correcto:"
+    ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
+      "grep DATABASE_URL $REMOTE_APP_DIR/.env | head -1"
   fi
 else
-  echo "  .env del servidor mantenido sin cambios."
+  echo "  .env del servidor mantenido sin cambios (correcto)."
 fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# PASO 4 — Reconstruir imagen Docker + reiniciar backend (clave SSH: 4)
+# PASO 4 — Reconstruir imagen Docker
 # ---------------------------------------------------------------------------
 echo "[4/5] Reconstruyendo imagen Docker del backend..."
 echo "  (Puede tardar 2-5 minutos si cambiaron dependencias en requirements.txt)"
@@ -99,6 +111,9 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "cd $REMOTE_APP_DIR && \
    docker compose -f docker-compose.prod.yml build backend"
 
+# ---------------------------------------------------------------------------
+# PASO 5 — Reiniciar backend + asegurar que nginx comparte su red
+# ---------------------------------------------------------------------------
 echo ""
 echo "[5/5] Reiniciando contenedor del backend (BD intacta)..."
 
@@ -107,6 +122,8 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
    docker rm inmufacil_backend 2>/dev/null || true && \
    cd $REMOTE_APP_DIR && \
    docker compose -f docker-compose.prod.yml up -d --no-deps backend && \
+   docker network connect $DOCKER_NETWORK inmufacil_proxy 2>/dev/null || true && \
+   docker exec inmufacil_proxy nginx -s reload && \
    echo '' && \
    echo '--- Estado de contenedores ---' && \
    docker ps --filter name=inmufacil --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
