@@ -96,13 +96,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       );
       
       if (success && mounted) {
-        // Redirect to Login or Home? 
-        // Plan says: Redirect to Login (or Auto-login). 
-        // Let's redirect to Login for now to be safe, asking user to login.
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cuenta creada con éxito. Por favor inicia sesión.'), backgroundColor: Colors.green),
+        // Auto-login: log in immediately after registration
+        final loggedIn = await ref.read(authProvider.notifier).login(
+          _emailController.text,
+          _passwordController.text,
         );
-        context.go('/login');
+        if (mounted) {
+          if (loggedIn) {
+            context.go('/');
+          } else {
+            // Fallback: go to login if auto-login fails
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Cuenta creada. Por favor inicia sesión.'), backgroundColor: Colors.green),
+            );
+            context.go('/login');
+          }
+        }
       } else {
         final error = ref.read(authProvider).errorMessage;
         if (error != null && mounted) {

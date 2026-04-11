@@ -23,7 +23,7 @@
 set -euo pipefail
 
 SERVER="root@87.106.247.84"
-REMOTE_APP_DIR="/opt/inmufacil/app"
+REMOTE_APP_DIR="/opt/inmufacil"
 # Nombre de BD en produccion (distinto al local "inmufacil_db")
 PROD_DB_NAME="inmufacil_prod"
 # Red Docker compartida entre backend, postgres y nginx
@@ -63,7 +63,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "mkdir -p $REMOTE_APP_DIR/backend"
 
 scp -o StrictHostKeyChecking=accept-new \
-  requirements.txt docker-compose.prod.yml "$SERVER:$REMOTE_APP_DIR/"
+  requirements.txt docker-compose.yml "$SERVER:$REMOTE_APP_DIR/"
 
 scp -o StrictHostKeyChecking=accept-new \
   -r backend "$SERVER:$REMOTE_APP_DIR/"
@@ -109,7 +109,7 @@ echo ""
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "cd $REMOTE_APP_DIR && \
-   docker compose -f docker-compose.prod.yml build backend"
+   docker compose -f docker-compose.yml build backend"
 
 # ---------------------------------------------------------------------------
 # PASO 5 — Reiniciar backend + asegurar que nginx comparte su red
@@ -121,8 +121,8 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "docker stop inmufacil_backend 2>/dev/null || true && \
    docker rm inmufacil_backend 2>/dev/null || true && \
    cd $REMOTE_APP_DIR && \
-   docker compose -f docker-compose.prod.yml up -d --no-deps backend && \
-   docker network connect $DOCKER_NETWORK inmufacil_proxy 2>/dev/null || true && \
+   docker compose -f docker-compose.yml up -d --no-deps backend && \
+   docker network connect $DOCKER_NETWORK inmufacil_backend 2>/dev/null || true && \
    docker exec inmufacil_proxy nginx -s reload && \
    echo '' && \
    echo '--- Estado de contenedores ---' && \
