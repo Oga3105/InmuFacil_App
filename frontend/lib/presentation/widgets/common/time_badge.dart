@@ -66,7 +66,7 @@ class PropertyTimeBadge extends StatelessWidget {
             return _buildPill(
               icon: Icons.update_rounded,
               iconSize: iconSize,
-              prefix: 'Act.',
+              prefix: 'Actualización',
               prefixSize: prefixSize,
               text: updatedText,
               textSize: timeSize,
@@ -132,7 +132,7 @@ class PropertyTimeBadge extends StatelessWidget {
   _BadgeStyle _getBadgeStyle(Duration diff, bool isDark, ColorScheme cs) {
     if (diff.inHours < 24) {
       return _BadgeStyle(
-        prefix: 'NUEVO:',
+        prefix: 'Publicación',
         bgColor: isDark ? const Color(0xFF0A1628) : const Color(0xFFEFF6FF),
         borderColor: isDark ? const Color(0xFF1E3A6E) : const Color(0xFFBFDBFE),
         iconColor: cs.primary,
@@ -140,7 +140,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else if (diff.inDays < 8) {
       return _BadgeStyle(
-        prefix: 'RECIENTE:',
+        prefix: 'Publicación',
         bgColor: isDark ? const Color(0xFF052E16) : const Color(0xFFF0FDF4),
         borderColor: isDark ? const Color(0xFF166534) : const Color(0xFFBBF7D0),
         iconColor: const Color(0xFF16A34A),
@@ -148,7 +148,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else if (diff.inDays < 31) {
       return _BadgeStyle(
-        prefix: 'Pub.',
+        prefix: 'Publicación',
         bgColor: isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED),
         borderColor: isDark ? const Color(0xFF92400E) : const Color(0xFFFED7AA),
         iconColor: isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C),
@@ -156,7 +156,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else {
       return _BadgeStyle(
-        prefix: 'Pub.',
+        prefix: 'Publicación',
         bgColor: cs.surfaceContainerHighest,
         borderColor: cs.outlineVariant,
         iconColor: cs.onSurfaceVariant,
