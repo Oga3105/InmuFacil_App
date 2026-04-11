@@ -28,12 +28,18 @@ class Property { // Added
     this.ownerPhotoUrl,
     this.hideExactLocation = false,
     this.energyCertification,
+    this.previousPrice,
+    this.priceUpdatedAt,
   });
   final String id;
   final String title;
   final String description; // Added
   final PropertyType type;
   final double price;
+  /// Previous price before the last reduction. Null if no reduction recorded.
+  final double? previousPrice;
+  /// When the price was last reduced.
+  final DateTime? priceUpdatedAt;
   final LatLng location;
   final String address;
   final int bedrooms;
@@ -86,6 +92,12 @@ class Property { // Added
       return '€${(price / 1000).toStringAsFixed(0)}K';
     }
     return '€${price.toStringAsFixed(0)}';
+  }
+
+  /// Discount percentage vs previous price. Null if no price reduction recorded.
+  int? get discountPct {
+    if (previousPrice == null || previousPrice! <= price) return null;
+    return ((previousPrice! - price) / previousPrice! * 100).round();
   }
 
   /// Format price as full currency string with thousands separators (e.g. €320.000)

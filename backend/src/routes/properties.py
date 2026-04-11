@@ -367,7 +367,7 @@ async def update_property(
     Update a property listing and its satellite data.
     """
     property = verify_property_ownership(db, property_id, current_user.id)
-    
+
     # Update Core
     core_data = property_update.model_dump(exclude={'features', 'legal', 'financial'}, exclude_unset=True)
     # Auto-compute location string from structured fields if not provided
@@ -376,6 +376,15 @@ async def update_property(
                               core_data.get('city'), core_data.get('postal_code')] if p]
         core_data['location'] = ', '.join(parts) or 'Sin dirección'
     from datetime import datetime, timezone as _tz
+    # Price history: if the new price is lower than the current one, record the old price
+    new_price = core_data.get('price')
+    if new_price is not None and property.price is not None and new_price < property.price:
+        property.previous_price = property.price
+        property.price_updated_at = datetime.now(_tz.utc)
+    elif new_price is not None and property.price is not None and new_price >= property.price:
+        # Price raised or unchanged: clear any previous discount
+        property.previous_price = None
+        property.price_updated_at = None
     for key, value in core_data.items():
         setattr(property, key, value)
 

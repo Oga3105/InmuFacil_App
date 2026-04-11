@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/favorites_provider.dart';
+import '../common/price_tag.dart';
 
 class SmartExplorerCard extends ConsumerWidget {
   const SmartExplorerCard({
@@ -11,6 +12,7 @@ class SmartExplorerCard extends ConsumerWidget {
     required this.address,
     required this.priceEur,
     required this.surfaceM2,
+    this.previousPriceEur,
     this.bedrooms,
     this.bathrooms,
     this.description,
@@ -26,6 +28,7 @@ class SmartExplorerCard extends ConsumerWidget {
   final String title;
   final String address;
   final int priceEur;
+  final int? previousPriceEur;
   final double surfaceM2;
   final int? bedrooms;
   final int? bathrooms;
@@ -52,7 +55,6 @@ class SmartExplorerCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isFavorite = ref.watch(favoritesProvider).contains(propertyId);
     const successGreen = Color(0xFF16A34A);
-    const brandBlue = Color(0xFF135BEC);
     final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
@@ -203,8 +205,12 @@ class SmartExplorerCard extends ConsumerWidget {
                     const SizedBox(height: 8),
                     // Price + m²
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(_formatPrice(priceEur), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: brandBlue)),
+                        PriceTag(
+                          price: priceEur.toDouble(),
+                          previousPrice: previousPriceEur?.toDouble(),
+                        ),
                         const Spacer(),
                         Text('${surfaceM2.toStringAsFixed(0)} m\u00b2', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
@@ -250,17 +256,6 @@ class SmartExplorerCard extends ConsumerWidget {
     );
   }
 
-  static String _formatPrice(int price) {
-    final s = price.toString();
-    final buffer = StringBuffer();
-    int counter = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      if (counter > 0 && counter % 3 == 0) buffer.write('.');
-      buffer.write(s[i]);
-      counter++;
-    }
-    return '${String.fromCharCodes(buffer.toString().codeUnits.reversed)} \u20ac';
-  }
 }
 
 class _OverlayButton extends StatelessWidget {

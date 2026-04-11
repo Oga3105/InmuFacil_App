@@ -421,6 +421,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                       title: p.title,
                                       address: p.address,
                                       priceEur: p.price.round(),
+                                      previousPriceEur: p.previousPrice?.round(),
                                       surfaceM2: p.squareMeters,
                                       bedrooms: p.bedrooms,
                                       bathrooms: p.bathrooms,
