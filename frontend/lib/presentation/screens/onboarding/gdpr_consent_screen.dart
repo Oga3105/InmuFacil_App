@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
+import '../info/info_screen.dart';
 
 /// Pantalla de consentimiento GDPR — solo se muestra al nuevo usuario que
 /// se registra via Google. Sin aceptacion el usuario es deslogueado.
@@ -29,7 +31,7 @@ class GdprConsentScreen extends ConsumerWidget {
                   Center(
                     child: CircleAvatar(
                       radius: 36,
-                      backgroundColor: successColor.withOpacity(0.12),
+                      backgroundColor: successColor.withValues(alpha: 0.12),
                       child: Icon(Icons.shield_outlined, size: 36, color: successColor),
                     ),
                   ),
@@ -73,7 +75,10 @@ class GdprConsentScreen extends ConsumerWidget {
                           style: TextStyle(
                             color: colorScheme.primary,
                             decoration: TextDecoration.underline,
+                            decorationColor: colorScheme.primary,
                           ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push(InfoScreen.routeFor(InfoPageType.terms)),
                         ),
                         const TextSpan(text: ' y la '),
                         TextSpan(
@@ -81,7 +86,10 @@ class GdprConsentScreen extends ConsumerWidget {
                           style: TextStyle(
                             color: colorScheme.primary,
                             decoration: TextDecoration.underline,
+                            decorationColor: colorScheme.primary,
                           ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () => context.push(InfoScreen.routeFor(InfoPageType.privacy)),
                         ),
                         const TextSpan(text: '.'),
                       ],
@@ -93,8 +101,8 @@ class GdprConsentScreen extends ConsumerWidget {
                   ElevatedButton(
                     onPressed: () => context.go('/'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: colorScheme.secondary,
-                      foregroundColor: colorScheme.onSecondary,
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -137,8 +145,8 @@ class GdprConsentScreen extends ConsumerWidget {
 }
 
 class _GdprItem extends StatelessWidget {
-  final String text;
   const _GdprItem({required this.text});
+  final String text;
 
   @override
   Widget build(BuildContext context) {
