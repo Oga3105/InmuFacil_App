@@ -1242,5 +1242,21 @@
     "no_consent_info": "El vendedor aún no ha activado el análisis de confort IA para esta propiedad. Puedes solicitárselo y recibirá un email para activarlo.",
     "request_btn": "Solicitar informe al vendedor",
     "request_error": "No se pudo enviar la solicitud. Inténtalo más tarde."
+  },
+  "time": {
+    "publication": "Publicación",
+    "update": "Actualización",
+    "just_now": "hace unos minutos",
+    "n_min": "hace {n} min",
+    "one_hour": "hace 1 hora",
+    "n_hours": "hace {n} horas",
+    "one_day": "hace 1 día",
+    "n_days": "hace {n} días",
+    "one_week": "hace 1 semana",
+    "n_weeks": "hace {n} semanas",
+    "one_month": "hace 1 mes",
+    "n_months": "hace {n} meses",
+    "one_year": "hace 1 año",
+    "n_years": "hace {n} años"
   }
 }

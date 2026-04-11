@@ -564,5 +564,21 @@
     "request_coming_soon": "Aviat podràs sol·licitar-ho des d'aquí",
     "mvp_info": "En aquesta fase MVP els documents són informatius. La verificació completa estarà disponible aviat.",
     "upload_coming_soon": "Pujada de fitxers aviat disponible"
+  },
+  "time": {
+    "publication": "Publicació",
+    "update": "Actualització",
+    "just_now": "fa uns minuts",
+    "n_min": "fa {n} min",
+    "one_hour": "fa 1 hora",
+    "n_hours": "fa {n} hores",
+    "one_day": "fa 1 dia",
+    "n_days": "fa {n} dies",
+    "one_week": "fa 1 setmana",
+    "n_weeks": "fa {n} setmanes",
+    "one_month": "fa 1 mes",
+    "n_months": "fa {n} mesos",
+    "one_year": "fa 1 any",
+    "n_years": "fa {n} anys"
   }
 }

@@ -694,5 +694,21 @@
     "request_coming_soon": "Coming soon — you will be able to request it from here",
     "mvp_info": "In this MVP phase, documents are informational. Full verification will be available soon.",
     "upload_coming_soon": "File upload coming soon"
+  },
+  "time": {
+    "publication": "Published",
+    "update": "Updated",
+    "just_now": "just now",
+    "n_min": "{n} min ago",
+    "one_hour": "1 hour ago",
+    "n_hours": "{n} hours ago",
+    "one_day": "1 day ago",
+    "n_days": "{n} days ago",
+    "one_week": "1 week ago",
+    "n_weeks": "{n} weeks ago",
+    "one_month": "1 month ago",
+    "n_months": "{n} months ago",
+    "one_year": "1 year ago",
+    "n_years": "{n} years ago"
   }
 }

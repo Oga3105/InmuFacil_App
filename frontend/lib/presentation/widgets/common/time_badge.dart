@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Public shared widget for displaying how long a property has been listed.
@@ -66,7 +67,7 @@ class PropertyTimeBadge extends StatelessWidget {
             return _buildPill(
               icon: Icons.update_rounded,
               iconSize: iconSize,
-              prefix: 'Actualización',
+              prefix: 'time.update'.tr(),
               prefixSize: prefixSize,
               text: updatedText,
               textSize: timeSize,
@@ -132,7 +133,7 @@ class PropertyTimeBadge extends StatelessWidget {
   _BadgeStyle _getBadgeStyle(Duration diff, bool isDark, ColorScheme cs) {
     if (diff.inHours < 24) {
       return _BadgeStyle(
-        prefix: 'Publicación',
+        prefix: 'time.publication'.tr(),
         bgColor: isDark ? const Color(0xFF0A1628) : const Color(0xFFEFF6FF),
         borderColor: isDark ? const Color(0xFF1E3A6E) : const Color(0xFFBFDBFE),
         iconColor: cs.primary,
@@ -140,7 +141,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else if (diff.inDays < 8) {
       return _BadgeStyle(
-        prefix: 'Publicación',
+        prefix: 'time.publication'.tr(),
         bgColor: isDark ? const Color(0xFF052E16) : const Color(0xFFF0FDF4),
         borderColor: isDark ? const Color(0xFF166534) : const Color(0xFFBBF7D0),
         iconColor: const Color(0xFF16A34A),
@@ -148,7 +149,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else if (diff.inDays < 31) {
       return _BadgeStyle(
-        prefix: 'Publicación',
+        prefix: 'time.publication'.tr(),
         bgColor: isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED),
         borderColor: isDark ? const Color(0xFF92400E) : const Color(0xFFFED7AA),
         iconColor: isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C),
@@ -156,7 +157,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else {
       return _BadgeStyle(
-        prefix: 'Publicación',
+        prefix: 'time.publication'.tr(),
         bgColor: cs.surfaceContainerHighest,
         borderColor: cs.outlineVariant,
         iconColor: cs.onSurfaceVariant,
@@ -168,22 +169,34 @@ class PropertyTimeBadge extends StatelessWidget {
   String _formatDuration(Duration diff) {
     if (diff.inMinutes < 60) {
       final m = diff.inMinutes;
-      return 'hace ${m == 0 ? 'unos minutos' : '$m min'}';
+      return m == 0
+          ? 'time.just_now'.tr()
+          : 'time.n_min'.tr(namedArgs: {'n': '$m'});
     } else if (diff.inHours < 24) {
       final h = diff.inHours;
-      return 'hace $h ${h == 1 ? 'hora' : 'horas'}';
+      return h == 1
+          ? 'time.one_hour'.tr()
+          : 'time.n_hours'.tr(namedArgs: {'n': '$h'});
     } else if (diff.inDays < 7) {
       final d = diff.inDays;
-      return 'hace $d ${d == 1 ? 'día' : 'días'}';
+      return d == 1
+          ? 'time.one_day'.tr()
+          : 'time.n_days'.tr(namedArgs: {'n': '$d'});
     } else if (diff.inDays < 31) {
       final w = (diff.inDays / 7).floor();
-      return 'hace $w ${w == 1 ? 'semana' : 'semanas'}';
+      return w == 1
+          ? 'time.one_week'.tr()
+          : 'time.n_weeks'.tr(namedArgs: {'n': '$w'});
     } else if (diff.inDays < 365) {
       final mo = (diff.inDays / 30).floor();
-      return 'hace $mo ${mo == 1 ? 'mes' : 'meses'}';
+      return mo == 1
+          ? 'time.one_month'.tr()
+          : 'time.n_months'.tr(namedArgs: {'n': '$mo'});
     } else {
       final y = (diff.inDays / 365).floor();
-      return 'hace $y ${y == 1 ? 'año' : 'años'}';
+      return y == 1
+          ? 'time.one_year'.tr()
+          : 'time.n_years'.tr(namedArgs: {'n': '$y'});
     }
   }
 }

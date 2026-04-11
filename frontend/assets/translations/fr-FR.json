@@ -564,5 +564,21 @@
     "request_coming_soon": "Bientôt, vous pourrez le demander depuis ici",
     "mvp_info": "Dans cette phase MVP, les documents sont informatifs. La vérification complète sera disponible prochainement.",
     "upload_coming_soon": "Téléchargement de fichiers bientôt disponible"
+  },
+  "time": {
+    "publication": "Publication",
+    "update": "Mise à jour",
+    "just_now": "il y a quelques minutes",
+    "n_min": "il y a {n} min",
+    "one_hour": "il y a 1 heure",
+    "n_hours": "il y a {n} heures",
+    "one_day": "il y a 1 jour",
+    "n_days": "il y a {n} jours",
+    "one_week": "il y a 1 semaine",
+    "n_weeks": "il y a {n} semaines",
+    "one_month": "il y a 1 mois",
+    "n_months": "il y a {n} mois",
+    "one_year": "il y a 1 an",
+    "n_years": "il y a {n} ans"
   }
 }

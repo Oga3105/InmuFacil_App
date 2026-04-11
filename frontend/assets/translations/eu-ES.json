@@ -510,5 +510,21 @@
     "request_coming_soon": "Laster hemen eskatu ahal izango duzu",
     "mvp_info": "MVP fase honetan dokumentuak informatiboak dira. Egiaztapen osoa laster eskuragarri egongo da.",
     "upload_coming_soon": "Fitxategiak igotzea laster erabilgarri"
+  },
+  "time": {
+    "publication": "Argitalpena",
+    "update": "Eguneraketa",
+    "just_now": "duela minutu batzuk",
+    "n_min": "duela {n} min",
+    "one_hour": "duela 1 ordu",
+    "n_hours": "duela {n} ordu",
+    "one_day": "duela 1 egun",
+    "n_days": "duela {n} egun",
+    "one_week": "duela 1 aste",
+    "n_weeks": "duela {n} aste",
+    "one_month": "duela 1 hilabete",
+    "n_months": "duela {n} hilabete",
+    "one_year": "duela 1 urte",
+    "n_years": "duela {n} urte"
   }
 }

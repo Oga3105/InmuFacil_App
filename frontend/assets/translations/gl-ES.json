@@ -430,5 +430,21 @@
     "request_coming_soon": "En breve poderás solicitalo desde aquí",
     "mvp_info": "Nesta fase MVP os documentos son informativos. A verificación completa estará dispoñible en breve.",
     "upload_coming_soon": "Subida de ficheiros en breve dispoñible"
+  },
+  "time": {
+    "publication": "Publicación",
+    "update": "Actualización",
+    "just_now": "hai uns minutos",
+    "n_min": "hai {n} min",
+    "one_hour": "hai 1 hora",
+    "n_hours": "hai {n} horas",
+    "one_day": "hai 1 día",
+    "n_days": "hai {n} días",
+    "one_week": "hai 1 semana",
+    "n_weeks": "hai {n} semanas",
+    "one_month": "hai 1 mes",
+    "n_months": "hai {n} meses",
+    "one_year": "hai 1 ano",
+    "n_years": "hai {n} anos"
   }
 }
