@@ -1,21 +1,30 @@
+import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../../core/network/dio_factory.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  const ForgotPasswordScreen({super.key});
+  const ForgotPasswordScreen({super.key, this.prefillEmail});
+
+  final String? prefillEmail;
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
-  final _emailController = TextEditingController();
+  late final TextEditingController _emailController;
   bool _isLoading = false;
-  bool _emailSent = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.prefillEmail ?? '');
+  }
 
   @override
   void dispose() {
@@ -26,7 +35,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _sendReset() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() => _errorMessage = 'Introduce tu email.');
+      setState(() => _errorMessage = 'auth.email_required'.tr());
       return;
     }
     setState(() {
@@ -34,25 +43,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _errorMessage = null;
     });
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      final dio = buildAuthDio();
+      await dio.post('/auth/request-password-reset', data: {'email': email});
       if (mounted) {
-        setState(() {
-          _emailSent = true;
-          _isLoading = false;
-        });
+        await context.push('/reset-password', extra: email);
+        if (mounted) setState(() => _isLoading = false);
       }
-    } on FirebaseAuthException catch (_) {
+    } on DioException {
       if (mounted) {
         setState(() {
-          _emailSent = true;
           _isLoading = false;
+          _errorMessage = 'auth.reset_error_connection'.tr();
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = 'Error de conexion. Intentalo de nuevo.';
+          _errorMessage = 'auth.reset_error_unexpected'.tr();
         });
       }
     }
@@ -89,7 +97,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
                       TextSpan(text: 'Inmu', style: TextStyle(color: colorScheme.primary)),
-                      TextSpan(text: 'Fácil', style: TextStyle(color: successColor)),
+                      TextSpan(text: 'Facil', style: TextStyle(color: successColor)),
                     ],
                   ),
                 ),
@@ -99,35 +107,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         actions: [
           if (MediaQuery.sizeOf(context).width >= 650)
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () => context.go('/'),
-              child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.25),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
-                    const SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
-                  ],
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => context.go('/'),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withValues(alpha: 0.25),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
+                      const SizedBox(width: 5),
+                      Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           const SizedBox(width: 8),
           const UserAvatarMenu(),
           const SizedBox(width: 16),
@@ -140,7 +148,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: _emailSent ? _buildSuccessState() : _buildFormState(),
+          child: _buildFormState(),
         ),
       ),
     );
@@ -152,21 +160,49 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Recuperar Acceso',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          decoration: BoxDecoration(
+            color: cs.primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.primary.withValues(alpha: 0.18)),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'Introduce tu email y te enviaremos un enlace para restablecer tu contrasena.',
-          style: TextStyle(
-            fontSize: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.5,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.lock_reset_outlined, color: cs.primary, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'auth.forgot_title'.tr(),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: cs.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'auth.forgot_subtitle'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 32),
@@ -176,29 +212,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           textInputAction: TextInputAction.done,
           onSubmitted: (_) => _sendReset(),
           decoration: InputDecoration(
-            hintText: 'ejemplo@correo.com',
-            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            hintText: 'auth.email_hint'.tr(),
+            hintStyle: TextStyle(color: cs.onSurfaceVariant),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
+              borderSide: BorderSide(color: cs.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: cs.primary,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: cs.primary, width: 2),
             ),
             filled: true,
-            fillColor: theme.colorScheme.surfaceContainerLow,
+            fillColor: cs.surfaceContainerLow,
           ),
         ),
         if (_errorMessage != null) ...[
@@ -211,10 +241,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             child: Text(
               _errorMessage!,
-              style: TextStyle(
-                color: cs.onErrorContainer,
-                fontSize: 13,
-              ),
+              style: TextStyle(color: cs.onErrorContainer, fontSize: 13),
             ),
           ),
         ],
@@ -225,121 +252,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             backgroundColor: cs.primary,
             foregroundColor: cs.onPrimary,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           child: _isLoading
               ? SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(
-                    color: cs.onPrimary,
-                    strokeWidth: 2,
-                  ),
+                  child: CircularProgressIndicator(color: cs.onPrimary, strokeWidth: 2),
                 )
-              : const Text(
-                  'Enviar enlace de recuperacion',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
+              : Text(
+                  'auth.forgot_send_button'.tr(),
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
         ),
         const SizedBox(height: 16),
         TextButton(
           onPressed: () => context.pop(),
           child: Text(
-            'Volver al inicio de sesion',
-            style: TextStyle(
-              fontSize: 14,
-              color: cs.onSurfaceVariant,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSuccessState() {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final isDarkState = theme.brightness == Brightness.dark;
-    final successColorState = isDarkState ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: 32),
-        Center(
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: successColorState.withOpacity(0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.check_rounded,
-              color: successColorState,
-              size: 44,
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-        Text(
-          'Enlace enviado',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Si el correo existe en nuestra base de datos, recibiras un enlace de recuperacion. Revisa tu bandeja de entrada y la carpeta de spam.',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-            height: 1.6,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: const Text(
-              'El enlace caduca en 1 hora.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF92400E),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 40),
-        FilledButton(
-          onPressed: () => context.pop(),
-          style: FilledButton.styleFrom(
-            backgroundColor: cs.primary,
-            foregroundColor: cs.onPrimary,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: const Text(
-            'Volver al inicio de sesion',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-            ),
+            'auth.forgot_back'.tr(),
+            style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
           ),
         ),
       ],
