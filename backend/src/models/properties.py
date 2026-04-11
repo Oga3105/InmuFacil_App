@@ -19,6 +19,8 @@ class Property(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     price = Column(Float, nullable=False)
+    previous_price = Column(Float, nullable=True)
+    price_updated_at = Column(DateTime(timezone=True), nullable=True)
     location = Column(String, nullable=True)
 
     # Structured address fields

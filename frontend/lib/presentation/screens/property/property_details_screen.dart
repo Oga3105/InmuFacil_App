@@ -18,6 +18,7 @@ import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../providers/property_form_provider.dart';
 import '../../providers/property_analytics_provider.dart';
 import '../../widgets/common/premium_button.dart';
+import '../../widgets/common/price_tag.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
@@ -346,9 +347,10 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                    crossAxisAlignment: CrossAxisAlignment.start,
                    children: [
                       // Title & Price (Mobile Order)
-                      Text(
-                        property.formattedPriceFull, // Full price with thousands separator
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface),
+                      PriceTag(
+                        price: property.price,
+                        previousPrice: property.previousPrice,
+                        large: true,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -944,17 +946,20 @@ class _SummaryCard extends ConsumerWidget {
         children: [
           // Price
           Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                property.formattedPriceFull,
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: colorScheme.onSurface),
+              PriceTag(
+                price: property.price,
+                previousPrice: property.previousPrice,
+                large: true,
               ),
               const SizedBox(width: 8),
-              Text(
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
                 'I.V.A incluido',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant),
+              ),
               ),
             ],
           ),

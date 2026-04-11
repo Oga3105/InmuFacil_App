@@ -296,6 +296,8 @@ class PropertyResponse(PropertyBase):
     status: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
+    previous_price: Optional[float] = None
+    price_updated_at: Optional[datetime] = None
 
     features: Optional[PropertyFeaturesSchema] = None
     legal: Optional[PropertyLegalSchema] = None

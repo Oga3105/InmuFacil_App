@@ -36,6 +36,8 @@ class PropertyModel {
     this.ownerPhotoUrl,
     this.hideExactLocation = false,
     this.energyCertification,
+    this.previousPrice,
+    this.priceUpdatedAt,
   });
 
   /// Safely parse dynamic value to int regardless of whether backend sends int, num or String.
@@ -111,6 +113,8 @@ class PropertyModel {
       ownerPhotoUrl: json['owner_photo_url'] as String?,
       hideExactLocation: json['hide_exact_location'] as bool? ?? false,
       energyCertification: legal['energy_certification'] as String?,
+      previousPrice: json['previous_price'] != null ? (json['previous_price'] as num).toDouble() : null,
+      priceUpdatedAt: json['price_updated_at'] != null ? DateTime.tryParse(json['price_updated_at'] as String) : null,
     );
   }
   final int id;
@@ -138,6 +142,8 @@ class PropertyModel {
   final String? ownerPhotoUrl;
   final bool hideExactLocation;
   final String? energyCertification;
+  final double? previousPrice;
+  final DateTime? priceUpdatedAt;
 
   /// Convert to domain entity
   Property toEntity() {
@@ -164,6 +170,8 @@ class PropertyModel {
       ownerPhotoUrl: ownerPhotoUrl,
       hideExactLocation: hideExactLocation,
       energyCertification: energyCertification,
+      previousPrice: previousPrice,
+      priceUpdatedAt: priceUpdatedAt,
     );
   }
   
