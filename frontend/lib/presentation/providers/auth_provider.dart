@@ -349,17 +349,15 @@ class AuthNotifier extends Notifier<AuthState> {
       await _storage.write(key: 'auth_token', value: token);
       _dio.options.headers['Authorization'] = 'Bearer $token';
 
-      if (!isNewUser) {
-        final user = await _fetchUserProfile();
-        state = state.copyWith(isLoading: false, user: user);
-        ref.invalidate(myPropertiesProvider);
-        ref.invalidate(sentOffersProvider);
-        ref.invalidate(receivedOffersProvider);
-        ref.invalidate(chatListProvider);
-      } else {
-        // Usuario nuevo: no cargamos perfil aun, el onboarding lo completara
-        state = state.copyWith(isLoading: false);
-      }
+      // Cargar perfil en ambos casos: nuevo y existente.
+      // El usuario nuevo va al consent screen ya autenticado; si declina,
+      // deleteAccount() borra la cuenta y hace logout.
+      final user = await _fetchUserProfile();
+      state = state.copyWith(isLoading: false, user: user);
+      ref.invalidate(myPropertiesProvider);
+      ref.invalidate(sentOffersProvider);
+      ref.invalidate(receivedOffersProvider);
+      ref.invalidate(chatListProvider);
 
       return isNewUser;
     } on DioException catch (e) {
