@@ -5,31 +5,33 @@ import 'package:flutter/material.dart';
 class DemoBanner extends StatelessWidget implements PreferredSizeWidget {
   const DemoBanner({super.key});
 
-  static const double _height = 28.0;
-
   @override
-  Size get preferredSize => const Size.fromHeight(_height);
+  Size get preferredSize => const Size.fromHeight(44.0);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: _height,
       width: double.infinity,
       color: const Color(0xFFFEF3C7), // amber-100
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.science_outlined, size: 14, color: Color(0xFF92400E)),
-          const SizedBox(width: 6),
-          Text(
-            'Entorno de demostración — Los inmuebles son ficticios y no representan ofertas reales.',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF92400E),
-              letterSpacing: 0.1,
+          Icon(Icons.science_outlined, size: 14, color: Color(0xFF92400E)),
+          SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              'Entorno de demostración — Los inmuebles son ficticios y no representan ofertas reales.',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF92400E),
+                letterSpacing: 0.1,
+              ),
+              textAlign: TextAlign.center,
+              softWrap: true,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
