@@ -7,27 +7,27 @@
 #
 # Que hace:
 #   1. Avisa si hay cambios sin commitear (no bloquea, pero advierte).
-#   2. Crea el directorio remoto si no existe.
-#   3. Sincroniza el codigo del backend via scp.
-#   4. (Opcional) Actualiza el .env del servidor parcheando valores de produccion.
-#   5. Reconstruye SOLO la imagen Docker del backend.
-#   6. Reinicia SOLO el contenedor backend. La BD NO se toca.
-#   7. Reconecta nginx a la red del backend si es necesario.
+#   2. Sube SOLO el codigo del backend al servidor (NUNCA el docker-compose.yml).
+#   3. (Opcional) Actualiza el .env del servidor parcheando valores de produccion.
+#   4. Reconstruye SOLO la imagen Docker del backend usando el compose del servidor.
+#   5. Reinicia SOLO el contenedor backend. La BD NO se toca.
+#   6. Reconecta el backend a la red de nginx con alias correcto.
 #
-# IMPORTANTE — Pregunta sobre el .env:
-#   Responde N (no) salvo que hayas anadido nuevas variables de entorno al
-#   proyecto. El .env del servidor esta configurado para produccion y NO debe
-#   sobreescribirse con el .env local (que apunta a localhost).
-#   Si respondes S, el script parchea automaticamente DATABASE_URL para Docker.
+# IMPORTANTE:
+#   El docker-compose.yml del servidor es el de produccion y NUNCA se sobreescribe.
+#   El .env del servidor esta configurado para produccion. Responde N a la pregunta
+#   del .env salvo que hayas anadido variables nuevas al proyecto.
 # =============================================================================
 set -euo pipefail
 
 SERVER="root@87.106.247.84"
 REMOTE_APP_DIR="/opt/inmufacil"
-# Nombre de BD en produccion (distinto al local "inmufacil_db")
+# Nombre de BD en produccion
 PROD_DB_NAME="inmufacil_prod"
-# Red Docker compartida entre backend, postgres y nginx
-DOCKER_NETWORK="app_inmufacil_net"
+# Red que comparten nginx y backend (nginx resuelve 'backend' en esta red)
+NGINX_NETWORK="app_inmufacil_net"
+# Red interna del compose (backend <-> DB)
+COMPOSE_NETWORK="inmufacil_inmufacil_net"
 
 echo ""
 echo "============================================"
@@ -54,7 +54,8 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# PASO 2 — Sincronizar codigo al servidor
+# PASO 2 — Sincronizar SOLO el codigo del backend
+# NUNCA se sube docker-compose.yml (el servidor tiene el de produccion).
 # ---------------------------------------------------------------------------
 echo "[2/5] Sincronizando codigo del backend al servidor..."
 echo ""
@@ -62,11 +63,16 @@ echo ""
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "mkdir -p $REMOTE_APP_DIR/backend"
 
-scp -o StrictHostKeyChecking=accept-new \
-  requirements.txt docker-compose.yml "$SERVER:$REMOTE_APP_DIR/"
-
+# Solo el codigo: backend/ y requirements.txt
+# El docker-compose.yml del servidor NO se toca.
 scp -o StrictHostKeyChecking=accept-new \
   -r backend "$SERVER:$REMOTE_APP_DIR/"
+
+# requirements.txt solo si existe en raiz (puede estar en backend/)
+if [ -f "requirements.txt" ]; then
+  scp -o StrictHostKeyChecking=accept-new \
+    requirements.txt "$SERVER:$REMOTE_APP_DIR/"
+fi
 
 echo "  Codigo sincronizado."
 
@@ -76,7 +82,6 @@ echo "  Codigo sincronizado."
 echo ""
 echo "  AVISO: El .env del servidor esta configurado para produccion."
 echo "  Responde S solo si has anadido nuevas variables al proyecto."
-echo "  En ese caso el script parcheara automaticamente DATABASE_URL."
 read -rp "[3/5] Actualizar el .env del servidor con el .env local? (s/N): " update_env
 if [[ "$update_env" =~ ^[sS]$ ]]; then
   if [ ! -f ".env" ]; then
@@ -85,13 +90,10 @@ if [[ "$update_env" =~ ^[sS]$ ]]; then
   else
     scp -o StrictHostKeyChecking=accept-new \
       .env "$SERVER:$REMOTE_APP_DIR/.env"
-    # Parche 1: host de BD local -> nombre de servicio Docker
-    # Parche 2: nombre de BD local -> nombre de BD de produccion
     ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
       "sed -i 's|localhost:[0-9]*|db:5432|g' $REMOTE_APP_DIR/.env && \
        sed -i 's|/inmufacil_db|/$PROD_DB_NAME|g' $REMOTE_APP_DIR/.env"
-    echo "  .env actualizado. DATABASE_URL parcheada para Docker + produccion."
-    echo "  Verifica que el resultado es correcto:"
+    echo "  .env actualizado. Verificando DATABASE_URL:"
     ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
       "grep DATABASE_URL $REMOTE_APP_DIR/.env | head -1"
   fi
@@ -101,18 +103,21 @@ fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# PASO 4 — Reconstruir imagen Docker
+# PASO 4 — Reconstruir imagen Docker usando el compose del servidor
 # ---------------------------------------------------------------------------
 echo "[4/5] Reconstruyendo imagen Docker del backend..."
 echo "  (Puede tardar 2-5 minutos si cambiaron dependencias en requirements.txt)"
 echo ""
 
 ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
-  "cd $REMOTE_APP_DIR && \
-   docker compose -f docker-compose.yml build backend"
+  "cd $REMOTE_APP_DIR && docker compose build backend"
 
 # ---------------------------------------------------------------------------
-# PASO 5 — Reiniciar backend + asegurar que nginx comparte su red
+# PASO 5 — Reiniciar backend + reconectar redes
+#
+# Tras recrear el contenedor con docker compose, este queda en la red interna
+# del compose (COMPOSE_NETWORK). Hay que conectarlo ademas a NGINX_NETWORK
+# con el alias 'backend' para que nginx pueda resolverlo por nombre.
 # ---------------------------------------------------------------------------
 echo ""
 echo "[5/5] Reiniciando contenedor del backend (BD intacta)..."
@@ -121,8 +126,9 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
   "docker stop inmufacil_backend 2>/dev/null || true && \
    docker rm inmufacil_backend 2>/dev/null || true && \
    cd $REMOTE_APP_DIR && \
-   docker compose -f docker-compose.yml up -d --no-deps backend && \
-   docker network connect $DOCKER_NETWORK inmufacil_backend 2>/dev/null || true && \
+   docker compose up -d --no-deps backend && \
+   docker network disconnect $NGINX_NETWORK inmufacil_backend 2>/dev/null || true && \
+   docker network connect --alias backend $NGINX_NETWORK inmufacil_backend && \
    docker exec inmufacil_proxy nginx -s reload && \
    echo '' && \
    echo '--- Estado de contenedores ---' && \
