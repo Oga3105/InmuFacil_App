@@ -441,7 +441,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                        ),
                                      ),
                                      TextButton(
-                                       onPressed: () => context.push('/forgot-password'),
+                                       onPressed: () {
+                                         final email = _emailController.text.trim();
+                                         context.push('/forgot-password', extra: email.isNotEmpty ? email : null);
+                                       },
                                        style: TextButton.styleFrom(
                                          padding: EdgeInsets.zero,
                                          minimumSize: Size.zero,

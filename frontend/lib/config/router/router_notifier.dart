@@ -15,6 +15,7 @@ class RouterNotifier extends Notifier<void> with ChangeNotifier {
     '/login',
     '/register',
     '/forgot-password',
+    '/reset-password',
     '/onboarding/consent',
     '/search',
     '/trust-dashboard',
