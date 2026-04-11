@@ -36,6 +36,7 @@ class UserUpdate(BaseModel):
     """Schema for user profile updates."""
     full_name: Optional[str] = Field(None, min_length=3, max_length=100)
     phone: Optional[str] = Field(None, min_length=9, max_length=15)
+    email_notifications_enabled: Optional[bool] = None
 
 
 class UserResponse(UserBase):
@@ -48,6 +49,7 @@ class UserResponse(UserBase):
     rejection_reason: Optional[str] = None
     phone: Optional[str] = None
     profile_photo_url: Optional[str] = None
+    email_notifications_enabled: bool = True
 
     class Config:
         from_attributes = True

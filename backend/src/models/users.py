@@ -64,6 +64,11 @@ class User(Base):
     # Push Notifications — FCM device token (V17 Notification Center)
     fcm_token = Column(String(512), nullable=True)
 
+    # Email Notification Preferences (@Shield GDPR opt-out)
+    # Controls whether user receives emails triggered by OTHER users' actions.
+    # Own-action confirmation emails are always sent regardless of this flag.
+    email_notifications_enabled = Column(Boolean, default=True, nullable=False, server_default="true")
+
     # Relationships
     # Using string references to avoid circular imports
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")

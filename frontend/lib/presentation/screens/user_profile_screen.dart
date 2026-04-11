@@ -50,6 +50,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   // [NEW] Photo upload state
   bool _isUploadingPhoto = false;
 
+  // Email notification preference (null = use value from user object)
+  bool? _emailNotificationsEnabled;
+
   // Properties tab sort and filter state
   String _propertiesSortBy = 'newest';
   String _propertiesStatusFilter = 'all';
@@ -646,6 +649,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     _buildPersonalInfoCard(user),
                     const SizedBox(height: 24),
                     _buildSecurityCard(user),
+                    const SizedBox(height: 24),
+                    _buildNotificationsCard(user),
                   ],
                 ),
               ),
@@ -675,6 +680,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               _buildPersonalInfoCard(user),
               const SizedBox(height: 24),
               _buildSecurityCard(user),
+              const SizedBox(height: 24),
+              _buildNotificationsCard(user),
               const SizedBox(height: 24),
               _buildSolvencyCard(),
               const SizedBox(height: 10),
@@ -976,6 +983,82 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 )),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationsCard(User user) {
+    final theme = Theme.of(context);
+    final currentValue = _emailNotificationsEnabled ?? user.emailNotificationsEnabled;
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'profile.notifications_title'.tr(),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
+            ),
+            child: SwitchListTile(
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              secondary: Icon(
+                currentValue
+                    ? Icons.notifications_outlined
+                    : Icons.notifications_off_outlined,
+                color: currentValue
+                    ? theme.colorScheme.primary
+                    : Colors.grey.shade400,
+              ),
+              title: Text(
+                'profile.email_notifications_label'.tr(),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+              subtitle: Text(
+                currentValue
+                    ? 'profile.email_notifications_on'.tr()
+                    : 'profile.email_notifications_off'.tr(),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+              ),
+              value: currentValue,
+              activeColor: theme.colorScheme.primary,
+              onChanged: (newValue) async {
+                setState(() => _emailNotificationsEnabled = newValue);
+                final result = await ref
+                    .read(authProvider.notifier)
+                    .updateProfile(emailNotificationsEnabled: newValue);
+                if (!result['success'] && mounted) {
+                  // Revert on failure
+                  setState(() => _emailNotificationsEnabled = !newValue);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(result['error'] ?? 'Error al guardar preferencia'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),

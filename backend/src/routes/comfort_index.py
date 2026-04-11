@@ -25,7 +25,11 @@ from backend.src.config.database import get_db
 from backend.src.models import Property, User
 from backend.src.models.ai_consent import AIConsentLog
 from backend.src.services.gemini_service import call_with_fallback, get_client
-from backend.src.services.email_service import send_comfort_request_email
+import asyncio
+from backend.src.services.email_service import (
+    send_comfort_request_email,
+    send_comfort_request_confirmation_email,
+)
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
@@ -317,11 +321,31 @@ async def request_comfort_from_seller(
     db.add(log_entry)
     db.commit()
 
-    sent = await send_comfort_request_email(
-        seller_email=seller.email,
-        seller_name=seller.full_name,
-        property_title=prop.title or f"Propiedad #{property_id}",
-        buyer_name=current_user.full_name,
+    property_title = prop.title or f"Propiedad #{property_id}"
+
+    # Notify seller only if they have email notifications enabled
+    sent = False
+    if getattr(seller, "email_notifications_enabled", True):
+        sent = await send_comfort_request_email(
+            seller_email=seller.email,
+            seller_name=seller.full_name,
+            property_title=property_title,
+            buyer_name=current_user.full_name,
+        )
+    else:
+        logger.info(
+            "[EMAIL] Seller %s has email_notifications_enabled=False — skipping comfort request email",
+            seller.id,
+        )
+
+    # Confirmation to buyer — always sent regardless of their notification preference
+    asyncio.create_task(
+        send_comfort_request_confirmation_email(
+            buyer_email=current_user.email,
+            buyer_name=current_user.full_name,
+            seller_name=seller.full_name,
+            property_title=property_title,
+        )
     )
 
     return ComfortRequestResponse(

@@ -3,6 +3,7 @@ Offers Router (@Jules)
 Handles the lifecycle of Property Offers (Manifestación de Interés).
 """
 
+import asyncio
 from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -13,6 +14,14 @@ from backend.src.config.database import get_db
 from backend.src.models import User, Property, PropertyOffer, OfferStatus, OfferHistory, OfferMessage, BuyerSolvency
 from backend.src.utils.security import get_current_active_user
 from backend.src.utils.crypto import encrypt_data, decrypt_data
+from backend.src.services.email_service import (
+    send_offer_received_email,
+    send_offer_sent_confirmation_email,
+    send_offer_accepted_notification_email,
+    send_offer_accepted_confirmation_email,
+    send_counter_offer_notification_email,
+    send_counter_offer_confirmation_email,
+)
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
 
@@ -339,6 +348,39 @@ async def create_offer(
     db.commit()
     # Re-fetch with eager loads so the response includes nested property and buyer
     created = _offers_query(db).filter(PropertyOffer.id == offer.id).first()
+
+    # --- Email notifications (fire-and-forget, best-effort) ---
+    seller = db.query(User).filter(User.id == prop.owner_id).first()
+    property_address = prop.location or prop.street or prop.city or f"Propiedad #{prop.id}"
+    valid_until_str = valid_until.strftime("%d/%m/%Y %H:%M") if valid_until else "—"
+
+    # Notify seller of new offer (only if notifications enabled)
+    if seller and getattr(seller, "email_notifications_enabled", True):
+        asyncio.create_task(
+            send_offer_received_email(
+                seller_email=seller.email,
+                seller_name=seller.full_name,
+                buyer_name=current_user.full_name,
+                property_title=prop.title or f"Propiedad #{prop.id}",
+                property_address=property_address,
+                amount=offer_data.amount,
+                valid_until=valid_until_str,
+            )
+        )
+
+    # Confirm to buyer that their offer was sent (always)
+    asyncio.create_task(
+        send_offer_sent_confirmation_email(
+            buyer_email=current_user.email,
+            buyer_name=current_user.full_name,
+            property_title=prop.title or f"Propiedad #{prop.id}",
+            property_address=property_address,
+            amount=offer_data.amount,
+            seller_name=seller.full_name if seller else "el vendedor",
+            valid_until=valid_until_str,
+        )
+    )
+
     return _serialize_offer(created, db)
 
 
@@ -430,6 +472,41 @@ async def counter_offer(
     db.add(history)
     db.commit()
     db.refresh(offer)
+
+    # --- Email notifications for counter-offer (fire-and-forget, best-effort) ---
+    prop_obj = offer.property
+    prop_title = prop_obj.title or f"Propiedad #{offer.property_id}" if prop_obj else f"Propiedad #{offer.property_id}"
+
+    # Determine the OTHER participant to notify
+    if is_owner:
+        # Seller counter-offered → notify buyer
+        recipient = db.query(User).filter(User.id == offer.buyer_id).first()
+    else:
+        # Buyer counter-offered → notify seller
+        recipient = db.query(User).filter(User.id == prop_obj.owner_id).first() if prop_obj else None
+
+    # Notify the other participant (conditional on their preference)
+    if recipient and getattr(recipient, "email_notifications_enabled", True):
+        asyncio.create_task(
+            send_counter_offer_notification_email(
+                recipient_email=recipient.email,
+                recipient_name=recipient.full_name,
+                actor_name=current_user.full_name,
+                property_title=prop_title,
+                new_amount=counter_data.amount,
+            )
+        )
+
+    # Confirm to the actor (always)
+    asyncio.create_task(
+        send_counter_offer_confirmation_email(
+            actor_email=current_user.email,
+            actor_name=current_user.full_name,
+            property_title=prop_title,
+            new_amount=counter_data.amount,
+        )
+    )
+
     return offer
 
 
@@ -479,9 +556,42 @@ async def accept_offer(
     from backend.src.services.timeline_service import TimelineService
     timeline_service = TimelineService(db)
     timeline_service.initialize_timeline(offer)
-    
+
     db.commit()
     db.refresh(offer)
+
+    # --- Email notifications (fire-and-forget, best-effort) ---
+    prop_obj = offer.property
+    buyer_obj = db.query(User).filter(User.id == offer.buyer_id).first()
+    seller_obj = db.query(User).filter(User.id == prop_obj.owner_id).first() if prop_obj else None
+    prop_title = prop_obj.title or f"Propiedad #{offer.property_id}" if prop_obj else f"Propiedad #{offer.property_id}"
+    prop_address = (prop_obj.location or prop_obj.street or prop_obj.city or prop_title) if prop_obj else prop_title
+
+    # Notify buyer that their offer was accepted (only if notifications enabled)
+    if buyer_obj and getattr(buyer_obj, "email_notifications_enabled", True):
+        asyncio.create_task(
+            send_offer_accepted_notification_email(
+                buyer_email=buyer_obj.email,
+                buyer_name=buyer_obj.full_name,
+                property_title=prop_title,
+                property_address=prop_address,
+                amount=int(offer.amount),
+            )
+        )
+
+    # Confirm to actor (seller or buyer in counter-accept) that they accepted (always)
+    if current_user and seller_obj:
+        asyncio.create_task(
+            send_offer_accepted_confirmation_email(
+                seller_email=current_user.email,
+                seller_name=current_user.full_name,
+                buyer_name=buyer_obj.full_name if buyer_obj else "el comprador",
+                property_title=prop_title,
+                property_address=prop_address,
+                amount=int(offer.amount),
+            )
+        )
+
     return offer
 
 

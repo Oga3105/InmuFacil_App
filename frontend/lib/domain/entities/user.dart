@@ -12,6 +12,7 @@ class User {
     this.createdAt,
     this.rejectionReason,
     this.profilePhotoUrl,
+    this.emailNotificationsEnabled = true,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -27,6 +28,7 @@ class User {
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       rejectionReason: json['rejection_reason'],
       profilePhotoUrl: json['profile_photo_url'],
+      emailNotificationsEnabled: json['email_notifications_enabled'] as bool? ?? true,
     );
   }
 
@@ -41,6 +43,7 @@ class User {
   final DateTime? createdAt;
   final String? rejectionReason;
   final String? profilePhotoUrl;
+  final bool emailNotificationsEnabled;
 
   User copyWith({
     String? id,
@@ -55,6 +58,7 @@ class User {
     String? rejectionReason,
     String? profilePhotoUrl,
     bool clearProfilePhoto = false,
+    bool? emailNotificationsEnabled,
   }) {
     return User(
       id: id ?? this.id,
@@ -68,6 +72,7 @@ class User {
       createdAt: createdAt ?? this.createdAt,
       rejectionReason: rejectionReason ?? this.rejectionReason,
       profilePhotoUrl: clearProfilePhoto ? null : (profilePhotoUrl ?? this.profilePhotoUrl),
+      emailNotificationsEnabled: emailNotificationsEnabled ?? this.emailNotificationsEnabled,
     );
   }
 }

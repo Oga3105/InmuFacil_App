@@ -217,12 +217,19 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  /// Update profile (name, phone)
-  Future<Map<String, dynamic>> updateProfile({String? fullName, String? phone}) async {
+  /// Update profile (name, phone, email notification preference)
+  Future<Map<String, dynamic>> updateProfile({
+    String? fullName,
+    String? phone,
+    bool? emailNotificationsEnabled,
+  }) async {
     try {
       final body = <String, dynamic>{};
       if (fullName != null) body['full_name'] = fullName;
       if (phone != null) body['phone'] = phone;
+      if (emailNotificationsEnabled != null) {
+        body['email_notifications_enabled'] = emailNotificationsEnabled;
+      }
 
       final response = await _dio.put('/users/me', data: body);
       final updatedUser = User.fromJson(response.data);
