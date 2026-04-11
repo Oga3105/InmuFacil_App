@@ -118,7 +118,9 @@ class GdprConsentScreen extends ConsumerWidget {
                   // Boton rechazar
                   OutlinedButton(
                     onPressed: () async {
-                      await ref.read(authProvider.notifier).logout();
+                      // Hard-delete the account so next Google sign-in
+                      // triggers the consent screen again (is_new_user = true).
+                      await ref.read(authProvider.notifier).deleteAccount();
                       if (context.mounted) context.go('/login');
                     },
                     style: OutlinedButton.styleFrom(

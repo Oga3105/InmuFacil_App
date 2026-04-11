@@ -446,5 +446,17 @@
     "n_months": "hai {n} meses",
     "one_year": "hai 1 ano",
     "n_years": "hai {n} anos"
+  },
+  "onboarding": {
+    "gdpr_title": "Antes de continuar",
+    "gdpr_subtitle": "Para usar InmuFácil necesitamos o teu consentimento.",
+    "gdpr_item_1": "Tratamos os teus datos conforme ao RXPD (UE) 2016/679.",
+    "gdpr_item_2": "Podes exercer o teu dereito ao esquecemento en calquera momento desde o teu perfil.",
+    "gdpr_item_3": "Os teus datos de identidade cifranse con AES-256.",
+    "gdpr_accept_button": "Acepto — Continuar",
+    "gdpr_decline_button": "Non Acepto — Saír",
+    "gdpr_terms_prefix": "Ao continuar aceptas os ",
+    "gdpr_terms_link": "Termos e Condicións",
+    "gdpr_privacy_link": "Política de Privacidade"
   }
 }

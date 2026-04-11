@@ -242,7 +242,7 @@ class AuthNotifier extends Notifier<AuthState> {
       await _dio.post('/auth/change-password', data: {
         'current_password': currentPassword,
         'new_password': newPassword,
-      });
+      },);
       return {'success': true};
     } on DioException catch (e) {
       final msg = e.response?.data['detail'] ?? 'Error al cambiar contraseña';
@@ -282,6 +282,19 @@ class AuthNotifier extends Notifier<AuthState> {
     } catch (e) {
       return {'success': false, 'error': 'Error inesperado'};
     }
+  }
+
+  /// Permanent account deletion (GDPR right to erasure).
+  /// Called when user declines GDPR consent on onboarding.
+  /// Deletes the account from the backend, then clears local session.
+  Future<void> deleteAccount() async {
+    try {
+      await _dio.delete('/users/me');
+    } catch (_) {
+      // If the request fails (network error, account already gone), proceed
+      // with local cleanup anyway so the user is never stuck.
+    }
+    await logout();
   }
 
   Future<Map<String, dynamic>> deleteProfilePhoto() async {
@@ -371,7 +384,7 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> logout() async {
     await _storage.delete(key: 'auth_token');
     _dio.options.headers.remove('Authorization');
-    await _googleSignIn.signOut().catchError((_) {});
+    await _googleSignIn.signOut().catchError((_) => null);
     ref.invalidate(myPropertiesProvider);
     ref.invalidate(sentOffersProvider);
     ref.invalidate(receivedOffersProvider);
@@ -392,7 +405,7 @@ class AuthNotifier extends Notifier<AuthState> {
     ref.invalidate(receivedOffersProvider);
     ref.invalidate(chatListProvider);
     state = AuthState(isLoading: false);
-    _googleSignIn.signOut().catchError((_) {});
+    _googleSignIn.signOut().catchError((_) => null);
   }
 }
 

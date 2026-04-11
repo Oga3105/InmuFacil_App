@@ -526,5 +526,17 @@
     "n_months": "duela {n} hilabete",
     "one_year": "duela 1 urte",
     "n_years": "duela {n} urte"
+  },
+  "onboarding": {
+    "gdpr_title": "Jarraitu aurretik",
+    "gdpr_subtitle": "InmuFácil erabiltzeko zure baimena behar dugu.",
+    "gdpr_item_1": "Zure datuak RGPD (EB) 2016/679 araudiaren arabera tratatzen ditugu.",
+    "gdpr_item_2": "Ahanztura-eskubidea edozein unetan egikaritu dezakezu zure profiletik.",
+    "gdpr_item_3": "Zure nortasun-datuak AES-256 enkriptazioarekin babesten dira.",
+    "gdpr_accept_button": "Onartzen Dut — Jarraitu",
+    "gdpr_decline_button": "Ez Dut Onartzen — Irten",
+    "gdpr_terms_prefix": "Jarraituz gero, honako hauek onartzen dituzu: ",
+    "gdpr_terms_link": "Erabilera-baldintzak",
+    "gdpr_privacy_link": "Pribatutasun-politika"
   }
 }

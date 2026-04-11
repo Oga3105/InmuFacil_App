@@ -144,6 +144,23 @@ async def upload_profile_photo(
     return _build_user_response(current_user, decrypted_phone)
 
 
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_own_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Borrado permanente de la propia cuenta (GDPR — derecho al olvido).
+    Elimina el registro completo del usuario de la base de datos.
+    Usado cuando el usuario rechaza el consentimiento GDPR en el onboarding.
+    """
+    user_id = current_user.id
+    db.delete(current_user)
+    db.commit()
+    logger.info(f"[GDPR] User {user_id} deleted their own account (consent declined).")
+    return None
+
+
 @router.delete("/me/photo", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_profile_photo(
     db: Session = Depends(get_db),
