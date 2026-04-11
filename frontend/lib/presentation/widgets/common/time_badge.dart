@@ -148,7 +148,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else if (diff.inDays < 31) {
       return _BadgeStyle(
-        prefix: null,
+        prefix: 'Pub.',
         bgColor: isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED),
         borderColor: isDark ? const Color(0xFF92400E) : const Color(0xFFFED7AA),
         iconColor: isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C),
@@ -156,7 +156,7 @@ class PropertyTimeBadge extends StatelessWidget {
       );
     } else {
       return _BadgeStyle(
-        prefix: null,
+        prefix: 'Pub.',
         bgColor: cs.surfaceContainerHighest,
         borderColor: cs.outlineVariant,
         iconColor: cs.onSurfaceVariant,
