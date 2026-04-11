@@ -40,56 +40,92 @@ class PropertyTimeBadge extends StatelessWidget {
     final double iconSize = large ? 14 : 13;
     final double prefixSize = large ? 12 : 11;
     final double timeSize = large ? 12 : 11;
-    final double updatedSize = large ? 11 : 10;
 
-    return Row(
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: style.bgColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: style.borderColor, width: 1),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.history_rounded, size: iconSize, color: style.iconColor),
-              const SizedBox(width: 5),
-              if (style.prefix != null) ...[
-                Text(
-                  style.prefix!,
-                  style: TextStyle(
-                    fontSize: prefixSize,
-                    fontWeight: FontWeight.w800,
-                    color: style.textColor,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-                const SizedBox(width: 4),
-              ],
-              Text(
-                timeText,
-                style: TextStyle(
-                  fontSize: timeSize,
-                  fontWeight: FontWeight.w600,
-                  color: style.textColor,
-                ),
-              ),
-              if (updatedText != null) ...[
-                Text(
-                  '  ·  Actualizado hace $updatedText',
-                  style: TextStyle(
-                    fontSize: updatedSize,
-                    fontStyle: FontStyle.italic,
-                    color: style.textColor.withOpacity(0.7),
-                  ),
-                ),
-              ],
-            ],
-          ),
+        // Pill 1: fecha de publicacion
+        _buildPill(
+          icon: Icons.history_rounded,
+          iconSize: iconSize,
+          prefix: style.prefix,
+          prefixSize: prefixSize,
+          text: timeText,
+          textSize: timeSize,
+          bgColor: style.bgColor,
+          borderColor: style.borderColor,
+          iconColor: style.iconColor,
+          textColor: style.textColor,
         ),
+        // Pill 2: ultima actualizacion (solo si difiere > 60 min de la creacion)
+        if (updatedText != null)
+          Builder(builder: (context) {
+            final updatedDiff = DateTime.now().difference(updatedAt!);
+            final updStyle = _getBadgeStyle(updatedDiff, isDark, colorScheme);
+            return _buildPill(
+              icon: Icons.update_rounded,
+              iconSize: iconSize,
+              prefix: 'Act.',
+              prefixSize: prefixSize,
+              text: updatedText,
+              textSize: timeSize,
+              bgColor: updStyle.bgColor,
+              borderColor: updStyle.borderColor,
+              iconColor: updStyle.iconColor,
+              textColor: updStyle.textColor,
+            );
+          },),
       ],
+    );
+  }
+
+  Widget _buildPill({
+    required IconData icon,
+    required double iconSize,
+    required String? prefix,
+    required double prefixSize,
+    required String text,
+    required double textSize,
+    required Color bgColor,
+    required Color borderColor,
+    required Color iconColor,
+    required Color textColor,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: iconSize, color: iconColor),
+          const SizedBox(width: 5),
+          if (prefix != null) ...[
+            Text(
+              prefix,
+              style: TextStyle(
+                fontSize: prefixSize,
+                fontWeight: FontWeight.w800,
+                color: textColor,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: textSize,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -1120,51 +1120,168 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildTrustDashboardButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => context.push('/trust-dashboard'),
-        icon: const Icon(Icons.workspace_premium_outlined, size: 16),
-        label: Text('profile.trust_level_button'.tr()),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF135BEC),
-          side: const BorderSide(color: Color(0xFFCBD5E1)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+    const color = Color(0xFF135BEC);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.push('/trust-dashboard'),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.workspace_premium_outlined, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'profile.trust_level_button'.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Consulta tu reputacion como comprador o vendedor',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: color, size: 18),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAiConsentHistoryButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => context.push(AiConsentHistoryScreen.routePath),
-        icon: const Icon(Icons.privacy_tip_outlined, size: 16),
-        label: const Text('Historial de Consentimientos IA'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF7C3AED),
-          side: const BorderSide(color: Color(0xFFDDD6FE)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+    const color = Color(0xFF7C3AED);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.push(AiConsentHistoryScreen.routePath),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.privacy_tip_outlined, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Historial de Consentimientos IA',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Revisa los usos de IA que has autorizado',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: color, size: 18),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildLifestyleButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        onPressed: () => context.push('/lifestyle/questionnaire'),
-        icon: const Icon(Icons.explore_outlined, size: 16),
-        label: Text('profile.lifestyle_button'.tr()),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF16A34A),
-          side: const BorderSide(color: Color(0xFFBBF7D0)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          padding: const EdgeInsets.symmetric(vertical: 12),
+    const color = Color(0xFF16A34A);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.push('/lifestyle/questionnaire'),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: color.withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(9),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.explore_outlined, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'profile.lifestyle_button'.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: color,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Encuentra el barrio que mejor se adapta a ti',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: color, size: 18),
+            ],
+          ),
         ),
       ),
     );
@@ -1579,12 +1696,13 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
   }
 
   Widget _buildAddPropertyBanner() {
+    const color = Color(0xFF135BEC);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        border: Border.all(color: color.withValues(alpha: 0.20)),
       ),
       child: InkWell(
         onTap: () => context.push('/property/create'),
@@ -1596,13 +1714,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               Stack(
                 alignment: Alignment.topRight,
                 children: [
-                  Icon(Icons.home_work_outlined,
-                      size: 36, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  const Icon(Icons.home_work_outlined, size: 36, color: color),
                   Container(
                     width: 16,
                     height: 16,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF135BEC),
+                      color: color,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.add, size: 12, color: Colors.white),
@@ -1610,12 +1727,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
+              const Text(
                 '\u00BFTienes otra propiedad?',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
+                  color: color,
                 ),
               ),
               const SizedBox(height: 4),
@@ -1623,7 +1740,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 'Publicar otro anuncio ahora',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF135BEC),
+                  color: color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
