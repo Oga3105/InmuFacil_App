@@ -320,7 +320,11 @@
     "password_change_error": "Errorea pasahitza aldatzean. Saiatu geroago.",
     "password_change_success": "Pasahitza ongi eguneratu da",
     "action_activate": "Aktibatu",
-    "action_deactivate": "Desaktibatu"
+    "action_deactivate": "Desaktibatu",
+    "notifications_title": "Jakinarazpenak",
+    "email_notifications_label": "Posta elektronikozko jakinarazpenak",
+    "email_notifications_on": "Beste erabiltzaileek zure propietate edo eskaintzetan jardutean mezu elektronikoak jasoko dituzu.",
+    "email_notifications_off": "Ez dituzu beste erabiltzaileen jarduera-mezuak jasoko. Zure ekintzen berrespena bai bidaliko da."
   },
   "pre_offer_tax": {
     "title": "Zerga-laburpen estimatua",

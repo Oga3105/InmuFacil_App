@@ -560,6 +560,651 @@ def _build_ai_abuse_alert_html(
 """
 
 
+# ============================================================================
+# Action Confirmation Emails — sent to the ACTOR (always, regardless of prefs)
+# and Notification Emails — sent to the OTHER PARTY (only if notifications ON)
+# ============================================================================
+
+def _build_comfort_request_confirmation_html(
+    buyer_name: str, seller_name: str, property_title: str
+) -> str:
+    dashboard_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitud enviada - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Tu solicitud ha sido enviada
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{buyer_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Has solicitado el <strong>Indice de Confort con IA</strong> para la propiedad
+              <strong>"{property_title}"</strong>.
+            </p>
+            <div style="background:#EFF6FF;border-left:4px solid #135BEC;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#1E40AF;">
+                <strong>Accion realizada:</strong> Solicitud de Indice de Confort<br>
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Vendedor notificado:</strong> {seller_name}
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              Hemos notificado al vendedor. Si activa el analisis, el informe de confort
+              aparecera en el detalle de la propiedad automaticamente.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{dashboard_link}"
+                 style="display:inline-block;background:#135BEC;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Ver mis ofertas
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_comfort_request_confirmation_email(
+    buyer_email: str,
+    buyer_name: str,
+    seller_name: str,
+    property_title: str,
+) -> bool:
+    """Confirmacion al COMPRADOR de que su solicitud de Indice de Confort fue enviada."""
+    html = _build_comfort_request_confirmation_html(buyer_name, seller_name, property_title)
+    return await _send_email(
+        to=buyer_email,
+        subject=f"Has solicitado el Indice de Confort de '{property_title}'",
+        html_body=html,
+    )
+
+
+def _build_offer_received_html(
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+    valid_until: str,
+) -> str:
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    offers_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nueva oferta recibida - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Has recibido una nueva oferta
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{seller_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              <strong>{buyer_name}</strong> ha presentado una oferta por tu propiedad en InmuFacil.
+            </p>
+            <div style="background:#EFF6FF;border-left:4px solid #135BEC;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#1E40AF;">
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Direccion:</strong> {property_address}<br>
+                <strong>Oferta recibida:</strong> {formatted_amount} EUR<br>
+                <strong>Comprador:</strong> {buyer_name}<br>
+                <strong>Valida hasta:</strong> {valid_until}
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              Tienes <strong>48 horas</strong> para aceptar, rechazar o realizar una contraoferta.
+              Si no respondes en ese plazo, la oferta expirara automaticamente.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{offers_link}"
+                 style="display:inline-block;background:#135BEC;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Ver oferta en InmuFacil
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_offer_received_email(
+    seller_email: str,
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+    valid_until: str,
+) -> bool:
+    """Notificacion al VENDEDOR de que ha recibido una nueva oferta."""
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    html = _build_offer_received_html(
+        seller_name, buyer_name, property_title, property_address, amount, valid_until
+    )
+    return await _send_email(
+        to=seller_email,
+        subject=f"Has recibido una oferta de {formatted_amount} EUR por '{property_title}'",
+        html_body=html,
+    )
+
+
+def _build_offer_sent_confirmation_html(
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+    seller_name: str,
+    valid_until: str,
+) -> str:
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    offers_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oferta enviada - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#135BEC;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Tu oferta ha sido enviada
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{buyer_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Tu oferta ha sido enviada correctamente al vendedor. Te avisaremos cuando responda.
+            </p>
+            <div style="background:#EFF6FF;border-left:4px solid #135BEC;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#1E40AF;">
+                <strong>Accion realizada:</strong> Oferta enviada<br>
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Direccion:</strong> {property_address}<br>
+                <strong>Importe ofertado:</strong> {formatted_amount} EUR<br>
+                <strong>Vendedor:</strong> {seller_name}<br>
+                <strong>Oferta valida hasta:</strong> {valid_until}
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              El vendedor tiene 48 horas para aceptar, rechazar o realizar una contraoferta.
+              Puedes seguir el estado desde tu perfil en InmuFacil.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{offers_link}"
+                 style="display:inline-block;background:#135BEC;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Ver mis ofertas
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_offer_sent_confirmation_email(
+    buyer_email: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+    seller_name: str,
+    valid_until: str,
+) -> bool:
+    """Confirmacion al COMPRADOR de que su oferta fue enviada correctamente."""
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    html = _build_offer_sent_confirmation_html(
+        buyer_name, property_title, property_address, amount, seller_name, valid_until
+    )
+    return await _send_email(
+        to=buyer_email,
+        subject=f"Tu oferta de {formatted_amount} EUR ha sido enviada",
+        html_body=html,
+    )
+
+
+def _build_offer_accepted_notification_html(
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> str:
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    offers_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oferta aceptada - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#16A34A;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Tu oferta ha sido aceptada
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{buyer_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Excelente noticia: el propietario ha aceptado tu oferta.
+            </p>
+            <div style="background:#F0FDF4;border-left:4px solid #16A34A;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#14532D;">
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Direccion:</strong> {property_address}<br>
+                <strong>Importe acordado:</strong> {formatted_amount} EUR
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              El siguiente paso es iniciar el proceso de arras y formalizacion de la compraventa.
+              Accede a tu perfil para revisar los proximos pasos: firma del contrato de arras,
+              obtencion de financiacion y cita en notaria.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{offers_link}"
+                 style="display:inline-block;background:#16A34A;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Continuar el proceso
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_offer_accepted_notification_email(
+    buyer_email: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> bool:
+    """Notificacion al COMPRADOR de que su oferta ha sido aceptada."""
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    html = _build_offer_accepted_notification_html(
+        buyer_name, property_title, property_address, amount
+    )
+    return await _send_email(
+        to=buyer_email,
+        subject=f"Tu oferta de {formatted_amount} EUR ha sido aceptada",
+        html_body=html,
+    )
+
+
+def _build_offer_accepted_confirmation_html(
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> str:
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    offers_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oferta aceptada - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#16A34A;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Has aceptado la oferta
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{seller_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Has aceptado la oferta de <strong>{buyer_name}</strong>. El comprador ha sido
+              notificado y comenzara el proceso de formalizacion de la compraventa.
+            </p>
+            <div style="background:#F0FDF4;border-left:4px solid #16A34A;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#14532D;">
+                <strong>Accion realizada:</strong> Oferta aceptada<br>
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Direccion:</strong> {property_address}<br>
+                <strong>Importe acordado:</strong> {formatted_amount} EUR<br>
+                <strong>Comprador:</strong> {buyer_name}
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              Espera el contacto del comprador para coordinar los proximos pasos:
+              contrato de arras y cita en notaria.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{offers_link}"
+                 style="display:inline-block;background:#16A34A;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Ver mis ofertas recibidas
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_offer_accepted_confirmation_email(
+    seller_email: str,
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> bool:
+    """Confirmacion al VENDEDOR de que acepto la oferta."""
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    html = _build_offer_accepted_confirmation_html(
+        seller_name, buyer_name, property_title, property_address, amount
+    )
+    return await _send_email(
+        to=seller_email,
+        subject=f"Has aceptado la oferta de {buyer_name} por '{property_title}'",
+        html_body=html,
+    )
+
+
+def _build_counter_offer_html(
+    recipient_name: str,
+    actor_name: str,
+    property_title: str,
+    new_amount: int,
+    is_confirmation: bool,
+) -> str:
+    """Reutilizado para notificacion al destinatario Y confirmacion al actor."""
+    formatted_amount = f"{new_amount:,}".replace(",", ".")
+    offers_link = f"{FRONTEND_BASE_URL}/profile"
+    if is_confirmation:
+        heading = "Tu contraoferta ha sido enviada"
+        intro = f"Has enviado una contraoferta de <strong>{formatted_amount} EUR</strong> " \
+                f"por la propiedad <strong>\"{property_title}\"</strong>."
+        action_label = "Accion realizada: Contraoferta enviada"
+        other_label = f"Destinatario notificado: {actor_name}"
+        cta_text = "Ver mis ofertas"
+    else:
+        heading = "Has recibido una contraoferta"
+        intro = f"<strong>{actor_name}</strong> ha enviado una contraoferta de " \
+                f"<strong>{formatted_amount} EUR</strong> por la propiedad " \
+                f"<strong>\"{property_title}\"</strong>."
+        action_label = "Tipo de accion: Contraoferta recibida"
+        other_label = f"Realizada por: {actor_name}"
+        cta_text = "Responder en InmuFacil"
+
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{heading} - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#7C3AED;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              {heading}
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{recipient_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              {intro}
+            </p>
+            <div style="background:#F5F3FF;border-left:4px solid #7C3AED;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#4C1D95;">
+                <strong>{action_label}</strong><br>
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Nuevo importe:</strong> {formatted_amount} EUR<br>
+                <strong>{other_label}</strong>
+              </p>
+            </div>
+            <p style="margin:0 0 20px;color:#475569;font-size:14px;line-height:1.6;">
+              Accede a tu perfil para ver los detalles y responder.
+            </p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{offers_link}"
+                 style="display:inline-block;background:#7C3AED;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                {cta_text}
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+"""
+
+
+async def send_counter_offer_notification_email(
+    recipient_email: str,
+    recipient_name: str,
+    actor_name: str,
+    property_title: str,
+    new_amount: int,
+) -> bool:
+    """Notificacion al OTRO PARTICIPANTE de que ha recibido una contraoferta."""
+    formatted_amount = f"{new_amount:,}".replace(",", ".")
+    html = _build_counter_offer_html(
+        recipient_name, actor_name, property_title, new_amount, is_confirmation=False
+    )
+    return await _send_email(
+        to=recipient_email,
+        subject=f"Nueva contraoferta de {formatted_amount} EUR por '{property_title}'",
+        html_body=html,
+    )
+
+
+async def send_counter_offer_confirmation_email(
+    actor_email: str,
+    actor_name: str,
+    property_title: str,
+    new_amount: int,
+) -> bool:
+    """Confirmacion al ACTOR de que su contraoferta ha sido enviada."""
+    formatted_amount = f"{new_amount:,}".replace(",", ".")
+    html = _build_counter_offer_html(
+        actor_name, actor_name, property_title, new_amount, is_confirmation=True
+    )
+    return await _send_email(
+        to=actor_email,
+        subject=f"Tu contraoferta de {formatted_amount} EUR ha sido enviada",
+        html_body=html,
+    )
+
+
+# ============================================================================
+# AI Abuse Alert (internal — kept below the user-facing emails)
+# ============================================================================
+
 async def send_ai_abuse_alert_email(
     user_id: int,
     feature: str,

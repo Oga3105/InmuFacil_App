@@ -374,7 +374,11 @@
     "password_change_error": "Erreur lors du changement de mot de passe. Réessayez plus tard.",
     "password_change_success": "Mot de passe mis à jour avec succès",
     "action_activate": "Activer",
-    "action_deactivate": "Désactiver"
+    "action_deactivate": "Désactiver",
+    "notifications_title": "Notifications",
+    "email_notifications_label": "Notifications par e-mail",
+    "email_notifications_on": "Vous recevrez des e-mails quand d'autres utilisateurs agissent sur vos biens ou offres.",
+    "email_notifications_off": "Vous ne recevrez pas d'e-mails d'activité des autres utilisateurs. Vos propres confirmations seront toujours envoyées."
   },
   "pre_offer_tax": {
     "title": "Récapitulatif Fiscal Estimé",

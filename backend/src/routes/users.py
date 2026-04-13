@@ -38,6 +38,8 @@ def _build_user_response(user: User, decrypted_phone: Optional[str] = None) -> U
         rejection_reason=user.rejection_reason,
         phone=decrypted_phone,
         profile_photo_url=user.profile_photo_url,
+        email_notifications_enabled=user.email_notifications_enabled
+            if user.email_notifications_enabled is not None else True,
     )
 
 
@@ -85,6 +87,9 @@ async def update_user_me(
 
     if user_update.phone:
         current_user.encrypted_phone = encrypt_data(user_update.phone)
+
+    if user_update.email_notifications_enabled is not None:
+        current_user.email_notifications_enabled = user_update.email_notifications_enabled
 
     db.commit()
     db.refresh(current_user)

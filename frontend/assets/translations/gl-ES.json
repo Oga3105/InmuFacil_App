@@ -240,7 +240,11 @@
     "password_change_error": "Erro ao cambiar o contrasinal. Inténtao máis tarde.",
     "password_change_success": "Contrasinal actualizado correctamente",
     "action_activate": "Activar",
-    "action_deactivate": "Desactivar"
+    "action_deactivate": "Desactivar",
+    "notifications_title": "Notificacións",
+    "email_notifications_label": "Notificacións por correo",
+    "email_notifications_on": "Recibirás correos cando outros usuarios actúen sobre as túas propiedades ou ofertas.",
+    "email_notifications_off": "Non recibirás correos de actividade doutros usuarios. As túas propias confirmacións si se enviarán."
   },
   "pre_offer_tax": {
     "title": "Resumo Fiscal Estimado",

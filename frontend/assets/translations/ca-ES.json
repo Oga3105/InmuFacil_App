@@ -374,7 +374,11 @@
     "password_change_error": "Error en canviar la contrasenya. Torna-ho a intentar més tard.",
     "password_change_success": "Contrasenya actualitzada correctament",
     "action_activate": "Activar",
-    "action_deactivate": "Desactivar"
+    "action_deactivate": "Desactivar",
+    "notifications_title": "Notificacions",
+    "email_notifications_label": "Notificacions per correu",
+    "email_notifications_on": "Rebràs correus quan altres usuaris actuïn sobre les teves propietats o ofertes.",
+    "email_notifications_off": "No rebràs correus d'activitat d'altres usuaris. Les teves pròpies confirmacions sí s'enviaran."
   },
   "pre_offer_tax": {
     "title": "Resum Fiscal Estimat",
