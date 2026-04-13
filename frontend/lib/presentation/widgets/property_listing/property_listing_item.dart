@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
 import '../../../../domain/entities/property.dart';
 import '../common/premium_button.dart';
+import '../common/price_tag.dart';
 import '../common/time_badge.dart';
 import '../../providers/auth_provider.dart';
 
@@ -21,8 +21,6 @@ class PropertyListingItem extends ConsumerWidget {
     const successGreen = Color(0xFF16A34A);
     final onSurface = theme.colorScheme.onSurface;
     final onSurfaceVariant = theme.colorScheme.onSurfaceVariant;
-
-    final currencyFormat = NumberFormat.currency(locale: 'es_ES', symbol: '€', decimalDigits: 0);
 
     Widget buildImageStack() => Stack(
       fit: StackFit.expand,
@@ -127,18 +125,9 @@ class PropertyListingItem extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      currencyFormat.format(property.price),
-                      style: TextStyle(
-                        fontSize: isMobile ? 18 : 22,
-                        fontWeight: FontWeight.w900,
-                        color: onSurface,
-                      ),
-                    ),
-                  ],
+                PriceTag(
+                  price: property.price,
+                  previousPrice: property.previousPrice,
                 ),
               ],
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
+import '../common/price_tag.dart';
 
 class PropertyFloatingCard extends ConsumerWidget {
 
@@ -122,14 +123,10 @@ class PropertyFloatingCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  property.formattedPrice,
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
+                PriceTag(
+                  price: property.price,
+                  previousPrice: property.previousPrice,
+                  large: true,
                 ),
                 const SizedBox(height: 2),
                 Text(
