@@ -267,7 +267,7 @@ class _MapSection extends ConsumerWidget {
         // Mobile Search Trigger (Floating Card) - opens full search panel in bottom sheet
         if (isMobile)
            Positioned(
-             top: 80,
+             top: 108,
              left: 16,
              right: 16,
              child: Material(

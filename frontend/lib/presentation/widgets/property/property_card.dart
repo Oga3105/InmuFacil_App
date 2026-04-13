@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../domain/entities/property.dart';
 import '../common/demo_banner.dart';
+import '../common/price_tag.dart';
 
 class PropertyCard extends StatelessWidget {
 
@@ -51,19 +52,15 @@ class PropertyCard extends StatelessWidget {
                     top: 12,
                     right: 12,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: const [BoxShadow(blurRadius: 4, color: Colors.black26)],
+                        color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black26)],
                       ),
-                      child: Text(
-                        property.formattedPrice,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
+                      child: PriceTag(
+                        price: property.price,
+                        previousPrice: property.previousPrice,
                       ),
                     ),
                   ),
