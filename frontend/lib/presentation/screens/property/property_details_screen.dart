@@ -17,7 +17,6 @@ import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../providers/property_form_provider.dart';
 import '../../providers/property_analytics_provider.dart';
-import '../../widgets/common/premium_button.dart';
 import '../../widgets/common/price_tag.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -176,13 +175,13 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                               ref.read(searchProvider.notifier).setPage(page);
                             }
                             context.go('/search?highlight=${widget.propertyId}');
-                          } else if (value == 'publish') {
-                            context.push('/property/create');
+                          } else if (value == 'offer') {
+                            if (_canAct('offer')) context.push('/property/${widget.propertyId}/offer?price=${property.price}');
                           }
                         },
                         itemBuilder: (_) => const [
                           PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
-                          PopupMenuItem(value: 'publish', child: Row(children: [Icon(Icons.add_home, size: 18), SizedBox(width: 8), Text('Publicar Gratis')])),
+                          if (!isOwner) PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('Hacer Oferta')])),
                         ],
                       ),
                       avatarWidget,
@@ -214,14 +213,17 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    PremiumButton(
-                      label: 'Publicar Gratis',
-                      onPressed: () {},
-                      color: const Color(0xFF135BEC),
-                      fullWidth: false,
-                      fontSize: 14,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                    ),
+                    if (!isOwner)
+                      FilledButton.icon(
+                        onPressed: () { if (_canAct('offer')) context.push('/property/${widget.propertyId}/offer?price=${property.price}'); },
+                        icon: const Icon(Icons.gavel_rounded, size: 18),
+                        label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF135BEC),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
                     const SizedBox(width: 12),
                     avatarWidget,
                   ],
