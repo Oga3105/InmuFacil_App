@@ -64,10 +64,10 @@ class AuthNotifier extends Notifier<AuthState> {
       if (token != null) {
         // Set token for Dio
         _dio.options.headers['Authorization'] = 'Bearer $token';
-        
+
         // Validate token by fetching profile
         final user = await _fetchUserProfile();
-        
+
         state = state.copyWith(
           user: user,
           isLoading: false,
@@ -284,6 +284,26 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
+  /// Silently re-confirms auth state from storage without any loading indicator
+  /// or destructive side-effect (no logout on failure).
+  ///
+  /// Called from the GDPR accept button to guard against the Flutter Web
+  /// edge case where in-memory Riverpod state is reset between signInWithGoogle
+  /// and the home navigation (e.g., a transient provider rebuild or a GoRouter
+  /// refresh cycle). The token in localStorage is always the source of truth.
+  Future<void> ensureAuthenticated() async {
+    if (state.isAuthenticated) return; // already good — nothing to do
+    final token = await _storage.read(key: 'auth_token');
+    if (token == null) return; // no token — cannot restore
+    _dio.options.headers['Authorization'] = 'Bearer $token';
+    try {
+      final user = await _fetchUserProfile();
+      state = state.copyWith(user: user);
+    } catch (e) {
+      // Silent: if the profile fetch fails the user will appear as guest.
+    }
+  }
+
   /// Permanent account deletion (GDPR right to erasure).
   /// Called when user declines GDPR consent on onboarding.
   /// Deletes the account from the backend, then clears local session.
@@ -368,8 +388,6 @@ class AuthNotifier extends Notifier<AuthState> {
       );
       return false;
     } catch (e, st) {
-      // ignore: avoid_print
-      print('[GoogleSignIn] Error inesperado: $e\n$st');
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Error inesperado con Google Sign-In: $e',

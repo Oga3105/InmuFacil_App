@@ -42,10 +42,22 @@ class AuthInterceptor extends Interceptor {
       final isOwnApi = url.startsWith(EnvConfig.apiBaseUrl);
 
       if (isOwnApi) {
-        // Guard: only treat as session-expired if the user was authenticated.
-        // A 401 on /auth/token (wrong password) has no stored token yet.
-        final token = await _storage.read(key: _tokenKey);
-        if (token != null) {
+        // Guard: only treat as session-expired when the request was actually
+        // sent WITH an Authorization header.
+        //
+        // The previous implementation re-read the token from storage at the
+        // time the 401 arrived, which caused a race condition on new Google
+        // sign-in: a request sent without a token (unauthenticated) could
+        // receive its 401 response *after* signInWithGoogle() had already
+        // written the new token to storage — the interceptor would then find
+        // the fresh token, delete it, and fire a spurious session-expiry
+        // that immediately logged the user out.
+        //
+        // Checking the request's own Authorization header avoids the race:
+        // if the request had no token, it was never an authenticated session.
+        final sentWithToken =
+            err.requestOptions.headers['Authorization'] != null;
+        if (sentWithToken) {
           await _storage.delete(key: _tokenKey);
           notifySessionExpired();
         }

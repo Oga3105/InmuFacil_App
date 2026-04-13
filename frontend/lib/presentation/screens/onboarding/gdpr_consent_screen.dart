@@ -99,7 +99,13 @@ class GdprConsentScreen extends ConsumerWidget {
 
                   // Boton aceptar
                   ElevatedButton(
-                    onPressed: () => context.go('/'),
+                    onPressed: () async {
+                      // Re-confirm auth state from storage in case it was
+                      // reset by a GoRouter rebuild or Flutter Web page reload.
+                      await ref.read(authProvider.notifier).ensureAuthenticated();
+                      if (!context.mounted) return;
+                      context.go('/');
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF2563EB),
                       foregroundColor: Colors.white,
