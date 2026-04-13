@@ -57,6 +57,56 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     });
   }
 
+  bool _canMakeOffer(BuildContext ctx) {
+    final auth = ref.read(authProvider);
+    if (!auth.isAuthenticated) {
+      showDialog(
+        context: ctx,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Cuenta requerida', textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          content: const Text('Debes estar registrado para hacer una oferta por esta propiedad.',
+              textAlign: TextAlign.center),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancelar')),
+            FilledButton(
+              onPressed: () { Navigator.of(ctx).pop(); ctx.pushNamed('login'); },
+              child: const Text('Iniciar sesión'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+    final dniStatus = (auth.user?.dniStatus ?? '').toUpperCase();
+    if (dniStatus != 'VALIDADO') {
+      showDialog(
+        context: ctx,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Verificación requerida', textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          content: const Text('Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
+              textAlign: TextAlign.center),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Cancelar')),
+            FilledButton(
+              onPressed: () { Navigator.of(ctx).pop(); ctx.push('/verify-identity'); },
+              child: const Text('Verificar identidad'),
+            ),
+          ],
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     // 1. Try search cache first (fast path)
@@ -176,12 +226,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                             }
                             context.go('/search?highlight=${widget.propertyId}');
                           } else if (value == 'offer') {
-                            if (_canAct('offer')) context.push('/property/${widget.propertyId}/offer?price=${property.price}');
+                            if (_canMakeOffer(context)) context.push('/property/${widget.propertyId}/offer?price=${property.price}');
                           }
                         },
-                        itemBuilder: (_) => const [
-                          PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
-                          if (!isOwner) PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('Hacer Oferta')])),
+                        itemBuilder: (_) => [
+                          const PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
+                          if (!isOwner) const PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('Hacer Oferta')])),
                         ],
                       ),
                       avatarWidget,
@@ -215,7 +265,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                     const SizedBox(width: 16),
                     if (!isOwner)
                       FilledButton.icon(
-                        onPressed: () { if (_canAct('offer')) context.push('/property/${widget.propertyId}/offer?price=${property.price}'); },
+                        onPressed: () { if (_canMakeOffer(context)) context.push('/property/${widget.propertyId}/offer?price=${property.price}'); },
                         icon: const Icon(Icons.gavel_rounded, size: 18),
                         label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
                         style: FilledButton.styleFrom(
