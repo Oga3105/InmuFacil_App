@@ -229,7 +229,8 @@ class _MapSection extends ConsumerWidget {
           child: OpenStreetMapWidget(),
         ),
         
-        // Navigation bar at top (fixed to top edge, not floating)
+        // Navigation bar + DemoBanner + (mobile) search trigger, all in one Column
+        // so the search bar is always naturally below the banner with no hardcoded offset.
         Positioned(
           top: 0,
           left: 0,
@@ -239,6 +240,50 @@ class _MapSection extends ConsumerWidget {
             children: [
               _MapNavigationBar(),
               const DemoBanner(),
+              if (isMobile)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          useSafeArea: true,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          builder: (ctx) => SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.92,
+                            child: _SearchPanel(),
+                          ),
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Buscar por ciudad, zona...',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.tune, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -262,55 +307,6 @@ class _MapSection extends ConsumerWidget {
               ),
             ),
           ),
-          
-           
-        // Mobile Search Trigger (Floating Card) - opens full search panel in bottom sheet
-        if (isMobile)
-           Positioned(
-             top: 108,
-             left: 16,
-             right: 16,
-             child: Material(
-               elevation: 4,
-               borderRadius: BorderRadius.circular(12),
-               child: InkWell(
-                 borderRadius: BorderRadius.circular(12),
-                 onTap: () {
-                   showModalBottomSheet(
-                     context: context,
-                     isScrollControlled: true,
-                     useSafeArea: true,
-                     shape: const RoundedRectangleBorder(
-                       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                     ),
-                     builder: (ctx) => SizedBox(
-                       height: MediaQuery.of(context).size.height * 0.92,
-                       child: _SearchPanel(),
-                     ),
-                   );
-                 },
-                 child: Padding(
-                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                   child: Row(
-                     children: [
-                       Icon(Icons.search, color: Theme.of(context).colorScheme.primary),
-                       const SizedBox(width: 12),
-                       Expanded(
-                         child: Text(
-                           'Buscar por ciudad, zona...',
-                           style: TextStyle(
-                             color: Theme.of(context).colorScheme.onSurfaceVariant,
-                             fontSize: 15,
-                           ),
-                         ),
-                       ),
-                       Icon(Icons.tune, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 20),
-                     ],
-                   ),
-                 ),
-               ),
-             ),
-           ),
 
         // [Removed] StatsCard per user request (Step 15713)
         // User wants "Clean Filters" button in the left panel instead.
