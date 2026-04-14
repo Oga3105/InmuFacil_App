@@ -231,6 +231,104 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Application Events
 # ============================================================================
 
+def _apply_schema_migrations(engine) -> None:
+    """
+    Idempotent schema migrations that SQLAlchemy create_all cannot handle:
+    - ALTER TYPE ... ADD VALUE (must run outside a transaction in PostgreSQL)
+    - ALTER TABLE ... ADD COLUMN IF NOT EXISTS (safe to run repeatedly)
+    - Data migration: uppercase enum values -> lowercase
+
+    Handles two scenarios:
+    - Production DB (created via create_all): has lowercase values but may be
+      missing 'draft', 'exposed', 'unpublished'.
+    - Legacy local DB (created from SQL scripts): has UPPERCASE values like
+      'PUBLISHED', 'PISO', etc. and is missing all lowercase variants.
+    """
+    from sqlalchemy import text
+
+    # --- Step 1: ADD missing enum values via AUTOCOMMIT ----------------------
+    # ALTER TYPE ADD VALUE cannot run inside a transaction block.
+    enum_migrations = {
+        "propertystatus": ["draft", "exposed", "published", "unpublished", "reserved", "sold"],
+        "propertytype": [
+            "piso", "atico", "duplex", "chalet", "casa_rustica", "casa_singular",
+            "local", "oficina", "nave", "edificio", "garaje", "terreno", "finca_rustica",
+        ],
+    }
+    try:
+        with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            for type_name, values in enum_migrations.items():
+                for val in values:
+                    try:
+                        conn.execute(
+                            text(f"ALTER TYPE {type_name} ADD VALUE IF NOT EXISTS '{val}'")
+                        )
+                    except Exception as exc:
+                        logger.warning(f"[MIGRATION] ADD VALUE '{val}' to {type_name}: {repr(exc)}")
+        logger.info("[MIGRATION] Enum values ensured.")
+    except Exception as exc:
+        logger.warning(f"[MIGRATION] Enum migration skipped (non-PostgreSQL or type missing): {repr(exc)}")
+
+    # --- Step 2: ADD missing columns ----------------------------------------
+    column_migrations = [
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS previous_price FLOAT",
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_updated_at TIMESTAMPTZ",
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS ai_comfort_consent BOOLEAN NOT NULL DEFAULT FALSE",
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS ai_comfort_consent_date TIMESTAMPTZ",
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS ai_comfort_data_cache TEXT",
+        "ALTER TABLE properties ADD COLUMN IF NOT EXISTS ai_comfort_cache_expires_at TIMESTAMPTZ",
+    ]
+    try:
+        with engine.connect() as conn:
+            for stmt in column_migrations:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as exc:
+                    logger.warning(f"[MIGRATION] Column migration: {repr(exc)}")
+            conn.commit()
+        logger.info("[MIGRATION] Columns ensured.")
+    except Exception as exc:
+        logger.warning(f"[MIGRATION] Column migration skipped: {repr(exc)}")
+
+    # --- Step 3: Migrate UPPERCASE status/type values to lowercase -----------
+    # Legacy DBs created from hand-written SQL may have stored 'PUBLISHED' etc.
+    # After Step 1 the lowercase values exist in the enum, so the cast is safe.
+    data_migrations = [
+        # Properties: status
+        """
+        UPDATE properties
+           SET status = LOWER(status::text)::propertystatus
+         WHERE status IS NOT NULL
+           AND status::text ~ '^[A-Z_]+$'
+        """,
+        # Properties: property_type
+        """
+        UPDATE properties
+           SET property_type = LOWER(property_type::text)::propertytype
+         WHERE property_type IS NOT NULL
+           AND property_type::text ~ '^[A-Z_]+$'
+        """,
+        # Properties: operation_type
+        """
+        UPDATE properties
+           SET operation_type = LOWER(operation_type::text)::operationtype
+         WHERE operation_type IS NOT NULL
+           AND operation_type::text ~ '^[A-Z_]+$'
+        """,
+    ]
+    try:
+        with engine.connect() as conn:
+            for stmt in data_migrations:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as exc:
+                    logger.warning(f"[MIGRATION] Data migration: {repr(exc)}")
+            conn.commit()
+        logger.info("[MIGRATION] Data normalised (uppercase -> lowercase).")
+    except Exception as exc:
+        logger.warning(f"[MIGRATION] Data normalisation skipped: {repr(exc)}")
+
+
 @app.on_event("startup")
 async def startup_event():
     """
@@ -256,7 +354,12 @@ async def startup_event():
         # Auto-Migration (Dev Mode)
         logger.info("[DB] Checking database schema...")
         Base.metadata.create_all(bind=engine)
-        logger.info("[DB] ✅ Schema synchronized. PostgreSQL operativo.")
+        logger.info("[DB] Schema synchronized. PostgreSQL operativo.")
+
+        # Idempotent enum + column migrations (handles both fresh DBs and legacy
+        # DBs that were created from SQL scripts with UPPERCASE enum values).
+        _apply_schema_migrations(engine)
+        logger.info("[DB] Schema migrations applied.")
         
     except OperationalError as e:
         logger.critical(

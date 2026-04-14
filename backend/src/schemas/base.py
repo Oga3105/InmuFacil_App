@@ -130,6 +130,7 @@ class PropertyFeaturesSchema(BaseModel):
 
     class Config:
         use_enum_values = True
+        from_attributes = True
 
 
 class PropertyLegalSchema(BaseModel):
@@ -143,6 +144,7 @@ class PropertyLegalSchema(BaseModel):
 
     class Config:
         use_enum_values = True
+        from_attributes = True
 
 
 class PropertyFinancialSchema(BaseModel):
@@ -150,9 +152,10 @@ class PropertyFinancialSchema(BaseModel):
     community_fees_monthly: float = Field(0.0, ge=0)
     estimated_rent_monthly: Optional[float] = None
     # Calculated fields like gross_yield are response-only mostly, but allowed here
-    
+
     class Config:
         use_enum_values = True
+        from_attributes = True
 
 
 class PropertyEnvironmentSchema(BaseModel):
@@ -165,6 +168,7 @@ class PropertyEnvironmentSchema(BaseModel):
 
     class Config:
         use_enum_values = True
+        from_attributes = True
 
 
 # ============================================================================
@@ -280,7 +284,7 @@ class PropertyDraftCreate(BaseModel):
 
 class StatusUpdate(BaseModel):
     """Schema for PATCH /{id}/status endpoint."""
-    status: Literal["draft", "published", "unpublished"]
+    status: Literal["draft", "published", "unpublished", "exposed"]
 
 
 class PropertyResponse(PropertyBase):
