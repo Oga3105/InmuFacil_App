@@ -346,6 +346,37 @@ def _apply_schema_migrations(engine) -> None:
     except Exception as exc:
         logger.warning(f"[MIGRATION] Data normalisation skipped: {repr(exc)}")
 
+    # --- Step 4: Convert native PostgreSQL enum columns to VARCHAR -------------
+    # Required for native_enum=False in SQLAlchemy models. Idempotent: VARCHAR
+    # columns accept the same ALTER TYPE statement without error.
+    varchar_migrations = [
+        "ALTER TABLE properties ALTER COLUMN status TYPE VARCHAR USING status::text",
+        "ALTER TABLE properties ALTER COLUMN property_type TYPE VARCHAR USING property_type::text",
+        "ALTER TABLE properties ALTER COLUMN operation_type TYPE VARCHAR USING operation_type::text",
+        "ALTER TABLE property_features ALTER COLUMN orientation TYPE VARCHAR USING orientation::text",
+        "ALTER TABLE property_features ALTER COLUMN heating_type TYPE VARCHAR USING heating_type::text",
+        "ALTER TABLE property_features ALTER COLUMN conservation_state TYPE VARCHAR USING conservation_state::text",
+        "ALTER TABLE property_legal ALTER COLUMN energy_certification TYPE VARCHAR USING energy_certification::text",
+        "ALTER TABLE property_legal ALTER COLUMN ite_status TYPE VARCHAR USING ite_status::text",
+        "ALTER TABLE property_legal ALTER COLUMN nota_simple_status TYPE VARCHAR USING nota_simple_status::text",
+        "ALTER TABLE property_environment ALTER COLUMN crime_rate_level TYPE VARCHAR USING crime_rate_level::text",
+        "ALTER TABLE property_media ALTER COLUMN media_type TYPE VARCHAR USING media_type::text",
+        "ALTER TABLE offers ALTER COLUMN status TYPE VARCHAR USING status::text",
+        "ALTER TABLE users ALTER COLUMN dni_status TYPE VARCHAR USING dni_status::text",
+        "ALTER TABLE users ALTER COLUMN user_type TYPE VARCHAR USING user_type::text",
+    ]
+    try:
+        with engine.connect() as conn:
+            for stmt in varchar_migrations:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as exc:
+                    logger.warning(f"[MIGRATION] VARCHAR migration: {repr(exc)}")
+            conn.commit()
+        logger.info("[MIGRATION] Enum columns converted to VARCHAR.")
+    except Exception as exc:
+        logger.warning(f"[MIGRATION] VARCHAR migration skipped: {repr(exc)}")
+
 
 @app.on_event("startup")
 async def startup_event():
