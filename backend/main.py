@@ -254,6 +254,22 @@ def _apply_schema_migrations(engine) -> None:
             "piso", "atico", "duplex", "chalet", "casa_rustica", "casa_singular",
             "local", "oficina", "nave", "edificio", "garaje", "terreno", "finca_rustica",
         ],
+        "operationtype": ["venta", "alquiler", "btr", "inversion"],
+        "orientation": ["norte", "sur", "este", "oeste", "noreste", "noroeste", "sureste", "suroeste"],
+        "heatingtype": ["gas_natural", "electrica", "central", "aerotermia", "otro"],
+        "conservationstate": ["a_estrenar", "buen_estado", "a_reformar"],
+        # energycertification: A-G are uppercase in Python — only add mixed-case variants
+        "energycertification": ["en_tramite", "exento"],
+        "itestatus": ["pasada", "pendiente", "desfavorable", "no_obligado"],
+        "notasimplestatus": ["pending", "verified", "rejected"],
+        "crimerate": ["bajo", "medio", "alto"],
+        "mediatype": ["image", "video", "virtual_tour"],
+        "offerstatus": [
+            "pending", "accepted", "rejected", "withdrawn",
+            "counter_offer", "signing_pending", "signed", "completed",
+        ],
+        "dnistatus": ["sin_verificar", "pendiente", "validado", "rechazado"],
+        "usertype": ["particular", "profesional", "financiero", "admin", "provider"],
     }
     try:
         with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
@@ -294,27 +310,29 @@ def _apply_schema_migrations(engine) -> None:
     # Legacy DBs created from hand-written SQL may have stored 'PUBLISHED' etc.
     # After Step 1 the lowercase values exist in the enum, so the cast is safe.
     data_migrations = [
-        # Properties: status
-        """
-        UPDATE properties
-           SET status = LOWER(status::text)::propertystatus
-         WHERE status IS NOT NULL
-           AND status::text ~ '^[A-Z_]+$'
-        """,
-        # Properties: property_type
-        """
-        UPDATE properties
-           SET property_type = LOWER(property_type::text)::propertytype
-         WHERE property_type IS NOT NULL
-           AND property_type::text ~ '^[A-Z_]+$'
-        """,
-        # Properties: operation_type
-        """
-        UPDATE properties
-           SET operation_type = LOWER(operation_type::text)::operationtype
-         WHERE operation_type IS NOT NULL
-           AND operation_type::text ~ '^[A-Z_]+$'
-        """,
+        # properties
+        "UPDATE properties SET status = LOWER(status::text)::propertystatus WHERE status IS NOT NULL AND status::text ~ '^[A-Z_]+$'",
+        "UPDATE properties SET property_type = LOWER(property_type::text)::propertytype WHERE property_type IS NOT NULL AND property_type::text ~ '^[A-Z_]+$'",
+        "UPDATE properties SET operation_type = LOWER(operation_type::text)::operationtype WHERE operation_type IS NOT NULL AND operation_type::text ~ '^[A-Z_]+$'",
+        # property_features
+        "UPDATE property_features SET orientation = LOWER(orientation::text)::orientation WHERE orientation IS NOT NULL AND orientation::text ~ '^[A-Z_]+$'",
+        "UPDATE property_features SET heating_type = LOWER(heating_type::text)::heatingtype WHERE heating_type IS NOT NULL AND heating_type::text ~ '^[A-Z_]+$'",
+        "UPDATE property_features SET conservation_state = LOWER(conservation_state::text)::conservationstate WHERE conservation_state IS NOT NULL AND conservation_state::text ~ '^[A-Z_]+$'",
+        # property_legal — energycertification needs special handling:
+        # A-G stay uppercase (Python enum uses uppercase letters), only EN_TRAMITE / EXENTO change
+        "UPDATE property_legal SET energy_certification = 'en_tramite'::energycertification WHERE energy_certification::text = 'EN_TRAMITE'",
+        "UPDATE property_legal SET energy_certification = 'exento'::energycertification WHERE energy_certification::text = 'EXENTO'",
+        "UPDATE property_legal SET ite_status = LOWER(ite_status::text)::itestatus WHERE ite_status IS NOT NULL AND ite_status::text ~ '^[A-Z_]+$'",
+        "UPDATE property_legal SET nota_simple_status = LOWER(nota_simple_status::text)::notasimplestatus WHERE nota_simple_status IS NOT NULL AND nota_simple_status::text ~ '^[A-Z_]+$'",
+        # property_environment
+        "UPDATE property_environment SET crime_rate_level = LOWER(crime_rate_level::text)::crimerate WHERE crime_rate_level IS NOT NULL AND crime_rate_level::text ~ '^[A-Z_]+$'",
+        # property_media
+        "UPDATE property_media SET media_type = LOWER(media_type::text)::mediatype WHERE media_type IS NOT NULL AND media_type::text ~ '^[A-Z_]+$'",
+        # offers
+        "UPDATE offers SET status = LOWER(status::text)::offerstatus WHERE status IS NOT NULL AND status::text ~ '^[A-Z_]+$'",
+        # users
+        "UPDATE users SET dni_status = LOWER(dni_status::text)::dnistatus WHERE dni_status IS NOT NULL AND dni_status::text ~ '^[A-Z_]+$'",
+        "UPDATE users SET user_type = LOWER(user_type::text)::usertype WHERE user_type IS NOT NULL AND user_type::text ~ '^[A-Z_]+$'",
     ]
     try:
         with engine.connect() as conn:
