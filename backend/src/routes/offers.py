@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import cast, String
 from pydantic import BaseModel, Field, ConfigDict
 
 from backend.src.config.database import get_db
@@ -325,7 +326,7 @@ async def create_offer(
     active_offer = db.query(PropertyOffer).filter(
         PropertyOffer.property_id == offer_data.property_id,
         PropertyOffer.buyer_id == current_user.id,
-        PropertyOffer.status == OfferStatus.PENDING
+        cast(PropertyOffer.status, String) == OfferStatus.PENDING.value
     ).first()
     
     if active_offer:

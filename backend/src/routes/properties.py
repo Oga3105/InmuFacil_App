@@ -23,7 +23,7 @@ from backend.src.services.payment_service import MockPaymentProvider
 from backend.src.services.document_service import process_document, get_decrypted_document, get_decrypted_document_from_path, ComplianceError
 from pydantic import BaseModel
 from typing import Optional
-from sqlalchemy import or_
+from sqlalchemy import or_, cast, String
 
 # Ensure tables exist (fail-safe for new satellites)
 # Base.metadata.create_all(bind=engine)
@@ -100,9 +100,12 @@ async def list_properties(
     )
     
     # 2. Logic: Visibility (Hito 8)
+    # Use cast to VARCHAR to avoid SQLAlchemy native-enum binding generating
+    # UPPERCASE labels ('PUBLISHED') that no longer match normalised lowercase data.
+    _status_col = cast(Property.status, String)
     query = query.filter(
-        (Property.status == PropertyStatus.PUBLISHED) | 
-        ((Property.status == PropertyStatus.RESERVED) & (Property.hide_when_reserved == False))
+        (_status_col == PropertyStatus.PUBLISHED.value) |
+        ((_status_col == PropertyStatus.RESERVED.value) & (Property.hide_when_reserved == False))
     )
     
     # 3. Dynamic Filters
@@ -123,11 +126,11 @@ async def list_properties(
     if max_price is not None:
         query = query.filter(Property.price <= max_price)
         
-    # Types
+    # Types — cast to avoid uppercase native-enum label mismatch
     if property_type:
-        query = query.filter(Property.property_type == property_type)
+        query = query.filter(cast(Property.property_type, String) == property_type.value)
     if operation_type:
-        query = query.filter(Property.operation_type == operation_type)
+        query = query.filter(cast(Property.operation_type, String) == operation_type.value)
         
     # Surface
     if min_surface:
