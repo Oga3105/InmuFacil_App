@@ -364,6 +364,21 @@ def _apply_schema_migrations(engine) -> None:
         "ALTER TABLE offers ALTER COLUMN status TYPE VARCHAR USING status::text",
         "ALTER TABLE users ALTER COLUMN dni_status TYPE VARCHAR USING dni_status::text",
         "ALTER TABLE users ALTER COLUMN user_type TYPE VARCHAR USING user_type::text",
+        # Additional enum columns (were missing, caused LookupError in prod)
+        "ALTER TABLE property_documents ALTER COLUMN doc_type TYPE VARCHAR USING doc_type::text",
+        "ALTER TABLE service_orders ALTER COLUMN service_type TYPE VARCHAR USING service_type::text",
+        "ALTER TABLE service_orders ALTER COLUMN status TYPE VARCHAR USING status::text",
+        "ALTER TABLE visit_appointments ALTER COLUMN status TYPE VARCHAR USING status::text",
+        "ALTER TABLE mortgage_profiles ALTER COLUMN employment_status TYPE VARCHAR USING employment_status::text",
+        "ALTER TABLE property_valuations ALTER COLUMN provider TYPE VARCHAR USING provider::text",
+        "ALTER TABLE buyer_solvency ALTER COLUMN payment_method TYPE VARCHAR USING payment_method::text",
+        "ALTER TABLE buyer_solvency ALTER COLUMN stress_index TYPE VARCHAR USING stress_index::text",
+        "ALTER TABLE buyer_solvency ALTER COLUMN solvency_level TYPE VARCHAR USING solvency_level::text",
+        "ALTER TABLE transaction_steps ALTER COLUMN required_role TYPE VARCHAR USING required_role::text",
+        "ALTER TABLE transaction_steps ALTER COLUMN status TYPE VARCHAR USING status::text",
+        "ALTER TABLE notaries ALTER COLUMN integration_type TYPE VARCHAR USING integration_type::text",
+        "ALTER TABLE post_sale_documents ALTER COLUMN doc_type TYPE VARCHAR USING doc_type::text",
+        "ALTER TABLE post_sale_doc_flags ALTER COLUMN doc_type TYPE VARCHAR USING doc_type::text",
     ]
     try:
         with engine.connect() as conn:
@@ -376,6 +391,35 @@ def _apply_schema_migrations(engine) -> None:
         logger.info("[MIGRATION] Enum columns converted to VARCHAR.")
     except Exception as exc:
         logger.warning(f"[MIGRATION] VARCHAR migration skipped: {repr(exc)}")
+
+    # --- Step 5: Lowercase legacy UPPERCASE values in VARCHAR enum columns ----
+    # After Step 4 these columns are plain text; safe to LOWER() legacy rows
+    # that still hold UPPERCASE values from older migrations.
+    lowercase_migrations = [
+        "UPDATE property_documents SET doc_type = LOWER(doc_type) WHERE doc_type ~ '^[A-Z_]+$'",
+        "UPDATE service_orders SET service_type = LOWER(service_type) WHERE service_type ~ '^[A-Z_]+$'",
+        "UPDATE service_orders SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
+        "UPDATE visit_appointments SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
+        "UPDATE mortgage_profiles SET employment_status = LOWER(employment_status) WHERE employment_status ~ '^[A-Z_]+$'",
+        "UPDATE property_valuations SET provider = LOWER(provider) WHERE provider ~ '^[A-Z_]+$'",
+        "UPDATE buyer_solvency SET payment_method = LOWER(payment_method) WHERE payment_method ~ '^[A-Z_]+$'",
+        "UPDATE buyer_solvency SET stress_index = LOWER(stress_index) WHERE stress_index ~ '^[A-Z_]+$'",
+        "UPDATE buyer_solvency SET solvency_level = LOWER(solvency_level) WHERE solvency_level ~ '^[A-Z_]+$'",
+        "UPDATE transaction_steps SET required_role = LOWER(required_role) WHERE required_role ~ '^[A-Z_]+$'",
+        "UPDATE transaction_steps SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
+        "UPDATE notaries SET integration_type = LOWER(integration_type) WHERE integration_type ~ '^[A-Z_]+$'",
+    ]
+    try:
+        with engine.connect() as conn:
+            for stmt in lowercase_migrations:
+                try:
+                    conn.execute(text(stmt))
+                except Exception as exc:
+                    logger.warning(f"[MIGRATION] Lowercase migration: {repr(exc)}")
+            conn.commit()
+        logger.info("[MIGRATION] Legacy UPPERCASE values lowercased.")
+    except Exception as exc:
+        logger.warning(f"[MIGRATION] Lowercase migration skipped: {repr(exc)}")
 
 
 @app.on_event("startup")
