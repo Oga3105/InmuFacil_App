@@ -312,6 +312,51 @@ async def create_draft_property(
     return new_property
 
 
+@router.put("/{property_id}/draft", response_model=PropertyResponse)
+async def update_draft_property(
+    property_id: int,
+    draft_data: PropertyDraftCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Update a property as draft. All fields optional; unset fields are left as-is.
+    Forces status back to draft.
+    """
+    prop = verify_property_ownership(db, property_id, current_user.id)
+    core_data = draft_data.model_dump(exclude={'features', 'legal', 'financial'}, exclude_unset=True)
+    if not core_data.get('location') and core_data.get('street'):
+        parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
+                              core_data.get('city'), core_data.get('postal_code')] if p]
+        if parts:
+            core_data['location'] = ', '.join(parts)
+    for key, value in core_data.items():
+        setattr(prop, key, value)
+    prop.status = PropertyStatus.DRAFT
+
+    if draft_data.features:
+        if not prop.features:
+            prop.features = PropertyFeatures(property_id=prop.id)
+        for key, value in draft_data.features.model_dump(exclude_unset=True).items():
+            setattr(prop.features, key, value)
+
+    db.commit()
+    prop = (
+        db.query(Property)
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
+        .filter(Property.id == property_id)
+        .first()
+    )
+    return prop
+
+
 @router.patch("/{property_id}/status", response_model=PropertyResponse)
 async def update_property_status(
     property_id: int,
