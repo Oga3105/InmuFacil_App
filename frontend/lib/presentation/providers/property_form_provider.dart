@@ -974,10 +974,9 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
       String propertyId;
       if (state.isEditMode) {
-        // In edit mode: just mark the existing property as draft
-        await _dio.patch(
-          '/properties/${state.editingPropertyId}/status',
-          data: {'status': 'draft'},
+        await _dio.put(
+          '/properties/${state.editingPropertyId}/draft',
+          data: body,
         );
         propertyId = state.editingPropertyId!;
       } else {
