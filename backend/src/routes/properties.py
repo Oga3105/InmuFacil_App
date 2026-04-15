@@ -100,12 +100,12 @@ async def list_properties(
     )
     
     # 2. Logic: Visibility (Hito 8)
-    # Use cast to VARCHAR to avoid SQLAlchemy native-enum binding generating
-    # UPPERCASE labels ('PUBLISHED') that no longer match normalised lowercase data.
+    # Cast to VARCHAR + compare against enum NAME (UPPERCASE), which is what
+    # SQLAlchemy Enum(native_enum=False) persists by default.
     _status_col = cast(Property.status, String)
     query = query.filter(
-        (_status_col == PropertyStatus.PUBLISHED.value) |
-        ((_status_col == PropertyStatus.RESERVED.value) & (Property.hide_when_reserved == False))
+        (_status_col == PropertyStatus.PUBLISHED.name) |
+        ((_status_col == PropertyStatus.RESERVED.name) & (Property.hide_when_reserved == False))
     )
     
     # 3. Dynamic Filters
@@ -128,9 +128,9 @@ async def list_properties(
         
     # Types — cast to avoid uppercase native-enum label mismatch
     if property_type:
-        query = query.filter(cast(Property.property_type, String) == property_type.value)
+        query = query.filter(cast(Property.property_type, String) == property_type.name)
     if operation_type:
-        query = query.filter(cast(Property.operation_type, String) == operation_type.value)
+        query = query.filter(cast(Property.operation_type, String) == operation_type.name)
         
     # Surface
     if min_surface:

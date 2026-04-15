@@ -306,45 +306,11 @@ def _apply_schema_migrations(engine) -> None:
     except Exception as exc:
         logger.warning(f"[MIGRATION] Column migration skipped: {repr(exc)}")
 
-    # --- Step 3: Migrate UPPERCASE status/type values to lowercase -----------
-    # Legacy DBs created from hand-written SQL may have stored 'PUBLISHED' etc.
-    # After Step 1 the lowercase values exist in the enum, so the cast is safe.
-    data_migrations = [
-        # properties
-        "UPDATE properties SET status = LOWER(status::text)::propertystatus WHERE status IS NOT NULL AND status::text ~ '^[A-Z_]+$'",
-        "UPDATE properties SET property_type = LOWER(property_type::text)::propertytype WHERE property_type IS NOT NULL AND property_type::text ~ '^[A-Z_]+$'",
-        "UPDATE properties SET operation_type = LOWER(operation_type::text)::operationtype WHERE operation_type IS NOT NULL AND operation_type::text ~ '^[A-Z_]+$'",
-        # property_features
-        "UPDATE property_features SET orientation = LOWER(orientation::text)::orientation WHERE orientation IS NOT NULL AND orientation::text ~ '^[A-Z_]+$'",
-        "UPDATE property_features SET heating_type = LOWER(heating_type::text)::heatingtype WHERE heating_type IS NOT NULL AND heating_type::text ~ '^[A-Z_]+$'",
-        "UPDATE property_features SET conservation_state = LOWER(conservation_state::text)::conservationstate WHERE conservation_state IS NOT NULL AND conservation_state::text ~ '^[A-Z_]+$'",
-        # property_legal — energycertification needs special handling:
-        # A-G stay uppercase (Python enum uses uppercase letters), only EN_TRAMITE / EXENTO change
-        "UPDATE property_legal SET energy_certification = 'en_tramite'::energycertification WHERE energy_certification::text = 'EN_TRAMITE'",
-        "UPDATE property_legal SET energy_certification = 'exento'::energycertification WHERE energy_certification::text = 'EXENTO'",
-        "UPDATE property_legal SET ite_status = LOWER(ite_status::text)::itestatus WHERE ite_status IS NOT NULL AND ite_status::text ~ '^[A-Z_]+$'",
-        "UPDATE property_legal SET nota_simple_status = LOWER(nota_simple_status::text)::notasimplestatus WHERE nota_simple_status IS NOT NULL AND nota_simple_status::text ~ '^[A-Z_]+$'",
-        # property_environment
-        "UPDATE property_environment SET crime_rate_level = LOWER(crime_rate_level::text)::crimerate WHERE crime_rate_level IS NOT NULL AND crime_rate_level::text ~ '^[A-Z_]+$'",
-        # property_media
-        "UPDATE property_media SET media_type = LOWER(media_type::text)::mediatype WHERE media_type IS NOT NULL AND media_type::text ~ '^[A-Z_]+$'",
-        # offers
-        "UPDATE offers SET status = LOWER(status::text)::offerstatus WHERE status IS NOT NULL AND status::text ~ '^[A-Z_]+$'",
-        # users
-        "UPDATE users SET dni_status = LOWER(dni_status::text)::dnistatus WHERE dni_status IS NOT NULL AND dni_status::text ~ '^[A-Z_]+$'",
-        "UPDATE users SET user_type = LOWER(user_type::text)::usertype WHERE user_type IS NOT NULL AND user_type::text ~ '^[A-Z_]+$'",
-    ]
-    try:
-        with engine.connect() as conn:
-            for stmt in data_migrations:
-                try:
-                    conn.execute(text(stmt))
-                except Exception as exc:
-                    logger.warning(f"[MIGRATION] Data migration: {repr(exc)}")
-            conn.commit()
-        logger.info("[MIGRATION] Data normalised (uppercase -> lowercase).")
-    except Exception as exc:
-        logger.warning(f"[MIGRATION] Data normalisation skipped: {repr(exc)}")
+    # --- Step 3: (no-op) kept for log compatibility ---------------------------
+    # Earlier versions lowercased enum values here. That was WRONG:
+    # SQLAlchemy Enum(native_enum=False) persists the member NAME (UPPERCASE),
+    # not the value. Normalisation now happens in Step 5 after VARCHAR cast.
+    logger.info("[MIGRATION] Data normalisation deferred to Step 5.")
 
     # --- Step 4: Convert native PostgreSQL enum columns to VARCHAR -------------
     # Required for native_enum=False in SQLAlchemy models. Idempotent: VARCHAR
@@ -392,34 +358,52 @@ def _apply_schema_migrations(engine) -> None:
     except Exception as exc:
         logger.warning(f"[MIGRATION] VARCHAR migration skipped: {repr(exc)}")
 
-    # --- Step 5: Lowercase legacy UPPERCASE values in VARCHAR enum columns ----
-    # After Step 4 these columns are plain text; safe to LOWER() legacy rows
-    # that still hold UPPERCASE values from older migrations.
-    lowercase_migrations = [
-        "UPDATE property_documents SET doc_type = LOWER(doc_type) WHERE doc_type ~ '^[A-Z_]+$'",
-        "UPDATE service_orders SET service_type = LOWER(service_type) WHERE service_type ~ '^[A-Z_]+$'",
-        "UPDATE service_orders SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
-        "UPDATE visit_appointments SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
-        "UPDATE mortgage_profiles SET employment_status = LOWER(employment_status) WHERE employment_status ~ '^[A-Z_]+$'",
-        "UPDATE property_valuations SET provider = LOWER(provider) WHERE provider ~ '^[A-Z_]+$'",
-        "UPDATE buyer_solvency SET payment_method = LOWER(payment_method) WHERE payment_method ~ '^[A-Z_]+$'",
-        "UPDATE buyer_solvency SET stress_index = LOWER(stress_index) WHERE stress_index ~ '^[A-Z_]+$'",
-        "UPDATE buyer_solvency SET solvency_level = LOWER(solvency_level) WHERE solvency_level ~ '^[A-Z_]+$'",
-        "UPDATE transaction_steps SET required_role = LOWER(required_role) WHERE required_role ~ '^[A-Z_]+$'",
-        "UPDATE transaction_steps SET status = LOWER(status) WHERE status ~ '^[A-Z_]+$'",
-        "UPDATE notaries SET integration_type = LOWER(integration_type) WHERE integration_type ~ '^[A-Z_]+$'",
+    # --- Step 5: UPPERCASE enum VARCHAR columns (match SA Enum.name) ----------
+    # SQLAlchemy Enum(native_enum=False) persists the enum member NAME
+    # (UPPERCASE: DRAFT, PUBLISHED, PENDING...) — not the .value (lowercase).
+    # Any legacy rows stored as lowercase (from bad earlier migrations) must be
+    # UPPER()-ed so the ORM can map them back to enum members.
+    # post_sale_documents / post_sale_doc_flags use values_callable -> stay lowercase.
+    uppercase_migrations = [
+        "UPDATE properties SET status = UPPER(status) WHERE status ~ '^[a-z_]+$'",
+        "UPDATE properties SET property_type = UPPER(property_type) WHERE property_type ~ '^[a-z_]+$'",
+        "UPDATE properties SET operation_type = UPPER(operation_type) WHERE operation_type ~ '^[a-z_]+$'",
+        "UPDATE property_features SET orientation = UPPER(orientation) WHERE orientation ~ '^[a-z_]+$'",
+        "UPDATE property_features SET heating_type = UPPER(heating_type) WHERE heating_type ~ '^[a-z_]+$'",
+        "UPDATE property_features SET conservation_state = UPPER(conservation_state) WHERE conservation_state ~ '^[a-z_]+$'",
+        # energy_certification: A-G already uppercase; exento/en_tramite -> EXENTO/EN_TRAMITE
+        "UPDATE property_legal SET energy_certification = UPPER(energy_certification) WHERE energy_certification ~ '^[a-z_]+$'",
+        "UPDATE property_legal SET ite_status = UPPER(ite_status) WHERE ite_status ~ '^[a-z_]+$'",
+        "UPDATE property_legal SET nota_simple_status = UPPER(nota_simple_status) WHERE nota_simple_status ~ '^[a-z_]+$'",
+        "UPDATE property_environment SET crime_rate_level = UPPER(crime_rate_level) WHERE crime_rate_level ~ '^[a-z_]+$'",
+        "UPDATE property_media SET media_type = UPPER(media_type) WHERE media_type ~ '^[a-z_]+$'",
+        "UPDATE offers SET status = UPPER(status) WHERE status ~ '^[a-z_]+$'",
+        "UPDATE users SET dni_status = UPPER(dni_status) WHERE dni_status ~ '^[a-z_]+$'",
+        "UPDATE users SET user_type = UPPER(user_type) WHERE user_type ~ '^[a-z_]+$'",
+        "UPDATE property_documents SET doc_type = UPPER(doc_type) WHERE doc_type ~ '^[a-z_]+$'",
+        "UPDATE service_orders SET service_type = UPPER(service_type) WHERE service_type ~ '^[a-z_]+$'",
+        "UPDATE service_orders SET status = UPPER(status) WHERE status ~ '^[a-z_]+$'",
+        "UPDATE visit_appointments SET status = UPPER(status) WHERE status ~ '^[a-z_]+$'",
+        "UPDATE mortgage_profiles SET employment_status = UPPER(employment_status) WHERE employment_status ~ '^[a-z_]+$'",
+        "UPDATE property_valuations SET provider = UPPER(provider) WHERE provider ~ '^[a-z_]+$'",
+        "UPDATE buyer_solvency SET payment_method = UPPER(payment_method) WHERE payment_method ~ '^[a-z_]+$'",
+        "UPDATE buyer_solvency SET stress_index = UPPER(stress_index) WHERE stress_index ~ '^[a-z_]+$'",
+        "UPDATE buyer_solvency SET solvency_level = UPPER(solvency_level) WHERE solvency_level ~ '^[a-z_]+$'",
+        "UPDATE transaction_steps SET required_role = UPPER(required_role) WHERE required_role ~ '^[a-z_]+$'",
+        "UPDATE transaction_steps SET status = UPPER(status) WHERE status ~ '^[a-z_]+$'",
+        "UPDATE notaries SET integration_type = UPPER(integration_type) WHERE integration_type ~ '^[a-z_]+$'",
     ]
     try:
         with engine.connect() as conn:
-            for stmt in lowercase_migrations:
+            for stmt in uppercase_migrations:
                 try:
                     conn.execute(text(stmt))
                 except Exception as exc:
-                    logger.warning(f"[MIGRATION] Lowercase migration: {repr(exc)}")
+                    logger.warning(f"[MIGRATION] Uppercase migration: {repr(exc)}")
             conn.commit()
-        logger.info("[MIGRATION] Legacy UPPERCASE values lowercased.")
+        logger.info("[MIGRATION] Enum VARCHAR values uppercased to match SA Enum.name.")
     except Exception as exc:
-        logger.warning(f"[MIGRATION] Lowercase migration skipped: {repr(exc)}")
+        logger.warning(f"[MIGRATION] Uppercase migration skipped: {repr(exc)}")
 
 
 @app.on_event("startup")
