@@ -89,7 +89,7 @@ class PropertyModel {
 
     return PropertyModel(
       id: _parseInt(json['id']) ?? 0,
-      title: json['title'] as String,
+      title: json['title'] as String? ?? '',
       description: json['description'] as String? ?? '',
       type: json['property_type'] as String? ?? 'piso',
       price: (json['price'] ?? 0.0).toDouble(),
