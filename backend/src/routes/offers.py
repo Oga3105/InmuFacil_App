@@ -326,7 +326,7 @@ async def create_offer(
     active_offer = db.query(PropertyOffer).filter(
         PropertyOffer.property_id == offer_data.property_id,
         PropertyOffer.buyer_id == current_user.id,
-        cast(PropertyOffer.status, String) == OfferStatus.PENDING.value
+        cast(PropertyOffer.status, String) == OfferStatus.PENDING.name
     ).first()
     
     if active_offer:
