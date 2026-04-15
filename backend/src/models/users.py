@@ -62,7 +62,12 @@ class User(Base):
     notifications = relationship("NotificationLog", back_populates="user", cascade="all, delete-orphan")
 
     financial_advisor_id = Column(Integer, ForeignKey("users.id"), nullable=True)
-    financial_advisor = relationship("User", remote_side="User.id", backref="advisees")
+    financial_advisor = relationship(
+        "User",
+        foreign_keys=[financial_advisor_id],
+        remote_side=[id],
+        backref="advisees",
+    )
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email}, type={self.user_type})>"
