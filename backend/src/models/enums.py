@@ -100,8 +100,12 @@ class HeatingType(str, enum.Enum):
 
 class ConservationState(str, enum.Enum):
     A_ESTRENAR = "a_estrenar"
+    OBRA_NUEVA = "obra_nueva"
     BUEN_ESTADO = "buen_estado"
+    REFORMADO = "reformado"
     A_REFORMAR = "a_reformar"
+    EN_CONSTRUCCION = "en_construccion"
+    PARA_DERRIBAR = "para_derribar"
 
 class EnergyCertification(str, enum.Enum):
     A = "A"

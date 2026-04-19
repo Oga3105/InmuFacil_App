@@ -971,8 +971,6 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         'allow_visits': state.allowVisits,
         if (state.selectedLocation != null) 'latitude': state.selectedLocation!.latitude,
         if (state.selectedLocation != null) 'longitude': state.selectedLocation!.longitude,
-        if (state.propertyCondition != null)
-          'conservation_state': state.propertyCondition!.backendValue,
         if (state.energyCertification != null)
           'legal': {'energy_certification': state.energyCertification},
         'features': {
@@ -989,6 +987,8 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
           'has_wardrobes': state.hasWardrobes,
           'has_exterior': state.hasExterior,
           'has_accessibility': state.hasAccessibility,
+          if (state.propertyCondition != null)
+            'conservation_state': state.propertyCondition!.backendValue,
         },
       };
 
@@ -1079,8 +1079,6 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
       'latitude': state.selectedLocation?.latitude,
       'longitude': state.selectedLocation?.longitude,
       'allow_visits': state.allowVisits,
-      if (state.propertyCondition != null)
-        'conservation_state': state.propertyCondition!.backendValue,
       'legal': {
         if (state.energyCertification != null)
           'energy_certification': state.energyCertification,
@@ -1099,6 +1097,8 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         'has_wardrobes': state.hasWardrobes,
         'has_exterior': state.hasExterior,
         'has_accessibility': state.hasAccessibility,
+        if (state.propertyCondition != null)
+          'conservation_state': state.propertyCondition!.backendValue,
       },
     };
   }

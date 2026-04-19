@@ -566,20 +566,20 @@ class _CeeSelectorWidget extends StatelessWidget {
             // EN_TRAMITE chip
             GestureDetector(
               onTap: () => notifier.setEnergyCertification(
-                  selected == 'EN_TRAMITE' ? null : 'EN_TRAMITE'),
+                  selected == 'en_tramite' ? null : 'en_tramite'),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: selected == 'EN_TRAMITE'
+                  color: selected == 'en_tramite'
                       ? Colors.grey.shade600
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: selected == 'EN_TRAMITE'
+                    color: selected == 'en_tramite'
                         ? Colors.grey.shade600
                         : Colors.grey.shade300,
-                    width: selected == 'EN_TRAMITE' ? 2 : 1,
+                    width: selected == 'en_tramite' ? 2 : 1,
                   ),
                 ),
                 child: Text(
@@ -587,7 +587,7 @@ class _CeeSelectorWidget extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
-                    color: selected == 'EN_TRAMITE'
+                    color: selected == 'en_tramite'
                         ? Colors.white
                         : Colors.grey.shade600,
                   ),
@@ -604,7 +604,7 @@ class _CeeSelectorWidget extends StatelessWidget {
                   size: 14, color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
               const SizedBox(width: 6),
               Text(
-                selected == 'EN_TRAMITE'
+                selected == 'en_tramite'
                     ? 'Certificado en tramite seleccionado'
                     : 'Calificacion $selected seleccionada',
                 style: TextStyle(
