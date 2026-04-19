@@ -161,7 +161,8 @@ async def list_properties(
 
 @router.get("/{property_id}", response_model=PropertyResponse)
 async def get_property(
-    property_id: int, 
+    property_id: int,
+    response: Response,
     db: Session = Depends(get_db)
 ):
     """
@@ -175,9 +176,10 @@ async def get_property(
         joinedload(Property.media),
         joinedload(Property.owner)
     ).filter(Property.id == property_id).first()
-    
+
     if not property:
         raise HTTPException(status_code=404, detail="Property not found")
+    response.headers["Cache-Control"] = "no-store"
     return property
 
 
@@ -339,13 +341,19 @@ async def update_draft_property(
 
     if draft_data.features:
         if not prop.features:
-            prop.features = PropertyFeatures(property_id=prop.id)
+            new_features = PropertyFeatures(property_id=prop.id)
+            db.add(new_features)
+            db.flush()
+            prop.features = new_features
         for key, value in draft_data.features.model_dump(exclude_unset=True).items():
             setattr(prop.features, key, value)
 
     if draft_data.legal:
         if not prop.legal:
-            prop.legal = PropertyLegal(property_id=prop.id)
+            new_legal = PropertyLegal(property_id=prop.id)
+            db.add(new_legal)
+            db.flush()
+            prop.legal = new_legal
         for key, value in draft_data.legal.model_dump(exclude_unset=True).items():
             setattr(prop.legal, key, value)
 
