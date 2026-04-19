@@ -277,7 +277,6 @@ class PropertyDraftCreate(BaseModel):
     hide_exact_location: bool = False
     ai_comfort_consent: bool = False
     allow_visits: Optional[bool] = None
-    conservation_state: Optional[str] = None
     features: Optional[PropertyFeaturesSchema] = None
     legal: Optional[PropertyLegalSchema] = None
 
