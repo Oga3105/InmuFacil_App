@@ -1063,6 +1063,7 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
     return {
       'title': state.titleText,
       'description': state.descriptionText,
+      'status': 'published',
       'property_type': state.selectedType?.backendValue ?? 'piso',
       'operation_type': 'venta',
       'location': _buildLocationString(),
