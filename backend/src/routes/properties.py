@@ -272,7 +272,7 @@ async def create_draft_property(
     """
     Save a partial listing as draft. All fields optional except status.
     """
-    core_data = draft_data.model_dump(exclude={'features'}, exclude_none=True)
+    core_data = draft_data.model_dump(exclude={'features', 'legal'}, exclude_none=True)
     # Auto-compute location string from structured fields if not provided
     if not core_data.get('location') and core_data.get('street'):
         parts = [p for p in [core_data.get('street'), core_data.get('street_number'),
@@ -291,6 +291,9 @@ async def create_draft_property(
     if draft_data.features:
         features = PropertyFeatures(**draft_data.features.model_dump(), property_id=new_property.id)
         db.add(features)
+    if draft_data.legal:
+        legal = PropertyLegal(**draft_data.legal.model_dump(), property_id=new_property.id)
+        db.add(legal)
     db.commit()
     # Re-query with eager joins — same pattern as PATCH /status.
     # SQLAlchemy 2.0 expires all attributes after commit; returning the bare
@@ -339,6 +342,12 @@ async def update_draft_property(
             prop.features = PropertyFeatures(property_id=prop.id)
         for key, value in draft_data.features.model_dump(exclude_unset=True).items():
             setattr(prop.features, key, value)
+
+    if draft_data.legal:
+        if not prop.legal:
+            prop.legal = PropertyLegal(property_id=prop.id)
+        for key, value in draft_data.legal.model_dump(exclude_unset=True).items():
+            setattr(prop.legal, key, value)
 
     db.commit()
     prop = (
