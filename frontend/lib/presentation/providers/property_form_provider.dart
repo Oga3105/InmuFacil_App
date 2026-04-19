@@ -968,8 +968,28 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
         if (state.postalCodeText.isNotEmpty) 'postal_code': state.postalCodeText,
         'hide_exact_location': state.hideExactLocation,
         'ai_comfort_consent': state.aiComfortConsent,
+        'allow_visits': state.allowVisits,
         if (state.selectedLocation != null) 'latitude': state.selectedLocation!.latitude,
         if (state.selectedLocation != null) 'longitude': state.selectedLocation!.longitude,
+        if (state.propertyCondition != null)
+          'conservation_state': state.propertyCondition!.backendValue,
+        if (state.energyCertification != null)
+          'legal': {'energy_certification': state.energyCertification},
+        'features': {
+          'bedrooms': state.bedrooms,
+          'bathrooms': state.bathrooms,
+          'has_lift': state.hasLift,
+          'has_garage': state.hasGarage,
+          'has_pool': state.hasPool,
+          'has_terrace': state.hasTerrace,
+          'has_garden': state.hasGarden,
+          'has_ac': state.hasAC,
+          'has_heating': state.hasHeating,
+          'has_storage': state.hasStorage,
+          'has_wardrobes': state.hasWardrobes,
+          'has_exterior': state.hasExterior,
+          'has_accessibility': state.hasAccessibility,
+        },
       };
 
       String propertyId;
