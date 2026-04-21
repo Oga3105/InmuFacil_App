@@ -7,6 +7,7 @@ import '../common/premium_button.dart';
 import '../common/price_tag.dart';
 import '../common/time_badge.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/offers_provider.dart';
 
 class PropertyListingItem extends ConsumerWidget {
 
@@ -374,7 +375,7 @@ class PropertyListingItem extends ConsumerWidget {
     );
   }
 
-  void _handleContactAction(BuildContext context, WidgetRef ref) {
+  Future<void> _handleContactAction(BuildContext context, WidgetRef ref) async {
     final auth = ref.read(authProvider);
     final isLoggedIn = auth.isAuthenticated;
     if (!isLoggedIn) {
@@ -401,7 +402,53 @@ class PropertyListingItem extends ConsumerWidget {
       );
       return;
     }
-    // Proceed with contact action (e.g. open chat)
-    // context.push('/chat/${property.ownerId}');
+    // Check for active offer to open chat
+    const activeStatuses = {
+      'pending', 'counter_offer', 'countered', 'accepted',
+      'signing_pending', 'signed',
+    };
+    final sentOffers = ref.read(sentOffersProvider).asData?.value ?? [];
+    final activeOffer = sentOffers.where((o) =>
+      o.propertyId == property.id &&
+      activeStatuses.contains(o.status.toLowerCase()),
+    ).firstOrNull;
+
+    if (activeOffer == null) {
+      if (!context.mounted) return;
+      showDialog<void>(
+        context: context,
+        builder: (_) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          title: const Text('Haz una oferta primero'),
+          content: const Text(
+            'El chat privado con el vendedor se abre al hacer una oferta. '
+            'Ambas partes pueden chatear desde ese momento.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Entendido'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.push('/property/${property.id}/offer');
+              },
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
+              child: const Text('Hacer Oferta'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // Enable chat and navigate
+    try {
+      await ref.read(sentOffersProvider.notifier).enableChat(activeOffer.id);
+    } catch (_) {
+      // chat might already be enabled
+    }
+    if (context.mounted) context.push('/chat/${activeOffer.id}');
   }
 }
