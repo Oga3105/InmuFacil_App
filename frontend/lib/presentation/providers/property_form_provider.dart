@@ -649,7 +649,10 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
     try {
       await _ensureAuth();
-      final response = await _dio.get('/properties/$propertyId');
+      final response = await _dio.get(
+        '/properties/$propertyId',
+        options: Options(headers: {'Cache-Control': 'no-cache'}),
+      );
       final data = response.data as Map<String, dynamic>;
       final features = data['features'] as Map<String, dynamic>? ?? {};
 
