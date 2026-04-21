@@ -499,90 +499,140 @@ class _SlotsPanel extends StatelessWidget {
   String _label(VisitSlot s) =>
       '${s.startTime.hour.toString().padLeft(2, '0')}:${s.startTime.minute.toString().padLeft(2, '0')}';
 
+  bool _isSameSlot(VisitSlot a, VisitSlot b) =>
+      a.windowId == b.windowId &&
+      a.startTime.isAtSameMomentAs(b.startTime);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'HORAS DISPONIBLES',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-            color: Color(0xFF64748B),
-          ),
+        Row(
+          children: [
+            const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF64748B)),
+            const SizedBox(width: 6),
+            const Text(
+              'HORAS DISPONIBLES',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.8,
+                color: Color(0xFF64748B),
+              ),
+            ),
+            if (slots.isNotEmpty) ...[
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '${slots.where((s) => s.isAvailable).length} libres',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF16A34A),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 12),
         if (slots.isEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Text(
-              'Selecciona un día\npara ver horarios',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade400,
-                height: 1.5,
-              ),
-              textAlign: TextAlign.center,
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 28),
+            child: Column(
+              children: [
+                Icon(Icons.touch_app_outlined, size: 32, color: Colors.grey.shade300),
+                const SizedBox(height: 8),
+                Text(
+                  'Selecciona un dia con disponibilidad\npara ver los horarios',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           )
         else
-          // 2-column grid of slots
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-              childAspectRatio: 2.5,
-            ),
-            itemCount: slots.length,
-            itemBuilder: (context, i) {
-              final slot = slots[i];
-              final isSelected = selectedSlot?.windowId == slot.windowId;
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: slots.map((slot) {
+              final isSelected = selectedSlot != null && _isSameSlot(selectedSlot!, slot);
               final isAvailable = slot.isAvailable;
               return GestureDetector(
                 onTap: isAvailable ? () => onSlotSelected(slot) : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? const Color(0xFF135BEC)
-                        : isAvailable
-                            ? Colors.white
-                            : Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
+                child: MouseRegion(
+                  cursor: isAvailable ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
                       color: isSelected
                           ? const Color(0xFF135BEC)
-                          : Colors.grey.shade300,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _label(slot),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w500,
+                          : isAvailable
+                              ? const Color(0xFFF8FAFC)
+                              : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
                         color: isSelected
-                            ? Colors.white
+                            ? const Color(0xFF135BEC)
                             : isAvailable
-                                ? const Color(0xFF1E293B)
-                                : Colors.grey.shade400,
-                        decoration: isAvailable
-                            ? null
-                            : TextDecoration.lineThrough,
-                        decorationColor: Colors.grey.shade400,
+                                ? const Color(0xFFCBD5E1)
+                                : Colors.grey.shade200,
+                        width: isSelected ? 1.5 : 1,
                       ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF135BEC).withOpacity(0.2),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (isSelected)
+                          const Padding(
+                            padding: EdgeInsets.only(right: 6),
+                            child: Icon(Icons.check_circle, size: 14, color: Colors.white),
+                          ),
+                        if (!isAvailable)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: Icon(Icons.block, size: 13, color: Colors.grey.shade400),
+                          ),
+                        Text(
+                          _label(slot),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                            color: isSelected
+                                ? Colors.white
+                                : isAvailable
+                                    ? const Color(0xFF1E293B)
+                                    : Colors.grey.shade400,
+                            decoration: isAvailable ? null : TextDecoration.lineThrough,
+                            decorationColor: Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               );
-            },
+            }).toList(),
           ),
       ],
     );
@@ -949,38 +999,63 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                     _sameDay(widget.selectedDay!, day);
             final isPast = day.isBefore(
                 DateTime.now().subtract(const Duration(days: 1)));
+            final isToday = _sameDay(day, DateTime.now());
 
             Color bg = Colors.transparent;
-            Color textColor = Colors.grey.shade300;
+            Color textColor = const Color(0xFFCBD5E1); // muted for unavailable
             FontWeight weight = FontWeight.normal;
-            Border? border;
 
             if (isSelected) {
               bg = const Color(0xFF135BEC);
               textColor = Colors.white;
               weight = FontWeight.w700;
             } else if (isAvailable && !isPast) {
-              textColor = const Color(0xFF1E293B);
-              weight = FontWeight.w600;
+              bg = const Color(0xFFEFF6FF);
+              textColor = const Color(0xFF135BEC);
+              weight = FontWeight.w700;
+            } else if (!isPast) {
+              textColor = const Color(0xFF94A3B8);
+              weight = FontWeight.w500;
             }
 
             return GestureDetector(
               onTap: isAvailable && !isPast
                   ? () => widget.onDaySelected(day)
                   : null,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: bg,
-                  borderRadius: BorderRadius.circular(6),
-                  border: border,
-                ),
-                child: Center(
-                  child: Text(
-                    '${day.day}',
-                    style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: weight,
-                        color: textColor),
+              child: MouseRegion(
+                cursor: isAvailable && !isPast
+                    ? SystemMouseCursors.click
+                    : SystemMouseCursors.basic,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(8),
+                    border: isToday && !isSelected
+                        ? Border.all(color: const Color(0xFF135BEC), width: 1.5)
+                        : null,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${day.day}',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: weight,
+                            color: textColor),
+                      ),
+                      // Green dot for available days (not selected)
+                      if (isAvailable && !isPast && !isSelected)
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF16A34A),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
