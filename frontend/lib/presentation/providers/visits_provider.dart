@@ -345,8 +345,8 @@ class VisitWindow {
     return VisitWindow(
       id: json['id'] as int? ?? 0,
       propertyId: json['property_id'] as int? ?? 0,
-      startTime: DateTime.tryParse(json['start_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
-      endTime: DateTime.tryParse(json['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+      startTime: DateTime.tryParse(json['start_time'] as String? ?? '') ?? DateTime.now(),
+      endTime: DateTime.tryParse(json['end_time'] as String? ?? '') ?? DateTime.now(),
       slotDurationMinutes: json['slot_duration_minutes'] as int? ?? 20,
     );
   }
@@ -374,14 +374,14 @@ final sellerWindowsProvider = FutureProvider.autoDispose
       windowMap[wId] = VisitWindow(
         id: wId,
         propertyId: int.tryParse(propertyId) ?? 0,
-        startTime: DateTime.tryParse(map['start_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
-        endTime: DateTime.tryParse(map['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+        startTime: DateTime.tryParse(map['start_time'] as String? ?? '') ?? DateTime.now(),
+        endTime: DateTime.tryParse(map['end_time'] as String? ?? '') ?? DateTime.now(),
         slotDurationMinutes: 20,
       );
     } else {
       // Extend the window end time to the last slot's end
       final existing = windowMap[wId]!;
-      final slotEnd = DateTime.tryParse(map['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now();
+      final slotEnd = DateTime.tryParse(map['end_time'] as String? ?? '') ?? DateTime.now();
       if (slotEnd.isAfter(existing.endTime)) {
         windowMap[wId] = VisitWindow(
           id: existing.id,
@@ -414,8 +414,8 @@ Future<bool> createVisitWindow({
   try {
     await dio.post('/visits/windows', data: {
       'property_id': propertyId,
-      'start_time': startTime.toUtc().toIso8601String(),
-      'end_time': endTime.toUtc().toIso8601String(),
+      'start_time': startTime.toIso8601String(),
+      'end_time': endTime.toIso8601String(),
       'slot_duration_minutes': slotDurationMinutes,
     });
     return true;
