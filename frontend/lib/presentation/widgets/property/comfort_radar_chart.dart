@@ -389,19 +389,7 @@ class _ComfortCard extends StatelessWidget {
                   ?.copyWith(color: Colors.grey.shade500),
             ),
 
-            if (result.cached) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.cached, size: 12, color: Colors.grey.shade400),
-                  const SizedBox(width: 4),
-                  Text(
-                    'comfort.cached'.tr(),
-                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                  ),
-                ],
-              ),
-            ],
+            // cached indicator removed — not relevant to end users
 
             if (result.lowData) ...[
               const SizedBox(height: 8),
@@ -446,12 +434,29 @@ class _ComfortCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Disclaimer
-            Text(
-              result.disclaimer,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade400,
-                fontStyle: FontStyle.italic,
-                fontSize: 10,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFF6FF),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFBFDBFE)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, size: 13, color: Color(0xFF3B82F6)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      result.disclaimer,
+                      style: const TextStyle(
+                        color: Color(0xFF1E40AF),
+                        fontStyle: FontStyle.italic,
+                        fontSize: 11,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
