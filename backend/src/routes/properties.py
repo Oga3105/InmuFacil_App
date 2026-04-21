@@ -458,33 +458,57 @@ async def update_property(
         property.ai_comfort_consent_date = datetime.now(_tz.utc)
 
     # Update Satellites (Create if not exists, Update if exists)
-    
+
     # Features
     if property_update.features:
         if not property.features:
-            property.features = PropertyFeatures(property_id=property.id)
+            new_features = PropertyFeatures(property_id=property.id)
+            db.add(new_features)
+            db.flush()
+            property.features = new_features
         for key, value in property_update.features.model_dump(exclude_unset=True).items():
             setattr(property.features, key, value)
 
     # Legal
     if property_update.legal:
         if not property.legal:
-            property.legal = PropertyLegal(property_id=property.id)
+            new_legal = PropertyLegal(property_id=property.id)
+            db.add(new_legal)
+            db.flush()
+            property.legal = new_legal
         for key, value in property_update.legal.model_dump(exclude_unset=True).items():
             setattr(property.legal, key, value)
-            
+
     # Financial
     if property_update.financial:
         if not property.financial:
-            property.financial = PropertyFinancial(property_id=property.id)
+            new_financial = PropertyFinancial(property_id=property.id)
+            db.add(new_financial)
+            db.flush()
+            property.financial = new_financial
         for key, value in property_update.financial.model_dump(exclude_unset=True).items():
             setattr(property.financial, key, value)
-            
+
     # Recalculate Metrics
     calculate_metrics(property)
-        
+
     db.commit()
-    db.refresh(property)
+    # Re-query with eager joins — db.refresh() only reloads core columns; Pydantic
+    # would then lazy-load relationships on an expired session object, which fails
+    # in SQLAlchemy 2.0.  Same pattern as create_property and update_draft_property.
+    property = (
+        db.query(Property)
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
+        .filter(Property.id == property_id)
+        .first()
+    )
     return property
 
 
