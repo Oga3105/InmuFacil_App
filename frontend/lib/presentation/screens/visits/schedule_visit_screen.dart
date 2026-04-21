@@ -75,6 +75,14 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => _buildEmptyState(),
         data: (slots) {
+          // If no slots at all, show email request fallback
+          if (slots.isEmpty) {
+            return _NoSlotsEmailRequest(
+              property: property,
+              propertyId: widget.propertyId,
+            );
+          }
+
           final grouped = _groupSlotsByDay(slots);
           final availableDays = grouped.keys
               .where((d) =>
@@ -1015,6 +1023,186 @@ class _NavButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(icon, size: 18, color: const Color(0xFF64748B)),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// No slots — email request fallback
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NoSlotsEmailRequest extends ConsumerStatefulWidget {
+  const _NoSlotsEmailRequest({
+    required this.property,
+    required this.propertyId,
+  });
+
+  final dynamic property;
+  final String propertyId;
+
+  @override
+  ConsumerState<_NoSlotsEmailRequest> createState() =>
+      _NoSlotsEmailRequestState();
+}
+
+class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
+  final _messageController = TextEditingController();
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final emailState = ref.watch(requestVisitByEmailProvider);
+
+    ref.listen<EmailRequestState>(requestVisitByEmailProvider, (_, next) {
+      if (next.status == EmailRequestStatus.success) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Solicitud enviada al vendedor por email'),
+          backgroundColor: Color(0xFF16A34A),
+        ));
+        ref.read(requestVisitByEmailProvider.notifier).reset();
+      } else if (next.status == EmailRequestStatus.error) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(next.errorMessage ?? 'Error al enviar la solicitud'),
+          backgroundColor: Colors.red,
+        ));
+        ref.read(requestVisitByEmailProvider.notifier).reset();
+      }
+    });
+
+    final isLoading = emailState.status == EmailRequestStatus.loading;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Property card
+          _PropertyCard(property: widget.property),
+          const SizedBox(height: 24),
+
+          // No availability message
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF7ED),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.event_busy_outlined,
+                      size: 32, color: Color(0xFFF97316)),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'El vendedor aun no ha configurado horarios de visita',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Puedes enviarle una solicitud por email para que abra '
+                  'su disponibilidad y puedas reservar una cita.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Optional message
+                TextField(
+                  controller: _messageController,
+                  maxLines: 3,
+                  maxLength: 500,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
+                  decoration: InputDecoration(
+                    hintText: 'Mensaje para el vendedor (opcional)',
+                    hintStyle:
+                        TextStyle(fontSize: 13, color: Colors.grey.shade400),
+                    filled: true,
+                    fillColor: const Color(0xFFF8FAFC),
+                    contentPadding: const EdgeInsets.all(12),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF135BEC), width: 1.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Send request button
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: isLoading
+                        ? null
+                        : () => ref
+                            .read(requestVisitByEmailProvider.notifier)
+                            .request(
+                              propertyId: widget.propertyId,
+                              message: _messageController.text.trim(),
+                            ),
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2),
+                          )
+                        : const Icon(Icons.email_outlined),
+                    label: Text(
+                      isLoading
+                          ? 'Enviando...'
+                          : 'Solicitar visita por email',
+                      style: const TextStyle(
+                          fontSize: 15, fontWeight: FontWeight.w700),
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF135BEC),
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Trust banner
+          const _TrustBanner(),
+        ],
       ),
     );
   }
