@@ -38,13 +38,41 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
             onPressed: () => context.canPop() ? context.pop() : context.go('/'),
           ),
         ),
-        title: const Text(
-          'Horarios de visita',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/logo_inmufacil.png', height: 28),
+            const SizedBox(width: 8),
+            Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: 'Inmu',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                ),
+                const TextSpan(
+                  text: 'Facil',
+                  style: TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18,
+                  ),
+                ),
+              ]),
+            ),
+          ],
         ),
-        actions: const [
-          UserAvatarMenu(),
-          SizedBox(width: 16),
+        actions: [
+          IconButton(
+            tooltip: 'Inicio',
+            icon: const Icon(Icons.home_outlined),
+            onPressed: () => context.go('/'),
+          ),
+          const UserAvatarMenu(),
+          const SizedBox(width: 16),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
