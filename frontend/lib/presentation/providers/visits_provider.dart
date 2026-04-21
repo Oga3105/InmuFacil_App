@@ -270,6 +270,60 @@ final myVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
   return unique;
 });
 
+// --- Request Visit by Email (when no slots available) ---
+
+enum EmailRequestStatus { idle, loading, success, error }
+
+class EmailRequestState {
+  const EmailRequestState({this.status = EmailRequestStatus.idle, this.errorMessage});
+  final EmailRequestStatus status;
+  final String? errorMessage;
+}
+
+final requestVisitByEmailProvider =
+    NotifierProvider<RequestVisitByEmailNotifier, EmailRequestState>(
+        RequestVisitByEmailNotifier.new);
+
+class RequestVisitByEmailNotifier extends Notifier<EmailRequestState> {
+  @override
+  EmailRequestState build() => const EmailRequestState();
+
+  Future<void> request({
+    required String propertyId,
+    String message = '',
+  }) async {
+    state = const EmailRequestState(status: EmailRequestStatus.loading);
+    try {
+      const storage = FlutterSecureStorage();
+      final token = await storage.read(key: 'auth_token');
+      final dio = buildAuthDio();
+      if (token != null) {
+        dio.options.headers['Authorization'] = 'Bearer $token';
+      }
+      await dio.post('/visits/request-email', data: {
+        'property_id': int.tryParse(propertyId) ?? 0,
+        'message': message,
+      });
+      state = const EmailRequestState(status: EmailRequestStatus.success);
+    } on DioException catch (e) {
+      final detail = e.response?.data is Map
+          ? (e.response?.data['detail'] as String? ?? 'Error al enviar la solicitud')
+          : 'Error al enviar la solicitud';
+      state = EmailRequestState(
+        status: EmailRequestStatus.error,
+        errorMessage: detail,
+      );
+    } catch (_) {
+      state = const EmailRequestState(
+        status: EmailRequestStatus.error,
+        errorMessage: 'Error inesperado. Intentalo de nuevo.',
+      );
+    }
+  }
+
+  void reset() => state = const EmailRequestState();
+}
+
 final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmentId) async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'auth_token');

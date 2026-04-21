@@ -7,7 +7,7 @@ Allows Sellers to define availability windows and Buyers to book smart slots.
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 
@@ -16,11 +16,12 @@ from backend.src.models import (
     User, Property, VisitWindow, VisitAppointment, VisitStatus
 )
 from backend.src.schemas.base import (
-    VisitWindowCreate, VisitWindowResponse, 
+    VisitWindowCreate, VisitWindowResponse,
     VisitSlotResponse, VisitRequest, VisitAppointmentResponse
 )
 from backend.src.utils.security import get_current_active_user
 from backend.src.routes.properties import verify_property_ownership
+from backend.src.services.email_service import send_visit_request_email
 
 router = APIRouter(prefix="/visits", tags=["Visits"])
 
@@ -357,21 +358,21 @@ async def book_visit_slot(
     window = db.query(VisitWindow).filter(VisitWindow.id == request.window_id).first()
     if not window:
         raise HTTPException(status_code=404, detail="Visit window not found")
-        
+
     # 2. Validate Slot Alignment (Anti-Hack check)
     # Ensure start_time matches a valid slot start
     # Simplified: check if start_time is between window start/end
-    
+
     # 3. Check availability (Race Condition Safety needed for Production, simple check for MVP)
     existing = db.query(VisitAppointment).filter(
         VisitAppointment.window_id == window.id,
         VisitAppointment.start_time == request.start_time,
         VisitAppointment.status != VisitStatus.REJECTED
     ).first()
-    
+
     if existing:
         raise HTTPException(status_code=409, detail="Slot already booked")
-        
+
     # 4. Create Appointment
     appointment = VisitAppointment(
         window_id=window.id,
@@ -383,8 +384,72 @@ async def book_visit_slot(
         q_timeline=request.q_timeline,
         q_maturity=request.q_maturity
     )
-    
+
     db.add(appointment)
     db.commit()
     db.refresh(appointment)
     return appointment
+
+
+# ============================================================================
+# Visit Request by Email (no slots available fallback)
+# ============================================================================
+
+class VisitRequestByEmail(BaseModel):
+    property_id: int
+    message: str = Field("", max_length=500)
+
+
+class VisitRequestByEmailResponse(BaseModel):
+    status: str
+    detail: str
+
+
+@router.post(
+    "/request-email",
+    response_model=VisitRequestByEmailResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def request_visit_by_email(
+    body: VisitRequestByEmail,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer requests a visit via email when the seller has no availability windows.
+    Sends a notification email to the property owner asking them to set up
+    visit times.
+    """
+    # 1. Validate property exists
+    prop = db.query(Property).filter(Property.id == body.property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    # 2. Prevent seller from emailing themselves
+    if prop.owner_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Cannot request a visit on your own property")
+
+    # 3. Fetch owner details
+    owner = db.query(User).filter(User.id == prop.owner_id).first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Property owner not found")
+
+    # 4. Send email
+    sent = await send_visit_request_email(
+        seller_email=owner.email,
+        seller_name=owner.full_name,
+        buyer_name=current_user.full_name,
+        property_title=prop.title or "Sin titulo",
+        buyer_message=body.message,
+    )
+
+    if not sent:
+        raise HTTPException(
+            status_code=502,
+            detail="No se pudo enviar el email. Intentalo mas tarde.",
+        )
+
+    return VisitRequestByEmailResponse(
+        status="sent",
+        detail="Solicitud de visita enviada al vendedor por email.",
+    )
