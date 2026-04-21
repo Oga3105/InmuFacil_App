@@ -17,6 +17,7 @@ import '../../presentation/screens/property_listing_screen.dart';
 import '../../presentation/screens/chat/chat_list_screen.dart';
 import '../../presentation/screens/chat/chat_detail_screen.dart';
 import '../../presentation/screens/visits/schedule_visit_screen.dart';
+import '../../presentation/screens/visits/manage_visits_screen.dart';
 import '../../presentation/screens/offers/make_offer_screen.dart';
 import '../../presentation/screens/offers/offer_management_screen.dart';
 import '../../presentation/screens/offers/transaction_timeline_screen.dart';
@@ -228,6 +229,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final propertyId = state.pathParameters['id']!;
           return ScheduleVisitScreen(propertyId: propertyId);
+        },
+      ),
+      GoRoute(
+        path: '/property/:id/visits/manage',
+        name: 'manage-visits',
+        builder: (context, state) {
+          final propertyId = state.pathParameters['id']!;
+          return ManageVisitsScreen(propertyId: propertyId);
         },
       ),
       GoRoute(

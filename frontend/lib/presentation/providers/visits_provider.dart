@@ -324,6 +324,106 @@ class RequestVisitByEmailNotifier extends Notifier<EmailRequestState> {
   void reset() => state = const EmailRequestState();
 }
 
+// --- Seller: Visit Windows Management ---
+
+class VisitWindow {
+  const VisitWindow({
+    required this.id,
+    required this.propertyId,
+    required this.startTime,
+    required this.endTime,
+    required this.slotDurationMinutes,
+  });
+
+  final int id;
+  final int propertyId;
+  final DateTime startTime;
+  final DateTime endTime;
+  final int slotDurationMinutes;
+
+  factory VisitWindow.fromJson(Map<String, dynamic> json) {
+    return VisitWindow(
+      id: json['id'] as int? ?? 0,
+      propertyId: json['property_id'] as int? ?? 0,
+      startTime: DateTime.tryParse(json['start_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+      endTime: DateTime.tryParse(json['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+      slotDurationMinutes: json['slot_duration_minutes'] as int? ?? 20,
+    );
+  }
+}
+
+final sellerWindowsProvider = FutureProvider.autoDispose
+    .family<List<VisitWindow>, String>((ref, propertyId) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  final dio = buildAuthDio();
+  if (token != null) {
+    dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+  // Re-use the slots endpoint to infer existing windows, or query windows directly
+  // The backend doesn't have a GET /visits/windows?property_id=X endpoint,
+  // so we derive from slots: group by window_id and extract unique windows.
+  final resp = await dio.get('/visits/properties/$propertyId/slots');
+  final List<dynamic> data = resp.data is List ? resp.data as List : [];
+  final windowMap = <int, VisitWindow>{};
+  for (final item in data) {
+    final map = item as Map<String, dynamic>;
+    final wId = map['window_id'] as int? ?? 0;
+    if (!windowMap.containsKey(wId)) {
+      // First slot of this window — use it to reconstruct window info
+      windowMap[wId] = VisitWindow(
+        id: wId,
+        propertyId: int.tryParse(propertyId) ?? 0,
+        startTime: DateTime.tryParse(map['start_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+        endTime: DateTime.tryParse(map['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now(),
+        slotDurationMinutes: 20,
+      );
+    } else {
+      // Extend the window end time to the last slot's end
+      final existing = windowMap[wId]!;
+      final slotEnd = DateTime.tryParse(map['end_time'] as String? ?? '')?.toLocal() ?? DateTime.now();
+      if (slotEnd.isAfter(existing.endTime)) {
+        windowMap[wId] = VisitWindow(
+          id: existing.id,
+          propertyId: existing.propertyId,
+          startTime: existing.startTime,
+          endTime: slotEnd,
+          slotDurationMinutes: existing.slotDurationMinutes,
+        );
+      }
+    }
+  }
+  final windows = windowMap.values.toList();
+  windows.sort((a, b) => a.startTime.compareTo(b.startTime));
+  return windows;
+});
+
+/// Creates a new visit window for a property.
+Future<bool> createVisitWindow({
+  required int propertyId,
+  required DateTime startTime,
+  required DateTime endTime,
+  int slotDurationMinutes = 20,
+}) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  final dio = buildAuthDio();
+  if (token != null) {
+    dio.options.headers['Authorization'] = 'Bearer $token';
+  }
+  try {
+    await dio.post('/visits/windows', data: {
+      'property_id': propertyId,
+      'start_time': startTime.toUtc().toIso8601String(),
+      'end_time': endTime.toUtc().toIso8601String(),
+      'slot_duration_minutes': slotDurationMinutes,
+    });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmentId) async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'auth_token');

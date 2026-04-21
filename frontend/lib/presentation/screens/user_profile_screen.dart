@@ -1715,6 +1715,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               onView: () => context.push('/property/${p.id}'),
               onOffers: () => context.push('/property/${p.id}/offers'),
               onEdit: () => context.push('/property/${p.id}/edit'),
+              onManageVisits: () => context.push('/property/${p.id}/visits/manage'),
               onDeactivate: () async {
                 final target =
                     status == 'published' ? 'unpublished' : 'published';
@@ -3478,6 +3479,7 @@ class _GestionarMenu extends StatelessWidget {
     required this.onEdit,
     required this.onDeactivate,
     required this.onDelete,
+    this.onManageVisits,
   });
 
   final Property property;
@@ -3486,6 +3488,7 @@ class _GestionarMenu extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDeactivate;
   final VoidCallback onDelete;
+  final VoidCallback? onManageVisits;
 
   bool get _isActive => (property.status ?? 'published') == 'published';
 
@@ -3502,6 +3505,9 @@ class _GestionarMenu extends StatelessWidget {
             break;
           case 'edit':
             onEdit();
+            break;
+          case 'visits':
+            onManageVisits?.call();
             break;
           case 'deactivate':
             onDeactivate();
@@ -3546,6 +3552,17 @@ class _GestionarMenu extends StatelessWidget {
               Icon(Icons.edit_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 12),
               Text('common.edit'.tr(),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'visits',
+          child: Row(
+            children: [
+              Icon(Icons.calendar_month_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              const SizedBox(width: 12),
+              Text('Horarios de visita',
                   style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),
