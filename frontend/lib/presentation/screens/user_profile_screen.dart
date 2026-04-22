@@ -2603,6 +2603,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
     final isLoading = agendaAsync.isLoading || chatVisitsAsync.isLoading;
     final hasError = agendaAsync.hasError || chatVisitsAsync.hasError;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2610,31 +2611,24 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Mis Visitas',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Visitas programadas como comprador o vendedor.',
-                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-            _SortButton<String>(
-              value: _visitsSortBy,
-              options: const {
-                'soonest': 'Más próximas',
-                'latest': 'Más lejanas',
-                'status': 'Por estado',
-              },
-              onChanged: (v) => setState(() => _visitsSortBy = v),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Mis Visitas',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Visitas programadas como comprador o vendedor.',
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -2656,8 +2650,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 const SizedBox(height: 12),
                 TextButton(
                   onPressed: () {
-                    ref.invalidate(sentOffersProvider);
-                    ref.invalidate(receivedOffersProvider);
+                    ref.invalidate(myVisitsProvider);
+                    ref.invalidate(chatVisitsProvider);
                   },
                   child: Text('profile.retry'.tr()),
                 ),
@@ -2667,31 +2661,16 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         else
           Builder(
             builder: (context) {
-              // Source 1: chat-action visit scan via /visits/chat (most reliable)
               final chatVisits = chatVisitsAsync.value ?? [];
-
-              // Source 2: visits from the booking system (/visits/agenda)
               final agendaVisits = agendaAsync.value ?? [];
 
-              // Merge, deduplicate by id
               final seenIds = <String>{};
-              var visits = [
+              final allVisits = [
                 ...chatVisits.where((v) => seenIds.add(v.id)),
                 ...agendaVisits.where((v) => seenIds.add(v.id)),
               ];
-              switch (_visitsSortBy) {
-                case 'latest':
-                  visits.sort((a, b) => b.startTime.compareTo(a.startTime));
-                  break;
-                case 'status':
-                  visits.sort((a, b) => a.status.compareTo(b.status));
-                  break;
-                case 'soonest':
-                default:
-                  visits.sort((a, b) => a.startTime.compareTo(b.startTime));
-              }
 
-              if (visits.isEmpty) {
+              if (allVisits.isEmpty) {
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 48),
@@ -2702,7 +2681,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           width: 64,
                           height: 64,
                           decoration: BoxDecoration(
-                            color: kNavyLight,
+                            color: isDark ? kNavy.withValues(alpha: 0.2) : kNavyLight,
                             borderRadius: BorderRadius.circular(32),
                           ),
                           child: const Icon(
@@ -2721,19 +2700,77 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Las visitas que reserves o aceptes aparecerán aquí.',
+                        Text(
+                          'Las visitas que reserves o aceptes apareceran aqui.',
                           textAlign: TextAlign.center,
-                          style:
-                              TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 );
               }
+
+              final now = DateTime.now();
+              final finishedStatuses = {'cancelled', 'rejected', 'completed', 'no_show'};
+
+              // Upcoming: future date AND not in a terminal status
+              final upcoming = allVisits
+                  .where((v) => v.startTime.isAfter(now) && !finishedStatuses.contains(v.status.toLowerCase()))
+                  .toList()
+                ..sort((a, b) => a.startTime.compareTo(b.startTime));
+
+              // Past: already happened OR in a terminal status
+              final past = allVisits
+                  .where((v) => !v.startTime.isAfter(now) || finishedStatuses.contains(v.status.toLowerCase()))
+                  .toList()
+                ..sort((a, b) => b.startTime.compareTo(a.startTime));
+
               return Column(
-                children: visits.map((v) => _buildVisitTile(v)).toList(),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // -- Upcoming section --
+                  _VisitSectionHeader(
+                    icon: Icons.upcoming_outlined,
+                    title: 'Proximas visitas',
+                    count: upcoming.length,
+                    color: kNavy,
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+                  if (upcoming.isEmpty)
+                    _VisitEmptySection(
+                      message: 'No tienes visitas proximas.',
+                      isDark: isDark,
+                    )
+                  else
+                    ...upcoming.map((v) => _buildVisitTile(v)),
+
+                  const SizedBox(height: 28),
+
+                  // -- Past section --
+                  _VisitSectionHeader(
+                    icon: Icons.history,
+                    title: 'Visitas pasadas',
+                    count: past.length,
+                    color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                    isDark: isDark,
+                  ),
+                  const SizedBox(height: 12),
+                  if (past.isEmpty)
+                    _VisitEmptySection(
+                      message: 'No hay visitas en el historial.',
+                      isDark: isDark,
+                    )
+                  else
+                    ...past.map((v) => Opacity(
+                          opacity: 0.7,
+                          child: _buildVisitTile(v),
+                        )),
+                ],
               );
             },
           ),
@@ -2783,7 +2820,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         border: Border.all(
             color: isUpcoming
                 ? kNavy.withValues(alpha: 0.2)
-                : Colors.grey.shade200),
+                : Theme.of(context).dividerColor.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -2800,7 +2837,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             width: 52,
             height: 52,
             decoration: BoxDecoration(
-              color: isUpcoming ? kNavy : Colors.grey.shade100,
+              color: isUpcoming
+                  ? kNavy
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Column(
@@ -2809,7 +2848,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 Text(
                   '${v.startTime.day}',
                   style: TextStyle(
-                    color: isUpcoming ? Colors.white : Colors.grey.shade500,
+                    color: isUpcoming ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
@@ -2817,7 +2856,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 Text(
                   _monthAbbr(v.startTime.month),
                   style: TextStyle(
-                    color: isUpcoming ? Colors.white70 : Colors.grey.shade400,
+                    color: isUpcoming ? Colors.white70 : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
@@ -3401,6 +3440,101 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     } else {
       return '${date.day}/${date.month}';
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _VisitSectionHeader — section title for upcoming/past visits
+// ---------------------------------------------------------------------------
+
+class _VisitSectionHeader extends StatelessWidget {
+  const _VisitSectionHeader({
+    required this.icon,
+    required this.title,
+    required this.count,
+    required this.color,
+    required this.isDark,
+  });
+
+  final IconData icon;
+  final String title;
+  final int count;
+  final Color color;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: color),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: isDark ? 0.25 : 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '$count',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _VisitEmptySection — placeholder when a section has no visits
+// ---------------------------------------------------------------------------
+
+class _VisitEmptySection extends StatelessWidget {
+  const _VisitEmptySection({
+    required this.message,
+    required this.isDark,
+  });
+
+  final String message;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 13,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
   }
 }
 
