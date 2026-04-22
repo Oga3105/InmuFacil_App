@@ -2906,7 +2906,45 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               ],
             ),
           ),
-          // Actions Menu
+          // Seller: Approve/Reject buttons for pending visits
+          if (isUpcoming && v.role == 'seller' && v.status == 'requested')
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _VisitActionButton(
+                  icon: Icons.check_circle_outline,
+                  color: const Color(0xFF16A34A),
+                  tooltip: 'Aceptar visita',
+                  onTap: () async {
+                    final ok = await updateVisitStatus(v.id, 'approved');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(ok ? 'Visita aceptada' : 'Error al aceptar la visita'),
+                        backgroundColor: ok ? const Color(0xFF16A34A) : Colors.red,
+                      ));
+                      ref.invalidate(myVisitsProvider);
+                    }
+                  },
+                ),
+                const SizedBox(width: 4),
+                _VisitActionButton(
+                  icon: Icons.cancel_outlined,
+                  color: Colors.red,
+                  tooltip: 'Rechazar visita',
+                  onTap: () async {
+                    final ok = await updateVisitStatus(v.id, 'rejected');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(ok ? 'Visita rechazada' : 'Error al rechazar la visita'),
+                        backgroundColor: ok ? const Color(0xFF64748B) : Colors.red,
+                      ));
+                      ref.invalidate(myVisitsProvider);
+                    }
+                  },
+                ),
+              ],
+            ),
+          // Actions Menu (reschedule / cancel)
           if (isUpcoming && v.status != 'cancelled' && v.status != 'rejected')
             PopupMenuButton<String>(
               icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurfaceVariant),
@@ -2931,18 +2969,27 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               ],
               onSelected: (action) async {
                 if (action == 'reschedule') {
+                  // Show cancel dialog, then redirect to booking page
+                  final reason = await showDialog<String>(
+                    context: context,
+                    builder: (_) => const VisitCancelDialog(),
+                  );
+                  if (reason == null) return;
+
                   if (v.id.startsWith('chat_')) {
                     final parts = v.id.split('_');
-                    if (parts.length > 1) {
-                       context.push('/chat/${parts[1]}');
-                    }
+                    if (parts.length > 1) context.push('/chat/${parts[1]}');
                   } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('profile.visit_reschedule_hint'.tr()),
-                        duration: Duration(seconds: 4),
-                      ),
-                    );
+                    final success = await ref.read(cancelVisitProvider(v.id).future);
+                    if (success && mounted) {
+                      ref.invalidate(myVisitsProvider);
+                      ref.invalidate(activeVisitForPropertyProvider(v.propertyId));
+                      context.push('/property/${v.propertyId}/visit');
+                    } else if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('profile.visit_cancel_error'.tr())),
+                      );
+                    }
                   }
                 } else if (action == 'cancel') {
                   final reason = await showDialog<String>(
@@ -2952,27 +2999,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   if (reason == null) return;
 
                   if (v.id.startsWith('chat_')) {
-                    // Navigate to chat detail screen to handle cancellation where the logic is
-                     final parts = v.id.split('_');
+                    final parts = v.id.split('_');
                     if (parts.length > 1) {
-                       context.push('/chat/${parts[1]}');
-                       ScaffoldMessenger.of(context).showSnackBar(
+                      context.push('/chat/${parts[1]}');
+                      ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('profile.visit_cancel_from_chat'.tr())),
                       );
                     }
                   } else {
-                     final success = await ref.read(cancelVisitProvider(v.id).future);
-                     if (success && mounted) {
-                       ScaffoldMessenger.of(context).showSnackBar(
-                         SnackBar(content: Text('profile.visit_cancelled_ok'.tr())),
-                       );
-                       ref.invalidate(myVisitsProvider);
-                       ref.read(slotsProvider(v.propertyId)); // trigger refresh of slots if applicable
-                     } else if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                         SnackBar(content: Text('profile.visit_cancel_error'.tr())),
-                       );
-                     }
+                    final success = await ref.read(cancelVisitProvider(v.id).future);
+                    if (success && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('profile.visit_cancelled_ok'.tr())),
+                      );
+                      ref.invalidate(myVisitsProvider);
+                    } else if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('profile.visit_cancel_error'.tr())),
+                      );
+                    }
                   }
                 }
               },
@@ -3356,6 +3401,44 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
     } else {
       return '${date.day}/${date.month}';
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// _VisitActionButton — approve/reject button for seller visit management
+// ---------------------------------------------------------------------------
+
+class _VisitActionButton extends StatelessWidget {
+  const _VisitActionButton({
+    required this.icon,
+    required this.color,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 20, color: color),
+        ),
+      ),
+    );
   }
 }
 

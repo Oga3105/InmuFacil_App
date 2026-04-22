@@ -424,6 +424,44 @@ Future<bool> createVisitWindow({
   }
 }
 
+// --- Active visit for a specific property (prevents duplicate bookings) ---
+
+final activeVisitForPropertyProvider = FutureProvider.autoDispose
+    .family<MyVisit?, String>((ref, propertyId) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  if (token == null) return null;
+
+  final dio = buildAuthDio();
+  dio.options.headers['Authorization'] = 'Bearer $token';
+
+  try {
+    final resp = await dio.get('/visits/agenda', queryParameters: {'role': 'buyer'});
+    final List<dynamic> data = resp.data is List ? resp.data as List : [];
+    for (final item in data) {
+      final map = item as Map<String, dynamic>;
+      final window = map['window'] as Map<String, dynamic>? ?? {};
+      final property = window['property'] as Map<String, dynamic>? ?? {};
+      final propId = (property['id'] ?? '').toString();
+      final status = (map['status'] as String?) ?? '';
+      if (propId == propertyId && (status == 'requested' || status == 'approved')) {
+        return MyVisit(
+          id: (map['id'] ?? '').toString(),
+          propertyTitle: (property['title'] as String?) ?? 'Propiedad',
+          propertyId: propId,
+          startTime: DateTime.tryParse(map['start_time'] as String? ?? '') ?? DateTime.now(),
+          status: status,
+          role: 'buyer',
+          notes: map['notes'] as String?,
+        );
+      }
+    }
+  } catch (_) {}
+  return null;
+});
+
+// --- Cancel visit ---
+
 final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmentId) async {
   const storage = FlutterSecureStorage();
   final token = await storage.read(key: 'auth_token');
@@ -441,3 +479,23 @@ final cancelVisitProvider = FutureProvider.family<bool, String>((ref, appointmen
     return false;
   }
 });
+
+// --- Update visit status (approve/reject) ---
+
+Future<bool> updateVisitStatus(String appointmentId, String newStatus) async {
+  const storage = FlutterSecureStorage();
+  final token = await storage.read(key: 'auth_token');
+  if (token == null) return false;
+
+  final dio = buildAuthDio();
+  dio.options.headers['Authorization'] = 'Bearer $token';
+
+  try {
+    await dio.patch('/visits/$appointmentId/status', data: {
+      'status': newStatus,
+    });
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
