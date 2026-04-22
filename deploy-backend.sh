@@ -129,7 +129,7 @@ ssh -o StrictHostKeyChecking=accept-new "$SERVER" \
    docker compose up -d --no-deps backend && \
    docker network disconnect $NGINX_NETWORK inmufacil_backend 2>/dev/null || true && \
    docker network connect --alias backend $NGINX_NETWORK inmufacil_backend && \
-   docker exec inmufacil_proxy nginx -s reload && \
+   docker restart inmufacil_proxy && \
    echo '' && \
    echo '--- Estado de contenedores ---' && \
    docker ps --filter name=inmufacil --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
