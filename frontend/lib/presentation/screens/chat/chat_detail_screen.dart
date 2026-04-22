@@ -101,66 +101,6 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     _scrollToBottom();
   }
 
-  Future<void> _requestDocuments() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: RichText(
-          text: const TextSpan(
-            children: [
-              TextSpan(
-                text: 'Solicitar',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: Color(0xFF135BEC),
-                ),
-              ),
-              TextSpan(
-                text: ' documentos',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
-                  color: Color(0xFF16A34A),
-                ),
-              ),
-            ],
-          ),
-        ),
-        content: const Text(
-          'Se enviara una solicitud de documentacion al otro participante.',
-        ),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () => Navigator.pop(context, false),
-            child: Text('common.cancel'.tr()),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF7C3AED),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text('chat.request_docs_button'.tr()),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
-    await ref
-        .read(chatDetailProvider(widget.offerId).notifier)
-        .sendAction(
-          actionType: 'docs_request',
-          metadata: {},
-        );
-    _scrollToBottom();
-  }
-
   Future<String?> _showDateTimePickerDialog() async {
     final picked = await showDatePicker(
       context: context,
@@ -457,7 +397,6 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
           _QuickActionBar(
             onVisit: _sendVisitRequest,
             onOffer: _sendOfferProposal,
-            onDocs: _requestDocuments,
             isBuyer: notifier.isBuyer,
             visitStatus: visitStatus,
             hasExistingOfferProposal: ['pending', 'counter_offer', 'accepted', 'signing_pending', 'signed', 'completed']
@@ -1497,7 +1436,6 @@ class _QuickActionBar extends StatelessWidget {
   const _QuickActionBar({
     required this.onVisit,
     required this.onOffer,
-    required this.onDocs,
     required this.isBuyer,
     required this.visitStatus,
     required this.hasExistingOfferProposal,
@@ -1505,7 +1443,6 @@ class _QuickActionBar extends StatelessWidget {
 
   final VoidCallback onVisit;
   final VoidCallback onOffer;
-  final VoidCallback onDocs;
   final bool isBuyer;
   /// 'none' | 'pending' | 'accepted' | rejected maps back to 'none'
   final String visitStatus;
@@ -1542,12 +1479,6 @@ class _QuickActionBar extends StatelessWidget {
             ),
             const SizedBox(width: 8),
           ],
-          _QuickActionButton(
-            icon: Icons.folder_outlined,
-            label: 'Documentos',
-            color: const Color(0xFF7C3AED),
-            onTap: onDocs,
-          ),
         ],
       ),
     );
