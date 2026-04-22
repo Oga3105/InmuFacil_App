@@ -964,7 +964,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                       child: Text(
                         d,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF94A3B8),
                         ),
@@ -973,7 +973,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                   ))
               .toList(),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
 
         // Days grid
         GridView.builder(
@@ -983,6 +983,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
             crossAxisCount: 7,
             mainAxisSpacing: 2,
             crossAxisSpacing: 2,
+            childAspectRatio: 1.3,
           ),
           itemCount: offset + daysInMonth,
           itemBuilder: (context, index) {
@@ -1040,16 +1041,16 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                       Text(
                         '${day.day}',
                         style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 12,
                             fontWeight: weight,
                             color: textColor),
                       ),
                       // Green dot for available days (not selected)
                       if (isAvailable && !isPast && !isSelected)
                         Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          width: 5,
-                          height: 5,
+                          margin: const EdgeInsets.only(top: 1),
+                          width: 4,
+                          height: 4,
                           decoration: const BoxDecoration(
                             color: Color(0xFF16A34A),
                             shape: BoxShape.circle,
