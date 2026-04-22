@@ -35,6 +35,7 @@ class VisitAppointment(Base):
     start_time = Column(DateTime(timezone=True), nullable=False)
     status = Column(Enum(VisitStatus, native_enum=False), default=VisitStatus.REQUESTED, nullable=False)
 
+    notes = Column(String, nullable=True)
     q_solvency = Column(String, nullable=True)
     q_timeline = Column(String, nullable=True)
     q_maturity = Column(String, nullable=True)

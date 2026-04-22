@@ -430,6 +430,7 @@ class VisitRequest(BaseModel):
     """
     window_id: int
     start_time: datetime
+    notes: Optional[str] = Field(None, description="Buyer message / comment for the seller")
     # Filtering Questions (optional — buyer may skip)
     q_solvency: Optional[str] = Field(None, description="Funding status (Contado, Hipoteca aprobada...)")
     q_timeline: Optional[str] = Field(None, description="Desired move-in date")
@@ -445,7 +446,8 @@ class VisitAppointmentResponse(BaseModel):
     buyer_id: int
     start_time: datetime
     status: str # requested, approved, rejected
-    
+    notes: Optional[str] = None
+
     # Answers (Visible to Seller)
     q_solvency: Optional[str] = None
     q_timeline: Optional[str] = None
