@@ -2914,7 +2914,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 _VisitActionButton(
                   icon: Icons.check_circle_outline,
                   color: const Color(0xFF16A34A),
-                  tooltip: 'Aceptar visita',
+                  label: 'Aceptar',
                   onTap: () async {
                     final ok = await updateVisitStatus(v.id, 'approved');
                     if (mounted) {
@@ -2926,11 +2926,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     }
                   },
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
                 _VisitActionButton(
                   icon: Icons.cancel_outlined,
                   color: Colors.red,
-                  tooltip: 'Rechazar visita',
+                  label: 'Rechazar',
                   onTap: () async {
                     final ok = await updateVisitStatus(v.id, 'rejected');
                     if (mounted) {
@@ -3412,30 +3412,40 @@ class _VisitActionButton extends StatelessWidget {
   const _VisitActionButton({
     required this.icon,
     required this.color,
-    required this.tooltip,
+    required this.label,
     required this.onTap,
   });
 
   final IconData icon;
   final Color color;
-  final String tooltip;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20, color: color),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
         ),
       ),
     );

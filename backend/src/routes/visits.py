@@ -398,6 +398,7 @@ async def book_visit_slot(
         buyer_id=current_user.id,
         start_time=request.start_time,
         status=VisitStatus.REQUESTED,
+        notes=request.notes,
         # Filtering Answers
         q_solvency=request.q_solvency,
         q_timeline=request.q_timeline,
