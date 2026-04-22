@@ -207,7 +207,7 @@ final chatVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
 DateTime? _parseVisitDateStr(String? s) {
   if (s == null || s.isEmpty) return null;
   final iso = DateTime.tryParse(s);
-  if (iso != null) return iso.toLocal();
+  if (iso != null) return iso;
   try {
     final parts = s.split(' ');
     final dp = parts[0].split('/');
@@ -250,7 +250,7 @@ final myVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
       propertyTitle: (property['title'] as String?) ?? 'Propiedad',
       propertyId: (property['id'] ?? '').toString(),
       startTime:
-          DateTime.tryParse(map['start_time'] as String? ?? '')?.toLocal() ??
+          DateTime.tryParse(map['start_time'] as String? ?? '') ??
               DateTime.now(),
       status: (map['status'] as String?) ?? 'requested',
       role: role,

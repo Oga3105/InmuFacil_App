@@ -124,10 +124,14 @@ async def list_visit_requests(
     return requests
 
 
+class StatusUpdate(BaseModel):
+    status: str
+
+
 @router.patch("/{appointment_id}/status", response_model=VisitAppointmentResponse)
 async def update_visit_status(
     appointment_id: int,
-    new_status: str, 
+    body: StatusUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
@@ -153,22 +157,23 @@ async def update_visit_status(
         raise HTTPException(status_code=403, detail="Not authorized")
 
     current_status = appointment.status
-    
+    new_status = body.status
+
     # 1. State Machine Logic
     # ----------------------------------------------------------------
-    
+
     # CANCELLED (Universal)
     if new_status == VisitStatus.CANCELLED:
         if current_status in [VisitStatus.COMPLETED, VisitStatus.NO_SHOW, VisitStatus.REJECTED]:
              raise HTTPException(status_code=400, detail="Cannot cancel finalized visit")
         # Proceed
-        
+
     # SELLER ACTIONS
     elif is_seller:
         if new_status in [VisitStatus.APPROVED, VisitStatus.REJECTED]:
             if current_status != VisitStatus.REQUESTED:
                 raise HTTPException(status_code=400, detail=f"Cannot change from {current_status} to {new_status}")
-                
+
         elif new_status in [VisitStatus.COMPLETED, VisitStatus.NO_SHOW]:
             if current_status != VisitStatus.APPROVED:
                 raise HTTPException(status_code=400, detail="Visit must be APPROVED before completion")
@@ -181,7 +186,7 @@ async def update_visit_status(
              pass # Allowed checks done above
         else:
             raise HTTPException(status_code=403, detail="Buyer can only CANCEL visits")
-            
+
     # 2. Update
     appointment.status = new_status
     db.commit()
