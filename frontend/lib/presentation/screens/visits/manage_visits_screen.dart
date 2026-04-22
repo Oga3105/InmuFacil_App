@@ -29,58 +29,94 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        elevation: 0,
         automaticallyImplyLeading: false,
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
           child: AppBarBackButton(
-            onPressed: () => context.canPop() ? context.pop() : context.go('/'),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
           ),
         ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset('assets/images/logo_inmufacil.png', height: 28),
-            const SizedBox(width: 8),
-            Text.rich(
-              TextSpan(children: [
-                TextSpan(
-                  text: 'Inmu',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
+        title: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => context.go('/'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/images/logo_inmufacil.png', height: 32),
+                const SizedBox(width: 8),
+                const Text.rich(
+                  TextSpan(
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                    children: [
+                      TextSpan(
+                          text: 'Inmu',
+                          style: TextStyle(color: Color(0xFF135BEC))),
+                      TextSpan(
+                          text: 'Facil',
+                          style: TextStyle(color: Color(0xFF16A34A))),
+                    ],
                   ),
                 ),
-                const TextSpan(
-                  text: 'Facil',
-                  style: TextStyle(
-                    color: Color(0xFF1E293B),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                  ),
-                ),
-              ]),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Inicio',
-            icon: const Icon(Icons.home_outlined),
-            onPressed: () => context.go('/'),
           ),
-          const UserAvatarMenu(),
-          const SizedBox(width: 16),
-        ],
+        ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            color: Theme.of(context).colorScheme.outlineVariant,
-            height: 1,
-          ),
+          child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
         ),
+        actions: [
+          Builder(builder: (context) {
+            final isMobile = MediaQuery.of(context).size.width < 650;
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isMobile) ...[
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () => context.go('/'),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF135BEC),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF135BEC).withOpacity(0.25),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                            SizedBox(width: 6),
+                            Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+                const UserAvatarMenu(),
+                const SizedBox(width: 16),
+              ],
+            );
+          }),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 40),

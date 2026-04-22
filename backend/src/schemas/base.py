@@ -430,10 +430,10 @@ class VisitRequest(BaseModel):
     """
     window_id: int
     start_time: datetime
-    # Filtering Questions
-    q_solvency: str = Field(..., description="Funding status (Contado, Hipoteca aprobada...)")
-    q_timeline: str = Field(..., description="Desired move-in date")
-    q_maturity: str = Field(..., description="Experience level (First visit, etc)")
+    # Filtering Questions (optional — buyer may skip)
+    q_solvency: Optional[str] = Field(None, description="Funding status (Contado, Hipoteca aprobada...)")
+    q_timeline: Optional[str] = Field(None, description="Desired move-in date")
+    q_maturity: Optional[str] = Field(None, description="Experience level (First visit, etc)")
 
 
 class VisitAppointmentResponse(BaseModel):
