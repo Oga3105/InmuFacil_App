@@ -45,6 +45,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
   Widget build(BuildContext context) {
     final slotsAsync = ref.watch(slotsProvider(widget.propertyId));
     final bookingState = ref.watch(bookVisitProvider);
+    final activeVisitAsync = ref.watch(activeVisitForPropertyProvider(widget.propertyId));
     final property = ref
         .watch(searchProvider)
         .filteredProperties
@@ -58,6 +59,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
           backgroundColor: Color(0xFF16A34A),
         ));
         ref.read(bookVisitProvider.notifier).reset();
+        ref.invalidate(activeVisitForPropertyProvider(widget.propertyId));
         context.pop();
       } else if (next.status == BookingStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -67,6 +69,61 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
         ref.read(bookVisitProvider.notifier).reset();
       }
     });
+
+    // Guard: if buyer already has an active visit for this property
+    final activeVisit = activeVisitAsync.value;
+    if (activeVisit != null) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        appBar: _buildAppBar(context),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.event_available, size: 32, color: Color(0xFF135BEC)),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Ya tienes una visita agendada para esta propiedad',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Estado: ${activeVisit.status == "requested" ? "Pendiente de confirmacion" : "Confirmada"}',
+                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${activeVisit.startTime.day}/${activeVisit.startTime.month}/${activeVisit.startTime.year} a las ${activeVisit.startTime.hour.toString().padLeft(2, '0')}:${activeVisit.startTime.minute.toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF135BEC)),
+                ),
+                const SizedBox(height: 24),
+                FilledButton.icon(
+                  onPressed: () => context.push('/profile?tab=3'),
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text('Ver mis visitas'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF135BEC),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,

@@ -368,7 +368,21 @@ async def book_visit_slot(
     # Ensure start_time matches a valid slot start
     # Simplified: check if start_time is between window start/end
 
-    # 3. Check availability (Race Condition Safety needed for Production, simple check for MVP)
+    # 3. Prevent duplicate booking: same buyer cannot have an active visit for same property
+    active_statuses = [VisitStatus.REQUESTED, VisitStatus.APPROVED]
+    duplicate = db.query(VisitAppointment).join(VisitWindow).filter(
+        VisitWindow.property_id == window.property_id,
+        VisitAppointment.buyer_id == current_user.id,
+        VisitAppointment.status.in_(active_statuses)
+    ).first()
+
+    if duplicate:
+        raise HTTPException(
+            status_code=409,
+            detail="Ya tienes una visita programada para esta propiedad"
+        )
+
+    # 4. Check slot availability
     existing = db.query(VisitAppointment).filter(
         VisitAppointment.window_id == window.id,
         VisitAppointment.start_time == request.start_time,

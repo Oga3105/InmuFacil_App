@@ -24,6 +24,7 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/demo_banner.dart';
 import '../../widgets/property/document_status_section.dart';
 import '../../widgets/property/comfort_radar_chart.dart';
+import '../../providers/visits_provider.dart';
 
 String _obfuscateAddress(String address) {
   if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
@@ -456,7 +457,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         // Mobile fixed bottom action bar
         Positioned(
           bottom: 0, left: 0, right: 0,
-          child: _ActionBar(property: property, ref: ref, context: context),
+          child: _ActionBar(property: property, context: context),
         ),
       ],
     );
@@ -1066,7 +1067,7 @@ class _SummaryCard extends ConsumerWidget {
             ],
           ),
           // Action buttons
-          _ActionBar(property: property, ref: ref, context: context, vertical: true),
+          _ActionBar(property: property, context: context, vertical: true),
         ],
       ),
     );
@@ -1228,20 +1229,18 @@ class _ViabilityMetric extends StatelessWidget {
 
 // ─── Shared action-bar (desktop vertical + mobile horizontal) ──────────────────
 
-class _ActionBar extends StatelessWidget {
+class _ActionBar extends ConsumerWidget {
   const _ActionBar({
     required this.property,
-    required this.ref,
     required this.context,
     this.vertical = false,
   });
   final Property property;
-  final WidgetRef ref;
   final BuildContext context;
   final bool vertical;
 
   // ── guard: returns true if the action can proceed ──
-  bool _canAct(String action) {
+  bool _canAct(String action, WidgetRef ref) {
     final auth = ref.read(authProvider);
     final isLoggedIn = auth.isAuthenticated;
     if (!isLoggedIn) {
@@ -1332,26 +1331,34 @@ class _ActionBar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context2) {
+  Widget build(BuildContext context2, WidgetRef ref) {
     final auth = ref.watch(authProvider);
     final currentUserId = auth.user?.id;
     final isOwner = property.ownerId != null &&
         currentUserId != null &&
         property.ownerId == currentUserId;
+    final activeVisitAsync = auth.isAuthenticated && !isOwner
+        ? ref.watch(activeVisitForPropertyProvider(property.id))
+        : null;
+    final activeVisit = activeVisitAsync?.value;
 
     if (vertical) {
       // Desktop: vertical stack
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (activeVisit != null)
+            _VisitStatusBanner(visit: activeVisit, propertyId: property.id),
           if (!isOwner) ...[
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                    onPressed: activeVisit != null
+                        ? null
+                        : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
                     icon: const Icon(Icons.calendar_month_outlined, size: 20),
-                    label: const Text('Solicitar Visita', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita', style: const TextStyle(fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1361,7 +1368,7 @@ class _ActionBar extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                    onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                     icon: const Icon(Icons.gavel_rounded, size: 20),
                     label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
                     style: FilledButton.styleFrom(
@@ -1414,14 +1421,18 @@ class _ActionBar extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (activeVisit != null)
+            _VisitStatusBanner(visit: activeVisit, propertyId: property.id),
           if (!isOwner) ...[
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () { if (_canAct('visit')) context.push('/property/${property.id}/visit'); },
+                    onPressed: activeVisit != null
+                        ? null
+                        : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
                     icon: const Icon(Icons.calendar_month_outlined),
-                    label: const Text('Solicitar Visita'),
+                    label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color(0xFF0f172a),
                       side: const BorderSide(color: Color(0xFF0f172a), width: 2),
@@ -1435,7 +1446,7 @@ class _ActionBar extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: FilledButton.icon(
-                    onPressed: () { if (_canAct('offer')) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                    onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                     icon: const Icon(Icons.gavel_rounded),
                     label: const Text('Hacer Oferta'),
                     style: FilledButton.styleFrom(
@@ -1478,6 +1489,75 @@ class _ActionBar extends StatelessWidget {
     );
   }
 }
+
+class _VisitStatusBanner extends StatelessWidget {
+  const _VisitStatusBanner({required this.visit, required this.propertyId});
+  final MyVisit visit;
+  final String propertyId;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPending = visit.status == 'requested';
+    final color = isPending ? const Color(0xFFF59E0B) : const Color(0xFF16A34A);
+    final bgColor = isPending ? const Color(0xFFFFFBEB) : const Color(0xFFF0FDF4);
+    final borderColor = isPending ? const Color(0xFFFDE68A) : const Color(0xFFBBF7D0);
+    final icon = isPending ? Icons.hourglass_top_rounded : Icons.check_circle_outline;
+    final label = isPending ? 'Visita pendiente de confirmacion' : 'Visita confirmada';
+    final hour = '${visit.startTime.hour.toString().padLeft(2, '0')}:${visit.startTime.minute.toString().padLeft(2, '0')}';
+    final day = '${visit.startTime.day}/${visit.startTime.month}/${visit.startTime.year}';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: color),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$day a las $hour',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+                ),
+              ],
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.push('/profile?tab=3'),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: const Text(
+                  'Ver visita',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E293B)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 class _OwnerVisitsToggle extends StatefulWidget {
   const _OwnerVisitsToggle({required this.property, required this.ref});
