@@ -1,70 +1,87 @@
-# InmuFácil - Frontend
+# 📱 InmuFacil — Frontend
 
-Aplicación Multiplataforma (Mobile-First y Web) desarrollada con **Flutter** e inyección de dependencias reactiva mediante **Riverpod**.
+Aplicacion Multiplataforma (Web + Android) desarrollada con **Flutter** y gestion de estado reactiva con **Riverpod v3**.
 
-## 📚 Documentación
+## 📚 Documentacion
 
-Para mantener una fuente única de la verdad, toda la documentación reside en el directorio raíz `/docs`.
+Para mantener una fuente unica de la verdad, toda la documentacion reside en el directorio raiz `/docs`.
 
-**Enlaces Útiles para el Frontend:**
-- [UI y Personalización (ThemeData)](../docs/THEME_CUSTOMIZATION.md)
-- [Testing de Widgets](../docs/TESTING_STRATEGY.md)
-- [Contratos DTO y API](../docs/CONTRACTS.md)
-- [Arquitectura (Layered/Clean)](../docs/ARCHITECTURE.md)
+| Documento | Enlace |
+|-----------|--------|
+| 🎨 UI y Personalizacion (ThemeData) | [THEME_CUSTOMIZATION.md](../docs/THEME_CUSTOMIZATION.md) |
+| 🧪 Testing de Widgets | [TESTING_STRATEGY.md](../docs/TESTING_STRATEGY.md) |
+| 📦 Contratos DTO y API | [CONTRACTS.md](../docs/CONTRACTS.md) |
+| 🏗️ Arquitectura (Layered/Clean) | [ARCHITECTURE.md](../docs/ARCHITECTURE.md) |
 
-## 🌟 Key Features
+## 🌟 Funcionalidades
 
+- 🔑 Autenticacion: login, registro, Google OAuth, MFA email
+- 👤 Perfil: foto, KYC (camara/galeria), verificacion DNI/NIE/Pasaporte
+- 🏘️ Publicacion: wizard 5 pasos con descripcion IA (Gemini)
+- 🗺️ Mapa interactivo: flutter_map + OpenStreetMap
+- 📋 Listado inteligente: SmartExplorerCard, filtros avanzados, comparador
+- 💬 Chat P2P: mensajeria con acciones rapidas (visita, oferta)
+- 📅 Visitas: calendario, reserva de slots, proximas/pasadas
+- 💰 Ofertas: contraofertas, timeline, arras, firma digital
+- 🪪 Solvency Passport: asistente de solvencia
+- 🌍 i18n: 9 idiomas (es, en, fr, de, it, pt, zh, ar, ro)
+- 🔒 GDPR: consentimiento IA, trust dashboard
 
-Para mantener una fuente única de la verdad, toda la documentación reside en el directorio raíz `/docs`.
+## 🏗️ Estructura
 
-**Enlaces Útiles para el Frontend:**
-- [UI y Personalización (ThemeData)](../docs/THEME_CUSTOMIZATION.md)
-- [Testing de Widgets](../docs/TESTING_STRATEGY.md)
-- [Contratos DTO y API](../docs/CONTRACTS.md)
-- [Arquitectura (Layered/Clean)](../docs/ARCHITECTURE.md)
+```
+lib/
+├── core/                    # Config, formatters, utils
+│   └── formatters/          # CurrencyInputFormatter (solo enteros)
+├── data/                    # Repositories, data sources, DTOs
+├── domain/                  # Entities, use cases
+└── presentation/
+    ├── screens/             # 50+ pantallas
+    │   ├── auth/            # Login, registro, onboarding
+    │   ├── property/        # Detalle, publicacion, edicion
+    │   ├── chat/            # Lista, detalle
+    │   ├── visits/          # Calendario, gestion
+    │   ├── offers/          # Negociacion, timeline
+    │   └── ...
+    ├── widgets/             # Componentes reutilizables
+    └── providers/           # Riverpod state management
+```
 
-## 🚀 Inicio Rápido (Localhost)
+## 🚀 Inicio Rapido
 
 ```bash
-# 1. Obtener dependencias de pubspec
+# 1. Instalar dependencias
 flutter pub get
 
-### 🔒 Security & Limits
-- **Rate Limiting:** Debounced requests (500ms) to comply with Nominatim's 1 req/sec policy.
-- **Input Sanitization:** Search queries are trimmed, length-limited (200 chars), and validated against a whitelist.
-- **User-Agent:** Compliant headers included in all requests.
+# 2. Configurar variables de entorno
+# Editar .env con API_BASE_URL y GOOGLE_WEB_CLIENT_ID
 
-## 🎨 404 "Not Found" Experience
+# 3. Ejecutar en desarrollo
+flutter run -d chrome --web-port 8001
 
-A custom, secure, and internationally friendly 404 page.
+# 4. Build produccion (Web)
+MSYS_NO_PATHCONV=1 flutter build web --release --base-href /TFM/
+```
 
-- **Design:** Pixel-Perfect reproduction of isometric 3D art using native Flutter widgets (No heavy assets).
-- **Security:** "Notify Me" form includes robust email validation (Regex) and state management to prevent spam.
-- **i18n:** Fully translated into 9 languages including error messages and UI elements.
-- **Responsiveness:** Adapts layout for mobile (Column) and desktop (Row).
+## 🧪 Testing
 
-## 🚀 Getting Started
+```bash
+flutter test
+flutter test --coverage
+genhtml coverage/lcov.info -o coverage/html
+```
 
-1. **Install Dependencies:**
-   ```bash
-   flutter pub get
-   ```
-2. **Run Development Server:**
-   ```bash
-   flutter run -d chrome --web-port 8001
-   ```
+## ⚙️ Configuracion
 
-## 🏗️ Project Structure
+| Variable | Descripcion |
+|----------|-------------|
+| `API_BASE_URL` | URL del backend (default: `https://inmufacil.com/api/v1`) |
+| `GOOGLE_WEB_CLIENT_ID` | Google OAuth Client ID |
+| `API_TIMEOUT` | Timeout HTTP en ms (default: 30000) |
 
-- `lib/presentation/`: UI components (Screens, Widgets, Providers).
-- `lib/domain/`: Business logic and Entities.
-- `lib/data/`: Repositories and API implementation.
-- `lib/core/`: Utilities, Services, and Configuration.
-- `assets/translations/`: i18n JSON files.
+## 📐 Convenciones
 
-## 📝 Configuration
-
-- **Map Provider:** OpenStreetMap (No API key required).
-- **Geocoding:** Nominatim (Free, rate-limited).
-- **Backend:** Expects API at localhost:8000 (configurable in .env).
-
+- 🌍 **i18n obligatorio**: usar `.tr()` en todo texto visible — nunca hardcodear strings
+- 💰 **Importes monetarios**: solo `int`, usar `CurrencyInputFormatter`
+- 📱 **Riverpod v3**: `FutureProvider.autoDispose.family` para datos async con parametro
+- 🎨 **Material Design 3**: seguir `Theme.of(context).colorScheme` para dark/light mode

@@ -44,7 +44,7 @@
 | Contratos | OPERACIONAL | PDF dinamico con ReportLab, arras, firma digital |
 | i18n | OPERACIONAL | 9 idiomas (es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO) |
 | DNS/CDN | CONFIGURADO | Cloudflare — dominio inmufacil.com activo |
-| VPS Despliegue | EN PROGRESO | Nuevo servidor VPS en configuracion |
+| VPS Despliegue | OPERACIONAL | Debian 12, IP 87.106.247.84, Docker + Nginx |
 
 ### Hitos Completados (Backend)
 
@@ -174,7 +174,7 @@
 ### Infraestructura
 - **Docker + Docker Compose** — contenedorizacion completa (backend + db)
 - **Cloudflare** — DNS, proxy, SSL/TLS (dominio inmufacil.com)
-- **VPS (nuevo)** — Debian 12, configuracion en progreso
+- **VPS** — Debian 12, operacional (IP 87.106.247.84)
 - **GitHub Actions** — CI/CD (workflows en .github/)
 
 ---

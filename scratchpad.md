@@ -1,198 +1,111 @@
 # Memoria del Proyecto InmuFacil
 
-**Version:** 12.0
-**Fecha ultima actualizacion:** 2026-03-22
-**Estado:** DOCUMENTACION ACTUALIZADA — Google OAuth implementado
+**Version:** 13.0
+**Fecha ultima actualizacion:** 2026-04-22
+**Estado:** MVP OPERACIONAL — Backend + Frontend desplegados en produccion
 **Repositorio:** https://github.com/Oga3105/InmuFacil_App.git
 **Rama principal de desarrollo:** `develop`
-**Ultimo commit en develop:** ac02e0b — Merge PR #160 (lifestyle integration)
-**En progreso:** `feature/google-oauth-registration` (PR #161 abierto)
+**URL produccion:** https://inmufacil.com/TFM/
 
 ---
 
-## Estado de Ramas
+## Infraestructura de Produccion
 
-| Rama | Estado | Descripcion |
+| Componente | Estado | Detalle |
 |---|---|---|
-| `develop` | Rama principal | Base de todo el desarrollo |
-| `feature/google-oauth-registration` | PR #161 abierto | Google OAuth implementado, pendiente merge |
-| `docs/update-project-documentation-march-2026` | En progreso | Esta rama — actualizacion docs |
+| Backend FastAPI | OPERACIONAL | Docker container, puerto 8000 |
+| PostgreSQL 15 | OPERACIONAL | Docker volume `inmufacil_postgres_data` |
+| Nginx Proxy | OPERACIONAL | SSL via Cloudflare, puertos 80/443 |
+| Frontend Flutter Web | OPERACIONAL | Servido en /TFM/ via Nginx |
+| DNS/CDN | CONFIGURADO | Cloudflare — dominio inmufacil.com activo |
+| VPS | OPERACIONAL | Debian 12, IP 87.106.247.84 |
+
+### Credenciales de produccion (DB)
+- Usuario: `user_admin`
+- Base de datos: `inmufacil_prod`
+- Directorio: `/opt/inmufacil`
 
 ---
 
-## Estrategia de Ramificacion (Git Flow)
+## Hitos Completados (Backend — 17/17)
 
-- **Rama de Desarrollo:** `develop`
-- **Rama Produccion Estable:** `main`
-- **Politica:** Todo desarrollo en ramas `feature/` o `fix/`. PR obligatoria para merge a `develop`. Solo versiones validadas fusionan a `main`.
-
----
-
-## Hitos Completados (Backend FastAPI)
-
-### Hito 1-2: Estructura Base + KYC Seguro
-- Autenticacion JWT completa (registro, login, MFA email, recuperacion contrasena)
-- KYC: cifrado AES-256-GCM para DNI/telefono, redaccion automatica, validacion MIME
-- MFA: tokens 6 digitos, 15 min expiracion
-- Brute Force Prevention (MITRE T1110)
-- Audit logging sin datos sensibles
-
-### Hito 3: Escudo Anti-Agencias
-- Filtro heurístico: 30+ dominios, 40+ keywords
-- Validacion multi-factor, IP tracking, 15+ tests
-
-### Hito 4: Busqueda y Filtrado
-- SQL Query Builder dinamico (precio, m2, habitaciones, tipo, georeferencia)
-- Prevencion SQL Injection via Pydantic + ORM
-
-### Hito 5: Visitas en Bloque
-- Algoritmo de slot scheduling automatico
-- Dashboard de estado (Requested, Approved, Completed)
-- RBAC: Owner vs Buyer
-
-### Hito 6: Ofertas Transparentes
-- Modelo `PropertyOffer` transaccional
-- Prevencion auto-ofertas, estados gestionados
-
-### Hito 7: Negociacion Hibrida
-- Protocolo de contraofertas
-- Chat encriptado (Fernet) activado bajo demanda
-- Historial de negociacion inmutable
-
-### Hito 8: Reserva y Senal
-- Payment Mock Provider
-- Idempotencia, bloqueo de concurrencia
-- Visibilidad configurable al reservar
-
-### Hito 9: Verificacion Documental
-- OCR de Nota Simple (EasyOCR)
-- Deteccion automatica de Referencia Catastral
-- Politica de retencion y borrado seguro
-
-### Hito 10: Tasacion
-- Algoritmo de valoracion comparativa
-- Historico de tasaciones
-- Mock de fuentes externas
-
-### Hito 11: Financiacion
-- Scoring hipotecario, simulacion de cuotas
-- Mock meta-buscador: iAhorro, BBVA, Santander
-- Rol FINANCIERO y asignacion de asesores
-
-### Hito 12: Contratos Dinamicos
-- Generacion PDF con ReportLab (Arras Penitenciales)
-- Cuestionario legal (clausulas condicionales: Cuerpo Cierto, AML, etc.)
-- Analisis de contratos propios con Gemini AI
-- Consentimiento expreso + liability waiver en DB
-
-### Hito 13: Firma Digital
-- Arquitectura hexagonal (Ports & Adapters)
-- Mock provider con tokens OTP (secrets.token_urlsafe)
-- Trazabilidad de estados: SIGNING_PENDING -> SIGNED
-
-### Hito 14: Preparacion Notarial
-- Gestion de notarios colaboradores
-- Dossier ZIP: contrato, nota simple, DNIs desencriptados, MANIFEST.txt SHA-256
-- The Great Unmasking (des-anonimizacion controlada)
-
-### Hito 15: Cierre Definitivo
-- Automatizacion de estado SOLD/COMPLETED
-- Certificado de Cierre Digital
-- Integracion con Timeline
-
-### Hito 16: Post-Sales Intelligence
-- Estimador de costes (ITP, notaria, registro)
-- Traspaso seguro de suministros (CUPS, facturas cifradas)
-- Compliance legal (disclaimers obligatorios)
-
-### Hito 17: Mercado de Servicios
-- API Router unificado `/services/*`
-- RBAC (Admin/Provider/User)
-- Tickets y seguimiento de ordenes
-- Modelos extensibles (notarios, tasadores, mudanzas)
+- **Hito 1-2:** Estructura base, autenticacion JWT, KYC cifrado AES-256-GCM
+- **Hito 3:** Anti-agency filter (Escudo Anti-Inmo) — 30+ dominios, 40+ keywords
+- **Hito 3b:** Propiedades e Inteligencia de Datos (CRUD + Satelites)
+- **Hito 4:** Busqueda y filtrado + Visitas en Bloque (slot scheduling)
+- **Hito 5:** Realizacion de Visitas (maquina de estados, dashboard)
+- **Hito 6:** Ofertas Transparentes (anti-auto-oferta)
+- **Hito 7:** Negociacion Hibrida (contraofertas + Chat encriptado Fernet)
+- **Hito 8:** Reserva y Senal (Payment Mock, idempotencia)
+- **Hito 9:** Verificacion Documental (Nota Simple OCR, ref. catastral)
+- **Hito 10:** Tasacion (algoritmo comparativo, historico)
+- **Hito 11:** Financiacion (scoring hipotecario, simulacion cuotas)
+- **Hito 12:** Contratos Dinamicos (ReportLab PDF, cuestionario legal, IA Gemini)
+- **Hito 13:** Firma Digital (arquitectura hexagonal, mock provider, tokens OTP)
+- **Hito 14:** Preparacion Notarial (dossier ZIP, SHA-256 manifest)
+- **Hito 15:** Cierre Definitivo (certificado digital, SOLD/COMPLETED)
+- **Hito 16:** Post-Sales Intelligence (ITP/notaria/registro, traspaso suministros)
+- **Hito 17:** Mercado de Servicios (API unificada, RBAC, tickets, ordenes)
 
 ---
 
-## Funcionalidades Frontend Flutter (Completadas)
+## Funcionalidades Frontend Flutter (50+ pantallas)
 
 ### Core
-- Login, registro, recuperacion de contrasena
-- Google OAuth (PR #161 — pendiente merge)
+- Login, registro, recuperacion de contrasena, Google OAuth
 - Perfil de usuario: foto, edicion, cambio de contrasena
-- KYC: captura de documento (camara/galeria), validacion numero (NIE/NIF/Pasaporte con checksum)
+- KYC: captura de documento (camara/galeria), validacion numero (NIE/NIF/Pasaporte)
 - Solvency Passport: asistente wizard, segundo comprador
-- Chat: lista de conversaciones, detalle con mensajeria
+- Chat P2P: lista de conversaciones, detalle con mensajeria, acciones rapidas
 - Notificaciones push (backend)
 
 ### Propiedades
-- Wizard de publicacion 5 pasos (tipo/ubicacion → detalles/precio → fotos → descripcion IA → preview)
+- Wizard de publicacion 5 pasos (tipo/ubicacion, detalles/precio, fotos, descripcion IA, preview)
 - Listado: grid inteligente (SmartExplorerCard), filtros avanzados
 - Mapa interactivo: flutter_map + OpenStreetMap, filtros geograficos
 - Comparador hibrido de propiedades
-- CEE (Certificado Eficiencia Energetica): display en tarjeta de propiedad
-- ComfortRadar: widget de indice de confort por barrio
-- Lifestyle questionnaire: matching de barrio por estilo de vida
+- CEE (Certificado Eficiencia Energetica): display en tarjeta
+- ComfortRadar: indice de confort por barrio
+- Lifestyle questionnaire: matching de barrio
+
+### Visitas
+- Calendario de disponibilidad del vendedor
+- Reserva de slots por el comprador (con notas/comentarios)
+- Seccion proximas/pasadas con orden inteligente
+- Botones Aceptar/Rechazar con texto para el vendedor
+- Reprogramacion y cancelacion
+- Prevencion de duplicados (un comprador, una visita activa por inmueble)
+- Slots cancelados se liberan para rebooking
 
 ### Flujo de Compraventa
-- Make Offer screen con validacion monetaria
+- Make Offer con validacion monetaria (solo enteros, separador de miles)
 - Offer Management: contraofertas, timeline de estados
-- Arras Interview (3 paginas)
-- Arras buyer/seller stepper
-- Smart Bid Risk: analisis de riesgo de oferta
-- Pre-offer tax summary (ITP estimado)
-- Transaction Timeline completo: tasacion, FEIN, notaria, firma, post-venta, entrega llaves
+- Arras Interview (3 paginas), buyer/seller stepper
+- Smart Bid Risk, pre-offer tax summary
+- Transaction Timeline: tasacion, FEIN, notaria, firma, post-venta, entrega llaves
 
 ### Legal y Seguridad
 - Info screen (9 tipos de informacion legal/funcional)
-- Trust Dashboard (Bronze/Silver/Gold segun nivel de verificacion)
-- GDPR AI Consent: consentimiento explicito por tipo de IA (RGPD Art. 6.1.a)
-- AI Consent History screen (historial de cambios)
-- Onboarding Google: GDPR consent + user type selection
-
-### Admin
-- AI analytics dashboard
-- Weekly report screen
+- Trust Dashboard (Bronze/Silver/Gold)
+- GDPR AI Consent (RGPD Art. 6.1.a), historial de consentimientos
 
 ### i18n
 - 9 idiomas: es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO
 
 ---
 
-## Infraestructura
+## PRs Recientes (Abril 2026)
 
-### DNS / Cloudflare
-- Nameservers de IONOS cambiados a Cloudflare
-- Zone ID: 117f5abc1238908b73a3cea2c8b2bd6a
-- Registros A configurados: raiz, www, api → IP VPS
-- Proxy Cloudflare activo (icono naranja)
-- Dominio principal: inmufacil.com
-
-### VPS
-- Nuevo VPS adquirido (Marzo 2026), configuracion en progreso
-- SO: Debian 12
-- Docker: instalacion pendiente
-
-### Local
-- Docker Compose con backend (FastAPI puerto 8000) + PostgreSQL 15
-- Frontend corre en localhost:8001 (flutter run -d chrome --web-port 8001)
-
----
-
-## Pendientes
-
-### Inmediatos
-- [ ] Completar instalacion Docker en nuevo VPS
-- [ ] Configurar Nginx en VPS para servir Flutter Web en /TFM
-- [ ] Build Flutter Web produccion y subir al VPS
-- [ ] Merge PR #161 (Google OAuth) tras completar instalacion Docker y verificar en produccion
-- [ ] Cambiar contrasena root del VPS (seguridad)
-- [ ] Configurar GOOGLE_WEB_CLIENT_ID en ambos .env con credencial real de Google Cloud
-
-### A medio plazo
-- [ ] Configurar dominios adicionales (inmufacil.es, etc.) con redirect rules en Cloudflare
-- [ ] Activar HTTPS Full (strict) en Cloudflare una vez VPS tenga certificado
-- [ ] Configurar `X-Robots-Tag: noindex` durante fase TFM
-- [ ] Configurar GitHub Actions para CI/CD automatico
+| PR | Descripcion | Estado |
+|---|---|---|
+| #246 | fix(chat): remove non-functional documents button | Merged |
+| #245 | feat(visits): split into upcoming and past sections | Merged |
+| #244 | feat(visits): buyer notes and labeled action buttons | Merged |
+| #243 | fix(visits): free slots when visit is cancelled | Merged |
+| #242 | feat(visits): complete visit flow (approve/reject, duplicate guard, status banner) | Merged |
+| #241 | fix(visit): cancel endpoint and timezone offset | Merged |
+| #240 | fix(visits): appbar styling and booking 422 fix | Merged |
+| #239 | fix(comfort): remove cached label and improve AI disclaimer | Merged |
 
 ---
 
@@ -200,7 +113,7 @@
 
 ### Variables de Entorno (NUNCA en git)
 - `DATABASE_URL` — URL de conexion PostgreSQL
-- `SECRET_KEY_JWT` — firma JWT (cambiar en produccion)
+- `SECRET_KEY_JWT` — firma JWT
 - `INMUFACIL_MASTER_KEY` — cifrado AES-256 PII
 - `GEMINI_API_KEY` — API de Gemini
 - `GOOGLE_WEB_CLIENT_ID` — OAuth Web Client ID
@@ -217,14 +130,10 @@
 
 | Archivo | Estado | Contenido |
 |---|---|---|
-| `docs/vision_proyecto.md` | ACTUALIZADO (v12.0) | Vision completa con estado actual Marzo 2026 |
+| `README.md` | ACTUALIZADO (Abril 2026) | Indice principal del proyecto |
+| `docs/vision_proyecto.md` | ACTUALIZADO (v12.0) | Vision completa del proyecto |
 | `docs/ARCHITECTURE.md` | ACTUALIZADO (v3.0) | Stack completo backend + frontend |
 | `docs/API_REFERENCE.md` | ACTUALIZADO (v3.0) | Todos los endpoints actuales |
 | `docs/DEPLOYMENT_GUIDE.md` | ACTUALIZADO (v2.0) | VPS + Docker + Cloudflare |
 | `docs/GETTING_STARTED.md` | ACTUALIZADO (v2.0) | Setup completo local + produccion |
-| `docs/adrs/001-015` | Existentes | Decisiones arquitectonicas previas |
-| `docs/adrs/016` | NUEVO | Google OAuth sin Firebase |
-| `docs/adrs/017` | NUEVO | Flutter Clean Architecture + Riverpod v3 |
-| `docs/adrs/018` | NUEVO | Integracion Gemini AI |
-| `docs/adrs/019` | NUEVO | GDPR AI Consent (RGPD Art. 6.1.a) |
-| `docs/adrs/020` | NUEVO | Cloudflare + VPS deployment |
+| `docs/adrs/001-020` | Existentes | Decisiones arquitectonicas |
