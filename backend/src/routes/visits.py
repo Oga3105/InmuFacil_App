@@ -39,11 +39,11 @@ def calculate_slots(window: VisitWindow, existing_appointments: List[VisitAppoin
     current_time = window.start_time.replace(tzinfo=None) # Simplify TZ handling for calc
     end_time = window.end_time.replace(tzinfo=None)
     
-    # Normalize appointment times
+    # Normalize appointment times — exclude cancelled and rejected
     booked_times = {
-        appt.start_time.replace(tzinfo=None) 
-        for appt in existing_appointments 
-        if appt.status != VisitStatus.REJECTED
+        appt.start_time.replace(tzinfo=None)
+        for appt in existing_appointments
+        if appt.status not in (VisitStatus.REJECTED, VisitStatus.CANCELLED)
     }
     
     while current_time + timedelta(minutes=window.slot_duration_minutes) <= end_time:
@@ -382,11 +382,11 @@ async def book_visit_slot(
             detail="Ya tienes una visita programada para esta propiedad"
         )
 
-    # 4. Check slot availability
+    # 4. Check slot availability — cancelled slots are free
     existing = db.query(VisitAppointment).filter(
         VisitAppointment.window_id == window.id,
         VisitAppointment.start_time == request.start_time,
-        VisitAppointment.status != VisitStatus.REJECTED
+        VisitAppointment.status.not_in([VisitStatus.REJECTED, VisitStatus.CANCELLED])
     ).first()
 
     if existing:
