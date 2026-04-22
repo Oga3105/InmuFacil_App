@@ -1,373 +1,223 @@
-# InmuFácil 🏠🔐
+# 🏠🔐 InmuFacil
 
 **Plataforma P2P de Compraventa Inmobiliaria con Seguridad DevSecOps**
 
-InmuFácil es una plataforma peer-to-peer que elimina intermediarios en las transacciones inmobiliarias, sustituyendo la confianza tradicional de las agencias por tecnología de cifrado de grado militar y validación de identidad automatizada.
+InmuFacil es una plataforma peer-to-peer que elimina intermediarios en las transacciones inmobiliarias, sustituyendo la confianza tradicional de las agencias por tecnologia de cifrado de grado militar y validacion de identidad automatizada.
+
+🎓 **TFM (Trabajo Fin de Master) — Ciberseguridad / Desarrollo**
 
 ---
 
-## 📚 Documentación del Proyecto (Single Source of Truth)
+## 📚 Documentacion del Proyecto (Single Source of Truth)
 
-La documentación estructurada del proyecto reside exclusivamente en la carpeta `/docs`.
-Cualquier desviación de este estándar será corregida por el Agente **@Architect**.
+La documentacion estructurada reside exclusivamente en la carpeta `/docs`.
 
-- [Guía Rápida (Localhost)](docs/GETTING_STARTED.md)
-- [Arquitectura General (Clean Architecture, Stack)](docs/ARCHITECTURE.md)
-- [Guía de Despliegue (VPS + Docker + Cloudflare)](docs/DEPLOYMENT_GUIDE.md)
-- [Referencia de API y Contratos](docs/API_REFERENCE.md)
-- [Modelos de Datos Compartidos](docs/CONTRACTS.md)
-- [Políticas de Seguridad y OWASP](docs/SECURITY.md)
-- [Gestión de Secretos (.env)](docs/SECRETS.md)
-- [Máquinas de Estado (Visitas y Ofertas)](docs/STATE_MACHINE.md)
-- [Estrategia de Testing (Pytest, Widget Tests)](docs/TESTING_STRATEGY.md)
-- [UI y Estilos (Theme Customization)](docs/THEME_CUSTOMIZATION.md)
-- [Solución de Problemas (Troubleshooting)](docs/TROUBLESHOOTING.md)
-- [Decision Records (ADR)](docs/ADR/)
-
----
-
-## 🎯 Visión del Proyecto
-
-**"Donde la tecnología reemplaza la confianza"**
-
-InmuFácil permite que particulares compren y vendan propiedades directamente, sin agencias inmobiliarias, utilizando:
-- **Gemini AI** para asistencia inteligente y validación
-- **Cifrado AES-256-GCM** para protección de datos sensibles (Vault Activado)
-- **Verificación KYC automatizada** con redacción de PII (100% opacidad verificada)
-- **Escudo Anti-Agencias** para mantener el ecosistema P2P puro
+| Documento | Enlace |
+|-----------|--------|
+| 🚀 Guia Rapida | [GETTING_STARTED.md](docs/GETTING_STARTED.md) |
+| 🏗️ Arquitectura | [ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| ☁️ Despliegue (VPS + Docker + Cloudflare) | [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) |
+| 📡 Referencia de API | [API_REFERENCE.md](docs/API_REFERENCE.md) |
+| 📦 Modelos de Datos | [CONTRACTS.md](docs/CONTRACTS.md) |
+| 🛡️ Seguridad y OWASP | [SECURITY.md](docs/SECURITY.md) |
+| 🔑 Gestion de Secretos | [SECRETS.md](docs/SECRETS.md) |
+| 🔄 Maquinas de Estado | [STATE_MACHINE.md](docs/STATE_MACHINE.md) |
+| 🧪 Testing | [TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
+| 🎨 UI y Estilos | [THEME_CUSTOMIZATION.md](docs/THEME_CUSTOMIZATION.md) |
+| 🔧 Troubleshooting | [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
+| 📋 Decision Records | [ADR/](docs/ADR/) |
 
 ---
 
-<<<<<<< HEAD
-## 📚 Documentación Estructurada (Single Source of Truth)
+## 🎯 Vision del Proyecto
 
-Toda la documentación técnica e histórica de InmuFácil reside en el directorio `/docs`.
+**"Donde la tecnologia reemplaza la confianza"**
 
-- **[Guía Rápida (GETTING_STARTED)](docs/GETTING_STARTED.md)**: Cómo iniciar los entornos locales.
-- **[Arquitectura (ARCHITECTURE)](docs/ARCHITECTURE.md)**: Flutter & FastAPI, Satélites, Riverpod.
-- **[Guía de Despliegue (DEPLOYMENT_GUIDE)](docs/DEPLOYMENT_GUIDE.md)**: VPS, Docker, y Cloudflare.
-- **[Contratos de Datos y API](docs/API_REFERENCE.md)**: DTOs, Modelos y Endpoints.
-- **[Seguridad y Secretos](docs/SECURITY.md)**: Prevención OWASP, CORS, y Políticas `.env`.
-- **[Testing y Troubleshooting](docs/TESTING_STRATEGY.md)**: Estrategias de Pytest y resolución de errores.
-- **[Archivos de Decisión Arquitectónica (ADR)](docs/ADR/)**: Decisiones técnicas históricas irrefutables.
+InmuFacil permite que particulares compren y vendan propiedades directamente, sin agencias inmobiliarias, utilizando:
+- 🤖 **Gemini AI** para asistencia inteligente y validacion
+- 🔐 **Cifrado AES-256-GCM** para proteccion de datos sensibles (Vault Activado)
+- 🪪 **Verificacion KYC automatizada** con redaccion de PII (100% opacidad verificada)
+- 🛡️ **Escudo Anti-Agencias** para mantener el ecosistema P2P puro
 
 ---
 
-## � Estado Actual del Proyecto (Status Matrix)
-=======
 ## 📊 Estado Actual del Proyecto
->>>>>>> origin/feature/hito12-contracts
 
-**Hito Actual:** 🔐 **Hito 3 / Misión 9: Autenticación Completa (JWT + MFA)** ✅ COMPLETADO Y VERIFICADO
+**Estado:** ✅ MVP completo — Backend + Frontend operacionales en produccion
+**URL:** 🌐 https://inmufacil.com/TFM/
+**Rama Activa:** `develop`
 
-**API Version:** `0.5.0` - Auth-Ready
+### ✅ Hitos Backend (17/17 completados)
 
-**Progreso:**
-- ✅ **Hito 1:** Estructura Base y Autenticación
-- ✅ **Hito 2:** Validación de Identidad (KYC Seguro + Vault Activation)
-  - ✅ Misión 5: Vault Activation (Master Key + Fail-safe)
-  - ✅ Misión 6: Security Breach Remediation
-  - ✅ Misión 8: API Frontend Integration (Secure CORS)
-- ✅ **Hito 3 / Misión 9:** Autenticación y Seguridad de Acceso
-  - ✅ Registro con Anti-Agency Filter
-  - ✅ Login JWT (Access Token 30min)
-  - ✅ MFA por Email (6-digit OTP)
-  - ✅ Reset Password Seguro
-- ✅ **Hito 3b:** Módulo de Propiedades e Inteligencia de Datos
-  - ✅ CRUD Vendedor (Publicación y Gestión)
-  - ✅ Arquitectura de Datos Satélite (Legal, Financiero, Físico, Entorno)
-  - ✅ Cálculo automático de Rentabilidad (Yield) y KPIs
+| # | Hito | Descripcion |
+|---|------|-------------|
+| 1-2 | 🏗️ Estructura + KYC | Base, autenticacion JWT, cifrado AES-256-GCM, Vault |
+| 3 | 🔑 Autenticacion | JWT + MFA Email + Google OAuth + Escudo Anti-Agencias |
+| 3b | 🏘️ Propiedades | CRUD Vendedor + Arquitectura Datos Satelite |
+| 4 | 📅 Visitas | Smart Scheduling, Slots Dinamicos, Dashboard |
+| 5 | 👁️ Ejecucion Visitas | Maquina de Estados, Approve/Reject, RBAC |
+| 6 | 💰 Ofertas | Modelo Transparente, Anti-Auto-Oferta |
+| 7 | 🤝 Negociacion | Contraofertas, Chat Encriptado Fernet |
+| 8 | 💳 Reserva y Senal | Payment Mock, Idempotencia, Concurrencia |
+| 9 | 📄 Verificacion Documental | Nota Simple OCR, Ref. Catastral, AES-256 |
+| 10 | 📈 Tasacion | Algoritmo Comparativo, Historico |
+| 11 | 🏦 Financiacion | Scoring Hipotecario, Simulacion Cuotas |
+| 12 | 📝 Contratos | ReportLab PDF, Cuestionario Legal, Gemini AI |
+| 13 | ✍️ Firma Digital | Arquitectura Hexagonal, Tokens OTP |
+| 14 | ⚖️ Prep. Notarial | Dossier ZIP, SHA-256 Manifest |
+| 15 | 🏁 Cierre Definitivo | Certificado Digital, Estado SOLD |
+| 16 | 📊 Post-Sales | ITP, Suministros, Compliance |
+| 17 | 🛒 Mercado Servicios | API Unificada, RBAC, Tickets |
 
-- ✅ **Hito 4:** Sistema de Visitas en Bloque (Smart Scheduling)
-  - ✅ Ventanas de Disponibilidad (Vendedor)
-  - ✅ Algoritmo de Slots Dinámicos (Comprador)
-  - ✅ Gestión de Citas (Approve/Reject)
-- ✅ **Hito Extra:** Defensa en Profundidad (Hardening)
-  - ✅ Anti-Malware (MIME Type Validation)
-  - ✅ Bloqueo de Fuerza Bruta (Automated)
-  - ✅ Tests de Prevención IDOR
+### 📱 Frontend Flutter (50+ pantallas)
 
-- ✅ **Hito 5:** Realización de Visitas (Ejecución)
-  - ✅ Máquina de Estados (Requested -> Approved -> Completed)
-  - ✅ Dashboard (Agenda de Vendedor/Comprador)
-  - ✅ Defensa de Roles (Solo el dueño valida la visita)
+- 🔑 Autenticacion completa: login, registro, Google OAuth, MFA
+- 👤 Perfil de usuario: foto, KYC, configuracion, notificaciones
+- 🏘️ Publicacion de inmuebles: wizard 5 pasos con IA para descripcion
+- 🗺️ Mapa interactivo: flutter_map, OpenStreetMap, filtros geograficos
+- 📋 Listado: grid inteligente (SmartExplorerCard), comparador hibrido
+- 💬 Chat P2P: mensajeria, acciones rapidas (visita, oferta)
+- 📅 Visitas: calendario, reserva de slots, proximas/pasadas
+- 💰 Ofertas y negociacion: contraofertas, timeline completo
+- 📝 Arras: interview screen, buyer/seller stepper
+- ✍️ Firma digital, notaria, post-venta y entrega de llaves
+- 🪪 Solvency Passport: asistente de solvencia
+- 🌍 i18n: 9 idiomas
+- 🔒 GDPR: consentimiento IA (RGPD Art. 6.1.a), trust dashboard
 
-- ✅ **Hito 6:** Manifestación de Interés (Ofertas)
-  - ✅ Modelo de Ofertas Transparentes
-  - ✅ Reglas de Negocio (Anti-Auto-Oferta)
-  - ✅ API de Ofertas (Crear, Listar Enviadas/Recibidas)
+### ⚙️ DevOps
 
-- ✅ **Hito: Búsqueda Avanzada (Extra)**
-  - ✅ Filtrado Dinámico (Precio, Tipo, Satélites)
-  - ✅ Búsqueda Combinatoria (Features + Core)
-  - ✅ TDD (`tests/test_search_logic.py`)
+- 🔍 CodeQL para analisis de seguridad Python
+- 🤖 Dependabot (Python, Flutter, GitHub Actions)
+- 🚫 Pre-commit hooks (deteccion de secretos)
+- 📝 Templates de issues y PR con checklists
+- 🚀 Deploy scripts (backend + frontend) automatizados
 
-- ✅ **Hito 7:** Negociación y Cierre (Híbrido)
-  - ✅ Protocolo de Contraofertas (Historial Auditado)
-  - ✅ Chat Encriptado (Opcional, Defense in Depth)
-  - ✅ Modelo de Cierre (Accept/Reject)
+---
 
-- ✅ **Hito 8:** Reserva y Señal (Híbrido)
-  - ✅ Modelo de Reservas e Idempotencia
-  - ✅ Mock Payment Provider (Simulación Financiera)
-  - ✅ Bloqueo de Concurrencia (Race Conditions)
-  - ✅ Configuración de Visibilidad (Hide when Reserved)
+## 🏗️ Stack Tecnologico
 
-- ✅ **Hito 9:** Verificación Documental (Compliance)
-  - ✅ Subida Cifrada (AES-256) de Nota Simple
-  - ✅ Extracción OCR de Referencia Catastral
-  - ✅ Modelo `PropertyDocument` Seguro
+### Backend
+| Tecnologia | Version | Uso |
+|------------|---------|-----|
+| FastAPI | 0.135.1 | Framework async, OpenAPI 3.1 |
+| Python | 3.13 | Runtime |
+| PostgreSQL | 15 | Base de datos (Docker) |
+| SQLAlchemy | 2.0.48 | ORM |
+| Pydantic | v2 | Validacion y serializacion |
+| cryptography | 46.0.5 | AES-256-GCM |
+| google-genai | >= 1.0 | Gemini Vision + IA |
+| ReportLab | - | Generacion PDF contratos |
 
-- 🎯 **Hito 10:** Tasación (Siguiente Paso)
+### Frontend
+| Tecnologia | Version | Uso |
+|------------|---------|-----|
+| Flutter | Latest stable | Web + Android |
+| Riverpod | 3.2.1 | Estado reactivo |
+| GoRouter | 17.1.0 | Navegacion declarativa |
+| Dio | 5.9.2 | HTTP + interceptores JWT |
+| flutter_map | 8.2.2 | Mapas OpenStreetMap |
+| easy_localization | 3.0.3 | i18n (9 idiomas) |
+| google_sign_in | 6.2.1 | Google OAuth |
 
-- ✅ **Frontend:** Inicialización Flutter con Clean Architecture
-  - ✅ Estructura domain/data/presentation
-  - ✅ API client con interceptores JWT
-  - ✅ Tema Material Design 3
-  - ✅ Routing con go_router
-  - ✅ **Geocoding Integrado:** Nominatim API (Local First) + Mapa Reactivo
-  - ✅ **Página 404:** Diseño Isométrico, Segura e Internacionalizada (9 idiomas)
-  - ⏳ Implementación UI pendiente (@UIBuilder)
-
-- ✅ **DevOps:** Automatización GitHub (CodeQL, Dependabot, Templates)
-  - ✅ CodeQL para análisis de seguridad Python
-  - ✅ Dependabot (Python, Flutter, GitHub Actions)
-  - ✅ Templates de issues (bug, feature, vulnerabilidad)
-  - ✅ Template de Pull Request con checklists
-  - ✅ Documentación completa en español
-
-**Rama Activa:** `develop`  
-**Último Commit:** `feat(404): refine illustration (pixel-perfect), add i18n (9 langs) and security validation`
+### Infraestructura
+| Componente | Detalle |
+|------------|---------|
+| 🐳 Docker + Compose | Contenedorizacion (backend + db + nginx) |
+| ☁️ Cloudflare | DNS, proxy, SSL/TLS (inmufacil.com) |
+| 🖥️ VPS Debian 12 | Produccion operacional |
+| 🔀 Nginx | Reverse proxy + static files |
 
 ---
 
 ## 🛡️ Stack de Seguridad
 
-### Vault de Cifrado (Activado)
-- **AES-256-GCM**: Cifrado autenticado para DNI y teléfonos
-- **Master Key Management**: Clave maestra de 32 bytes (base64 encoded)
-- **Fail-Safe Startup**: Aplicación no arranca sin clave válida
-- **Key Rotation**: Procedimiento documentado para rotación cada 90 días
-- **PBKDF2**: Derivación de claves con 100,000 iteraciones
-- **Bcrypt**: Hashing de contraseñas con salt automático
-- **IV Único**: Nonce aleatorio de 12 bytes por operación
+### 🔐 Vault de Cifrado (Activado)
+- **AES-256-GCM**: Cifrado autenticado para DNI y telefonos
+- **Master Key Management**: Clave maestra de 32 bytes (base64)
+- **Fail-Safe Startup**: Aplicacion no arranca sin clave valida
+- **PBKDF2**: Derivacion de claves con 100,000 iteraciones
+- **Bcrypt**: Hashing de contrasenas con salt automatico
 
-### Redacción Automática de PII (Verificada 100%)
-**Protección de Información Personal Identificable:**
-- 🖼️ **DNI Image Redaction**: Redacción automática de zonas sensibles
-  - MRZ (Machine Readable Zone) - 60,000 píxeles verificados
-  - Firma del titular - 92,000 píxeles verificados
-  - Equipo Emisor - 18,000 píxeles verificados
-- ✅ **100% Opacity Verified**: 170,000+ píxeles testeados como negros (#000000)
-- 🔒 **Cifrado en Reposo**: DNI y teléfonos cifrados en base de datos
-- 🚫 **Zero-Log Policy**: Datos sensibles nunca en logs
-- 🗑️ **Secure Cleanup**: Archivos originales eliminados inmediatamente
+### 🪪 Redaccion Automatica de PII (Verificada 100%)
+- **DNI Image Redaction**: MRZ, firma, equipo emisor — 170,000+ pixeles verificados
+- **Cifrado en Reposo**: DNI y telefonos cifrados en base de datos
+- **Zero-Log Policy**: Datos sensibles nunca en logs
 
-### Arquitectura DevSecOps
-- **Security by Design**: Seguridad desde el diseño inicial
-- **Security by Default**: Configuración segura por defecto
-- **Defense in Depth**: Múltiples capas de seguridad (6 capas)
-- **Shift Left**: Seguridad en todas las fases del desarrollo
-- **Fail-Safe Defaults**: Sistema falla en modo seguro
+### 🏰 Arquitectura DevSecOps
+- Security by Design / Security by Default / Defense in Depth (6 capas)
+- Secure CORS: Origenes especificos (NO wildcards)
+- Security Headers: X-Content-Type-Options, X-Frame-Options, CSP
 
-### API Security (Frontend-Ready)
-- **Secure CORS**: Orígenes específicos (NO wildcards)
-- **Security Headers**: X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, CSP
-- **External Connection Audit**: Logging de todas las conexiones con IP tracking
-- **Rate Limiting**: Preparado para implementación
-
-### Prevención de Amenazas (MITRE ATT&CK)
-- ✅ **T1110 (Brute Force)**: Rate limiting + bloqueo temporal
-- ✅ **T1566 (Phishing)**: Validación MIME de archivos
-- ✅ **T1552 (Unsecured Credentials)**: Cifrado at-rest + vault
-- ✅ **T1078 (Valid Accounts)**: MFA por email
-
-### CI/CD Security & Automation
-- 🔍 **Pre-Commit Hooks**: Detección de secretos antes de commit
-- 📝 **Audit Logging**: Trazabilidad completa sin datos sensibles
-- 🚨 **Security Monitoring**: Alertas en tiempo real
-- 🧪 **Automated Testing**: Suite de tests de seguridad
-- 🤖 **CodeQL Scanning**: Análisis automático de vulnerabilidades con GitHub CodeQL
-- 🔐 **Dependabot**: Monitoreo y actualización automática de dependencias vulnerables
-- 📊 **PR Reviews**: Revisiones automáticas de código y detección de malas prácticas
-- 📝 **Issue Templates**: Plantillas estructuradas para bugs, features y vulnerabilidades
+### ⚔️ Prevencion de Amenazas (MITRE ATT&CK)
+| Tecnica | Mitigacion |
+|---------|-----------|
+| T1110 (Brute Force) | Rate limiting + bloqueo temporal |
+| T1566 (Phishing) | Validacion MIME de archivos |
+| T1552 (Unsecured Credentials) | Cifrado at-rest + vault |
+| T1078 (Valid Accounts) | MFA por email |
 
 ---
 
-## 🏗️ Arquitectura Técnica
-
-### Backend
-- **Framework**: FastAPI 0.104.1
-- **Base de Datos**: SQLAlchemy 2.0.23 (SQLite dev, PostgreSQL prod)
-- **Autenticación**: JWT + MFA Email
-- **Validación**: Pydantic 2.5.0 con schemas seguros
-
-### Frontend (Multi-Platform Strategy)
-- **Framework**: Flutter (Dart)
-- **Targets**: Mobile (iOS/Android) & Web (Responsive)
-- **Architecture**: Clean Architecture + Riverpod
-
-### Seguridad
-- **Cryptography**: 41.0.7 (AES-256-GCM)
-- **Passlib**: 1.7.4 (Bcrypt)
-- **Pillow**: 10.1.0 (Procesamiento de imágenes)
-- **Python-Magic**: 0.4.27 (Validación MIME)
-
-### Testing
-- **Pytest**: 7.4.3
-- **Coverage**: TDD con tests de seguridad
-
----
-
-## 🚀 Instalación y Configuración
+## 🚀 Instalacion y Configuracion
 
 ### Requisitos Previos
-- Python 3.10+
-- Git
-- Virtual Environment
+- 🐍 Python 3.10+
+- 💙 Flutter SDK
+- 🐳 Docker + Docker Compose
+- 📦 Git
 
-### Instalación
+### Instalacion
 
 ```bash
 # Clonar repositorio
 git clone https://github.com/Oga3105/InmuFacil_App.git
 cd InmuFacil_App
-
-# Cambiar a rama develop
 git checkout develop
 
-# Crear entorno virtual
+# Backend
 python -m venv .venv
-
-# Activar entorno virtual
-# Windows:
-.venv\Scripts\activate
-# Linux/Mac:
-source .venv/bin/activate
-
-# Instalar dependencias
+source .venv/bin/activate  # Linux/Mac
+# .venv\Scripts\activate   # Windows
 pip install -r requirements.txt
+
+# Frontend
+cd frontend
+flutter pub get
 ```
 
-### Configuración de Seguridad (CRÍTICO)
+### 🔑 Configuracion de Seguridad
 
-> [!IMPORTANT]
-> La aplicación **NO ARRANCARÁ** sin la configuración correcta del vault de cifrado.
-> Este es un comportamiento de seguridad intencional (Fail-Safe Defaults).
+> ⚠️ **IMPORTANTE:** La aplicacion NO ARRANCARA sin la configuracion correcta del vault de cifrado.
 
-**Paso 1: Copiar template de configuración**
 ```bash
 cp .env.example .env
+# Editar .env con las claves requeridas (ver .env.example)
 ```
 
-**Paso 2: Generar clave maestra de cifrado**
-```bash
-python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
-```
+Variables criticas:
+| Variable | Descripcion |
+|----------|-------------|
+| `INMUFACIL_MASTER_KEY` | Cifrado AES-256 PII (32 bytes, base64) |
+| `SECRET_KEY_JWT` | Firma JWT |
+| `DATABASE_URL` | Conexion PostgreSQL |
+| `GEMINI_API_KEY` | API de Gemini |
+| `GOOGLE_WEB_CLIENT_ID` | OAuth Web Client ID |
 
-Este comando generará una clave de 32 bytes codificada en base64, similar a:
-```
-l2ZAbAkXldtm0gpXefU63TEuw8bs7yPg4FSQHKa3TsE=
-```
-
-**Paso 3: Configurar variables en `.env`**
-
-Edita el archivo `.env` y añade tu clave generada:
+### ▶️ Ejecutar
 
 ```bash
-# ============================================================================
-# ENCRYPTION & SECURITY (CRÍTICO - REQUERIDO PARA ARRANQUE)
-# ============================================================================
-
-# Master encryption key for AES-256-GCM (32 bytes, base64 encoded)
-INMUFACIL_MASTER_KEY=<TU_CLAVE_GENERADA_AQUÍ>
-
-# JWT Secret Key for authentication tokens
-SECRET_KEY_JWT=<GENERA_OTRA_CLAVE_PARA_JWT>
-
-# ============================================================================
-# DATABASE CONFIGURATION
-# ============================================================================
-
-DATABASE_URL=sqlite:///./inmufacil.db
-
-# ============================================================================
-# APPLICATION SETTINGS
-# ============================================================================
-
-ENVIRONMENT=development
-DEBUG=true
-API_BASE_URL=http://localhost:8000
-LOG_LEVEL=INFO
-```
-
-> [!WARNING]
-> **NUNCA** compartas o commites tu archivo `.env` a Git.
-> El archivo está protegido por `.gitignore` y pre-commit hooks.
-
-**Paso 4: Verificar configuración**
-
-Al arrancar la aplicación, verás en los logs:
-```
-✅ Master encryption key loaded and validated successfully
-🔐 VAULT: ACTIVATED
-```
-
-Si ves errores, verifica que:
-- La clave tiene exactamente 32 bytes cuando se decodifica de base64
-- El archivo `.env` está en la raíz del proyecto
-- No hay espacios extra en la clave
-
-### Rotación de Claves (Key Rotation)
-
-**Procedimiento de rotación de la clave maestra:**
-
-> [!CAUTION]
-> La rotación de claves requiere re-cifrar todos los datos sensibles en la base de datos.
-> Realiza este procedimiento solo durante ventanas de mantenimiento.
-
-**Pasos para rotación segura:**
-
-1. **Backup completo de la base de datos:**
-   ```bash
-   # Crear backup antes de rotación
-   cp inmufacil.db inmufacil.db.backup.$(date +%Y%m%d_%H%M%S)
-   ```
-
-2. **Generar nueva clave:**
-   ```bash
-   python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
-   ```
-
-3. **Ejecutar script de rotación (futuro):**
-   ```bash
-   # TODO: Implementar en próxima misión
-   python scripts/rotate_encryption_key.py --old-key OLD_KEY --new-key NEW_KEY
-   ```
-
-4. **Actualizar `.env` con nueva clave**
-
-5. **Verificar integridad:**
-   ```bash
-   # Verificar que todos los datos se descifraron correctamente
-   python scripts/verify_encryption.py
-   ```
-
-6. **Reiniciar aplicación**
-
-**Frecuencia recomendada:** Cada 90 días o inmediatamente si se sospecha compromiso.
-
-### Ejecutar la Aplicación
-
-Consulta la **[Guía de Despliegue](docs/DEPLOYMENT_GUIDE.md)** o el **[Getting Started](docs/GETTING_STARTED.md)** en la carpeta `/docs`.
-
-```bash
-# Desarrollo
+# Backend (desarrollo)
 uvicorn backend.main:app --reload
+# 📡 http://localhost:8000 — API
+# 📖 http://localhost:8000/docs — Swagger
 
-# La API estará disponible en:
-# http://localhost:8000
-# Documentación: http://localhost:8000/docs
+# Frontend (desarrollo)
+cd frontend
+flutter run -d chrome --web-port 8001
+
+# Docker (produccion)
+docker compose up -d
 ```
 
 ---
@@ -375,93 +225,28 @@ uvicorn backend.main:app --reload
 ## 🧪 Testing
 
 ```bash
-# Ejecutar todos los tests
+# Backend
 pytest tests/ -v
-
-# Tests específicos
-pytest tests/test_auth.py -v
-pytest tests/test_filters.py -v
-
-# Con coverage
 pytest tests/ --cov=backend --cov-report=html
+
+# Frontend
+cd frontend
+flutter test
+flutter test --coverage
 ```
 
 ---
 
-## 🤖 GitHub Automation
+## ⚖️ Compliance
 
-InmuFácil incluye un completo sistema de automatización en GitHub para mejorar la calidad del código, seguridad y colaboración.
-
-### Características Implementadas
-
-#### 📊 PR Summaries & Code Review Automático
-- **Resúmenes automáticos** de cambios en cada Pull Request
-- **Análisis de código** con Flake8, Pylint y Bandit
-- **Detección de malas prácticas**: `print()` statements, código duplicado, vulnerabilidades
-- **Comentarios automáticos** en PRs con recomendaciones
-
-#### 🔍 Code Scanning con CodeQL
-- **Análisis continuo** de código Python
-- **Detección de vulnerabilidades** (SQL Injection, XSS, Command Injection, etc.)
-- **Escaneo automático** en push, PR y semanalmente
-- **Reportes en GitHub Security** para trazabilidad
-
-#### 🔐 Dependabot
-- **Monitoreo de dependencias** vulnerables (Python pip + GitHub Actions)
-- **PRs automáticos** con actualizaciones seguras
-- **Agrupación inteligente** por tipo (security, development, core framework)
-- **Alertas de seguridad** proactivas
-
-#### 📝 Issue & PR Templates
-- **Plantillas estructuradas** para Bug Reports, Feature Requests y Security Vulnerabilities
-- **PR Template** con checklist completo de revisión
-- **Discussion Templates** para ideas y preguntas
-- **Guías claras** para reportar problemas con pasos de reproducción
-
-### Documentación Completa
-
-Para más detalles sobre cómo usar y configurar estas características, consulta:
-
-📖 **[GitHub Automation Guide](.github/GITHUB_AUTOMATION.md)**
-
-### Activación Rápida
-
-1. **CodeQL**: Ve a Settings → Code security and analysis → Habilita Code scanning
-2. **Dependabot**: Ve a Settings → Code security and analysis → Habilita Dependabot alerts
-3. **Discussions**: Ve a Settings → Features → Habilita Discussions
-4. **Templates**: Se activan automáticamente al crear issues/PRs
-
----
-
-## 🔐 Características de Seguridad
-
-### 1. Escudo Anti-Agencias 🛡️
-**Protección del ecosistema P2P:**
-- Detección de 30+ dominios de agencias inmobiliarias
-- Análisis de keywords profesionales (40+ términos)
-- Validación multi-factor para prevenir falsos positivos
-- Logging de intentos bloqueados con IP tracking
-
-### 2. KYC Seguro (Know Your Customer)
-**Validación de identidad con privacidad:**
-- MFA por email (tokens de 6 dígitos, 15 min expiration)
-- Redacción automática de DNI antes de almacenamiento
-- Cifrado AES-256-GCM de datos personales
-- Validación MIME para prevenir archivos maliciosos
-
-### 3. Brute Force Prevention
-**Protección contra ataques:**
-- Máximo 3 intentos fallidos de upload
-- Bloqueo temporal de 15 minutos
-- Ventana deslizante de 30 minutos
-- Alertas de seguridad estructuradas
-
-### 4. Audit Trail Completo
-**Trazabilidad sin comprometer privacidad:**
-- Logs estructurados para SIEM
-- Filtros automáticos de datos sensibles
-- Eventos de seguridad con severidad
-- Cumplimiento GDPR
+| Normativa | Estado | Implementacion |
+|-----------|--------|---------------|
+| 🇪🇺 GDPR | ✅ Activo | Cifrado PII, derecho al olvido, consentimiento IA (Art. 6.1.a) |
+| 🔒 OWASP Top 10 | ✅ Activo | SQLi prevenido (Pydantic + ORM), XSS headers, CSRF |
+| 💳 PCI DSS | ⏳ Parcial | Cifrado at-rest, audit logging — pagos reales pendientes |
+| 📋 ISO 27001 | ✅ Activo | RBAC, controles de acceso, gestion de secretos |
+| ⚔️ MITRE ATT&CK | ✅ Activo | Cobertura T1110, T1566, T1552, T1078 |
+| ✍️ eIDAS | ⏳ Pendiente | Firma digital en mock; QTSP real en hoja de ruta |
 
 ---
 
@@ -469,73 +254,50 @@ Para más detalles sobre cómo usar y configurar estas características, consult
 
 ```
 InmuFacil_Project/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── models.py            # SQLAlchemy models
-│   ├── schemas.py           # Pydantic schemas
-│   ├── database.py          # DB configuration
-│   ├── security.py          # Password hashing
-│   ├── crypto.py            # AES-256-GCM encryption
-│   ├── filters.py           # Anti-agency filter
-│   ├── security_monitor.py  # Brute force prevention
-│   └── services/
-│       ├── email_service.py # MFA tokens
-│       └── kyc_service.py   # DNI processing
-│   ├── routers/
-│   │   ├── users.py         # User & Admin routes
-│   │   ├── kyc.py           # KYC routes
-│   │   └── properties.py    # Properties routes (Core + Satellites)
-├── frontend/
-│   ├── lib/
-│   │   ├── main.dart        # Entry point
-│   │   ├── core/            # Config & Utils
-│   │   ├── data/            # Repositories & Data Sources
-│   │   ├── domain/          # Entities & Use Cases
-│   │   └── presentation/
-│   │       ├── screens/     # UI Screens (Home, NotFound, etc.)
-│   │       ├── widgets/     # Reusable Components
-│   │       └── providers/   # State Management (Riverpod)
-│   ├── assets/
-│   │   └── translations/    # i18n JSON files (9 languages)
-│   ├── web/                 # Web entrypoint
-│   └── pubspec.yaml         # Dependencies
-├── tests/
-│   ├── test_auth.py         # Authentication tests
-│   └── test_filters.py      # Filter tests
-├── docs/
-│   └── vision_proyecto.md   # Project vision
-├── .git/hooks/
-│   └── pre-commit           # Secret detection
-├── requirements.txt         # Dependencies
-├── .gitignore              # Git exclusions
-├── .agent/
-│   └── rules/
-│       └── roles_definition.md  # Agent governance & protocols
-└── README.md               # This file
+├── 🔧 backend/
+│   ├── main.py                    # FastAPI application
+│   └── src/
+│       ├── config/                # Database, settings
+│       ├── models/                # SQLAlchemy models (30+ tablas)
+│       ├── routes/                # API routers (40+)
+│       ├── schemas/               # Pydantic schemas
+│       ├── services/              # Email, KYC, AI, contracts
+│       └── utils/                 # Security, crypto, filters
+├── 📱 frontend/
+│   └── lib/
+│       ├── core/                  # Config, formatters, utils
+│       ├── data/                  # Repositories, data sources
+│       ├── domain/                # Entities, use cases
+│       └── presentation/
+│           ├── screens/           # 50+ UI screens
+│           ├── widgets/           # Reusable components
+│           └── providers/         # Riverpod state management
+├── 📚 docs/                       # Documentacion tecnica
+│   └── ADR/                       # Decision records (20+)
+├── 🤖 .agents/                    # Agent governance & protocols
+│   ├── roles/                     # @Architect, @Jules, @Shield...
+│   └── protocols/                 # TDD, pre-commit, git governance
+├── 🔀 nginx/                      # Proxy configuration
+├── 🧪 tests/                      # Backend test suite
+├── 🐳 docker-compose.yml          # Local development
+├── 🐳 docker-compose.prod.yml     # Production
+├── 🚀 deploy-backend.sh           # Backend deploy script
+├── 🚀 deploy-frontend.sh          # Frontend deploy script
+└── 📦 requirements.txt            # Python dependencies
 ```
 
 ---
 
-## 🤝 Contribución
+## 🤝 Contribucion
 
-Este proyecto sigue estándares DevSecOps estrictos:
+Este proyecto sigue estandares DevSecOps estrictos:
 
-1. **Todas las contribuciones en rama `develop`**
-2. **Tests obligatorios para nuevas features**
-3. **Pre-commit hooks activos** (detección de secretos)
-4. **Code review requerido**
-5. **Documentación actualizada**
-
----
-
-## 📜 Compliance y Estándares
-
-- ✅ **GDPR**: Cifrado de datos personales, derecho al olvido
-- ✅ **OWASP Top 10**: Mitigación de vulnerabilidades críticas
-- ✅ **PCI DSS**: Cifrado at-rest, audit logging
-- ✅ **ISO 27001**: Controles de seguridad implementados
-- ✅ **MITRE ATT&CK**: Cobertura de técnicas de ataque
+1. ✅ Todas las contribuciones en rama `develop`
+2. 🧪 Tests obligatorios para nuevas features (TDD)
+3. 🚫 Pre-commit hooks activos (deteccion de secretos)
+4. 📋 Pull Request obligatoria con code review
+5. 📚 Documentacion actualizada antes de merge
 
 ---
 
-**InmuFácil - Donde la tecnología reemplaza la confianza** 🏠🔐
+**🏠🔐 InmuFacil — Donde la tecnologia reemplaza la confianza**
