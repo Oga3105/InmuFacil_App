@@ -31,12 +31,12 @@ Anota mentalmente (o en el commit message) si el cambio afecta:
 
 Si el cambio introduce una **decisión arquitectónica nueva** (ej. nueva biblioteca, cambio de patrón, nueva estrategia de datos):
 
-1. Revisa `docs/ADR/` para confirmar que no choca con un ADR ya aceptado.
+1. Revisa `docs/adrs/` para confirmar que no choca con un ADR ya aceptado.
 2. Si el cambio contradice un ADR existente → **crea o actualiza el ADR** antes de continuar.
 3. Nombra el nuevo ADR con el siguiente número disponible: `NNN_descripcion_corta.md`.
 
 ```
-docs/ADR/NNN_descripcion_corta.md
+docs/adrs/NNN_descripcion_corta.md
 ```
 
 Usa la plantilla estándar del proyecto (Estado, Fecha, Contexto, Decisión, Consecuencias).
@@ -51,7 +51,7 @@ Para cada área marcada en el Paso 0, verifica y actualiza el documento correspo
 |-------------------------|----------------------------------------------------------|
 | Arquitectura general    | `docs/ARCHITECTURE.md`                                   |
 | API / Endpoints         | `docs/API_REFERENCE.md`                                  |
-| Base de datos / modelos | `docs/ADR/009_protocolo_integridad_db.md` + migraciones  |
+| Base de datos / modelos | `docs/adrs/009_protocolo_integridad_db.md` + migraciones  |
 | Contratos / flujos      | `docs/CONTRACTS.md` / `docs/STATE_MACHINE.md`            |
 | Seguridad / RGPD        | `docs/SECURITY.md`                                       |
 | Despliegue              | `docs/DEPLOYMENT_GUIDE.md`                               |
@@ -131,4 +131,4 @@ Si abres un PR, incluye en la descripción:
 | `git diff HEAD -- docs/`                      | Ver qué docs han cambiado              |
 | `git log --oneline -10`                       | Revisar commits recientes              |
 | `docker exec -it inmufacil_postgres psql ...` | Verificar esquema DB                   |
-| `ls docs/ADR/ \| tail -5`                     | Ver últimos ADRs                       |
+| `ls docs/adrs/ \| tail -5`                     | Ver últimos ADRs                       |

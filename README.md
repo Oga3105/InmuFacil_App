@@ -25,7 +25,7 @@ La documentacion estructurada reside exclusivamente en la carpeta `/docs`.
 | 🧪 Testing | [TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) |
 | 🎨 UI y Estilos | [THEME_CUSTOMIZATION.md](docs/THEME_CUSTOMIZATION.md) |
 | 🔧 Troubleshooting | [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) |
-| 📋 Decision Records | [ADR/](docs/ADR/) |
+| 📋 Decision Records | [adrs/](docs/adrs/) |
 
 ---
 
