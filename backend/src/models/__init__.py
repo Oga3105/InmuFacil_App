@@ -23,3 +23,4 @@ from .lifestyle import UserLifestyleProfile
 from .notification_log import NotificationLog
 from .leads import Lead
 from .post_sale import PostSaleDocument, PostSaleDocFlag, PostSaleDocType
+from .user_report import UserReport, ReportCategory

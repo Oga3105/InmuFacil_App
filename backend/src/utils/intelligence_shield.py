@@ -35,6 +35,9 @@ RISK_THRESHOLD = 80
 WEIGHT_PHONE_PORTAL = 40
 WEIGHT_NAME_PROFESSIONAL = 40
 WEIGHT_DISPOSABLE_EMAIL = 20
+WEIGHT_REPORT = 25
+
+REINVESTIGATION_THRESHOLD = 3
 
 DISPOSABLE_EMAIL_DOMAINS = {
     "tempmail.com",
@@ -139,6 +142,50 @@ def calculate_risk_score(
     if disposable_email:
         score += WEIGHT_DISPOSABLE_EMAIL
     return score
+
+
+def calculate_risk_score_with_reports(
+    phone_match: bool,
+    name_match: bool,
+    disposable_email: bool,
+    report_count: int,
+) -> int:
+    """
+    Calculate risk score including community reports.
+
+    Each verified report from a distinct user adds WEIGHT_REPORT points.
+    The total score is capped at 100.
+
+    Args:
+        phone_match: Phone found on real estate portals.
+        name_match: Name linked to professional real estate roles.
+        disposable_email: Email domain is disposable/temporary.
+        report_count: Number of distinct user reports against this user.
+
+    Returns:
+        Integer risk score (0-100).
+    """
+    base_score = calculate_risk_score(
+        phone_match=phone_match,
+        name_match=name_match,
+        disposable_email=disposable_email,
+    )
+    report_score = report_count * WEIGHT_REPORT
+    return min(base_score + report_score, 100)
+
+
+def should_trigger_reinvestigation(report_count: int) -> bool:
+    """
+    Determine if a user's report count warrants an automatic
+    OSINT re-investigation.
+
+    Args:
+        report_count: Current number of distinct reports against the user.
+
+    Returns:
+        True if re-investigation should be triggered.
+    """
+    return report_count >= REINVESTIGATION_THRESHOLD
 
 
 # ============================================================================
