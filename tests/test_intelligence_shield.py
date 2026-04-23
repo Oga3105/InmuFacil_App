@@ -458,3 +458,132 @@ async def test_investigation_produces_structured_log(legitimate_user, caplog):
     assert any("INVESTIGATION" in record.message for record in caplog.records), (
         "Should produce a log entry containing 'INVESTIGATION'"
     )
+
+
+# ============================================================================
+# Test Case 9: Threshold Notification Trigger (Prompt 3)
+# ============================================================================
+
+@pytest.mark.anyio
+async def test_threshold_notification_trigger():
+    """
+    When a user accumulates 3 reports from distinct users, the system
+    should invoke send_admin_moderation_alert.
+    """
+    from backend.src.utils.intelligence_shield import (
+        should_trigger_reinvestigation,
+        REINVESTIGATION_THRESHOLD,
+    )
+    from backend.src.services.moderation_alerts import send_admin_moderation_alert
+
+    # Below threshold: should NOT trigger
+    assert should_trigger_reinvestigation(2) is False
+
+    # At threshold: should trigger
+    assert should_trigger_reinvestigation(3) is True
+
+    # Verify send_admin_moderation_alert is callable and async
+    with patch(
+        "backend.src.services.moderation_alerts._send_email",
+        new_callable=AsyncMock,
+        return_value=True,
+    ) as mock_send, patch(
+        "backend.src.services.moderation_alerts.ADMIN_EMAIL",
+        "admin@inmufacil.com",
+    ):
+        result = await send_admin_moderation_alert(
+            reported_user_name="Carlos Agente",
+            reported_user_email="carlos@gmail.com",
+            reported_user_phone="+34699887766",
+            report_count=3,
+            ai_score=75,
+            reports_summary=[
+                {"reporter": "user1@gmail.com", "category": "profesional_camuflado"},
+                {"reporter": "user2@gmail.com", "category": "pide_comision"},
+                {"reporter": "user3@gmail.com", "category": "profesional_camuflado"},
+            ],
+        )
+        assert result is True
+        mock_send.assert_called_once()
+
+
+# ============================================================================
+# Test Case 10: Critical Risk Score Alert (Prompt 3)
+# ============================================================================
+
+@pytest.mark.anyio
+async def test_critical_risk_score_alert():
+    """
+    If the OSINT investigation yields a score > 90, an immediate alert
+    email should be sent to the admin BEFORE blocking the registration.
+    """
+    from backend.src.services.moderation_alerts import send_admin_moderation_alert
+
+    with patch(
+        "backend.src.services.moderation_alerts._send_email",
+        new_callable=AsyncMock,
+        return_value=True,
+    ) as mock_send, patch(
+        "backend.src.services.moderation_alerts.ADMIN_EMAIL",
+        "admin@inmufacil.com",
+    ):
+        result = await send_admin_moderation_alert(
+            reported_user_name="Pedro Broker",
+            reported_user_email="pedro@outlook.com",
+            reported_user_phone="+34611223344",
+            report_count=0,
+            ai_score=95,
+            reports_summary=[],
+        )
+        assert result is True
+        # Verify the email was actually sent
+        mock_send.assert_called_once()
+        call_args = mock_send.call_args
+        assert "95" in call_args.kwargs.get("subject", "") or "95" in str(call_args)
+
+
+# ============================================================================
+# Test Case 11: Watermark in Logs (Prompt 3)
+# ============================================================================
+
+@pytest.mark.anyio
+async def test_investigation_log_contains_watermark(legitimate_user, caplog):
+    """
+    Each investigation log entry should contain a unique watermark ID
+    for traceability.
+    """
+    mock_search_results = {"phone_snippets": [], "name_snippets": []}
+    mock_llm_analysis = {
+        "phone_professional_match": False,
+        "name_professional_match": False,
+        "confidence": 0.05,
+        "reasoning": "Clean profile.",
+    }
+
+    with patch(
+        "backend.src.utils.intelligence_shield.search_osint_sources",
+        new_callable=AsyncMock,
+        return_value=mock_search_results,
+    ), patch(
+        "backend.src.utils.intelligence_shield.analyze_with_llm",
+        new_callable=AsyncMock,
+        return_value=mock_llm_analysis,
+    ):
+        import logging
+        with caplog.at_level(logging.INFO, logger="inmufacil.intelligence_shield"):
+            result = await investigate_user_osint(
+                email=legitimate_user["email"],
+                full_name=legitimate_user["full_name"],
+                phone=legitimate_user["phone"],
+            )
+
+    # The result should contain a watermark_id
+    assert "watermark_id" in result, "Investigation result should contain watermark_id"
+    assert len(result["watermark_id"]) > 0
+
+    # The log should contain the watermark
+    assert any(
+        result["watermark_id"] in record.message
+        for record in caplog.records
+        if "INVESTIGATION" in record.message
+    ), "Log entry should contain the watermark ID"

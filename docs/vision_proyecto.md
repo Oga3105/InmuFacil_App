@@ -91,11 +91,26 @@
 
 ## Seguridad por Capas (Defense in Depth)
 
-### Capa 1: Perimetro — Escudo Anti-Agencias
+### Capa 1a: Perimetro Estatico — Escudo Anti-Agencias v1
 - Bloqueo de 30+ dominios de agencias inmobiliarias conocidas
 - Deteccion de 40+ keywords profesionales en emails/nombres
 - Validacion multi-factor para prevenir falsos positivos
 - IP tracking y analisis de patrones de comportamiento
+
+### Capa 1b: Perimetro Dinamico — Active Intelligence Shield 2.0
+- Investigacion OSINT de telefono y nombre en portales inmobiliarios
+- Analisis con IA (Gemini) de perfiles profesionales en LinkedIn/redes
+- Risk scoring ponderado: telefono (+40), nombre (+40), email desechable (+20)
+- Umbral de bloqueo configurable (>= 80 puntos)
+- Fallback seguro: score=0 si APIs externas fallan
+- Watermark ID unico por investigacion para trazabilidad
+
+### Capa 1c: Moderacion Social — Community Shield
+- Denuncias P2P entre usuarios verificados (3 categorias)
+- +25 puntos de riesgo por denuncia de usuario distinto
+- Re-investigacion OSINT automatica al 3er reporte
+- Alertas SMTP al administrador (IONOS) para accion inmediata
+- Prevencion de auto-denuncias y denuncias duplicadas
 
 ### Capa 2: Identidad — KYC + Google OAuth
 - MFA por email (tokens 6 digitos, 15 min expiracion)

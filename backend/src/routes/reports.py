@@ -20,7 +20,9 @@ from backend.src.utils.security import get_current_active_user
 from backend.src.utils.intelligence_shield import (
     should_trigger_reinvestigation,
     investigate_user_osint,
+    RISK_THRESHOLD,
 )
+from backend.src.services.moderation_alerts import send_admin_moderation_alert
 
 logger = logging.getLogger("inmufacil.community_shield")
 
@@ -193,20 +195,53 @@ async def report_agent(
             reported_user.report_count,
         )
         # Trigger async OSINT re-investigation (best-effort, non-blocking)
+        ai_score = 0
         try:
             phone = ""
             if reported_user.encrypted_phone:
                 # Phone is encrypted; in production, decrypt before investigating.
                 # For now, use empty string (OSINT will rely on name search only).
                 phone = ""
-            await investigate_user_osint(
+            osint_result = await investigate_user_osint(
                 email=reported_user.email,
                 full_name=reported_user.full_name,
                 phone=phone,
             )
+            ai_score = osint_result.get("risk_score", 0)
         except Exception as exc:
             logger.error(
                 "[COMMUNITY_SHIELD] Re-investigation failed for user_id=%d: %s",
+                reported_user.id,
+                exc,
+            )
+
+        # Build reports summary for admin alert
+        all_reports = (
+            db.query(UserReport)
+            .filter(UserReport.reported_id == reported_user.id)
+            .all()
+        )
+        reports_summary = []
+        for r in all_reports:
+            reporter_user = db.query(User).filter(User.id == r.reporter_id).first()
+            reports_summary.append({
+                "reporter": reporter_user.email if reporter_user else "unknown",
+                "category": r.reason_category.value if r.reason_category else "N/A",
+            })
+
+        # Send admin moderation alert (best-effort)
+        try:
+            await send_admin_moderation_alert(
+                reported_user_name=reported_user.full_name,
+                reported_user_email=reported_user.email,
+                reported_user_phone="",
+                report_count=reported_user.report_count,
+                ai_score=ai_score,
+                reports_summary=reports_summary,
+            )
+        except Exception as exc:
+            logger.error(
+                "[COMMUNITY_SHIELD] Failed to send admin alert for user_id=%d: %s",
                 reported_user.id,
                 exc,
             )

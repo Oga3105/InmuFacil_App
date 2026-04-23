@@ -38,6 +38,8 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 - 🔐 **Cifrado AES-256-GCM** para proteccion de datos sensibles (Vault Activado)
 - 🪪 **Verificacion KYC automatizada** con redaccion de PII (100% opacidad verificada)
 - 🛡️ **Escudo Anti-Agencias** para mantener el ecosistema P2P puro
+- 🧠 **Active Intelligence Shield 2.0** con OSINT e IA para deteccion avanzada
+- 👥 **Community Shield** con denuncias P2P y alertas automaticas al admin
 
 ---
 

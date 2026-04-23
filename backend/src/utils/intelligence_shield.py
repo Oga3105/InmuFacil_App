@@ -22,6 +22,7 @@ Risk Scoring Weights:
 """
 
 import logging
+import uuid
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger("inmufacil.intelligence_shield")
@@ -313,6 +314,9 @@ async def investigate_user_osint(
     full_name = full_name.strip()
     phone = phone.strip()
 
+    # Generate unique watermark for traceability
+    watermark_id = uuid.uuid4().hex[:12]
+
     # Check disposable email (local check, no API needed)
     is_disposable = check_disposable_email(email)
 
@@ -324,8 +328,9 @@ async def investigate_user_osint(
         )
     except Exception as exc:
         logger.error(
-            f"[OSINT] Search failed for '{full_name}': {exc}. "
-            "Defaulting to safe score=0."
+            "[OSINT] wm=%s Search failed for '%s': %s. "
+            "Defaulting to safe score=0.",
+            watermark_id, full_name, exc,
         )
         result = {
             "risk_score": 0,
@@ -338,6 +343,7 @@ async def investigate_user_osint(
             },
             "reasoning": "OSINT search unavailable. Defaulting to allow.",
             "error": str(exc),
+            "watermark_id": watermark_id,
         }
         _log_investigation(email, full_name, result)
         return result
@@ -353,8 +359,9 @@ async def investigate_user_osint(
         reasoning = llm_result.get("reasoning", "")
     except Exception as exc:
         logger.error(
-            f"[LLM] Analysis failed for '{full_name}': {exc}. "
-            "Defaulting to safe score (disposable email check only)."
+            "[LLM] wm=%s Analysis failed for '%s': %s. "
+            "Defaulting to safe score (disposable email check only).",
+            watermark_id, full_name, exc,
         )
         phone_match = False
         name_match = False
@@ -376,6 +383,7 @@ async def investigate_user_osint(
             },
             "reasoning": reasoning,
             "error": str(exc),
+            "watermark_id": watermark_id,
         }
         _log_investigation(email, full_name, result)
         return result
@@ -400,6 +408,7 @@ async def investigate_user_osint(
             "disposable_email": is_disposable,
         },
         "reasoning": reasoning,
+        "watermark_id": watermark_id,
     }
 
     _log_investigation(email, full_name, result)
@@ -430,9 +439,12 @@ def _log_investigation(
     domain = email.split("@")[-1] if "@" in email else "unknown"
     log_level = logging.WARNING if result["blocked"] else logging.INFO
 
+    watermark = result.get("watermark_id", "N/A")
+
     logger.log(
         log_level,
-        "[INVESTIGATION] verdict=%s score=%d domain=%s factors=%s reasoning='%s'",
+        "[INVESTIGATION] wm=%s verdict=%s score=%d domain=%s factors=%s reasoning='%s'",
+        watermark,
         result["verdict"],
         result["risk_score"],
         domain,
