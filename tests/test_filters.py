@@ -136,7 +136,6 @@ async def test_block_agency_domain_regardless_of_name():
     is_valid, reason = await validate_user_is_not_agency(
         email="normal.person@tecnocasa.es",
         full_name="Juan Normal",  # No keywords in name
-        user_type="particular"
     )
     assert not is_valid
     assert "tecnocasa.es" in reason
@@ -153,40 +152,37 @@ async def test_allow_keyword_in_name_if_personal_email():
     is_valid, reason = await validate_user_is_not_agency(
         email="gestor.family@gmail.com",
         full_name="Pedro Gestor García",
-        user_type="particular"
     )
     assert is_valid, "Should allow personal email even with keyword in name"
 
 
 @pytest.mark.anyio
-async def test_block_professional_type_with_keywords():
+async def test_keywords_in_name_with_personal_email_allowed():
     """
-    Test: Professional user type + keywords = blocked
-    
-    @Jules: Multi-factor detection for professional accounts
+    Test: Keywords in name with personal email = allowed (ADR-021).
+
+    Since user_type is no longer client-sendable, keywords alone with
+    a personal email domain are insufficient evidence to block.
     """
     is_valid, reason = await validate_user_is_not_agency(
-        email="contact@gmail.com",  # Personal domain
-        full_name="Agencia Inmobiliaria Madrid",  # But professional name
-        user_type="profesional"  # And professional account type
+        email="contact@gmail.com",
+        full_name="Agencia Inmobiliaria Madrid",
     )
-    assert not is_valid
-    assert "professional" in reason.lower() or "keywords" in reason.lower()
+    assert is_valid, "Keywords alone with personal email should not block (ADR-021)"
 
 
 @pytest.mark.anyio
-async def test_allow_particular_type_with_keywords():
+async def test_allow_keyword_surname_with_personal_email():
     """
-    Test: Particular user type + keywords = allowed (benefit of doubt)
-    
-    @Shield: False positive prevention for edge cases
+    Test: Keyword-like surname with personal email = allowed.
+
+    @Shield: False positive prevention for edge cases.
     """
     is_valid, reason = await validate_user_is_not_agency(
         email="user@gmail.com",
-        full_name="Consultor Pérez",  # Has keyword
-        user_type="particular"  # But claims to be particular
+        full_name="Consultor Perez",
     )
-    assert is_valid, "Should allow particular users even with keywords (single factor)"
+    assert is_valid, "Should allow personal email even with keyword in name"
 
 
 # ============================================================================
@@ -276,28 +272,15 @@ async def test_real_world_agency_attempts():
     @Jules: Comprehensive real-world validation
     """
     agency_attempts = [
-        {
-            "email": "info@tecnocasa.es",
-            "name": "Tecnocasa Madrid Centro",
-            "type": "profesional"
-        },
-        {
-            "email": "contacto@remax.com",
-            "name": "RE/MAX España",
-            "type": "profesional"
-        },
-        {
-            "email": "ventas@donpiso.es",
-            "name": "Don Piso Asesor Inmobiliario",
-            "type": "profesional"
-        },
+        {"email": "info@tecnocasa.es", "name": "Tecnocasa Madrid Centro"},
+        {"email": "contacto@remax.com", "name": "RE/MAX Espana"},
+        {"email": "ventas@donpiso.es", "name": "Don Piso Asesor Inmobiliario"},
     ]
-    
+
     for attempt in agency_attempts:
         is_valid, reason = await validate_user_is_not_agency(
             email=attempt["email"],
             full_name=attempt["name"],
-            user_type=attempt["type"]
         )
         assert not is_valid, f"Should block {attempt['email']}"
 
@@ -310,28 +293,15 @@ async def test_real_world_legitimate_users():
     @Shield: False positive prevention validation
     """
     legitimate_users = [
-        {
-            "email": "juan.perez@gmail.com",
-            "name": "Juan Pérez García",
-            "type": "particular"
-        },
-        {
-            "email": "maria.lopez@hotmail.com",
-            "name": "María López Fernández",
-            "type": "particular"
-        },
-        {
-            "email": "pedro.sanchez@yahoo.es",
-            "name": "Pedro Sánchez Martín",
-            "type": "particular"
-        },
+        {"email": "juan.perez@gmail.com", "name": "Juan Perez Garcia"},
+        {"email": "maria.lopez@hotmail.com", "name": "Maria Lopez Fernandez"},
+        {"email": "pedro.sanchez@yahoo.es", "name": "Pedro Sanchez Martin"},
     ]
-    
+
     for user in legitimate_users:
         is_valid, reason = await validate_user_is_not_agency(
             email=user["email"],
             full_name=user["name"],
-            user_type=user["type"]
         )
         assert is_valid, f"Should allow legitimate user {user['email']}"
         assert reason == ""
