@@ -498,6 +498,7 @@ async def health_check():
 from backend.src.routes import auth, users, kyc, properties, visits, offers, financing, contracts, signature, notary, timeline, financial, handover, services, leads, chat, solvency, favorites, arras_interview, post_sale, fein, tasacion, notaria_appt, entrega_llaves, ai_description, property_analytics, ai_generate, market_price, price_validator, legal_guides, nota_simple, urban_growth, solvency_passport, market_gap, neighborhood_twins, comfort_index, signature_verification, notifications_email, ai_consent, ai_usage
 from backend.src.routes import notifications as notifications_router
 from backend.src.routes import lifestyle
+from backend.src.routes import reports as reports_router
 
 from fastapi import APIRouter
 
@@ -551,6 +552,7 @@ api_v1_router.include_router(notifications_email.router)    # V52 - Email Notifi
 api_v1_router.include_router(ai_consent.router)             # GDPR - AI Consent Logging (Art. 6.1.a)
 api_v1_router.include_router(ai_usage.router)               # AI Usage Tracking - GET /ai/usage/me
 api_v1_router.include_router(lifestyle.router)               # Lifestyle Profile (DB-persisted per user)
+api_v1_router.include_router(reports_router.router)           # Community Shield - User Reports
 
 # Include V1 Router in App
 app.include_router(api_v1_router)

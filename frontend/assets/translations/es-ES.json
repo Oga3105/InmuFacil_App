@@ -1262,5 +1262,18 @@
     "n_months": "hace {n} meses",
     "one_year": "hace 1 año",
     "n_years": "hace {n} años"
+  },
+  "report": {
+    "button_tooltip": "Reportar usuario",
+    "modal_title": "Reportar usuario sospechoso",
+    "modal_subtitle": "Selecciona el motivo de tu denuncia. Las denuncias falsas pueden ser sancionadas.",
+    "category_professional": "Profesional camuflado",
+    "category_commission": "Pide comision",
+    "category_inaccurate": "Datos inexactos",
+    "description_label": "Descripcion (opcional)",
+    "description_hint": "Describe el comportamiento sospechoso...",
+    "submit": "Enviar denuncia",
+    "success": "Denuncia enviada correctamente",
+    "error": "Error al enviar la denuncia"
   }
 }

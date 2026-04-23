@@ -714,5 +714,18 @@
     "n_months": "{n} months ago",
     "one_year": "1 year ago",
     "n_years": "{n} years ago"
+  },
+  "report": {
+    "button_tooltip": "Report user",
+    "modal_title": "Report suspicious user",
+    "modal_subtitle": "Select the reason for your report. False reports may be penalized.",
+    "category_professional": "Camouflaged professional",
+    "category_commission": "Asks for commission",
+    "category_inaccurate": "Inaccurate data",
+    "description_label": "Description (optional)",
+    "description_hint": "Describe the suspicious behavior...",
+    "submit": "Submit report",
+    "success": "Report submitted successfully",
+    "error": "Error submitting report"
   }
 }

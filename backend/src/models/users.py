@@ -53,6 +53,8 @@ class User(Base):
 
     email_notifications_enabled = Column(Boolean, default=True, nullable=False, server_default="true")
 
+    report_count = Column(Integer, default=0, nullable=False, server_default="0")
+
     properties = relationship("Property", back_populates="owner", cascade="all, delete-orphan")
     appointments = relationship("VisitAppointment", back_populates="buyer")
 
