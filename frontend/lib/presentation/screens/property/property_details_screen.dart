@@ -1426,41 +1426,38 @@ class _ActionBar extends ConsumerWidget {
           if (activeVisit != null)
             _VisitStatusBanner(visit: activeVisit, propertyId: property.id),
           if (!isOwner) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: activeVisit != null
-                        ? null
-                        : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
-                    icon: const Icon(Icons.calendar_month_outlined),
-                    label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF0f172a),
-                      side: const BorderSide(color: Color(0xFF0f172a), width: 2),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      alignment: Alignment.center,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
+                icon: const Icon(Icons.gavel_rounded),
+                label: const Text('Hacer Oferta'),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF135BEC),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: FilledButton.icon(
-                    onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
-                    icon: const Icon(Icons.gavel_rounded),
-                    label: const Text('Hacer Oferta'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: const Color(0xFF135BEC),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      alignment: Alignment.center,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                  ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: activeVisit != null
+                    ? null
+                    : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
+                icon: const Icon(Icons.calendar_month_outlined),
+                label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF0f172a),
+                  side: const BorderSide(color: Color(0xFF0f172a), width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  alignment: Alignment.center,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-              ],
+              ),
             ),
             const SizedBox(height: 10),
             SizedBox(
