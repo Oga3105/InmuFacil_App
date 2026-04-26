@@ -1,0 +1,15 @@
+{
+  "name": "inmufacil-slides",
+  "version": "1.0.0",
+  "description": "TFM Presentation - InmuFacil",
+  "private": true,
+  "scripts": {
+    "dev": "slidev --open",
+    "build": "slidev build --base /TFM/slides/",
+    "export": "slidev export --output inmufacil-tfm.pdf"
+  },
+  "dependencies": {
+    "@slidev/cli": "^52.14.2",
+    "@slidev/theme-default": "^0.25.0"
+  }
+}
