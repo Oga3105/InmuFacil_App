@@ -57,6 +57,9 @@ dependencies:
   # External URL launching
   url_launcher: ^6.3.0
 
+  # Share (native share sheet + WhatsApp)
+  share_plus: ^10.1.4
+
   # Real-time chat (WebSocket)
   web_socket_channel: ^3.0.1
 

@@ -710,5 +710,18 @@
     "gdpr_terms_prefix": "By continuing you accept the ",
     "gdpr_terms_link": "Terms and Conditions",
     "gdpr_privacy_link": "Privacy Policy"
+  },
+  "share": {
+    "title": "Share property",
+    "via_whatsapp": "Share via WhatsApp",
+    "copy_link": "Copy link",
+    "more_options": "More options",
+    "link_copied": "Link copied to clipboard",
+    "message_intro": "Check out this property on InmuFacil!",
+    "bedrooms_short": "bed.",
+    "bathrooms_short": "bath.",
+    "verified_seller": "Verified seller",
+    "energy_cert": "Energy rating: {rating}",
+    "view_property": "View property"
   }
 }

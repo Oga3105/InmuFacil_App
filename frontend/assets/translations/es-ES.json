@@ -1275,5 +1275,18 @@
     "submit": "Enviar denuncia",
     "success": "Denuncia enviada correctamente",
     "error": "Error al enviar la denuncia"
+  },
+  "share": {
+    "title": "Compartir inmueble",
+    "via_whatsapp": "Compartir por WhatsApp",
+    "copy_link": "Copiar enlace",
+    "more_options": "Mas opciones",
+    "link_copied": "Enlace copiado al portapapeles",
+    "message_intro": "Mira este inmueble en InmuFacil!",
+    "bedrooms_short": "hab.",
+    "bathrooms_short": "banos",
+    "verified_seller": "Vendedor verificado",
+    "energy_cert": "Certificacion energetica: {rating}",
+    "view_property": "Ver inmueble"
   }
 }

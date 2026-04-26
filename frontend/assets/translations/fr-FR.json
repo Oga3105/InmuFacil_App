@@ -596,5 +596,18 @@
     "gdpr_terms_prefix": "En continuant, vous acceptez les ",
     "gdpr_terms_link": "Conditions Générales",
     "gdpr_privacy_link": "Politique de Confidentialité"
+  },
+  "share": {
+    "title": "Partager le bien",
+    "via_whatsapp": "Partager via WhatsApp",
+    "copy_link": "Copier le lien",
+    "more_options": "Plus d'options",
+    "link_copied": "Lien copie dans le presse-papiers",
+    "message_intro": "Decouvrez ce bien sur InmuFacil !",
+    "bedrooms_short": "ch.",
+    "bathrooms_short": "sdb.",
+    "verified_seller": "Vendeur verifie",
+    "energy_cert": "Certification energetique : {rating}",
+    "view_property": "Voir le bien"
   }
 }
