@@ -4,6 +4,7 @@ Moderation Alert Service -- Admin Notification via SMTP (IONOS)
 Sends structured email alerts to the platform administrator when:
 - A user accumulates >= 3 reports from distinct users.
 - An OSINT investigation yields a critical risk score (> 90).
+- A registration attempt is blocked by the anti-agency filter (Layer 1).
 
 Integrates with the Active Intelligence Shield 2.0 and Community Shield
 reporting system.
@@ -293,6 +294,174 @@ async def send_admin_moderation_alert(
     logger.info(
         "[MODERATION] Sending alert: severity=%s score=%d reports=%d user=%s",
         severity, ai_score, report_count, reported_user_email,
+    )
+
+    return await _send_email(
+        to=recipient,
+        subject=subject,
+        html_body=html_body,
+    )
+
+
+# ============================================================================
+# Blocked Registration Alert (Layer 1 — Static Filter)
+# ============================================================================
+
+
+def _build_blocked_registration_html(
+    email: str,
+    full_name: str,
+    reason: str,
+    ip_address: str,
+    auth_method: str,
+) -> str:
+    """Build HTML body for blocked registration alert."""
+    from datetime import datetime
+
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+
+    return f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Bloqueado - InmuFacil</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0"
+               style="background:#ffffff;border-radius:16px;overflow:hidden;
+                      box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:#F59E0B;padding:24px 40px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:800;">
+                [SHIELD] Registro Bloqueado -- Escudo Anti-Agencia
+              </h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+                Layer 1: Filtro Estatico
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:32px 40px;">
+              <h2 style="margin:0 0 16px;color:#1E293B;font-size:18px;">
+                Intento de registro rechazado
+              </h2>
+
+              <table width="100%" style="margin-bottom:24px;">
+                <tr>
+                  <td style="padding:8px 0;color:#64748B;width:140px;">Email:</td>
+                  <td style="padding:8px 0;color:#1E293B;font-weight:600;">
+                    {email}
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#64748B;">Nombre:</td>
+                  <td style="padding:8px 0;color:#1E293B;">{full_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#64748B;">Metodo:</td>
+                  <td style="padding:8px 0;color:#1E293B;">{auth_method}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#64748B;">IP:</td>
+                  <td style="padding:8px 0;color:#1E293B;">{ip_address}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#64748B;">Fecha:</td>
+                  <td style="padding:8px 0;color:#1E293B;">{timestamp}</td>
+                </tr>
+              </table>
+
+              <!-- Reason box -->
+              <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:8px;
+                          padding:16px;margin-bottom:24px;">
+                <p style="margin:0;color:#92400E;font-weight:700;font-size:13px;">
+                  Motivo del bloqueo:
+                </p>
+                <p style="margin:8px 0 0;color:#78350F;font-size:14px;">
+                  {reason}
+                </p>
+              </div>
+
+              <!-- Action Button -->
+              <div style="text-align:center;margin:24px 0;">
+                <a href="{ADMIN_PANEL_URL}"
+                   style="display:inline-block;background:#F59E0B;color:#ffffff;
+                          text-decoration:none;padding:14px 32px;border-radius:8px;
+                          font-weight:700;font-size:14px;">
+                  Revisar en Panel de Admin
+                </a>
+              </div>
+
+              <p style="color:#94A3B8;font-size:11px;text-align:center;margin-top:24px;">
+                Este email fue generado automaticamente por el Escudo Anti-Agencia
+                de InmuFacil. No responder a este correo.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+
+async def send_blocked_registration_alert(
+    email: str,
+    full_name: str,
+    reason: str,
+    ip_address: str = "unknown",
+    auth_method: str = "email",
+) -> bool:
+    """
+    Send an alert when the anti-agency filter blocks a registration attempt.
+
+    Called from auth.py when validate_user_is_not_agency() returns False.
+
+    Args:
+        email: Email that attempted to register.
+        full_name: Name provided during registration.
+        reason: Human-readable reason for the block.
+        ip_address: Client IP address.
+        auth_method: 'email' or 'google'.
+
+    Returns:
+        True if email was sent successfully, False otherwise.
+    """
+    recipient = ADMIN_EMAIL
+    if not recipient:
+        logger.warning(
+            "[MODERATION] ADMIN_EMAIL not configured. "
+            "Blocked registration alert not sent."
+        )
+        return False
+
+    subject = (
+        f"[InmuFacil Shield] Registro bloqueado: "
+        f"{email} ({auth_method})"
+    )
+
+    html_body = _build_blocked_registration_html(
+        email=email,
+        full_name=full_name,
+        reason=reason,
+        ip_address=ip_address,
+        auth_method=auth_method,
+    )
+
+    logger.info(
+        "[MODERATION] Sending blocked registration alert: email=%s reason=%s",
+        email, reason,
     )
 
     return await _send_email(
