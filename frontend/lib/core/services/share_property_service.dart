@@ -9,7 +9,7 @@ class SharePropertyService {
   SharePropertyService._();
 
   static String propertyUrl(String propertyId) =>
-      'https://inmufacil.app/property/$propertyId';
+      'https://inmufacil.com/property/$propertyId';
 
   static String buildShareText(Property property) {
     final buf = StringBuffer();
@@ -47,6 +47,11 @@ class SharePropertyService {
     buf.writeln();
     buf.writeln(
         '${'share.view_property'.tr()}: ${propertyUrl(property.id)}');
+
+    if (property.imageUrl != null) {
+      buf.writeln();
+      buf.writeln(property.imageUrl);
+    }
 
     return buf.toString();
   }
