@@ -23,6 +23,7 @@ from firebase_admin import credentials, auth as firebase_auth_sdk
 from backend.src.config.database import get_db
 from backend.src.models import User, UserType, DNIStatus
 from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
+from backend.src.services.moderation_alerts import send_blocked_registration_alert
 from backend.src.utils.security import verify_password, get_password_hash, create_access_token
 from backend.src.services.email_service import (
     generate_verification_token, get_token_expiration,
@@ -159,6 +160,14 @@ async def register(
             country="ES"
         )
         logger.warning(f"[SHIELD] Registration blocked: {reason} | Email: {user_data.email}")
+        # Alert admin (fire-and-forget, non-blocking)
+        await send_blocked_registration_alert(
+            email=user_data.email,
+            full_name=user_data.full_name,
+            reason=reason,
+            ip_address=client_ip,
+            auth_method="email",
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Registration not allowed: {reason}"
@@ -504,6 +513,13 @@ async def google_auth(
                     country="ES"
                 )
                 logger.warning(f"[SHIELD] Google auth bloqueado: {reason} | Email: {email}")
+                await send_blocked_registration_alert(
+                    email=email,
+                    full_name=full_name,
+                    reason=reason,
+                    ip_address=client_ip,
+                    auth_method="google",
+                )
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"Registro no permitido: {reason}"
