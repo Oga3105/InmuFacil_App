@@ -1,0 +1,143 @@
+/* InmuFacil TFM - Dark Theme with Corporate Colors */
+
+:root {
+  --slidev-theme-primary: #135BEC;
+  --inmufacil-blue: #135BEC;
+  --inmufacil-green: #16A34A;
+  --inmufacil-navy: #0E2242;
+  --inmufacil-navy-light: #1C3F73;
+  --inmufacil-navy-mid: #234983;
+  --inmufacil-blue-soft: #60A5FA;
+  --inmufacil-text: #E2E8F0;
+  --inmufacil-muted: #94A3B8;
+}
+
+/* Force dark background on all slides */
+.slidev-layout {
+  background: var(--inmufacil-navy) !important;
+  color: var(--inmufacil-text) !important;
+}
+
+/* Page wrapper */
+.slidev-page,
+#slide-container,
+body,
+html {
+  background: var(--inmufacil-navy) !important;
+}
+
+/* Headings */
+.slidev-layout h1 {
+  color: #ffffff !important;
+  border-bottom: 2px solid var(--inmufacil-blue);
+  padding-bottom: 6px;
+  display: inline-block;
+}
+
+.slidev-layout h2 {
+  color: #ffffff !important;
+}
+
+.slidev-layout h3 {
+  color: var(--inmufacil-blue-soft) !important;
+}
+
+/* Paragraphs and list items */
+.slidev-layout p,
+.slidev-layout li {
+  color: var(--inmufacil-text) !important;
+}
+
+/* Strong/bold */
+.slidev-layout strong {
+  color: #ffffff !important;
+}
+
+/* Links */
+.slidev-layout a {
+  color: var(--inmufacil-blue-soft) !important;
+}
+
+/* Tables */
+.slidev-layout table {
+  font-size: 0.82em;
+}
+
+.slidev-layout th {
+  background: var(--inmufacil-navy-light) !important;
+  color: var(--inmufacil-blue-soft) !important;
+  border-bottom: 2px solid var(--inmufacil-blue) !important;
+  padding: 6px 10px !important;
+}
+
+.slidev-layout td {
+  border-bottom: 1px solid var(--inmufacil-navy-mid) !important;
+  color: var(--inmufacil-text) !important;
+  padding: 5px 10px !important;
+}
+
+.slidev-layout tr:hover td {
+  background: rgba(19, 91, 236, 0.08);
+}
+
+/* Code blocks */
+.slidev-layout code {
+  background: var(--inmufacil-navy-light) !important;
+  color: var(--inmufacil-blue-soft) !important;
+}
+
+.slidev-layout pre {
+  background: var(--inmufacil-navy-light) !important;
+  border: 1px solid var(--inmufacil-navy-mid) !important;
+}
+
+/* Blockquotes */
+.slidev-layout blockquote {
+  border-left: 4px solid var(--inmufacil-blue) !important;
+  background: rgba(19, 91, 236, 0.1) !important;
+  padding: 8px 16px !important;
+}
+
+.slidev-layout blockquote p {
+  color: #CBD5E1 !important;
+}
+
+/* Custom card class */
+.card {
+  background: var(--inmufacil-navy-light);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--inmufacil-navy-mid);
+}
+
+.card h3 {
+  margin-top: 0 !important;
+}
+
+/* Navigation and UI chrome */
+.slidev-nav,
+.slidev-controls {
+  color: var(--inmufacil-text) !important;
+}
+
+/* Slide number */
+.slidev-page-number {
+  color: var(--inmufacil-muted) !important;
+}
+
+/* Presenter notes */
+.slidev-layout .my-auto {
+  color: var(--inmufacil-text) !important;
+}
+
+/* Cover/center layouts */
+.slidev-layout.cover,
+.slidev-layout.center,
+.slidev-layout.intro {
+  background: var(--inmufacil-navy) !important;
+}
+
+.slidev-layout.cover h1,
+.slidev-layout.center h1 {
+  border-bottom: none;
+}
