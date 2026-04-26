@@ -520,36 +520,38 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                ),
              ),
              
-             // View Controls
-             if (MediaQuery.of(context).size.width > 600) // Hide on very small screens
-             Row(
-               children: [
-                 SizedBox(
-                   height: 42,
-                   child: Container(
-                     padding: const EdgeInsets.all(4),
-                     decoration: BoxDecoration(
-                       color: theme.colorScheme.surface,
-                       borderRadius: BorderRadius.circular(8),
-                       border: Border.all(color: theme.colorScheme.outlineVariant),
+             // View Controls (desktop only) + Sort (always visible)
+             if (MediaQuery.of(context).size.width > 600)
+               Row(
+                 children: [
+                   SizedBox(
+                     height: 42,
+                     child: Container(
+                       padding: const EdgeInsets.all(4),
+                       decoration: BoxDecoration(
+                         color: theme.colorScheme.surface,
+                         borderRadius: BorderRadius.circular(8),
+                         border: Border.all(color: theme.colorScheme.outlineVariant),
+                       ),
+                        child: Row(
+                          children: [
+                            _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
+                               ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
+                            }),
+                            _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
+                               ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
+                            }),
+                            _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
+                          ],
+                        ),
                      ),
-                      child: Row(
-                        children: [
-                          _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
-                             ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
-                          }),
-                          _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
-                             ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
-                          }),
-                          _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
-                        ],
-                      ),
                    ),
-                 ),
-                  const SizedBox(width: 12),
-                  _buildSortingDropdown(context, searchState, ref),
-               ],
-             ),
+                    const SizedBox(width: 12),
+                    _buildSortingDropdown(context, searchState, ref),
+                 ],
+               )
+             else
+               _buildSortingDropdown(context, searchState, ref),
           ],
         ),
       ],

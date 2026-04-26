@@ -1385,12 +1385,12 @@ class _MapNavigationBar extends ConsumerWidget {
                   },
                   itemBuilder: (_) => [
                     PopupMenuItem(value: 'buy', child: Row(children: [const Icon(Icons.search), const SizedBox(width: 8), const Text('Comprar')])),
-                    PopupMenuItem(value: 'sell', child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Vender')])),
-                    PopupMenuItem(value: 'how', child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')])),
-                    PopupMenuItem(value: 'what-is', child: Row(children: [const Icon(Icons.home_outlined), const SizedBox(width: 8), const Text('Qué es InmuFácil')])),
-                    PopupMenuItem(value: 'buyer-guide', child: Row(children: [const Icon(Icons.person_outline), const SizedBox(width: 8), const Text('Guía del Comprador')])),
-                    PopupMenuItem(value: 'seller-guide', child: Row(children: [const Icon(Icons.storefront_outlined), const SizedBox(width: 8), const Text('Guía del Vendedor')])),
-                    PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.mail_outline), const SizedBox(width: 8), const Text('Contacto')])),
+                    PopupMenuItem(value: 'sell', child: Row(children: [const Icon(Icons.add_business_outlined), const SizedBox(width: 8), const Text('Vender')])),
+                    PopupMenuItem(value: 'how', child: Row(children: [const Icon(Icons.help_outline), const SizedBox(width: 8), const Text('Cómo funciona')])),
+                    PopupMenuItem(value: 'what-is', child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Qué es InmuFácil')])),
+                    PopupMenuItem(value: 'buyer-guide', child: Row(children: [const Icon(Icons.shopping_bag_outlined), const SizedBox(width: 8), const Text('Guía del Comprador')])),
+                    PopupMenuItem(value: 'seller-guide', child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Guía del Vendedor')])),
+                    PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.support_agent_outlined), const SizedBox(width: 8), const Text('Contacto')])),
                   ],
                 ),
                 if (isAuthenticated) ...[
