@@ -289,6 +289,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   String? _currentUserPhotoUrl;
   String? _otherUserName;
   String? _otherUserPhotoUrl;
+  int? _otherUserId;
   WebSocketChannel? _channel;
   StreamSubscription<dynamic>? _wsSub;
   bool _wsConnected = false;
@@ -300,6 +301,7 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
   String? get currentUserPhotoUrl => _currentUserPhotoUrl;
   String? get otherUserName => _otherUserName;
   String? get otherUserPhotoUrl => _otherUserPhotoUrl;
+  int? get otherUserId => _otherUserId;
   bool get wsConnected => _wsConnected;
   bool get isBuyer => _isBuyer;
   String? get offerStatus => _offerStatus;
@@ -344,6 +346,8 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
         if (_otherUserName == null || _otherUserName!.isEmpty)
           _otherUserName = 'Vendedor';
         _otherUserPhotoUrl = property['seller_photo_url'] as String?;
+        final ownerIdRaw = property['owner_id'] ?? sentOffer['property_owner_id'];
+        if (ownerIdRaw != null) _otherUserId = int.tryParse(ownerIdRaw.toString());
       } else {
         final receivedOffer = received.cast<Map<String, dynamic>?>().firstWhere(
             (o) => (o?['id'] ?? '').toString() == _offerId,
@@ -356,6 +360,8 @@ class ChatDetailNotifier extends AsyncNotifier<List<ChatMessage>> {
           if (_otherUserName == null || _otherUserName!.isEmpty)
             _otherUserName = 'Comprador';
           _otherUserPhotoUrl = buyer['photo_url'] as String?;
+          final buyerIdRaw = buyer['id'] ?? receivedOffer['buyer_id'];
+          if (buyerIdRaw != null) _otherUserId = int.tryParse(buyerIdRaw.toString());
         }
       }
     } catch (_) {}

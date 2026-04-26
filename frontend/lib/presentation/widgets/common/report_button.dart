@@ -1,5 +1,8 @@
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/network/dio_factory.dart';
 
 /// Categories for reporting a suspected professional agent.
 enum ReportCategory {
@@ -35,23 +38,21 @@ extension ReportCategoryExt on ReportCategory {
 
 /// A button that opens a modal to report a suspected professional agent.
 ///
-/// Place this widget on property detail screens or user profile cards.
-/// It requires the [reportedUserId] of the user being reported and an
-/// [onReport] callback that handles the API call.
+/// Place this widget on property detail screens, chat screens, or user
+/// profile cards. It handles the full flow: modal selection, API call,
+/// and user feedback via SnackBar.
 class ReportButton extends StatelessWidget {
   final int reportedUserId;
-  final Future<void> Function(int reportedUserId, ReportCategory category, String? description) onReport;
 
   const ReportButton({
     super.key,
     required this.reportedUserId,
-    required this.onReport,
   });
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.flag_outlined),
+      icon: const Icon(Icons.flag_outlined, size: 20),
       tooltip: 'report.button_tooltip'.tr(),
       onPressed: () => _showReportModal(context),
     );
@@ -69,16 +70,24 @@ class ReportButton extends StatelessWidget {
 
     if (result != null && context.mounted) {
       try {
-        await onReport(reportedUserId, result.category, result.description);
+        final dio = buildAuthDio();
+        await dio.post('/reports/report-agent', data: {
+          'reported_id': reportedUserId,
+          'reason_category': result.category.apiValue,
+          if (result.description != null) 'description': result.description,
+        });
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('report.success'.tr())),
           );
         }
-      } catch (e) {
+      } on DioException catch (e) {
         if (context.mounted) {
+          final detail = e.response?.data is Map
+              ? (e.response?.data as Map)['detail'] ?? 'report.error'.tr()
+              : 'report.error'.tr();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('report.error'.tr())),
+            SnackBar(content: Text(detail.toString())),
           );
         }
       }

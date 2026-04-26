@@ -9,6 +9,7 @@ import '../../providers/chat_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
+import '../../widgets/common/report_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/visits/visit_cancel_dialog.dart';
 
@@ -551,6 +552,8 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         ],
       ),
       actions: [
+        if (notifier.otherUserId != null)
+          ReportButton(reportedUserId: notifier.otherUserId!),
         // Inicio button — same style as offer_management_screen
         if (MediaQuery.sizeOf(context).width >= 650)
         MouseRegion(
