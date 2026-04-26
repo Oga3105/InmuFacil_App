@@ -5,6 +5,7 @@ import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dar
 import '../../../../domain/entities/property.dart';
 import '../common/premium_button.dart';
 import '../common/price_tag.dart';
+import '../common/share_bottom_sheet.dart';
 import '../common/time_badge.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
@@ -218,7 +219,7 @@ class PropertyListingItem extends ConsumerWidget {
                     IconButton(
                       icon: const Icon(Icons.share_outlined),
                       color: onSurfaceVariant,
-                      onPressed: () {},
+                      onPressed: () => showShareBottomSheet(context, property),
                       tooltip: 'Compartir',
                     ),
                     const SizedBox(width: 8),

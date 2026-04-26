@@ -596,5 +596,18 @@
     "gdpr_terms_prefix": "En continuar acceptes els ",
     "gdpr_terms_link": "Termes i Condicions",
     "gdpr_privacy_link": "Política de Privacitat"
+  },
+  "share": {
+    "title": "Compartir immoble",
+    "via_whatsapp": "Compartir per WhatsApp",
+    "copy_link": "Copiar enllac",
+    "more_options": "Mes opcions",
+    "link_copied": "Enllac copiat al porta-retalls",
+    "message_intro": "Mira aquest immoble a InmuFacil!",
+    "bedrooms_short": "hab.",
+    "bathrooms_short": "banys",
+    "verified_seller": "Venedor verificat",
+    "energy_cert": "Certificacio energetica: {rating}",
+    "view_property": "Veure immoble"
   }
 }

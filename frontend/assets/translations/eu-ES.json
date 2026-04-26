@@ -542,5 +542,18 @@
     "gdpr_terms_prefix": "Jarraituz gero, honako hauek onartzen dituzu: ",
     "gdpr_terms_link": "Erabilera-baldintzak",
     "gdpr_privacy_link": "Pribatutasun-politika"
+  },
+  "share": {
+    "title": "Higiezina partekatu",
+    "via_whatsapp": "WhatsApp bidez partekatu",
+    "copy_link": "Esteka kopiatu",
+    "more_options": "Aukera gehiago",
+    "link_copied": "Esteka arbelera kopiatua",
+    "message_intro": "Begiratu higiezin hau InmuFacil-en!",
+    "bedrooms_short": "log.",
+    "bathrooms_short": "bain.",
+    "verified_seller": "Saltzaile egiaztatua",
+    "energy_cert": "Energia-ziurtagiria: {rating}",
+    "view_property": "Higiezina ikusi"
   }
 }

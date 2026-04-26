@@ -8,6 +8,8 @@ import 'package:latlong2/latlong.dart';
 // import 'package:easy_localization/easy_localization.dart';
 
 import '../../../domain/entities/property.dart';
+import '../../widgets/common/report_button.dart';
+import '../../widgets/common/share_bottom_sheet.dart';
 import '../../../domain/entities/property_type.dart'; // [FIX] Import added
 // import '../../providers/property_provider.dart'; // TODO: Implement specific provider
 import '../../providers/search_provider.dart';
@@ -434,7 +436,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ComfortRadarChart(propertyId: property.id),
                       ],
                       const SizedBox(height: 32),
-                      _OwnerCard(property: property),
+                      _OwnerCard(property: property, isOwner: isOwner),
                       const SizedBox(height: 24),
                       _SellerMetricsCard(propertyId: property.id, status: property.status),
                       if (isOwner) ...[
@@ -629,7 +631,7 @@ class _HeroImageSectionState extends State<_HeroImageSection>
             right: 16,
             child: Row(
               children: [
-                _CircleButton(icon: Icons.share_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, onPressed: () {}),
+                _CircleButton(icon: Icons.share_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, onPressed: () => showShareBottomSheet(context, widget.property)),
                 const SizedBox(width: 8),
                 AnimatedBuilder(
                   animation: _heartScale,
@@ -1050,7 +1052,7 @@ class _SummaryCard extends ConsumerWidget {
             _EnergyCertBadge(rating: property.energyCertification!),
           ],
           const SizedBox(height: 16),
-          _OwnerCard(property: property),
+          _OwnerCard(property: property, isOwner: isOwner),
           const SizedBox(height: 24),
           _SellerMetricsCard(propertyId: property.id, status: property.status),
           const SizedBox(height: 16),
@@ -1946,8 +1948,9 @@ class _MetricDivider extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _OwnerCard extends StatelessWidget {
-  const _OwnerCard({required this.property});
+  const _OwnerCard({required this.property, this.isOwner = false});
   final Property property;
+  final bool isOwner;
 
   @override
   Widget build(BuildContext context) {
@@ -2023,6 +2026,8 @@ class _OwnerCard extends StatelessWidget {
               ],
             ),
           ),
+          if (!isOwner && property.ownerId != null)
+            ReportButton(reportedUserId: int.tryParse(property.ownerId!) ?? 0),
         ],
       ),
     );

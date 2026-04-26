@@ -462,5 +462,18 @@
     "gdpr_terms_prefix": "Ao continuar aceptas os ",
     "gdpr_terms_link": "Termos e Condicións",
     "gdpr_privacy_link": "Política de Privacidade"
+  },
+  "share": {
+    "title": "Compartir inmoble",
+    "via_whatsapp": "Compartir por WhatsApp",
+    "copy_link": "Copiar enlace",
+    "more_options": "Mais opcions",
+    "link_copied": "Enlace copiado ao portapapeis",
+    "message_intro": "Mira este inmoble en InmuFacil!",
+    "bedrooms_short": "hab.",
+    "bathrooms_short": "banos",
+    "verified_seller": "Vendedor verificado",
+    "energy_cert": "Certificacion enerxetica: {rating}",
+    "view_property": "Ver inmoble"
   }
 }
