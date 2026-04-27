@@ -107,7 +107,7 @@ Una plataforma **peer-to-peer** que permite a particulares comprar y vender prop
 <h3 style="margin-top:0; color:#60A5FA !important;">Backend</h3>
 <div style="font-size:0.82em;">
 
-- **FastAPI** (Python 3.13)
+- **FastAPI** (Python 3.10)
 - **PostgreSQL 15** (Docker)
 - **SQLAlchemy 2.0** + **Pydantic v2**
 - **Gemini AI** (Vision + Asistente)
@@ -165,7 +165,7 @@ Una plataforma **peer-to-peer** que permite a particulares comprar y vender prop
 
 <div style="color:#16A34A; font-weight:700; margin:12px 0 6px;">BACKEND MODULAR</div>
 
-17 routers: auth, properties, visits, offers, negotiation, contracts, signature, notary, closing, post-sales...
+35+ routers: auth, properties, visits, offers, contracts, signature, notary, chat, solvency, AI, post-sales...
 </div>
 
 </div>
@@ -400,7 +400,7 @@ Internacionalizaci&oacute;n: <strong style="color:#fff;">9 idiomas</strong> &mda
 |--------------|--------|
 | **&Iacute;ndice de confort** | <span style="color:#4ADE80;">Activa</span> |
 | **Barrios gemelos** | <span style="color:#4ADE80;">Activa</span> |
-| **Descripci&oacute;n IA** | <span style="color:#4ADE80;">Activa</span> |
+| **Smart Fallback IA** | <span style="color:#4ADE80;">Activa</span> |
 | **Validador de precio** | <span style="color:#94A3B8;">Preparada</span> |
 | **Market Gap** | <span style="color:#94A3B8;">Preparada</span> |
 | **Crecimiento urbano** | <span style="color:#94A3B8;">Preparada</span> |
@@ -540,7 +540,7 @@ Popup expl&iacute;cito antes de cualquier procesamiento con IA &middot; Trust Da
 | Hitos backend | **17 / 17** |
 | Pantallas frontend | **50+** |
 | Idiomas soportados | **9** |
-| Routers API | **17** |
+| Routers API | **35+** |
 </div>
 
 <div style="background:#1C3F73; padding:16px; border-radius:10px; border:1px solid #234983;">

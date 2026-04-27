@@ -31,7 +31,7 @@ backend/
     │   ├── visits.py        # VisitWindow, VisitAppointment
     │   ├── offers.py        # PropertyOffer, OfferMessage
     │   └── ...
-    ├── routes/              # API routers (40+)
+    ├── routes/              # API routers (35+)
     │   ├── auth.py          # JWT, MFA, Google OAuth
     │   ├── properties.py    # CRUD + busqueda
     │   ├── visits.py        # Scheduling + estado
@@ -75,9 +75,10 @@ pytest tests/ --cov=backend --cov-report=html
 
 - 🔐 AES-256-GCM para cifrado de PII (DNI, telefono)
 - 🔑 JWT con MFA por email
-- 🛡️ Escudo Anti-Agencias v1 (30+ dominios, 40+ keywords)
-- 🧠 Active Intelligence Shield 2.0 (OSINT + IA + scoring ponderado)
-- 👥 Community Shield (denuncias P2P + re-investigacion automatica)
+- 🛡️ Escudo Anti-Agencias (3 capas):
+  - Layer 1 — Estatico: 30+ dominios, 40+ keywords, bloqueo + alerta SMTP
+  - Layer 2 — IA + OSINT: Active Intelligence Shield 2.0, scoring 0-100, Gemini
+  - Layer 3 — Comunidad: denuncias P2P, umbral 3 reports, re-investigacion automatica
 - 📧 Alertas de moderacion al admin via SMTP (IONOS)
 - ⚔️ Prevencion MITRE ATT&CK (T1110, T1566, T1552, T1078)
 - ✅ RBAC en todos los endpoints sensibles

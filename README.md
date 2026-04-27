@@ -102,13 +102,13 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 ### Backend
 | Tecnologia | Version | Uso |
 |------------|---------|-----|
-| FastAPI | 0.135.1 | Framework async, OpenAPI 3.1 |
-| Python | 3.13 | Runtime |
+| FastAPI | 0.136.1 | Framework async, OpenAPI 3.1 |
+| Python | 3.10 | Runtime (Docker prod) |
 | PostgreSQL | 15 | Base de datos (Docker) |
-| SQLAlchemy | 2.0.48 | ORM |
+| SQLAlchemy | 2.0.49 | ORM |
 | Pydantic | v2 | Validacion y serializacion |
-| cryptography | 46.0.5 | AES-256-GCM |
-| google-genai | >= 1.0 | Gemini Vision + IA |
+| cryptography | 47.0.0 | AES-256-GCM |
+| google-genai | >= 1.73.1 | Gemini Vision + IA |
 | ReportLab | - | Generacion PDF contratos |
 
 ### Frontend
@@ -116,7 +116,7 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 |------------|---------|-----|
 | Flutter | Latest stable | Web + Android |
 | Riverpod | 3.2.1 | Estado reactivo |
-| GoRouter | 17.1.0 | Navegacion declarativa |
+| GoRouter | 17.2.2 | Navegacion declarativa |
 | Dio | 5.9.2 | HTTP + interceptores JWT |
 | flutter_map | 8.2.2 | Mapas OpenStreetMap |
 | easy_localization | 3.0.3 | i18n (9 idiomas) |
