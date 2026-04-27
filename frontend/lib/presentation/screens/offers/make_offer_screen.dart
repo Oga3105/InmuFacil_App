@@ -7,6 +7,8 @@ import '../../providers/offers_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+// import '../../widgets/offers/price_validator_widget.dart'; // DESHACER: kept for future use
+// import '../../widgets/offers/market_gap_widget.dart'; // DESHACER: kept for future use
 
 class MakeOfferScreen extends ConsumerStatefulWidget {
   const MakeOfferScreen({

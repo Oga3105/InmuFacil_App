@@ -13,6 +13,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/common/app_bar_back_button.dart';
 import '../widgets/common/user_avatar_menu.dart';
 import '../widgets/common/demo_banner.dart';
+import '../widgets/property/neighborhood_twins_panel.dart';
 
 class PropertyListingScreen extends ConsumerStatefulWidget {
   const PropertyListingScreen({super.key, this.highlightId, this.fromMap = false});
@@ -454,6 +455,23 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                               },
                             ),
                           
+                          // Neighborhood Twins (Barrios Gemelos)
+                          Builder(builder: (_) {
+                            // Extract postal code from first property in current results
+                            final firstPc = allFilteredProperties.isEmpty
+                                ? ''
+                                : (RegExp(r'\b(\d{5})\b')
+                                        .firstMatch(allFilteredProperties.first.address)
+                                        ?.group(1) ??
+                                    '');
+                            if (firstPc.isEmpty) return const SizedBox.shrink();
+                            return NeighborhoodTwinsPanel(
+                              postalCode: firstPc,
+                              city: searchState.location.isNotEmpty
+                                  ? searchState.location
+                                  : null,
+                            );
+                          }),
                           // Pagination
                           const SizedBox(height: 40),
                           _buildPagination(ref, searchState, allFilteredProperties.length),

@@ -886,7 +886,10 @@
     },
     "twins": {
       "header_bottom": "Inmuebles en Zonas con Perfil Similar",
-      "match_score": "{score}% compatibilidad"
+      "match_score": "{score}% compatibilidad",
+      "loading": "Buscando barrios gemelos...",
+      "section_title": "BARRIOS GEMELOS",
+      "section_subtitle": "Zonas con perfil similar a tu busqueda actual"
     }
   },
   "info": {
