@@ -48,5 +48,8 @@ uploads/
 # AI tools (local config)
 .claude/
 
+# Node (Slidev)
+node_modules/
+
 # Stitch Design Files (temporary)
 frontend/design_inbox/
