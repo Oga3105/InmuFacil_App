@@ -16,6 +16,7 @@ import '../../providers/offers_provider.dart';
 import '../../providers/urgency_provider.dart';
 import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/demo_banner.dart';
+import '../../widgets/common/language_selector_widget.dart';
 import '../info/info_screen.dart';
 
 /// Home/Landing Screen with Google Maps Integration
@@ -1393,6 +1394,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.support_agent_outlined), const SizedBox(width: 8), const Text('Contacto')])),
                   ],
                 ),
+                const LanguageSelectorWidget(compact: true),
                 if (isAuthenticated) ...[
                   const UserAvatarMenu(),
                 ] else
@@ -1598,6 +1600,7 @@ class _MapNavigationBar extends ConsumerWidget {
                     fullWidth: false,
                   ),
                   const SizedBox(width: 12),
+                  const LanguageSelectorWidget(compact: true),
 
                   // [AUTH STATE LOGIC]
                   if (isAuthenticated)
