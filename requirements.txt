@@ -54,7 +54,7 @@ opencv-python-headless>=4.10.0.84
 # ============================================================================
 # OCR - Semantic Document Analysis (@Jules)
 # ============================================================================
-easyocr>=1.7.0
+easyocr>=1.7.2
 # EasyOCR for text detection and recognition
 # Note: First run will download Spanish language model (~500MB)
 
