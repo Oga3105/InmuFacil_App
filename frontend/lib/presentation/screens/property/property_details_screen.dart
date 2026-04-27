@@ -26,7 +26,7 @@ import '../../widgets/common/user_avatar_menu.dart';
 import '../../widgets/common/demo_banner.dart';
 import '../../widgets/property/document_status_section.dart';
 import '../../widgets/property/comfort_radar_chart.dart';
-import '../../widgets/property/market_price_widget.dart';
+// DESHACER: import '../../widgets/property/market_price_widget.dart';
 // import '../../widgets/property/urban_growth_widget.dart'; // DESHACER: kept for future use
 // import '../../widgets/property/legal_guide_button.dart'; // DESHACER: kept for future use
 import '../../providers/visits_provider.dart';
@@ -438,14 +438,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         const SizedBox(height: 32),
                         ComfortRadarChart(propertyId: property.id),
                       ],
-                      if (_extractPostalCode(property.address).isNotEmpty) ...[
-                        const SizedBox(height: 24),
-                        MarketPriceWidget(
-                          postalCode: _extractPostalCode(property.address),
-                          surfaceArea: property.squareMeters,
-                          propertyType: property.type.name,
-                        ),
-                      ],
+                      // DESHACER: MarketPriceWidget removed from property details UI.
                       const SizedBox(height: 32),
                       _OwnerCard(property: property, isOwner: isOwner),
                       const SizedBox(height: 24),
@@ -1079,19 +1072,7 @@ class _SummaryCard extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
           ),
-          // Market Price — zone analytics
-          Builder(builder: (_) {
-            final pc = RegExp(r'\b(\d{5})\b').firstMatch(property.address)?.group(1) ?? '';
-            if (pc.isEmpty) return const SizedBox.shrink();
-            return Column(children: [
-              MarketPriceWidget(
-                postalCode: pc,
-                surfaceArea: property.squareMeters,
-                propertyType: property.type.name,
-              ),
-              const SizedBox(height: 16),
-            ]);
-          }),
+          // DESHACER: MarketPriceWidget removed from property details UI.
           // Action buttons
           _ActionBar(property: property, context: context, vertical: true),
         ],

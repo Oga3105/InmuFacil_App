@@ -50,8 +50,8 @@ class MarketPriceResult {
 // Provider
 // ---------------------------------------------------------------------------
 
-class _MarketPriceArgs {
-  const _MarketPriceArgs({
+class MarketPriceArgs {
+  const MarketPriceArgs({
     required this.postalCode,
     required this.surfaceArea,
     required this.propertyType,
@@ -63,7 +63,7 @@ class _MarketPriceArgs {
 
   @override
   bool operator ==(Object other) =>
-      other is _MarketPriceArgs &&
+      other is MarketPriceArgs &&
       other.postalCode == postalCode &&
       other.surfaceArea == surfaceArea &&
       other.propertyType == propertyType;
@@ -74,8 +74,8 @@ class _MarketPriceArgs {
 
 const _storage = FlutterSecureStorage();
 
-final _marketPriceProvider =
-    FutureProvider.autoDispose.family<MarketPriceResult, _MarketPriceArgs>(
+final marketPriceProvider =
+    FutureProvider.autoDispose.family<MarketPriceResult, MarketPriceArgs>(
   (ref, args) async {
     final token = await _storage.read(key: 'auth_token');
     final dio = buildAuthDio();
@@ -126,12 +126,12 @@ class MarketPriceWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final args = _MarketPriceArgs(
+    final args = MarketPriceArgs(
       postalCode: postalCode,
       surfaceArea: surfaceArea,
       propertyType: propertyType,
     );
-    final asyncValue = ref.watch(_marketPriceProvider(args));
+    final asyncValue = ref.watch(marketPriceProvider(args));
 
     return asyncValue.when(
       loading: () => const _MarketPriceLoading(),

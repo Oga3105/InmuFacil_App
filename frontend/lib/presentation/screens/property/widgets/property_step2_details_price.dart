@@ -6,6 +6,7 @@ import '../../../../core/formatters/currency_input_formatter.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import '../../../providers/property_form_provider.dart';
+import '../../../widgets/property/market_price_widget.dart';
 import 'property_condition_selector.dart';
 
 class PropertyStep2DetailsPrice extends ConsumerStatefulWidget {
@@ -147,6 +148,12 @@ class _PropertyStep2DetailsPriceState
                       ),
                     ),
                   ],
+                ),
+                // ── Market price hint ──────────────────────────
+                _MarketPriceHint(
+                  postalCode: s.postalCodeText,
+                  surfaceText: s.surfaceText,
+                  propertyType: s.selectedType?.backendValue ?? 'piso',
                 ),
                 const SizedBox(height: 16),
                 // Bedrooms & Bathrooms (label inline)
@@ -434,6 +441,92 @@ class _CircleButtonState extends State<_CircleButton> {
           );
         },
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Market price suggestion hint — subtle, informational
+// Shows a price range based on market data when postal code + surface exist
+// ---------------------------------------------------------------------------
+
+class _MarketPriceHint extends ConsumerWidget {
+  const _MarketPriceHint({
+    required this.postalCode,
+    required this.surfaceText,
+    required this.propertyType,
+  });
+
+  final String postalCode;
+  final String surfaceText;
+  final String propertyType;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final surface = double.tryParse(surfaceText.replaceAll(',', '.'));
+    if (postalCode.length != 5 || surface == null || surface <= 0) {
+      return const SizedBox.shrink();
+    }
+
+    final args = MarketPriceArgs(
+      postalCode: postalCode,
+      surfaceArea: surface,
+      propertyType: propertyType,
+    );
+    final async = ref.watch(marketPriceProvider(args));
+
+    return async.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (result) {
+        if (result.pricePerM2 <= 0 || result.lowDensity) {
+          return const SizedBox.shrink();
+        }
+
+        final totalEstimate = result.pricePerM2 * surface.round();
+        final low = (totalEstimate * 0.85).round();
+        final high = (totalEstimate * 1.15).round();
+        final lowStr = CurrencyInputFormatter.format(low);
+        final highStr = CurrencyInputFormatter.format(high);
+        final ppm2Str = CurrencyInputFormatter.format(result.pricePerM2);
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.shade100),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.auto_awesome, size: 14, color: Colors.blue.shade300),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600, height: 1.4),
+                      children: [
+                        TextSpan(
+                          text: 'Referencia de mercado: ',
+                          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+                        ),
+                        TextSpan(text: '$lowStr - $highStr EUR '),
+                        TextSpan(
+                          text: '($ppm2Str EUR/m\u00B2, ${result.zoneLabel})',
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
