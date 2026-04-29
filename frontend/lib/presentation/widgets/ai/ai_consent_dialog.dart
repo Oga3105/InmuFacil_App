@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/services/ai_consent_service.dart';
@@ -61,7 +62,7 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
     } catch (_) {
       setState(() {
         _loading = false;
-        _error = 'No se pudo registrar el consentimiento. Intenta de nuevo.';
+        _error = 'ai_consent.error_generic'.tr();
       });
     }
   }
@@ -95,54 +96,49 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Builder(builder: (context) => Text(
-                      'Consentimiento para uso de IA',
+                    child: Text(
+                      'ai_consent.title'.tr(),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                    )),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 18),
 
-              // Accion
               _InfoRow(
                 icon: Icons.bolt_outlined,
-                label: 'Accion',
+                label: 'ai_consent.action_label'.tr(),
                 value: config.actionLabel,
               ),
               const SizedBox(height: 10),
 
-              // Datos enviados
               _InfoRow(
                 icon: Icons.upload_outlined,
-                label: 'Datos que se envian',
+                label: 'ai_consent.data_sent_label'.tr(),
                 value: config.dataCategories.map((c) => '• $c').join('\n'),
               ),
               const SizedBox(height: 10),
 
-              // Proveedor IA
               _InfoRow(
                 icon: Icons.smart_toy_outlined,
-                label: 'Proveedor de IA',
+                label: 'ai_consent.ai_provider_label'.tr(),
                 value: config.aiProvider,
               ),
               const SizedBox(height: 10),
 
-              // Finalidad
               _InfoRow(
                 icon: Icons.flag_outlined,
-                label: 'Finalidad',
+                label: 'ai_consent.purpose_label'.tr(),
                 value: config.purpose,
               ),
               const SizedBox(height: 16),
 
               // Texto legal
-              Builder(builder: (context) {
-                return Container(
+              Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFEF3C7),
@@ -150,21 +146,15 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                   border: Border.all(color: const Color(0xFFFBBF24)),
                 ),
                 child: Text(
-                  'AVISO: InmuFácil enviara los datos indicados a ${config.aiProvider}, '
-                  'un proveedor externo. InmuFácil no controla ni garantiza el uso que '
-                  '${config.aiProvider} realice con dichos datos. Al aceptar, consientes '
-                  'expresamente este tratamiento. Tu consentimiento quedara registrado '
-                  'con fecha, hora e IP de sesion. Puedes consultar tu historial en '
-                  'Perfil > Historial de Consentimientos IA.\n'
-                  'Base juridica: Art. 6.1.a RGPD / Art. 7 LOPDGDD.',
+                  'ai_consent.legal_warning'
+                      .tr(namedArgs: {'provider': config.aiProvider}),
                   style: const TextStyle(
                     fontSize: 11,
                     color: Color(0xFF92400E),
                     height: 1.5,
                   ),
                 ),
-              );
-              }),
+              ),
 
               // Error
               if (_error != null) ...[
@@ -209,7 +199,7 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Cancelar'),
+                    child: Text('ai_consent.cancel_btn'.tr()),
                   ),
                   const SizedBox(width: 10),
                   FilledButton(
@@ -230,9 +220,10 @@ class _AiConsentDialogState extends State<AiConsentDialog> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text(
-                            'Acepto y continuar',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        : Text(
+                            'ai_consent.accept_btn'.tr(),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold),
                           ),
                   ),
                 ],
@@ -277,14 +268,14 @@ class _InfoRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 2),
-              Builder(builder: (context) => Text(
+              Text(
                 value,
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurface,
                   height: 1.4,
                 ),
-              )),
+              ),
             ],
           ),
         ),

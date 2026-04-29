@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Franja de aviso de entorno de demostración.
@@ -14,16 +15,16 @@ class DemoBanner extends StatelessWidget implements PreferredSizeWidget {
       width: double.infinity,
       color: const Color(0xFFFEF3C7), // amber-100
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.science_outlined, size: 14, color: Color(0xFF92400E)),
-          SizedBox(width: 6),
+          const Icon(Icons.science_outlined, size: 14, color: Color(0xFF92400E)),
+          const SizedBox(width: 6),
           Flexible(
             child: Text(
-              'Entorno de demostración — Los inmuebles son ficticios y no representan ofertas reales.',
-              style: TextStyle(
+              'demo.banner_text'.tr(),
+              style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF92400E),
@@ -52,9 +53,9 @@ class DemoBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         boxShadow: const [BoxShadow(blurRadius: 4, color: Colors.black26)],
       ),
-      child: const Text(
-        'DEMO',
-        style: TextStyle(
+      child: Text(
+        'demo.badge_text'.tr(),
+        style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w800,
           fontSize: 10,

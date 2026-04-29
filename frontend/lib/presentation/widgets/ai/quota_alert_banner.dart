@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,22 +36,21 @@ class QuotaAlertBanner extends ConsumerWidget {
           case QuotaAlertLevel.warning:
             return _BannerBar(
               color: _colorWarning,
-              message: 'Uso de IA al 80%. Considera optimizar el uso.',
+              message: 'quota_alert.warning'.tr(),
               icon: Icons.warning_amber_rounded,
             );
 
           case QuotaAlertLevel.critical:
             return _BannerBar(
               color: _colorCritical,
-              message: 'Uso de IA al 90%. Limite mensual proximo.',
+              message: 'quota_alert.critical'.tr(),
               icon: Icons.error_outline_rounded,
             );
 
           case QuotaAlertLevel.exceeded:
             return _BannerBar(
               color: _colorExceeded,
-              message:
-                  'Limite mensual de IA alcanzado. Funciones de IA deshabilitadas.',
+              message: 'quota_alert.exceeded'.tr(),
               icon: Icons.block_rounded,
             );
         }
