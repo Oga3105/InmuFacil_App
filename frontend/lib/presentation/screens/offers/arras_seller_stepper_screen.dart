@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,8 +120,8 @@ class _ArrasSellerStepperScreenState
       await dio.post('/arras/$offerId/seller/confirm');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Entrevista enviada. Esperando al comprador.'),
+          SnackBar(
+            content: Text('arras_interview.interview_sent_seller'.tr()),
             backgroundColor: kArrasGreen,
           ),
         );
