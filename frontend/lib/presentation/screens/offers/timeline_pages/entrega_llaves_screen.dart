@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,7 +81,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tu confirmacion registrada. Esperando a la otra parte.'),
+            content: Text('transaction.entrega_registered_snack'.tr()),
             backgroundColor: _kGreen,
           ),
         );
@@ -139,7 +140,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Aceptar'),
+            child: Text('common.accept'.tr()),
           ),
         ],
       ),
@@ -421,7 +422,7 @@ class _ConfirmationCard extends StatelessWidget {
                   ? const SizedBox(
                       width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Confirmar', style: TextStyle(fontSize: 13)),
+                  : Text('common.confirm'.tr(), style: const TextStyle(fontSize: 13)),
             )
           else
             Icon(Icons.hourglass_empty, color: Colors.grey.shade400, size: 20),
@@ -459,7 +460,7 @@ class _PendingDocsCard extends StatelessWidget {
             children: const [
               Icon(Icons.folder_open_outlined, color: _kBlue, size: 20),
               SizedBox(width: 10),
-              Text('Documentacion a entregar',
+              Text('transaction.entrega_docs_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -514,7 +515,7 @@ class _TipsCard extends StatelessWidget {
             children: const [
               Icon(Icons.lightbulb_outline, color: Color(0xFFB8860B), size: 20),
               SizedBox(width: 10),
-              Text('Consejos para la entrega',
+              Text('transaction.entrega_tips_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,

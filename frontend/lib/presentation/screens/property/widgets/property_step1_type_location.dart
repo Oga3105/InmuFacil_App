@@ -632,7 +632,7 @@ class _PropertyStep1TypeLocationState
       if (result.isFallback) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
+            content: Text('property.location_fallback'.tr()),
             duration: Duration(seconds: 3),
           ),
         );

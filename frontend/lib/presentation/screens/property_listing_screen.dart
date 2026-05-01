@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -192,7 +193,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'how',
-                  child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')]),
+                  child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), Text('property.how_it_works'.tr())]),
                 ),
                 PopupMenuItem(
                   value: 'favorites',
@@ -200,17 +201,17 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                     Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border,
                         color: searchState.onlyFavorites ? theme.colorScheme.error : null),
                     const SizedBox(width: 8),
-                    Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : null)),
+                    Text('property.favorites'.tr(), style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : null)),
                   ]),
                 ),
                 if (!isDesktop)
                   PopupMenuItem(
                     value: 'filters',
-                    child: Row(children: [const Icon(Icons.filter_list), const SizedBox(width: 8), const Text('Filtros')]),
+                    child: Row(children: [const Icon(Icons.filter_list), const SizedBox(width: 8), Text('common.filter'.tr())]),
                   ),
                 PopupMenuItem(
                   value: 'publish',
-                  child: Builder(builder: (context) => Row(children: [Icon(Icons.add_home_outlined, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), Text('Publicar propiedad', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))])),
+                  child: Builder(builder: (context) => Row(children: [Icon(Icons.add_home_outlined, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), Text('property.publish_property'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))])),
                 ),
               ],
             ),
@@ -237,14 +238,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text('Cómo funciona', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    child: Text('property.how_it_works'.tr(), style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                   ),
                   Container(height: 20, width: 1, color: theme.colorScheme.outlineVariant, margin: const EdgeInsets.symmetric(horizontal: 16)),
                   // Favorites Toggle
                   TextButton.icon(
                     onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(),
                     icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, size: 20),
-                    label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    label: Text('property.favorites'.tr(), style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                     style: TextButton.styleFrom(
                       backgroundColor: searchState.onlyFavorites ? theme.colorScheme.error.withOpacity(0.05) : null,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -299,7 +300,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                         OutlinedButton.icon(
                           onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
                           icon: const Icon(Icons.filter_list, size: 18),
-                          label: const Text('Filtros y búsqueda'),
+                          label: Text('property.filters_search_title'.tr()),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Theme.of(context).colorScheme.primary,
                             side: BorderSide(color: Theme.of(context).colorScheme.primary),
@@ -513,7 +514,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                      children: [
                        Text('España', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                        Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
-                       Text('Búsqueda', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                       Text('home.search_label'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                        Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
                        Text(searchState.location.isNotEmpty ? searchState.location : 'Todo',
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant),),

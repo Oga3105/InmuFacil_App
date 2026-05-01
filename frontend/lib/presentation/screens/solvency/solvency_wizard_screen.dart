@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -88,7 +89,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('solvency.error_saving'.tr(namedArgs: {'error': e.toString()})), backgroundColor: Colors.red),
         );
       }
     }
@@ -161,12 +162,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Colors.white),
                     SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -239,7 +240,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                       side: const BorderSide(color: _kNavy),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Anterior', style: TextStyle(color: _kNavy)),
+                    child: Text('common.previous'.tr(), style: const TextStyle(color: _kNavy)),
                   ),
                 const Spacer(),
                 ElevatedButton(

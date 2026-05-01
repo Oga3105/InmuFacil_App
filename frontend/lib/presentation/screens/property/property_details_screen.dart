@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-// import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../domain/entities/property.dart';
 import '../../widgets/common/report_button.dart';
@@ -70,17 +70,16 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         context: ctx,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Cuenta requerida', textAlign: TextAlign.center,
+          title: Text('property.account_required_title'.tr(), textAlign: TextAlign.center,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          content: const Text('Debes estar registrado para hacer una oferta por esta propiedad.',
-              textAlign: TextAlign.center),
+          content: Text('property.account_required_offer'.tr(), textAlign: TextAlign.center),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar')),
+                child: Text('common.cancel'.tr())),
             FilledButton(
               onPressed: () { Navigator.of(ctx).pop(); ctx.pushNamed('login'); },
-              child: const Text('Iniciar sesión'),
+              child: Text('property.login_cta'.tr()),
             ),
           ],
         ),
@@ -93,17 +92,15 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         context: ctx,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Verificación requerida', textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          content: const Text('Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
-              textAlign: TextAlign.center),
+          title: Text('property.verification_required_title'.tr(), textAlign: TextAlign.center, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          content: Text('property.verification_required_offer'.tr(), textAlign: TextAlign.center),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar')),
+                child: Text('common.cancel'.tr())),
             FilledButton(
               onPressed: () { Navigator.of(ctx).pop(); ctx.push('/verify-identity'); },
-              child: const Text('Verificar identidad'),
+              child: Text('property.verify_identity_cta'.tr()),
             ),
           ],
         ),
@@ -236,8 +233,8 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                           }
                         },
                         itemBuilder: (_) => [
-                          const PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
-                          if (!isOwner) const PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('Hacer Oferta')])),
+                          const PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('property.view_listings'.tr())])),
+                          if (!isOwner) const PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('property.make_offer'.tr())])),
                         ],
                       ),
                       avatarWidget,
@@ -263,7 +260,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         context.go('/search?highlight=${widget.propertyId}');
                       },
                       icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF135BEC)),
-                      label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
+                      label: Text('property.view_listings'.tr(), style: TextStyle(color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
                       style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -273,7 +270,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       FilledButton.icon(
                         onPressed: () { if (_canMakeOffer(context)) context.push('/property/${widget.propertyId}/offer?price=${property.price}'); },
                         icon: const Icon(Icons.gavel_rounded, size: 18),
-                        label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                        label: Text('property.make_offer'.tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF135BEC),
                           foregroundColor: Colors.white,
@@ -895,7 +892,7 @@ class _LocationSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ubicación aproximada', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+            Text('property.approx_location'.tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -907,7 +904,7 @@ class _LocationSection extends StatelessWidget {
                 children: [
                   Icon(Icons.shield_outlined, size: 14, color: colorScheme.primary),
                   const SizedBox(width: 4),
-                  Text('UBICACIÓN PROTEGIDA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                  Text('property.protected_location'.tr(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
                 ],
               ),
             ),
@@ -1321,7 +1318,7 @@ class _ActionBar extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Builder(
-              builder: (ctx) => Text('Cancelar',
+              builder: (ctx) => Text('common.cancel'.tr(),
                 style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
             ),
           ),
@@ -1377,7 +1374,7 @@ class _ActionBar extends ConsumerWidget {
                   child: FilledButton.icon(
                     onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                     icon: const Icon(Icons.gavel_rounded, size: 20),
-                    label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text('property.make_offer'.tr(), style: TextStyle(fontWeight: FontWeight.bold)),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF135BEC),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1395,7 +1392,7 @@ class _ActionBar extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => context.push('/property/${property.id}/offers'),
               icon: const Icon(Icons.list_alt_outlined, size: 20),
-              label: const Text('Gestionar Ofertas', style: TextStyle(fontWeight: FontWeight.w600)),
+              label: Text('property.manage_offers'.tr(), style: TextStyle(fontWeight: FontWeight.w600)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF135BEC),
                 side: const BorderSide(color: Color(0xFF135BEC)),
@@ -1436,7 +1433,7 @@ class _ActionBar extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                 icon: const Icon(Icons.gavel_rounded),
-                label: const Text('Hacer Oferta'),
+                label: Text('property.make_offer'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
@@ -1477,7 +1474,7 @@ class _ActionBar extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () => context.push('/property/${property.id}/offers'),
                 icon: const Icon(Icons.list_alt_outlined),
-                label: const Text('Gestionar Ofertas'),
+                label: Text('property.manage_offers'.tr()),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF135BEC),
                   side: const BorderSide(color: Color(0xFF135BEC)),
@@ -1585,7 +1582,7 @@ class _OwnerVisitsToggleState extends State<_OwnerVisitsToggle> {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('Permitir visitas', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+      title: Text('property.allow_visits'.tr(), style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
       subtitle: Text(
         _allowVisits ? 'Los interesados pueden solicitar visita' : 'Visitas desactivadas',
         style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
@@ -2014,17 +2011,17 @@ class _OwnerCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
                         SizedBox(width: 4),
-                        Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
+                        Text('verification.approved_banner'.tr(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
                       ],
                     ),
                   )
                 else
-                  Text('Identidad pendiente de verificar', style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+                  Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -2200,7 +2197,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: const Text('Haz una oferta primero'),
+          title: Text('property.make_offer_first'.tr()),
           content: const Text(
             'El chat privado con el vendedor se abre al hacer una oferta. '
             'Ambas partes pueden chatear desde ese momento.',
@@ -2208,7 +2205,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
+              child: Text('smart_bid_risk.understood_button'.tr()),
             ),
             FilledButton(
               onPressed: () {
@@ -2216,7 +2213,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
                 context.push('/property/${widget.propertyId}/offer');
               },
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: const Text('Hacer Oferta'),
+              child: Text('property.make_offer'.tr()),
             ),
           ],
         ),

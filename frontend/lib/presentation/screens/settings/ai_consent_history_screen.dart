@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -631,7 +632,7 @@ class _EmptyState extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => context.go('/'),
               icon: const Icon(Icons.home_outlined, size: 16),
-              label: const Text('Volver al inicio'),
+              label: Text('common.back_to_home'.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kPurple,
                 side: const BorderSide(color: Color(0xFFDDD6FE)),

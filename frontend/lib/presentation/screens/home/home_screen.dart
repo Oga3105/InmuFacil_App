@@ -1385,13 +1385,13 @@ class _MapNavigationBar extends ConsumerWidget {
                     }
                   },
                   itemBuilder: (_) => [
-                    PopupMenuItem(value: 'buy', child: Row(children: [const Icon(Icons.search), const SizedBox(width: 8), const Text('Comprar')])),
-                    PopupMenuItem(value: 'sell', child: Row(children: [const Icon(Icons.add_business_outlined), const SizedBox(width: 8), const Text('Vender')])),
-                    PopupMenuItem(value: 'how', child: Row(children: [const Icon(Icons.help_outline), const SizedBox(width: 8), const Text('Cómo funciona')])),
-                    PopupMenuItem(value: 'what-is', child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Qué es InmuFácil')])),
-                    PopupMenuItem(value: 'buyer-guide', child: Row(children: [const Icon(Icons.shopping_bag_outlined), const SizedBox(width: 8), const Text('Guía del Comprador')])),
-                    PopupMenuItem(value: 'seller-guide', child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), const Text('Guía del Vendedor')])),
-                    PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.support_agent_outlined), const SizedBox(width: 8), const Text('Contacto')])),
+                    PopupMenuItem(value: 'buy', child: Row(children: [const Icon(Icons.search), const SizedBox(width: 8), Text('home.buy_link'.tr())])),
+                    PopupMenuItem(value: 'sell', child: Row(children: [const Icon(Icons.add_business_outlined), const SizedBox(width: 8), Text('home.sell_link'.tr())])),
+                    PopupMenuItem(value: 'how', child: Row(children: [const Icon(Icons.help_outline), const SizedBox(width: 8), Text('home.how_it_works_link'.tr())])),
+                    PopupMenuItem(value: 'what-is', child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), Text('nav.what_is_link'.tr())])),
+                    PopupMenuItem(value: 'buyer-guide', child: Row(children: [const Icon(Icons.shopping_bag_outlined), const SizedBox(width: 8), Text('home.buyer_guide_link'.tr())])),
+                    PopupMenuItem(value: 'seller-guide', child: Row(children: [const Icon(Icons.sell_outlined), const SizedBox(width: 8), Text('home.seller_guide_link'.tr())])),
+                    PopupMenuItem(value: 'contact', child: Row(children: [const Icon(Icons.support_agent_outlined), const SizedBox(width: 8), Text('home.contact_link'.tr())])),
                   ],
                 ),
                 const LanguageSelectorWidget(compact: true),
@@ -1434,7 +1434,7 @@ class _MapNavigationBar extends ConsumerWidget {
                       ),
                     ),
                     child: Text(
-                      'Cómo funciona',
+                      'home.how_it_works_link'.tr(),
                       style: navTextStyle,
                     ),
                   ),
@@ -1447,19 +1447,19 @@ class _MapNavigationBar extends ConsumerWidget {
                     itemBuilder: (_) => [
                       PopupMenuItem(
                         value: 'what-is',
-                        child: Text('Qué es InmuFácil',
+                        child: Text('nav.what_is_link'.tr(),
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
                       PopupMenuItem(
                         value: 'buyer-guide',
-                        child: Text('Guía del Comprador',
+                        child: Text('home.buyer_guide_link'.tr(),
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
                       PopupMenuItem(
                         value: 'seller-guide',
-                        child: Text('Guía del Vendedor',
+                        child: Text('home.seller_guide_link'.tr(),
                             style: theme.textTheme.bodyMedium
                                 ?.copyWith(fontSize: 14)),
                       ),
@@ -1507,7 +1507,7 @@ class _MapNavigationBar extends ConsumerWidget {
                       ),
                     ),
                     child: Text(
-                      'Contacto',
+                      'home.contact_link'.tr(),
                       style: navTextStyle,
                     ),
                   ),
@@ -1527,7 +1527,7 @@ class _MapNavigationBar extends ConsumerWidget {
 
                   // --- Action buttons ---
                   PremiumButton(
-                    label: 'Comprar',
+                    label: 'home.buy_link'.tr(),
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
                       final visible = ref.read(filteredByMapPropertiesProvider);
@@ -1541,7 +1541,7 @@ class _MapNavigationBar extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   PremiumButton(
-                    label: 'Vender',
+                    label: 'home.sell_link'.tr(),
                     onPressed: () {
                       ref.read(searchProvider.notifier).clearError();
                       if (isAuthenticated) {

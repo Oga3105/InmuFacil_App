@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -517,7 +518,7 @@ class _EquityItemCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => context.push('/chat/$offerId'),
                   icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                  label: const Text('Ir al Chat'),
+                  label: Text('offer_mgmt.go_to_chat'.tr()),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _kRed,
                     side: BorderSide(
@@ -585,7 +586,7 @@ class _ErrorView extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_outlined),
-                label: const Text('Reintentar'),
+                label: Text('offer_mgmt.retry'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(

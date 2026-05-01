@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -147,7 +148,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Cita en notaria propuesta. Se notificara al vendedor.'),
+          content: Text('transaction.notary_proposed_snack'.tr()),
           backgroundColor: _kGreen,
         ),
       );
@@ -319,8 +320,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Firma ante notario',
-                    style: TextStyle(
+                Text('transaction.notary_signing_header'.tr(),
+                    style: const TextStyle(
                         color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
@@ -355,8 +356,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Proponer cita notarial',
-              style: TextStyle(
+          Text('transaction.notary_propose_appt_title'.tr(),
+              style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF135BEC))),
@@ -410,7 +411,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Proponer al vendedor'),
+              label: Text('transaction.notary_propose_seller_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -466,12 +467,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 Icon(Icons.check_circle, size: 16,
                     color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
                 const SizedBox(width: 4),
-                Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notary_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                 const SizedBox(width: 16),
                 Icon(Icons.check_circle, size: 16,
                     color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
                 const SizedBox(width: 4),
-                Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notary_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
           ],
@@ -496,7 +497,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Esperando propuesta del comprador',
+                Text('transaction.notary_waiting_buyer_proposal'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange.shade800,
@@ -526,11 +527,11 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(Icons.event_outlined, color: _kBlue, size: 20),
-            SizedBox(width: 8),
-            Text('Cita notarial propuesta por el comprador',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
+          Row(children: [
+            const Icon(Icons.event_outlined, color: _kBlue, size: 20),
+            const SizedBox(width: 8),
+            Text('transaction.notary_buyer_proposed_appt'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 12),
           if (_savedCity != null)
@@ -545,12 +546,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               Icon(Icons.check_circle, size: 16,
                   color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
               const SizedBox(width: 4),
-              Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notary_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               const SizedBox(width: 16),
               Icon(Icons.check_circle, size: 16,
                   color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
               const SizedBox(width: 4),
-              Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notary_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
             ],
           ),
         ],
@@ -643,7 +644,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 extra: widget.offer,
               ),
               icon: const Icon(Icons.key_outlined),
-              label: const Text('Confirmar firma y entrega de llaves'),
+              label: Text('transaction.notary_confirm_signing_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(

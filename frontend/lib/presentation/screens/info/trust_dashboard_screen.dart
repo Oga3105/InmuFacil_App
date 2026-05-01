@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -88,12 +89,12 @@ class TrustDashboardScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Colors.white),
                     SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -177,7 +178,7 @@ class TrustDashboardScreen extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () => context.go('/solvency/wizard'),
               icon: const Icon(Icons.verified_user_outlined),
-              label: const Text('Completar pasaporte'),
+              label: Text('solvency.complete_passport'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 shape: RoundedRectangleBorder(
@@ -275,13 +276,13 @@ class _LevelHeroCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white.withOpacity(0.5)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.group, color: Colors.white, size: 14),
                   SizedBox(width: 5),
-                  Text('Solvencia Conjunta',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  Text('solvency.joint_solvency'.tr(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),

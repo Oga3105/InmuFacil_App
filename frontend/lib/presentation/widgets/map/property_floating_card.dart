@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
@@ -190,10 +191,10 @@ class PropertyFloatingCard extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Ver detalle', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text('property.view_detail'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                         SizedBox(width: 8),
                         Icon(Icons.chevron_right, size: 18),
                       ],

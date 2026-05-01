@@ -200,7 +200,15 @@
     "withdraw": "Erretiratu",
     "home": "Hasiera",
     "yes": "Bai",
-    "no": "Ez"
+    "no": "Ez",
+    "retry": "Berriro saiatu",
+    "back_to_home": "Hasierara itzuli",
+    "view_details": "Xehetasunak ikusi",
+    "activate": "Aktibatu",
+    "previous": "Aurrekoa",
+    "verify": "Egiaztatu",
+    "continue": "Jarraitu",
+    "try_again": "Berriro saiatu"
   },
   "discovery": {
     "twin_zones": {
@@ -310,7 +318,15 @@
     "verified_subtitle": "Zure erosketa segurua",
     "verified_this_week": "Aste honetan egiaztatuak",
     "verified_title": "P2P Egiaztatua",
-    "welcome": "Ongi etorri InmuFácil-era"
+    "welcome": "Ongi etorri InmuFácil-era",
+    "buy_link": "Comprar",
+    "sell_link": "Vender",
+    "how_it_works_link": "Cómo funciona",
+    "buyer_guide_link": "Guía del Comprador",
+    "seller_guide_link": "Guía del Vendedor",
+    "contact_link": "Contacto",
+    "filters_label": "Filtros",
+    "search_label": "Búsqueda"
   },
   "info": {
     "buyer_guide": {
@@ -708,7 +724,9 @@
     "terms_link": "Términos de Servicio",
     "title_badge": "Verificar Identidad",
     "verify_subtitle": "Confirmación de seguridad para transacciones P2P seguras.",
-    "verify_title": "Verifica tu Identidad"
+    "verify_title": "Verifica tu Identidad",
+    "activating_camera": "Kamera aktibatzen…",
+    "capture_error": "Kapturatzeko errore: {error}"
   },
   "lifestyle": {
     "green_historic": "Erdialde historikoa",
@@ -761,7 +779,8 @@
     "work_home": "Urrutiko lana",
     "work_hybrid": "Hibrido",
     "work_office": "Eguneko bulegoa",
-    "work_title": "Lan-ingurune"
+    "work_title": "Lan-ingurune",
+    "access_required": "Sarbidea beharrezkoa da"
   },
   "not_found": {
     "building_future_part1": "Eraikitzen ari gara ",
@@ -1041,11 +1060,32 @@
     "vat_included": "BEZ barne",
     "verification_required_contact": "Identitate egiaztatua duten erabiltzaileek bakarrik jar daitezke harremanetan partikularrekin. Osatu zure KYC egiaztapena jarraitzeko.",
     "verification_required_offer": "Identitate egiaztatua duten erabiltzaileek bakarrik egin ditzakete eskaintzak. Osatu zure KYC egiaztapena jarraitzeko.",
-    "verification_required_title": "Egiaztapena beharrezkoa",
+    "verification_required_title": "Verificación requerida",
     "verification_required_visit": "Identitate egiaztatua duten erabiltzaileek bakarrik eska ditzakete bisitaldiak. Osatu zure KYC egiaztapena jarraitzeko.",
     "verify_identity_cta": "Identitatea egiaztatu",
     "viability_title": "Nire Bideragarritasuna Jabetza honetarako",
-    "view_listings": "Jabetzak Ikusi"
+    "view_listings": "Jabetzak Ikusi",
+    "allow_visits": "Permitir visitas",
+    "identity_pending": "Identidad pendiente de verificar",
+    "make_offer_first": "Haz una oferta primero",
+    "visit_duration_label": "Duración de cada visita",
+    "visit_window_end_error": "La hora de fin debe ser posterior a la de inicio",
+    "visit_window_created": "Ventana de disponibilidad creada correctamente",
+    "visit_window_error": "Error al crear la ventana. Puede que se solape con otra existente.",
+    "visit_past": "Pasada",
+    "visit_active": "Activa",
+    "filters_search_title": "Filtros y búsqueda",
+    "how_it_works": "Cómo funciona",
+    "favorites": "Favoritos",
+    "publish_property": "Publicar propiedad",
+    "draft_saved": "Zirriborroa zuzen gorde da",
+    "location_fallback": "Ezin izan da zure kokapena lortu. Espainia erakusten ari gara.",
+    "check_registry": "Kontsultatu Registradores.org-en",
+    "link_error": "Ezin izan da esteka ireki",
+    "ref_copied": "Erreferentzia arbelean kopiatuta",
+    "finish_drawing": "AMAITU",
+    "view_detail": "Xehetasuna ikusi",
+    "read_badge": "(irakurria)"
   },
   "property_wizard": {
     "add_photos": "ARGAZKIAK GEHITU",
@@ -1176,7 +1216,9 @@
     "advantage_future": "Futuro",
     "advantage_price": "Precio",
     "advantage_quality": "Calidad",
-    "header": "Hemos encontrado tu zona ideal fuera de tu búsqueda habitual"
+    "header": "Hemos encontrado tu zona ideal fuera de tu búsqueda habitual",
+    "bedrooms_label": "{count} Logela",
+    "bathrooms_label": "{count} Komunak"
   },
   "solvency": {
     "awareness_subtitle": "El \"Abogado del Diablo\" — seamos honestos",
@@ -1208,7 +1250,7 @@
     "emergency_hint": "Independiente del dinero para la compra.",
     "emergency_question_joint": "¿Contais con un fondo de emergencia de al menos 3-6 meses de gastos?",
     "emergency_question_solo": "¿Cuentas con un fondo de emergencia de al menos 3-6 meses de gastos?",
-    "error_saving": "Error al guardar: {error}",
+    "error_saving": "Gordetzeko errore: {error}",
     "get_passport": "Obtener mi Pasaporte",
     "home_button": "Inicio",
     "income_hint": "ej. 2.500",
@@ -1251,7 +1293,13 @@
     "step_dna": "ADN Financiero",
     "step_label": "Paso {current} de {total}",
     "step_purchase_type": "Tipo de Compra",
-    "yes": "Si"
+    "yes": "Si",
+    "complete_wizard": "Completar el Asistente",
+    "update": "Actualizar",
+    "go_to_profile": "Ir al perfil",
+    "complete_passport": "Pasaportea osatu",
+    "joint_solvency": "Solventzia Bateratua",
+    "error_loading": "Kargatzeko errore: {error}"
   },
   "time": {
     "just_now": "duela minutu batzuk",
@@ -1397,7 +1445,58 @@
     "solvency_level_gold": "Urrea",
     "solvency_level_silver": "Zilarra",
     "solvency_level_bronze": "Brontzea",
-    "solvency_none": "Egiaztatu gabe"
+    "solvency_none": "Egiaztatu gabe",
+    "fein_step_badge": "Paso previo a la Notaría",
+    "fein_info_title": "¿Qué es la FEIN?",
+    "fein_process_title": "Proceso bancario",
+    "fein_confirm_title": "Confirmar recepción de la FEIN",
+    "fein_waiting_buyer_confirm": "Esperando confirmación del comprador",
+    "go_to_notary_btn": "Ir a Firma en Notaría",
+    "back_to_timeline": "Volver al timeline",
+    "notary_signing_header": "Firma ante notario",
+    "notary_propose_appt_title": "Proponer cita notarial",
+    "notary_propose_seller_btn": "Proponer al vendedor",
+    "notary_buyer_label": "Comprador",
+    "notary_seller_label": "Vendedor",
+    "notary_waiting_buyer_proposal": "Esperando propuesta del comprador",
+    "notary_buyer_proposed_appt": "Cita notarial propuesta por el comprador",
+    "notary_proposed_snack": "Cita en notaría propuesta. Se notificará al vendedor.",
+    "entrega_registered_snack": "Tu confirmación registrada. Esperando a la otra parte.",
+    "entrega_docs_title": "Documentación a entregar",
+    "entrega_tips_title": "Consejos para la entrega",
+    "doc_uploaded_snack": "Documento subido correctamente.",
+    "doc_uploading": "Subiendo...",
+    "doc_available": "Documento disponible",
+    "doc_delivered_in_person": "Entregado en mano por el vendedor",
+    "doc_not_applicable": "No aplica para esta vivienda",
+    "doc_pending_seller": "Pendiente del vendedor",
+    "doc_downloaded_snack": "Documento descargado correctamente.",
+    "tasacion_send_proposal_btn": "Enviar propuesta al vendedor",
+    "tasacion_proposal_sent": "Propuesta enviada — pendiente de confirmación",
+    "tasacion_proposal_sent_hint": "El vendedor debe aceptar o proponer otra fecha. Recibirás una notificación.",
+    "tasacion_buyer_proposes": "El comprador propone esta cita",
+    "tasacion_accept_date_btn": "Aceptar esta fecha",
+    "tasacion_propose_alt": "Propón una fecha alternativa",
+    "tasacion_send_counter_btn": "Enviar contraoferta",
+    "tasacion_seller_proposes_alt": "El vendedor propone otra fecha",
+    "tasacion_date_declined": "La fecha que propusiste no le viene bien. Ha sugerido una alternativa.",
+    "tasacion_propose_alt_btn": "Proponer otra fecha",
+    "tasacion_confirmed_title": "Cita confirmada",
+    "tasacion_confirm_visit_title": "Confirmar visita del tasador",
+    "tasacion_confirm_visit_hint": "Pulsa el botón una vez el tasador haya visitado la vivienda y realizado la inspección.",
+    "tasacion_confirm_visit_btn": "El tasador ha visitado la vivienda",
+    "tasacion_completed_title": "Tasación completada",
+    "tasacion_go_fein_btn": "Ir a Formalización Bancaria (FEIN)",
+    "arras_accepted_snack": "Has aceptado el contrato.",
+    "arras_no_interview": "No hay información de la entrevista",
+    "arras_retry_gen_btn": "Reintentar generación",
+    "arras_request_changes_btn": "Solicitar cambios",
+    "arras_accept_contract_btn": "Aceptar contrato",
+    "arras_send_rejection_btn": "Enviar rechazo",
+    "make_offer_sent_snack": "Oferta enviada correctamente",
+    "interview_your_label": "Tú",
+    "arras_view_contract_btn": "Ver contrato",
+    "go_to_post_venta_btn": "Ir a Post-Venta y Suministros"
   },
   "arras_interview": {
     "title_buyer": "Arras Elkarrizketa — Eroslea",
@@ -1477,5 +1576,49 @@
     "what_is_link": "Zer da InmuFácil",
     "contact_link": "Kontaktua eta laguntza",
     "session_closed": "Saioa behar bezala itxi da"
+  },
+  "offer_mgmt": {
+    "error_loading": "Error al cargar ofertas",
+    "retry": "Reintentar",
+    "accept_offer_title": "Aceptar oferta",
+    "accept_offer_body": "Vas a aceptar la oferta de €{amount}. Esta acción no se puede deshacer.",
+    "reject_offer_title": "Rechazar oferta",
+    "reject_offer_body_short": "El comprador será notificado de que su oferta ha sido rechazada.",
+    "reject_offer_body": "El comprador será notificado de que su oferta ha sido rechazada. Esta acción no se puede deshacer.",
+    "counter_offer_title_part1": "Contra",
+    "counter_offer_title_part2": "ofertar",
+    "counter_offer_hint": "Tu contraoferta",
+    "accept_offer_btn": "Aceptar Oferta",
+    "counter_offer_btn": "Contraofertar",
+    "offer_rejected_snack": "Oferta rechazada",
+    "reject_offer_error": "Error al rechazar la oferta. Inténtalo de nuevo.",
+    "accept_solvency_btn": "Aceptar solvencia y ver timeline",
+    "chat_btn": "Chat",
+    "buyer_solvency_title": "Solvencia del comprador",
+    "buyer_no_solvency": "El comprador aún no tiene pasaporte de solvencia.",
+    "verified_badge": "VERIFICADO",
+    "solvency_level_label": "Nivel {level}",
+    "solvency_row_extra_costs": "Conoce gastos adicionales",
+    "solvency_row_savings": "Ahorros iniciales",
+    "solvency_row_preapproval": "Preaprobación hipotecaria",
+    "solvency_row_financing": "Financiación",
+    "solvency_row_second_buyer": "Segundo comprador",
+    "go_to_chat": "Ir al Chat"
+  },
+  "visits": {
+    "visit_requested": "Bisita eskaera zuzen bidali da",
+    "view_my_visits": "Nire bisita ikusi",
+    "no_slots": "Ez dago ordurik erabilgarri",
+    "request_sent_email": "Eskaera saltzaileari emailez bidali zaio",
+    "minutes_label": "{min} minutu",
+    "schedules_title": "Bisita ordutegiak"
+  },
+  "notifications": {
+    "all_read": "Jakinarazpen guztiak irakurrita markatuta."
+  },
+  "admin": {
+    "no_data": "Daturik gabe.",
+    "no_entries": "Sarrerarik gabe.",
+    "confirm_panic_mode": "Ikara Modua aktibatzea baieztatu"
   }
 }

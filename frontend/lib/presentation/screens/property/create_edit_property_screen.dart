@@ -236,7 +236,7 @@ class _CreateEditPropertyScreenState
                     children: [
                       Icon(Icons.home_rounded, size: 16, color: cs.onPrimary),
                       const SizedBox(width: 5),
-                      Text('Inicio', style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                      Text('common.home'.tr(), style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                     ],
                   ),
                 );

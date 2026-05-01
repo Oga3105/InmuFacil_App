@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -55,7 +56,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
     ref.listen<BookingState>(bookVisitProvider, (_, next) {
       if (next.status == BookingStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Visita solicitada correctamente'),
+          content: Text('visits.visit_requested'.tr()),
           backgroundColor: Color(0xFF16A34A),
         ));
         ref.read(bookVisitProvider.notifier).reset();
@@ -111,7 +112,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                 FilledButton.icon(
                   onPressed: () => context.push('/profile?tab=3'),
                   icon: const Icon(Icons.calendar_month),
-                  label: const Text('Ver mis visitas'),
+                  label: Text('visits.view_my_visits'.tr()),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF135BEC),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -251,12 +252,12 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.home_rounded, size: 16, color: Colors.white),
                   SizedBox(width: 5),
-                  Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                  Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                 ],
               ),
             ),
@@ -281,13 +282,13 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
           Icon(Icons.calendar_today_outlined,
               size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 12),
-          const Text('No hay horarios disponibles',
+          Text('visits.no_slots'.tr(),
               style: TextStyle(color: Color(0xFF64748B))),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () =>
                 ref.invalidate(slotsProvider(widget.propertyId)),
-            child: const Text('Reintentar'),
+            child: Text('common.retry'.tr()),
           ),
         ],
       ),
@@ -1195,7 +1196,7 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
     ref.listen<EmailRequestState>(requestVisitByEmailProvider, (_, next) {
       if (next.status == EmailRequestStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Solicitud enviada al vendedor por email'),
+          content: Text('visits.request_sent_email'.tr()),
           backgroundColor: Color(0xFF16A34A),
         ));
         ref.read(requestVisitByEmailProvider.notifier).reset();

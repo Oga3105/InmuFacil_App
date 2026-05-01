@@ -273,7 +273,7 @@ class _ArrasBuyerStepperScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$_deadlineDays dias',
+                      'arras_interview.days_label'.tr(namedArgs: {'n': _deadlineDays.toString()}),
                       style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -287,7 +287,7 @@ class _ArrasBuyerStepperScreenState
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '~${(_deadlineDays / 30).toStringAsFixed(1)} meses',
+                        'arras_interview.months_approx'.tr(namedArgs: {'n': (_deadlineDays / 30).toStringAsFixed(1)}),
                         style: TextStyle(
                             color: kGreen,
                             fontWeight: FontWeight.bold,
@@ -297,7 +297,7 @@ class _ArrasBuyerStepperScreenState
                   ],
                 ),
                 Text(
-                  'Plazo maximo para firmar en notaria',
+                  'arras_interview.deadline_title'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 Slider(
@@ -312,10 +312,10 @@ class _ArrasBuyerStepperScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('15 dias',
+                    Text('arras_interview.days_min'.tr(),
                         style: TextStyle(
                             fontSize: 11, color: colorScheme.onSurfaceVariant)),
-                    Text('180 dias',
+                    Text('arras_interview.days_max'.tr(),
                         style: TextStyle(
                             fontSize: 11, color: colorScheme.onSurfaceVariant)),
                   ],

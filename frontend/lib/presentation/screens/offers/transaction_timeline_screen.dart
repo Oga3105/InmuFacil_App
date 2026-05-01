@@ -1772,7 +1772,7 @@ class _SellerSolvencySectionState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.verified_user_outlined,
                   color: Color(0xFF16A34A), size: 18),

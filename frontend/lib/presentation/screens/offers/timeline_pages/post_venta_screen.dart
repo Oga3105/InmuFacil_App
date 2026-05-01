@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -122,7 +123,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
         if (docId != null) _docIds[docType] = docId;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documento subido correctamente.'), backgroundColor: _kGreen),
+        SnackBar(content: Text('transaction.doc_uploaded_snack'.tr()), backgroundColor: _kGreen),
       );
     } on DioException catch (e) {
       if (!mounted) return;
@@ -204,12 +205,12 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.home_rounded, size: 18, color: Colors.white),
                   SizedBox(width: 6),
-                  Text('Inicio',
+                  Text('common.home'.tr(),
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -597,7 +598,7 @@ class _SellerDocCard extends StatelessWidget {
 
   Widget _buildActionArea(BuildContext context) {
     if (status == 'uploading') {
-      return const Text('Subiendo...', style: TextStyle(fontSize: 12, color: _kBlue));
+      return Text('transaction.doc_uploading'.tr(), style: const TextStyle(fontSize: 12, color: _kBlue));
     }
 
     if (status == 'uploaded') {
@@ -862,28 +863,28 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.check_circle, color: _kGreen, size: 13),
           const SizedBox(width: 4),
-          Text('Documento disponible',
+          Text('transaction.doc_available'.tr(),
               style: TextStyle(fontSize: 11, color: _kGreen, fontWeight: FontWeight.w500)),
         ]);
       case 'in_person':
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.handshake_outlined, color: _kBlue, size: 13),
           const SizedBox(width: 4),
-          Text('Entregado en mano por el vendedor',
+          Text('transaction.doc_delivered_in_person'.tr(),
               style: TextStyle(fontSize: 11, color: _kBlue, fontWeight: FontWeight.w500)),
         ]);
       case 'not_applicable':
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.block_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 13),
           const SizedBox(width: 4),
-          Text('No aplica para esta vivienda',
+          Text('transaction.doc_not_applicable'.tr(),
               style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]);
       default:
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.hourglass_empty, color: Colors.orange.shade400, size: 13),
           const SizedBox(width: 4),
-          Text('Pendiente del vendedor',
+          Text('transaction.doc_pending_seller'.tr(),
               style: TextStyle(fontSize: 11, color: Colors.orange.shade600)),
         ]);
     }
@@ -914,7 +915,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Documento descargado correctamente.'),
+          content: Text('transaction.doc_downloaded_snack'.tr()),
           backgroundColor: _kGreen,
           duration: Duration(seconds: 3),
         ),

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Full-screen camera dialog.
@@ -89,7 +90,7 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
       setState(() => _capturing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al capturar: $e')),
+          SnackBar(content: Text('kyc.capture_error'.tr(namedArgs: {'error': e.toString()}))),
         );
       }
     }
@@ -131,14 +132,14 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
           children: [
             // ── Camera preview ──
             if (_loading)
-              const Center(
+              Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
-                    Text('Activando cámara…',
-                        style: TextStyle(color: Colors.white)),
+                    const CircularProgressIndicator(color: Colors.white),
+                    const SizedBox(height: 16),
+                    Text('kyc.activating_camera'.tr(),
+                        style: const TextStyle(color: Colors.white)),
                   ],
                 ),
               )

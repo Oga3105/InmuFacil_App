@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -55,14 +56,14 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('¿Cancelar verificación?'),
+        title: Text('kyc.discard_title'.tr()),
         content: const Text(
           'Si sales ahora, los documentos subidos no se guardarán y tendrás que empezar de nuevo.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Seguir aquí'),
+            child: Text('kyc.stay_here'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -70,7 +71,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
               backgroundColor: Colors.red.shade600,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Sí, cancelar'),
+            child: Text('kyc.confirm_cancel'.tr()),
           ),
         ],
       ),
@@ -403,12 +404,12 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Co-titular',
+                        Text('second_buyer.badge_cotitular'.tr(),
                             style: TextStyle(
                                 color: colorScheme.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700)),
-                        Text('AES-256 Encrypted',
+                        Text('kyc.badge_encrypted'.tr(),
                             style: TextStyle(
                                 color: colorScheme.onSurfaceVariant,
                                 fontSize: 10,
@@ -515,7 +516,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                                   color: colorScheme.primary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
-                          Text('AES-256 Encrypted',
+                          Text('kyc.badge_encrypted'.tr(),
                               style: TextStyle(
                                   color: colorScheme.onSurfaceVariant,
                                   fontSize: 10,
@@ -717,7 +718,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                    shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancelar',
+                  child: Text('common.cancel'.tr(),
                       style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 12),
@@ -1029,7 +1030,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Volver al timeline',
+                child: Text('transaction.back_to_timeline'.tr(),
                     style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),

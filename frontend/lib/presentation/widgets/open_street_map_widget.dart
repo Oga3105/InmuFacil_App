@@ -278,7 +278,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                              visualDensity: VisualDensity.compact,
                            ),
                            icon: const Icon(Icons.check, size: 16),
-                           label: const Text('TERMINAR'),
+                           label: Text('property.finish_drawing'.tr()),
                         ),
                       ],
                     ),
@@ -398,7 +398,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
       if (result.isFallback) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
+            content: Text('property.location_fallback'.tr()),
             duration: Duration(seconds: 3),
           ),
         );
@@ -428,7 +428,7 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Ver Detalles'),
+                child: Text('common.view_details'.tr()),
               ),
             ),
           ],

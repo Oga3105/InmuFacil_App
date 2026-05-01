@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -98,12 +99,12 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                             ),
                           ],
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.home_rounded, size: 18, color: Colors.white),
                             SizedBox(width: 6),
-                            Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                            Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                           ],
                         ),
                       ),
@@ -272,7 +273,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
               showDialog(
                 context: context,
                 builder: (_) => SimpleDialog(
-                  title: const Text('Duracion de cada visita'),
+                  title: Text('property.visit_duration_label'.tr()),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   children: [15, 20, 30, 45, 60].map((min) {
                     return SimpleDialogOption(
@@ -280,7 +281,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                         setState(() => _slotDuration = min);
                         Navigator.pop(context);
                       },
-                      child: Text('$min minutos',
+                      child: Text('visits.minutes_label'.tr(namedArgs: {'min': min.toString()}),
                           style: TextStyle(
                             fontWeight: _slotDuration == min ? FontWeight.w700 : FontWeight.normal,
                             color: _slotDuration == min ? const Color(0xFF135BEC) : null,
@@ -391,7 +392,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
 
     if (!end.isAfter(start)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('La hora de fin debe ser posterior a la de inicio'),
+        content: Text('property.visit_window_end_error'.tr()),
         backgroundColor: Colors.red,
       ));
       return;
@@ -411,14 +412,14 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
       ref.invalidate(slotsProvider(widget.propertyId));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Ventana de disponibilidad creada correctamente'),
+          content: Text('property.visit_window_created'.tr()),
           backgroundColor: Color(0xFF16A34A),
         ));
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Error al crear la ventana. Puede que se solape con otra existente.'),
+          content: Text('property.visit_window_error'.tr()),
           backgroundColor: Colors.red,
         ));
       }
@@ -548,7 +549,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text('Pasada',
+              child: Text('property.visit_past'.tr(),
                   style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
             )
           else
@@ -558,7 +559,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                 color: const Color(0xFFDCFCE7),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text('Activa',
+              child: Text('property.visit_active'.tr(),
                   style: TextStyle(fontSize: 11, color: Color(0xFF16A34A), fontWeight: FontWeight.w600)),
             ),
         ],

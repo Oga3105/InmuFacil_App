@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -72,12 +73,12 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Colors.white),
                     SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -100,11 +101,11 @@ class SolvencyPassportScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 12),
-              Text('Error al cargar: $e'),
+              Text('solvency.error_loading'.tr(namedArgs: {'error': e.toString()})),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(mySolvencyProvider),
-                child: const Text('Reintentar'),
+                child: Text('chat.retry'.tr()),
               ),
             ],
           ),
@@ -150,7 +151,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () => context.push('/solvency/wizard'),
                 icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
-                label: const Text('Completar el Asistente', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: Text('solvency.complete_wizard'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kNavy,
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
@@ -324,7 +325,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => context.push('/solvency/wizard'),
                       icon: const Icon(Icons.refresh, size: 18, color: _kNavy),
-                      label: const Text('Actualizar', style: TextStyle(color: _kNavy)),
+                      label: Text('solvency.update'.tr(), style: TextStyle(color: _kNavy)),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         side: const BorderSide(color: _kNavy),
@@ -337,7 +338,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => context.go('/profile'),
                       icon: const Icon(Icons.person_outline, size: 18, color: Colors.white),
-                      label: const Text('Ir al perfil', style: TextStyle(color: Colors.white)),
+                      label: Text('solvency.go_to_profile'.tr(), style: TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _kNavy,
                         padding: const EdgeInsets.symmetric(vertical: 14),

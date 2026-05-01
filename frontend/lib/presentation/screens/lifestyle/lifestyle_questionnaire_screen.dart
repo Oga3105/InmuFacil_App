@@ -56,11 +56,11 @@ class _LifestyleQuestionnaireScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.lock_outline_rounded, color: Color(0xFF135BEC)),
             SizedBox(width: 10),
-            Text('Acceso requerido', style: TextStyle(fontSize: 18)),
+            Text('lifestyle.access_required'.tr(), style: const TextStyle(fontSize: 18)),
           ],
         ),
         content: const Text(
@@ -70,21 +70,21 @@ class _LifestyleQuestionnaireScreenState
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               context.go('/login');
             },
-            child: const Text('Iniciar sesion'),
+            child: Text('auth.login_link'.tr()),
           ),
           FilledButton.tonal(
             onPressed: () {
               Navigator.of(ctx).pop();
               context.go('/register');
             },
-            child: const Text('Registrarse'),
+            child: Text('auth.register_button'.tr()),
           ),
         ],
       ),
@@ -149,12 +149,12 @@ class _LifestyleQuestionnaireScreenState
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Colors.white),
                     SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -261,7 +261,7 @@ class _LifestyleQuestionnaireScreenState
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text('Iniciar sesión', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                              child: Text('auth.login_link'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                             ),
                             OutlinedButton(
                               onPressed: () => context.go('/register'),
@@ -272,7 +272,7 @@ class _LifestyleQuestionnaireScreenState
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text('Registrarse', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF135BEC))),
+                              child: Text('auth.register_button'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF135BEC))),
                             ),
                           ],
                         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,7 +62,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
       if (next.status == OfferSubmitStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Oferta enviada correctamente'),
+            content: Text('transaction.make_offer_sent_snack'.tr()),
             backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
@@ -141,7 +142,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
                     const SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),

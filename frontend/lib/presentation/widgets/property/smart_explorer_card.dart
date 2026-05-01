@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -223,13 +224,13 @@ class SmartExplorerCard extends ConsumerWidget {
                           if (bedrooms != null) ...[
                             Icon(Icons.bed, size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             const SizedBox(width: 3),
-                            Text('$bedrooms Hab.', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('smart_explorer.bedrooms_label'.tr(namedArgs: {'count': bedrooms.toString()}), style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                             const SizedBox(width: 10),
                           ],
                           if (bathrooms != null) ...[
                             Icon(Icons.bathtub_outlined, size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             const SizedBox(width: 3),
-                            Text('$bathrooms Baños', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('smart_explorer.bathrooms_label'.tr(namedArgs: {'count': bathrooms.toString()}), style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ],
                       ),

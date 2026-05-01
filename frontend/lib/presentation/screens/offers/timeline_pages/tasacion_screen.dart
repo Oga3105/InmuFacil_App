@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -412,7 +413,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Enviar propuesta al vendedor'),
+              label: Text('transaction.tasacion_send_proposal_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -449,7 +450,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Row(children: [
               const Icon(Icons.schedule_outlined, color: _kOrange, size: 20),
               const SizedBox(width: 8),
-              const Text('Propuesta enviada — pendiente de confirmacion',
+              Text('transaction.tasacion_proposal_sent'.tr(),
                   style: TextStyle(fontWeight: FontWeight.bold, color: _kOrange, fontSize: 14)),
             ]),
             const SizedBox(height: 12),
@@ -461,7 +462,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 color: _kOrange,
               ),
             const SizedBox(height: 10),
-            Text('El vendedor debe aceptar o proponer otra fecha. Recibiras una notificacion.',
+            Text('transaction.tasacion_proposal_sent_hint'.tr(),
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
           ],
         ),
@@ -480,10 +481,10 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
+          Row(children: [
             Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
             SizedBox(width: 8),
-            Text('El comprador propone esta cita',
+            Text('transaction.tasacion_buyer_proposes'.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 14),
@@ -520,7 +521,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar esta fecha'),
+              label: Text('transaction.tasacion_accept_date_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -565,7 +566,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Propon una fecha alternativa',
+          Text('transaction.tasacion_propose_alt'.tr(),
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _kOrange)),
           const SizedBox(height: 12),
           _DateTimeRow(
@@ -607,7 +608,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Enviar contraoferta'),
+              label: Text('transaction.tasacion_send_counter_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kOrange,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -634,14 +635,14 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
+          Row(children: [
             Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
             SizedBox(width: 8),
-            Text('El vendedor propone otra fecha',
+            Text('transaction.tasacion_seller_proposes_alt'.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 6),
-          Text('La fecha que propusiste no le viene bien. Ha sugerido una alternativa.',
+          Text('transaction.tasacion_date_declined'.tr(),
               style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
           const SizedBox(height: 14),
           if (_sellerDate != null && _sellerTime != null)
@@ -674,7 +675,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar esta fecha'),
+              label: Text('transaction.tasacion_accept_date_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -695,7 +696,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                         _notesCtrl.clear();
                       }),
               icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-              label: const Text('Proponer otra fecha'),
+              label: Text('transaction.tasacion_propose_alt_btn'.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kBlue,
                 side: const BorderSide(color: _kBlue),
@@ -731,7 +732,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         children: [
           const Icon(Icons.check_circle, color: _kGreen, size: 40),
           const SizedBox(height: 10),
-          const Text('Cita confirmada',
+          Text('transaction.tasacion_confirmed_title'.tr(),
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
           const SizedBox(height: 8),
           if (_buyerDate != null && _buyerTime != null)
@@ -768,14 +769,14 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(children: [
+              Row(children: [
                 Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
                 SizedBox(width: 8),
-                Text('Confirmar visita del tasador',
+                Text('transaction.tasacion_confirm_visit_title'.tr(),
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
               ]),
               const SizedBox(height: 8),
-              Text('Pulsa el boton una vez el tasador haya visitado la vivienda y realizado la inspeccion.',
+              Text('transaction.tasacion_confirm_visit_hint'.tr(),
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4)),
               const SizedBox(height: 16),
               SizedBox(
@@ -785,7 +786,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                   icon: _isLoading
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check_circle_outline),
-                  label: const Text('El tasador ha visitado la vivienda'),
+                  label: Text('transaction.tasacion_confirm_visit_btn'.tr()),
                   style: FilledButton.styleFrom(
                     backgroundColor: _kGreen,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -813,7 +814,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         children: [
           const Icon(Icons.verified_outlined, color: _kGreen, size: 40),
           const SizedBox(height: 10),
-          const Text('Tasacion completada',
+          Text('transaction.tasacion_completed_title'.tr(),
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
           const SizedBox(height: 8),
           Text(
@@ -830,7 +831,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               child: FilledButton.icon(
                 onPressed: () => context.push('/offers/${widget.offer.id}/fein', extra: widget.offer),
                 icon: const Icon(Icons.account_balance_outlined),
-                label: const Text('Ir a Formalizacion Bancaria (FEIN)'),
+                label: Text('transaction.tasacion_go_fein_btn'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -887,12 +888,12 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [BoxShadow(color: _kBlue.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2))],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(Icons.home_rounded, size: 18, color: Colors.white),
                 SizedBox(width: 6),
-                Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),

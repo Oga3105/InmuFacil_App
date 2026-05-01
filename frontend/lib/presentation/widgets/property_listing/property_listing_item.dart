@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -360,7 +361,7 @@ class PropertyListingItem extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Builder(
-              builder: (ctx) => Text('Cancelar',
+              builder: (ctx) => Text('common.cancel'.tr(),
                 style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
             ),
           ),
@@ -420,7 +421,7 @@ class PropertyListingItem extends ConsumerWidget {
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: const Text('Haz una oferta primero'),
+          title: Text('property.make_offer_first'.tr()),
           content: const Text(
             'El chat privado con el vendedor se abre al hacer una oferta. '
             'Ambas partes pueden chatear desde ese momento.',
@@ -428,7 +429,7 @@ class PropertyListingItem extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
+              child: Text('smart_bid_risk.understood_button'.tr()),
             ),
             FilledButton(
               onPressed: () {
@@ -436,7 +437,7 @@ class PropertyListingItem extends ConsumerWidget {
                 context.push('/property/${property.id}/offer');
               },
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: const Text('Hacer Oferta'),
+              child: Text('property.make_offer'.tr()),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 const kArrasBlue  = Color(0xFF135BEC);
@@ -116,7 +117,7 @@ class ArrasBottomBar extends StatelessWidget {
                 side: BorderSide(color: Colors.grey.shade400),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('Atras', style: TextStyle(color: Colors.grey.shade700)),
+              child: Text('common.back'.tr(), style: TextStyle(color: Colors.grey.shade700)),
             ),
           const Spacer(),
           if (page < 2)
@@ -127,7 +128,7 @@ class ArrasBottomBar extends StatelessWidget {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
               ),
-              child: Text('Continuar', style: TextStyle(color: colorScheme.onPrimary)),
+              child: Text('common.next'.tr(), style: TextStyle(color: colorScheme.onPrimary)),
             )
           else
             FilledButton.icon(

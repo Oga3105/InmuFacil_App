@@ -200,7 +200,15 @@
     "withdraw": "Retirer",
     "home": "Accueil",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "retry": "Réessayer",
+    "back_to_home": "Retour à l'accueil",
+    "view_details": "Voir les détails",
+    "activate": "Activer",
+    "previous": "Précédent",
+    "verify": "Vérifier",
+    "continue": "Continuer",
+    "try_again": "Réessayer"
   },
   "discovery": {
     "twin_zones": {
@@ -310,7 +318,15 @@
     "verified_subtitle": "Votre achat sécurisé",
     "verified_this_week": "Vérifiées cette semaine",
     "verified_title": "P2P Vérifié",
-    "welcome": "Bienvenue sur InmuFácil"
+    "welcome": "Bienvenue sur InmuFácil",
+    "buy_link": "Acheter",
+    "sell_link": "Vendre",
+    "how_it_works_link": "Comment ça marche",
+    "buyer_guide_link": "Guide de l'acheteur",
+    "seller_guide_link": "Guide du vendeur",
+    "contact_link": "Contact",
+    "filters_label": "Filtres",
+    "search_label": "Recherche"
   },
   "info": {
     "buyer_guide": {
@@ -708,7 +724,9 @@
     "terms_link": "Terms",
     "title_badge": "Identity Verification",
     "verify_subtitle": "Quick and secure process to unlock all features.",
-    "verify_title": "Verify your identity"
+    "verify_title": "Verify your identity",
+    "activating_camera": "Activation de la caméra…",
+    "capture_error": "Erreur lors de la capture : {error}"
   },
   "lifestyle": {
     "green_historic": "Centre historique",
@@ -761,7 +779,8 @@
     "work_home": "Télétravail",
     "work_hybrid": "Hybride",
     "work_office": "Bureau quotidien",
-    "work_title": "Environnement de travail"
+    "work_title": "Environnement de travail",
+    "access_required": "Accès requis"
   },
   "not_found": {
     "building_future_part1": "Nous construisons le ",
@@ -1034,7 +1053,7 @@
     "protected_location": "LOCALISATION PROTÉGÉE",
     "publish_free": "Publier gratuitement",
     "read_less": "Lire moins",
-    "read_more": "Lire plus",
+    "read_more": "Lire la suite",
     "request_visit": "Demander une visite",
     "surface": "Surface",
     "title": "Propriété",
@@ -1045,7 +1064,28 @@
     "verification_required_visit": "Seuls les utilisateurs avec une identité vérifiée peuvent demander des visites. Complétez votre vérification KYC pour continuer.",
     "verify_identity_cta": "Vérifier l'identité",
     "viability_title": "Ma Viabilité pour cette Propriété",
-    "view_listings": "Voir les annonces"
+    "view_listings": "Voir les annonces",
+    "allow_visits": "Autoriser les visites",
+    "identity_pending": "Identité en attente de vérification",
+    "make_offer_first": "Faites d'abord une offre",
+    "visit_duration_label": "Durée de chaque visite",
+    "visit_window_end_error": "L'heure de fin doit être postérieure à l'heure de début",
+    "visit_window_created": "Fenêtre de disponibilité créée avec succès",
+    "visit_window_error": "Erreur lors de la création de la fenêtre. Elle peut chevaucher une autre.",
+    "visit_past": "Passée",
+    "visit_active": "Active",
+    "filters_search_title": "Filtres et recherche",
+    "how_it_works": "Comment ça marche",
+    "favorites": "Favoris",
+    "publish_property": "Publier une propriété",
+    "draft_saved": "Brouillon enregistré avec succès",
+    "location_fallback": "Impossible d'obtenir votre position. Affichage de l'Espagne.",
+    "check_registry": "Consulter sur Registradores.org",
+    "link_error": "Impossible d'ouvrir le lien",
+    "ref_copied": "Référence copiée dans le presse-papiers",
+    "finish_drawing": "TERMINER",
+    "view_detail": "Voir le détail",
+    "read_badge": "(lu)"
   },
   "property_wizard": {
     "add_photos": "AJOUTER DES PHOTOS",
@@ -1176,7 +1216,9 @@
     "advantage_future": "future value",
     "advantage_price": "price",
     "advantage_quality": "quality",
-    "header": "Smart suggestions"
+    "header": "Smart suggestions",
+    "bedrooms_label": "{count} Ch.",
+    "bathrooms_label": "{count} SdB"
   },
   "solvency": {
     "awareness_subtitle": "Answer honestly. This information is for your own assessment.",
@@ -1208,7 +1250,7 @@
     "emergency_hint": "An emergency fund protects you against unexpected expenses after the purchase.",
     "emergency_question_joint": "Do both of you have an emergency fund covering at least 3 months of expenses?",
     "emergency_question_solo": "Do you have an emergency fund covering at least 3 months of expenses?",
-    "error_saving": "Error saving: {error}",
+    "error_saving": "Erreur lors de l'enregistrement : {error}",
     "get_passport": "Get my Passport",
     "home_button": "Home",
     "income_hint": "After taxes and deductions",
@@ -1251,7 +1293,13 @@
     "step_dna": "Financial DNA",
     "step_label": "Step {current} of {total}",
     "step_purchase_type": "Purchase Type",
-    "yes": "Yes"
+    "yes": "Yes",
+    "complete_wizard": "Compléter l'assistant",
+    "update": "Mettre à jour",
+    "go_to_profile": "Aller au profil",
+    "complete_passport": "Compléter le passeport",
+    "joint_solvency": "Solvabilité Conjointe",
+    "error_loading": "Erreur lors du chargement : {error}"
   },
   "time": {
     "just_now": "il y a quelques minutes",
@@ -1455,7 +1503,58 @@
     "brand_text": "InmuFácil Secure-Tech · © 2023 InmuFácil S.L. Système de transactions sécurisées sous protocole AES-256",
     "footer_help": "Aide",
     "footer_legal": "Juridique",
-    "footer_security": "Sécurité"
+    "footer_security": "Sécurité",
+    "fein_step_badge": "Étape avant la signature notariale",
+    "fein_info_title": "Qu'est-ce que la FEIN ?",
+    "fein_process_title": "Processus bancaire",
+    "fein_confirm_title": "Confirmer la réception de la FEIN",
+    "fein_waiting_buyer_confirm": "En attente de confirmation de l'acheteur",
+    "go_to_notary_btn": "Aller à la signature notariale",
+    "back_to_timeline": "Retour au suivi",
+    "notary_signing_header": "Signature devant notaire",
+    "notary_propose_appt_title": "Proposer un rendez-vous notarial",
+    "notary_propose_seller_btn": "Proposer au vendeur",
+    "notary_buyer_label": "Acheteur",
+    "notary_seller_label": "Vendeur",
+    "notary_waiting_buyer_proposal": "En attente de la proposition de l'acheteur",
+    "notary_buyer_proposed_appt": "Rendez-vous notarial proposé par l'acheteur",
+    "notary_proposed_snack": "Rendez-vous notarial proposé. Le vendeur sera notifié.",
+    "entrega_registered_snack": "Votre confirmation enregistrée. En attente de l'autre partie.",
+    "entrega_docs_title": "Documents à remettre",
+    "entrega_tips_title": "Conseils pour la remise",
+    "doc_uploaded_snack": "Document téléversé avec succès.",
+    "doc_uploading": "Téléversement...",
+    "doc_available": "Document disponible",
+    "doc_delivered_in_person": "Remis en main propre par le vendeur",
+    "doc_not_applicable": "Non applicable pour ce bien",
+    "doc_pending_seller": "En attente du vendeur",
+    "doc_downloaded_snack": "Document téléchargé avec succès.",
+    "tasacion_send_proposal_btn": "Envoyer la proposition au vendeur",
+    "tasacion_proposal_sent": "Proposition envoyée — en attente de confirmation",
+    "tasacion_proposal_sent_hint": "Le vendeur doit accepter ou proposer une autre date. Vous recevrez une notification.",
+    "tasacion_buyer_proposes": "L'acheteur propose ce rendez-vous",
+    "tasacion_accept_date_btn": "Accepter cette date",
+    "tasacion_propose_alt": "Proposer une date alternative",
+    "tasacion_send_counter_btn": "Envoyer une contre-proposition",
+    "tasacion_seller_proposes_alt": "Le vendeur propose une autre date",
+    "tasacion_date_declined": "La date que vous avez proposée ne convient pas. Il a suggéré une alternative.",
+    "tasacion_propose_alt_btn": "Proposer une autre date",
+    "tasacion_confirmed_title": "Rendez-vous confirmé",
+    "tasacion_confirm_visit_title": "Confirmer la visite de l'expert",
+    "tasacion_confirm_visit_hint": "Appuyez sur le bouton une fois que l'expert a visité le bien et effectué l'inspection.",
+    "tasacion_confirm_visit_btn": "L'expert a visité le bien",
+    "tasacion_completed_title": "Expertise terminée",
+    "tasacion_go_fein_btn": "Aller à la formalisation bancaire (FEIN)",
+    "arras_accepted_snack": "Vous avez accepté le contrat.",
+    "arras_no_interview": "Aucune information d'entretien disponible",
+    "arras_retry_gen_btn": "Réessayer la génération",
+    "arras_request_changes_btn": "Demander des modifications",
+    "arras_accept_contract_btn": "Accepter le contrat",
+    "arras_send_rejection_btn": "Envoyer le rejet",
+    "make_offer_sent_snack": "Offre envoyée avec succès",
+    "interview_your_label": "Vous",
+    "arras_view_contract_btn": "Voir le contrat",
+    "go_to_post_venta_btn": "Aller à l'après-vente et fournitures"
   },
   "arras_interview": {
     "confirm_my_part": "Confirmer ma partie",
@@ -1589,5 +1688,49 @@
     "what_is_link": "Qu'est-ce qu'InmuFácil",
     "contact_link": "Contact et aide",
     "session_closed": "Déconnexion réussie"
+  },
+  "offer_mgmt": {
+    "error_loading": "Erreur de chargement des offres",
+    "retry": "Réessayer",
+    "accept_offer_title": "Accepter l'offre",
+    "accept_offer_body": "Vous allez accepter l'offre de €{amount}. Cette action est irréversible.",
+    "reject_offer_title": "Refuser l'offre",
+    "reject_offer_body_short": "L'acheteur sera notifié que son offre a été refusée.",
+    "reject_offer_body": "L'acheteur sera notifié que son offre a été refusée. Cette action est irréversible.",
+    "counter_offer_title_part1": "Contre-",
+    "counter_offer_title_part2": "offre",
+    "counter_offer_hint": "Votre contre-offre",
+    "accept_offer_btn": "Accepter l'offre",
+    "counter_offer_btn": "Contre-offre",
+    "offer_rejected_snack": "Offre refusée",
+    "reject_offer_error": "Erreur lors du refus de l'offre. Veuillez réessayer.",
+    "accept_solvency_btn": "Accepter la solvabilité et voir le calendrier",
+    "chat_btn": "Chat",
+    "buyer_solvency_title": "Solvabilité de l'acheteur",
+    "buyer_no_solvency": "L'acheteur n'a pas encore complété son passeport de solvabilité.",
+    "verified_badge": "VÉRIFIÉ",
+    "solvency_level_label": "Niveau {level}",
+    "solvency_row_extra_costs": "Connaît les frais supplémentaires",
+    "solvency_row_savings": "Épargne initiale",
+    "solvency_row_preapproval": "Préapprobation hypothécaire",
+    "solvency_row_financing": "Financement",
+    "solvency_row_second_buyer": "Deuxième acheteur",
+    "go_to_chat": "Aller au Chat"
+  },
+  "visits": {
+    "visit_requested": "Visite demandée avec succès",
+    "view_my_visits": "Voir mes visites",
+    "no_slots": "Aucun créneau disponible",
+    "request_sent_email": "Demande envoyée au vendeur par email",
+    "minutes_label": "{min} minutes",
+    "schedules_title": "Horaires de visite"
+  },
+  "notifications": {
+    "all_read": "Toutes les notifications marquées comme lues."
+  },
+  "admin": {
+    "no_data": "Aucune donnée.",
+    "no_entries": "Aucune entrée.",
+    "confirm_panic_mode": "Confirmer l'activation du Mode Panique"
   }
 }

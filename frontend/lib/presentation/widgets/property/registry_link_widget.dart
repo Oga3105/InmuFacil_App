@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,7 +24,7 @@ class RegistryLinkWidget extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('No se pudo abrir el enlace'),
+            content: Text('property.link_error'.tr()),
           ),
         );
       }
@@ -35,7 +36,7 @@ class RegistryLinkWidget extends StatelessWidget {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Referencia copiada al portapapeles'),
+          content: Text('property.ref_copied'.tr()),
         ),
       );
     }
@@ -93,7 +94,7 @@ class RegistryLinkWidget extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () => _openRegistradores(context),
                 icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Consultar en Registradores.org'),
+                label: Text('property.check_registry'.tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,

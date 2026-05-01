@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -1017,9 +1018,9 @@ class PropertyFormNotifier extends Notifier<PropertyFormState> {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Borrador guardado correctamente'),
-            backgroundColor: Color(0xFFCA8A04),
+          SnackBar(
+            content: Text('property.draft_saved'.tr()),
+            backgroundColor: const Color(0xFFCA8A04),
           ),
         );
         context.go('/profile?tab=1');

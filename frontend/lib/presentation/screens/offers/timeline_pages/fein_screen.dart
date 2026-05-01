@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -239,8 +240,8 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Paso previo a la Notaria',
-                    style: TextStyle(
+                Text('transaction.fein_step_badge'.tr(),
+                    style: const TextStyle(
                         color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
@@ -284,8 +285,8 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Que es la FEIN?',
-              style: TextStyle(
+          Text('transaction.fein_info_title'.tr(),
+              style: const TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 12),
           ...items.map((item) => Padding(
@@ -340,8 +341,8 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Proceso bancario',
-              style: TextStyle(
+          Text('transaction.fein_process_title'.tr(),
+              style: const TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 16),
           ...steps.asMap().entries.map((e) {
@@ -422,8 +423,8 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Confirmar recepcion de la FEIN',
-              style: TextStyle(
+          Text('transaction.fein_confirm_title'.tr(),
+              style: const TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 16),
           _CheckItem(
@@ -481,7 +482,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Esperando confirmacion del comprador',
+                Text('transaction.fein_waiting_buyer_confirm'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange.shade800,
@@ -535,7 +536,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                     strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.verified_outlined),
-        label: const Text('Confirmar recepcion de la FEIN'),
+        label: Text('transaction.fein_confirm_title'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kBlue,
           disabledBackgroundColor: Colors.grey.shade300,
@@ -614,7 +615,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   extra: widget.offer,
                 ),
                 icon: const Icon(Icons.gavel_outlined),
-                label: const Text('Ir a Firma en Notaria'),
+                label: Text('transaction.go_to_notary_btn'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(
@@ -626,8 +627,8 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Volver al timeline',
-                  style: TextStyle(color: _kBlue)),
+              child: Text('transaction.back_to_timeline'.tr(),
+                  style: const TextStyle(color: _kBlue)),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -142,7 +143,7 @@ class _AdminAiAnalyticsScreenState
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Theme.of(context).colorScheme.onPrimary),
                     const SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -291,7 +292,7 @@ class _AdminAiAnalyticsScreenState
           ),
           const SizedBox(height: 12),
           if (entries.isEmpty)
-            const Text('Sin datos.',
+            Text('admin.no_data'.tr(),
                 style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
           else
             ...entries.map(
@@ -360,7 +361,7 @@ class _AdminAiAnalyticsScreenState
           ),
           const SizedBox(height: 12),
           if (recent.isEmpty)
-            const Text('Sin entradas.',
+            Text('admin.no_entries'.tr(),
                 style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
           else
             ...recent.map((log) {
@@ -501,7 +502,7 @@ class _PanicControlCardState extends State<_PanicControlCard> {
         builder: (_) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: const Text('Confirmar activacion de Modo Panico'),
+          title: Text('admin.confirm_panic_mode'.tr()),
           content: Text(
             'Deseas forzar el uso de ${_selectedModel.toUpperCase()} para todos los usuarios? '
             'Esto anulara la logica de precision Pro.',
@@ -509,12 +510,12 @@ class _PanicControlCardState extends State<_PanicControlCard> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
+              child: Text('common.cancel'.tr()),
             ),
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: _amber),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Activar'),
+              child: Text('common.activate'.tr()),
             ),
           ],
         ),

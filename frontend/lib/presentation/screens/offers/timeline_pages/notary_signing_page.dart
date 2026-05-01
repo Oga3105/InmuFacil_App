@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -401,7 +402,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                     strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.verified_outlined),
-        label: const Text('Confirmar firma y entrega de llaves'),
+        label: Text('transaction.notary_confirm_signing_btn'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kGreen,
           disabledBackgroundColor: Colors.grey.shade300,
@@ -457,7 +458,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                       extra: widget.offer);
                 },
                 icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('Ir a Post-Venta y Suministros'),
+                label: Text('transaction.go_to_post_venta_btn'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(
@@ -469,7 +470,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Volver al timeline',
+              child: Text('transaction.back_to_timeline'.tr(),
                   style: TextStyle(color: _kBlue)),
             ),
           ],

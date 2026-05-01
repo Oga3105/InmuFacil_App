@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -491,7 +492,7 @@ class _RoleCard extends StatelessWidget {
                           color: _kBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text('Tu',
+                        child: Text('transaction.interview_your_label'.tr(),
                             style: TextStyle(
                                 color: _kBlue,
                                 fontSize: 10,
@@ -642,7 +643,7 @@ class _ContractCard extends StatelessWidget {
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
-              child: const Text('Ver contrato'),
+              child: Text('transaction.arras_view_contract_btn'.tr()),
             ),
           ],
         ],

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -135,7 +136,7 @@ class _ArrasContractReviewScreenState
         final isDark = Theme.of(context).brightness == Brightness.dark;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Has aceptado el contrato.'),
+            content: Text('transaction.arras_accepted_snack'.tr()),
             backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
@@ -204,7 +205,7 @@ class _ArrasContractReviewScreenState
         data: (data) {
           if (data == null) {
             return const Center(
-                child: Text('No hay informacion de la entrevista'));
+                child: Text('transaction.arras_no_interview'.tr()));
           }
           final contractStatus = data['contract_status'] as String?;
           final contractText = data['contract_text'] as String?;
@@ -296,7 +297,7 @@ class _ArrasContractReviewScreenState
                       child: CircularProgressIndicator(
                           color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.refresh_outlined),
-              label: const Text('Reintentar generacion'),
+              label: Text('transaction.arras_retry_gen_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
@@ -422,7 +423,7 @@ class _ArrasContractReviewScreenState
             FilledButton.icon(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back_outlined),
-              label: const Text('Volver al timeline'),
+              label: Text('transaction.back_to_timeline'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 shape: RoundedRectangleBorder(
@@ -591,7 +592,7 @@ class _ArrasContractReviewScreenState
                           borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Cancelar'),
+                    child: Text('common.cancel'.tr()),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -609,7 +610,7 @@ class _ArrasContractReviewScreenState
                           borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Enviar rechazo'),
+                    child: Text('transaction.arras_send_rejection_btn'.tr()),
                   ),
                 ),
               ],
@@ -865,7 +866,7 @@ class _ContractActionBar extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: loading ? null : onReject,
               icon: Icon(Icons.edit_outlined, color: colorScheme.error),
-              label: Text('Solicitar cambios',
+              label: Text('transaction.arras_request_changes_btn'.tr(),
                   style: TextStyle(color: colorScheme.error)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
@@ -887,7 +888,7 @@ class _ContractActionBar extends StatelessWidget {
                       child: CircularProgressIndicator(
                           color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar contrato'),
+              label: Text('transaction.arras_accept_contract_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: kGreen,
                 disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),

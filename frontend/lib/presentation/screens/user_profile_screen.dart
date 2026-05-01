@@ -344,12 +344,12 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.home_rounded, size: 18, color: Colors.white),
                           SizedBox(width: 6),
-                          Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                          Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                         ],
                       ),
                     ),
@@ -3789,7 +3789,7 @@ class _GestionarMenu extends StatelessWidget {
             children: [
               Icon(Icons.calendar_month_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 12),
-              Text('Horarios de visita',
+              Text('visits.schedules_title'.tr(),
                   style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),

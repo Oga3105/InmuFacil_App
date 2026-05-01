@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -172,13 +173,13 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                     Icon(Icons.error_outline,
                         size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(height: 12),
-                    const Text('Error al cargar ofertas'),
+                    Text('offer_mgmt.error_loading'.tr()),
                     const SizedBox(height: 12),
                     TextButton(
                       onPressed: () => ref
                           .read(receivedOffersProvider.notifier)
                           .refresh(),
-                      child: const Text('Reintentar'),
+                      child: Text('offer_mgmt.retry'.tr()),
                     ),
                   ],
                 ),
@@ -295,12 +296,12 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
                       color: const Color(0xFF135BEC),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                        SizedBox(width: 6),
-                        Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                        const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -908,13 +909,13 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        title: const Text('Aceptar oferta'),
+        title: Text('offer_mgmt.accept_offer_title'.tr()),
         content: Text(
-            'Vas a aceptar la oferta de \u20AC${widget.offer.amount.toStringAsFixed(0)}. Esta accion no se puede deshacer.'),
+            'offer_mgmt.accept_offer_body'.tr(namedArgs: {'amount': widget.offer.amount.toStringAsFixed(0)})),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
@@ -922,7 +923,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               backgroundColor: const Color(0xFF16A34A),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Aceptar'),
+            child: Text('common.accept'.tr()),
           ),
         ],
       ),
@@ -940,13 +941,12 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        title: const Text('Rechazar oferta'),
-        content: const Text(
-            'El comprador sera notificado de que su oferta ha sido rechazada.'),
+        title: Text('offer_mgmt.reject_offer_title'.tr()),
+        content: Text('offer_mgmt.reject_offer_body_short'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
@@ -954,7 +954,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               foregroundColor: Colors.red,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Rechazar'),
+            child: Text('common.reject'.tr()),
           ),
         ],
       ),
@@ -973,19 +973,19 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        title: const Text.rich(
+        title: Text.rich(
           TextSpan(
             children: [
               TextSpan(
-                text: 'Contra',
-                style: TextStyle(
+                text: 'offer_mgmt.counter_offer_title_part1'.tr(),
+                style: const TextStyle(
                   color: Color(0xFF135BEC),
                   fontWeight: FontWeight.w800,
                 ),
               ),
               TextSpan(
-                text: 'ofertar',
-                style: TextStyle(
+                text: 'offer_mgmt.counter_offer_title_part2'.tr(),
+                style: const TextStyle(
                   color: Color(0xFF16A34A),
                   fontWeight: FontWeight.w800,
                 ),
@@ -998,7 +998,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           keyboardType: TextInputType.number,
           inputFormatters: [CurrencyInputFormatter()],
           decoration: InputDecoration(
-            labelText: 'Tu contraoferta',
+            labelText: 'offer_mgmt.counter_offer_hint'.tr(),
             suffixText: ' €',
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8)),
@@ -1012,7 +1012,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1021,7 +1021,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Enviar'),
+            child: Text('common.send'.tr()),
           ),
         ],
       ),
@@ -1074,8 +1074,8 @@ class _ActionButtonsRow extends StatelessWidget {
             padding: _pad,
             tapTargetSize: _tts,
           ),
-          child: const Text('Aceptar Oferta',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          child: Text('offer_mgmt.accept_offer_btn'.tr(),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
         OutlinedButton(
           onPressed: onCounter,
@@ -1086,8 +1086,8 @@ class _ActionButtonsRow extends StatelessWidget {
             padding: _pad,
             tapTargetSize: _tts,
           ),
-          child: const Text('Contraofertar',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          child: Text('offer_mgmt.counter_offer_btn'.tr(),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
         OutlinedButton(
           onPressed: onReject,
@@ -1098,8 +1098,8 @@ class _ActionButtonsRow extends StatelessWidget {
             padding: _pad,
             tapTargetSize: _tts,
           ),
-          child: const Text('Rechazar',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+          child: Text('common.reject'.tr(),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
         ),
         _ChatButtonSmall(offerId: offer.id),
       ],
@@ -1124,14 +1124,14 @@ class _BuyerVerifiedBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: colorScheme.secondary),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.verified_outlined, size: 12, color: Color(0xFF16A34A)),
           SizedBox(width: 4),
           Text(
-            'VERIFICADO',
-            style: TextStyle(
+            'offer_mgmt.verified_badge'.tr(),
+            style: const TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.w800,
               color: Color(0xFF16A34A),
@@ -1395,18 +1395,17 @@ class _SolvencyAcceptanceSectionState
       builder: (_) => AlertDialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Rechazar oferta'),
-        content: const Text(
-            'El comprador sera notificado de que su oferta ha sido rechazada. Esta accion no se puede deshacer.'),
+        title: Text('offer_mgmt.reject_offer_title'.tr()),
+        content: Text('offer_mgmt.reject_offer_body'.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Rechazar'),
+            child: Text('common.reject'.tr()),
           ),
         ],
       ),
@@ -1419,16 +1418,16 @@ class _SolvencyAcceptanceSectionState
           .reject(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Oferta rechazada')),
+          SnackBar(content: Text('offer_mgmt.offer_rejected_snack'.tr())),
         );
         context.pop();
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
               content:
-                  Text('Error al rechazar la oferta. Intentalo de nuevo.')),
+                  Text('offer_mgmt.reject_offer_error'.tr())),
         );
       }
     } finally {
@@ -1453,14 +1452,14 @@ class _SolvencyAcceptanceSectionState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.verified_user_outlined,
+              const Icon(Icons.verified_user_outlined,
                   color: Color(0xFF16A34A), size: 18),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Text(
-                'Solvencia del comprador',
-                style: TextStyle(
+                'offer_mgmt.buyer_solvency_title'.tr(),
+                style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     color: Color(0xFF166534)),
@@ -1475,13 +1474,13 @@ class _SolvencyAcceptanceSectionState
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
             error: (_, __) => Text(
-              'El comprador aun no tiene pasaporte de solvencia.',
+              'offer_mgmt.buyer_no_solvency'.tr(),
               style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
                 return Text(
-                  'El comprador aun no ha completado el pasaporte de solvencia.',
+                  'offer_mgmt.buyer_no_solvency'.tr(),
                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
               }
@@ -1489,19 +1488,19 @@ class _SolvencyAcceptanceSectionState
               final (levelLabel, levelColor, levelBg, levelIcon) =
                   switch (level) {
                 'gold' => (
-                  'Oro',
+                  'transaction.solvency_level_gold'.tr(),
                   const Color(0xFFB8860B),
                   const Color(0xFFFFFBEB),
                   Icons.emoji_events_outlined
                 ),
                 'silver' => (
-                  'Plata',
+                  'transaction.solvency_level_silver'.tr(),
                   const Color(0xFF64748B),
                   colorScheme.surfaceContainerHighest,
                   Icons.verified_outlined
                 ),
                 _ => (
-                  'Bronce',
+                  'transaction.solvency_level_bronze'.tr(),
                   const Color(0xFFD97706),
                   const Color(0xFFFFF7ED),
                   Icons.shield_outlined
@@ -1526,7 +1525,7 @@ class _SolvencyAcceptanceSectionState
                         Icon(levelIcon, color: levelColor, size: 18),
                         const SizedBox(width: 6),
                         Text(
-                          'Nivel $levelLabel',
+                          'offer_mgmt.solvency_level_label'.tr(namedArgs: {'level': levelLabel}),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -1542,9 +1541,9 @@ class _SolvencyAcceptanceSectionState
                               color: const Color(0xFF135BEC),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'Compra conjunta',
-                              style: TextStyle(
+                            child: Text(
+                              'transaction.solvency_joint_purchase'.tr(),
+                              style: const TextStyle(
                                   fontSize: 10,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600),
@@ -1555,23 +1554,23 @@ class _SolvencyAcceptanceSectionState
                     ),
                   ),
                   _SolvencyRow(
-                      label: 'Conoce gastos adicionales',
-                      value: passport.knowsExtraCosts ? 'Si' : 'No'),
+                      label: 'offer_mgmt.solvency_row_extra_costs'.tr(),
+                      value: passport.knowsExtraCosts ? 'common.yes'.tr() : 'common.no'.tr()),
                   _SolvencyRow(
-                      label: 'Ahorros iniciales',
-                      value: passport.hasInitialSavings ? 'Si' : 'No'),
+                      label: 'offer_mgmt.solvency_row_savings'.tr(),
+                      value: passport.hasInitialSavings ? 'common.yes'.tr() : 'common.no'.tr()),
                   _SolvencyRow(
-                      label: 'Preaprobacion hipotecaria',
-                      value: passport.hasPreApproval ? 'Si' : 'No'),
+                      label: 'offer_mgmt.solvency_row_preapproval'.tr(),
+                      value: passport.hasPreApproval ? 'common.yes'.tr() : 'common.no'.tr()),
                   _SolvencyRow(
-                      label: 'Financiacion',
+                      label: 'offer_mgmt.solvency_row_financing'.tr(),
                       value: passport.paymentMethodLabel ??
                           passport.paymentMethod ??
                           '-'),
                   if (passport.isMultiBuyer &&
                       passport.secondBuyerName != null)
                     _SolvencyRow(
-                        label: 'Segundo comprador',
+                        label: 'offer_mgmt.solvency_row_second_buyer'.tr(),
                         value: passport.secondBuyerName!),
                 ],
               );
@@ -1593,7 +1592,7 @@ class _SolvencyAcceptanceSectionState
                               strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.verified_user_outlined, size: 16),
-                  label: const Text('Aceptar solvencia y ver timeline'),
+                  label: Text('offer_mgmt.accept_solvency_btn'.tr()),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF16A34A),
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1614,7 +1613,7 @@ class _SolvencyAcceptanceSectionState
                             strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.cancel_outlined, size: 16),
-                label: const Text('Rechazar'),
+                label: Text('common.reject'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(
@@ -1844,8 +1843,8 @@ class _ChatButtonSmallState extends ConsumerState<_ChatButtonSmall> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : const Icon(Icons.chat_bubble_outline, size: 14),
-      label: const Text('Chat',
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
+      label: Text('offer_mgmt.chat_btn'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
       style: OutlinedButton.styleFrom(
         foregroundColor: const Color(0xFF135BEC),
         side: const BorderSide(color: Color(0xFF135BEC)),

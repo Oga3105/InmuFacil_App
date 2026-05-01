@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -63,7 +64,7 @@ class _SecondBuyerStatusScreenState
                 TextButton(
                   onPressed: () =>
                       ref.invalidate(solvency_prov.secondBuyerStatusProvider),
-                  child: const Text('Reintentar'),
+                  child: Text('common.retry'.tr()),
                 ),
               ],
             ),
@@ -149,7 +150,7 @@ class _SecondBuyerStatusScreenState
                 children: [
                   Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 6),
-                  Text('Inicio',
+                  Text('common.home'.tr(),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
@@ -257,7 +258,7 @@ class _SecondBuyerStatusScreenState
             OutlinedButton.icon(
               onPressed: () => context.go('/'),
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Volver al Inicio'),
+              label: Text('common.back_to_home'.tr()),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 24, vertical: 12),
@@ -355,7 +356,7 @@ class _SecondBuyerStatusScreenState
                 ElevatedButton.icon(
                   onPressed: () => context.go('/'),
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Continuar'),
+                  label: Text('common.continue'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: greenColor,
                     foregroundColor: Colors.white,
@@ -461,7 +462,7 @@ class _SecondBuyerStatusScreenState
                   onPressed: () =>
                       context.go('/solvency/second-buyer'),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Intentar de nuevo'),
+                  label: Text('common.try_again'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.onSurface,
                     foregroundColor: colorScheme.surface,

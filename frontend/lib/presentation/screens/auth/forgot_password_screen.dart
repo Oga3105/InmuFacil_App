@@ -130,7 +130,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     children: [
                       Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
                       const SizedBox(width: 5),
-                      Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                      Text('common.home'.tr(), style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                     ],
                   ),
                 ),

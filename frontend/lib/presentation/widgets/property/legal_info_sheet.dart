@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
@@ -193,7 +194,7 @@ class LegalInfoSheet extends ConsumerWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => ref.invalidate(_legalGuideProvider(args)),
-              child: const Text('Reintentar'),
+              child: Text('common.retry'.tr()),
             ),
           ],
         ),

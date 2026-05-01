@@ -200,7 +200,15 @@
     "withdraw": "Withdraw",
     "home": "Home",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "retry": "Retry",
+    "back_to_home": "Back to Home",
+    "view_details": "View Details",
+    "activate": "Activate",
+    "previous": "Previous",
+    "verify": "Verify",
+    "continue": "Continue",
+    "try_again": "Try Again"
   },
   "discovery": {
     "twin_zones": {
@@ -310,7 +318,15 @@
     "verified_subtitle": "Your secure purchase",
     "verified_this_week": "Verified this week",
     "verified_title": "Verified P2P",
-    "welcome": "Welcome to InmuFácil"
+    "welcome": "Welcome to InmuFácil",
+    "buy_link": "Buy",
+    "sell_link": "Sell",
+    "how_it_works_link": "How it works",
+    "buyer_guide_link": "Buyer's Guide",
+    "seller_guide_link": "Seller's Guide",
+    "contact_link": "Contact",
+    "filters_label": "Filters",
+    "search_label": "Search"
   },
   "info": {
     "buyer_guide": {
@@ -708,7 +724,9 @@
     "terms_link": "Terms",
     "title_badge": "Identity Verification",
     "verify_subtitle": "Quick and secure process to unlock all features.",
-    "verify_title": "Verify your identity"
+    "verify_title": "Verify your identity",
+    "activating_camera": "Activating camera…",
+    "capture_error": "Error capturing: {error}"
   },
   "lifestyle": {
     "green_historic": "Historic centre",
@@ -761,7 +779,8 @@
     "work_home": "Remote work",
     "work_hybrid": "Hybrid",
     "work_office": "Daily office",
-    "work_title": "Work environment"
+    "work_title": "Work environment",
+    "access_required": "Access Required"
   },
   "not_found": {
     "building_future_part1": "We are building the ",
@@ -1045,7 +1064,28 @@
     "verification_required_visit": "Only users with verified identity can request viewings. Complete your KYC verification to continue.",
     "verify_identity_cta": "Verify identity",
     "viability_title": "My Viability for this Property",
-    "view_listings": "View Listings"
+    "view_listings": "View Listings",
+    "allow_visits": "Allow visits",
+    "identity_pending": "Identity pending verification",
+    "make_offer_first": "Make an offer first",
+    "visit_duration_label": "Duration of each visit",
+    "visit_window_end_error": "End time must be after start time",
+    "visit_window_created": "Availability window created successfully",
+    "visit_window_error": "Error creating window. It may overlap with another existing one.",
+    "visit_past": "Past",
+    "visit_active": "Active",
+    "filters_search_title": "Filters and search",
+    "how_it_works": "How it works",
+    "favorites": "Favourites",
+    "publish_property": "Publish property",
+    "draft_saved": "Draft saved successfully",
+    "location_fallback": "Could not get your location. Showing Spain.",
+    "check_registry": "Check at Registradores.org",
+    "link_error": "Could not open the link",
+    "ref_copied": "Reference copied to clipboard",
+    "finish_drawing": "FINISH",
+    "view_detail": "View Detail",
+    "read_badge": "(read)"
   },
   "property_wizard": {
     "add_photos": "ADD PHOTOS",
@@ -1176,7 +1216,9 @@
     "advantage_future": "future value",
     "advantage_price": "price",
     "advantage_quality": "quality",
-    "header": "Smart suggestions"
+    "header": "Smart suggestions",
+    "bedrooms_label": "{count} Beds",
+    "bathrooms_label": "{count} Baths"
   },
   "solvency": {
     "awareness_subtitle": "Answer honestly. This information is for your own assessment.",
@@ -1251,7 +1293,13 @@
     "step_dna": "Financial DNA",
     "step_label": "Step {current} of {total}",
     "step_purchase_type": "Purchase Type",
-    "yes": "Yes"
+    "yes": "Yes",
+    "complete_wizard": "Complete the Wizard",
+    "update": "Update",
+    "go_to_profile": "Go to profile",
+    "complete_passport": "Complete Passport",
+    "joint_solvency": "Joint Solvency",
+    "error_loading": "Error loading: {error}"
   },
   "time": {
     "just_now": "just now",
@@ -1455,7 +1503,58 @@
     "brand_text": "InmuFácil Secure-Tech · © 2023 InmuFácil S.L. Secure transaction system under AES-256 protocol",
     "footer_help": "Help",
     "footer_legal": "Legal",
-    "footer_security": "Security"
+    "footer_security": "Security",
+    "fein_step_badge": "Step prior to Notary signing",
+    "fein_info_title": "What is the FEIN?",
+    "fein_process_title": "Bank process",
+    "fein_confirm_title": "Confirm receipt of FEIN",
+    "fein_waiting_buyer_confirm": "Awaiting buyer confirmation",
+    "go_to_notary_btn": "Go to Notary Signing",
+    "back_to_timeline": "Back to timeline",
+    "notary_signing_header": "Signing before notary",
+    "notary_propose_appt_title": "Propose notary appointment",
+    "notary_propose_seller_btn": "Propose to seller",
+    "notary_buyer_label": "Buyer",
+    "notary_seller_label": "Seller",
+    "notary_waiting_buyer_proposal": "Awaiting buyer's proposal",
+    "notary_buyer_proposed_appt": "Notary appointment proposed by buyer",
+    "notary_proposed_snack": "Notary appointment proposed. The seller will be notified.",
+    "entrega_registered_snack": "Your confirmation registered. Waiting for the other party.",
+    "entrega_docs_title": "Documents to hand over",
+    "entrega_tips_title": "Tips for the handover",
+    "doc_uploaded_snack": "Document uploaded successfully.",
+    "doc_uploading": "Uploading...",
+    "doc_available": "Document available",
+    "doc_delivered_in_person": "Delivered in person by the seller",
+    "doc_not_applicable": "Not applicable for this property",
+    "doc_pending_seller": "Pending from seller",
+    "doc_downloaded_snack": "Document downloaded successfully.",
+    "tasacion_send_proposal_btn": "Send proposal to seller",
+    "tasacion_proposal_sent": "Proposal sent — pending confirmation",
+    "tasacion_proposal_sent_hint": "The seller must accept or propose another date. You will receive a notification.",
+    "tasacion_buyer_proposes": "The buyer proposes this appointment",
+    "tasacion_accept_date_btn": "Accept this date",
+    "tasacion_propose_alt": "Propose an alternative date",
+    "tasacion_send_counter_btn": "Send counter-proposal",
+    "tasacion_seller_proposes_alt": "The seller proposes another date",
+    "tasacion_date_declined": "The date you proposed didn't work. They have suggested an alternative.",
+    "tasacion_propose_alt_btn": "Propose another date",
+    "tasacion_confirmed_title": "Appointment confirmed",
+    "tasacion_confirm_visit_title": "Confirm appraiser visit",
+    "tasacion_confirm_visit_hint": "Press the button once the appraiser has visited the property and completed the inspection.",
+    "tasacion_confirm_visit_btn": "The appraiser has visited the property",
+    "tasacion_completed_title": "Appraisal completed",
+    "tasacion_go_fein_btn": "Go to Bank Formalisation (FEIN)",
+    "arras_accepted_snack": "You have accepted the contract.",
+    "arras_no_interview": "No interview information available",
+    "arras_retry_gen_btn": "Retry generation",
+    "arras_request_changes_btn": "Request changes",
+    "arras_accept_contract_btn": "Accept contract",
+    "arras_send_rejection_btn": "Send rejection",
+    "make_offer_sent_snack": "Offer sent successfully",
+    "interview_your_label": "You",
+    "arras_view_contract_btn": "View contract",
+    "go_to_post_venta_btn": "Go to Post-Sale & Utilities"
   },
   "arras_interview": {
     "confirm_my_part": "Confirm my part",
@@ -1589,5 +1688,49 @@
     "what_is_link": "What is InmuFácil",
     "contact_link": "Contact & Help",
     "session_closed": "Signed out successfully"
+  },
+  "offer_mgmt": {
+    "error_loading": "Error loading offers",
+    "retry": "Retry",
+    "accept_offer_title": "Accept offer",
+    "accept_offer_body": "You are about to accept the offer of €{amount}. This action cannot be undone.",
+    "reject_offer_title": "Reject offer",
+    "reject_offer_body_short": "The buyer will be notified that their offer has been rejected.",
+    "reject_offer_body": "The buyer will be notified that their offer has been rejected. This action cannot be undone.",
+    "counter_offer_title_part1": "Counter",
+    "counter_offer_title_part2": "offer",
+    "counter_offer_hint": "Your counter-offer",
+    "accept_offer_btn": "Accept Offer",
+    "counter_offer_btn": "Counter-offer",
+    "offer_rejected_snack": "Offer rejected",
+    "reject_offer_error": "Error rejecting the offer. Please try again.",
+    "accept_solvency_btn": "Accept solvency and view timeline",
+    "chat_btn": "Chat",
+    "buyer_solvency_title": "Buyer solvency",
+    "buyer_no_solvency": "The buyer has not yet completed their solvency passport.",
+    "verified_badge": "VERIFIED",
+    "solvency_level_label": "Level {level}",
+    "solvency_row_extra_costs": "Knows extra costs",
+    "solvency_row_savings": "Initial savings",
+    "solvency_row_preapproval": "Mortgage pre-approval",
+    "solvency_row_financing": "Financing",
+    "solvency_row_second_buyer": "Second buyer",
+    "go_to_chat": "Go to Chat"
+  },
+  "visits": {
+    "visit_requested": "Visit requested successfully",
+    "view_my_visits": "View my visits",
+    "no_slots": "No available time slots",
+    "request_sent_email": "Request sent to seller by email",
+    "minutes_label": "{min} minutes",
+    "schedules_title": "Visit Schedules"
+  },
+  "notifications": {
+    "all_read": "All notifications marked as read."
+  },
+  "admin": {
+    "no_data": "No data.",
+    "no_entries": "No entries.",
+    "confirm_panic_mode": "Confirm Panic Mode Activation"
   }
 }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,14 +217,14 @@ class _IdentityVerificationScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('¿Cancelar verificación?'),
+        title: Text('kyc.discard_title'.tr()),
         content: const Text(
           'Si sales ahora, los documentos subidos no se guardarán y tendrás que empezar de nuevo.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Seguir aquí'),
+            child: Text('kyc.stay_here'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -231,7 +232,7 @@ class _IdentityVerificationScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sí, cancelar'),
+            child: Text('kyc.confirm_cancel'.tr()),
           ),
         ],
       ),
@@ -488,7 +489,7 @@ class _IdentityVerificationScreenState
                                   color: Colors.blue.shade700,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
-                          Text('AES-256 Encrypted',
+                          Text('kyc.badge_encrypted'.tr(),
                               style: TextStyle(
                                   color: Colors.blue.shade400,
                                   fontSize: 10,
@@ -731,7 +732,7 @@ class _IdentityVerificationScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancelar',
+                  child: Text('common.cancel'.tr(),
                       style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 12),

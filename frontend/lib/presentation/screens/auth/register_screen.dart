@@ -83,7 +83,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (!_isTermsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debes aceptar los Términos y Condiciones'), backgroundColor: Colors.red),
+        SnackBar(content: Text('auth.accept_terms_required'.tr()), backgroundColor: Colors.red),
       );
       return;
     }
@@ -107,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           } else {
             // Fallback: go to login if auto-login fails
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cuenta creada. Por favor inicia sesión.'), backgroundColor: Colors.green),
+              SnackBar(content: Text('auth.register_success'.tr()), backgroundColor: Colors.green),
             );
             context.go('/login');
           }
@@ -656,7 +656,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        Row(
                          mainAxisAlignment: MainAxisAlignment.center,
                          children: [
-                           Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                           Text('auth.have_account'.tr(), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                             MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: InkWell(

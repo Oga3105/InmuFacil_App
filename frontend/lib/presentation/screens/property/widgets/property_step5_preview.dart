@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -516,11 +517,11 @@ class _PreviewDescriptionSection extends StatelessWidget {
               alignment: Alignment.centerLeft,
               foregroundColor: const Color(0xFF135BEC),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Leer m\u00E1s',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                Text('property.read_more'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 Icon(Icons.keyboard_arrow_down, size: 16),
               ],
             ),

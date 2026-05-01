@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,7 +47,7 @@ class LegalGuideButton extends ConsumerWidget {
           side: const BorderSide(color: _kGreen),
         ),
         onPressed: () => _onTap(context, ref, guideKey),
-        child: Text('$label (leido)'),
+        child: Text('$label ${'property.read_badge'.tr()}'),
       );
     }
 
