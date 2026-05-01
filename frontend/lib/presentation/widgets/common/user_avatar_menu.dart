@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -76,7 +77,7 @@ class UserAvatarMenu extends ConsumerWidget {
           enabled: false,
           height: 28,
           child: Text(
-            'Requiere tu atencion',
+            'urgency.attention_header'.tr(),
             style: theme.textTheme.labelSmall?.copyWith(
               color: urgencyGreen,
               fontWeight: FontWeight.w700,
@@ -108,7 +109,7 @@ class UserAvatarMenu extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          action.label,
+                          action.label.tr(),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: urgencyGreen,
                             fontWeight: FontWeight.w600,
@@ -143,7 +144,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('profile'),
         child: _NavItem(
           icon: Icons.person_outline,
-          label: 'Mi Perfil',
+          label: 'profile.tab_my_profile'.tr(),
           accentColor: navItemColor,
         ),
       ),
@@ -155,7 +156,7 @@ class UserAvatarMenu extends ConsumerWidget {
           value: _NavValue('my-properties'),
           child: _NavItem(
             icon: Icons.home_work_outlined,
-            label: 'Mis Propiedades',
+            label: 'profile.tab_properties'.tr(),
             accentColor: navItemColor,
           ),
         ),
@@ -167,7 +168,7 @@ class UserAvatarMenu extends ConsumerWidget {
           value: _NavValue('offers'),
           child: _NavItem(
             icon: Icons.handshake_outlined,
-            label: 'Mis Ofertas',
+            label: 'profile.tab_offers'.tr(),
             accentColor: navItemColor,
           ),
         ),
@@ -179,7 +180,7 @@ class UserAvatarMenu extends ConsumerWidget {
           value: _NavValue('visits'),
           child: _NavItem(
             icon: Icons.calendar_month_outlined,
-            label: 'Mis Visitas',
+            label: 'profile.my_visits_title'.tr(),
             accentColor: navItemColor,
           ),
         ),
@@ -191,7 +192,7 @@ class UserAvatarMenu extends ConsumerWidget {
           value: _NavValue('messages'),
           child: _NavItem(
             icon: Icons.chat_bubble_outline,
-            label: 'Mensajes',
+            label: 'profile.tab_messages'.tr(),
             accentColor: navItemColor,
           ),
         ),
@@ -205,7 +206,7 @@ class UserAvatarMenu extends ConsumerWidget {
         enabled: false,
         height: 28,
         child: Text(
-          'Informacion y ayuda',
+          'nav.info_section_header'.tr(),
           style: theme.textTheme.labelSmall?.copyWith(
             color: Colors.grey[500],
             fontWeight: FontWeight.w700,
@@ -219,7 +220,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('info-what-is'),
         child: _NavItem(
           icon: Icons.info_outline,
-          label: 'Que es InmuFácil',
+          label: 'nav.what_is_link'.tr(),
           accentColor: theme.colorScheme.onSurface,
         ),
       ),
@@ -229,7 +230,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('info-buyer-guide'),
         child: _NavItem(
           icon: Icons.shopping_bag_outlined,
-          label: 'Guia del Comprador',
+          label: 'info.buyer_guide.title'.tr(),
           accentColor: const Color(0xFF135BEC),
         ),
       ),
@@ -239,7 +240,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('info-seller-guide'),
         child: _NavItem(
           icon: Icons.sell_outlined,
-          label: 'Guia del Vendedor',
+          label: 'info.seller_guide.title'.tr(),
           accentColor: const Color(0xFF16A34A),
         ),
       ),
@@ -249,7 +250,7 @@ class UserAvatarMenu extends ConsumerWidget {
         value: _NavValue('info-contact'),
         child: _NavItem(
           icon: Icons.support_agent_outlined,
-          label: 'Contacto y Ayuda',
+          label: 'nav.contact_link'.tr(),
           accentColor: theme.colorScheme.onSurface,
         ),
       ),
@@ -263,8 +264,8 @@ class UserAvatarMenu extends ConsumerWidget {
           children: [
             Icon(Icons.logout, color: Colors.red, size: 20),
             SizedBox(width: 8),
-            Text('Cerrar Sesion',
-                style: TextStyle(color: Colors.red, fontSize: 14)),
+            Text('common.logout'.tr(),
+                style: const TextStyle(color: Colors.red, fontSize: 14)),
           ],
         ),
       ),
@@ -286,7 +287,7 @@ class UserAvatarMenu extends ConsumerWidget {
             if (context.mounted) {
               context.go('/');
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Sesion cerrada correctamente')),
+                SnackBar(content: Text('nav.session_closed'.tr())),
               );
             }
 

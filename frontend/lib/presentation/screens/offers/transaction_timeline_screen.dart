@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -287,12 +288,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
                       color: const Color(0xFF135BEC),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                        SizedBox(width: 6),
-                        Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                        const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                        const SizedBox(width: 6),
+                        Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -387,32 +388,32 @@ class TransactionTimelineScreen extends ConsumerWidget {
     final steps = <_TimelineStep>[
       _TimelineStep(
         title: stage == 0
-            ? 'Oferta Enviada'
+            ? 'transaction.offer_sent'.tr()
             : stage > 0
-                ? 'Oferta Aceptada'
-                : (s == 'withdrawn' ? 'Oferta Retirada' : 'Oferta Rechazada'),
+                ? 'transaction.offer_accepted_step'.tr()
+                : (s == 'withdrawn' ? 'transaction.offer_withdrawn_step'.tr() : 'transaction.offer_rejected_step'.tr()),
         subtitle: stage > 0
-            ? 'Vendedor acepto la oferta'
+            ? 'transaction.seller_accepted_offer'.tr()
             : stage == 0
                 ? (s == 'counter_offer'
-                    ? 'El vendedor ha realizado una contraoferta'
-                    : 'Pendiente de respuesta del vendedor')
-                : (s == 'withdrawn' ? 'Oferta retirada por el comprador' : 'Oferta rechazada por el vendedor'),
+                    ? 'transaction.seller_counter_offered'.tr()
+                    : 'transaction.pending_seller_response'.tr())
+                : (s == 'withdrawn' ? 'transaction.withdrawn_by_buyer'.tr() : 'transaction.rejected_by_seller'.tr()),
         state: stage < 0 ? _StepState.locked : stepState(0),
         actionsWidget: step0Actions,
       ),
       _TimelineStep(
-        title: 'Verificacion de Solvencia',
+        title: 'transaction.solvency_title'.tr(),
         subtitle: stage > 1 || offerData.sellerSolvencyAccepted
-            ? 'Validado por InmuFacil Secure-Tech'
+            ? 'transaction.solvency_validated'.tr()
             : stage == 1
-                ? 'Verificando solvencia del comprador'
-                : 'Pendiente de aceptacion de oferta',
+                ? 'transaction.solvency_verifying'.tr()
+                : 'transaction.solvency_pending_offer'.tr(),
         state: offerData.sellerSolvencyAccepted
             ? _StepState.done
             : stepState(1),
         ctaLabel: isBuyer && stage == 1 && !hasPassport
-            ? 'Completar pasaporte'
+            ? 'transaction.complete_passport_btn'.tr()
             : null,
         ctaIcon: isBuyer && stage == 1 && !hasPassport
             ? Icons.verified_user_outlined
@@ -426,20 +427,20 @@ class TransactionTimelineScreen extends ConsumerWidget {
       // su identidad. Desaparece automaticamente cuando second_buyer_pending = false.
       if (needsSecondIdentity || offerData.secondBuyerPending)
         _TimelineStep(
-          title: 'Verificacion de Identidad — 2° Titular',
+          title: 'transaction.second_buyer_title'.tr(),
           subtitle: offerData.secondBuyerPending
               ? (isBuyer
-                  ? 'Tu segundo comprador debe completar su verificacion'
-                  : 'Pendiente: el segundo comprador debe verificar su identidad')
-              : 'Identidad del segundo titular confirmada',
+                  ? 'transaction.second_buyer_pending_buyer'.tr()
+                  : 'transaction.second_buyer_pending_seller'.tr())
+              : 'transaction.second_buyer_confirmed'.tr(),
           description: offerData.secondBuyerPending && isBuyer
-              ? 'Para avanzar al contrato de Arras, el segundo comprador debe enviar sus datos de identidad. Usa el boton de abajo para añadirlos.'
+              ? 'transaction.second_buyer_desc'.tr()
               : null,
           state: offerData.secondBuyerPending
               ? _StepState.active
               : _StepState.done,
           ctaLabel: isBuyer && offerData.secondBuyerPending
-              ? 'Añadir datos del 2° comprador'
+              ? 'transaction.add_second_buyer_btn'.tr()
               : null,
           ctaIcon: isBuyer && offerData.secondBuyerPending
               ? Icons.person_add_alt_1_outlined
@@ -449,16 +450,15 @@ class TransactionTimelineScreen extends ConsumerWidget {
               : null,
         ),
       _TimelineStep(
-        title: 'Contrato de Arras',
+        title: 'transaction.arras_title'.tr(),
         subtitle: stage > 2
-            ? 'Firmado por ambas partes'
+            ? 'transaction.arras_signed_both'.tr()
             : stage == 2
                 ? _arrasSubtitle(arrasStatus, isBuyer)
-                : 'Pendiente de verificacion de solvencia',
+                : 'transaction.arras_pending_solvency'.tr(),
         description: stage == 2 &&
                 arrasStatus != 'accepted'
-            ? 'Ambas partes deben completar su entrevista. La IA generara el '
-              'contrato cuando ambos confirmen sus respuestas.'
+            ? 'transaction.arras_description'.tr()
             : null,
         state: arrasStatus == 'accepted' ? _StepState.done : stepState(2),
         ctaLabel: stage == 2 ? _arrasCtaLabel(arrasStatus, isBuyer) : null,
@@ -468,12 +468,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
             : null,
       ),
       _TimelineStep(
-        title: 'Tasacion de la Vivienda',
+        title: 'transaction.appraisal_title'.tr(),
         subtitle: stage > 3
-            ? 'Informe del tasador completado'
+            ? 'transaction.appraisal_done'.tr()
             : stage == 3
                 ? _tasacionSubtitle(tasacionApptStatus, isBuyer)
-                : 'Pendiente de firma de arras',
+                : 'transaction.appraisal_pending_arras'.tr(),
         state: tasacionApptStatus == 'completed' && stage == 3
             ? _StepState.done
             : stepState(3),
@@ -493,24 +493,23 @@ class TransactionTimelineScreen extends ConsumerWidget {
       ),
       if (requiresFein)
         _TimelineStep(
-          title: 'Formalizacion Bancaria (FEIN)',
+          title: 'transaction.fein_title'.tr(),
           subtitle: stage > 3 || feinBuyerConfirmed
-              ? 'FEIN confirmada — banco ha aprobado la hipoteca'
+              ? 'transaction.fein_confirmed_sub'.tr()
               : stage == 3 && tasacionApptStatus == 'completed'
                   ? (isBuyer
-                      ? 'Tu banco debe emitirte la FEIN — confirma cuando la recibas'
-                      : 'El banco del comprador esta tramitando la FEIN')
+                      ? 'transaction.fein_buyer_pending'.tr()
+                      : 'transaction.fein_seller_pending'.tr())
                   : stage == 3
-                      ? 'Pendiente tras tasacion — banco emite la FEIN'
-                      : 'Pendiente de firma de arras',
+                      ? 'transaction.fein_pending_appraisal'.tr()
+                      : 'transaction.fein_locked'.tr(),
           state: stage > 3 || feinBuyerConfirmed
               ? _StepState.done
               : (stage == 3 && tasacionApptStatus == 'completed'
                   ? _StepState.active
                   : _StepState.locked),
-          // CTA solo para el comprador, y solo si aun no ha confirmado
           ctaLabel: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
-              ? 'Confirmar FEIN del banco'
+              ? 'transaction.fein_confirm_btn'.tr()
               : null,
           ctaIcon: (isBuyer && stage == 3 && tasacionApptStatus == 'completed' && !feinBuyerConfirmed)
               ? Icons.account_balance_outlined
@@ -520,12 +519,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
               : null,
         ),
       _TimelineStep(
-        title: 'Firma en Notaria y Entrega de Llaves',
+        title: 'transaction.notary_title'.tr(),
         subtitle: stage >= 4
-            ? 'Escrituras firmadas y llaves entregadas'
+            ? 'transaction.notary_done'.tr()
             : feinBuyerConfirmed
                 ? _notariaSubtitle(notariaApptStatus, isBuyer)
-                : 'Pendiente de formalizacion bancaria (FEIN)',
+                : 'transaction.notary_pending_fein'.tr(),
         state: stage >= 4
             ? _StepState.done
             : feinBuyerConfirmed
@@ -542,12 +541,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
             : null,
       ),
       _TimelineStep(
-        title: 'Post-Venta y Suministros',
+        title: 'transaction.post_sale_title'.tr(),
         subtitle: stage >= 4
-            ? 'Gestiona el cambio de titularidad de los suministros'
-            : 'Accesible tras la firma en notaria',
+            ? 'transaction.post_sale_subtitle'.tr()
+            : 'transaction.post_sale_locked'.tr(),
         state: stage >= 4 ? _StepState.active : _StepState.locked,
-        ctaLabel: stage >= 4 ? 'Gestionar suministros' : null,
+        ctaLabel: stage >= 4 ? 'transaction.post_sale_btn'.tr() : null,
         ctaIcon: stage >= 4 ? Icons.receipt_long_outlined : null,
         ctaCallback: stage >= 4
             ? () => context.push('/offers/${offerData.id}/post-venta', extra: offerData)
@@ -571,14 +570,14 @@ class TransactionTimelineScreen extends ConsumerWidget {
       steps.insert(
         1,
         _TimelineStep(
-          title: isVisitConfirmed ? 'Visita Confirmada' : 'Visita Solicitada',
+          title: isVisitConfirmed ? 'transaction.visit_confirmed_step'.tr() : 'transaction.visit_requested_step'.tr(),
           subtitle: isVisitConfirmed
-              ? 'Cita acordada: $visitDate'
+              ? 'transaction.visit_date_confirmed'.tr(namedArgs: {'date': visitDate ?? ''})
               : isVisitPending
-                  ? 'Propuesta: $visitDate — pendiente de confirmacion'
-                  : 'Ultima actividad: $visitDate',
+                  ? 'transaction.visit_date_pending'.tr(namedArgs: {'date': visitDate ?? ''})
+                  : 'transaction.visit_date_last'.tr(namedArgs: {'date': visitDate ?? ''}),
           state: isVisitConfirmed ? _StepState.done : _StepState.active,
-          ctaLabel: 'Ver agenda de visitas',
+          ctaLabel: 'transaction.visit_btn'.tr(),
           ctaIcon: Icons.calendar_month_outlined,
           ctaRoute: '/profile?tab=3',
         ),
@@ -593,25 +592,25 @@ class TransactionTimelineScreen extends ConsumerWidget {
   String _arrasSubtitle(String arrasStatus, bool isBuyer) {
     switch (arrasStatus) {
       case 'accepted':
-        return 'Firmado por ambas partes';
+        return 'transaction.arras_signed_both'.tr();
       case 'contract_ready':
       case 'buyer_accepted':
       case 'seller_accepted':
-        return 'Contrato listo — pendiente de firma';
+        return 'transaction.arras_contract_ready'.tr();
       case 'generating':
-        return 'Generando contrato con IA...';
+        return 'transaction.arras_generating'.tr();
       case 'both_done':
-        return 'Ambas entrevistas completadas — generando contrato';
+        return 'transaction.arras_both_done'.tr();
       case 'buyer_done':
         return isBuyer
-            ? 'Tu entrevista completada — esperando al vendedor'
-            : 'Comprador listo — completa tu entrevista';
+            ? 'transaction.arras_buyer_done_buyer'.tr()
+            : 'transaction.arras_buyer_done_seller'.tr();
       case 'seller_done':
         return !isBuyer
-            ? 'Tu entrevista completada — esperando al comprador'
-            : 'Vendedor listo — completa tu entrevista';
+            ? 'transaction.arras_seller_done_seller'.tr()
+            : 'transaction.arras_seller_done_buyer'.tr();
       default:
-        return 'Completa tu entrevista para continuar';
+        return 'transaction.arras_complete_yours'.tr();
     }
   }
 
@@ -622,12 +621,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
       case 'contract_ready':
       case 'buyer_accepted':
       case 'seller_accepted':
-        return 'Revisar contrato';
+        return 'transaction.arras_review_btn'.tr();
       case 'generating':
       case 'both_done':
-        return 'Ver estado';
+        return 'transaction.arras_view_status_btn'.tr();
       default:
-        return isBuyer ? 'Comenzar entrevista' : 'Completar entrevista';
+        return isBuyer ? 'transaction.arras_start_btn'.tr() : 'transaction.arras_complete_btn'.tr();
     }
   }
 
@@ -650,23 +649,23 @@ class TransactionTimelineScreen extends ConsumerWidget {
   String _tasacionSubtitle(String apptStatus, bool isBuyer) {
     switch (apptStatus) {
       case 'completed':
-        return 'Tasacion completada — informe emitido';
+        return 'transaction.appraisal_completed_sub'.tr();
       case 'accepted':
         return isBuyer
-            ? 'Cita acordada — pendiente de visita del tasador'
-            : 'Cita acordada — confirma cuando el tasador visite la vivienda';
+            ? 'transaction.appraisal_accepted_buyer'.tr()
+            : 'transaction.appraisal_accepted_seller'.tr();
       case 'rejected':
         return isBuyer
-            ? 'Vendedor propuso fecha alternativa — pendiente de tu respuesta'
-            : 'Fecha rechazada — pendiente de nueva propuesta del comprador';
+            ? 'transaction.appraisal_rejected_buyer'.tr()
+            : 'transaction.appraisal_rejected_seller'.tr();
       case 'proposed':
         return isBuyer
-            ? 'Fecha propuesta — pendiente de confirmacion del vendedor'
-            : 'Comprador propuso una fecha — pendiente de tu respuesta';
-      default: // pending
+            ? 'transaction.appraisal_proposed_buyer'.tr()
+            : 'transaction.appraisal_proposed_seller'.tr();
+      default:
         return isBuyer
-            ? 'Agenda la visita del tasador para continuar'
-            : 'Pendiente de que el comprador proponga una fecha';
+            ? 'transaction.appraisal_pending_buyer'.tr()
+            : 'transaction.appraisal_pending_seller'.tr();
     }
   }
 
@@ -675,17 +674,17 @@ class TransactionTimelineScreen extends ConsumerWidget {
       case 'completed':
         return null;
       case 'accepted':
-        return isBuyer ? 'Ver cita confirmada' : 'Confirmar visita del tasador';
+        return isBuyer ? 'transaction.appraisal_see_confirmed_btn'.tr() : 'transaction.appraisal_confirm_visit_btn'.tr();
       case 'rejected':
         return isBuyer
-            ? 'Ver propuesta del vendedor'
-            : 'Ver estado — esperando comprador';
+            ? 'transaction.appraisal_see_seller_btn'.tr()
+            : 'transaction.appraisal_waiting_buyer_btn'.tr();
       case 'proposed':
         return isBuyer
-            ? 'Ver propuesta enviada'
-            : 'Aceptar o rechazar propuesta';
-      default: // pending
-        return isBuyer ? 'Agendar visita del tasador' : null;
+            ? 'transaction.appraisal_see_proposal_btn'.tr()
+            : 'transaction.appraisal_accept_reject_btn'.tr();
+      default:
+        return isBuyer ? 'transaction.appraisal_schedule_btn'.tr() : null;
     }
   }
 
@@ -711,24 +710,24 @@ class TransactionTimelineScreen extends ConsumerWidget {
   String _notariaSubtitle(String apptStatus, bool isBuyer) {
     switch (apptStatus) {
       case 'completed':
-        return 'Firma realizada — pendiente de entrega de llaves';
+        return 'transaction.notary_signing_done'.tr();
       case 'scheduled':
-        return 'Cita acordada — pendiente de firma en notaria';
-      default: // pending
+        return 'transaction.notary_scheduled'.tr();
+      default:
         return isBuyer
-            ? 'A la espera de cita en notaria — propone fecha y lugar'
-            : 'A la espera de cita en notaria — el comprador eligira fecha';
+            ? 'transaction.notary_buyer_pending'.tr()
+            : 'transaction.notary_seller_pending'.tr();
     }
   }
 
   String? _notariaCtaLabel(String apptStatus, bool isBuyer, int stage) {
-    if (stage >= 4) return 'Ver estado de la firma';
+    if (stage >= 4) return 'transaction.notary_view_status'.tr();
     switch (apptStatus) {
       case 'completed':
       case 'scheduled':
-        return 'Confirmar firma y entrega de llaves';
-      default: // pending
-        return isBuyer ? 'Proponer cita en notaria' : 'Ver estado';
+        return 'transaction.notary_confirm_signing_btn'.tr();
+      default:
+        return isBuyer ? 'transaction.notary_propose_btn'.tr() : 'transaction.notary_view_status_btn'.tr();
     }
   }
 
@@ -829,9 +828,9 @@ class _HeaderCards extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'COMPRADOR',
-                style: TextStyle(
+              Text(
+                'transaction.buyer_header_label'.tr(),
+                style: const TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF94A3B8),
@@ -1269,7 +1268,7 @@ class _HelpFooter extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            '¿Necesitas ayuda con este paso?',
+            'transaction.help_question'.tr(),
             style: TextStyle(
               fontSize: 13,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -1284,8 +1283,8 @@ class _HelpFooter extends StatelessWidget {
               const SizedBox(width: 6),
               GestureDetector(
                 onTap: () {},
-                child: const Text(
-                  'Hablar con un asesor legal',
+                child: Text(
+                  'transaction.talk_to_advisor'.tr(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -1320,17 +1319,15 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Retirar oferta'),
-        content: const Text(
-          '¿Seguro que quieres retirar tu oferta? Esta acción no se puede deshacer.',
-        ),
+        title: Text('transaction.withdraw_dialog_title'.tr()),
+        content: Text('transaction.withdraw_dialog_content'.tr()),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -1338,7 +1335,7 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Retirar'),
+            child: Text('common.withdraw'.tr()),
           ),
         ],
       ),
@@ -1350,14 +1347,14 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
       await ref.read(sentOffersProvider.notifier).withdraw(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Oferta retirada correctamente')),
+          SnackBar(content: Text('transaction.withdraw_ok'.tr())),
         );
         context.go('/profile?tab=2');
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al retirar la oferta. Inténtalo de nuevo.')),
+          SnackBar(content: Text('transaction.withdraw_error'.tr())),
         );
       }
     } finally {
@@ -1376,9 +1373,9 @@ class _WithdrawOfferButtonState extends ConsumerState<_WithdrawOfferButton> {
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.red),
             )
           : const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
-      label: const Text(
-        'Retirar Oferta',
-        style: TextStyle(fontWeight: FontWeight.w700, color: Colors.red),
+      label: Text(
+        'transaction.withdraw_offer_btn'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.red),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: Colors.red,
@@ -1409,9 +1406,9 @@ class _BuyerCounterOfferActionsState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Aceptar contraoferta'),
+        title: Text('transaction.accept_counter_title'.tr()),
         content: Text(
-          '\u00BFAceptas la contraoferta de ${CurrencyInputFormatter.format(widget.offer.amount)} \u20AC?',
+          'transaction.accept_counter_content'.tr(namedArgs: {'amount': CurrencyInputFormatter.format(widget.offer.amount)}),
         ),
         actions: [
           TextButton(
@@ -1420,7 +1417,7 @@ class _BuyerCounterOfferActionsState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -1429,7 +1426,7 @@ class _BuyerCounterOfferActionsState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Aceptar'),
+            child: Text('common.accept'.tr()),
           ),
         ],
       ),
@@ -1440,14 +1437,14 @@ class _BuyerCounterOfferActionsState
       await ref.read(sentOffersProvider.notifier).accept(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Oferta aceptada')),
+          SnackBar(content: Text('transaction.accept_counter_ok'.tr())),
         );
         context.go('/');
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al aceptar la oferta. Intentalo de nuevo.')),
+          SnackBar(content: Text('transaction.accept_counter_error'.tr())),
         );
       }
     } finally {
@@ -1462,19 +1459,19 @@ class _BuyerCounterOfferActionsState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text.rich(
+        title: Text.rich(
           TextSpan(
             children: [
               TextSpan(
-                text: 'Hacer ',
-                style: TextStyle(
+                text: 'transaction.new_offer_title_part1'.tr(),
+                style: const TextStyle(
                   color: Color(0xFF135BEC),
                   fontWeight: FontWeight.w800,
                 ),
               ),
               TextSpan(
-                text: 'nueva oferta',
-                style: TextStyle(
+                text: 'transaction.new_offer_title_part2'.tr(),
+                style: const TextStyle(
                   color: Color(0xFF16A34A),
                   fontWeight: FontWeight.w800,
                 ),
@@ -1488,15 +1485,15 @@ class _BuyerCounterOfferActionsState
             controller: controller,
             keyboardType: TextInputType.number,
             inputFormatters: [CurrencyInputFormatter()],
-            decoration: const InputDecoration(
-              labelText: 'Nuevo importe',
+            decoration: InputDecoration(
+              labelText: 'transaction.new_offer_amount_label'.tr(),
               suffixText: ' €',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Introduce un importe';
+              if (v == null || v.isEmpty) return 'transaction.new_offer_amount_required'.tr();
               final parsed = CurrencyInputFormatter.parse(v);
-              if (parsed == null || parsed <= 0) return 'Importe no valido';
+              if (parsed == null || parsed <= 0) return 'transaction.new_offer_amount_invalid'.tr();
               return null;
             },
           ),
@@ -1508,7 +1505,7 @@ class _BuyerCounterOfferActionsState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -1519,7 +1516,7 @@ class _BuyerCounterOfferActionsState
             onPressed: () {
               if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
             },
-            child: const Text('Enviar'),
+            child: Text('common.send'.tr()),
           ),
         ],
       ),
@@ -1534,14 +1531,14 @@ class _BuyerCounterOfferActionsState
           .counterBack(widget.offer.id, newAmount);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Tu nueva oferta ha sido enviada')),
+          SnackBar(content: Text('transaction.new_offer_ok'.tr())),
         );
         context.go('/profile?tab=2');
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al enviar la oferta. Intentalo de nuevo.')),
+          SnackBar(content: Text('transaction.new_offer_error'.tr())),
         );
       }
     } finally {
@@ -1553,10 +1550,8 @@ class _BuyerCounterOfferActionsState
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Rechazar contraoferta'),
-        content: const Text(
-          '\u00BFRechazas la contraoferta? Esta accion no se puede deshacer.',
-        ),
+        title: Text('transaction.reject_counter_title'.tr()),
+        content: Text('transaction.reject_counter_content'.tr()),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
@@ -1564,7 +1559,7 @@ class _BuyerCounterOfferActionsState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -1573,7 +1568,7 @@ class _BuyerCounterOfferActionsState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Rechazar'),
+            child: Text('common.reject'.tr()),
           ),
         ],
       ),
@@ -1584,14 +1579,14 @@ class _BuyerCounterOfferActionsState
       await ref.read(sentOffersProvider.notifier).reject(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Contraoferta rechazada')),
+          SnackBar(content: Text('transaction.reject_counter_ok'.tr())),
         );
         context.go('/profile?tab=2');
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al rechazar la oferta. Intentalo de nuevo.')),
+          SnackBar(content: Text('transaction.reject_counter_error'.tr())),
         );
       }
     } finally {
@@ -1607,9 +1602,9 @@ class _BuyerCounterOfferActionsState
           child: FilledButton.icon(
             onPressed: _loading ? null : _accept,
             icon: const Icon(Icons.check_circle_outline, size: 14),
-            label: const Text(
-              'Aceptar',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+            label: Text(
+              'common.accept'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
             ),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF135BEC),
@@ -1627,9 +1622,9 @@ class _BuyerCounterOfferActionsState
             onPressed: _loading ? null : _counterBack,
             icon: const Icon(Icons.edit_outlined,
                 size: 14, color: Color(0xFFEA580C)),
-            label: const Text(
-              'Nueva Oferta',
-              style: TextStyle(
+            label: Text(
+              'transaction.new_offer_btn'.tr(),
+              style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                   color: Color(0xFFEA580C)),
@@ -1650,9 +1645,9 @@ class _BuyerCounterOfferActionsState
           child: OutlinedButton.icon(
             onPressed: _loading ? null : _reject,
             icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
-            label: const Text(
-              'Rechazar',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
+            label: Text(
+              'common.reject'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
             ),
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.red,
@@ -1694,14 +1689,14 @@ class _SellerSolvencySectionState
           .acceptSolvency(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Solvencia aceptada')),
+          SnackBar(content: Text('transaction.accept_solvency_ok'.tr())),
         );
         ref.invalidate(receivedOffersProvider);
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al aceptar la solvencia')),
+          SnackBar(content: Text('transaction.accept_solvency_error'.tr())),
         );
       }
     } finally {
@@ -1715,9 +1710,8 @@ class _SellerSolvencySectionState
       builder: (_) => AlertDialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: const Text('Rechazar oferta'),
-        content: const Text(
-            'El comprador sera notificado de que su oferta ha sido rechazada.'),
+        title: Text('transaction.reject_offer_dialog_title'.tr()),
+        content: Text('transaction.reject_offer_dialog_content'.tr()),
         actions: [
           TextButton(
             style: TextButton.styleFrom(
@@ -1725,7 +1719,7 @@ class _SellerSolvencySectionState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -1734,7 +1728,7 @@ class _SellerSolvencySectionState
                   borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Rechazar'),
+            child: Text('common.reject'.tr()),
           ),
         ],
       ),
@@ -1747,14 +1741,14 @@ class _SellerSolvencySectionState
           .reject(widget.offer.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Oferta rechazada')),
+          SnackBar(content: Text('transaction.reject_offer_ok'.tr())),
         );
         context.go('/profile');
       }
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error al rechazar la oferta')),
+          SnackBar(content: Text('transaction.reject_offer_error'.tr())),
         );
       }
     } finally {
@@ -1784,8 +1778,8 @@ class _SellerSolvencySectionState
                   color: Color(0xFF16A34A), size: 18),
               SizedBox(width: 8),
               Text(
-                'Solvencia del comprador',
-                style: TextStyle(
+                'transaction.buyer_solvency_title'.tr(),
+                style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     color: Color(0xFF166534)),
@@ -1800,13 +1794,13 @@ class _SellerSolvencySectionState
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))),
             error: (_, __) => Text(
-              'El comprador aun no tiene pasaporte de solvencia.',
+              'transaction.buyer_no_passport'.tr(),
               style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             data: (passport) {
               if (passport == null) {
                 return Text(
-                  'El comprador aun no ha completado el pasaporte de solvencia.',
+                  'transaction.buyer_passport_incomplete'.tr(),
                   style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 );
               }
@@ -1814,19 +1808,19 @@ class _SellerSolvencySectionState
               final (levelLabel, levelColor, levelBg, levelIcon) =
                   switch (level) {
                 'gold' => (
-                  'Oro',
+                  'transaction.solvency_level_gold'.tr(),
                   const Color(0xFFB8860B),
                   const Color(0xFFFFFBEB),
                   Icons.emoji_events_outlined
                 ),
                 'silver' => (
-                  'Plata',
+                  'transaction.solvency_level_silver'.tr(),
                   const Color(0xFF64748B),
                   const Color(0xFFF8FAFC),
                   Icons.verified_outlined
                 ),
                 _ => (
-                  'Bronce',
+                  'transaction.solvency_level_bronze'.tr(),
                   const Color(0xFFD97706),
                   const Color(0xFFFFF7ED),
                   Icons.shield_outlined
@@ -1851,7 +1845,7 @@ class _SellerSolvencySectionState
                         Icon(levelIcon, color: levelColor, size: 18),
                         const SizedBox(width: 6),
                         Text(
-                          'Nivel $levelLabel',
+                          levelLabel,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
@@ -1867,9 +1861,9 @@ class _SellerSolvencySectionState
                               color: const Color(0xFF135BEC),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Text(
-                              'Compra conjunta',
-                              style: TextStyle(
+                            child: Text(
+                              'transaction.solvency_joint_purchase'.tr(),
+                              style: const TextStyle(
                                   fontSize: 10,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600),
@@ -1879,14 +1873,14 @@ class _SellerSolvencySectionState
                       ],
                     ),
                   ),
-                  _SolvencyRowCompact('Conoce gastos adicionales',
-                      passport.knowsExtraCosts ? 'Si' : 'No'),
-                  _SolvencyRowCompact('Ahorros iniciales',
-                      passport.hasInitialSavings ? 'Si' : 'No'),
-                  _SolvencyRowCompact('Preaprobacion hipotecaria',
-                      passport.hasPreApproval ? 'Si' : 'No'),
+                  _SolvencyRowCompact('transaction.solvency_knows_extra_costs'.tr(),
+                      passport.knowsExtraCosts ? 'common.yes'.tr() : 'common.no'.tr()),
+                  _SolvencyRowCompact('transaction.solvency_initial_savings'.tr(),
+                      passport.hasInitialSavings ? 'common.yes'.tr() : 'common.no'.tr()),
+                  _SolvencyRowCompact('transaction.solvency_pre_approval'.tr(),
+                      passport.hasPreApproval ? 'common.yes'.tr() : 'common.no'.tr()),
                   _SolvencyRowCompact(
-                      'Financiacion',
+                      'transaction.solvency_financing'.tr(),
                       passport.paymentMethodLabel ??
                           passport.paymentMethod ??
                           '-'),
@@ -1910,8 +1904,8 @@ class _SellerSolvencySectionState
                               strokeWidth: 2, color: Colors.white),
                         )
                       : const Icon(Icons.verified_user_outlined, size: 16),
-                  label: const Text('Aceptar Solvencia',
-                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  label: Text('transaction.accept_solvency_btn'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.w700)),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF16A34A),
                     padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1933,8 +1927,8 @@ class _SellerSolvencySectionState
                             strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.cancel_outlined, size: 16),
-                label: const Text('Rechazar',
-                    style: TextStyle(fontWeight: FontWeight.w700)),
+                label: Text('common.reject'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red,
                   padding: const EdgeInsets.symmetric(
@@ -2001,21 +1995,21 @@ class _BrandBar extends StatelessWidget {
           Icon(Icons.verified_user_outlined,
               size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
-          const Expanded(
+          Expanded(
             child: Text(
-              'InmuFacil Secure-Tech \u00B7 \u00A9 2023 InmuFacil S.L. Sistema de transacciones seguras bajo protocolo AES-256',
-              style: TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+              'transaction.brand_text'.tr(),
+              style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 12),
           Row(
             children: [
-              _FooterLink('Ayuda'),
+              _FooterLink('transaction.footer_help'.tr()),
               const SizedBox(width: 10),
-              _FooterLink('Legal'),
+              _FooterLink('transaction.footer_legal'.tr()),
               const SizedBox(width: 10),
-              _FooterLink('Seguridad'),
+              _FooterLink('transaction.footer_security'.tr()),
             ],
           ),
         ],

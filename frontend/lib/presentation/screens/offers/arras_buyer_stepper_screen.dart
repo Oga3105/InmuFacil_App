@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -121,7 +122,7 @@ class _ArrasBuyerStepperScreenState
   Future<void> _saveAndConfirm() async {
     if (_paymentMethod == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecciona tu metodo de financiacion')),
+        SnackBar(content: Text('arras_interview.payment_required'.tr())),
       );
       return;
     }
@@ -138,7 +139,7 @@ class _ArrasBuyerStepperScreenState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Entrevista enviada. Esperando al vendedor.'),
+            content: Text('arras_interview.interview_sent_buyer'.tr()),
             backgroundColor: Theme.of(context).brightness == Brightness.dark
                 ? const Color(0xFF4ADE80)
                 : const Color(0xFF16A34A),

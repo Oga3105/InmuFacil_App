@@ -137,7 +137,7 @@ UrgentAction? buyerBlockingAction(
   if (offer.buyerId != currentUserId) return null;
 
   final s = offer.status;
-  final title = offer.propertyTitle ?? 'Propiedad sin titulo';
+  final title = offer.propertyTitle ?? 'urgency.no_property_title';
 
   // Terminal or pre-acceptance states require no action
   if (s == 'rejected' || s == 'withdrawn' || s == 'completed' ||
@@ -151,7 +151,7 @@ UrgentAction? buyerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.verifyIdentity,
-      label: 'Completar verificacion de identidad',
+      label: 'urgency.complete_kyc',
       route: '/verify-identity',
       offer: offer,
     );
@@ -163,8 +163,9 @@ UrgentAction? buyerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.completeSolvency,
-      label: 'Completar Pasaporte de Solvencia',
+      label: 'urgency.complete_solvency',
       route: '/solvency/second-buyer',
+      routeExtra: offer,
       offer: offer,
     );
   }
@@ -175,7 +176,7 @@ UrgentAction? buyerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.signArras,
-      label: 'Firmar Contrato de Arras',
+      label: 'urgency.sign_arras',
       route: '/offers/${offer.id}/arras',
       routeExtra: offer,
       offer: offer,
@@ -199,7 +200,7 @@ UrgentAction? buyerBlockingAction(
           offerId: offer.id,
           propertyTitle: title,
           type: UrgentActionType.postVenta,
-          label: 'Revisar documentos de post-venta',
+          label: 'urgency.review_post_sale_buyer',
           route: '/offers/${offer.id}/post-venta',
           routeExtra: offer,
           offer: offer,
@@ -210,8 +211,8 @@ UrgentAction? buyerBlockingAction(
         propertyTitle: title,
         type: UrgentActionType.notaryAppointment,
         label: ns == 'scheduled'
-            ? 'Confirmar firma y entrega de llaves'
-            : 'Coordinar cita en notaria',
+            ? 'urgency.confirm_signing_keys'
+            : 'urgency.coordinate_notary',
         route: '/offers/${offer.id}/notaria',
         routeExtra: offer,
         offer: offer,
@@ -224,7 +225,7 @@ UrgentAction? buyerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmFein,
-        label: 'Ir a Formalizacion Bancaria (FEIN)',
+        label: 'urgency.go_to_fein',
         route: '/offers/${offer.id}/fein',
         routeExtra: offer,
         offer: offer,
@@ -236,7 +237,7 @@ UrgentAction? buyerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmTasacion,
-        label: 'Cita del tasador confirmada',
+        label: 'urgency.appraiser_appt_confirmed',
         route: '/offers/${offer.id}/tasacion',
         routeExtra: offer,
         offer: offer,
@@ -248,7 +249,7 @@ UrgentAction? buyerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmTasacion,
-        label: 'Esperando confirmacion del vendedor',
+        label: 'urgency.waiting_seller_confirmation',
         route: '/offers/${offer.id}/tasacion',
         routeExtra: offer,
         offer: offer,
@@ -259,9 +260,7 @@ UrgentAction? buyerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.confirmTasacion,
-      label: ts == 'rejected'
-          ? 'Responder contraoferta del tasador'
-          : 'Agendar visita del tasador',
+      label: 'urgency.schedule_appraiser_visit',
       route: '/offers/${offer.id}/tasacion',
       routeExtra: offer,
       offer: offer,
@@ -280,7 +279,7 @@ UrgentAction? sellerBlockingAction(
   String? liveNotariaStatus,
 }) {
   final s = offer.status;
-  final title = offer.propertyTitle ?? 'Propiedad sin titulo';
+  final title = offer.propertyTitle ?? 'urgency.no_property_title';
 
   // Solvency submitted by buyer but not yet reviewed by seller
   if (s == 'accepted' &&
@@ -290,7 +289,7 @@ UrgentAction? sellerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.reviewSolvency,
-      label: 'Revisar solvencia del comprador',
+      label: 'urgency.review_buyer_solvency',
       route: '/offers/${offer.id}/timeline',
       routeExtra: offer,
       offer: offer,
@@ -303,7 +302,7 @@ UrgentAction? sellerBlockingAction(
       offerId: offer.id,
       propertyTitle: title,
       type: UrgentActionType.signArras,
-      label: 'Firmar Contrato de Arras',
+      label: 'urgency.sign_arras',
       route: '/offers/${offer.id}/arras',
       routeExtra: offer,
       offer: offer,
@@ -321,7 +320,7 @@ UrgentAction? sellerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmTasacion,
-        label: 'Confirmar cita del tasador',
+        label: 'urgency.confirm_appraiser_appt',
         route: '/offers/${offer.id}/tasacion',
         routeExtra: offer,
         offer: offer,
@@ -333,7 +332,7 @@ UrgentAction? sellerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmTasacion,
-        label: 'Confirmar visita del tasador',
+        label: 'urgency.confirm_appraiser_visit',
         route: '/offers/${offer.id}/tasacion',
         routeExtra: offer,
         offer: offer,
@@ -350,7 +349,7 @@ UrgentAction? sellerBlockingAction(
             offerId: offer.id,
             propertyTitle: title,
             type: UrgentActionType.postVenta,
-            label: 'Gestionar documentos de post-venta',
+            label: 'urgency.review_post_sale_seller',
             route: '/offers/${offer.id}/post-venta',
             routeExtra: offer,
             offer: offer,
@@ -361,8 +360,8 @@ UrgentAction? sellerBlockingAction(
           propertyTitle: title,
           type: UrgentActionType.notaryAppointment,
           label: ns == 'scheduled'
-              ? 'Confirmar firma y entrega de llaves'
-              : 'A la espera de cita en notaria',
+              ? 'urgency.confirm_signing_keys'
+              : 'urgency.coordinate_notary',
           route: '/offers/${offer.id}/notaria',
           routeExtra: offer,
           offer: offer,

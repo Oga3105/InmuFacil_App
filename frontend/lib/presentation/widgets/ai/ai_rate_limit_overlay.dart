@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../core/services/ai_types.dart';
 
@@ -29,9 +30,9 @@ class AiRateLimitOverlay extends StatelessWidget {
             color: Color(0xFFD97706),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Limite de seguridad alcanzado',
-            style: TextStyle(
+          Text(
+            'ai_rate_limit.title'.tr(),
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w700,
               color: Color(0xFF92400E),
@@ -40,8 +41,7 @@ class AiRateLimitOverlay extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Para proteger la integridad de la plataforma, el uso de IA para '
-            '${category.name} se restablecera en 24 horas.',
+            'ai_rate_limit.message'.tr(namedArgs: {'category': category.name}),
             style: const TextStyle(fontSize: 13, color: Color(0xFF92400E)),
             textAlign: TextAlign.center,
           ),

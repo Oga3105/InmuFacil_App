@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class VisitCancelDialog extends StatefulWidget {
@@ -8,14 +9,18 @@ class VisitCancelDialog extends StatefulWidget {
 }
 
 class _VisitCancelDialogState extends State<VisitCancelDialog> {
-  String? _selectedReason;
+  String? _selectedReasonKey;
   final _otherReasonController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  final List<String> _reasons = [
-    'Retirar oferta',
-    'Indisposición / Problemas de agenda',
-    'Otros',
+  static const _keyWithdraw = 'visit_cancel.reason_withdraw';
+  static const _keySchedule = 'visit_cancel.reason_schedule';
+  static const _keyOther = 'visit_cancel.reason_other';
+
+  final List<String> _reasonKeys = [
+    _keyWithdraw,
+    _keySchedule,
+    _keyOther,
   ];
 
   @override
@@ -28,14 +33,17 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text.rich(
+      title: Text.rich(
         TextSpan(
           children: [
-            TextSpan(text: 'Anular ', style: TextStyle(color: Color(0xFF135BEC))),
-            TextSpan(text: 'visita', style: TextStyle(color: Color(0xFF16A34A))),
+            TextSpan(
+              text:
+                  '${'visit_cancel.title_part1'.tr()} ${'visit_cancel.title_part2'.tr()}',
+              style: const TextStyle(color: Color(0xFF135BEC)),
+            ),
           ],
         ),
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
       ),
       content: Form(
         key: _formKey,
@@ -43,42 +51,43 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Por favor, indica el motivo de la anulación:',
-              style: TextStyle(fontSize: 14, color: Color(0xFF334155)),
+            Text(
+              'visit_cancel.reason_prompt'.tr(),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF334155)),
             ),
             const SizedBox(height: 12),
-            ..._reasons.map((reason) => ListTile(
-                  title: Text(reason, style: const TextStyle(fontSize: 14)),
+            ..._reasonKeys.map((key) => ListTile(
+                  title: Text(key.tr(), style: const TextStyle(fontSize: 14)),
                   leading: Radio<String>(
-                    value: reason,
-                    groupValue: _selectedReason,
+                    value: key,
+                    groupValue: _selectedReasonKey,
                     activeColor: const Color(0xFF135BEC),
                     onChanged: (val) {
-                      setState(() => _selectedReason = val);
+                      setState(() => _selectedReasonKey = val);
                     },
                   ),
                   contentPadding: EdgeInsets.zero,
                   dense: true,
                   onTap: () {
-                    setState(() => _selectedReason = reason);
+                    setState(() => _selectedReasonKey = key);
                   },
                 )),
-            if (_selectedReason == 'Otros') ...[
+            if (_selectedReasonKey == _keyOther) ...[
               const SizedBox(height: 12),
               TextFormField(
                 controller: _otherReasonController,
                 decoration: InputDecoration(
-                  labelText: 'Especifica el motivo',
+                  labelText: 'visit_cancel.reason_other_label'.tr(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 maxLines: 2,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'El motivo es obligatorio.';
+                    return 'visit_cancel.reason_other_required'.tr();
                   }
                   return null;
                 },
@@ -90,31 +99,35 @@ class _VisitCancelDialogState extends State<VisitCancelDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Volver', style: TextStyle(color: Color(0xFF64748B))),
+          child: Text('visit_cancel.back_btn'.tr(),
+              style: const TextStyle(color: Color(0xFF64748B))),
         ),
         FilledButton(
           style: FilledButton.styleFrom(
             backgroundColor: Colors.red.shade600,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
           onPressed: () {
-            if (_selectedReason == null) {
+            if (_selectedReasonKey == null) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Selecciona un motivo.')),
+                SnackBar(
+                    content: Text('visit_cancel.reason_required'.tr())),
               );
               return;
             }
-            if (_selectedReason == 'Otros' && !_formKey.currentState!.validate()) {
+            if (_selectedReasonKey == _keyOther &&
+                !_formKey.currentState!.validate()) {
               return;
             }
-            
-            final finalReason = _selectedReason == 'Otros' 
+
+            final finalReason = _selectedReasonKey == _keyOther
                 ? _otherReasonController.text.trim()
-                : _selectedReason!;
-                
+                : _selectedReasonKey!.tr();
+
             Navigator.pop(context, finalReason);
           },
-          child: const Text('Anular Visita'),
+          child: Text('visit_cancel.confirm_btn'.tr()),
         ),
       ],
     );
