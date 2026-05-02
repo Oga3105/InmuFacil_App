@@ -91,6 +91,7 @@ flutter:
     - assets/translations/
     - assets/images/
     - assets/icons/
+    - assets/flags/
     - .env
     # - .env.development
     # - .env.production

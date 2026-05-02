@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -80,7 +81,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Tu confirmacion registrada. Esperando a la otra parte.'),
+            content: Text('transaction.keys_confirm_wait_snack'.tr()),
             backgroundColor: _kGreen,
           ),
         );
@@ -88,7 +89,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
     } on DioException catch (e) {
       if (!mounted) return;
       final detail = (e.response?.data as Map?)?['detail'] as String?;
-      setState(() => _errorMessage = detail ?? 'Error al confirmar. Intentalo de nuevo.');
+      setState(() => _errorMessage = detail ?? 'transaction.keys_confirm_error'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -113,8 +114,8 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
                   color: _kGreen, size: 56),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Transaccion completada',
+            Text(
+              'transaction.keys_completed_title'.tr(),
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -123,8 +124,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Felicidades. La compraventa ha finalizado con exito.\n'
-              'Las llaves han sido entregadas.',
+              'transaction.keys_completed_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 13, color: Colors.grey.shade600, height: 1.5),
@@ -139,7 +139,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Aceptar'),
+            child: Text('transaction.keys_accept'.tr()),
           ),
         ],
       ),
@@ -251,7 +251,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
                 _HeroCard(isComplete: isComplete),
                 const SizedBox(height: 24),
                 _ConfirmationCard(
-                  label: 'Vendedor',
+                  label: 'transaction.keys_seller'.tr(),
                   icon: Icons.home_outlined,
                   confirmed: _sellerConfirmed,
                   isCurrentUser: !isBuyer,
@@ -260,7 +260,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
                 ),
                 const SizedBox(height: 12),
                 _ConfirmationCard(
-                  label: 'Comprador',
+                  label: 'transaction.keys_buyer'.tr(),
                   icon: Icons.person_outline,
                   confirmed: _buyerConfirmed,
                   isCurrentUser: isBuyer,
@@ -319,8 +319,8 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             isComplete
-                ? 'Llaves entregadas'
-                : 'Entrega de llaves pendiente',
+                ? 'transaction.keys_delivered_title'.tr()
+                : 'transaction.keys_pending_title'.tr(),
             style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -329,8 +329,8 @@ class _HeroCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             isComplete
-                ? 'La transaccion ha concluido exitosamente.'
-                : 'Ambas partes deben confirmar la entrega\npara cerrar la transaccion.',
+                ? 'transaction.keys_delivered_desc'.tr()
+                : 'transaction.keys_pending_desc'.tr(),
             textAlign: TextAlign.center,
             style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
           ),
@@ -393,10 +393,10 @@ class _ConfirmationCard extends StatelessWidget {
                         color: confirmed ? _kGreen : const Color(0xFF135BEC))),
                 Text(
                   confirmed
-                      ? 'Entrega confirmada'
+                      ? 'transaction.keys_confirmed'.tr()
                       : isCurrentUser
-                          ? 'Confirma cuando hayas entregado/recibido las llaves'
-                          : 'Esperando confirmacion',
+                          ? 'transaction.keys_confirm_prompt'.tr()
+                          : 'transaction.keys_waiting_confirm'.tr(),
                   style: TextStyle(
                       fontSize: 12,
                       color: confirmed ? _kGreen : Colors.grey.shade500),
@@ -421,7 +421,7 @@ class _ConfirmationCard extends StatelessWidget {
                   ? const SizedBox(
                       width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Confirmar', style: TextStyle(fontSize: 13)),
+                  : Text('transaction.keys_confirm_btn'.tr(), style: TextStyle(fontSize: 13)),
             )
           else
             Icon(Icons.hourglass_empty, color: Colors.grey.shade400, size: 20),
@@ -436,13 +436,13 @@ class _PendingDocsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const docs = [
-      'Copia de las escrituras firmadas',
-      'Certificado energetico (CEE)',
-      'Manual de uso de la vivienda',
-      'Llaves de todas las cerraduras',
-      'Tarjeta de garantia de electrodomesticos',
-      'Datos de la comunidad y administrador',
+    final docs = [
+      'transaction.keys_doc1'.tr(),
+      'transaction.keys_doc2'.tr(),
+      'transaction.keys_doc3'.tr(),
+      'transaction.keys_doc4'.tr(),
+      'transaction.keys_doc5'.tr(),
+      'transaction.keys_doc6'.tr(),
     ];
 
     return Container(
@@ -493,11 +493,11 @@ class _TipsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const tips = [
-      'Revisa el estado de la vivienda antes de firmar la entrega',
-      'Anota las lecturas de los contadores de agua, luz y gas',
-      'Solicita el certificado de estar al corriente de pagos en la comunidad',
-      'Cambia el cilindro de la cerradura por seguridad',
+    final tips = [
+      'transaction.keys_tip1'.tr(),
+      'transaction.keys_tip2'.tr(),
+      'transaction.keys_tip3'.tr(),
+      'transaction.keys_tip4'.tr(),
     ];
 
     return Container(

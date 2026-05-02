@@ -83,7 +83,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (!_isTermsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debes aceptar los Términos y Condiciones'), backgroundColor: Colors.red),
+        SnackBar(content: Text('auth.accept_terms_required'.tr()), backgroundColor: Colors.red),
       );
       return;
     }
@@ -107,7 +107,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           } else {
             // Fallback: go to login if auto-login fails
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cuenta creada. Por favor inicia sesión.'), backgroundColor: Colors.green),
+              SnackBar(content: Text('auth.account_created'.tr()), backgroundColor: Colors.green),
             );
             context.go('/login');
           }
@@ -300,8 +300,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 const SizedBox(height: 24),
                 
                 // Headline
-                const Text(
-                  'Seguridad Garantizada entre Particulares',
+                Text(
+                  'auth.security_guaranteed'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -317,7 +317,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildFeatureItem(Icons.verified_user_outlined, 'P2P VERIFICADO'),
+                    _buildFeatureItem(Icons.verified_user_outlined, 'auth.p2p_verified_label'.tr()),
                     Column(
                       children: [
                         Container(
@@ -329,8 +329,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           child: _buildEuroOffIcon(),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'SIN COMISIONES',
+                        Text(
+                          'auth.no_fees'.tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -412,7 +412,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                        // Header (Left Aligned)
                        Text(
-                         'Crea tu cuenta',
+                         'auth.create_account'.tr(),
                          textAlign: TextAlign.left,
                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                            color: Theme.of(context).colorScheme.onSurface,
@@ -422,7 +422,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        ),
                        const SizedBox(height: 6),
                        Text(
-                         'Únete a la red P2P más segura del sector inmobiliario.',
+                         'auth.join_p2p'.tr(),
                          textAlign: TextAlign.left,
                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                            color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -454,7 +454,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                        // Name Field
                        Text(
-                         'Nombre completo',
+                         'auth.full_name_label'.tr(),
                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
@@ -463,14 +463,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.next,
                          onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_emailFocusNode),
                          style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration(context, 'Ej: Juan Pérez'),
-                         validator: (value) => (value == null || value.length < 3) ? 'Mínimo 3 caracteres' : null,
+                         decoration: _buildInputDecoration(context, 'auth.full_name_hint'.tr()),
+                         validator: (value) => (value == null || value.length < 3) ? 'auth.min_3_chars'.tr() : null,
                        ),
                        const SizedBox(height: 14),
 
                        // Email Field
                        Text(
-                         'Correo electrónico',
+                         'auth.email_label_short'.tr(),
                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
@@ -480,11 +480,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.next,
                          onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                           style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration(context, 'nombre@ejemplo.com'),
+                         decoration: _buildInputDecoration(context, 'auth.email_hint'.tr()),
                          validator: (value) {
-                           if (value == null || value.isEmpty) return 'Requerido';
+                           if (value == null || value.isEmpty) return 'auth.field_required'.tr();
                            final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                           if (!emailRegex.hasMatch(value)) return 'Ingresa un correo válido';
+                           if (!emailRegex.hasMatch(value)) return 'auth.email_invalid'.tr();
                            return null;
                            },
                        ),
@@ -492,7 +492,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
                        // Password Field
                        Text(
-                         'Contraseña',
+                         'auth.password_label_short'.tr(),
                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
@@ -503,14 +503,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.next,
                           onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
                           style: const TextStyle(fontSize: 13),
-                          decoration: _buildInputDecoration(context, 'Mínimo 8 caracteres').copyWith(
+                          decoration: _buildInputDecoration(context, 'auth.min_8_chars'.tr()).copyWith(
                             suffixIcon: SizedBox(
                               width: 80,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Tooltip(
-                                    message: 'Generar contraseña segura',
+                                    message: 'auth.generate_password'.tr(),
                                     child: IconButton(
                                       icon: const Icon(
                                         Icons.auto_fix_high,
@@ -534,13 +534,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                           ),
-                          validator: (value) => (value == null || value.length < 8) ? 'Mínimo 8 caracteres' : null,
+                          validator: (value) => (value == null || value.length < 8) ? 'auth.min_8_chars'.tr() : null,
                         ),
                        const SizedBox(height: 14),
 
                        // Confirm Password Field
                        Text(
-                         'Confirmar contraseña',
+                         'auth.confirm_password'.tr(),
                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                        ),
                        const SizedBox(height: 6),
@@ -551,14 +551,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                          textInputAction: TextInputAction.done,
                          onFieldSubmitted: (_) => _handleRegister(),
                           style: const TextStyle(fontSize: 13),
-                         decoration: _buildInputDecoration(context, 'Repite tu contraseña').copyWith(
+                         decoration: _buildInputDecoration(context, 'auth.confirm_password_hint'.tr()).copyWith(
                            suffixIcon: IconButton(
                              icon: Icon(_isConfirmPasswordVisible ? Icons.visibility_outlined : Icons.visibility_off_outlined, color: Colors.grey[400], size: 18),
                              onPressed: () => setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible),
                            ),
                          ),
                          validator: (value) {
-                           if (value != _passwordController.text) return 'Las contraseñas no coinciden';
+                           if (value != _passwordController.text) return 'auth.passwords_mismatch'.tr();
                            return null;
                          },
                        ),
@@ -583,11 +583,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                            Expanded(
                              child: Text.rich(
                                TextSpan(
-                                 text: 'Acepto los ',
+                                 text: 'auth.accept_prefix'.tr(),
                                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
                                  children: [
                                    TextSpan(
-                                     text: 'Terminos y Condiciones',
+                                     text: 'auth.terms_conditions'.tr(),
                                      style: TextStyle(
                                        color: _glowBlueColor,
                                        fontWeight: FontWeight.w600,
@@ -599,9 +599,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                                  InfoPageType.terms),
                                            ),
                                    ),
-                                   const TextSpan(text: ' y la '),
+                                   TextSpan(text: ' ${'auth.and_the'.tr()} '),
                                    TextSpan(
-                                     text: 'Politica de Privacidad',
+                                     text: 'auth.privacy_policy'.tr(),
                                      style: TextStyle(
                                        color: _glowBlueColor,
                                        fontWeight: FontWeight.w600,
@@ -641,8 +641,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                                 child: isLoading 
                                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                  : const Text(
-                                      'Crear Cuenta',
+                                  : Text(
+                                      'auth.create_account_button'.tr(),
                                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                                     ),
                               ),
@@ -656,7 +656,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                        Row(
                          mainAxisAlignment: MainAxisAlignment.center,
                          children: [
-                           Text('¿Ya tienes cuenta? ', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                           Text('auth.already_have_account'.tr(), style: TextStyle(color: Colors.grey[600], fontSize: 12)),
                             MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: InkWell(
@@ -665,7 +665,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                                   child: Text(
-                                    'Inicia sesión',
+                                    'auth.login_link'.tr(),
                                     style: TextStyle(color: _glowBlueColor, fontWeight: FontWeight.bold, fontSize: 12),
                                   ),
                                 ),

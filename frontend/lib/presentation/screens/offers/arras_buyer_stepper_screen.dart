@@ -148,7 +148,7 @@ class _ArrasBuyerStepperScreenState
         context.pop();
       }
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al guardar';
+      final msg = e.response?.data?['detail'] ?? 'arras_interview.error_save'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -180,7 +180,7 @@ class _ArrasBuyerStepperScreenState
             onPrev: _prevPage,
             onNext: _nextPage,
             onConfirm: _loading ? null : _saveAndConfirm,
-            confirmLabel: 'Confirmar mi parte',
+            confirmLabel: 'arras_interview.confirm_my_part'.tr(),
             loading: _loading,
           ),
         ],
@@ -201,8 +201,8 @@ class _ArrasBuyerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.location_city_outlined,
-            title: 'Logistica y Notaria',
-            subtitle: 'Paso 1 de 3 — Plazos y preferencias de firma',
+            title: 'arras_interview.step1_title'.tr(),
+            subtitle: 'arras_interview.step1_subtitle'.tr(),
             color: colorScheme.primary,
           ),
           const SizedBox(height: 24),
@@ -238,7 +238,7 @@ class _ArrasBuyerStepperScreenState
                   ],
                 ),
                 Text(
-                  'Porcentaje de arras (sobre ${CurrencyInputFormatter.format(widget.offer.amount)} EUR)',
+                  'arras_interview.deposit_pct_label'.tr(namedArgs: {'amount': CurrencyInputFormatter.format(widget.offer.amount)}),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 Slider(
@@ -273,7 +273,7 @@ class _ArrasBuyerStepperScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$_deadlineDays dias',
+                      'arras_interview.days_label'.tr(namedArgs: {'n': '$_deadlineDays'}),
                       style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -287,7 +287,7 @@ class _ArrasBuyerStepperScreenState
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '~${(_deadlineDays / 30).toStringAsFixed(1)} meses',
+                        'arras_interview.months_approx'.tr(namedArgs: {'n': (_deadlineDays / 30).toStringAsFixed(1)}),
                         style: TextStyle(
                             color: kGreen,
                             fontWeight: FontWeight.bold,
@@ -297,7 +297,7 @@ class _ArrasBuyerStepperScreenState
                   ],
                 ),
                 Text(
-                  'Plazo maximo para firmar en notaria',
+                  'arras_interview.deadline_title'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 Slider(
@@ -312,10 +312,10 @@ class _ArrasBuyerStepperScreenState
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('15 dias',
+                    Text('arras_interview.days_min'.tr(),
                         style: TextStyle(
                             fontSize: 11, color: colorScheme.onSurfaceVariant)),
-                    Text('180 dias',
+                    Text('arras_interview.days_max'.tr(),
                         style: TextStyle(
                             fontSize: 11, color: colorScheme.onSurfaceVariant)),
                   ],
@@ -329,7 +329,7 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Notaria preferida (opcional)',
+                  'arras_interview.notary_pref_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -339,7 +339,7 @@ class _ArrasBuyerStepperScreenState
                 TextField(
                   controller: _notaryPrefCtrl,
                   decoration: InputDecoration(
-                    hintText: 'Ej: Notaria de Madrid — Lopez y Asociados',
+                    hintText: 'arras_interview.notary_pref_hint'.tr(),
                     prefixIcon:
                         Icon(Icons.gavel_outlined, color: colorScheme.primary),
                     border: OutlineInputBorder(
@@ -357,7 +357,7 @@ class _ArrasBuyerStepperScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Fecha maxima de firma (opcional)',
+                  'arras_interview.max_date_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -382,7 +382,7 @@ class _ArrasBuyerStepperScreenState
                       color: colorScheme.primary),
                   label: Text(
                     _maxSigningDate == null
-                        ? 'Seleccionar fecha'
+                        ? 'arras_interview.select_date'.tr()
                         : '${_maxSigningDate!.day}/${_maxSigningDate!.month}/${_maxSigningDate!.year}',
                     style: TextStyle(
                         color: _maxSigningDate == null
@@ -406,7 +406,7 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Datos identificativos del inmueble',
+                  'arras_interview.property_ids_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -414,36 +414,36 @@ class _ArrasBuyerStepperScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Necesarios para la validez legal del contrato',
+                  'arras_interview.property_ids_subtitle'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 16),
                 _LabeledField(
-                  label: 'Tu domicilio (comprador)',
+                  label: 'arras_interview.buyer_address_label'.tr(),
                   controller: _buyerAddressCtrl,
-                  hint: 'Calle, numero, piso, localidad, CP',
+                  hint: 'arras_interview.address_hint'.tr(),
                   icon: Icons.home_outlined,
                 ),
                 const SizedBox(height: 12),
                 _LabeledField(
-                  label: 'Direccion completa de la vivienda',
+                  label: 'arras_interview.property_address_label'.tr(),
                   controller: _propertyAddressCtrl,
-                  hint: 'Calle, numero, piso, localidad, CP',
+                  hint: 'arras_interview.address_hint'.tr(),
                   icon: Icons.location_on_outlined,
                 ),
                 const SizedBox(height: 12),
                 _LabeledField(
-                  label: 'Referencia catastral',
+                  label: 'arras_interview.cadastral_label'.tr(),
                   controller: _cadastralRefCtrl,
-                  hint: 'Ej: 9872023 VH5797S 0001 WX',
+                  hint: 'arras_interview.cadastral_hint'.tr(),
                   icon: Icons.grid_view_outlined,
                   caps: TextCapitalization.characters,
                 ),
                 const SizedBox(height: 12),
                 _LabeledField(
-                  label: 'Datos registrales',
+                  label: 'arras_interview.registry_label'.tr(),
                   controller: _registryDataCtrl,
-                  hint: 'Registro, tomo, folio, finca, inscripcion',
+                  hint: 'arras_interview.registry_hint'.tr(),
                   icon: Icons.article_outlined,
                 ),
               ],
@@ -505,7 +505,7 @@ class _ArrasBuyerStepperScreenState
                 if (_extensionAllowed) ...[
                   const SizedBox(height: 12),
                   Text(
-                    'Causas admitidas:',
+                    'arras_interview.extension_reasons'.tr(),
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -618,7 +618,7 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Metodo de financiacion',
+                  'arras_interview.payment_method_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -626,7 +626,7 @@ class _ArrasBuyerStepperScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Selecciona como tienes previsto pagar',
+                  'arras_interview.payment_method_desc'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
@@ -646,7 +646,7 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Clausulas adicionales (opcional)',
+                  'arras_interview.additional_clauses_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -654,7 +654,7 @@ class _ArrasBuyerStepperScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Cualquier condicion especial que quieras incluir en el contrato',
+                  'arras_interview.additional_clauses_desc'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
@@ -662,7 +662,7 @@ class _ArrasBuyerStepperScreenState
                   controller: _additionalClausesCtrl,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: 'Ej: La vivienda debe entregarse vacia...',
+                    hintText: 'arras_interview.additional_clauses_hint'.tr(),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: colorScheme.outlineVariant),

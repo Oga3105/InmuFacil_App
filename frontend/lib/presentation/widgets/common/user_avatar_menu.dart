@@ -260,10 +260,10 @@ class UserAvatarMenu extends ConsumerWidget {
     items.add(
       PopupMenuItem<_MenuValue>(
         value: _LogoutValue(),
-        child: const Row(
+        child: Row(
           children: [
-            Icon(Icons.logout, color: Colors.red, size: 20),
-            SizedBox(width: 8),
+            const Icon(Icons.logout, color: Colors.red, size: 20),
+            const SizedBox(width: 8),
             Text('common.logout'.tr(),
                 style: const TextStyle(color: Colors.red, fontSize: 14)),
           ],

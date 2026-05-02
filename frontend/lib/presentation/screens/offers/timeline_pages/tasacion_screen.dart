@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -130,7 +131,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         _sellerRejectionNotes = '';
         _showRejectForm = false;
       });
-      _snack('Propuesta enviada. El vendedor debe confirmar la fecha.');
+      _snack('transaction.tasacion_snack_proposed'.tr());
     } on DioException catch (e) {
       _setError(e);
     } finally {
@@ -148,7 +149,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       );
       if (!mounted) return;
       setState(() => _apptStatus = 'accepted');
-      _snack('Cita aceptada. El tasador visitara la vivienda en la fecha acordada.');
+      _snack('transaction.tasacion_snack_accepted'.tr());
     } on DioException catch (e) {
       _setError(e);
     } finally {
@@ -181,7 +182,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         _rejectTime = null;
         _rejectNotesCtrl.clear();
       });
-      _snack('Fecha alternativa enviada al comprador.');
+      _snack('transaction.tasacion_snack_rejected'.tr());
     } on DioException catch (e) {
       _setError(e);
     } finally {
@@ -207,7 +208,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         _sellerTime = null;
         _sellerRejectionNotes = '';
       });
-      _snack('Fecha aceptada. Cita confirmada con el tasador.');
+      _snack('transaction.tasacion_snack_counter_accepted'.tr());
     } on DioException catch (e) {
       _setError(e);
     } finally {
@@ -293,7 +294,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   void _setError(DioException e) {
     if (!mounted) return;
     final detail = (e.response?.data as Map?)?['detail'] as String?;
-    setState(() => _errorMessage = detail ?? 'Error de red. Intentalo de nuevo.');
+    setState(() => _errorMessage = detail ?? 'transaction.network_error_fallback'.tr());
   }
 
   void _snack(String msg) {
@@ -321,21 +322,19 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 _InfoCard(
                   icon: Icons.assessment_outlined,
                   color: _kBlue,
-                  title: 'Para que sirve la tasacion?',
-                  body: 'El banco necesita una tasacion oficial para conceder la hipoteca. '
-                      'El tasador visitara la propiedad y emitira un informe de valor de mercado. '
-                      'El coste corre a cargo del comprador (aprox. 300-500 EUR).',
+                  title: 'transaction.tasacion_info_title'.tr(),
+                  body: 'transaction.tasacion_info_body'.tr(),
                 ),
                 const SizedBox(height: 20),
                 _buildRoleView(context, isSeller),
                 const SizedBox(height: 20),
                 _ChecklistCard(
-                  title: isSeller ? 'Que necesitas preparar para la visita' : 'Que necesita el tasador',
-                  items: const [
-                    'Acceso libre a todas las estancias',
-                    'Documentacion de la propiedad disponible',
-                    'Nota simple actualizada',
-                    'Plano de la vivienda si dispones de el',
+                  title: isSeller ? 'transaction.tasacion_checklist_seller'.tr() : 'transaction.tasacion_checklist_buyer'.tr(),
+                  items: [
+                    'transaction.tasacion_checklist_1'.tr(),
+                    'transaction.tasacion_checklist_2'.tr(),
+                    'transaction.tasacion_checklist_3'.tr(),
+                    'transaction.tasacion_checklist_4'.tr(),
                   ],
                 ),
                 if (_errorMessage != null) ...[
@@ -369,20 +368,20 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   // pending — comprador
   Widget _buildBuyerScheduleForm(BuildContext context) {
     return _TaskCard(
-      title: 'Agendar visita del tasador',
-      subtitle: 'Elige fecha y hora para que el tasador acceda a la vivienda',
+      title: 'transaction.tasacion_schedule_title'.tr(),
+      subtitle: 'transaction.tasacion_schedule_subtitle'.tr(),
       child: Column(
         children: [
           _DateTimeRow(
-            label: 'Fecha',
-            value: _buyerDate != null ? _formatDate(_buyerDate!) : 'Seleccionar',
+            label: 'transaction.tasacion_date_label'.tr(),
+            value: _buyerDate != null ? _formatDate(_buyerDate!) : 'transaction.tasacion_select'.tr(),
             icon: Icons.calendar_today_outlined,
             onTap: _pickBuyerDate,
           ),
           const SizedBox(height: 12),
           _DateTimeRow(
-            label: 'Hora',
-            value: _buyerTime != null ? _formatTime(_buyerTime!, context) : 'Seleccionar',
+            label: 'transaction.tasacion_time_label'.tr(),
+            value: _buyerTime != null ? _formatTime(_buyerTime!, context) : 'transaction.tasacion_select'.tr(),
             icon: Icons.access_time_outlined,
             onTap: _pickBuyerTime,
           ),
@@ -391,7 +390,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             controller: _notesCtrl,
             maxLines: 3,
             decoration: InputDecoration(
-              labelText: 'Notas para el acceso (opcional)',
+              labelText: 'transaction.tasacion_notes_label'.tr(),
               labelStyle: TextStyle(color: Colors.grey.shade600),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               enabledBorder: OutlineInputBorder(
@@ -412,7 +411,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Enviar propuesta al vendedor'),
+              label: Text('transaction.tasacion_send_proposal'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -430,9 +429,8 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   Widget _buildSellerWaiting() => _InfoCard(
         icon: Icons.hourglass_empty_outlined,
         color: _kOrange,
-        title: 'Esperando propuesta del comprador',
-        body: 'El comprador esta eligiendo fecha y hora para la visita del tasador. '
-            'Recibiras una notificacion cuando proponga una cita.',
+        title: 'transaction.tasacion_waiting_title'.tr(),
+        body: 'transaction.tasacion_waiting_body'.tr(),
       );
 
   // proposed — comprador (esperando respuesta del vendedor)
@@ -449,19 +447,19 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Row(children: [
               const Icon(Icons.schedule_outlined, color: _kOrange, size: 20),
               const SizedBox(width: 8),
-              const Text('Propuesta enviada — pendiente de confirmacion',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: _kOrange, fontSize: 14)),
+              Text('transaction.tasacion_proposed_badge'.tr(),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: _kOrange, fontSize: 14)),
             ]),
             const SizedBox(height: 12),
             if (_buyerDate != null && _buyerTime != null)
               _AppointmentBadge(
                 date: _buyerDate!,
                 time: _buyerTime!,
-                label: 'Tu propuesta',
+                label: 'transaction.tasacion_your_proposal'.tr(),
                 color: _kOrange,
               ),
             const SizedBox(height: 10),
-            Text('El vendedor debe aceptar o proponer otra fecha. Recibiras una notificacion.',
+            Text('transaction.tasacion_proposed_hint'.tr(),
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
           ],
         ),
@@ -483,12 +481,12 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           const Row(children: [
             Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
             SizedBox(width: 8),
-            Text('El comprador propone esta cita',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
+            Text('transaction.tasacion_buyer_proposes'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 14),
           if (_buyerDate != null && _buyerTime != null)
-            _AppointmentBadge(date: _buyerDate!, time: _buyerTime!, label: 'Fecha propuesta', color: _kBlue),
+            _AppointmentBadge(date: _buyerDate!, time: _buyerTime!, label: 'transaction.tasacion_proposed_date'.tr(), color: _kBlue),
           if (_notesCtrl.text.isNotEmpty) ...[
             const SizedBox(height: 10),
             Container(
@@ -520,7 +518,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar esta fecha'),
+              label: Text('transaction.tasacion_accept_date'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -535,7 +533,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             child: OutlinedButton.icon(
               onPressed: _isLoading ? null : () => setState(() => _showRejectForm = !_showRejectForm),
               icon: Icon(_showRejectForm ? Icons.expand_less : Icons.event_busy_outlined, size: 18),
-              label: Text(_showRejectForm ? 'Cancelar' : 'No puedo en esa fecha — proponer otra'),
+              label: Text(_showRejectForm ? 'transaction.tasacion_cancel_label'.tr() : 'transaction.tasacion_reject_propose'.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kOrange,
                 side: BorderSide(color: _kOrange.withOpacity(0.6)),
@@ -565,19 +563,19 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Propon una fecha alternativa',
+          Text('transaction.tasacion_alt_title'.tr(),
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _kOrange)),
           const SizedBox(height: 12),
           _DateTimeRow(
-            label: 'Fecha alternativa',
-            value: _rejectDate != null ? _formatDate(_rejectDate!) : 'Seleccionar',
+            label: 'transaction.tasacion_alt_date'.tr(),
+            value: _rejectDate != null ? _formatDate(_rejectDate!) : 'transaction.tasacion_select'.tr(),
             icon: Icons.calendar_today_outlined,
             onTap: _pickRejectDate,
           ),
           const SizedBox(height: 10),
           _DateTimeRow(
-            label: 'Hora alternativa',
-            value: _rejectTime != null ? _formatTime(_rejectTime!, context) : 'Seleccionar',
+            label: 'transaction.tasacion_alt_time'.tr(),
+            value: _rejectTime != null ? _formatTime(_rejectTime!, context) : 'transaction.tasacion_select'.tr(),
             icon: Icons.access_time_outlined,
             onTap: _pickRejectTime,
           ),
@@ -586,7 +584,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             controller: _rejectNotesCtrl,
             maxLines: 2,
             decoration: InputDecoration(
-              labelText: 'Motivo o notas (opcional)',
+              labelText: 'transaction.tasacion_alt_notes'.tr(),
               labelStyle: TextStyle(color: Colors.grey.shade600),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               enabledBorder: OutlineInputBorder(
@@ -607,7 +605,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Enviar contraoferta'),
+              label: Text('transaction.tasacion_send_counter'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kOrange,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -637,15 +635,15 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           const Row(children: [
             Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
             SizedBox(width: 8),
-            Text('El vendedor propone otra fecha',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
+            Text('transaction.tasacion_seller_counter_title'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 6),
-          Text('La fecha que propusiste no le viene bien. Ha sugerido una alternativa.',
+          Text('transaction.tasacion_seller_counter_body'.tr(),
               style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
           const SizedBox(height: 14),
           if (_sellerDate != null && _sellerTime != null)
-            _AppointmentBadge(date: _sellerDate!, time: _sellerTime!, label: 'Propuesta del vendedor', color: _kOrange),
+            _AppointmentBadge(date: _sellerDate!, time: _sellerTime!, label: 'transaction.tasacion_seller_proposal'.tr(), color: _kOrange),
           if (_sellerRejectionNotes.isNotEmpty) ...[
             const SizedBox(height: 10),
             Container(
@@ -674,7 +672,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar esta fecha'),
+              label: Text('transaction.tasacion_accept_date'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -695,7 +693,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                         _notesCtrl.clear();
                       }),
               icon: const Icon(Icons.edit_calendar_outlined, size: 18),
-              label: const Text('Proponer otra fecha'),
+              label: Text('transaction.tasacion_propose_other'.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kBlue,
                 side: const BorderSide(color: _kBlue),
@@ -713,9 +711,8 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
   Widget _buildSellerWaitingNewProposal() => _InfoCard(
         icon: Icons.hourglass_empty_outlined,
         color: _kOrange,
-        title: 'Esperando nueva propuesta',
-        body: 'El comprador ha recibido tu contraoferta. Recibiras una notificacion '
-            'cuando acepte la fecha o proponga una nueva.',
+        title: 'transaction.tasacion_waiting_new_title'.tr(),
+        body: 'transaction.tasacion_waiting_new_body'.tr(),
       );
 
   // accepted — ambas partes acordaron la fecha
@@ -731,19 +728,19 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         children: [
           const Icon(Icons.check_circle, color: _kGreen, size: 40),
           const SizedBox(height: 10),
-          const Text('Cita confirmada',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
+          Text('transaction.tasacion_confirmed'.tr(),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
           const SizedBox(height: 8),
           if (_buyerDate != null && _buyerTime != null)
             Text(
-              '${_formatDate(_buyerDate!)} a las ${_formatTime(_buyerTime!, context)}',
+              'transaction.tasacion_confirmed_at'.tr(namedArgs: {'date': _formatDate(_buyerDate!), 'time': _formatTime(_buyerTime!, context)}),
               style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
             ),
           const SizedBox(height: 6),
           Text(
             isSeller
-                ? 'Una vez el tasador haya visitado la vivienda, confirma la visita abajo.'
-                : 'El vendedor confirmara que la visita ha tenido lugar. Contacta con tu banco.',
+                ? 'transaction.tasacion_seller_confirm_hint'.tr()
+                : 'transaction.tasacion_buyer_confirm_hint'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
@@ -771,11 +768,11 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               const Row(children: [
                 Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
                 SizedBox(width: 8),
-                Text('Confirmar visita del tasador',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
+                Text('transaction.tasacion_confirm_visit_title'.tr(),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
               ]),
               const SizedBox(height: 8),
-              Text('Pulsa el boton una vez el tasador haya visitado la vivienda y realizado la inspeccion.',
+              Text('transaction.tasacion_confirm_visit_body'.tr(),
                   style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4)),
               const SizedBox(height: 16),
               SizedBox(
@@ -785,7 +782,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                   icon: _isLoading
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.check_circle_outline),
-                  label: const Text('El tasador ha visitado la vivienda'),
+                  label: Text('transaction.tasacion_visit_done'.tr()),
                   style: FilledButton.styleFrom(
                     backgroundColor: _kGreen,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -813,13 +810,13 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         children: [
           const Icon(Icons.verified_outlined, color: _kGreen, size: 40),
           const SizedBox(height: 10),
-          const Text('Tasacion completada',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
+          Text('transaction.tasacion_completed'.tr(),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: _kGreen)),
           const SizedBox(height: 8),
           Text(
             isSeller
-                ? 'Has confirmado la visita del tasador. El comprador puede avanzar.'
-                : 'La visita ha sido confirmada por el vendedor. Contacta con tu banco para el informe.',
+                ? 'transaction.tasacion_completed_seller'.tr()
+                : 'transaction.tasacion_completed_buyer'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
           ),
@@ -830,7 +827,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               child: FilledButton.icon(
                 onPressed: () => context.push('/offers/${widget.offer.id}/fein', extra: widget.offer),
                 icon: const Icon(Icons.account_balance_outlined),
-                label: const Text('Ir a Formalizacion Bancaria (FEIN)'),
+                label: Text('transaction.tasacion_goto_fein'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -892,7 +889,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               children: [
                 Icon(Icons.home_rounded, size: 18, color: Colors.white),
                 SizedBox(width: 6),
-                Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),

@@ -31,7 +31,7 @@ class PropertyStep3PhotosExtras extends ConsumerWidget {
           // ── CEE card ──────────────────────────────────────────────────────
           _SectionCard(
             icon: Icons.energy_savings_leaf_outlined,
-            title: 'Certificado de Eficiencia Energetica',
+            title: 'property_wizard.energy_cert_title'.tr(),
             child: _CeeSelectorWidget(s: s, notifier: notifier),
           ),
           const SizedBox(height: 16),

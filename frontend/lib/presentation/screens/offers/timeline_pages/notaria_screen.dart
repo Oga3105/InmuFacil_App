@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -146,15 +147,15 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
         _savedTime  = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Cita en notaria propuesta. Se notificara al vendedor.'),
+        SnackBar(
+          content: Text('transaction.notaria_snack_proposed'.tr()),
           backgroundColor: _kGreen,
         ),
       );
     } on DioException catch (e) {
       if (!mounted) return;
       final detail = (e.response?.data as Map?)?['detail'] as String?;
-      setState(() => _errorMessage = detail ?? 'Error al guardar la propuesta.');
+      setState(() => _errorMessage = detail ?? 'transaction.notaria_error_save'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -229,8 +230,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                   Icon(Icons.home_rounded, size: 18, color: Colors.white),
                   SizedBox(width: 6),
                   Text(
-                    'Inicio',
-                    style: TextStyle(
+                    'common.home'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -319,14 +320,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Firma ante notario',
-                    style: TextStyle(
+                Text('transaction.notaria_info_title'.tr(),
+                    style: const TextStyle(
                         color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
-                  'El comprador propone la fecha y el lugar de la notaria. '
-                  'El vendedor confirma o propone una alternativa. '
-                  'Ambas partes deben acudir con la documentacion completa.',
+                  'transaction.notaria_info_body'.tr(),
                   style: TextStyle(
                       color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
                 ),
@@ -355,8 +354,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Proponer cita notarial',
-              style: TextStyle(
+          Text('transaction.notaria_form_title'.tr(),
+              style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF135BEC))),
@@ -365,8 +364,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           TextField(
             controller: _cityCtrl,
             decoration: InputDecoration(
-              labelText: 'Ciudad / Notaria',
-              hintText: 'Ej: Notaria Hernandez, Sevilla',
+              labelText: 'transaction.notaria_city_label'.tr(),
+              hintText: 'transaction.notaria_city_hint'.tr(),
               prefixIcon: const Icon(Icons.location_on_outlined, color: _kBlue),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               enabledBorder: OutlineInputBorder(
@@ -381,19 +380,19 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           ),
           const SizedBox(height: 12),
           _DatePickerRow(
-            label: 'Fecha',
+            label: 'transaction.notaria_date_label'.tr(),
             value: _selectedDate != null
                 ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                : 'Seleccionar fecha',
+                : 'transaction.notaria_select_date'.tr(),
             icon: Icons.calendar_today_outlined,
             onTap: _pickDate,
           ),
           const SizedBox(height: 12),
           _DatePickerRow(
-            label: 'Hora',
+            label: 'transaction.notaria_time_label'.tr(),
             value: _selectedTime != null
                 ? _selectedTime!.format(context)
-                : 'Seleccionar hora',
+                : 'transaction.notaria_select_time'.tr(),
             icon: Icons.access_time_outlined,
             onTap: _pickTime,
           ),
@@ -410,7 +409,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               icon: _isLoading
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.send_outlined),
-              label: const Text('Proponer al vendedor'),
+              label: Text('transaction.notaria_send_proposal'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 disabledBackgroundColor: Colors.grey.shade300,
@@ -444,7 +443,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            isCompleted ? 'Firma confirmada por ambas partes' : 'Cita programada',
+            isCompleted ? 'transaction.notaria_confirmed_both'.tr() : 'transaction.notaria_scheduled'.tr(),
             style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -466,12 +465,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 Icon(Icons.check_circle, size: 16,
                     color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
                 const SizedBox(width: 4),
-                Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                 const SizedBox(width: 16),
                 Icon(Icons.check_circle, size: 16,
                     color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
                 const SizedBox(width: 4),
-                Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
           ],
@@ -496,14 +495,14 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Esperando propuesta del comprador',
+                Text('transaction.notaria_waiting_title'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange.shade800,
                         fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
-                  'El comprador esta eligiendo la notaria y la fecha.',
+                  'transaction.notaria_waiting_body'.tr(),
                   style: TextStyle(color: Colors.orange.shade700, fontSize: 13),
                 ),
               ],
@@ -529,28 +528,28 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           const Row(children: [
             Icon(Icons.event_outlined, color: _kBlue, size: 20),
             SizedBox(width: 8),
-            Text('Cita notarial propuesta por el comprador',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
+            Text('transaction.notaria_seller_view_title'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
           ]),
           const SizedBox(height: 12),
           if (_savedCity != null)
-            _DetailRow(icon: Icons.location_on_outlined, label: 'Notaria', value: _savedCity!),
+            _DetailRow(icon: Icons.location_on_outlined, label: 'transaction.notaria_detail_notary'.tr(), value: _savedCity!),
           if (_savedDate != null)
-            _DetailRow(icon: Icons.calendar_today_outlined, label: 'Fecha', value: _savedDate!),
+            _DetailRow(icon: Icons.calendar_today_outlined, label: 'transaction.notaria_date_label'.tr(), value: _savedDate!),
           if (_savedTime != null)
-            _DetailRow(icon: Icons.access_time_outlined, label: 'Hora', value: _savedTime!),
+            _DetailRow(icon: Icons.access_time_outlined, label: 'transaction.notaria_time_label'.tr(), value: _savedTime!),
           const SizedBox(height: 8),
           Row(
             children: [
               Icon(Icons.check_circle, size: 16,
                   color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
               const SizedBox(width: 4),
-              Text('Comprador', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
               const SizedBox(width: 16),
               Icon(Icons.check_circle, size: 16,
                   color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
               const SizedBox(width: 4),
-              Text('Vendedor', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
             ],
           ),
         ],
@@ -559,7 +558,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildWaitingBanner(bool isBuyer) {
-    final otherParty = isBuyer ? 'el vendedor' : 'el comprador';
+    final otherParty = isBuyer ? 'transaction.notaria_other_seller'.tr() : 'transaction.notaria_other_buyer'.tr();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -576,9 +575,9 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Tu confirmacion registrada',
-                  style: TextStyle(
+                Text(
+                  'transaction.notaria_your_confirmation_title'.tr(),
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF14532D),
@@ -586,9 +585,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Has confirmado la firma y la entrega de llaves. '
-                  'Estamos esperando a que $otherParty confirme tambien '
-                  'para cerrar la transaccion.',
+                  'transaction.notaria_your_confirmation_body'.tr(namedArgs: {'party': otherParty}),
                   style: TextStyle(
                     fontSize: 13,
                     color: _kGreen.withOpacity(0.85),
@@ -618,9 +615,9 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             children: [
               const Icon(Icons.verified_outlined, color: _kGreen, size: 20),
               const SizedBox(width: 8),
-              const Text(
-                'Ya realizamos la firma',
-                style: TextStyle(
+              Text(
+                'transaction.notaria_signing_title'.tr(),
+                style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF14532D)),
@@ -629,8 +626,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Si la firma ante notario ya tuvo lugar, '
-            'confirma la firma y la entrega de llaves para cerrar este hito.',
+            'transaction.notaria_signing_body'.tr(),
             style: TextStyle(
                 fontSize: 13, color: _kGreen.withOpacity(0.85), height: 1.5),
           ),
@@ -643,7 +639,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 extra: widget.offer,
               ),
               icon: const Icon(Icons.key_outlined),
-              label: const Text('Confirmar firma y entrega de llaves'),
+              label: Text('transaction.notaria_signing_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kGreen,
                 shape: RoundedRectangleBorder(
@@ -658,34 +654,34 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildDocumentChecklist() {
-    const buyerDocs = [
-      'DNI / NIE en vigor (original)',
-      'Preaprobacion hipotecaria del banco',
-      'Certificado de solvencia (si aplica)',
-      'Poder notarial (si actua por tercero)',
+    final buyerDocs = [
+      'transaction.notaria_doc_buyer_1'.tr(),
+      'transaction.notaria_doc_buyer_2'.tr(),
+      'transaction.notaria_doc_buyer_3'.tr(),
+      'transaction.notaria_doc_buyer_4'.tr(),
     ];
-    const sellerDocs = [
-      'Escritura de propiedad original',
-      'DNI / NIE en vigor (original)',
-      'Ultimo recibo IBI pagado',
-      'Certificado de estar al corriente en la comunidad',
-      'Certificado energetico (CEE)',
-      'Certificado de deuda cero de hipoteca (si aplica)',
-      'Nota simple actualizada (no mas de 3 meses)',
+    final sellerDocs = [
+      'transaction.notaria_doc_seller_1'.tr(),
+      'transaction.notaria_doc_seller_2'.tr(),
+      'transaction.notaria_doc_seller_3'.tr(),
+      'transaction.notaria_doc_seller_4'.tr(),
+      'transaction.notaria_doc_seller_5'.tr(),
+      'transaction.notaria_doc_seller_6'.tr(),
+      'transaction.notaria_doc_seller_7'.tr(),
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Documentos para la firma',
-          style: TextStyle(
+        Text(
+          'transaction.notaria_docs_title'.tr(),
+          style: const TextStyle(
               fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC)),
         ),
         const SizedBox(height: 16),
-        _DocsSection(title: 'Comprador', icon: Icons.person_outline, docs: buyerDocs),
+        _DocsSection(title: 'transaction.notaria_buyer_label'.tr(), icon: Icons.person_outline, docs: buyerDocs),
         const SizedBox(height: 12),
-        _DocsSection(title: 'Vendedor', icon: Icons.home_outlined, docs: sellerDocs),
+        _DocsSection(title: 'transaction.notaria_seller_label'.tr(), icon: Icons.home_outlined, docs: sellerDocs),
       ],
     );
   }

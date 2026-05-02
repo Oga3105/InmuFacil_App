@@ -118,12 +118,12 @@ class _PropertyComparisonScreenState
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -399,10 +399,10 @@ class _ComparisonTable extends StatelessWidget {
     );
   }
 
-  static String _noData(String? v) => v?.isNotEmpty == true ? v! : 'Sin datos';
+  static String _noData(String? v) => v?.isNotEmpty == true ? v! : 'property.comparison.no_data'.tr();
 
   static String _formatCurrency(int? value, {String suffix = ''}) {
-    if (value == null) return 'Sin datos';
+    if (value == null) return 'property.comparison.no_data'.tr();
     return '${CurrencyInputFormatter.format(value)} €$suffix';
   }
 
@@ -412,13 +412,13 @@ class _ComparisonTable extends StatelessWidget {
   }
 
   static String _boolLabel(bool? value) {
-    if (value == null) return 'Sin datos';
-    return value ? 'Si' : 'No';
+    if (value == null) return 'property.comparison.no_data'.tr();
+    return value ? 'common.yes'.tr() : 'common.no'.tr();
   }
 
   static String _conditionLabel(bool? needsRenovation) {
-    if (needsRenovation == null) return 'Sin datos';
-    return needsRenovation ? 'Reforma' : 'Listo';
+    if (needsRenovation == null) return 'property.comparison.no_data'.tr();
+    return needsRenovation ? 'property.comparison.needs_renovation'.tr() : 'property.comparison.ready'.tr();
   }
 
   // Returns true if A wins, false if B wins, null if tie or missing data.
@@ -462,10 +462,8 @@ class _RowData {
   final String? valueB;
   final bool? winnerIsA; // true = A wins, false = B wins, null = no winner
 
-  static const _noData = 'Sin datos';
-
-  String get displayA => valueA?.isNotEmpty == true ? valueA! : _noData;
-  String get displayB => valueB?.isNotEmpty == true ? valueB! : _noData;
+  String get displayA => valueA?.isNotEmpty == true ? valueA! : 'property.comparison.no_data'.tr();
+  String get displayB => valueB?.isNotEmpty == true ? valueB! : 'property.comparison.no_data'.tr();
 }
 
 class _ComparisonRow extends StatelessWidget {

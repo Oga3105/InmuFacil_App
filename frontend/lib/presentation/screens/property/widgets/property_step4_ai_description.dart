@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,7 +96,7 @@ class _PropertyStep4AiDescriptionState
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'Descripcion del inmueble',
+                        'property_wizard.desc_card_title'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -118,7 +119,7 @@ class _PropertyStep4AiDescriptionState
                             },
                       icon: const Icon(Icons.auto_awesome, size: 15),
                       label: Text(
-                        isGenerating ? 'Generando...' : 'Generar con IA',
+                        isGenerating ? 'property_wizard.generating'.tr() : 'property_wizard.generate_ai'.tr(),
                       ),
                       style: FilledButton.styleFrom(
                         backgroundColor: _blue,
@@ -154,8 +155,8 @@ class _PropertyStep4AiDescriptionState
                   const SizedBox(height: 6),
                   Text(
                     hasImages
-                        ? 'La IA esta analizando datos e imagenes...'
-                        : 'La IA esta generando la descripcion...',
+                        ? 'property_wizard.ai_analyzing_images'.tr()
+                        : 'property_wizard.ai_generating_desc'.tr(),
                     style: const TextStyle(
                       fontSize: 12,
                       color: _green,
@@ -178,8 +179,7 @@ class _PropertyStep4AiDescriptionState
                     height: 1.6,
                   ),
                   decoration: InputDecoration(
-                    hintText:
-                        'Escribe aqui un borrador o pulsa "Generar con IA" para obtener una descripcion comercial profesional. El texto generado es totalmente editable.',
+                    hintText: 'property_wizard.desc_placeholder'.tr(),
                     hintStyle: TextStyle(
                         color: colorScheme.onSurfaceVariant, fontSize: 13),
                     border: OutlineInputBorder(
@@ -209,7 +209,7 @@ class _PropertyStep4AiDescriptionState
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      '${s.descriptionText.length} / 10000 caracteres',
+                      'property_wizard.char_count'.tr(namedArgs: {'count': '${s.descriptionText.length}'}),
                       style: TextStyle(
                         fontSize: 11,
                         color: s.descriptionText.length < 20

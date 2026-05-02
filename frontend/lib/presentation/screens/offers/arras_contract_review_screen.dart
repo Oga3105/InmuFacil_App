@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../providers/auth_provider.dart';
@@ -111,7 +112,7 @@ class _ArrasContractReviewScreenState
         }
       });
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al reintentar';
+      final msg = e.response?.data?['detail'] ?? 'arras_interview.contract_retry_error'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -135,13 +136,13 @@ class _ArrasContractReviewScreenState
         final isDark = Theme.of(context).brightness == Brightness.dark;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Has aceptado el contrato.'),
+            content: Text('arras_interview.contract_accepted_snack'.tr()),
             backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
       }
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al aceptar';
+      final msg = e.response?.data?['detail'] ?? 'arras_interview.contract_accept_error'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -174,7 +175,7 @@ class _ArrasContractReviewScreenState
         context.pop();
       }
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al rechazar';
+      final msg = e.response?.data?['detail'] ?? 'arras_interview.contract_reject_error'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -215,7 +216,7 @@ class _ArrasContractReviewScreenState
           final fullyAccepted = contractStatus == 'fully_accepted';
 
           if (contractStatus == 'error') {
-            return _buildErrorView(contractText ?? 'Error al generar el contrato.');
+            return _buildErrorView(contractText ?? 'arras_interview.error_generating'.tr());
           }
 
           if (contractStatus == 'generating' || contractText == null) {
@@ -263,7 +264,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 24),
             Text(
-              'Error al generar el contrato',
+              'arras_interview.error_generating_title'.tr(),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -296,7 +297,7 @@ class _ArrasContractReviewScreenState
                       child: CircularProgressIndicator(
                           color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.refresh_outlined),
-              label: const Text('Reintentar generacion'),
+              label: Text('arras_interview.retry_generation'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
@@ -308,7 +309,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 12),
             Text(
-              'Si el problema persiste, espera unos minutos antes de reintentar.',
+              'arras_interview.retry_persistence_warn'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
             ),
@@ -336,7 +337,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 28),
             Text(
-              'Generando contrato con IA',
+              'arras_interview.generating_contract_title'.tr(),
               style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -344,9 +345,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 12),
             Text(
-              'Gemini esta redactando el Contrato de Arras Penitenciales '
-              'con las condiciones acordadas por ambas partes. '
-              'Este proceso puede tardar unos segundos.',
+              'arras_interview.generating_contract_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14,
@@ -367,7 +366,7 @@ class _ArrasContractReviewScreenState
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'La pagina se actualizara automaticamente cuando el contrato este listo.',
+                      'arras_interview.generating_contract_wait'.tr(),
                       style: TextStyle(
                           fontSize: 13, color: colorScheme.onPrimaryContainer),
                     ),
@@ -402,7 +401,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 24),
             Text(
-              'Contrato firmado',
+              'arras_interview.contract_signed_title'.tr(),
               style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -410,8 +409,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 12),
             Text(
-              'Ambas partes han aceptado el Contrato de Arras Penitenciales. '
-              'La transaccion avanza a la etapa de tasacion.',
+              'arras_interview.contract_signed_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14,
@@ -422,7 +420,7 @@ class _ArrasContractReviewScreenState
             FilledButton.icon(
               onPressed: () => context.pop(),
               icon: const Icon(Icons.arrow_back_outlined),
-              label: const Text('Volver al timeline'),
+              label: Text('arras_interview.back_to_timeline'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.primary,
                 shape: RoundedRectangleBorder(
@@ -470,12 +468,12 @@ class _ArrasContractReviewScreenState
         // ── Rejection notes if any ─────────────────────────────
         if (otherRejectionNotes != null && otherRejectionNotes.isNotEmpty)
           _RejectionNotesBanner(
-            label: isBuyer ? 'Notas del vendedor:' : 'Notas del comprador:',
+            label: isBuyer ? 'arras_interview.seller_notes'.tr() : 'arras_interview.buyer_notes'.tr(),
             notes: otherRejectionNotes,
           ),
         if (myRejectionNotes != null && myRejectionNotes.isNotEmpty)
           _RejectionNotesBanner(
-            label: 'Mis notas anteriores:',
+            label: 'arras_interview.my_notes'.tr(),
             notes: myRejectionNotes,
             isMine: true,
           ),
@@ -523,8 +521,8 @@ class _ArrasContractReviewScreenState
         else
           _WaitingBanner(
             label: otherAccepted
-                ? 'Ambos han aceptado.'
-                : 'Has aceptado. Esperando a la otra parte...',
+                ? 'arras_interview.both_accepted'.tr()
+                : 'arras_interview.accepted_waiting'.tr(),
           ),
       ],
     );
@@ -550,7 +548,7 @@ class _ArrasContractReviewScreenState
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Solicitar cambios en el contrato',
+              'arras_interview.request_changes_title'.tr(),
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -558,8 +556,7 @@ class _ArrasContractReviewScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Explica que cambios necesitas. Ambas partes deberan volver a confirmar '
-              'sus entrevistas y el contrato se regenerara.',
+              'arras_interview.request_changes_desc'.tr(),
               style: TextStyle(fontSize: 13, color: Theme.of(ctx).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
@@ -569,7 +566,7 @@ class _ArrasContractReviewScreenState
               autofocus: true,
               decoration: InputDecoration(
                 hintText:
-                    'Ej: Necesito incluir la clausula de entrega de llaves en el plazo...',
+                    'arras_interview.request_changes_hint'.tr(),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: Theme.of(ctx).colorScheme.outlineVariant),
@@ -591,7 +588,7 @@ class _ArrasContractReviewScreenState
                           borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Cancelar'),
+                    child: Text('arras_interview.cancel'.tr()),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -609,7 +606,7 @@ class _ArrasContractReviewScreenState
                           borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: const Text('Enviar rechazo'),
+                    child: Text('arras_interview.send_rejection'.tr()),
                   ),
                 ),
               ],
@@ -691,7 +688,7 @@ class _ArrasContractReviewScreenState
                           Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
                           const SizedBox(width: 6),
                           Text(
-                            'Inicio',
+                            'common.home'.tr(),
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.w600,
@@ -737,7 +734,7 @@ class _ContractStatusBanner extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         children: [
-          _Badge(label: 'Comprador', accepted: buyerAccepted),
+          _Badge(label: 'arras_interview.buyer'.tr(), accepted: buyerAccepted),
           const Spacer(),
           if (generationCount > 1)
             Container(
@@ -748,12 +745,12 @@ class _ContractStatusBanner extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                'Version $generationCount',
+                "${'arras_interview.version_prefix'.tr()} $generationCount",
                 style: const TextStyle(color: Colors.white60, fontSize: 11),
               ),
             ),
           const Spacer(),
-          _Badge(label: 'Vendedor', accepted: sellerAccepted),
+          _Badge(label: 'arras_interview.seller'.tr(), accepted: sellerAccepted),
         ],
       ),
     );
@@ -865,7 +862,7 @@ class _ContractActionBar extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: loading ? null : onReject,
               icon: Icon(Icons.edit_outlined, color: colorScheme.error),
-              label: Text('Solicitar cambios',
+              label: Text('arras_interview.request_changes_btn'.tr(),
                   style: TextStyle(color: colorScheme.error)),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
@@ -887,7 +884,7 @@ class _ContractActionBar extends StatelessWidget {
                       child: CircularProgressIndicator(
                           color: colorScheme.onPrimary, strokeWidth: 2))
                   : const Icon(Icons.check_circle_outline),
-              label: const Text('Aceptar contrato'),
+              label: Text('arras_interview.accept_contract_btn'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: kGreen,
                 disabledBackgroundColor: colorScheme.onSurface.withValues(alpha: 0.12),
@@ -980,7 +977,7 @@ class _EquityAnalysisBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Analizar mi posicion',
+                      'arras_interview.analyze_position'.tr(),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -989,7 +986,7 @@ class _EquityAnalysisBanner extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'IA analiza cada clausula desde tu perspectiva',
+                      'arras_interview.analyze_position_desc'.tr(),
                       style: TextStyle(
                           fontSize: 12, color: cs.onSurfaceVariant),
                     ),

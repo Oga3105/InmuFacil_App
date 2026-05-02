@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -130,7 +131,7 @@ class _MobilePreview extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        s.titleText.isNotEmpty ? s.titleText : 'Sin titulo',
+                        s.titleText.isNotEmpty ? s.titleText : 'property_wizard.no_title'.tr(),
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -195,7 +196,7 @@ class _PreviewBanner extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              'Vista previa',
+              'property_wizard.preview_badge'.tr(),
               style: TextStyle(
                 color: colorScheme.onPrimary,
                 fontWeight: FontWeight.bold,
@@ -206,7 +207,7 @@ class _PreviewBanner extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Asi veran los compradores tu anuncio. Revisa antes de publicar.',
+              'property_wizard.preview_hint'.tr(),
               style: TextStyle(fontSize: 12, color: colorScheme.onPrimaryContainer),
             ),
           ),
@@ -261,7 +262,7 @@ class _PreviewSummaryCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                'I.V.A incluido',
+                'property_wizard.vat_included'.tr(),
                 style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -272,7 +273,7 @@ class _PreviewSummaryCard extends StatelessWidget {
           const SizedBox(height: 12),
           // Title
           Text(
-            s.titleText.isNotEmpty ? s.titleText : 'Sin titulo',
+            s.titleText.isNotEmpty ? s.titleText : 'property_wizard.no_title'.tr(),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -359,8 +360,8 @@ class _PreviewMortgageCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'TU HIPOTECA IDEAL',
+              Text(
+                'property_wizard.mortgage_label'.tr(),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -370,7 +371,7 @@ class _PreviewMortgageCard extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Builder(builder: (context) => Text(
-                'Desde ${CurrencyInputFormatter.format(monthly)}\u20AC / mes',
+                'property_wizard.mortgage_from'.tr(namedArgs: {'amount': '${CurrencyInputFormatter.format(monthly)}\u20AC'}),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -407,9 +408,9 @@ class _StatsGrid extends StatelessWidget {
       crossAxisSpacing: 8,
       childAspectRatio: 1.5,
       children: [
-        _StatItem(icon: Icons.bed, label: '${s.bedrooms} Hab.'),
+        _StatItem(icon: Icons.bed, label: 'property_wizard.bedrooms_short'.tr(namedArgs: {'count': '${s.bedrooms}'})),
         _StatItem(
-            icon: Icons.bathtub_outlined, label: '${s.bathrooms} Ba\u00F1os'),
+            icon: Icons.bathtub_outlined, label: 'property_wizard.bathrooms_short'.tr(namedArgs: {'count': '${s.bathrooms}'})),
         _StatItem(icon: Icons.square_foot, label: _surfaceLabel),
         if (s.selectedType != null)
           _StatItem(
@@ -417,29 +418,29 @@ class _StatsGrid extends StatelessWidget {
             label: _typeLabel(s.selectedType!.backendValue),
           ),
         if (s.hasExterior)
-          const _StatItem(
-              icon: Icons.wb_sunny_outlined, label: 'Exterior'),
+          _StatItem(
+              icon: Icons.wb_sunny_outlined, label: 'amenity.exterior'.tr()),
         if (s.hasLift)
-          const _StatItem(
-              icon: Icons.elevator_outlined, label: 'Ascensor'),
+          _StatItem(
+              icon: Icons.elevator_outlined, label: 'amenity.lift'.tr()),
         if (s.hasPool)
-          const _StatItem(icon: Icons.pool_outlined, label: 'Piscina'),
+          _StatItem(icon: Icons.pool_outlined, label: 'amenity.pool'.tr()),
         if (s.hasGarage)
-          const _StatItem(icon: Icons.garage_outlined, label: 'Garaje'),
+          _StatItem(icon: Icons.garage_outlined, label: 'amenity.garage'.tr()),
         if (s.hasTerrace)
-          const _StatItem(icon: Icons.balcony_outlined, label: 'Terraza'),
+          _StatItem(icon: Icons.balcony_outlined, label: 'amenity.terrace'.tr()),
       ],
     );
   }
 
   static String _typeLabel(String v) {
-    const map = {
-      'piso': 'Piso',
-      'casa': 'Casa',
-      'chalet': 'Chalet',
-      'local': 'Local',
-      'garaje': 'Garaje',
-      'terreno': 'Terreno',
+    final map = {
+      'piso': 'property_wizard.type_piso'.tr(),
+      'casa': 'property_wizard.type_casa'.tr(),
+      'chalet': 'property_wizard.type_chalet'.tr(),
+      'local': 'property_wizard.type_local'.tr(),
+      'garaje': 'property_wizard.type_garaje'.tr(),
+      'terreno': 'property_wizard.type_terreno'.tr(),
     };
     return map[v] ?? v;
   }
@@ -484,7 +485,7 @@ class _PreviewDescriptionSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Builder(builder: (context) => Text(
-          'Sobre esta propiedad',
+          'property_wizard.about_property'.tr(),
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -497,7 +498,7 @@ class _PreviewDescriptionSection extends StatelessWidget {
           return Text(
             s.descriptionText.isNotEmpty
                 ? s.descriptionText
-                : 'Sin descripcion. Vuelve al paso anterior para generar una descripcion comercial.',
+                : 'property_wizard.no_description_preview'.tr(),
             style: TextStyle(
               fontSize: 16,
               height: 1.6,
@@ -516,12 +517,12 @@ class _PreviewDescriptionSection extends StatelessWidget {
               alignment: Alignment.centerLeft,
               foregroundColor: const Color(0xFF135BEC),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Leer m\u00E1s',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Icon(Icons.keyboard_arrow_down, size: 16),
+                Text('property_wizard.read_more'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                const Icon(Icons.keyboard_arrow_down, size: 16),
               ],
             ),
           ),
@@ -548,7 +549,7 @@ class _PreviewLocationSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Builder(builder: (context) => Text(
-              'Ubicaci\u00F3n aproximada',
+              'property_wizard.approx_location'.tr(),
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -571,7 +572,7 @@ class _PreviewLocationSection extends StatelessWidget {
                       size: 14, color: cs.primary),
                   const SizedBox(width: 4),
                   Text(
-                    'UBICACI\u00D3N PROTEGIDA',
+                    'property_wizard.protected_location_badge'.tr(),
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
@@ -638,7 +639,7 @@ class _PreviewLocationSection extends StatelessWidget {
                       ],
                     ),
                     child: Text(
-                      'Por seguridad y privacidad, no mostramos la ubicaci\u00F3n exacta hasta que la visita sea confirmada.',
+                      'property_wizard.location_privacy_note'.tr(),
                       style: TextStyle(
                         fontSize: 12,
                         fontStyle: FontStyle.italic,

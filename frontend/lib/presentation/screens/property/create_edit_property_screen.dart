@@ -97,7 +97,7 @@ class _CreateEditPropertyScreenState
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 6),
             action: SnackBarAction(
-              label: 'Cerrar',
+              label: 'common.close'.tr(),
               textColor: Colors.white,
               onPressed: () =>
                   ScaffoldMessenger.of(context).hideCurrentSnackBar(),
@@ -236,7 +236,7 @@ class _CreateEditPropertyScreenState
                     children: [
                       Icon(Icons.home_rounded, size: 16, color: cs.onPrimary),
                       const SizedBox(width: 5),
-                      Text('Inicio', style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                      Text('common.home'.tr(), style: TextStyle(color: cs.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                     ],
                   ),
                 );

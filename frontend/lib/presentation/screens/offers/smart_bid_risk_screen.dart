@@ -160,12 +160,12 @@ class SmartBidRiskScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),

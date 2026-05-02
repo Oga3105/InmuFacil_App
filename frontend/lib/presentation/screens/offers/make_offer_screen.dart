@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,7 +62,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
       if (next.status == OfferSubmitStatus.success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Oferta enviada correctamente'),
+            content: Text('offers.success_snackbar'.tr()),
             backgroundColor: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
           ),
         );
@@ -70,7 +71,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
       } else if (next.status == OfferSubmitStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.errorMessage ?? 'Error al enviar oferta'),
+            content: Text(next.errorMessage ?? 'offers.error_snackbar'.tr()),
             backgroundColor: colorScheme.error,
           ),
         );
@@ -141,7 +142,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: colorScheme.onPrimary),
                     const SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -166,7 +167,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
               child: Column(
                 children: [
                   Text(
-                    'Hacer una Oferta Formal',
+                    'offers.make_offer_title'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 22,
@@ -176,7 +177,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Envía una propuesta vinculante al vendedor',
+                    'offers.make_offer_subtitle'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -217,7 +218,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Forma de Pago',
+                              'offers.payment_method'.tr(),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -226,16 +227,16 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                             ),
                             const SizedBox(height: 8),
                             _PaymentOption(
-                              label: 'Al contado',
-                              sublabel: 'Fondos propios disponibles',
+                              label: 'offers.cash_label'.tr(),
+                              sublabel: 'offers.cash_subtitle'.tr(),
                               value: 'cash',
                               groupValue: _paymentTerm,
                               onChanged: (v) => setState(() => _paymentTerm = v),
                             ),
                             const SizedBox(height: 8),
                             _PaymentOption(
-                              label: 'Necesito Hipoteca',
-                              sublabel: 'Pendiente de aprobación bancaria',
+                              label: 'offers.mortgage_label'.tr(),
+                              sublabel: 'offers.mortgage_subtitle'.tr(),
                               value: 'mortgage',
                               groupValue: _paymentTerm,
                               onChanged: (v) => setState(() => _paymentTerm = v),
@@ -251,7 +252,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Fecha deseada de escritura',
+                              'offers.signing_date_label'.tr(),
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -289,7 +290,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                                               ? '${_closingDate!.day.toString().padLeft(2, '0')}/'
                                                 '${_closingDate!.month.toString().padLeft(2, '0')}/'
                                                 '${_closingDate!.year}'
-                                              : 'dd/mm/aaaa',
+                                              : 'offers.date_placeholder'.tr(),
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: _closingDate != null
@@ -305,7 +306,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'La fecha final será acordada de mutuo acuerdo ante notario.',
+                              'offers.signing_date_note'.tr(),
                               style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
                             ),
                           ],
@@ -317,7 +318,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
 
                   // ── Message to seller ─────────────────────────────────────
                   Text(
-                    'Mensaje al vendedor (opcional)',
+                    'offers.message_label'.tr(),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -330,7 +331,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                     maxLines: 4,
                     style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
                     decoration: InputDecoration(
-                      hintText: 'Añade algún detalle que quieras comentar al propietario...',
+                      hintText: 'offers.message_hint'.tr(),
                       hintStyle: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                       filled: true,
                       fillColor: colorScheme.surface,
@@ -368,7 +369,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                       controlAffinity: ListTileControlAffinity.leading,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       title: Text(
-                        'Entiendo que esta oferta es un compromiso serio de compra y estoy dispuesto a formalizarla mediante contrato de arras.',
+                        'offers.binding_commitment'.tr(),
                         style: TextStyle(fontSize: 13, color: colorScheme.onSurface),
                       ),
                     ),
@@ -389,7 +390,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'OFERTA TOTAL',
+                                'offers.total_label'.tr(),
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
@@ -437,9 +438,9 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                                 )
                               : const Icon(Icons.chevron_right_rounded, size: 20),
                           iconAlignment: IconAlignment.end,
-                          label: const Text(
-                            'Enviar Oferta Formal',
-                            style: TextStyle(
+                          label: Text(
+                            'offers.send_offer'.tr(),
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                             ),
@@ -465,7 +466,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                           Icon(Icons.shield_outlined, size: 14, color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
                           const SizedBox(width: 6),
                           Text(
-                            'OFERTA PROTEGIDA POR INMUFÁCIL SECURE TECH',
+                            'offers.protected_badge'.tr(),
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w700,
@@ -481,7 +482,7 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
 
                   // ── Legal disclaimer ──────────────────────────────────────
                   Text(
-                    'Al enviar esta oferta, la plataforma notificará instantáneamente al vendedor. Sus datos personales están protegidos por el RGPD y sólo se compartirán tras la aceptación de la oferta para los trámites legales correspondientes.',
+                    'offers.disclaimer_text'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
                   ),
@@ -559,7 +560,7 @@ class _PropertyCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: 'Precio de salida:  ',
+                        text: 'offers.asking_price_label'.tr(),
                         style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                       ),
                       TextSpan(
@@ -588,7 +589,7 @@ class _PropertyCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'DISPONIBLE',
+                  'offers.available_status'.tr(),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -645,7 +646,7 @@ class _OfferAmountCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'TU PROPUESTA ECONÓMICA',
+            'offers.economic_proposal'.tr(),
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
@@ -710,7 +711,7 @@ class _OfferAmountCard extends StatelessWidget {
                       size: 15, color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFF59E0B)),
                   const SizedBox(width: 6),
                   Text(
-                    'Tu oferta es un ${diffPct.abs().toStringAsFixed(0)}% inferior al precio de salida',
+                    'offers.low_offer_warning'.tr(args: [diffPct.abs().toStringAsFixed(0)]),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF92400E),
@@ -833,10 +834,10 @@ class _Footer extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: 24,
           children: [
-            _FooterLink('Aviso Legal'),
-            _FooterLink('Privacidad'),
-            _FooterLink('Seguridad'),
-            _FooterLink('Ayuda'),
+            _FooterLink('offers.legal_notice'.tr()),
+            _FooterLink('offers.privacy'.tr()),
+            _FooterLink('offers.security_link'.tr()),
+            _FooterLink('offers.help_link'.tr()),
           ],
         ),
       ],

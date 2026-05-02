@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -97,7 +99,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       final detail = (e.response?.data as Map?)?['detail'] as String?;
       setState(() {
         _errorMessage = detail ??
-            'Error al confirmar. Verifica que la tasacion este completada.';
+            'transaction.fein_error_confirm'.tr();
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -170,7 +172,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   Icon(Icons.home_rounded, size: 18, color: Colors.white),
                   SizedBox(width: 6),
                   Text(
-                    'Inicio',
+                    'common.home'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -239,16 +241,14 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Paso previo a la Notaria',
+                Text('transaction.fein_title'.tr(),
                     style: TextStyle(
                         color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
                   _isBuyer
-                      ? 'Tu banco ha recibido el informe de tasacion y debe emitir la FEIN '
-                        'al menos 10 dias antes de la firma. Confirma cuando la hayas recibido.'
-                      : 'El banco del comprador esta procesando la FEIN. '
-                        'Recibiras una notificacion cuando el comprador confirme.',
+                      ? 'transaction.fein_buyer_banner'.tr()
+                      : 'transaction.fein_seller_banner'.tr(),
                   style: TextStyle(
                       color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
                 ),
@@ -261,10 +261,10 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildWhatIsFein() {
-    const items = [
-      ('FEIN', 'Ficha Europea de Informacion Normalizada. Documento oficial del banco con las condiciones definitivas del prestamo.'),
-      ('FIPER', 'Ficha de Informacion Personalizada. Version espanola equivalente a la FEIN para prestamos variables.'),
-      ('10 dias', 'Plazo obligatorio entre la recepcion de la FEIN y la firma en notaria. Exigido por ley (LCCI 2019).'),
+    final items = [
+      ('transaction.fein_faq1_title'.tr(), 'transaction.fein_faq1_body'.tr()),
+      ('transaction.fein_faq2_title'.tr(), 'transaction.fein_faq2_body'.tr()),
+      ('transaction.fein_faq3_title'.tr(), 'transaction.fein_faq3_body'.tr()),
     ];
 
     return Container(
@@ -284,7 +284,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Que es la FEIN?',
+          Text('transaction.fein_what_is'.tr(),
               style: TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 12),
@@ -322,12 +322,12 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildTimeline() {
-    const steps = [
-      ('Tasacion completada', 'El banco recibe el informe del tasador', true),
-      ('Banco estudia la operacion', 'Calcula riesgo con la tasacion oficial', true),
-      ('Banco emite la FEIN', 'Te la envian por correo o app bancaria', false),
-      ('Periodo de reflexion (10 dias)', 'Lee con calma todas las condiciones', false),
-      ('Firma en Notaria', 'Con la FEIN aceptada, se puede firmar', false),
+    final steps = [
+      ('transaction.fein_step1_title'.tr(), 'transaction.fein_step1_body'.tr(), true),
+      ('transaction.fein_step2_title'.tr(), 'transaction.fein_step2_body'.tr(), true),
+      ('transaction.fein_step3_title'.tr(), 'transaction.fein_step3_body'.tr(), false),
+      ('transaction.fein_step4_title'.tr(), 'transaction.fein_step4_body'.tr(), false),
+      ('transaction.fein_step5_title'.tr(), 'transaction.fein_step5_body'.tr(), false),
     ];
 
     return Container(
@@ -340,7 +340,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Proceso bancario',
+          Text('transaction.fein_process_title'.tr(),
               style: TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 16),
@@ -422,19 +422,19 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Confirmar recepcion de la FEIN',
+          Text('transaction.fein_form_title'.tr(),
               style: TextStyle(
                   fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
           const SizedBox(height: 16),
           _CheckItem(
             value: _feinReceived,
-            label: 'He recibido la FEIN/FIPER de mi banco con las condiciones definitivas.',
+            label: 'transaction.fein_check1'.tr(),
             onChanged: (v) => setState(() => _feinReceived = v ?? false),
           ),
           const SizedBox(height: 8),
           _CheckItem(
             value: _conditionsRead,
-            label: 'He leido y entiendo las condiciones del prestamo (TAE, cuota, vinculaciones).',
+            label: 'transaction.fein_check2'.tr(),
             onChanged: (v) => setState(() => _conditionsRead = v ?? false),
           ),
           const SizedBox(height: 16),
@@ -451,8 +451,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Tras confirmar, deberan pasar al menos 10 dias antes de poder '
-                    'firmar en notaria. Este plazo es obligatorio por ley (LCCI 2019).',
+                    'transaction.fein_form_warn'.tr(),
                     style: TextStyle(
                         fontSize: 12, color: Colors.amber.shade900, height: 1.4),
                   ),
@@ -481,15 +480,14 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Esperando confirmacion del comprador',
+                Text('transaction.fein_seller_wait_title'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.orange.shade800,
                         fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
-                  'El banco del comprador esta tramitando la FEIN. '
-                  'Recibiras notificacion cuando el comprador la confirme.',
+                  'transaction.fein_seller_wait_body'.tr(),
                   style: TextStyle(color: Colors.orange.shade700, fontSize: 13),
                 ),
               ],
@@ -535,7 +533,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                     strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.verified_outlined),
-        label: const Text('Confirmar recepcion de la FEIN'),
+        label: Text('transaction.fein_form_title'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kBlue,
           disabledBackgroundColor: Colors.grey.shade300,
@@ -564,18 +562,15 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
               child: const Icon(Icons.verified, color: _kGreen, size: 44),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'FEIN confirmada',
+            Text('transaction.fein_success_title'.tr(),
               style: TextStyle(
                   fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
             ),
             const SizedBox(height: 12),
             Text(
               _isBuyer
-                  ? 'Has confirmado la recepcion de la FEIN. El plazo de 10 dias '
-                    'es informativo — ya puedes coordinar la cita en notaria.'
-                  : 'El comprador ha confirmado la FEIN. Ya podeis coordinar '
-                    'la cita en notaria para la firma final.',
+                  ? 'transaction.fein_success_buyer'.tr()
+                  : 'transaction.fein_success_seller'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14, color: Colors.grey.shade600, height: 1.6),
@@ -594,8 +589,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'La ley exige 10 dias entre la recepcion de la FEIN y la firma. '
-                      'Asegurate de coordinar la cita con ese margen.',
+                      'transaction.fein_success_warn'.tr(),
                       style: TextStyle(
                           fontSize: 12,
                           color: Colors.amber.shade900,
@@ -614,7 +608,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   extra: widget.offer,
                 ),
                 icon: const Icon(Icons.gavel_outlined),
-                label: const Text('Ir a Firma en Notaria'),
+                label: Text('transaction.fein_goto_notary'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(
@@ -626,7 +620,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Volver al timeline',
+              child: Text('transaction.fein_back_timeline'.tr(),
                   style: TextStyle(color: _kBlue)),
             ),
           ],

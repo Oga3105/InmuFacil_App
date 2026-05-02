@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -105,7 +106,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     } on DioException catch (e) {
       if (!mounted) return;
       final detail = (e.response?.data as Map?)?['detail'] as String?;
-      setState(() => _errorMessage = detail ?? 'Error al confirmar. Intentalo de nuevo.');
+      setState(() => _errorMessage = detail ?? 'transaction.keys_confirm_error'.tr());
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -256,18 +257,14 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Cierre de la transaccion',
+                Text(
+                  'transaction.notary_close_title'.tr(),
                   style: TextStyle(
                       color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isBuyer
-                      ? 'Confirma que has firmado la escritura publica y '
-                        'has recibido las llaves del inmueble.'
-                      : 'Confirma que has firmado la escritura publica y '
-                        'has entregado las llaves al nuevo propietario.',
+                  isBuyer ? 'transaction.notary_buyer_desc'.tr() : 'transaction.notary_seller_desc'.tr(),
                   style: TextStyle(
                       color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
                 ),
@@ -299,20 +296,20 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Estado de confirmaciones',
+          Text(
+            'transaction.notary_status_title'.tr(),
             style: TextStyle(
                 fontSize: 14, fontWeight: FontWeight.bold, color: _kNavy),
           ),
           const SizedBox(height: 12),
           _StatusRow(
-            label: isBuyer ? 'Tu confirmacion (Comprador)' : 'Tu confirmacion (Vendedor)',
+            label: isBuyer ? 'transaction.notary_your_confirm_buyer'.tr() : 'transaction.notary_your_confirm_seller'.tr(),
             isPending: !myConfirmed && !_submitted,
             isCurrentUser: true,
           ),
           const SizedBox(height: 8),
           _StatusRow(
-            label: isBuyer ? 'Confirmacion del Vendedor' : 'Confirmacion del Comprador',
+            label: isBuyer ? 'transaction.notary_other_confirm_seller'.tr() : 'transaction.notary_other_confirm_buyer'.tr(),
             isPending: !otherConfirmed,
             isCurrentUser: false,
           ),
@@ -339,23 +336,21 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Declaro bajo mi responsabilidad que:',
+          Text(
+            'transaction.notary_declare_title'.tr(),
             style: TextStyle(
                 fontSize: 14, fontWeight: FontWeight.bold, color: _kNavy),
           ),
           const SizedBox(height: 16),
           _CheckItem(
             value: _signingConfirmed,
-            label: 'He firmado la escritura publica de compraventa ante notario.',
+            label: 'transaction.notary_declare_signed'.tr(),
             onChanged: (v) => setState(() => _signingConfirmed = v ?? false),
           ),
           const SizedBox(height: 12),
           _CheckItem(
             value: _keysConfirmed,
-            label: isBuyer
-                ? 'He recibido las llaves y tomo posesion del inmueble.'
-                : 'He entregado las llaves al comprador y cedo la posesion.',
+            label: isBuyer ? 'transaction.notary_declare_keys_buyer'.tr() : 'transaction.notary_declare_keys_seller'.tr(),
             onChanged: (v) => setState(() => _keysConfirmed = v ?? false),
           ),
           const SizedBox(height: 16),
@@ -373,8 +368,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Esta confirmacion tiene validez legal. '
-                    'Solo confirma si la firma ya se ha realizado ante notario.',
+                    'transaction.notary_declare_warning'.tr(),
                     style: TextStyle(
                         fontSize: 12, color: Colors.amber.shade900, height: 1.4),
                   ),
@@ -401,7 +395,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                     strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.verified_outlined),
-        label: const Text('Confirmar firma y entrega de llaves'),
+        label: Text('transaction.notary_confirm_btn'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kGreen,
           disabledBackgroundColor: Colors.grey.shade300,
@@ -430,20 +424,14 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
               child: const Icon(Icons.verified, color: _kGreen, size: 44),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Confirmacion registrada',
+            Text(
+              'transaction.notary_success_title'.tr(),
               style: TextStyle(
                   fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
             ),
             const SizedBox(height: 12),
             Text(
-              isBuyer
-                  ? 'Has confirmado la recepcion de llaves. '
-                    'La transaccion avanzara a la fase de Post-Venta '
-                    'cuando el vendedor tambien confirme.'
-                  : 'Has confirmado la entrega de llaves. '
-                    'La transaccion avanzara a la fase de Post-Venta '
-                    'cuando el comprador tambien confirme.',
+              isBuyer ? 'transaction.notary_success_buyer'.tr() : 'transaction.notary_success_seller'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14, color: Colors.grey.shade600, height: 1.6),
@@ -457,7 +445,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                       extra: widget.offer);
                 },
                 icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('Ir a Post-Venta y Suministros'),
+                label: Text('transaction.notary_go_post_venta'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(
@@ -469,7 +457,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Volver al timeline',
+              child: Text('transaction.back_to_timeline'.tr(),
                   style: TextStyle(color: _kBlue)),
             ),
           ],
@@ -494,7 +482,7 @@ class _StatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isPending ? Colors.orange.shade600 : _kGreen;
     final icon  = isPending ? Icons.hourglass_empty : Icons.check_circle;
-    final text  = isPending ? 'Pendiente' : 'Confirmado';
+    final text  = isPending ? 'transaction.notary_pending'.tr() : 'transaction.notary_confirmed'.tr();
 
     return Row(
       children: [

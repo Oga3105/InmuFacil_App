@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,18 +7,26 @@ import '../../../providers/property_form_provider.dart';
 class PropertyStepperHeader extends ConsumerWidget {
   const PropertyStepperHeader({super.key});
 
-  static const _steps = ['Ubicacion', 'Detalles', 'Fotos', 'Documentos', 'Descripcion', 'Publicar'];
+  static List<String> _steps() => [
+    'property_wizard.step_location'.tr(),
+    'property_wizard.step_details'.tr(),
+    'property_wizard.step_photos'.tr(),
+    'property_wizard.step_documents'.tr(),
+    'property_wizard.step_description'.tr(),
+    'property_wizard.step_publish'.tr(),
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentStep = ref.watch(propertyFormProvider.select((s) => s.currentStep));
     final colorScheme = Theme.of(context).colorScheme;
 
+    final steps = _steps();
     return Container(
       color: colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Row(
-        children: List.generate(_steps.length * 2 - 1, (i) {
+        children: List.generate(steps.length * 2 - 1, (i) {
           if (i.isOdd) {
             // Connector line
             final stepIndex = i ~/ 2;
@@ -32,7 +41,7 @@ class PropertyStepperHeader extends ConsumerWidget {
           final stepIndex = i ~/ 2;
           return _StepCircle(
             index: stepIndex,
-            label: _steps[stepIndex],
+            label: steps[stepIndex],
             isActive: currentStep == stepIndex,
             isCompleted: currentStep > stepIndex,
           );

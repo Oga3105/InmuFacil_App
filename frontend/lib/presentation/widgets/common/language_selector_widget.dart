@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,7 +28,7 @@ class LanguageSelectorWidget extends ConsumerWidget {
     if (compact) {
       return IconButton(
         icon: const Icon(Icons.language),
-        tooltip: 'Language / Idioma',
+        tooltip: 'common.language'.tr(),
         onPressed: () => _showLanguageDialog(context, ref, currentLocale),
       );
     }
@@ -39,7 +40,7 @@ class LanguageSelectorWidget extends ConsumerWidget {
 
     return ListTile(
       leading: const Icon(Icons.language),
-      title: const Text('Language / Idioma'),
+      title: Text('common.language'.tr()),
       trailing: DropdownButton<Locale>(
         value: currentLocale,
         underline: const SizedBox.shrink(),
@@ -47,7 +48,14 @@ class LanguageSelectorWidget extends ConsumerWidget {
             .map(
               (l) => DropdownMenuItem(
                 value: l.locale,
-                child: Text('${l.flag}  ${l.label}'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _FlagCircle(assetPath: l.flagAsset),
+                    const SizedBox(width: 8),
+                    Text(l.label),
+                  ],
+                ),
               ),
             )
             .toList(),
@@ -57,7 +65,14 @@ class LanguageSelectorWidget extends ConsumerWidget {
           }
         },
       ),
-      subtitle: Text('${current.flag}  ${current.label}'),
+      subtitle: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _FlagCircle(assetPath: current.flagAsset),
+          const SizedBox(width: 8),
+          Text(current.label),
+        ],
+      ),
     );
   }
 
@@ -69,7 +84,7 @@ class LanguageSelectorWidget extends ConsumerWidget {
     showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Language / Idioma'),
+        title: Text('common.language'.tr()),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView(
@@ -77,7 +92,7 @@ class LanguageSelectorWidget extends ConsumerWidget {
             children: kSupportedLocales.map((l) {
               final isSelected = l.locale == currentLocale;
               return ListTile(
-                leading: Text(l.flag, style: const TextStyle(fontSize: 20)),
+                leading: _FlagCircle(assetPath: l.flagAsset, radius: 14),
                 title: Text(l.label),
                 trailing: isSelected
                     ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
@@ -91,6 +106,23 @@ class LanguageSelectorWidget extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Circular flag image widget used in the language selector.
+class _FlagCircle extends StatelessWidget {
+  final String assetPath;
+  final double radius;
+
+  const _FlagCircle({required this.assetPath, this.radius = 12});
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: radius,
+      backgroundImage: AssetImage(assetPath),
+      backgroundColor: Colors.grey.shade200,
     );
   }
 }

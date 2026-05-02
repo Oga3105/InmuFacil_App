@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-// import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../domain/entities/property.dart';
 import '../../widgets/common/report_button.dart';
@@ -33,7 +33,7 @@ import '../../providers/visits_provider.dart';
 
 String _obfuscateAddress(String address) {
   if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
-    return 'Ubicación protegida';
+    return 'property.obfuscated_address'.tr();
   }
   final parts = address.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
   if (parts.length >= 2) {
@@ -70,17 +70,17 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         context: ctx,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Cuenta requerida', textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          content: const Text('Debes estar registrado para hacer una oferta por esta propiedad.',
+          title: Text('property.account_required_title'.tr(), textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          content: Text('property.account_required_offer'.tr(),
               textAlign: TextAlign.center),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar')),
+                child: Text('common.cancel'.tr())),
             FilledButton(
               onPressed: () { Navigator.of(ctx).pop(); ctx.pushNamed('login'); },
-              child: const Text('Iniciar sesión'),
+              child: Text('property.login_cta'.tr()),
             ),
           ],
         ),
@@ -93,17 +93,17 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         context: ctx,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Verificación requerida', textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-          content: const Text('Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
+          title: Text('property.verification_required_title'.tr(), textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+          content: Text('property.verification_required_offer'.tr(),
               textAlign: TextAlign.center),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('Cancelar')),
+                child: Text('common.cancel'.tr())),
             FilledButton(
               onPressed: () { Navigator.of(ctx).pop(); ctx.push('/verify-identity'); },
-              child: const Text('Verificar identidad'),
+              child: Text('property.verify_identity_cta'.tr()),
             ),
           ],
         ),
@@ -236,8 +236,8 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                           }
                         },
                         itemBuilder: (_) => [
-                          const PopupMenuItem(value: 'list', child: Row(children: [Icon(Icons.format_list_bulleted, size: 18), SizedBox(width: 8), Text('Ver Inmuebles')])),
-                          if (!isOwner) const PopupMenuItem(value: 'offer', child: Row(children: [Icon(Icons.gavel_rounded, size: 18), SizedBox(width: 8), Text('Hacer Oferta')])),
+                          PopupMenuItem(value: 'list', child: Row(children: [const Icon(Icons.format_list_bulleted, size: 18), const SizedBox(width: 8), Text('property.view_listings'.tr())])),
+                          if (!isOwner) PopupMenuItem(value: 'offer', child: Row(children: [const Icon(Icons.gavel_rounded, size: 18), const SizedBox(width: 8), Text('property.make_offer'.tr())])),
                         ],
                       ),
                       avatarWidget,
@@ -263,7 +263,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         context.go('/search?highlight=${widget.propertyId}');
                       },
                       icon: const Icon(Icons.format_list_bulleted, size: 18, color: Color(0xFF135BEC)),
-                      label: const Text('Ver Inmuebles', style: TextStyle(color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
+                      label: Text('property.view_listings'.tr(), style: const TextStyle(color: Color(0xFF135BEC), fontWeight: FontWeight.bold)),
                       style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -273,7 +273,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       FilledButton.icon(
                         onPressed: () { if (_canMakeOffer(context)) context.push('/property/${widget.propertyId}/offer?price=${property.price}'); },
                         icon: const Icon(Icons.gavel_rounded, size: 18),
-                        label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                        label: Text('property.make_offer'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF135BEC),
                           foregroundColor: Colors.white,
@@ -320,7 +320,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               child: Center(
                 child: _NavigationArrow(
                   icon: Icons.chevron_left,
-                  label: 'Anterior',
+                  label: 'property.previous'.tr(),
                   onTap: () => context.pushNamed('property-details', pathParameters: {'id': effectivePrevId}),
                 ),
               ),
@@ -333,7 +333,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               child: Center(
                 child: _NavigationArrow(
                   icon: Icons.chevron_right,
-                  label: 'Siguiente',
+                  label: 'property.next_property'.tr(),
                   onTap: () => context.pushNamed('property-details', pathParameters: {'id': effectiveNextId}),
                 ),
               ),
@@ -842,13 +842,13 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
   Widget build(BuildContext context) {
     final text = widget.property.description.isNotEmpty
         ? widget.property.description
-        : 'No hay descripción disponible para esta propiedad.';
+        : 'property.no_description'.tr();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Sobre esta propiedad',
+          'property.about_property'.tr(),
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 12),
@@ -870,7 +870,7 @@ class _DescriptionSectionState extends State<_DescriptionSection> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                _expanded ? 'Leer menos' : 'Leer más',
+                _expanded ? 'property.read_less'.tr() : 'property.read_more'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               Icon(_expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, size: 16),
@@ -895,7 +895,7 @@ class _LocationSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Ubicación aproximada', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+            Text('property.approx_location'.tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
@@ -907,7 +907,7 @@ class _LocationSection extends StatelessWidget {
                 children: [
                   Icon(Icons.shield_outlined, size: 14, color: colorScheme.primary),
                   const SizedBox(width: 4),
-                  Text('UBICACIÓN PROTEGIDA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
+                  Text('property.protected_location'.tr(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colorScheme.primary)),
                 ],
               ),
             ),
@@ -962,7 +962,7 @@ class _LocationSection extends StatelessWidget {
                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                     ),
                     child: Text(
-                      'Por seguridad y privacidad, no mostramos la ubicación exacta hasta que la visita sea confirmada.',
+                      'property.privacy_notice'.tr(),
                       style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: colorScheme.onSurfaceVariant),
                       textAlign: TextAlign.center,
                     ),
@@ -1016,7 +1016,7 @@ class _SummaryCard extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
-                'I.V.A incluido',
+                'property.vat_included'.tr(),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colorScheme.onSurfaceVariant),
               ),
               ),
@@ -1147,7 +1147,7 @@ class _PropertyViabilityCard extends ConsumerWidget {
                   Icon(Icons.bar_chart_outlined, color: textColor, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    'Mi Viabilidad para este Piso',
+                    'property.viability_title'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -1174,7 +1174,7 @@ class _PropertyViabilityCard extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: _ViabilityMetric(
-                        label: 'Ratio deuda/ingreso',
+                        label: 'property.debt_income_ratio'.tr(),
                         value: '${(viability.dtiRatio! * 100).toStringAsFixed(0)}%',
                         color: textColor,
                       ),
@@ -1182,7 +1182,7 @@ class _PropertyViabilityCard extends ConsumerWidget {
                     if (viability.monthlyMortgageEstimate != null)
                       Expanded(
                         child: _ViabilityMetric(
-                          label: 'Cuota est.',
+                          label: 'property.monthly_mortgage_estimate'.tr(),
                           value: '${viability.monthlyMortgageEstimate} EUR/mes',
                           color: textColor,
                         ),
@@ -1197,7 +1197,7 @@ class _PropertyViabilityCard extends ConsumerWidget {
                   child: GestureDetector(
                     onTap: () => context.push('/solvency/wizard'),
                     child: Text(
-                      'Completar ADN Financiero',
+                      'property.complete_financial_dna'.tr(),
                       style: TextStyle(
                           fontSize: 12,
                           color: textColor,
@@ -1252,14 +1252,14 @@ class _ActionBar extends ConsumerWidget {
     final isLoggedIn = auth.isAuthenticated;
     if (!isLoggedIn) {
       _dialog(
-        title: 'Cuenta requerida',
+        title: 'property.account_required_title'.tr(),
         message: action == 'visit'
-            ? 'Debes estar registrado para solicitar una visita a esta propiedad.'
+            ? 'property.account_required_visit'.tr()
             : action == 'contact'
-                ? 'Debes estar registrado para contactar con el propietario de esta propiedad.'
-                : 'Debes estar registrado para hacer una oferta por esta propiedad.',
+                ? 'property.account_required_contact'.tr()
+                : 'property.account_required_offer'.tr(),
         icon: Icons.person_outline,
-        cta: 'Iniciar sesión',
+        cta: 'property.login_cta'.tr(),
         onCta: () { Navigator.of(context).pop(); context.pushNamed('login'); },
       );
       return false;
@@ -1268,14 +1268,14 @@ class _ActionBar extends ConsumerWidget {
     final isVerified = dniStatus == 'VALIDADO';
     if (!isVerified) {
       _dialog(
-        title: 'Verificación requerida',
+        title: 'property.verification_required_title'.tr(),
         message: action == 'visit'
-            ? 'Solo los usuarios con identidad verificada pueden solicitar visitas. Completa tu verificación KYC para continuar.'
+            ? 'property.verification_required_visit'.tr()
             : action == 'contact'
-                ? 'Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.'
-                : 'Solo los usuarios con identidad verificada pueden hacer ofertas. Completa tu verificación KYC para continuar.',
+                ? 'property.verification_required_contact'.tr()
+                : 'property.verification_required_offer'.tr(),
         icon: Icons.verified_user_outlined,
-        cta: 'Verificar identidad',
+        cta: 'property.verify_identity_cta'.tr(),
         onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
       );
       return false;
@@ -1321,7 +1321,7 @@ class _ActionBar extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Builder(
-              builder: (ctx) => Text('Cancelar',
+              builder: (ctx) => Text('common.cancel'.tr(),
                 style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
             ),
           ),
@@ -1365,7 +1365,7 @@ class _ActionBar extends ConsumerWidget {
                         ? null
                         : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
                     icon: const Icon(Icons.calendar_month_outlined, size: 20),
-                    label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text(activeVisit != null ? 'property.visit_scheduled'.tr() : 'property.request_visit'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1377,7 +1377,7 @@ class _ActionBar extends ConsumerWidget {
                   child: FilledButton.icon(
                     onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                     icon: const Icon(Icons.gavel_rounded, size: 20),
-                    label: const Text('Hacer Oferta', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text('property.make_offer'.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF135BEC),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1395,7 +1395,7 @@ class _ActionBar extends ConsumerWidget {
             OutlinedButton.icon(
               onPressed: () => context.push('/property/${property.id}/offers'),
               icon: const Icon(Icons.list_alt_outlined, size: 20),
-              label: const Text('Gestionar Ofertas', style: TextStyle(fontWeight: FontWeight.w600)),
+              label: Text('property.manage_offers'.tr(), style: const TextStyle(fontWeight: FontWeight.w600)),
               style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF135BEC),
                 side: const BorderSide(color: Color(0xFF135BEC)),
@@ -1436,7 +1436,7 @@ class _ActionBar extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () { if (_canAct('offer', ref)) context.push('/property/${property.id}/offer?price=${property.price}'); },
                 icon: const Icon(Icons.gavel_rounded),
-                label: const Text('Hacer Oferta'),
+                label: Text('property.make_offer'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
@@ -1454,7 +1454,7 @@ class _ActionBar extends ConsumerWidget {
                     ? null
                     : () { if (_canAct('visit', ref)) context.push('/property/${property.id}/visit'); },
                 icon: const Icon(Icons.calendar_month_outlined),
-                label: Text(activeVisit != null ? 'Visita agendada' : 'Solicitar Visita'),
+                label: Text(activeVisit != null ? 'property.visit_scheduled'.tr() : 'property.request_visit'.tr()),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF0f172a),
                   side: const BorderSide(color: Color(0xFF0f172a), width: 2),
@@ -1477,7 +1477,7 @@ class _ActionBar extends ConsumerWidget {
               child: OutlinedButton.icon(
                 onPressed: () => context.push('/property/${property.id}/offers'),
                 icon: const Icon(Icons.list_alt_outlined),
-                label: const Text('Gestionar Ofertas'),
+                label: Text('property.manage_offers'.tr()),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFF135BEC),
                   side: const BorderSide(color: Color(0xFF135BEC)),
@@ -1506,7 +1506,7 @@ class _VisitStatusBanner extends StatelessWidget {
     final bgColor = isPending ? const Color(0xFFFFFBEB) : const Color(0xFFF0FDF4);
     final borderColor = isPending ? const Color(0xFFFDE68A) : const Color(0xFFBBF7D0);
     final icon = isPending ? Icons.hourglass_top_rounded : Icons.check_circle_outline;
-    final label = isPending ? 'Visita pendiente de confirmacion' : 'Visita confirmada';
+    final label = isPending ? 'property.visit_pending'.tr() : 'property.visit_confirmed'.tr();
     final hour = '${visit.startTime.hour.toString().padLeft(2, '0')}:${visit.startTime.minute.toString().padLeft(2, '0')}';
     final day = '${visit.startTime.day}/${visit.startTime.month}/${visit.startTime.year}';
 
@@ -1532,7 +1532,7 @@ class _VisitStatusBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '$day a las $hour',
+                  'property.visit_date_time'.tr(namedArgs: {'day': day, 'hour': hour}),
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
                 ),
               ],
@@ -1549,9 +1549,9 @@ class _VisitStatusBanner extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
-                child: const Text(
-                  'Ver visita',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E293B)),
+                child: Text(
+                  'property.view_visit'.tr(),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E293B)),
                 ),
               ),
             ),
@@ -1585,9 +1585,9 @@ class _OwnerVisitsToggleState extends State<_OwnerVisitsToggle> {
   Widget build(BuildContext context) {
     return SwitchListTile(
       contentPadding: EdgeInsets.zero,
-      title: const Text('Permitir visitas', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+      title: Text('property.allow_visits'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
       subtitle: Text(
-        _allowVisits ? 'Los interesados pueden solicitar visita' : 'Visitas desactivadas',
+        _allowVisits ? 'property.visits_enabled'.tr() : 'property.visits_disabled'.tr(),
         style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
       value: _allowVisits,
@@ -1620,12 +1620,12 @@ class _PropertyStatsGrid extends StatelessWidget {
       crossAxisSpacing: 8,
       childAspectRatio: 1.5,
       children: [
-        _StatItem(icon: Icons.bed, label: '${property.bedrooms} Hab.'),
-        _StatItem(icon: Icons.bathtub_outlined, label: '${property.bathrooms} Baños'),
-        _StatItem(icon: Icons.square_foot, label: '${property.squareMeters} m²'), // [FIX] Getter is 'squareMeters'
-        _StatItem(icon: Icons.layers_outlined, label: property.floor ?? 'Bajo'), // [FIX] Use real floor data
-        const _StatItem(icon: Icons.wb_sunny_outlined, label: 'Exterior'), // Mock
-        const _StatItem(icon: Icons.elevator_outlined, label: 'Ascensor'), // Mock
+        _StatItem(icon: Icons.bed, label: 'property.bedrooms_count'.tr(namedArgs: {'count': '${property.bedrooms}'})),
+        _StatItem(icon: Icons.bathtub_outlined, label: 'property.bathrooms_count'.tr(namedArgs: {'count': '${property.bathrooms}'})),
+        _StatItem(icon: Icons.square_foot, label: 'property.surface_count'.tr(namedArgs: {'count': '${property.squareMeters}'})), // [FIX] Getter is 'squareMeters'
+        _StatItem(icon: Icons.layers_outlined, label: property.floor ?? 'property.floor_default'.tr()), // [FIX] Use real floor data
+        _StatItem(icon: Icons.wb_sunny_outlined, label: 'property.exterior'.tr()), // Mock
+        _StatItem(icon: Icons.elevator_outlined, label: 'property.elevator'.tr()), // Mock
       ],
     );
   }
@@ -1707,7 +1707,7 @@ class _EnergyCertBadge extends StatelessWidget {
     final upperRating = rating.toUpperCase();
     final isTramite = upperRating == 'EN_TRAMITE' || upperRating == 'EN TRAMITE';
     final color = isTramite ? const Color(0xFF94A3B8) : (_colors[upperRating] ?? const Color(0xFF94A3B8));
-    final label = isTramite ? 'En Tramite' : 'Calificacion Energetica $upperRating';
+    final label = isTramite ? 'property.energy_cert_in_progress'.tr() : 'property.energy_cert_rating'.tr(namedArgs: {'rating': upperRating});
 
     return Row(
       children: [
@@ -1772,13 +1772,13 @@ class _SellerMetricsCard extends ConsumerWidget {
   static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
 
-  String get _badgeLabel {
+  String _badgeLabel() {
     switch (status) {
-      case 'published': return 'ACTIVO';
-      case 'draft':     return 'BORRADOR';
-      case 'reserved':  return 'RESERVADO';
-      case 'sold':      return 'VENDIDO';
-      default:          return 'INACTIVO';
+      case 'published': return 'property.status_active'.tr();
+      case 'draft':     return 'property.status_draft'.tr();
+      case 'reserved':  return 'property.status_reserved'.tr();
+      case 'sold':      return 'property.status_sold'.tr();
+      default:          return 'property.status_inactive'.tr();
     }
   }
 
@@ -1830,7 +1830,7 @@ class _SellerMetricsCard extends ConsumerWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Rendimiento del Anuncio',
+                  'property.ad_performance'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -1845,7 +1845,7 @@ class _SellerMetricsCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  _badgeLabel,
+                  _badgeLabel(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -1875,21 +1875,21 @@ class _SellerMetricsCard extends ConsumerWidget {
                 children: [
                   _MetricCell(
                     value: data.views,
-                    label: 'Visitas',
+                    label: 'property.metric_views'.tr(),
                     icon: Icons.remove_red_eye_outlined,
                     color: _blue,
                   ),
                   _MetricDivider(),
                   _MetricCell(
                     value: data.favorites,
-                    label: 'Favoritos',
+                    label: 'property.metric_favorites'.tr(),
                     icon: Icons.favorite_border_outlined,
                     color: const Color(0xFFDC2626),
                   ),
                   _MetricDivider(),
                   _MetricCell(
                     value: data.offers,
-                    label: 'Ofertas',
+                    label: 'property.metric_offers'.tr(),
                     icon: Icons.payments_outlined,
                     color: _green,
                   ),
@@ -1956,7 +1956,7 @@ class _OwnerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = property.ownerName ?? 'Propietario';
+    final name = property.ownerName ?? 'property.owner_default_name'.tr();
     final isVerified = property.ownerIsVerified;
     final photoUrl = property.ownerPhotoUrl;
 
@@ -2014,17 +2014,17 @@ class _OwnerCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
-                        SizedBox(width: 4),
-                        Text('IDENTIDAD VERIFICADA', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
+                        const Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
+                        const SizedBox(width: 4),
+                        Text('property.identity_verified'.tr(), style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
                       ],
                     ),
                   )
                 else
-                  Text('Identidad pendiente de verificar', style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+                  Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -2095,7 +2095,7 @@ class _MortgageCard extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               Text(
-                'ESTIMACIÓN DE HIPOTECA',
+                'property.mortgage_title'.tr(),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -2121,7 +2121,7 @@ class _MortgageCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  '/mes',
+                  'property.mortgage_per_month'.tr(),
                   style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
                 ),
               ),
@@ -2129,12 +2129,12 @@ class _MortgageCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Financiación 80%  ·  ${_fmt(loanAmount)} €',
+            'property.mortgage_financing'.tr(namedArgs: {'amount': _fmt(loanAmount)}),
             style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 2),
           Text(
-            'Plazo 30 años  ·  TAE 3,5%',
+            'property.mortgage_term'.tr(),
             style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
@@ -2147,7 +2147,7 @@ class _MortgageCard extends StatelessWidget {
               border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Text(
-              'Cálculo orientativo. Sin vinculación bancaria.',
+              'property.mortgage_disclaimer'.tr(),
               style: TextStyle(
                 fontSize: 11,
                 color: colorScheme.onSurfaceVariant,
@@ -2200,15 +2200,14 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: const Text('Haz una oferta primero'),
-          content: const Text(
-            'El chat privado con el vendedor se abre al hacer una oferta. '
-            'Ambas partes pueden chatear desde ese momento.',
+          title: Text('property.offer_first_title'.tr()),
+          content: Text(
+            'property.offer_first_message'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
+              child: Text('property.understood'.tr()),
             ),
             FilledButton(
               onPressed: () {
@@ -2216,7 +2215,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
                 context.push('/property/${widget.propertyId}/offer');
               },
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: const Text('Hacer Oferta'),
+              child: Text('property.make_offer'.tr()),
             ),
           ],
         ),
@@ -2246,7 +2245,7 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
             )
           : const Icon(Icons.chat_bubble_outline, size: 20),
       label: Text(
-        'Contactar Particular',
+        'property.contact_private'.tr(),
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       style: OutlinedButton.styleFrom(

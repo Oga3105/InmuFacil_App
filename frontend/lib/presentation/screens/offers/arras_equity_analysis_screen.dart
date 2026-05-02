@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../providers/auth_provider.dart';
@@ -59,7 +60,7 @@ class ArrasEquityAnalysisScreen extends ConsumerWidget {
         loading: () =>
             const Center(child: CircularProgressIndicator(color: _kBlue)),
         error: (e, _) {
-          String msg = 'Error al cargar el analisis.';
+          String msg = 'arras_interview.equity_error'.tr();
           if (e is DioException) {
             final detail = e.response?.data?['detail'];
             if (detail != null) msg = detail.toString();
@@ -265,7 +266,7 @@ class _ScoreHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Analisis basado en las condiciones pactadas y el contrato generado por IA.',
+            'arras_interview.equity_score_desc'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
@@ -310,7 +311,7 @@ class _ScoreGauge extends StatelessWidget {
                 ),
               ),
               Text(
-                'de 100',
+                'arras_interview.equity_out_of_100'.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 12,
@@ -517,7 +518,7 @@ class _EquityItemCard extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => context.push('/chat/$offerId'),
                   icon: const Icon(Icons.chat_bubble_outline, size: 16),
-                  label: const Text('Ir al Chat'),
+                  label: Text('arras_interview.equity_go_chat'.tr()),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: _kRed,
                     side: BorderSide(
@@ -585,7 +586,7 @@ class _ErrorView extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_outlined),
-                label: const Text('Reintentar'),
+                label: Text('arras_interview.equity_retry'.tr()),
                 style: FilledButton.styleFrom(
                   backgroundColor: _kBlue,
                   shape: RoundedRectangleBorder(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../providers/auth_provider.dart';
@@ -90,14 +91,14 @@ class ArrasInterviewScreen extends ConsumerWidget {
 
         // ── Role cards ───────────────────────────────────────────
         _RoleCard(
-          title: 'Entrevista del Comprador',
+          title: 'arras_interview.hub_buyer_title'.tr(),
           icon: Icons.person_outlined,
           isMyRole: isBuyer,
           isDone: buyerDone,
           color: _kBlue,
-          statusLabel: buyerDone ? 'Completada' : 'Pendiente',
+          statusLabel: buyerDone ? 'arras_interview.hub_completed'.tr() : 'arras_interview.hub_pending'.tr(),
           ctaLabel: isBuyer
-              ? (buyerDone ? 'Ver / Editar entrevista' : 'Comenzar entrevista')
+              ? (buyerDone ? 'arras_interview.hub_view_edit'.tr() : 'arras_interview.hub_start'.tr())
               : null,
           onCta: isBuyer
               ? () => context.push('/offers/${offer.id}/arras/buyer',
@@ -107,14 +108,14 @@ class ArrasInterviewScreen extends ConsumerWidget {
         const SizedBox(height: 16),
 
         _RoleCard(
-          title: 'Entrevista del Vendedor',
+          title: 'arras_interview.hub_seller_title'.tr(),
           icon: Icons.home_outlined,
           isMyRole: !isBuyer,
           isDone: sellerDone,
           color: _kGreen,
-          statusLabel: sellerDone ? 'Completada' : 'Pendiente',
+          statusLabel: sellerDone ? 'arras_interview.hub_completed'.tr() : 'arras_interview.hub_pending'.tr(),
           ctaLabel: !isBuyer
-              ? (sellerDone ? 'Ver / Editar entrevista' : 'Comenzar entrevista')
+              ? (sellerDone ? 'arras_interview.hub_view_edit'.tr() : 'arras_interview.hub_start'.tr())
               : null,
           onCta: !isBuyer
               ? () => context.push('/offers/${offer.id}/arras/seller',
@@ -238,15 +239,15 @@ class _HeroCard extends StatelessWidget {
   String get _statusLabel {
     switch (arrasStatus) {
       case 'accepted':
-        return 'Contrato firmado por ambas partes';
+        return 'arras_interview.hub_status_accepted'.tr();
       case 'contract_ready':
       case 'buyer_accepted':
       case 'seller_accepted':
-        return 'Contrato listo para revision';
+        return 'arras_interview.hub_status_ready'.tr();
       case 'generating':
-        return 'Generando contrato con IA...';
+        return 'arras_interview.hub_status_generating_ai'.tr();
       case 'both_done':
-        return 'Generando borrador del contrato...';
+        return 'arras_interview.hub_status_generating_draft'.tr();
       case 'buyer_done':
         return isBuyer
             ? 'Tu entrevista completada — esperando al vendedor'
@@ -256,7 +257,7 @@ class _HeroCard extends StatelessWidget {
             ? 'Tu entrevista completada — esperando al comprador'
             : 'Vendedor listo — completa tu entrevista';
       default:
-        return 'Completa tu parte de la entrevista';
+        return 'arras_interview.hub_status_default'.tr();
     }
   }
 
@@ -323,14 +324,14 @@ class _HeroCard extends StatelessWidget {
               if (depositPercentage != null) ...[
                 const SizedBox(width: 8),
                 _Chip(
-                  label: 'Arras $depositPercentage%',
+                  label: 'arras_interview.hub_hero_arras_pct'.tr(namedArgs: {'pct': depositPercentage.toString()}),
                   icon: Icons.payments_outlined,
                 ),
               ],
               if (deadlineDays != null) ...[
                 const SizedBox(width: 8),
                 _Chip(
-                  label: '$deadlineDays dias',
+                  label: 'arras_interview.hub_hero_deadline'.tr(namedArgs: {'days': deadlineDays.toString()}),
                   icon: Icons.schedule_outlined,
                 ),
               ],
@@ -340,10 +341,10 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               _StatusDot(
-                  label: 'Comprador', active: buyerDone, color: _kGreen),
+                  label: 'arras_interview.hub_hero_buyer'.tr(), active: buyerDone, color: _kGreen),
               const SizedBox(width: 16),
               _StatusDot(
-                  label: 'Vendedor', active: sellerDone, color: _kGreen),
+                  label: 'arras_interview.hub_hero_seller'.tr(), active: sellerDone, color: _kGreen),
             ],
           ),
         ],
@@ -491,7 +492,7 @@ class _RoleCard extends StatelessWidget {
                           color: _kBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text('Tu',
+                        child: Text('arras_interview.hub_role_you'.tr(),
                             style: TextStyle(
                                 color: _kBlue,
                                 fontSize: 10,
@@ -536,7 +537,7 @@ class _RoleCard extends StatelessWidget {
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
-              child: Text(isDone ? 'Ver' : 'Comenzar'),
+              child: Text(isDone ? 'arras_interview.hub_btn_view'.tr() : 'arras_interview.hub_btn_start'.tr()),
             ),
           ],
         ],
@@ -570,8 +571,8 @@ class _ContractCard extends StatelessWidget {
     if (fullyAccepted) {
       cardColor = _kGreen;
       cardIcon = Icons.verified_outlined;
-      cardTitle = 'Contrato firmado';
-      cardSubtitle = 'Ambas partes han aceptado el contrato';
+      cardTitle = 'arras_interview.hub_contract_accepted_title'.tr();
+      cardSubtitle = 'arras_interview.hub_contract_accepted_desc'.tr();
     } else if (isGenerating) {
       cardColor = _kBlue;
       cardIcon = Icons.auto_awesome_outlined;
@@ -642,7 +643,7 @@ class _ContractCard extends StatelessWidget {
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
-              child: const Text('Ver contrato'),
+              child: Text('arras_interview.hub_contract_view_btn'.tr()),
             ),
           ],
         ],

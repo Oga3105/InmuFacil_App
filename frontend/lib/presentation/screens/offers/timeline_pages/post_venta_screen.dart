@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -122,12 +123,12 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
         if (docId != null) _docIds[docType] = docId;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Documento subido correctamente.'), backgroundColor: _kGreen),
+        SnackBar(content: Text('transaction.pv_snack_uploaded'.tr()), backgroundColor: _kGreen),
       );
     } on DioException catch (e) {
       if (!mounted) return;
       setState(() => _docStatus[docType] = null);
-      final msg = (e.response?.data as Map?)?['detail'] as String? ?? 'Error al subir.';
+      final msg = (e.response?.data as Map?)?['detail'] as String? ?? 'transaction.pv_error_upload'.tr();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
       );
@@ -146,7 +147,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
       setState(() => _docStatus[docType] = flag);
     } on DioException catch (e) {
       if (!mounted) return;
-      final msg = (e.response?.data as Map?)?['detail'] as String? ?? 'Error al guardar.';
+      final msg = (e.response?.data as Map?)?['detail'] as String? ?? 'transaction.pv_error_save'.tr();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
       );
@@ -209,8 +210,8 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
                 children: [
                   Icon(Icons.home_rounded, size: 18, color: Colors.white),
                   SizedBox(width: 6),
-                  Text('Inicio',
-                      style: TextStyle(
+                  Text('common.home'.tr(),
+                      style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 13)),
@@ -244,25 +245,25 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
 
   Widget _buildSellerTab(bool isCurrentUser) {
     final documents = [
-      _DocInfo(key: 'electricity', label: 'Facturas de Luz (ultimas 3)',
-          subtitle: 'Incluye el CUPS electrico',
-          noApplicaLabel: 'Sin suministro electrico',
+      _DocInfo(key: 'electricity', label: 'transaction.pv_elec_label'.tr(),
+          subtitle: 'transaction.pv_elec_sub'.tr(),
+          noApplicaLabel: 'transaction.pv_elec_na'.tr(),
           icon: Icons.bolt_outlined, color: Colors.amber),
-      _DocInfo(key: 'water', label: 'Facturas de Agua (ultimas 3)',
-          subtitle: 'Numero de contrato de agua',
-          noApplicaLabel: 'Sin suministro de agua',
+      _DocInfo(key: 'water', label: 'transaction.pv_water_label'.tr(),
+          subtitle: 'transaction.pv_water_sub'.tr(),
+          noApplicaLabel: 'transaction.pv_water_na'.tr(),
           icon: Icons.water_drop_outlined, color: Colors.blue),
-      _DocInfo(key: 'gas', label: 'Facturas de Gas (ultimas 3)',
-          subtitle: 'Incluye el CUPS de gas si aplica',
-          noApplicaLabel: 'Vivienda sin gas contratado',
+      _DocInfo(key: 'gas', label: 'transaction.pv_gas_label'.tr(),
+          subtitle: 'transaction.pv_gas_sub'.tr(),
+          noApplicaLabel: 'transaction.pv_gas_na'.tr(),
           icon: Icons.local_fire_department_outlined, color: Colors.orange),
-      _DocInfo(key: 'ibi', label: 'Ultimo recibo del IBI',
-          subtitle: 'Impuesto de Bienes Inmuebles',
-          noApplicaLabel: 'Exento de IBI (raro, justificar)',
+      _DocInfo(key: 'ibi', label: 'transaction.pv_ibi_label'.tr(),
+          subtitle: 'transaction.pv_ibi_sub'.tr(),
+          noApplicaLabel: 'transaction.pv_ibi_na'.tr(),
           icon: Icons.account_balance_outlined, color: Colors.purple),
-      _DocInfo(key: 'community', label: 'Info de Comunidad',
-          subtitle: 'Contacto del administrador y cuota mensual',
-          noApplicaLabel: 'Sin comunidad de propietarios',
+      _DocInfo(key: 'community', label: 'transaction.pv_comm_label'.tr(),
+          subtitle: 'transaction.pv_comm_sub'.tr(),
+          noApplicaLabel: 'transaction.pv_comm_na'.tr(),
           icon: Icons.apartment_outlined, color: _kGreen),
     ];
 
@@ -271,10 +272,10 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const _InfoBanner(
+        _InfoBanner(
           icon: Icons.upload_file_outlined,
           color: _kBlue,
-          message: 'Sube las facturas o indica como se entrega cada documento al comprador.',
+          message: 'transaction.pv_seller_banner'.tr(),
         ),
         const SizedBox(height: 20),
         ...documents.map((doc) => Padding(
@@ -307,7 +308,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Toda la documentacion ha sido gestionada. El comprador puede consultar el estado.',
+                    'transaction.pv_all_done'.tr(),
                     style: TextStyle(
                         color: _kGreen, fontWeight: FontWeight.w500, fontSize: 13),
                   ),
@@ -324,67 +325,67 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     final transfers = [
       _TransferInfo(
         key: 'electricity',
-        label: 'Cambio de titular — Electricidad',
-        subtitle: 'Con el CUPS del vendedor, llama a tu comercializadora',
+        label: 'transaction.pv_buyer_elec'.tr(),
+        subtitle: 'transaction.pv_buyer_elec_sub'.tr(),
         icon: Icons.bolt_outlined,
         color: Colors.amber,
         steps: [
-          'Descarga la ultima factura con el CUPS',
-          'Contacta con tu comercializadora electrica',
-          'Solicita el cambio de titularidad con el CUPS',
-          'El proceso suele tardar 5-10 dias habiles',
+          'transaction.pv_buyer_elec_1'.tr(),
+          'transaction.pv_buyer_elec_2'.tr(),
+          'transaction.pv_buyer_elec_3'.tr(),
+          'transaction.pv_buyer_elec_4'.tr(),
         ],
       ),
       _TransferInfo(
         key: 'water',
-        label: 'Cambio de titular — Agua',
-        subtitle: 'Contacta con la empresa municipal de agua',
+        label: 'transaction.pv_buyer_water'.tr(),
+        subtitle: 'transaction.pv_buyer_water_sub'.tr(),
         icon: Icons.water_drop_outlined,
         color: Colors.blue,
         steps: [
-          'Descarga la factura de agua con numero de contrato',
-          'Acude a las oficinas de la empresa de agua',
-          'Presenta DNI y escrituras de compra',
-          'El cambio es inmediato con cita previa',
+          'transaction.pv_buyer_water_1'.tr(),
+          'transaction.pv_buyer_water_2'.tr(),
+          'transaction.pv_buyer_water_3'.tr(),
+          'transaction.pv_buyer_water_4'.tr(),
         ],
       ),
       _TransferInfo(
         key: 'gas',
-        label: 'Cambio de titular — Gas',
-        subtitle: 'Solo si la vivienda tiene suministro de gas',
+        label: 'transaction.pv_buyer_gas'.tr(),
+        subtitle: 'transaction.pv_buyer_gas_sub'.tr(),
         icon: Icons.local_fire_department_outlined,
         color: Colors.orange,
         steps: [
-          'Descarga la factura de gas con el CUPS',
-          'Llama a tu comercializadora de gas',
-          'Solicita cambio de titularidad',
-          'Pueden requerir inspeccion de la instalacion',
+          'transaction.pv_buyer_gas_1'.tr(),
+          'transaction.pv_buyer_gas_2'.tr(),
+          'transaction.pv_buyer_gas_3'.tr(),
+          'transaction.pv_buyer_gas_4'.tr(),
         ],
       ),
       _TransferInfo(
         key: 'ibi',
-        label: 'IBI — Cambio de titular',
-        subtitle: 'Impuesto de Bienes Inmuebles municipal',
+        label: 'transaction.pv_buyer_ibi'.tr(),
+        subtitle: 'transaction.pv_buyer_ibi_sub'.tr(),
         icon: Icons.account_balance_outlined,
         color: Colors.purple,
         steps: [
-          'Descarga el ultimo recibo del IBI',
-          'Acude al ayuntamiento o sede electronica',
-          'Solicita el cambio de titular con escrituras y DNI',
-          'La modificacion aplica al ejercicio siguiente',
+          'transaction.pv_buyer_ibi_1'.tr(),
+          'transaction.pv_buyer_ibi_2'.tr(),
+          'transaction.pv_buyer_ibi_3'.tr(),
+          'transaction.pv_buyer_ibi_4'.tr(),
         ],
       ),
       _TransferInfo(
         key: 'community',
-        label: 'Comunidad de Propietarios',
-        subtitle: 'Contacto del administrador y cuota',
+        label: 'transaction.pv_buyer_comm'.tr(),
+        subtitle: 'transaction.pv_buyer_comm_sub'.tr(),
         icon: Icons.apartment_outlined,
         color: const Color(0xFF16A34A),
         steps: [
-          'Consulta los datos del administrador de fincas',
-          'Notifica el cambio de propietario por escrito',
-          'Facilita tu domiciliacion bancaria para la cuota',
-          'Solicita el certificado de deudas al dia',
+          'transaction.pv_buyer_comm_1'.tr(),
+          'transaction.pv_buyer_comm_2'.tr(),
+          'transaction.pv_buyer_comm_3'.tr(),
+          'transaction.pv_buyer_comm_4'.tr(),
         ],
       ),
     ];
@@ -392,10 +393,10 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const _InfoBanner(
+        _InfoBanner(
           icon: Icons.download_outlined,
           color: _kGreen,
-          message: 'Descarga los documentos disponibles para gestionar el cambio de titularidad.',
+          message: 'transaction.pv_buyer_banner'.tr(),
         ),
         const SizedBox(height: 20),
         ...transfers.map((t) => Padding(
@@ -597,13 +598,13 @@ class _SellerDocCard extends StatelessWidget {
 
   Widget _buildActionArea(BuildContext context) {
     if (status == 'uploading') {
-      return const Text('Subiendo...', style: TextStyle(fontSize: 12, color: _kBlue));
+      return Text('transaction.pv_uploading'.tr(), style: const TextStyle(fontSize: 12, color: _kBlue));
     }
 
     if (status == 'uploaded') {
       return _StatusChip(
         icon: Icons.check_circle_outline,
-        label: 'Archivo subido',
+        label: 'transaction.pv_file_uploaded'.tr(),
         color: _kGreen,
         onReset: onReset,
       );
@@ -612,7 +613,7 @@ class _SellerDocCard extends StatelessWidget {
     if (status == 'in_person') {
       return _StatusChip(
         icon: Icons.handshake_outlined,
-        label: 'Entregada en mano o por otro medio',
+        label: 'transaction.pv_in_person'.tr(),
         color: _kBlue,
         onReset: onReset,
       );
@@ -637,13 +638,13 @@ class _SellerDocCard extends StatelessWidget {
           children: [
             _ActionButton(
               icon: Icons.upload_file_outlined,
-              label: 'Subir archivo',
+              label: 'transaction.pv_upload_btn'.tr(),
               color: _kBlue,
               onTap: onUpload,
             ),
             _ActionButton(
               icon: Icons.handshake_outlined,
-              label: 'Entregada en mano',
+              label: 'transaction.pv_in_person_btn'.tr(),
               color: _kGreen,
               onTap: () => onFlag('in_person'),
             ),
@@ -862,28 +863,28 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.check_circle, color: _kGreen, size: 13),
           const SizedBox(width: 4),
-          Text('Documento disponible',
+          Text('transaction.pv_doc_available'.tr(),
               style: TextStyle(fontSize: 11, color: _kGreen, fontWeight: FontWeight.w500)),
         ]);
       case 'in_person':
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.handshake_outlined, color: _kBlue, size: 13),
           const SizedBox(width: 4),
-          Text('Entregado en mano por el vendedor',
+          Text('transaction.pv_in_person_badge'.tr(),
               style: TextStyle(fontSize: 11, color: _kBlue, fontWeight: FontWeight.w500)),
         ]);
       case 'not_applicable':
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.block_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 13),
           const SizedBox(width: 4),
-          Text('No aplica para esta vivienda',
+          Text('transaction.pv_not_applicable_badge'.tr(),
               style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ]);
       default:
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.hourglass_empty, color: Colors.orange.shade400, size: 13),
           const SizedBox(width: 4),
-          Text('Pendiente del vendedor',
+          Text('transaction.pv_pending_seller'.tr(),
               style: TextStyle(fontSize: 11, color: Colors.orange.shade600)),
         ]);
     }
@@ -913,8 +914,8 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
 
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Documento descargado correctamente.'),
+        SnackBar(
+          content: Text('transaction.pv_snack_downloaded'.tr()),
           backgroundColor: _kGreen,
           duration: Duration(seconds: 3),
         ),
@@ -922,7 +923,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
     } on DioException catch (e) {
       if (!context.mounted) return;
       final msg = (e.response?.data as Map?)?['detail'] as String? ??
-          'Error al descargar el documento.';
+          'transaction.pv_error_download'.tr();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: Colors.red.shade700),
       );
@@ -940,7 +941,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
     if (widget.docStatus == 'in_person') {
       return _StatusChip(
         icon: Icons.handshake_outlined,
-        label: 'Entregado en mano o por otro medio',
+        label: 'transaction.pv_in_person'.tr(),
         color: _kBlue,
         onReset: widget.canInteract ? widget.onReset : null,
       );
@@ -949,7 +950,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
     if (widget.docStatus == 'not_applicable') {
       return _StatusChip(
         icon: Icons.block_outlined,
-        label: 'No aplica para esta vivienda',
+        label: 'transaction.pv_not_applicable_badge'.tr(),
         color: Theme.of(context).colorScheme.onSurfaceVariant,
         onReset: widget.canInteract ? widget.onReset : null,
       );
@@ -969,7 +970,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
               icon: Icon(Icons.download_outlined, size: 16,
                   color: canDownload ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant),
               label: Text(
-                'Descargar',
+                'transaction.pv_download_btn'.tr(),
                 style: TextStyle(
                     color: canDownload ? _kBlue : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 13),
@@ -999,7 +1000,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
               ),
               _ActionButton(
                 icon: Icons.block_outlined,
-                label: 'No aplica',
+                label: 'transaction.pv_not_applicable_btn'.tr(),
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                 onTap: () => widget.onFlag!('not_applicable'),
               ),

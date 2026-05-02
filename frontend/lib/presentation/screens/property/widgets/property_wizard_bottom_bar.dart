@@ -70,10 +70,10 @@ class PropertyWizardBottomBar extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: isSubmitting && isLastStep
-                ? const Row(
+                ? Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
@@ -81,10 +81,10 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Text(
-                        'Publicando...',
-                        style: TextStyle(
+                        'property_wizard.publishing'.tr(),
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
                           color: Colors.white,
@@ -102,7 +102,7 @@ class PropertyWizardBottomBar extends ConsumerWidget {
                         ),
                       Text(
                         isLastStep
-                            ? 'Publicar anuncio'
+                            ? 'property_wizard.publish_ad'.tr()
                             : 'property_wizard.next'.tr(),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       ),

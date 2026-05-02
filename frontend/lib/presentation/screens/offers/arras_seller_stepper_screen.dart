@@ -128,7 +128,7 @@ class _ArrasSellerStepperScreenState
         context.pop();
       }
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al guardar';
+      final msg = e.response?.data?['detail'] ?? 'arras_interview.error_save'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -160,7 +160,7 @@ class _ArrasSellerStepperScreenState
             onPrev: _prevPage,
             onNext: _nextPage,
             onConfirm: _loading ? null : _saveAndConfirm,
-            confirmLabel: 'Confirmar mi parte',
+            confirmLabel: 'arras_interview.confirm_my_part'.tr(),
             loading: _loading,
           ),
         ],
@@ -180,8 +180,8 @@ class _ArrasSellerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.home_outlined,
-            title: 'Estado de la Vivienda',
-            subtitle: 'Paso 1 de 3 — Ocupacion y suministros',
+            title: 'arras_interview.seller_step1_title'.tr(),
+            subtitle: 'arras_interview.seller_step1_subtitle'.tr(),
             color: kArrasGreen,
           ),
           const SizedBox(height: 24),
@@ -190,9 +190,8 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Vivienda libre de arrendatarios',
-                  subtitle:
-                      'El inmueble estara desocupado en el momento de la entrega',
+                  title: 'arras_interview.free_of_tenants_title'.tr(),
+                  subtitle: 'arras_interview.free_of_tenants_sub'.tr(),
                   value: _propertyFreeOfTenants,
                   onChanged: (v) =>
                       setState(() => _propertyFreeOfTenants = v),
@@ -200,18 +199,16 @@ class _ArrasSellerStepperScreenState
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Suministros activos',
-                  subtitle:
-                      'Luz, agua y gas estan activos y al corriente de pago',
+                  title: 'arras_interview.utilities_active_title'.tr(),
+                  subtitle: 'arras_interview.utilities_active_sub'.tr(),
                   value: _utilitiesActive,
                   onChanged: (v) => setState(() => _utilitiesActive = v),
                   icon: Icons.bolt_outlined,
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Me comprometo a mantener suministros',
-                  subtitle:
-                      'Mantendre los suministros activos hasta la firma en notaria',
+                  title: 'arras_interview.utilities_maintenance_title'.tr(),
+                  subtitle: 'arras_interview.utilities_maintenance_sub'.tr(),
                   value: _utilitiesMaintenanceCommitment,
                   onChanged: (v) =>
                       setState(() => _utilitiesMaintenanceCommitment = v),
@@ -223,9 +220,7 @@ class _ArrasSellerStepperScreenState
           const SizedBox(height: 16),
           _InfoBox(
             icon: Icons.info_outline,
-            text:
-                'Un suministro cortado o una vivienda ocupada en el momento de la entrega son causas '
-                'de incumplimiento del contrato y pueden implicar devolver el doble de las arras.',
+            text: 'arras_interview.utilities_info_box'.tr(),
             color: colorScheme.primary,
             background: colorScheme.primaryContainer,
           ),
@@ -235,7 +230,7 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Tu domicilio (vendedor)',
+                  'arras_interview.seller_address_label'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -243,7 +238,7 @@ class _ArrasSellerStepperScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Necesario para identificarte en el contrato',
+                  'arras_interview.seller_address_needed_sub'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
@@ -251,7 +246,7 @@ class _ArrasSellerStepperScreenState
                   controller: _sellerAddressCtrl,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
-                    hintText: 'Calle, numero, piso, localidad, CP',
+                    hintText: 'arras_interview.seller_address_hint'.tr(),
                     prefixIcon: const Icon(Icons.home_outlined,
                         color: kArrasBlue, size: 18),
                     contentPadding: const EdgeInsets.symmetric(
@@ -288,8 +283,8 @@ class _ArrasSellerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.apartment_outlined,
-            title: 'Comunidad y Cargas',
-            subtitle: 'Paso 2 de 3 — Deudas y derramas',
+            title: 'arras_interview.seller_step2_title'.tr(),
+            subtitle: 'arras_interview.seller_step2_subtitle'.tr(),
             color: isDark ? const Color(0xFFFBBF24) : const Color(0xFFD97706),
           ),
           const SizedBox(height: 24),
@@ -298,9 +293,8 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Derramas aprobadas en comunidad',
-                  subtitle:
-                      'Existen derramas votadas o en curso en la comunidad de propietarios',
+                  title: 'arras_interview.approved_levies_title'.tr(),
+                  subtitle: 'arras_interview.approved_levies_sub'.tr(),
                   value: _hasApprovedLevies,
                   onChanged: (v) {
                     setState(() => _hasApprovedLevies = v);
@@ -314,7 +308,7 @@ class _ArrasSellerStepperScreenState
                     controller: _levyDetailsCtrl,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Describe la derrama (obras, importe, plazo...)',
+                      hintText: 'arras_interview.levy_details_hint_full'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide: BorderSide(color: Colors.grey.shade300),
@@ -333,9 +327,8 @@ class _ArrasSellerStepperScreenState
                 ],
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Certificado de cero deudas de comunidad',
-                  subtitle:
-                      'Aportare certificado de estar al corriente con la comunidad',
+                  title: 'arras_interview.zero_debt_cert_title'.tr(),
+                  subtitle: 'arras_interview.zero_debt_cert_sub'.tr(),
                   value: _zeroDebtCertificate,
                   onChanged: (v) => setState(() => _zeroDebtCertificate = v),
                   icon: Icons.verified_outlined,
@@ -349,9 +342,8 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Hipoteca pendiente a cancelar',
-                  subtitle:
-                      'La vivienda tiene hipoteca que se cancelara en el momento de la venta',
+                  title: 'arras_interview.mortgage_cancel_title'.tr(),
+                  subtitle: 'arras_interview.mortgage_cancel_sub'.tr(),
                   value: _hasMortgageToCancel,
                   onChanged: (v) {
                     setState(() => _hasMortgageToCancel = v);
@@ -368,7 +360,7 @@ class _ArrasSellerStepperScreenState
                       FilteringTextInputFormatter.digitsOnly
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Importe pendiente en EUR',
+                      hintText: 'arras_interview.mortgage_amount_hint_eur'.tr(),
                       suffixText: 'EUR',
                       prefixIcon: const Icon(Icons.euro_outlined,
                           color: kArrasBlue),
@@ -409,8 +401,8 @@ class _ArrasSellerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.receipt_long_outlined,
-            title: 'Finanzas e Impuestos',
-            subtitle: 'Paso 3 de 3 — Fiscalidad y datos bancarios',
+            title: 'arras_interview.seller_step3_title'.tr(),
+            subtitle: 'arras_interview.seller_step3_subtitle'.tr(),
             color: const Color(0xFF7C3AED),
           ),
           const SizedBox(height: 24),
@@ -419,18 +411,16 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Asumo la plusvalia municipal',
-                  subtitle:
-                      'Impuesto sobre el Incremento de Valor de Terrenos de Naturaleza Urbana',
+                  title: 'arras_interview.plusvalia_title'.tr(),
+                  subtitle: 'arras_interview.plusvalia_sub'.tr(),
                   value: _plusvaliaAssumed,
                   onChanged: (v) => setState(() => _plusvaliaAssumed = v),
                   icon: Icons.location_city_outlined,
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Acepto retencion del IBI',
-                  subtitle:
-                      'Acepto que se retenga la parte proporcional del IBI del año en curso',
+                  title: 'arras_interview.ibi_retention_seller_title'.tr(),
+                  subtitle: 'arras_interview.ibi_retention_seller_sub'.tr(),
                   value: _ibiRetentionAccepted,
                   onChanged: (v) =>
                       setState(() => _ibiRetentionAccepted = v),

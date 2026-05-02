@@ -149,7 +149,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         children: [
                           // Top Text (Behind/Above Card)
                           Text(
-                            'Sin intermediarios.\n0% comisiones.',
+                            'auth.no_intermediaries'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Outfit', // Assuming generic sans if not avail, but aiming for style
@@ -162,7 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 32),
                           Text(
-                            'Compra y vende sin comisiones.',
+                            'auth.buy_sell_no_fees'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 32,
@@ -172,7 +172,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 300), // Space for the card
                           Text(
-                            'De la búsqueda a la notaría\nen pasos seguros.',
+                            'auth.search_to_notary'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 24,
@@ -182,7 +182,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Elimina la incertidumbre.',
+                            'auth.eliminate_uncertainty'.tr(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 24,
@@ -275,7 +275,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 16),
                         
                         Text(
-                          'Inmuebles fácil entre particulares',
+                          'auth.tagline'.tr(),
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.white.withOpacity(0.9),
@@ -343,7 +343,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                                  // Header
                                  Text(
-                                   'Bienvenido de nuevo',
+                                   'auth.welcome_back'.tr(),
                                    textAlign: TextAlign.center,
                                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                      color: Theme.of(context).colorScheme.onSurface,
@@ -352,7 +352,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                  ),
                                  const SizedBox(height: 6),
                                  Text(
-                                   'Accede a tu panel seguro de InmuFácil.',
+                                   'auth.access_secure_panel'.tr(),
                                    textAlign: TextAlign.center,
                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -382,7 +382,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                                  // Email Field
                                  Text(
-                                   'CORREO ELECTRÓNICO',
+                                   'auth.email_field_label'.tr(),
                                    style: TextStyle(
                                      fontSize: 11,
                                      fontWeight: FontWeight.bold,
@@ -396,7 +396,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    textInputAction: TextInputAction.next,
                                    onFieldSubmitted: (_) => FocusScope.of(context).requestFocus(_passwordFocusNode),
                                    decoration: InputDecoration(
-                                     hintText: 'ejemplo@correo.com',
+                                     hintText: 'auth.email_hint'.tr(),
                                      hintStyle: TextStyle(color: Colors.grey[400]),
                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                      border: OutlineInputBorder(
@@ -416,11 +416,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    ),
                                    validator: (value) {
                                      if (value == null || value.isEmpty) {
-                                       return 'Por favor ingresa tu correo';
+                                       return 'auth.email_required'.tr();
                                      }
                                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                                      if (!emailRegex.hasMatch(value)) {
-                                       return 'Ingresa un correo válido';
+                                       return 'auth.email_invalid'.tr();
                                      }
                                      return null;
                                    },
@@ -432,7 +432,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                    children: [
                                      Text(
-                                       'CONTRASEÑA',
+                                       'auth.password_field_label'.tr(),
                                        style: TextStyle(
                                          fontSize: 11,
                                          fontWeight: FontWeight.bold,
@@ -451,7 +451,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                        ),
                                        child: Text(
-                                         '¿Olvidaste tu contraseña?',
+                                         'auth.forgot_password'.tr(),
                                          style: TextStyle(
                                            color: _glowBlueColor,
                                            fontWeight: FontWeight.w600,
@@ -497,7 +497,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    ),
                                    validator: (value) {
                                      if (value == null || value.isEmpty) {
-                                       return 'Por favor ingresa tu contraseña';
+                                       return 'auth.password_required'.tr();
                                      }
                                      return null;
                                    },
@@ -534,8 +534,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                           ),
                                           child: isLoading
                                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                                            : const Text(
-                                                'Entrar',
+                                            : Text(
+                                                'auth.login_button'.tr(),
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.bold,
@@ -559,8 +559,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                        minimumSize: Size.zero,
                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                      ),
-                                     child: const Text(
-                                       'Continuar sin registrarse →',
+                                     child: Text(
+                                       'auth.continue_without_account'.tr(),
                                        style: TextStyle(fontSize: 12),
                                      ),
                                    ),
@@ -573,7 +573,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                    mainAxisAlignment: MainAxisAlignment.center,
                                    children: [
                                      Text(
-                                       '¿No tienes cuenta?',
+                                       'auth.no_account'.tr(),
                                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
                                      ),
                                      TextButton(
@@ -584,7 +584,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                          ),
                                        ),
                                        child: Text(
-                                         'Regístrate',
+                                         'auth.register_link'.tr(),
                                          style: TextStyle(
                                            color: _glowBlueColor,
                                            fontWeight: FontWeight.bold,
@@ -613,16 +613,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                              icon: Icons.shield,
                              iconColor: const Color(0xFF16A34A),
                              bgColor: const Color(0xFFDCFCE7),
-                             label: 'GARANTÍA INMUFÁCIL',
-                             title: 'Tu venta tranquila',
+                             label: 'auth.guarantee_label'.tr(),
+                             title: 'auth.guarantee_title'.tr(),
                            ),
                            _buildTrustBadgeSimple(
                              context,
                              icon: Icons.lock,
                              iconColor: const Color(0xFF2563EB),
                              bgColor: const Color(0xFFDBEAFE),
-                             label: 'P2P VERIFICADO',
-                             title: 'Tu compra segura',
+                             label: 'auth.p2p_verified_label'.tr(),
+                             title: 'auth.p2p_verified_title'.tr(),
                            ),
                         ],
                       ),
