@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
@@ -88,14 +90,15 @@ class TrustDashboardScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('transaction.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
               ),
             ),
           ),
@@ -123,13 +126,14 @@ class TrustDashboardScreen extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Este pasaporte es exclusivo para compradores. Solo es necesario si tu intencion es adquirir una propiedad.',
+                    'solvency_dashboard.buyer_exclusive'.tr(),
                     style: TextStyle(fontSize: 12, color: _kBlue, height: 1.4),
                   ),
                 ),
               ],
             ),
           ),
+
           Expanded(
             child: solvencyAsync.when(
               loading: () => const Center(child: CircularProgressIndicator(color: _kBlue)),
@@ -162,13 +166,13 @@ class TrustDashboardScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Sin pasaporte de solvencia',
+              'solvency_dashboard.no_passport_title'.tr(),
               style: TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(height: 10),
             Text(
-              'Completa el Pasaporte de Solvencia Consciente para obtener tu nivel de confianza.',
+              'solvency_dashboard.no_passport_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
@@ -177,7 +181,8 @@ class TrustDashboardScreen extends ConsumerWidget {
             FilledButton.icon(
               onPressed: () => context.go('/solvency/wizard'),
               icon: const Icon(Icons.verified_user_outlined),
-              label: const Text('Completar pasaporte'),
+              label: Text('solvency_dashboard.complete_btn'.tr()),
+
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
                 shape: RoundedRectangleBorder(
@@ -263,7 +268,7 @@ class _LevelHeroCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Nivel de confianza de $userName',
+            'solvency_dashboard.level_trust_of'.tr(namedArgs: {'name': userName}),
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           if (isMultiBuyer) ...[
@@ -275,13 +280,13 @@ class _LevelHeroCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white.withOpacity(0.5)),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.group, color: Colors.white, size: 14),
-                  SizedBox(width: 5),
-                  Text('Solvencia Conjunta',
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                  const Icon(Icons.group, color: Colors.white, size: 14),
+                  const SizedBox(width: 5),
+                  Text('solvency_dashboard.joint_solvency'.tr(),
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
                 ],
               ),
             ),
@@ -308,31 +313,32 @@ class _TrustFactorsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final factors = [
       _Factor(
-        label: 'Conoce los gastos adicionales',
+        label: 'transaction.solvency_knows_extra_costs'.tr(),
         value: passport.knowsExtraCosts == true,
         icon: Icons.school_outlined,
       ),
       _Factor(
-        label: 'Ratio de endeudamiento < 35%',
+        label: 'solvency_dashboard.debt_ratio'.tr(),
         value: (passport.debtRatio ?? 1.0) < 0.35,
         icon: Icons.trending_down_outlined,
       ),
       _Factor(
-        label: 'Fondo de emergencia',
+        label: 'solvency_dashboard.emergency_fund'.tr(),
         value: passport.hasEmergencyFund == true,
         icon: Icons.savings_outlined,
       ),
       _Factor(
-        label: 'Ahorros iniciales',
+        label: 'transaction.solvency_initial_savings'.tr(),
         value: passport.hasInitialSavings == true,
         icon: Icons.account_balance_wallet_outlined,
       ),
       _Factor(
-        label: 'Preaprobacion hipotecaria',
+        label: 'transaction.solvency_pre_approval'.tr(),
         value: passport.hasPreApproval == true,
         icon: Icons.verified_outlined,
       ),
     ];
+
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -345,7 +351,7 @@ class _TrustFactorsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Factores de confianza',
+            'solvency_dashboard.trust_factors'.tr(),
             style: TextStyle(
                 fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
@@ -388,20 +394,21 @@ class _LevelExplainerCard extends StatelessWidget {
     final levels = [
       _LevelInfo(
         level: _TrustLevel.bronze,
-        range: '0-3 puntos',
-        description: 'Inicio del proceso. Completa mas factores para subir de nivel.',
+        range: '0-3 points',
+        description: 'solvency_dashboard.bronze_desc'.tr(),
       ),
       _LevelInfo(
         level: _TrustLevel.silver,
-        range: '4-5 puntos',
-        description: 'Buena solvencia. Los vendedores confian en tu capacidad de compra.',
+        range: '4-5 points',
+        description: 'solvency_dashboard.silver_desc'.tr(),
       ),
       _LevelInfo(
         level: _TrustLevel.gold,
-        range: '6-7 puntos',
-        description: 'Maxima confianza. Hipoteca aprobada o pago al contado con todos los factores.',
+        range: '6-7 points',
+        description: 'solvency_dashboard.gold_desc'.tr(),
       ),
     ];
+
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -414,7 +421,7 @@ class _LevelExplainerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Escala de confianza',
+            'solvency_dashboard.trust_scale'.tr(),
             style: TextStyle(
                 fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
@@ -480,24 +487,25 @@ class _BenefitsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final allBenefits = {
       _TrustLevel.bronze: [
-        'Puedes hacer ofertas en propiedades',
-        'El vendedor ve tu nivel en el pasaporte',
+        'solvency_dashboard.benefit_make_offers'.tr(),
+        'solvency_dashboard.benefit_seller_sees'.tr(),
       ],
       _TrustLevel.silver: [
-        'Puedes hacer ofertas en propiedades',
-        'El vendedor ve tu nivel en el pasaporte',
-        'Mayor probabilidad de que el vendedor acepte',
-        'Acceso a financiacion con condiciones preferentes',
+        'solvency_dashboard.benefit_make_offers'.tr(),
+        'solvency_dashboard.benefit_seller_sees'.tr(),
+        'solvency_dashboard.benefit_higher_prob'.tr(),
+        'solvency_dashboard.benefit_financing'.tr(),
       ],
       _TrustLevel.gold: [
-        'Puedes hacer ofertas en propiedades',
-        'El vendedor ve tu nivel en el pasaporte',
-        'Mayor probabilidad de que el vendedor acepte',
-        'Acceso a financiacion con condiciones preferentes',
-        'Prioridad en las visitas solicitadas',
-        'Insignia "Comprador Certificado" visible en tu perfil',
+        'solvency_dashboard.benefit_make_offers'.tr(),
+        'solvency_dashboard.benefit_seller_sees'.tr(),
+        'solvency_dashboard.benefit_higher_prob'.tr(),
+        'solvency_dashboard.benefit_financing'.tr(),
+        'solvency_dashboard.benefit_priority_visits'.tr(),
+        'solvency_dashboard.benefit_certified_badge'.tr(),
       ],
     };
+
 
     final benefits = allBenefits[level] ?? allBenefits[_TrustLevel.bronze]!;
     final config = _levelConfig(level);
@@ -513,7 +521,7 @@ class _BenefitsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Ventajas de tu nivel ${config.label}',
+            'solvency_dashboard.benefits_title'.tr(namedArgs: {'level': config.label}),
             style: TextStyle(
                 fontSize: 15, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
           ),
@@ -572,9 +580,11 @@ class _ExpiryCard extends StatelessWidget {
           Expanded(
             child: Text(
               isExpiringSoon
-                  ? 'Tu pasaporte caduca en $daysLeft dias. Renuvalo para mantener tu nivel.'
-                  : 'Pasaporte valido. Caduca en $daysLeft dias '
-                      '(${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year}).',
+                  ? 'solvency_dashboard.expiry_soon'.tr(namedArgs: {'days': daysLeft.toString()})
+                  : 'solvency_dashboard.expiry_valid'.tr(namedArgs: {
+                      'days': daysLeft.toString(),
+                      'date': '${expiresAt!.day}/${expiresAt!.month}/${expiresAt!.year}'
+                    }),
               style: TextStyle(
                 fontSize: 13,
                 color: isExpiringSoon ? Theme.of(context).colorScheme.onErrorContainer : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -606,25 +616,28 @@ class _LevelConfig {
 _LevelConfig _levelConfig(_TrustLevel level) {
   switch (level) {
     case _TrustLevel.gold:
-      return const _LevelConfig(
-        label: 'Oro',
+      return _LevelConfig(
+        label: 'transaction.solvency_level_gold'.tr(),
         icon: Icons.emoji_events,
-        gradient: [Color(0xFFB8860B), Color(0xFFDAA520)],
-        description: 'Maxima confianza. Financiacion solida y total conciencia financiera.',
+        gradient: const [Color(0xFFB8860B), Color(0xFFDAA520)],
+        description: 'solvency_dashboard.gold_desc'.tr(),
       );
+
     case _TrustLevel.silver:
-      return const _LevelConfig(
-        label: 'Plata',
+      return _LevelConfig(
+        label: 'transaction.solvency_level_silver'.tr(),
         icon: Icons.workspace_premium,
-        gradient: [Color(0xFF64748B), Color(0xFF94A3B8)],
-        description: 'Buena solvencia. Los vendedores valoraran positivamente tu oferta.',
+        gradient: const [Color(0xFF64748B), Color(0xFF94A3B8)],
+        description: 'solvency_dashboard.silver_desc'.tr(),
       );
+
     case _TrustLevel.bronze:
-      return const _LevelConfig(
-        label: 'Bronce',
+      return _LevelConfig(
+        label: 'transaction.solvency_level_bronze'.tr(),
         icon: Icons.military_tech,
-        gradient: [Color(0xFFB45309), Color(0xFFD97706)],
-        description: 'Nivel inicial. Completa mas factores para mejorar tu nivel de confianza.',
+        gradient: const [Color(0xFFB45309), Color(0xFFD97706)],
+        description: 'solvency_dashboard.bronze_desc'.tr(),
       );
+
   }
 }

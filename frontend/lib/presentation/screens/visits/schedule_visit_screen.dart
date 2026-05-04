@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -54,16 +55,16 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
 
     ref.listen<BookingState>(bookVisitProvider, (_, next) {
       if (next.status == BookingStatus.success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Visita solicitada correctamente'),
-          backgroundColor: Color(0xFF16A34A),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('visits.success_requested'.tr()),
+          backgroundColor: const Color(0xFF16A34A),
         ));
         ref.read(bookVisitProvider.notifier).reset();
         ref.invalidate(activeVisitForPropertyProvider(widget.propertyId));
         context.pop();
       } else if (next.status == BookingStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(next.errorMessage ?? 'Error al reservar'),
+          content: Text(next.errorMessage ?? 'visits.error_booking'.tr()),
           backgroundColor: Colors.red,
         ));
         ref.read(bookVisitProvider.notifier).reset();
@@ -92,14 +93,14 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                   child: const Icon(Icons.event_available, size: 32, color: Color(0xFF135BEC)),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Ya tienes una visita agendada para esta propiedad',
+                Text(
+                  'visits.already_scheduled_title'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Estado: ${activeVisit.status == "requested" ? "Pendiente de confirmacion" : "Confirmada"}',
+                  'visits.status_label'.tr(namedArgs: {'status': activeVisit.status == 'requested' ? 'visits.status_pending_confirm'.tr() : 'visits.status_confirmed'.tr()}),
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 8),
@@ -111,7 +112,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                 FilledButton.icon(
                   onPressed: () => context.push('/profile?tab=3'),
                   icon: const Icon(Icons.calendar_month),
-                  label: const Text('Ver mis visitas'),
+                  label: Text('visits.view_my_visits'.tr()),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF135BEC),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -218,7 +219,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 28),
               const SizedBox(width: 8),
-              const Text.rich(
+              Text.rich(
                 TextSpan(
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                   children: [
@@ -251,12 +252,13 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                   ),
                 ],
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   Icon(Icons.home_rounded, size: 16, color: Colors.white),
                   SizedBox(width: 5),
-                  Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                  Text('common.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+
                 ],
               ),
             ),
@@ -281,13 +283,13 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
           Icon(Icons.calendar_today_outlined,
               size: 48, color: Colors.grey.shade400),
           const SizedBox(height: 12),
-          const Text('No hay horarios disponibles',
+          Text('visits.no_slots_available'.tr(),
               style: TextStyle(color: Color(0xFF64748B))),
           const SizedBox(height: 12),
           TextButton(
             onPressed: () =>
                 ref.invalidate(slotsProvider(widget.propertyId)),
-            child: const Text('Reintentar'),
+            child: Text('common.retry'.tr()),
           ),
         ],
       ),
@@ -384,14 +386,14 @@ class _PropertyCard extends StatelessWidget {
                 color: const Color(0xFFDCFCE7),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
+              child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                   Icon(Icons.verified,
                       size: 13, color: Color(0xFF16A34A)),
                   SizedBox(width: 3),
                   Text(
-                    'Verificado',
+                    'common.verified'.tr(),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -464,8 +466,8 @@ class _DateTimeCard extends StatelessWidget {
                     size: 18, color: Color(0xFF135BEC)),
               ),
               const SizedBox(width: 10),
-              const Text(
-                'Selecciona Fecha y Hora',
+              Text(
+                'visits.select_date_time'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -569,8 +571,8 @@ class _SlotsPanel extends StatelessWidget {
           children: [
             const Icon(Icons.access_time_rounded, size: 14, color: Color(0xFF64748B)),
             const SizedBox(width: 6),
-            const Text(
-              'HORAS DISPONIBLES',
+            Text(
+              'visits.available_hours'.tr(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -587,7 +589,7 @@ class _SlotsPanel extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  '${slots.where((s) => s.isAvailable).length} libres',
+                  'visits.free_slots'.tr(namedArgs: {'count': slots.where((s) => s.isAvailable).length.toString()}),
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
@@ -607,7 +609,7 @@ class _SlotsPanel extends StatelessWidget {
                 Icon(Icons.touch_app_outlined, size: 32, color: Colors.grey.shade300),
                 const SizedBox(height: 8),
                 Text(
-                  'Selecciona un dia con disponibilidad\npara ver los horarios',
+                  'visits.select_day_hint'.tr(),
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade400,
@@ -717,8 +719,8 @@ class _NotesField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Notas para el vendedor (opcional)',
+              Text(
+            'visits.notes_label'.tr(),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -732,7 +734,7 @@ class _NotesField extends StatelessWidget {
             style: const TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
             decoration: InputDecoration(
               hintText:
-                  'Ej., ¿Hay ascensor? ¿Se aceptan mascotas en el edificio?',
+                  'visits.notes_hint'.tr(),
               hintStyle:
                   TextStyle(fontSize: 13, color: Colors.grey.shade400),
               filled: true,
@@ -784,8 +786,8 @@ class _TrustBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Visita Protegida por InmuFácil',
+              Text(
+                  'visits.protected_visit_title'.tr(),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -794,7 +796,7 @@ class _TrustBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'La identidad del vendedor ha sido verificada. Tus datos solo se compartirán para coordinar la visita.',
+                  'visits.protected_visit_desc'.tr(),
                   style: TextStyle(
                       fontSize: 12, color: Colors.blue.shade700, height: 1.4),
                 ),
@@ -824,6 +826,11 @@ class _BottomBar extends StatelessWidget {
   final BookingState bookingState;
   final VoidCallback onConfirm;
 
+  String _getMonthKey(int m) {
+    const keys = ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    return keys[m];
+  }
+
   String _shortMonth(int m) {
     const names = [
       '', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
@@ -838,7 +845,7 @@ class _BottomBar extends StatelessWidget {
     final t = selectedSlot!.startTime;
     final hour = t.hour.toString().padLeft(2, '0');
     final min = t.minute.toString().padLeft(2, '0');
-    return 'Visita: ${d.day} ${_shortMonth(d.month)} a las $hour:$min';
+    return 'visits.visit_summary_text'.tr(namedArgs: {'day': d.day.toString(), 'month': 'time.short_months.' + _getMonthKey(d.month).tr(), 'time': hour + ':' + min});
   }
 
   bool get _isLoading => bookingState.status == BookingStatus.loading;
@@ -870,8 +877,8 @@ class _BottomBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'RESUMEN DE VISITA',
+              Text(
+                    'visits.visit_summary'.tr(),
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
@@ -888,7 +895,7 @@ class _BottomBar extends StatelessWidget {
                       Text(
                         selectedSlot != null
                             ? _summaryText
-                            : 'Selecciona fecha y hora',
+                            : 'visits.select_date_time'.tr(),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -921,8 +928,8 @@ class _BottomBar extends StatelessWidget {
                       child: CircularProgressIndicator(
                           color: Colors.white, strokeWidth: 2),
                     )
-                  : const Text(
-                      'Confirmar Solicitud',
+                  : Text(
+                      'visits.confirm_request'.tr(),
                       style: TextStyle(
                           fontSize: 14, fontWeight: FontWeight.w700),
                     ),
@@ -983,7 +990,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${_monthName(_focusedMonth.month)} ${_focusedMonth.year}',
+              '${'time.months.' + _getMonthKeyLong(_focusedMonth.month).tr()} ${_focusedMonth.year}',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
@@ -1015,7 +1022,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
 
         // Day-of-week headers — Monday first
         Row(
-          children: const ['LU', 'MA', 'MI', 'JU', 'VI', 'SA', 'DO']
+          children: ['time.weekdays_short.mon'.tr(), 'time.weekdays_short.tue'.tr(), 'time.weekdays_short.wed'.tr(), 'time.weekdays_short.thu'.tr(), 'time.weekdays_short.fri'.tr(), 'time.weekdays_short.sat'.tr(), 'time.weekdays_short.sun'.tr()]
               .map((d) => Expanded(
                     child: Center(
                       child: Text(
@@ -1127,6 +1134,11 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
   bool _sameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
+  String _getMonthKeyLong(int m) {
+    const keys = ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    return keys[m];
+  }
+
   String _monthName(int month) {
     const names = [
       '',
@@ -1194,14 +1206,14 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
 
     ref.listen<EmailRequestState>(requestVisitByEmailProvider, (_, next) {
       if (next.status == EmailRequestStatus.success) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Solicitud enviada al vendedor por email'),
-          backgroundColor: Color(0xFF16A34A),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('visits.email_request_success'.tr()),
+          backgroundColor: const Color(0xFF16A34A),
         ));
         ref.read(requestVisitByEmailProvider.notifier).reset();
       } else if (next.status == EmailRequestStatus.error) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(next.errorMessage ?? 'Error al enviar la solicitud'),
+          content: Text(next.errorMessage ?? 'visits.email_request_error'.tr()),
           backgroundColor: Colors.red,
         ));
         ref.read(requestVisitByEmailProvider.notifier).reset();
@@ -1240,8 +1252,8 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
                       size: 32, color: Color(0xFFF97316)),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'El vendedor aun no ha configurado horarios de visita',
+                Text(
+                  'visits.no_seller_windows'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -1251,8 +1263,7 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Puedes enviarle una solicitud por email para que abra '
-                  'su disponibilidad y puedas reservar una cita.',
+                  'visits.no_seller_windows_desc'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -1269,7 +1280,7 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
                   maxLength: 500,
                   style: const TextStyle(fontSize: 14, color: Color(0xFF1E293B)),
                   decoration: InputDecoration(
-                    hintText: 'Mensaje para el vendedor (opcional)',
+                    hintText: 'visits.email_message_label'.tr(),
                     hintStyle:
                         TextStyle(fontSize: 13, color: Colors.grey.shade400),
                     filled: true,
@@ -1314,8 +1325,8 @@ class _NoSlotsEmailRequestState extends ConsumerState<_NoSlotsEmailRequest> {
                         : const Icon(Icons.email_outlined),
                     label: Text(
                       isLoading
-                          ? 'Enviando...'
-                          : 'Solicitar visita por email',
+                          ? 'common.sending'.tr()
+                          : 'visits.request_visit_email_btn'.tr(),
                       style: const TextStyle(
                           fontSize: 15, fontWeight: FontWeight.w700),
                     ),

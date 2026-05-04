@@ -54,7 +54,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     try {
       final token = await _notaryStorage.read(key: 'auth_token');
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -86,7 +86,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
 
       // Confirma firma en notaria — este es el paso crítico que abre Post-Venta.
       await dio.post(
-        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/confirm',
+        '${EnvConfig.apiBaseUrl}/notaria-appt/${widget.offer.id}/confirm',
         options: Options(headers: headers),
       );
 
@@ -94,7 +94,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
       // no exista aún o ya esté confirmado), la firma de notaria es suficiente.
       try {
         await dio.post(
-          '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/confirm',
+          '${EnvConfig.apiBaseUrl}/entrega-llaves/${widget.offer.id}/confirm',
           options: Options(headers: headers),
         );
       } on DioException {
@@ -169,20 +169,20 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
+                    color: const Color(0xFF135BEC).withOpacity(0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text(
-                    'Inicio',
-                    style: TextStyle(
+                    'common.home_btn'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -196,12 +196,12 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
             builder: (context, ref, _) {
               final isAuthenticated = ref.watch(authProvider).isAuthenticated;
               if (!isAuthenticated) return const SizedBox.shrink();
-              return const Row(
+              return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(width: 12),
-                  UserAvatarMenu(),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 12),
+                  const UserAvatarMenu(),
+                  const SizedBox(width: 16),
                 ],
               );
             },

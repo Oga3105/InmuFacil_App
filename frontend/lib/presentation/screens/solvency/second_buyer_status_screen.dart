@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -63,7 +64,7 @@ class _SecondBuyerStatusScreenState
                 TextButton(
                   onPressed: () =>
                       ref.invalidate(solvency_prov.secondBuyerStatusProvider),
-                  child: const Text('Reintentar'),
+                  child: Text('common.retry'.tr()),
                 ),
               ],
             ),
@@ -111,12 +112,12 @@ class _SecondBuyerStatusScreenState
                   style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.w800),
                   children: [
-                    TextSpan(
+                    const TextSpan(
                         text: 'Inmu',
                         style: TextStyle(color: Color(0xFF135BEC))),
                     TextSpan(
                         text: 'Fácil',
-                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Color(0xFF4ADE80) : Color(0xFF16A34A))),
+                        style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
                   ],
                 ),
               ),
@@ -149,7 +150,7 @@ class _SecondBuyerStatusScreenState
                 children: [
                   Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
                   const SizedBox(width: 6),
-                  Text('Inicio',
+                  Text('common.home_btn'.tr(),
                       style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontWeight: FontWeight.w600,
@@ -159,8 +160,8 @@ class _SecondBuyerStatusScreenState
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 16),
+        const Padding(
+          padding: EdgeInsets.only(right: 16),
           child: UserAvatarMenu(),
         ),
       ],
@@ -213,7 +214,7 @@ class _SecondBuyerStatusScreenState
                       size: 18, color: Colors.orange.shade700),
                   const SizedBox(width: 8),
                   Text(
-                    'VERIFICACIÓN EN CURSO',
+                    'kyc.verification_in_progress'.tr(),
                     style: TextStyle(
                       color: Colors.orange.shade700,
                       fontWeight: FontWeight.w700,
@@ -237,7 +238,7 @@ class _SecondBuyerStatusScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              'Estamos verificando al segundo titular',
+              'solvency.verifying_second_buyer'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -247,7 +248,7 @@ class _SecondBuyerStatusScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Nuestro sistema de IA está comparando el rostro con el documento oficial. Esto puede tardar unos minutos.',
+              'solvency.ai_verifying_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
             ),
@@ -257,7 +258,7 @@ class _SecondBuyerStatusScreenState
             OutlinedButton.icon(
               onPressed: () => context.go('/'),
               icon: const Icon(Icons.home_outlined),
-              label: const Text('Volver al Inicio'),
+              label: Text('common.back_to_home'.tr()),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 24, vertical: 12),
@@ -297,10 +298,9 @@ class _SecondBuyerStatusScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
             color: greenColor,
-            child: const Center(
-              child: Text(
-                '2° TITULAR VERIFICADO',
-                style: TextStyle(
+            child: Center(child: Text(
+                'solvency.second_buyer_verified'.tr(),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
@@ -336,7 +336,7 @@ class _SecondBuyerStatusScreenState
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Identidad confirmada',
+                  'kyc.identity_verified'.tr(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -345,7 +345,7 @@ class _SecondBuyerStatusScreenState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'El segundo titular ha superado la verificación biométrica. Podéis continuar con el proceso de compraventa.',
+                  'solvency.second_buyer_verified_desc'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                 ),
@@ -355,7 +355,7 @@ class _SecondBuyerStatusScreenState
                 ElevatedButton.icon(
                   onPressed: () => context.go('/'),
                   icon: const Icon(Icons.arrow_forward),
-                  label: const Text('Continuar'),
+                  label: Text('common.continue_btn'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: greenColor,
                     foregroundColor: Colors.white,
@@ -397,10 +397,9 @@ class _SecondBuyerStatusScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
             color: Colors.red.shade600,
-            child: const Center(
-              child: Text(
-                'VERIFICACIÓN RECHAZADA',
-                style: TextStyle(
+            child: Center(child: Text(
+                'kyc.verification_failed'.tr(),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
@@ -425,7 +424,7 @@ class _SecondBuyerStatusScreenState
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'No se pudo verificar la identidad',
+                  'kyc.could_not_verify'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
@@ -452,7 +451,7 @@ class _SecondBuyerStatusScreenState
                 ],
                 const SizedBox(height: 8),
                 Text(
-                  'Asegúrate de que las imágenes sean nítidas y que el rostro sea claramente visible.',
+                  'kyc.unreadable_body'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 14),
                 ),
@@ -461,7 +460,7 @@ class _SecondBuyerStatusScreenState
                   onPressed: () =>
                       context.go('/solvency/second-buyer'),
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Intentar de nuevo'),
+                  label: Text('common.try_again'.tr()),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.onSurface,
                     foregroundColor: colorScheme.surface,
@@ -484,11 +483,11 @@ class _SecondBuyerStatusScreenState
   Widget _buildProgressSteps({required int step}) {
     return Row(
       children: [
-        _buildStep('Enviado', Icons.check_circle, step >= 1),
+        _buildStep('kyc.submitted_step'.tr(), Icons.check_circle, step >= 1),
         _buildStepConnector(step >= 2),
-        _buildStep('Validando', Icons.pending, step >= 2),
+        _buildStep('kyc.validating_step'.tr(), Icons.pending, step >= 2),
         _buildStepConnector(step >= 3),
-        _buildStep('Listo', Icons.verified, step >= 3),
+        _buildStep('kyc.ready_step'.tr(), Icons.verified, step >= 3),
       ],
     );
   }

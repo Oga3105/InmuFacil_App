@@ -9,6 +9,8 @@ import '../common/share_bottom_sheet.dart';
 import '../common/time_badge.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/offers_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 class PropertyListingItem extends ConsumerWidget {
 
@@ -147,9 +149,10 @@ class PropertyListingItem extends ConsumerWidget {
                 spacing: 16,
                 runSpacing: 8,
                 children: [
-                  _buildStat(Icons.bed, '${property.bedrooms} Hab.', onSurface, onSurfaceVariant),
-                  _buildStat(Icons.bathtub_outlined, '${property.bathrooms} Baños', onSurface, onSurfaceVariant),
-                  _buildStat(Icons.square_foot, '${property.squareMeters} m²', onSurface, onSurfaceVariant),
+                  _buildStat(Icons.bed, '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}', onSurface, onSurfaceVariant),
+                  _buildStat(Icons.bathtub_outlined, '${property.bathrooms} ${'property_listing.bathrooms_unit'.tr()}', onSurface, onSurfaceVariant),
+
+                  _buildStat(Icons.square_foot, '${property.squareMeters} ${'property_listing.sqm_unit'.tr()}', onSurface, onSurfaceVariant),
                   if (property.floor != null)
                     _buildStat(Icons.apartment, '${property.floor}', onSurface, onSurfaceVariant),
                 ],
@@ -196,14 +199,14 @@ class PropertyListingItem extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: successGreen.withOpacity(0.2)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.verified, size: 16, color: successGreen),
-                        SizedBox(width: 6),
+                        const Icon(Icons.verified, size: 16, color: successGreen),
+                        const SizedBox(width: 6),
                         Text(
-                          'VENDEDOR VERIFICADO',
-                          style: TextStyle(
+                          'property_listing.verified_seller'.tr(),
+                          style: const TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
                             color: successGreen,
@@ -212,6 +215,7 @@ class PropertyListingItem extends ConsumerWidget {
                         ),
                       ],
                     ),
+
                   ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -220,11 +224,13 @@ class PropertyListingItem extends ConsumerWidget {
                       icon: const Icon(Icons.share_outlined),
                       color: onSurfaceVariant,
                       onPressed: () => showShareBottomSheet(context, property),
-                      tooltip: 'Compartir',
+                      tooltip: 'property_listing.share'.tr(),
+
                     ),
                     const SizedBox(width: 8),
                     PremiumButton(
-                      label: 'Contactar Particular',
+                      label: 'property_listing.contact_owner'.tr(),
+
                       icon: Icons.chat_bubble_outline,
                       color: brandBlue,
                       fullWidth: false,
@@ -295,7 +301,8 @@ class PropertyListingItem extends ConsumerWidget {
 
   static String _obfuscateAddress(String address) {
     if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
-      return 'Ubicación protegida';
+      return 'property_listing.protected_location'.tr();
+
     }
     final parts = address.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) {
@@ -360,8 +367,9 @@ class PropertyListingItem extends ConsumerWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             child: Builder(
-              builder: (ctx) => Text('Cancelar',
+              builder: (ctx) => Text('property_listing.cancel'.tr(),
                 style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant)),
+
             ),
           ),
           FilledButton(
@@ -369,7 +377,8 @@ class PropertyListingItem extends ConsumerWidget {
             style: FilledButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(cta),
+             child: Text(cta),
+
           ),
         ],
       ),
@@ -382,11 +391,12 @@ class PropertyListingItem extends ConsumerWidget {
     if (!isLoggedIn) {
       _showRequirementsDialog(
         context,
-        title: 'Cuenta requerida',
-        message: 'Debes estar registrado para contactar con el propietario de esta propiedad.',
+        title: 'property_listing.account_required_title'.tr(),
+        message: 'property_listing.account_required_msg'.tr(),
         icon: Icons.person_outline,
-        cta: 'Iniciar sesión',
+        cta: 'property_listing.login_btn'.tr(),
         onCta: () { Navigator.of(context).pop(); context.pushNamed('login'); },
+
       );
       return;
     }
@@ -395,11 +405,12 @@ class PropertyListingItem extends ConsumerWidget {
     if (!isVerified) {
       _showRequirementsDialog(
         context,
-        title: 'Verificación requerida',
-        message: 'Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.',
+        title: 'property_listing.verification_required_title'.tr(),
+        message: 'property_listing.verification_required_msg'.tr(),
         icon: Icons.verified_user_outlined,
-        cta: 'Verificar identidad',
+        cta: 'property_listing.verify_identity_btn'.tr(),
         onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
+
       );
       return;
     }
@@ -420,15 +431,14 @@ class PropertyListingItem extends ConsumerWidget {
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: const Text('Haz una oferta primero'),
-          content: const Text(
-            'El chat privado con el vendedor se abre al hacer una oferta. '
-            'Ambas partes pueden chatear desde ese momento.',
+          title: Text('property_listing.make_offer_first_title'.tr()),
+          content: Text(
+            'property_listing.make_offer_first_msg'.tr(),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
+              child: Text('property_listing.understood'.tr()),
             ),
             FilledButton(
               onPressed: () {
@@ -436,9 +446,10 @@ class PropertyListingItem extends ConsumerWidget {
                 context.push('/property/${property.id}/offer');
               },
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: const Text('Hacer Oferta'),
+              child: Text('property_listing.make_offer_btn'.tr()),
             ),
           ],
+
         ),
       );
       return;

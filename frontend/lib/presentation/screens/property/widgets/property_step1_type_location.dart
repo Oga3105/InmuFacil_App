@@ -597,7 +597,8 @@ class _PropertyStep1TypeLocationState
             child: FloatingActionButton(
               heroTag: 'step1_my_location',
               onPressed: _locating ? null : _goToMyLocation,
-              tooltip: 'Mi ubicación',
+              tooltip: 'map.my_location_tooltip'.tr(),
+
               elevation: 2,
               backgroundColor: Theme.of(context).colorScheme.surface,
               foregroundColor: Colors.black87,
@@ -631,9 +632,9 @@ class _PropertyStep1TypeLocationState
       ref.read(propertyFormProvider.notifier).setLocation(result.location);
       if (result.isFallback) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text('map.location_error'.tr()),
+            duration: const Duration(seconds: 3),
           ),
         );
       }

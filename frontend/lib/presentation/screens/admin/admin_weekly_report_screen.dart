@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 import '../../../core/services/ai_metrics_service.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -139,14 +141,16 @@ class AdminWeeklyReportScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('transaction.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
+
               ),
             ),
           ),
@@ -166,10 +170,11 @@ class AdminWeeklyReportScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(32),
             child: Text(
-              'Error al cargar el informe: $err',
+              'admin.weekly_error'.tr(namedArgs: {'error': err.toString()}),
               style: const TextStyle(color: Color(0xFFEF4444)),
               textAlign: TextAlign.center,
             ),
+
           ),
         ),
         data: (stats) => _WeeklyReportBody(stats: stats),
@@ -190,15 +195,15 @@ class _WeeklyReportBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _SectionHeader(title: 'Resumen de la semana'),
+        _SectionHeader(title: 'admin.weekly_summary'.tr()),
         const SizedBox(height: 16),
         _StatsGrid(stats: stats),
         const SizedBox(height: 24),
-        _SectionHeader(title: 'Distribucion de llamadas'),
+        _SectionHeader(title: 'admin.weekly_distribution'.tr()),
         const SizedBox(height: 16),
         _CallDistributionCard(stats: stats),
         const SizedBox(height: 24),
-        _SectionHeader(title: 'Impacto economico estimado'),
+        _SectionHeader(title: 'admin.weekly_impact'.tr()),
         const SizedBox(height: 16),
         _EconomicImpactCard(stats: stats),
       ],
@@ -251,29 +256,33 @@ class _StatsGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           children: [
             _StatCard(
-              label: 'Llamadas IA esta semana',
+              label: 'admin.weekly_calls_label'.tr(),
               value: stats.totalCalls.toString(),
               icon: Icons.bolt_rounded,
               color: _kBlue,
             ),
+
             _StatCard(
-              label: 'Tasa de exito',
+              label: 'admin.weekly_success_rate'.tr(),
               value: '${stats.successRate.toStringAsFixed(1)} %',
               icon: Icons.check_circle_outline_rounded,
               color: _kGreen,
             ),
+
             _StatCard(
-              label: 'Ahorro estimado',
+              label: 'admin.weekly_savings_label'.tr(),
               value: '${stats.estimatedCostSaved} \u20AC',
               icon: Icons.savings_outlined,
               color: _kGreen,
             ),
+
             _StatCard(
-              label: 'Latencia media',
+              label: 'admin.weekly_latency_label'.tr(),
               value: '${stats.averageLatencyMs} ms',
               icon: Icons.timer_outlined,
               color: _kOrange,
             ),
+
           ],
         );
       },
@@ -376,18 +385,20 @@ class _CallDistributionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DistributionRow(
-            label: 'Llamadas exitosas',
+            label: 'admin.weekly_calls_success'.tr(),
             count: stats.successfulCalls,
             total: total,
             color: _kGreen,
           ),
+
           const SizedBox(height: 12),
           _DistributionRow(
-            label: 'Llamadas fallidas',
+            label: 'admin.weekly_calls_failed'.tr(),
             count: stats.failedCalls,
             total: total,
             color: const Color(0xFFEF4444),
           ),
+
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
@@ -401,10 +412,14 @@ class _CallDistributionCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             total == 0
-                ? 'Sin datos para esta semana'
-                : '${stats.successfulCalls} de $total llamadas completadas con exito',
+                ? 'admin.weekly_no_data'.tr()
+                : 'admin.weekly_completed_desc'.tr(namedArgs: {
+                    'success': stats.successfulCalls.toString(),
+                    'total': total.toString()
+                  }),
             style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
           ),
+
         ],
       ),
     );
@@ -495,18 +510,20 @@ class _EconomicImpactCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${stats.estimatedCostSaved} \u20AC ahorrados esta semana',
+                      'admin.weekly_savings_title'.tr(namedArgs: {'amount': stats.estimatedCostSaved.toString()}),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: _kGreen,
                       ),
                     ),
+
                     Text(
-                      'Frente al proceso manual equivalente',
+                      'admin.weekly_manual_comparison'.tr(),
                       style: TextStyle(
                           fontSize: 12, color: Colors.grey.shade500),
                     ),
+
                   ],
                 ),
               ),
@@ -527,12 +544,13 @@ class _EconomicImpactCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Calculo basado en 0,002 EUR por llamada IA vs coste estimado de proceso manual.',
+                    'admin.weekly_calculation_desc'.tr(),
                     style: TextStyle(
                         fontSize: 12,
                         color: _kGreen.withOpacity(0.85),
                         height: 1.4),
                   ),
+
                 ),
               ],
             ),

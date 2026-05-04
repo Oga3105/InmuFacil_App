@@ -297,7 +297,7 @@ class _MapSection extends ConsumerWidget {
             right: 0,
             child: Center(
               child: _PremiumGlowButton(
-                label: 'Ver $propertyCount Inmuebles',
+                label: 'home.view_properties_count'.tr(args: [propertyCount.toString()]),
                 onPressed: () {
                   ref.read(searchProvider.notifier).clearError();
                   context.pushNamed('search', queryParameters: {'fromMap': 'true'});
@@ -339,7 +339,7 @@ class _MapSection extends ConsumerWidget {
                      const SizedBox(width: 8),
                      Flexible(
                        child: Text(
-                        '0 inmuebles encontrados',
+                        'home.no_results_found'.tr(),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
@@ -438,9 +438,9 @@ class _SearchPanel extends ConsumerWidget {
                               letterSpacing: -1.0, // tracking-tight
                             ),
                             children: [
-                              const TextSpan(text: 'Sin intermediarios.\n'),
+                              TextSpan(text: 'home.hero_title_part1'.tr() + '\n'),
                               TextSpan(
-                                text: '0% comisiones.',
+                                text: 'home.hero_title_part2'.tr(),
                                 style: TextStyle(color: theme.colorScheme.primary), // text-primary #2563EB specified
                               ),
                             ],
@@ -451,7 +451,7 @@ class _SearchPanel extends ConsumerWidget {
                         
                         // Subtitle: "Compra y vende sin comisiones."
                         Text(
-                          'Compra y vende sin comisiones.',
+                          'home.hero_subtitle'.tr(),
                           style: theme.textTheme.titleLarge?.copyWith( // ~ text-lg
                             fontWeight: FontWeight.bold, // font-bold
                             color: theme.colorScheme.onSurface,
@@ -464,9 +464,9 @@ class _SearchPanel extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildBenefitItem(context, 'De la búsqueda a la notaría en pasos seguros.'),
+                            _buildBenefitItem(context, 'home.benefit_1'.tr()),
                             const SizedBox(height: 12), // space-y-3
-                            _buildBenefitItem(context, 'Elimina la incertidumbre.'),
+                            _buildBenefitItem(context, 'home.benefit_2'.tr()),
                           ],
                         ),
                         
@@ -490,8 +490,8 @@ class _SearchPanel extends ConsumerWidget {
                                  icon: Icons.shield,
                                  iconColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                                  bgColor: (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)).withOpacity(0.12),
-                                 label: 'GARANTÍA INMUFÁCIL',
-                                 title: 'Tu venta tranquila',
+                                 label: 'home.trust_guarantee_label'.tr(),
+                                 title: 'home.trust_guarantee_title'.tr(),
                                ),
 
                                // Badge 2: Blue Lock
@@ -500,8 +500,8 @@ class _SearchPanel extends ConsumerWidget {
                                  icon: Icons.lock,
                                  iconColor: theme.colorScheme.primary,
                                  bgColor: theme.colorScheme.primary.withOpacity(0.12),
-                                 label: 'P2P VERIFICADO',
-                                 title: 'Tu compra segura',
+                                 label: 'home.trust_p2p_label'.tr(),
+                                 title: 'home.trust_p2p_title'.tr(),
                                ),
                              ],
                            ),
@@ -515,9 +515,9 @@ class _SearchPanel extends ConsumerWidget {
                            child: OutlinedButton.icon(
                              onPressed: () => context.push('/lifestyle/questionnaire'),
                              icon: const Icon(Icons.explore_outlined, size: 20),
-                             label: const Text(
-                               'Descubre tu barrio ideal',
-                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                             label: Text(
+                               'home.lifestyle_cta'.tr(),
+                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                              ),
                              style: OutlinedButton.styleFrom(
                                foregroundColor: theme.colorScheme.primary,
@@ -873,7 +873,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
 
           // ROOMS SELECTOR (Segmented buttons)
           Text(
-            'Habitaciones',
+            'home.bedrooms_label'.tr(),
              style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -912,7 +912,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
 
           // EXTRAS SECTION
           Text(
-            'Extras',
+            'home.extras_label'.tr(),
              style: theme.textTheme.labelLarge,
           ),
           const SizedBox(height: 8),
@@ -920,16 +920,26 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              'Terraza', 'Ascensor', 'Garaje', 'Piscina', 'Jardín',
-              'Aire Acondicionado', 'Calefacción', 'Trastero', 
-              'Armarios Empotrados', 'Exterior', 'Acceso movilidad reducida',
-            ].map((extra) {
-              final isSelected = searchState.selectedExtras.contains(extra);
+              {'val': 'Terraza', 'key': 'amenities.terrace'},
+              {'val': 'Ascensor', 'key': 'amenities.lift'},
+              {'val': 'Garaje', 'key': 'amenities.garage'},
+              {'val': 'Piscina', 'key': 'amenities.pool'},
+              {'val': 'Jardín', 'key': 'amenities.garden'},
+              {'val': 'Aire Acondicionado', 'key': 'amenities.ac'},
+              {'val': 'Calefacción', 'key': 'amenities.heating'},
+              {'val': 'Trastero', 'key': 'amenities.storage'},
+              {'val': 'Armarios Empotrados', 'key': 'amenities.wardrobes'},
+              {'val': 'Exterior', 'key': 'amenities.exterior'},
+              {'val': 'Acceso movilidad reducida', 'key': 'amenities.accessibility'},
+            ].map((extraObj) {
+              final String val = extraObj['val']!;
+              final String key = extraObj['key']!;
+              final isSelected = searchState.selectedExtras.contains(val);
               return FilterChip(
-                label: Text(extra),
+                label: Text(key.tr()),
                 selected: isSelected,
                 onSelected: (_) {
-                   ref.read(searchProvider.notifier).toggleExtra(extra);
+                   ref.read(searchProvider.notifier).toggleExtra(val);
                 },
                 selectedColor: theme.colorScheme.primary.withOpacity(0.1),
                 checkmarkColor: theme.colorScheme.primary,
@@ -974,7 +984,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                return Padding(
                  padding: const EdgeInsets.only(top: 12),
                  child: _PremiumGlowButton(
-                   label: 'Limpiar Filtros',
+                   label: 'home.clear_filters'.tr(),
                    onPressed: () => ref.read(searchProvider.notifier).resetFilters(),
                    color: const Color(0xFFB91C1C), // Shadow will be red too
                    icon: Icons.refresh,
@@ -1098,7 +1108,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tipo de inmueble',
+          'home.property_type_label'.tr(),
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: 8),
@@ -1698,7 +1708,7 @@ class _StatsCard extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                isEmpty ? '0 PROPIEDADES' : 'PROPIEDADES HOY',
+                isEmpty ? 'home.zero_properties'.tr() : 'home.properties_today'.tr(),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.primary, // Always blue branding as requested
                   letterSpacing: 0.5,
@@ -1728,7 +1738,7 @@ class _StatsCard extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              'Verificadas esta semana',
+                              'home.verified_this_week'.tr(),
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                                 fontSize: 10,
@@ -1763,7 +1773,7 @@ class _StatsCard extends ConsumerWidget {
                        const Icon(Icons.refresh, size: 14, color: Colors.red),
                        const SizedBox(width: 4),
                        Text(
-                         'Limpiar filtros',
+                         'home.clear_filters'.tr(),
                          style: theme.textTheme.labelSmall?.copyWith(
                            color: Colors.red,
                            fontWeight: FontWeight.bold,

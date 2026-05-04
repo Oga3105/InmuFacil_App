@@ -97,7 +97,7 @@ class _NarrowLayout extends StatelessWidget {
               children: [
                 Image.asset('assets/images/logo_inmufacil.png', height: 28),
                 const SizedBox(width: 8),
-                const Text.rich(
+                Text.rich(
                   TextSpan(
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
                     children: [
@@ -130,12 +130,12 @@ class _NarrowLayout extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Colors.white),
                     SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -175,8 +175,8 @@ class _InboxPane extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Mensajes',
+              Text(
+                'chat.title'.tr(),
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
@@ -187,7 +187,7 @@ class _InboxPane extends StatelessWidget {
               // Search bar
               TextField(
                 decoration: InputDecoration(
-                  hintText: 'Buscar conversaciones...',
+                  hintText: 'chat.search_hint'.tr(),
                   hintStyle: const TextStyle(
                     color: Color(0xFF94A3B8),
                     fontSize: 13,
@@ -247,13 +247,13 @@ class _InboxPane extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           color: colorScheme.surface,
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.lock_outline, size: 13, color: Color(0xFF16A34A)),
               SizedBox(width: 6),
               Text(
-                'CHAT ENCRIPTADO END-TO-END',
+                'chat.encrypted_badge'.tr(),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -436,9 +436,9 @@ class _ConversationTile extends StatelessWidget {
       return '${date.hour.toString().padLeft(2, '0')}:'
           '${date.minute.toString().padLeft(2, '0')}';
     } else if (diff.inDays == 1) {
-      return 'AYER';
+      return 'time.yesterday'.tr();
     } else if (diff.inDays < 7) {
-      const days = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
+      final days = ['time.weekdays_short.mon'.tr(), 'time.weekdays_short.tue'.tr(), 'time.weekdays_short.wed'.tr(), 'time.weekdays_short.thu'.tr(), 'time.weekdays_short.fri'.tr(), 'time.weekdays_short.sat'.tr(), 'time.weekdays_short.sun'.tr()];
       return days[date.weekday - 1];
     } else {
       return '${date.day}/${date.month}';
@@ -456,9 +456,9 @@ class _TrustBadgeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color, bg) = switch (badge) {
-      TrustBadge.gold   => ('ORO', _kGold, _kGoldLight),
-      TrustBadge.silver => ('PLATA', _kSilver, const Color(0xFFECEFF1)),
-      TrustBadge.bronze => ('BRONCE', _kBronze, const Color(0xFFFBEFEB)),
+      TrustBadge.gold   => ('chat.trust_gold'.tr(), _kGold, _kGoldLight),
+      TrustBadge.silver => ('chat.trust_silver'.tr(), _kSilver, const Color(0xFFECEFF1)),
+      TrustBadge.bronze => ('chat.trust_bronze'.tr(), _kBronze, const Color(0xFFFBEFEB)),
       TrustBadge.none   => ('', Colors.transparent, Colors.transparent),
     };
     if (badge == TrustBadge.none) return const SizedBox.shrink();
@@ -546,7 +546,7 @@ class _EmptyListState extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Sin conversaciones activas',
+              'chat.no_conversations'.tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -556,7 +556,7 @@ class _EmptyListState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Cuando el vendedor active el chat en una oferta, aparecera aqui.',
+              'chat.no_conversations_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -607,7 +607,7 @@ class _EmptyDetailPane extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Tus Conversaciones Seguras',
+                'chat.secure_conv_title'.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
@@ -617,7 +617,7 @@ class _EmptyDetailPane extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Selecciona un chat para ver los mensajes. Todas las comunicaciones en InmuFacil estan protegidas por encriptacion avanzada para tu seguridad.',
+                'chat.secure_conv_desc'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13,
@@ -631,17 +631,17 @@ class _EmptyDetailPane extends StatelessWidget {
                 children: [
                   _FeatureChip(
                     icon: Icons.shield_outlined,
-                    label: 'PROTECCION P2P',
+                    label: 'chat.feature_p2p'.tr(),
                     color: _kNavy,
                   ),
                   _FeatureChip(
                     icon: Icons.gavel_outlined,
-                    label: 'VALIDEZ LEGAL',
+                    label: 'chat.feature_legal'.tr(),
                     color: _kNavy,
                   ),
                   _FeatureChip(
                     icon: Icons.verified_user_outlined,
-                    label: 'KYC VERIFICADO',
+                    label: 'chat.feature_kyc'.tr(),
                     color: _kNavy,
                   ),
                 ],

@@ -8,6 +8,8 @@ import '../../providers/notifications_provider.dart';
 import '../../providers/urgency_provider.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 // ─── Colores de identidad visual ─────────────────────────────────────────────
 
@@ -79,8 +81,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                 ? TextButton(
                     onPressed: () => _markAllRead(context),
                     child: Text(
-                      'Marcar todo leido',
+                      'notifications.mark_all_read'.tr(),
                       style: TextStyle(
+
                         color: _kBlue,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -108,14 +111,15 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('common.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
               ),
             ),
           ),
@@ -140,8 +144,9 @@ class _NotificationsPageState extends ConsumerState<NotificationsPage> {
     await markAllNotificationsRead(ref);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Todas las notificaciones marcadas como leidas.')),
+        SnackBar(content: Text('notifications.mark_all_read_success'.tr())),
       );
+
     }
   }
 }
@@ -302,14 +307,15 @@ class _NotificationCard extends ConsumerWidget {
     final now = DateTime.now();
     final diff = now.difference(date);
 
-    if (diff.inMinutes < 1) return 'Ahora mismo';
-    if (diff.inMinutes < 60) return 'Hace ${diff.inMinutes} min';
-    if (diff.inHours < 24) return 'Hace ${diff.inHours} h';
-    if (diff.inDays == 1) return 'Ayer';
-    if (diff.inDays < 7) return 'Hace ${diff.inDays} dias';
+    if (diff.inMinutes < 1) return 'notifications.time.now'.tr();
+    if (diff.inMinutes < 60) return 'notifications.time.minutes_ago'.tr(args: [diff.inMinutes.toString()]);
+    if (diff.inHours < 24) return 'notifications.time.hours_ago'.tr(args: [diff.inHours.toString()]);
+    if (diff.inDays == 1) return 'notifications.time.yesterday'.tr();
+    if (diff.inDays < 7) return 'notifications.time.days_ago'.tr(args: [diff.inDays.toString()]);
 
     return DateFormat('d MMM', 'es').format(date);
   }
+
 }
 
 // ─── Estado vacio ─────────────────────────────────────────────────────────────
@@ -338,19 +344,21 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Sin notificaciones',
+            'notifications.empty_state'.tr(),
             style: theme.textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
+
           const SizedBox(height: 8),
           Text(
-            'Aqui apareceran los avisos\nde tu operacion.',
+            'notifications.empty_state_desc'.tr(),
             textAlign: TextAlign.center,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.55),
             ),
           ),
+
         ],
       ),
     );
@@ -378,11 +386,12 @@ class _ErrorState extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'No se pudieron cargar las notificaciones.',
+            'notifications.error_loading'.tr(),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
+
           const SizedBox(height: 16),
           FilledButton.tonal(
             onPressed: onRetry,
@@ -391,7 +400,8 @@ class _ErrorState extends StatelessWidget {
                 borderRadius: BorderRadius.circular(_kBorderRadius),
               ),
             ),
-            child: const Text('Reintentar'),
+            child: Text('notifications.retry'.tr()),
+
           ),
         ],
       ),

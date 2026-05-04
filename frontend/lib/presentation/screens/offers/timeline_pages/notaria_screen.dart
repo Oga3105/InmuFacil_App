@@ -224,11 +224,11 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text(
                     'common.home'.tr(),
                     style: const TextStyle(
@@ -525,9 +525,9 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(Icons.event_outlined, color: _kBlue, size: 20),
-            SizedBox(width: 8),
+          Row(children: [
+            const Icon(Icons.event_outlined, color: _kBlue, size: 20),
+            const SizedBox(width: 8),
             Text('transaction.notaria_seller_view_title'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
           ]),

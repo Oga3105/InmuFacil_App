@@ -123,7 +123,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final pickedTime = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 11, minute: 0),
-      helpText: 'Hora preferente de visita',
+      helpText: 'chat.visit_time_help'.tr(),
       builder: (ctx, child) {
         return ValueListenableBuilder<bool>(
           valueListenable: use24hNotifier,
@@ -191,10 +191,10 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: RichText(
-          text: const TextSpan(
+          text: TextSpan(
             children: [
               TextSpan(
-                text: 'Propuesta de ',
+                text: 'chat.offer_proposal_title'.tr() + ' ',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
@@ -202,7 +202,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 ),
               ),
               TextSpan(
-                text: 'oferta',
+                text: '',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 18,
@@ -230,9 +230,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               border: OutlineInputBorder(),
             ),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Introduce un importe';
+              if (v == null || v.isEmpty) return 'chat.error_amount_required'.tr();
               final parsed = CurrencyInputFormatter.parse(v);
-              if (parsed == null || parsed <= 0) return 'Importe no valido';
+              if (parsed == null || parsed <= 0) return 'chat.error_amount_invalid'.tr();
               return null;
             },
           ),
@@ -323,7 +323,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+              Text(
                       'chat.error_loading'.tr(),
                       style: const TextStyle(color: Color(0xFF64748B)),
                     ),
@@ -537,7 +537,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        otherOnline ? 'En linea' : 'Desconectado',
+                        otherOnline ? 'chat.online'.tr() : 'chat.offline'.tr(),
                         style: TextStyle(
                           color: cs.onSurfaceVariant,
                           fontSize: 11,
@@ -579,7 +579,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 Icon(Icons.home_rounded, size: 18, color: Theme.of(context).colorScheme.onPrimary),
                 const SizedBox(width: 6),
                 Text(
-                  'Inicio',
+                  'common.home'.tr(),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
@@ -646,9 +646,9 @@ class _SellerSolvencyBanner extends ConsumerWidget {
               children: [
                 const Icon(Icons.shield_outlined, color: Color(0xFF1D4ED8), size: 18),
                 const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'El comprador aun no ha completado su Pasaporte de Solvencia.',
+                Expanded(
+                      child: Text(
+                    'chat.solvency_not_completed'.tr(),
                     style: TextStyle(fontSize: 12, color: Color(0xFF1D4ED8)),
                   ),
                 ),
@@ -665,17 +665,17 @@ class _SellerSolvencyBanner extends ConsumerWidget {
         };
 
         final stressLabel = switch (passport.stressIndex) {
-          'low_risk'    => ('Bajo riesgo',   const Color(0xFF16A34A)),
-          'medium_risk' => ('Riesgo medio',  Colors.orange),
-          _             => ('Alto riesgo',   Colors.red),
+          'low_risk'    => ('solvency.low_risk'.tr(),   const Color(0xFF16A34A)),
+          'medium_risk' => ('solvency.medium_risk'.tr(),  Colors.orange),
+          _             => ('solvency.high_risk'.tr(),   Colors.red),
         };
 
         final paymentLabel = switch (passport.paymentMethod) {
-          'cash'              => 'Pago al contado',
-          'mortgage_approved' => 'Hipoteca aprobada',
-          'mortgage_pending'  => 'Hipoteca en tramite',
-          'house_to_sell'     => 'Venta de vivienda',
-          _                   => 'No especificado',
+          'cash'              => 'solvency.cash'.tr(),
+          'mortgage_approved' => 'solvency.mortgage_approved'.tr(),
+          'mortgage_pending'  => 'solvency.mortgage_pending'.tr(),
+          'house_to_sell'     => 'solvency.house_to_sell'.tr(),
+          _                   => 'solvency.unspecified_payment'.tr(),
         };
 
         return Container(
@@ -692,7 +692,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
               title: Row(
                 children: [
                   Text(
-                    'Candidato Cualificado — Nivel $levelLabel',
+                    'chat.qualified_candidate'.tr(namedArgs: {'level': levelLabel}),
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: _kNavy),
                   ),
                   const SizedBox(width: 8),
@@ -710,7 +710,7 @@ class _SellerSolvencyBanner extends ConsumerWidget {
                 ],
               ),
               subtitle: Text(
-                'Toca para ver detalles del pasaporte',
+                'chat.tap_for_details'.tr(),
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
               ),
               children: [
@@ -721,17 +721,17 @@ class _SellerSolvencyBanner extends ConsumerWidget {
                         _SolvencyChip(Icons.payments_outlined, paymentLabel),
                         const SizedBox(width: 8),
                         if (passport.hasPreApproval)
-                          _SolvencyChip(Icons.check_circle_outline, 'Preaprobacion bancaria'),
+                          _SolvencyChip(Icons.check_circle_outline, 'solvency.pre_approval'.tr()),
                       ],
                     ),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         if (passport.knowsExtraCosts)
-                          _SolvencyChip(Icons.lightbulb_outline, 'Conoce los gastos'),
+                          _SolvencyChip(Icons.lightbulb_outline, 'solvency.knows_costs'.tr()),
                         const SizedBox(width: 8),
                         if (passport.hasInitialSavings)
-                          _SolvencyChip(Icons.savings_outlined, 'Tiene ahorros iniciales'),
+                          _SolvencyChip(Icons.savings_outlined, 'solvency.has_savings'.tr()),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -747,8 +747,8 @@ class _SellerSolvencyBanner extends ConsumerWidget {
                           );
                         },
                         icon: const Icon(Icons.handshake_outlined, color: Colors.white, size: 18),
-                        label: const Text(
-                          'Aceptar Solvencia y Proceder a Borrador de Arras',
+                        label: Text(
+                          'chat.accept_solvency_btn'.tr(),
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -905,7 +905,7 @@ class _DateSeparator extends StatelessWidget {
     if (d == today.subtract(const Duration(days: 1))) return 'AYER';
     final diffDays = today.difference(d).inDays;
     if (diffDays < 7) {
-      const days = ['LUN', 'MAR', 'MIE', 'JUE', 'VIE', 'SAB', 'DOM'];
+      final days = ['time.weekdays_short.mon'.tr(), 'time.weekdays_short.tue'.tr(), 'time.weekdays_short.wed'.tr(), 'time.weekdays_short.thu'.tr(), 'time.weekdays_short.fri'.tr(), 'time.weekdays_short.sat'.tr(), 'time.weekdays_short.sun'.tr()];
       return days[date.weekday - 1];
     }
     return '${date.day}/${date.month}/${date.year}';
@@ -1240,9 +1240,9 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                           color: const Color(0xFFDCFCE7),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+                        child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                             Icon(Icons.shield_outlined,
                                 size: 9, color: Color(0xFF16A34A)),
                             SizedBox(width: 3),

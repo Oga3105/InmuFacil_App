@@ -72,7 +72,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Filtros',
+                        'property_listing.filters'.tr(),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -88,7 +88,8 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   TextField(
                     controller: _locationController,
                     decoration: InputDecoration(
-                      hintText: 'Ciudad, zona...',
+                      hintText: 'property_listing.location_hint'.tr(),
+
                       hintStyle: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
                       prefixIcon: const Icon(Icons.location_on, size: 18, color: primaryBlue),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
@@ -116,7 +117,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   SizedBox(
                     width: double.infinity,
                     child: PremiumButton(
-                      label: 'Buscar propiedades',
+                      label: 'property_listing.search_button'.tr(),
                       icon: Icons.search,
                       color: primaryBlue,
                       fontSize: 14,
@@ -136,7 +137,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   const SizedBox(height: 20),
                 
                 // Price Range
-                _buildSectionTitle('Rango de Precio'),
+                _buildSectionTitle('property_listing.price_range'.tr()),
                 const SizedBox(height: 8),
                 // Display current range values
                 Row(
@@ -172,7 +173,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 24),
 
                 // Rooms (matching Home screen)
-                _buildSectionTitle('Habitaciones'),
+                _buildSectionTitle('property_listing.bedrooms'.tr()),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -188,7 +189,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     icon: const Icon(Icons.arrow_drop_down),
                     isExpanded: true,
                     items: [1, 2, 3, 4, 5].map((e) {
-                      final label = (e >= 3) ? '$e+ Hab.' : '$e Hab.';
+                      final label = (e >= 3) ? '$e+ ${'property_listing.bedrooms_short'.tr()}' : '$e ${'property_listing.bedrooms_short'.tr()}';
                       return DropdownMenuItem(
                         value: e,
                         child: Text(label, style: const TextStyle(fontSize: 13)),
@@ -205,7 +206,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 24),
 
                 // Property Type (matching Home screen)
-                _buildSectionTitle('Tipo de inmueble'),
+                _buildSectionTitle('property_listing.property_type'.tr()),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<PropertyType>(
                   initialValue: searchState.propertyType,
@@ -241,19 +242,19 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 24),
 
                 // Extras (matching Home screen)
-                _buildSectionTitle('Extras'),
+                _buildSectionTitle('property_listing.extras'.tr()),
                 const SizedBox(height: 8),
-                _buildCheckbox(context, ref, 'Piscina', searchState.selectedExtras.contains('Piscina')),
-                _buildCheckbox(context, ref, 'Garaje', searchState.selectedExtras.contains('Garaje')),
-                _buildCheckbox(context, ref, 'Terraza', searchState.selectedExtras.contains('Terraza')),
-                _buildCheckbox(context, ref, 'Jardín', searchState.selectedExtras.contains('Jardín')),
-                _buildCheckbox(context, ref, 'Ascensor', searchState.selectedExtras.contains('Ascensor')),
-                _buildCheckbox(context, ref, 'Aire Acondicionado', searchState.selectedExtras.contains('Aire Acondicionado')),
-                _buildCheckbox(context, ref, 'Calefacción', searchState.selectedExtras.contains('Calefacción')),
-                _buildCheckbox(context, ref, 'Trastero', searchState.selectedExtras.contains('Trastero')),
-                _buildCheckbox(context, ref, 'Armarios Empotrados', searchState.selectedExtras.contains('Armarios Empotrados')),
-                _buildCheckbox(context, ref, 'Exterior', searchState.selectedExtras.contains('Exterior')),
-                _buildCheckbox(context, ref, 'Acceso movilidad reducida', searchState.selectedExtras.contains('Acceso movilidad reducida')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.pool', 'Piscina', searchState.selectedExtras.contains('Piscina')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.garage', 'Garaje', searchState.selectedExtras.contains('Garaje')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.terrace', 'Terraza', searchState.selectedExtras.contains('Terraza')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.garden', 'Jardín', searchState.selectedExtras.contains('Jardín')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.lift', 'Ascensor', searchState.selectedExtras.contains('Ascensor')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.ac', 'Aire Acondicionado', searchState.selectedExtras.contains('Aire Acondicionado')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.heating', 'Calefacción', searchState.selectedExtras.contains('Calefacción')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.storage', 'Trastero', searchState.selectedExtras.contains('Trastero')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.wardrobes', 'Armarios Empotrados', searchState.selectedExtras.contains('Armarios Empotrados')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.exterior', 'Exterior', searchState.selectedExtras.contains('Exterior')),
+                _buildCheckbox(context, ref, 'property_listing.extra_labels.accessible', 'Acceso movilidad reducida', searchState.selectedExtras.contains('Acceso movilidad reducida')),
 
                 // Conditional "Limpiar Filtros" Button (Red)
                 if (searchState.propertyType != PropertyType.all ||
@@ -263,7 +264,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                     searchState.selectedExtras.isNotEmpty) ...[
                       const SizedBox(height: 24),
                       PremiumButton(
-                        label: 'Limpiar filtros',
+                        label: 'property_listing.clear_filters'.tr(),
                         icon: Icons.refresh,
                         color: const Color(0xFFB91C1C), // Red
                         fontSize: 14,
@@ -309,9 +310,9 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 4),
                 InkWell(
                   onTap: () => context.push('/lifestyle/questionnaire'),
-                  child: const Text(
-                    'Editar mi perfil de estilo de vida →',
-                    style: TextStyle(
+                  child: Text(
+                    'property_listing.edit_lifestyle'.tr(),
+                    style: const TextStyle(
                       fontSize: 11,
                       color: Color(0xFF135BEC),
                       decoration: TextDecoration.underline,
@@ -328,10 +329,10 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                   children: [
                     const Icon(Icons.verified_user, color: Color(0xFF16A34A), size: 20),
                     const SizedBox(width: 8),
-                    const Flexible(
+                    Flexible(
                       child: Text(
-                        'Verificado InmuFácil',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
+                        'property_listing.verified_badge'.tr(),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF16A34A)),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -362,9 +363,9 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Vende directo.',
-                  style: TextStyle(
+                Text(
+                  'property_listing.promo.title'.tr(),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -372,7 +373,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Sin comisiones, sin intermediarios. Todo legal, todo seguro.',
+                  'property_listing.promo.subtitle'.tr(),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey.shade400,
@@ -381,11 +382,11 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
                 const SizedBox(height: 16),
                 InkWell(
                   onTap: () => context.push('/info/how-it-works'),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Text(
-                        'Saber más',
-                        style: TextStyle(
+                        'property_listing.promo.learn_more'.tr(),
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -467,7 +468,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
     );
   }
 
-  Widget _buildCheckbox(BuildContext context, WidgetRef ref, String label, bool isChecked, {bool isDeadLink = false}) {
+  Widget _buildCheckbox(BuildContext context, WidgetRef ref, String translationKey, String internalKey, bool isChecked) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -477,9 +478,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
             height: 20,
             child: Checkbox(
               value: isChecked,
-              onChanged: isDeadLink 
-                ? (val) => context.push('/404') 
-                : (val) => ref.read(searchProvider.notifier).toggleExtra(label),
+              onChanged: (val) => ref.read(searchProvider.notifier).toggleExtra(internalKey),
               activeColor: const Color(0xFF135BEC),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
               side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant, width: 1.5),
@@ -487,7 +486,7 @@ class _FilterSidebarState extends ConsumerState<FilterSidebar> {
           ),
           const SizedBox(width: 8),
           Text(
-            label,
+            translationKey.tr(),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,

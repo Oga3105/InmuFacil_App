@@ -11,6 +11,8 @@ import '../../../core/config/env_config.dart';
 import '../../../core/network/auth_interceptor.dart';
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -211,14 +213,14 @@ class AiConsentHistoryScreen extends ConsumerWidget {
                 ),
               ],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                SizedBox(width: 6),
+                const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
                 Text(
-                  'Inicio',
-                  style: TextStyle(
+                  'common.home_btn'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -272,15 +274,17 @@ class _PageHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Historial de Consentimientos IA',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kPurple),
+                      Text(
+                        'ai_consent.title'.tr(),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: _kPurple),
                       ),
+
                       const SizedBox(height: 4),
                       Text(
-                        'Registro de consentimientos explícitos para el tratamiento de datos por IA (Art. 15 RGPD).',
+                        'ai_consent.subtitle'.tr(),
                         style: TextStyle(fontSize: 13, color: _kPurple.withOpacity(0.85)),
                       ),
+
                     ],
                   ),
                 ),
@@ -291,8 +295,11 @@ class _PageHeader extends StatelessWidget {
           // Count badge
           Text(
             count == 0
-                ? 'Sin registros todavía'
-                : '$count consentimiento${count != 1 ? 's' : ''} registrado${count != 1 ? 's' : ''}',
+                ? 'ai_consent.no_records'.tr()
+                : count == 1 
+                  ? 'ai_consent.records_count_singular'.tr()
+                  : 'ai_consent.records_count'.tr(args: [count.toString()]),
+
             style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
@@ -305,16 +312,15 @@ class _PageHeader extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: const Color(0xFF93C5FD)),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, size: 14, color: Color(0xFF1D4ED8)),
-                SizedBox(width: 8),
+                const Icon(Icons.info_outline, size: 14, color: Color(0xFF1D4ED8)),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Base jurídica: Art. 6.1.a RGPD / Art. 7 LOPDGDD. '
-                    'Derecho de acceso: Art. 15 RGPD.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF1E40AF), height: 1.5),
+                    'ai_consent.gdpr_notice'.tr(),
+                    style: const TextStyle(fontSize: 11, color: Color(0xFF1E40AF), height: 1.5),
                   ),
                 ),
               ],
@@ -431,15 +437,16 @@ class _ConsentCardState extends State<_ConsentCard> {
                         border: Border.all(
                             color: _kGreen.withValues(alpha: 0.25)),
                       ),
-                      child: const Text(
-                        'ACEPTADO',
-                        style: TextStyle(
+                      child: Text(
+                        'ai_consent.accepted'.tr(),
+                        style: const TextStyle(
                           fontSize: 9,
                           fontWeight: FontWeight.bold,
                           color: _kGreen,
                           letterSpacing: 0.5,
                         ),
                       ),
+
                     ),
                     const SizedBox(width: 4),
                     Icon(
@@ -464,29 +471,30 @@ class _ConsentCardState extends State<_ConsentCard> {
                   children: [
                     _DetailRow(
                       icon: Icons.smart_toy_outlined,
-                      label: 'Proveedor de IA',
+                      label: 'ai_consent.provider'.tr(),
                       value: e.aiProvider,
                     ),
                     const SizedBox(height: 10),
                     _DetailRow(
                       icon: Icons.flag_outlined,
-                      label: 'Finalidad',
+                      label: 'ai_consent.purpose'.tr(),
                       value: e.purpose,
                     ),
                     const SizedBox(height: 10),
                     _DetailRow(
                       icon: Icons.upload_outlined,
-                      label: 'Datos enviados al proveedor',
+                      label: 'ai_consent.data_sent'.tr(),
                       value: e.dataCategories.map((c) => '• $c').join('\n'),
                     ),
                     if (e.propertyId != null) ...[
                       const SizedBox(height: 10),
                       _DetailRow(
                         icon: Icons.home_outlined,
-                        label: 'Inmueble de referencia',
+                        label: 'ai_consent.reference_property'.tr(),
                         value: 'ID: ${e.propertyId}',
                       ),
                     ],
+
                     const SizedBox(height: 12),
                     Builder(builder: (context) => Container(
                       padding: const EdgeInsets.symmetric(
@@ -500,10 +508,11 @@ class _ConsentCardState extends State<_ConsentCard> {
                         runSpacing: 4,
                         children: [
                           _MetaChip(
-                              icon: Icons.tag, text: 'Registro #${e.id}'),
+                              icon: Icons.tag, text: 'ai_consent.record_id'.tr(args: [e.id.toString()])),
                           _MetaChip(
                               icon: Icons.verified_outlined,
-                              text: 'Version ${e.consentTextVersion}'),
+                              text: 'ai_consent.version'.tr(args: [e.consentTextVersion])),
+
                           if (e.ipAddress != null)
                             _MetaChip(
                                 icon: Icons.router_outlined,
@@ -612,26 +621,27 @@ class _EmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Builder(builder: (context) => Text(
-              'Sin registros de consentimiento',
+              'ai_consent.empty_state'.tr(),
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             )),
+
             const SizedBox(height: 10),
-            const Text(
-              'Cuando uses funciones de IA (descripción de inmueble, '
-              'verificación de identidad…) y otorgues tu consentimiento, '
-              'los registros aparecerán aquí.',
+            Text(
+              'ai_consent.empty_state_desc'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: _kSlate, height: 1.6),
+              style: const TextStyle(fontSize: 13, color: _kSlate, height: 1.6),
             ),
+
             const SizedBox(height: 28),
             OutlinedButton.icon(
               onPressed: () => context.go('/'),
               icon: const Icon(Icons.home_outlined, size: 16),
-              label: const Text('Volver al inicio'),
+              label: Text('ai_consent.back_home'.tr()),
+
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kPurple,
                 side: const BorderSide(color: Color(0xFFDDD6FE)),
@@ -666,13 +676,14 @@ class _ErrorState extends StatelessWidget {
                 color: Color(0xFFDC2626), size: 44),
             const SizedBox(height: 16),
             Builder(builder: (context) => Text(
-              'No se pudo cargar el historial',
+              'ai_consent.error_loading'.tr(),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             )),
+
             const SizedBox(height: 8),
             Text(
               message,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../providers/legal_guides_provider.dart';
 import 'legal_info_sheet.dart';
@@ -46,7 +47,7 @@ class LegalGuideButton extends ConsumerWidget {
           side: const BorderSide(color: _kGreen),
         ),
         onPressed: () => _onTap(context, ref, guideKey),
-        child: Text('$label (leido)'),
+        child: Text('$label ${'legal.read_suffix'.tr()}'),
       );
     }
 
@@ -59,6 +60,7 @@ class LegalGuideButton extends ConsumerWidget {
       child: Text(label),
     );
   }
+
 
   Future<void> _onTap(
     BuildContext context,

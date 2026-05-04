@@ -52,6 +52,7 @@ void main() async {
       fallbackLocale: const Locale('es', 'ES'),
       startLocale: const Locale('es', 'ES'),
       saveLocale: true,
+      useOnlyLangCode: false,
       child: const ProviderScope(
         child: InmuFacilApp(),
       ),

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:camera/camera.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
@@ -41,7 +42,7 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
       _cameras = await availableCameras();
       if (_cameras.isEmpty) {
         setState(() {
-          _error = 'No se encontró ninguna cámara disponible.';
+          _error = 'kyc.no_camera'.tr();
           _loading = false;
         });
         return;
@@ -69,14 +70,14 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Error al acceder a la cámara: $e';
+          _error = 'kyc.camera_access_error'.tr(namedArgs: {'error': e.toString()});
           _loading = false;
         });
       }
     }
   }
 
-  Future<void> _capture() async {
+  Future<void> _takePicture() async {
     if (_controller == null || !_controller!.value.isInitialized || _capturing) {
       return;
     }
@@ -89,7 +90,7 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
       setState(() => _capturing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al capturar: $e')),
+          SnackBar(content: Text('kyc.camera_error'.tr(namedArgs: {'error': e.toString()}))),
         );
       }
     }
@@ -131,14 +132,14 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
           children: [
             // ── Camera preview ──
             if (_loading)
-              const Center(
+              Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: Colors.white),
-                    SizedBox(height: 16),
-                    Text('Activando cámara…',
-                        style: TextStyle(color: Colors.white)),
+                    const CircularProgressIndicator(color: Colors.white),
+                    const SizedBox(height: 16),
+                    Text('kyc.camera_activating'.tr(),
+                        style: const TextStyle(color: Colors.white)),
                   ],
                 ),
               )
@@ -185,13 +186,17 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
                       IconButton(
                         icon: const Icon(Icons.close, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(null),
-                        tooltip: 'Cancelar',
+                        tooltip: 'common.cancel'.tr(),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Centra tu rostro y pulsa capturar',
+                          'solvency.center_face_hint'.tr(),
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                       if (_cameras.length > 1)
@@ -199,7 +204,7 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
                           icon: const Icon(Icons.flip_camera_ios_outlined,
                               color: Colors.white),
                           onPressed: _switchCamera,
-                          tooltip: 'Cambiar cámara',
+                          tooltip: 'kyc.switch_camera'.tr(),
                         )
                       else
                         const SizedBox(width: 48),
@@ -216,48 +221,41 @@ class _CameraCaptureDialogState extends State<CameraCaptureDialog> {
                 left: 0,
                 right: 0,
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Face guide circle
-                    Container(
-                      width: 180,
-                      height: 180,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Colors.white.withOpacity(0.6), width: 2),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    // Capture button
                     GestureDetector(
-                      onTap: _capturing ? null : _capture,
+                      onTap: _capturing ? null : _takePicture,
                       child: Container(
-                        width: 72,
                         height: 72,
+                        width: 72,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _capturing
-                              ? Colors.grey
-                              : Colors.white,
-                          border: Border.all(
-                              color: Colors.white.withOpacity(0.4),
-                              width: 4),
+                          border: Border.all(color: Colors.white, width: 4),
                         ),
-                        child: _capturing
-                            ? const Padding(
-                                padding: EdgeInsets.all(20),
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 3,
-                                    color: Colors.black54),
-                              )
-                            : const Icon(Icons.camera_alt,
-                                color: Colors.black87, size: 32),
+                        child: Center(
+                          child: Container(
+                            height: 56,
+                            width: 56,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: _capturing
+                                ? const CircularProgressIndicator(
+                                    color: Colors.black)
+                                : null,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Capturar',
-                      style: TextStyle(color: Colors.white, fontSize: 13),
+                    Text(
+                      'solvency.capture_btn'.tr(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/config/env_config.dart';
 import '../../providers/search_provider.dart';
@@ -167,7 +168,7 @@ class LegalInfoSheet extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).pop(),
-            tooltip: 'Cerrar',
+            tooltip: 'legal.close_tooltip'.tr(),
           ),
         ],
       ),
@@ -186,20 +187,21 @@ class LegalInfoSheet extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'No se pudo cargar la guia. Intente de nuevo.',
+              'legal.error_loading_guide'.tr(),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => ref.invalidate(_legalGuideProvider(args)),
-              child: const Text('Reintentar'),
+              child: Text('legal.retry_btn'.tr()),
             ),
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildContent(
     BuildContext context,

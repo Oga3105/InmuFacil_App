@@ -56,36 +56,41 @@ class _LifestyleQuestionnaireScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.lock_outline_rounded, color: Color(0xFF135BEC)),
-            SizedBox(width: 10),
-            Text('Acceso requerido', style: TextStyle(fontSize: 18)),
+            const Icon(Icons.lock_outline_rounded, color: Color(0xFF135BEC)),
+            const SizedBox(width: 10),
+            Text('lifestyle.login_required_title'.tr(), style: const TextStyle(fontSize: 18)),
           ],
         ),
-        content: const Text(
-          'Inicia sesion o registrate para guardar tu perfil de estilo de vida y obtener recomendaciones personalizadas.',
-          style: TextStyle(height: 1.5),
+
+        content: Text(
+          'lifestyle.login_required_desc'.tr(),
+          style: const TextStyle(height: 1.5),
         ),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancelar'),
+            child: Text('common.cancel'.tr()),
           ),
+
           FilledButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               context.go('/login');
             },
-            child: const Text('Iniciar sesion'),
+            child: Text('auth.login_link'.tr()),
           ),
+
           FilledButton.tonal(
             onPressed: () {
               Navigator.of(ctx).pop();
               context.go('/register');
             },
-            child: const Text('Registrarse'),
+            child: Text('auth.register_button'.tr()),
           ),
+
         ],
       ),
     );
@@ -149,14 +154,15 @@ class _LifestyleQuestionnaireScreenState
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('transaction.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
               ),
             ),
           ),
@@ -234,19 +240,21 @@ class _LifestyleQuestionnaireScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Inicia sesion para guardar tu perfil',
-                          style: TextStyle(
+                        Text(
+                          'lifestyle.anonymous_banner_title'.tr(),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF9A3412),
                             fontSize: 13,
                           ),
                         ),
+
                         const SizedBox(height: 4),
-                        const Text(
-                          'Puedes explorar el cuestionario, pero necesitas una cuenta para guardar tus preferencias.',
-                          style: TextStyle(color: Color(0xFFB45309), fontSize: 12, height: 1.4),
+                        Text(
+                          'lifestyle.anonymous_banner_desc'.tr(),
+                          style: const TextStyle(color: Color(0xFFB45309), fontSize: 12, height: 1.4),
                         ),
+
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 8,
@@ -261,8 +269,9 @@ class _LifestyleQuestionnaireScreenState
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text('Iniciar sesión', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                              child: Text('auth.login_link'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                             ),
+
                             OutlinedButton(
                               onPressed: () => context.go('/register'),
                               style: OutlinedButton.styleFrom(
@@ -272,8 +281,9 @@ class _LifestyleQuestionnaireScreenState
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text('Registrarse', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF135BEC))),
+                              child: Text('auth.register_button'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF135BEC))),
                             ),
+
                           ],
                         ),
                       ],

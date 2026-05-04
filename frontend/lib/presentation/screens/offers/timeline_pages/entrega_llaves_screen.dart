@@ -11,6 +11,7 @@ import '../../../providers/auth_provider.dart';
 import '../../../widgets/common/user_avatar_menu.dart';
 import '../../../../core/config/env_config.dart';
 import '../../../../core/network/dio_factory.dart';
+
 const _kBlue    = Color(0xFF135BEC);
 const _kGreen   = Color(0xFF16A34A);
 const _kBg      = Color(0xFFF8FAFC);
@@ -46,7 +47,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
       final token = await _kStorage.read(key: 'auth_token');
       if (token == null) return;
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/entrega-llaves/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;
@@ -56,7 +57,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
         _sellerConfirmed = data['seller_confirmed'] as bool? ?? false;
       });
     } catch (_) {
-      // non-blocking — show empty state
+      // non-blocking
     } finally {
       if (mounted) setState(() => _isInitializing = false);
     }
@@ -67,7 +68,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
     try {
       final token = await _kStorage.read(key: 'auth_token');
       final resp = await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/entrega-llaves/${widget.offer.id}/confirm',
+        '${EnvConfig.apiBaseUrl}/entrega-llaves/${widget.offer.id}/confirm',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;
@@ -80,7 +81,7 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
         _showCompletionDialog();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('transaction.keys_confirm_wait_snack'.tr()),
             backgroundColor: _kGreen,
           ),
@@ -210,14 +211,14 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text(
-                    'Inicio',
-                    style: TextStyle(
+                    'common.home'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -231,12 +232,12 @@ class _EntregaLlavesScreenState extends ConsumerState<EntregaLlavesScreen> {
             builder: (context, ref, _) {
               final isAuthenticated = ref.watch(authProvider).isAuthenticated;
               if (!isAuthenticated) return const SizedBox.shrink();
-              return const Row(
+              return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(width: 12),
-                  UserAvatarMenu(),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 12),
+                  const UserAvatarMenu(),
+                  const SizedBox(width: 16),
                 ],
               );
             },
@@ -421,7 +422,7 @@ class _ConfirmationCard extends StatelessWidget {
                   ? const SizedBox(
                       width: 16, height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text('transaction.keys_confirm_btn'.tr(), style: TextStyle(fontSize: 13)),
+                  : Text('transaction.keys_confirm_btn'.tr(), style: const TextStyle(fontSize: 13)),
             )
           else
             Icon(Icons.hourglass_empty, color: Colors.grey.shade400, size: 20),
@@ -456,11 +457,11 @@ class _PendingDocsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.folder_open_outlined, color: _kBlue, size: 20),
-              SizedBox(width: 10),
-              Text('Documentacion a entregar',
-                  style: TextStyle(
+            children: [
+              const Icon(Icons.folder_open_outlined, color: _kBlue, size: 20),
+              const SizedBox(width: 10),
+              Text('transaction.keys_docs_delivery'.tr(),
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       color: Color(0xFF135BEC))),
@@ -511,11 +512,11 @@ class _TipsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.lightbulb_outline, color: Color(0xFFB8860B), size: 20),
-              SizedBox(width: 10),
-              Text('Consejos para la entrega',
-                  style: TextStyle(
+            children: [
+              const Icon(Icons.lightbulb_outline, color: Color(0xFFB8860B), size: 20),
+              const SizedBox(width: 10),
+              Text('transaction.keys_tips_title'.tr(),
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
                       color: Color(0xFF78350F))),

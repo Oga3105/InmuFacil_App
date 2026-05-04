@@ -246,9 +246,10 @@ class _TextContentState extends ConsumerState<_TextContent> {
         error: (error, stack) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${error.toString()}'), // Should use i18n
+              content: Text('${'common.error'.tr()}: ${error.toString()}'),
               backgroundColor: Colors.red,
             ),
+
           );
         },
       );

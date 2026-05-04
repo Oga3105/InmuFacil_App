@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -55,14 +56,14 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('¿Cancelar verificación?'),
-        content: const Text(
-          'Si sales ahora, los documentos subidos no se guardarán y tendrás que empezar de nuevo.',
+        title: Text('kyc.discard_title'.tr()),
+        content: Text(
+          'kyc.discard_content'.tr(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Seguir aquí'),
+            child: Text('kyc.stay_here'.tr()),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
@@ -70,7 +71,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
               backgroundColor: Colors.red.shade600,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Sí, cancelar'),
+            child: Text('kyc.confirm_cancel'.tr()),
           ),
         ],
       ),
@@ -210,9 +211,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4),
                               child: Text(
-                                'Cumplimos estrictamente con el RGPD. Tus documentos y datos biométricos se cifran '
-                                'bajo el estándar AES-256 y se utilizan exclusivamente para la verificación legal '
-                                'de identidad en transacciones P2P.',
+                                'kyc.rgpd_footer'.tr(),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                     color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11),
@@ -281,7 +280,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Verificar Identidad',
+                  'kyc.title_badge'.tr(),
                   style: TextStyle(
                     color: colorScheme.primary,
                     fontSize: 12,
@@ -324,7 +323,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
                   const SizedBox(width: 6),
                   Text(
-                    'Inicio',
+                    'common.home_btn'.tr(),
                     style: TextStyle(
                       color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
@@ -371,7 +370,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Datos del 2.º Comprador',
+                      'solvency.second_buyer_data'.tr(),
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -380,7 +379,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Introduce los datos del segundo titular de la compra.',
+                      'solvency.second_buyer_desc'.tr(),
                       style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 13),
                     ),
                   ],
@@ -403,12 +402,12 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Co-titular',
+                        Text('solvency.co_titular'.tr(),
                             style: TextStyle(
                                 color: colorScheme.primary,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700)),
-                        Text('AES-256 Encrypted',
+                        Text('kyc.badge_encrypted'.tr(),
                             style: TextStyle(
                                 color: colorScheme.onSurfaceVariant,
                                 fontSize: 10,
@@ -423,22 +422,22 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
           const SizedBox(height: 20),
           _textField(
             controller: _nameCtrl,
-            label: 'Nombre completo',
-            hint: 'Nombre y apellidos',
+            label: 'common.full_name'.tr(),
+            hint: 'common.name_surname'.tr(),
             icon: Icons.person_outline,
             validator: (v) => (v == null || v.trim().length < 2)
-                ? 'Introduce el nombre completo'
+                ? 'common.error_full_name'.tr()
                 : null,
           ),
           const SizedBox(height: 14),
           _textField(
             controller: _emailCtrl,
-            label: 'Correo electrónico',
-            hint: 'correo@ejemplo.com',
+            label: 'common.email'.tr(),
+            hint: 'common.email_example'.tr(),
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: (v) => (v == null || !v.contains('@'))
-                ? 'Introduce un correo válido'
+                ? 'common.error_email'.tr()
                 : null,
           ),
         ],
@@ -477,7 +476,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Verifica tu Identidad',
+                        'kyc.verify_title'.tr(),
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -486,7 +485,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Confirmación de seguridad para transacciones P2P seguras.',
+                        'kyc.verify_subtitle'.tr(),
                         style: TextStyle(
                             color: colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
@@ -510,12 +509,12 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('verified_user',
+                          Text('kyc.badge_verified_user'.tr(),
                               style: TextStyle(
                                   color: colorScheme.primary,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
-                          Text('AES-256 Encrypted',
+                          Text('kyc.badge_encrypted'.tr(),
                               style: TextStyle(
                                   color: colorScheme.onSurfaceVariant,
                                   fontSize: 10,
@@ -552,11 +551,11 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildSectionLabel('1', 'Tipo de documento'),
+                            _buildSectionLabel('1', 'kyc.step_doc_type'.tr()),
                             const SizedBox(height: 12),
                             _buildDocumentTypeSelector(),
                             const SizedBox(height: 24),
-                            _buildSectionLabel('2', 'Escaneo de Documento',
+                            _buildSectionLabel('2', 'kyc.step_scan'.tr(),
                                 locked: !step1Done),
                             const SizedBox(height: 12),
                             _lockedWrapper(
@@ -565,7 +564,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                                 children: [
                                   Expanded(
                                     child: DocumentUploadCard(
-                                      title: 'Parte Frontal',
+                                      title: 'kyc.doc_front'.tr(),
                                       onTap: () => _pickDocument('front'),
                                       imageBytes: _frontBytes,
                                       status: _frontPicking
@@ -579,7 +578,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: DocumentUploadCard(
-                                      title: 'Parte Trasera',
+                                      title: 'kyc.doc_back'.tr(),
                                       onTap: () => _pickDocument('back'),
                                       imageBytes: _backBytes,
                                       status: _backPicking
@@ -604,7 +603,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            _buildSectionLabel('3', 'Prueba de vida',
+                            _buildSectionLabel('3', 'kyc.step_selfie'.tr(),
                                 locked: !step2Done),
                             const SizedBox(height: 12),
                             Expanded(
@@ -624,11 +623,11 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionLabel('1', 'Tipo de documento'),
+                    _buildSectionLabel('1', 'kyc.step_doc_type'.tr()),
                     const SizedBox(height: 12),
                     _buildDocumentTypeSelector(),
                     const SizedBox(height: 24),
-                    _buildSectionLabel('2', 'Escaneo de Documento',
+                    _buildSectionLabel('2', 'kyc.step_scan'.tr(),
                         locked: !step1Done),
                     const SizedBox(height: 12),
                     _lockedWrapper(
@@ -637,7 +636,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                         children: [
                           Expanded(
                             child: DocumentUploadCard(
-                              title: 'Parte Frontal',
+                              title: 'kyc.doc_front'.tr(),
                               onTap: () => _pickDocument('front'),
                               imageBytes: _frontBytes,
                               status: _frontPicking
@@ -651,7 +650,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: DocumentUploadCard(
-                              title: 'Parte Trasera',
+                              title: 'kyc.doc_back'.tr(),
                               onTap: () => _pickDocument('back'),
                               imageBytes: _backBytes,
                               status: _backPicking
@@ -666,7 +665,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    _buildSectionLabel('3', 'Prueba de vida',
+                    _buildSectionLabel('3', 'kyc.step_selfie'.tr(),
                         locked: !step2Done),
                     const SizedBox(height: 12),
                     _lockedWrapper(
@@ -690,7 +689,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                         size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
                     Text(
-                      'SSL SECURE',
+                      'kyc.ssl_secure'.tr(),
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 11,
@@ -717,7 +716,7 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                    shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancelar',
+                  child: Text('common.cancel'.tr(),
                       style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 12),
@@ -743,8 +742,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: const Text(
-                      'Enviar Verificación',
+                    label: Text(
+                      'kyc.submit_button'.tr(),
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -930,7 +929,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Centra tu rostro',
+            'solvency.center_face'.tr(),
+
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -939,7 +939,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            'Iluminación uniforme, sin accesorios',
+            'solvency.lighting_hint'.tr(),
+
             textAlign: TextAlign.center,
             style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 11),
           ),
@@ -969,7 +970,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   hasSelfie ? Icons.check_circle_outline : Icons.camera_alt,
                   size: 16),
               label: Text(
-                hasSelfie ? 'Repetir foto' : 'Iniciar Cámara',
+                hasSelfie ? 'solvency.repeat_photo'.tr() : 'solvency.start_camera'.tr(),
+
                 style:
                     const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
@@ -1004,7 +1006,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Identidad Verificada',
+              'solvency.identity_verified'.tr(),
+
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
@@ -1014,7 +1017,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'La identidad del segundo comprador ha sido verificada y sus datos guardados de forma segura (AES-256).',
+              'solvency.second_buyer_verified_desc'.tr(),
+
               style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
@@ -1029,7 +1033,8 @@ class _SecondBuyerScreenState extends ConsumerState<SecondBuyerScreen> {
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Volver al timeline',
+                child: Text('common.timeline_btn'.tr(),
+
                     style: TextStyle(fontWeight: FontWeight.w700)),
               ),
             ),
