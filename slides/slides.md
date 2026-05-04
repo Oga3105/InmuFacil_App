@@ -368,7 +368,7 @@ Protecci&oacute;n de datos sensibles &mdash; GDPR Compliance
 </div>
 
 <div style="text-align:center; margin-top:10px; color:#94A3B8; font-size:0.85em;">
-Internacionalizaci&oacute;n: <strong style="color:#fff;">9 idiomas</strong> &mdash; ES, EN-US, EN-GB, EN-CA, FR-FR, FR-CA, CA, EU, GL
+Internacionalizaci&oacute;n: <strong style="color:#fff;">10 idiomas</strong> &mdash; ES, EN-US, EN-GB, EN-CA, FR-FR, FR-CA, CA, VA, EU, GL
 </div>
 
 ---
@@ -539,7 +539,7 @@ Popup expl&iacute;cito antes de cualquier procesamiento con IA &middot; Trust Da
 |---------|-------|
 | Hitos backend | **17 / 17** |
 | Pantallas frontend | **50+** |
-| Idiomas soportados | **9** |
+| Idiomas soportados | **10** |
 | Routers API | **35+** |
 </div>
 
