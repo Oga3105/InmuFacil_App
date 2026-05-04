@@ -48,7 +48,7 @@ mypy==1.20.2
 # KYC - Modern Image Processing (@Jules)
 # ============================================================================
 pillow==12.2.0  # Image processing
-numpy>=2.1.0,<2.3.0  # capped at <2.3 for Python 3.10 compat (Docker)
+numpy>=2.4.4,<2.5.0  # capped at <2.3 for Python 3.10 compat (Docker)
 opencv-python-headless>=4.10.0.84
 
 # ============================================================================
