@@ -205,11 +205,11 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text('common.home'.tr(),
                       style: const TextStyle(
                           color: Colors.white,
@@ -302,14 +302,14 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: _kGreen.withValues(alpha: 0.3)),
             ),
-            child: const Row(
+            child: Row(
               children: [
-                Icon(Icons.check_circle, color: _kGreen),
-                SizedBox(width: 12),
+                const Icon(Icons.check_circle, color: _kGreen),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     'transaction.pv_all_done'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: _kGreen, fontWeight: FontWeight.w500, fontSize: 13),
                   ),
                 ),

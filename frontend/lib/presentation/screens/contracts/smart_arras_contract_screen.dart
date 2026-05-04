@@ -190,14 +190,16 @@ class _SmartArrasContractScreenState
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('transaction.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
+
               ),
             ),
           ),
@@ -488,7 +490,7 @@ class SmartContractPreview extends StatelessWidget {
           // Document title
           Center(
             child: Text(
-              'CONTRATO DE ARRAS PENITENCIALES',
+              'arras_contract.preview_title'.tr(),
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
@@ -496,6 +498,7 @@ class SmartContractPreview extends StatelessWidget {
               ),
             ),
           ),
+
 
           const SizedBox(height: 4),
           Center(
@@ -515,8 +518,9 @@ class SmartContractPreview extends StatelessWidget {
 
           // REUNIDOS
           _PreviewSection(
-            label: 'REUNIDOS',
+            label: 'arras_contract.preview_section_reunidos'.tr(),
             labelColor: _blue,
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -539,8 +543,9 @@ class SmartContractPreview extends StatelessWidget {
 
           // OBJETO
           _PreviewSection(
-            label: 'OBJETO',
+            label: 'arras_contract.preview_section_objeto'.tr(),
             labelColor: _blue,
+
             child: _PreviewRow(
               title: 'arras_contract.preview_address'.tr(),
               value: propertyAddress,
@@ -552,8 +557,9 @@ class SmartContractPreview extends StatelessWidget {
 
           // PRECIO DE COMPRAVENTA
           _PreviewSection(
-            label: 'PRECIO DE COMPRAVENTA',
+            label: 'arras_contract.preview_section_precio'.tr(),
             labelColor: _blue,
+
             child: _PreviewRow(
               title: 'arras_contract.preview_sale_price'.tr(),
               value:
@@ -566,8 +572,9 @@ class SmartContractPreview extends StatelessWidget {
 
           // ARRAS (10%)
           _PreviewSection(
-            label: 'ARRAS (10%)',
+            label: 'arras_contract.preview_section_arras'.tr(),
             labelColor: _blue,
+
             child: _PreviewRow(
               title: 'arras_contract.preview_arras'.tr(),
               value:
@@ -580,8 +587,9 @@ class SmartContractPreview extends StatelessWidget {
 
           // PLAZO DE ESCRITURACION
           _PreviewSection(
-            label: 'PLAZO DE ESCRITURACION',
+            label: 'arras_contract.preview_section_plazo'.tr(),
             labelColor: _blue,
+
             child: _PreviewRow(
               title: 'arras_contract.preview_deadline'.tr(),
               value: deadlineText,
@@ -594,8 +602,9 @@ class SmartContractPreview extends StatelessWidget {
           if (needsMortgage) ...[
             const SizedBox(height: 14),
             _PreviewSection(
-              label: 'CLAUSULA DE DESISTIMIENTO',
+              label: 'arras_contract.preview_section_desistimiento'.tr(),
               labelColor: _green,
+
               child: Text(
                 'arras_contract.preview_mortgage_clause'.tr(),
                 style: theme.textTheme.bodySmall,
@@ -607,8 +616,9 @@ class SmartContractPreview extends StatelessWidget {
           if (furnitureItems.isNotEmpty) ...[
             const SizedBox(height: 14),
             _PreviewSection(
-              label: 'INVENTARIO',
+              label: 'arras_contract.preview_section_inventario'.tr(),
               labelColor: _blue,
+
               child: Text(
                 furnitureItems.join(', '),
                 style: theme.textTheme.bodySmall,

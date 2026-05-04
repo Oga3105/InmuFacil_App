@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -51,7 +52,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
               children: [
                 Image.asset('assets/images/logo_inmufacil.png', height: 32),
                 const SizedBox(width: 8),
-                const Text.rich(
+                Text.rich(
                   TextSpan(
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                     children: [
@@ -98,12 +99,12 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                             ),
                           ],
                         ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
+                        child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                             Icon(Icons.home_rounded, size: 18, color: Colors.white),
                             SizedBox(width: 6),
-                            Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                            Text('common.home'.tr(), style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                           ],
                         ),
                       ),
@@ -128,8 +129,8 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
             const SizedBox(height: 24),
 
             // ── Existing windows ─────────────────────────────────────
-            const Text(
-              'VENTANAS CONFIGURADAS',
+            Text(
+              'visits.configured_windows'.tr(),
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
@@ -148,15 +149,14 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
               error: (_, __) => _buildInfoCard(
                 icon: Icons.error_outline,
                 color: Colors.red,
-                text: 'Error al cargar las ventanas de visita',
+                text: 'visits.error_loading_windows'.tr(),
               ),
               data: (windows) {
                 if (windows.isEmpty) {
                   return _buildInfoCard(
                     icon: Icons.event_busy_outlined,
                     color: const Color(0xFFF97316),
-                    text: 'No tienes ventanas de visita configuradas.\n'
-                        'Los compradores no podran reservar citas hasta que crees al menos una.',
+                    text: 'visits.no_windows_configured'.tr(),
                   );
                 }
                 return Column(
@@ -193,8 +193,8 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                     size: 18, color: Color(0xFF135BEC)),
               ),
               const SizedBox(width: 10),
-              const Text(
-                'Crear nueva ventana de disponibilidad',
+              Text(
+                'visits.create_new_window'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
@@ -205,7 +205,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Define un bloque de horas en el que los compradores podran reservar visitas de ${_slotDuration} minutos.',
+            'visits.define_block_desc'.tr(namedArgs: {'duration': _slotDuration.toString()}),
             style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
           ),
           const SizedBox(height: 20),
@@ -213,7 +213,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
           // Date picker
           _buildPickerRow(
             icon: Icons.calendar_today_outlined,
-            label: 'Fecha',
+            label: 'common.date'.tr(),
             value: '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
             onTap: () async {
               final picked = await showDatePicker(
@@ -233,7 +233,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
               Expanded(
                 child: _buildPickerRow(
                   icon: Icons.access_time,
-                  label: 'Hora inicio',
+                  label: 'visits.start_time'.tr(),
                   value: _formatTime(_startTime),
                   onTap: () async {
                     final picked = await showTimePicker(
@@ -248,7 +248,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
               Expanded(
                 child: _buildPickerRow(
                   icon: Icons.access_time,
-                  label: 'Hora fin',
+                  label: 'visits.end_time'.tr(),
                   value: _formatTime(_endTime),
                   onTap: () async {
                     final picked = await showTimePicker(
@@ -266,13 +266,13 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
           // Slot duration
           _buildPickerRow(
             icon: Icons.timelapse_outlined,
-            label: 'Duracion por cita',
+            label: 'visits.slot_duration'.tr(),
             value: '$_slotDuration min',
             onTap: () {
               showDialog(
                 context: context,
                 builder: (_) => SimpleDialog(
-                  title: const Text('Duracion de cada visita'),
+                  title: Text('visits.visit_duration_title'.tr()),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   children: [15, 20, 30, 45, 60].map((min) {
                     return SimpleDialogOption(
@@ -280,7 +280,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                         setState(() => _slotDuration = min);
                         Navigator.pop(context);
                       },
-                      child: Text('$min minutos',
+                      child: Text('visits.minutes'.tr(namedArgs: {'min': min.toString()}),
                           style: TextStyle(
                             fontWeight: _slotDuration == min ? FontWeight.w700 : FontWeight.normal,
                             color: _slotDuration == min ? const Color(0xFF135BEC) : null,
@@ -310,7 +310,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                     )
                   : const Icon(Icons.check_circle_outline),
               label: Text(
-                _isCreating ? 'Creando...' : 'Crear ventana de disponibilidad',
+                _isCreating ? 'common.creating'.tr() : 'Crear ventana de disponibilidad',
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
               style: FilledButton.styleFrom(
@@ -358,9 +358,8 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
           Expanded(
             child: Text(
               slotCount > 0
-                  ? 'Se crearan $slotCount citas de $_slotDuration min '
-                    '(${_formatTime(_startTime)} - ${_formatTime(_endTime)})'
-                  : 'La hora de fin debe ser posterior a la de inicio',
+                  ? 'visits.preview_creating'.tr(namedArgs: {'count': slotCount.toString(), 'duration': _slotDuration.toString(), 'start': _formatTime(_startTime), 'end': _formatTime(_endTime)})
+                  : 'visits.error_end_after_start'.tr(),
               style: TextStyle(
                 fontSize: 13,
                 color: slotCount > 0 ? const Color(0xFF166534) : Colors.red.shade700,
@@ -390,10 +389,10 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
     );
 
     if (!end.isAfter(start)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('La hora de fin debe ser posterior a la de inicio'),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('visits.error_end_after_start'.tr()),
+          backgroundColor: Colors.red,
+        ));
       return;
     }
 
@@ -410,15 +409,15 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
       ref.invalidate(sellerWindowsProvider(widget.propertyId));
       ref.invalidate(slotsProvider(widget.propertyId));
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Ventana de disponibilidad creada correctamente'),
-          backgroundColor: Color(0xFF16A34A),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('visits.success_created'.tr()),
+          backgroundColor: const Color(0xFF16A34A),
         ));
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Error al crear la ventana. Puede que se solape con otra existente.'),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('visits.error_overlap'.tr()),
           backgroundColor: Colors.red,
         ));
       }
@@ -535,7 +534,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'Citas de ${w.slotDurationMinutes} min',
+                  'visits.slots_duration_text'.tr(namedArgs: {'duration': w.slotDurationMinutes.toString()}),
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
                 ),
               ],
@@ -548,7 +547,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text('Pasada',
+              child: Text('visits.past'.tr(),
                   style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
             )
           else
@@ -558,7 +557,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                 color: const Color(0xFFDCFCE7),
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Text('Activa',
+              child: Text('visits.active'.tr(),
                   style: TextStyle(fontSize: 11, color: Color(0xFF16A34A), fontWeight: FontWeight.w600)),
             ),
         ],

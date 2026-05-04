@@ -478,9 +478,9 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
-            SizedBox(width: 8),
+          Row(children: [
+            const Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
+            const SizedBox(width: 8),
             Text('transaction.tasacion_buyer_proposes'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
@@ -632,9 +632,9 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(children: [
-            Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
-            SizedBox(width: 8),
+          Row(children: [
+            const Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
+            const SizedBox(width: 8),
             Text('transaction.tasacion_seller_counter_title'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
           ]),
@@ -765,9 +765,9 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(children: [
-                Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
-                SizedBox(width: 8),
+              Row(children: [
+                const Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
+                const SizedBox(width: 8),
                 Text('transaction.tasacion_confirm_visit_title'.tr(),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
               ]),
@@ -884,12 +884,12 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [BoxShadow(color: _kBlue.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 2))],
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                SizedBox(width: 6),
-                Text('common.home'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
+                Text('common.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),

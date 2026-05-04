@@ -15,6 +15,8 @@ import 'arras_shared_widgets.dart';
 import '../../../../core/network/dio_factory.dart';
 
 // Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
+const _kNavy = Color(0xFF135BEC);
+const kArrasBlue = Color(0xFF135BEC);
 
 class ArrasSellerStepperScreen extends ConsumerStatefulWidget {
   const ArrasSellerStepperScreen({super.key, required this.offer});
@@ -436,33 +438,31 @@ class _ArrasSellerStepperScreenState
               children: [
                 Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: kArrasBlue.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.credit_card_outlined,
-                          color: kArrasBlue, size: 18),
-                    ),
-                    const SizedBox(width: 12),
+                    const Icon(Icons.lock_outline, size: 14, color: _kNavy),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'IBAN para recibir las arras',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: colorScheme.onPrimaryContainer),
-                          ),
-                          Text(
-                            'Cifrado de extremo a extremo — nunca visible al comprador',
-                            style: TextStyle(
-                                fontSize: 11, color: colorScheme.onSurfaceVariant),
-                          ),
-                        ],
+                      child: Text(
+                        'arras_interview.iban_title'.tr(),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _kNavy,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const SizedBox(width: 22),
+                    Expanded(
+                      child: Text(
+                        'arras_interview.iban_encrypted'.tr(),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: _kNavy.withOpacity(0.7),
+                        ),
                       ),
                     ),
                   ],
@@ -519,7 +519,8 @@ class _ArrasSellerStepperScreenState
                   controller: _bankNameCtrl,
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(
-                    hintText: 'Ej: CaixaBank, Santander, BBVA...',
+                    hintText: 'arras_interview.bank_placeholder'.tr(),
+
                     prefixIcon: const Icon(Icons.account_balance_outlined,
                         color: kArrasBlue, size: 18),
                     contentPadding: const EdgeInsets.symmetric(
@@ -536,24 +537,26 @@ class _ArrasSellerStepperScreenState
                             const BorderSide(color: kArrasBlue, width: 2)),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isDark ? colorScheme.surfaceContainer : const Color(0xFFF0FDF4),
-                    borderRadius: BorderRadius.circular(8),
+                    color: _kNavy.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.security_outlined,
-                          color: kGreen, size: 14),
-                      const SizedBox(width: 8),
+                      const Icon(Icons.shield_outlined, size: 16, color: _kNavy),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          'Tu IBAN se almacena cifrado con AES-256. El numero completo y la '
-                          'entidad bancaria apareceran en el contrato para el pago de las arras.',
+                          'arras_interview.iban_security_disclaimer'.tr(),
                           style: TextStyle(
-                              fontSize: 11, color: isDark ? const Color(0xFF34D399) : const Color(0xFF059669)),
+                            fontSize: 12,
+                            color: _kNavy.withOpacity(0.8),
+                            height: 1.4,
+                          ),
                         ),
                       ),
                     ],
@@ -584,7 +587,8 @@ class _ArrasSellerStepperScreenState
                   controller: _additionalClausesCtrl,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: 'Ej: Se incluyen los electrodomesticos...',
+                    hintText: 'arras_interview.furniture_placeholder'.tr(),
+
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide(color: Colors.grey.shade300),
@@ -648,15 +652,49 @@ class _ArrasSellerStepperScreenState
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
+        GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF135BEC),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF135BEC).withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  'common.home_btn'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         Consumer(
           builder: (context, ref, _) {
             final isAuthenticated = ref.watch(authProvider).isAuthenticated;
             if (!isAuthenticated) return const SizedBox.shrink();
-            return const Row(
+            return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                UserAvatarMenu(),
-                SizedBox(width: 16),
+                const SizedBox(width: 12),
+                const UserAvatarMenu(),
+                const SizedBox(width: 16),
               ],
             );
           },

@@ -1183,7 +1183,7 @@ class _PropertyViabilityCard extends ConsumerWidget {
                       Expanded(
                         child: _ViabilityMetric(
                           label: 'property.monthly_mortgage_estimate'.tr(),
-                          value: '${viability.monthlyMortgageEstimate} EUR/mes',
+                          value: '${viability.monthlyMortgageEstimate} ${'property.eur_per_month'.tr()}',
                           color: textColor,
                         ),
                       ),

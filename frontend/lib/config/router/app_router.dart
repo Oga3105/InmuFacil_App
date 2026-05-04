@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -308,9 +309,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/contracts',
         name: 'contracts',
         builder: (context, state) => Scaffold(
-          appBar: AppBar(title: const Text('Mis Contratos')),
-          body: const Center(child: Text('Zona de Contratos (Hito 12)')),
+          appBar: AppBar(title: Text('common.my_contracts'.tr())),
+          body: Center(child: Text('common.contracts_wip'.tr())),
         ),
+
       ),
 
       // Arras Interview (hub + sub-screens)

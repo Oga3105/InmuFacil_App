@@ -5,7 +5,8 @@ import 'package:latlong2/latlong.dart' hide Path;
 import 'package:go_router/go_router.dart';
 // For Timer (Hover Debounce)
 import 'dart:convert';
-// import 'package:easy_localization/easy_localization.dart'; // TEMP DISABLED
+import 'package:easy_localization/easy_localization.dart';
+
 
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
@@ -213,7 +214,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                         color: const Color(0xFF135BEC).withOpacity(0.15), 
                         borderColor: const Color(0xFF135BEC),
                         borderStrokeWidth: 2,
-                        label: searchState.location.isNotEmpty ? searchState.location : 'Zona',
+                        label: searchState.location.isNotEmpty ? searchState.location : 'map.zone_label'.tr(),
+
                         labelStyle: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                       ),
                       
@@ -265,10 +267,11 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                       children: [
                         const Icon(Icons.mode_edit_outline, color: Colors.orange, size: 20),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Dibuja tu zona punto a punto',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        Text(
+                          'map.draw_instruction'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
+
                         const SizedBox(width: 16),
                         FilledButton.icon(
                            onPressed: () => ref.read(mapStateProvider.notifier).completeDrawing(),
@@ -278,7 +281,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                              visualDensity: VisualDensity.compact,
                            ),
                            icon: const Icon(Icons.check, size: 16),
-                           label: const Text('TERMINAR'),
+                           label: Text('map.finish_btn'.tr()),
+
                         ),
                       ],
                     ),
@@ -300,7 +304,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                     mapState.isDrawingMode)
                   _MapToolButton(
                     icon: Icons.delete_outline,
-                    tooltip: 'Limpiar mapa',
+                    tooltip: 'map.clear_map_tooltip'.tr(),
+
                     color: Colors.red,
                     onPressed: () {
                       ref.read(mapStateProvider.notifier).clearZones();
@@ -315,7 +320,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 if (mapState.currentZonePolygon.isEmpty && mapState.cityBoundaryPolygon.isEmpty) 
                    _MapToolButton(
                     icon: mapState.isDrawingMode ? Icons.close : Icons.draw,
-                    tooltip: mapState.isDrawingMode ? 'Cancelar dibujo' : 'Dibujar zona',
+                    tooltip: mapState.isDrawingMode ? 'map.cancel_draw_tooltip'.tr() : 'map.draw_zone_tooltip'.tr(),
+
                     isActive: mapState.isDrawingMode,
                     // If drawing is active, allow cancelling via toggle. 
                     // If not active, allow starting ONLY if no zones exist (double check logic)
@@ -327,7 +333,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 // 3. Zoom In
                 _MapToolButton(
                   icon: Icons.add,
-                  tooltip: 'Acercar',
+                  tooltip: 'map.zoom_in_tooltip'.tr(),
+
                   onPressed: () => _zoomIn(),
                 ),
                 
@@ -336,7 +343,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 // 4. Zoom Out
                 _MapToolButton(
                   icon: Icons.remove,
-                  tooltip: 'Alejar',
+                  tooltip: 'map.zoom_out_tooltip'.tr(),
+
                   onPressed: () => _zoomOut(),
                 ),
                 
@@ -345,7 +353,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
                 // 5. My Location
                 _MapToolButton(
                   icon: Icons.my_location,
-                  tooltip: 'Mi ubicación',
+                  tooltip: 'map.my_location_tooltip'.tr(),
+
                   isLoading: _locating,
                   onPressed: _goToMyLocation,
                 ),
@@ -397,8 +406,9 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
       _mapController.move(result.location, 14.0);
       if (result.isFallback) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo obtener tu ubicación. Mostrando España.'),
+          SnackBar(
+            content: Text('map.location_error'.tr()),
+
             duration: Duration(seconds: 3),
           ),
         );
@@ -428,7 +438,8 @@ class _OpenStreetMapWidgetState extends ConsumerState<OpenStreetMapWidget> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Ver Detalles'),
+                child: Text('map.view_details'.tr()),
+
               ),
             ),
           ],

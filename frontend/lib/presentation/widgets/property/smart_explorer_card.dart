@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../providers/favorites_provider.dart';
 import '../common/price_tag.dart';
@@ -42,7 +43,7 @@ class SmartExplorerCard extends ConsumerWidget {
 
   static String _obfuscateAddress(String address) {
     if (RegExp(r'^-?\d+\.\d+,\s*-?\d+\.\d+$').hasMatch(address.trim())) {
-      return 'Ubicación protegida';
+      return 'property_listing.protected_location'.tr();
     }
     final parts = address.split(',').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
     if (parts.length >= 2) {
@@ -212,7 +213,7 @@ class SmartExplorerCard extends ConsumerWidget {
                           previousPrice: previousPriceEur?.toDouble(),
                         ),
                         const Spacer(),
-                        Text('${surfaceM2.toStringAsFixed(0)} m\u00b2', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                        Text('${surfaceM2.toStringAsFixed(0)} ${'property_listing.sqm_unit'.tr()}', style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                       ],
                     ),
                     // Stats
@@ -223,17 +224,18 @@ class SmartExplorerCard extends ConsumerWidget {
                           if (bedrooms != null) ...[
                             Icon(Icons.bed, size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             const SizedBox(width: 3),
-                            Text('$bedrooms Hab.', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('$bedrooms ${'property_listing.bedrooms_unit'.tr()}', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                             const SizedBox(width: 10),
                           ],
                           if (bathrooms != null) ...[
                             Icon(Icons.bathtub_outlined, size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                             const SizedBox(width: 3),
-                            Text('$bathrooms Baños', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                            Text('$bathrooms ${'property_listing.bathrooms_unit'.tr()}', style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           ],
                         ],
                       ),
                     ],
+
                     // Description (fills remaining space)
                     if (description != null && description!.isNotEmpty) ...[
                       const SizedBox(height: 6),

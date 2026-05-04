@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:inmufacil_frontend/domain/entities/property.dart';
 import 'package:inmufacil_frontend/presentation/providers/favorites_provider.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../common/price_tag.dart';
 
 class PropertyFloatingCard extends ConsumerWidget {
@@ -146,8 +147,8 @@ class PropertyFloatingCard extends ConsumerWidget {
                 Builder(
                   builder: (context) {
                     final List<Widget> items = [
-                      _buildFeature(context, Icons.bed, '${property.bedrooms} Hab'),
-                      _buildFeature(context, Icons.bathroom_outlined, '${property.bathrooms} Baño'),
+                      _buildFeature(context, Icons.bed, '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}'),
+                      _buildFeature(context, Icons.bathroom_outlined, '${property.bathrooms} ${'property_listing.bathrooms_unit'.tr()}'),
                       _buildFeature(context, Icons.square_foot, '${property.squareMeters}m²'),
                       if (property.floor != null)
                         _buildFeature(context, Icons.layers, '${property.floor}'),
@@ -190,12 +191,12 @@ class PropertyFloatingCard extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text('Ver detalle', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                        SizedBox(width: 8),
-                        Icon(Icons.chevron_right, size: 18),
+                        Text('map.view_detail_btn'.tr(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.chevron_right, size: 18),
                       ],
                     ),
                   ),
@@ -220,20 +221,21 @@ class PropertyFloatingCard extends ConsumerWidget {
         bg = colorScheme.secondaryContainer;
         fg = colorScheme.onSecondaryContainer;
         icon = Icons.check_circle_outline;
-        label = 'Publicado';
+        label = 'property_status.published'.tr();
         break;
       case 'draft':
         bg = const Color(0xFFFEF3C7);
         fg = const Color(0xFF92400E);
         icon = Icons.edit_note;
-        label = 'Borrador';
+        label = 'property_status.draft'.tr();
         break;
       default:
         bg = colorScheme.surfaceContainerHighest;
         fg = colorScheme.onSurfaceVariant;
         icon = Icons.visibility_off_outlined;
-        label = 'No publicado';
+        label = 'property_status.unpublished'.tr();
     }
+
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

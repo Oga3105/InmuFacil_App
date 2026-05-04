@@ -348,13 +348,13 @@ class VerificationNotifier extends Notifier<VerificationState> {
       final detail = e.response?.data?['detail'];
       state = state.copyWith(
         isExtractingDocNumber: false,
-        errorMessage: detail is String ? detail : 'Error al leer el documento.',
+        errorMessage: detail is String ? detail : 'kyc.error_reading_doc',
       );
       return null;
     } catch (_) {
       state = state.copyWith(
         isExtractingDocNumber: false,
-        errorMessage: 'Error inesperado al leer el documento.',
+        errorMessage: 'kyc.error_reading_doc',
       );
       return null;
     }
@@ -467,16 +467,16 @@ class VerificationNotifier extends Notifier<VerificationState> {
       );
       return true;
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'Error al enviar documentos';
+      final msg = e.response?.data?['detail'] ?? 'kyc.error_submitting';
       state = state.copyWith(
         isLoading: false,
-        errorMessage: msg is String ? msg : 'Error al enviar documentos',
+        errorMessage: msg is String ? msg : 'kyc.error_submitting',
       );
       return false;
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Error inesperado al enviar verificación',
+        errorMessage: 'kyc.error_unexpected',
       );
       return false;
     }
@@ -506,15 +506,15 @@ class VerificationNotifier extends Notifier<VerificationState> {
         );
         return;
       }
-      final msg = e.response?.data?['detail'] ?? 'Error al consultar estado';
+      final msg = e.response?.data?['detail'] ?? 'kyc.error_status';
       state = state.copyWith(
         isLoading: false,
-        errorMessage: msg is String ? msg : 'Error al consultar estado',
+        errorMessage: msg is String ? msg : 'kyc.error_status',
       );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Error inesperado',
+        errorMessage: 'kyc.error_unexpected',
       );
     }
   }

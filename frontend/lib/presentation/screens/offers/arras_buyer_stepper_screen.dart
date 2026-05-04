@@ -602,9 +602,9 @@ class _ArrasBuyerStepperScreenState
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Retencion de IBI no emitido',
+                  title: 'arras_interview.ibi_retention_title'.tr(),
                   subtitle:
-                      'Se retiene el importe del IBI pendiente de emision',
+                      'arras_interview.ibi_retention_sub'.tr(),
                   value: _retainPendingIbi,
                   onChanged: (v) => setState(() => _retainPendingIbi = v),
                   icon: Icons.account_balance_wallet_outlined,
@@ -726,15 +726,49 @@ class _ArrasBuyerStepperScreenState
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
       ),
       actions: [
+        if (MediaQuery.sizeOf(context).width >= 650)
+        GestureDetector(
+          onTap: () => context.go('/'),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF135BEC),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF135BEC).withOpacity(0.25),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  'common.home_btn'.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         Consumer(
           builder: (context, ref, _) {
             final isAuthenticated = ref.watch(authProvider).isAuthenticated;
             if (!isAuthenticated) return const SizedBox.shrink();
-            return const Row(
+            return Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                UserAvatarMenu(),
-                SizedBox(width: 16),
+                const SizedBox(width: 12),
+                const UserAvatarMenu(),
+                const SizedBox(width: 16),
               ],
             );
           },

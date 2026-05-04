@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/solvency_provider.dart';
@@ -72,12 +73,12 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('common.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -100,11 +101,11 @@ class SolvencyPassportScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 12),
-              Text('Error al cargar: $e'),
+              Text('solvency.loading_error'.tr(args: [e.toString()])),
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () => ref.invalidate(mySolvencyProvider),
-                child: const Text('Reintentar'),
+                child: Text('solvency.retry'.tr()),
               ),
             ],
           ),
@@ -135,14 +136,14 @@ class SolvencyPassportScreen extends ConsumerWidget {
                 child: const Icon(Icons.shield_outlined, size: 56, color: _kNavy),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'Aun no tienes un Pasaporte',
+              Text(
+                'solvency.no_passport_title'.tr(),
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _kNavy),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Completa el asistente para obtener tu nivel de solvencia y mostrar a los vendedores que eres un comprador serio.',
+                'solvency.no_passport_desc'.tr(),
                 style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
                 textAlign: TextAlign.center,
               ),
@@ -150,7 +151,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () => context.push('/solvency/wizard'),
                 icon: const Icon(Icons.play_arrow_rounded, color: Colors.white),
-                label: const Text('Completar el Asistente', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: Text('solvency.complete_wizard'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kNavy,
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
@@ -209,13 +210,13 @@ class SolvencyPassportScreen extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'PASAPORTE DE SOLVENCIA',
-                              style: TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600),
+                            Text(
+                              'solvency.passport_title'.tr(),
+                              style: const TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600),
                             ),
                             Text(
-                              'Nivel ${levelCfg.label}',
-                              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                              tr('solvency.level_label') + levelCfg.label,
+                              style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -241,8 +242,8 @@ class SolvencyPassportScreen extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(
                           passport.expiresAt != null
-                              ? 'Expira el ${_formatDate(passport.expiresAt!)} ($daysLeft dias)'
-                              : 'Sin caducidad',
+                              ? tr('solvency.expires_on') + _formatDate(passport.expiresAt!) + ' (' + daysLeft.toString() + tr('solvency.days') + ')'
+                              : 'solvency.no_expiry'.tr(),
                           style: const TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const Spacer(),
@@ -253,7 +254,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            daysLeft > 30 ? 'Valido' : 'Proxima caducidad',
+                            daysLeft > 30 ? 'solvency.valid_status'.tr() : 'solvency.expiring_soon'.tr(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 11,
@@ -271,7 +272,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
 
               // ── Stress index ───────────────────────────────────────────────
               _InfoCard(
-                title: 'Indice de Estres Financiero',
+                title: 'solvency.stress_index'.tr(),
                 child: Row(
                   children: [
                     Container(
@@ -288,7 +289,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        'Ratio de endeudamiento: ${((passport.debtRatio ?? 0) * 100).toStringAsFixed(0)}%',
+                        '${'solvency.debt_ratio'.tr()}${((passport.debtRatio ?? 0) * 100).toStringAsFixed(0)}%',
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                     ),
@@ -300,15 +301,15 @@ class SolvencyPassportScreen extends ConsumerWidget {
 
               // ── Checklist ──────────────────────────────────────────────────
               _InfoCard(
-                title: 'Resumen de Declaracion',
+                title: 'solvency.statement_summary'.tr(),
                 child: Column(
                   children: [
-                    _CheckRow('Conoce los gastos adicionales', passport.knowsExtraCosts == true),
-                    _CheckRow('Tiene fondo de emergencia', passport.hasEmergencyFund == true),
-                    _CheckRow('Tiene ahorros iniciales', passport.hasInitialSavings == true),
-                    _CheckRow('Tiene preaprobacion hipotecaria', passport.hasPreApproval == true),
+                    _CheckRow('solvency.knows_extra_costs'.tr(), passport.knowsExtraCosts == true),
+                    _CheckRow('solvency.has_emergency_fund'.tr(), passport.hasEmergencyFund == true),
+                    _CheckRow('solvency.has_initial_savings'.tr(), passport.hasInitialSavings == true),
+                    _CheckRow('solvency.has_preapproval'.tr(), passport.hasPreApproval == true),
                     _CheckRow(
-                      'Metodo de pago: ${_paymentLabel(passport.paymentMethod)}',
+                      tr('solvency.payment_method') + _paymentLabel(passport.paymentMethod),
                       passport.paymentMethod != null,
                     ),
                   ],
@@ -324,7 +325,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     child: OutlinedButton.icon(
                       onPressed: () => context.push('/solvency/wizard'),
                       icon: const Icon(Icons.refresh, size: 18, color: _kNavy),
-                      label: const Text('Actualizar', style: TextStyle(color: _kNavy)),
+                      label: Text('solvency.refresh'.tr(), style: const TextStyle(color: _kNavy)),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         side: const BorderSide(color: _kNavy),
@@ -337,7 +338,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => context.go('/profile'),
                       icon: const Icon(Icons.person_outline, size: 18, color: Colors.white),
-                      label: const Text('Ir al perfil', style: TextStyle(color: Colors.white)),
+                      label: Text('solvency.go_to_profile'.tr(), style: const TextStyle(color: Colors.white)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _kNavy,
                         padding: const EdgeInsets.symmetric(vertical: 14),
@@ -351,7 +352,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
               const SizedBox(height: 12),
 
               Text(
-                'Este pasaporte es visible de forma anonima para los vendedores de las propiedades a las que hayas hecho una oferta.',
+                'solvency.passport_visibility_info'.tr(),
                 style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
                 textAlign: TextAlign.center,
               ),
@@ -451,8 +452,8 @@ _LevelConfig _levelConfig(String level) {
   switch (level) {
     case 'gold':
       return _LevelConfig(
-        label: 'Oro',
-        emoji: 'Oro',
+        label: 'solvency.gold'.tr(),
+        emoji: 'solvency.gold'.tr(),
         gradStart: const Color(0xFFB8860B),
         gradEnd: const Color(0xFF996515),
         shadow: const Color(0xFFB8860B).withOpacity(0.4),
@@ -460,8 +461,8 @@ _LevelConfig _levelConfig(String level) {
       );
     case 'silver':
       return _LevelConfig(
-        label: 'Plata',
-        emoji: 'Plata',
+        label: 'solvency.silver'.tr(),
+        emoji: 'solvency.silver'.tr(),
         gradStart: const Color(0xFF64748B),
         gradEnd: const Color(0xFF475569),
         shadow: const Color(0xFF64748B).withOpacity(0.3),
@@ -469,8 +470,8 @@ _LevelConfig _levelConfig(String level) {
       );
     default: // bronze
       return _LevelConfig(
-        label: 'Bronce',
-        emoji: 'Bronce',
+        label: 'solvency.bronze'.tr(),
+        emoji: 'solvency.bronze'.tr(),
         gradStart: const Color(0xFFCD7F32),
         gradEnd: const Color(0xFFAB6A2A),
         shadow: const Color(0xFFCD7F32).withOpacity(0.3),
@@ -481,22 +482,22 @@ _LevelConfig _levelConfig(String level) {
 
 (String, Color) _stressLabel(String? index) {
   switch (index) {
-    case 'low_risk':   return ('Bajo riesgo',   const Color(0xFF16A34A));
-    case 'medium_risk': return ('Riesgo medio', Colors.orange);
-    case 'high_risk':  return ('Alto riesgo',   Colors.red);
-    default:           return ('Desconocido',   Colors.grey);
+    case 'low_risk':   return ('solvency.low_risk'.tr(),   const Color(0xFF16A34A));
+    case 'medium_risk': return ('solvency.medium_risk'.tr(), Colors.orange);
+    case 'high_risk':  return ('solvency.high_risk'.tr(),   Colors.red);
+    default:           return ('solvency.unknown_risk'.tr(),   Colors.grey);
   }
 }
 
 String _paymentLabel(String? method) {
   switch (method) {
-    case 'cash':                   return 'Pago al contado';
-    case 'mortgage_approved':      return 'Hipoteca aprobada';
-    case 'mortgage_pending':       return 'Hipoteca en tramite';
-    case 'house_to_sell':          return 'Venta de vivienda';
-    case 'savings_plus_mortgage':  return 'Ahorros + hipoteca';
-    case 'bridge_mortgage':        return 'Hipoteca puente';
-    default:                       return 'No especificado';
+    case 'cash':                   return 'solvency.cash'.tr();
+    case 'mortgage_approved':      return 'solvency.mortgage_approved'.tr();
+    case 'mortgage_pending':       return 'solvency.mortgage_pending'.tr();
+    case 'house_to_sell':          return 'solvency.house_to_sell'.tr();
+    case 'savings_plus_mortgage':  return 'solvency.savings_plus_mortgage'.tr();
+    case 'bridge_mortgage':        return 'solvency.bridge_mortgage'.tr();
+    default:                       return 'solvency.unspecified_payment'.tr();
   }
 }
 

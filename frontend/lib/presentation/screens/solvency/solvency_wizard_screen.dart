@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/formatters/currency_input_formatter.dart';
@@ -88,7 +89,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('solvency.save_error'.tr(args: [e.toString()])), backgroundColor: Colors.red),
         );
       }
     }
@@ -161,12 +162,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.home_rounded, size: 16, color: Colors.white),
-                    SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
+                    const Icon(Icons.home_rounded, size: 16, color: Colors.white),
+                    const SizedBox(width: 5),
+                    Text('common.home_btn'.tr(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
               ),
@@ -195,12 +196,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             child: Row(
               children: [
                 Text(
-                  'Paso ${_page + 1} de $_totalPages',
+                  'solvency.step_counter'.tr(namedArgs: {'x': (_page + 1).toString(), 'y': _totalPages.toString()}),
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                 ),
                 const Spacer(),
                 Text(
-                  ['Tipo de Compra', 'Aviso Legal', 'Conciencia Financiera', 'Declaracion', 'ADN Financiero'][_page],
+                  ['solvency.step_buyer_type'.tr(), 'solvency.step_disclaimer'.tr(), 'solvency.step_financial_awareness'.tr(), 'solvency.step_declaration'.tr(), 'solvency.step_financial_dna'.tr()][_page],
                   style: const TextStyle(color: _kNavy, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -239,7 +240,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                       side: const BorderSide(color: _kNavy),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
-                    child: const Text('Anterior', style: TextStyle(color: _kNavy)),
+                    child: Text('common.previous'.tr(), style: const TextStyle(color: _kNavy)),
                   ),
                 const Spacer(),
                 ElevatedButton(
@@ -253,7 +254,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   child: isLoading && _page == _totalPages - 1
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : Text(
-                          _page < _totalPages - 1 ? 'Continuar' : 'Obtener mi Pasaporte',
+                          _page < _totalPages - 1 ? 'common.continue_btn'.tr() : 'solvency.get_passport_btn'.tr(),
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                 ),
@@ -294,29 +295,29 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Tipo de compra',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
+          Text(
+            'solvency.buyer_type_title'.tr(),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
           ),
           const SizedBox(height: 8),
           Text(
-            'Para personalizar tu pasaporte necesitamos saber cuantos titulares participan en la compra.',
+            'solvency.buyer_type_desc'.tr(),
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
           ),
           const SizedBox(height: 32),
           _BuyerTypeCard(
             selected: _isMultiBuyer == false,
             icon: Icons.person_outline,
-            title: 'Solo yo',
-            subtitle: 'Compra individual. Solo tu figura como titular.',
+            title: 'solvency.just_me'.tr(),
+            subtitle: 'solvency.individual_purchase'.tr(),
             onTap: () => setState(() => _isMultiBuyer = false),
           ),
           const SizedBox(height: 16),
           _BuyerTypeCard(
             selected: _isMultiBuyer == true,
             icon: Icons.group_outlined,
-            title: 'Con alguien mas',
-            subtitle: 'Compra conjunta: pareja, familiar u otro cotitular.',
+            title: 'solvency.with_someone_else'.tr(),
+            subtitle: 'solvency.joint_purchase'.tr(),
             onTap: () => setState(() => _isMultiBuyer = true),
           ),
           if (_isMultiBuyer == true) ...[
@@ -331,12 +332,12 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline_rounded, color: _kNavy, size: 20),
+                  const Icon(Icons.info_outline_rounded, color: _kNavy, size: 20),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Perfecto. En los siguientes pasos introduce los datos financieros SUMADOS de ambos titulares. Mas adelante solicitaremos la verificacion de identidad del segundo titular.',
-                      style: TextStyle(fontSize: 13, color: _kNavy, height: 1.5),
+                      'solvency.joint_purchase_info'.tr(),
+                      style: const TextStyle(fontSize: 13, color: _kNavy, height: 1.5),
                     ),
                   ),
                 ],
@@ -361,8 +362,8 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             children: [
               _SectionHeader(
                 icon: Icons.gavel_outlined,
-                title: 'Aviso de Responsabilidad Civil',
-                subtitle: 'Lee atentamente antes de continuar',
+                title: 'solvency.liability_notice_title'.tr(),
+                subtitle: 'solvency.read_carefully'.tr(),
               ),
               const SizedBox(height: 24),
               Builder(builder: (context) {
@@ -373,16 +374,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                   border: Border.all(color: const Color(0xFF93C5FD)),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'Este Pasaporte de Solvencia es una declaración voluntaria y veraz de tu situación '
-                  'financiera. La información que proporciones no es verificada por InmuFácil y '
-                  'su uso indebido puede acarrear responsabilidad civil.\n\n'
-                  'InmuFácil actúa como plataforma neutral. La decisión final de aceptar o '
-                  'rechazar una oferta basándose en este pasaporte corresponde exclusivamente '
-                  'a cada vendedor.\n\n'
-                  'Tus datos son procesados conforme al RGPD/LOPD y se eliminarán '
-                  'automáticamente a los 90 días.',
-                  style: TextStyle(fontSize: 14, height: 1.6, color: Color(0xFF1E40AF)),
+                child: Text(
+                  'solvency.liability_notice_body'.tr(),
+                  style: const TextStyle(fontSize: 14, height: 1.6, color: Color(0xFF1E40AF)),
                 ),
               );
               }),
@@ -399,10 +393,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                     ),
                     const SizedBox(width: 8),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'He leído y acepto los términos de responsabilidad. Declaro que la información que voy a proporcionar es veraz.',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        'solvency.accept_terms'.tr(),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -419,10 +413,10 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
 
   Widget _buildPage2() {
     final stressLabel = _debtRatio > 0.38
-        ? ('Alto riesgo', Colors.red)
+        ? ('solvency.risk_high'.tr(), Colors.red)
         : _debtRatio > 0.35
-            ? ('Riesgo medio', Colors.orange)
-            : ('Bajo riesgo', _kGreen);
+            ? ('solvency.risk_medium'.tr(), Colors.orange)
+            : ('solvency.risk_low'.tr(), _kGreen);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -434,17 +428,17 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             children: [
               _SectionHeader(
                 icon: Icons.psychology_outlined,
-                title: 'Conciencia Financiera',
-                subtitle: 'El "Abogado del Diablo" — seamos honestos',
+                title: 'solvency.step_financial_awareness'.tr(),
+                subtitle: 'solvency.financial_awareness_subtitle'.tr(),
               ),
               const SizedBox(height: 24),
 
               // Costs awareness
               _YesNoQuestion(
                 question: _isMultiBuyer == true
-                    ? '¿Habeis tenido en cuenta los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)'
-                    : '¿Conoces los gastos adicionales de la compra?\n(ITP/IVA, notaria, gestoria, registro...)',
-                hint: 'Generalmente un 10-15% adicional sobre el precio de compra.',
+                    ? 'solvency.knows_extra_costs_multi'.tr()
+                    : 'solvency.knows_extra_costs_single'.tr(),
+                hint: 'solvency.extra_costs_hint'.tr(),
                 value: _knowsExtraCosts,
                 onChanged: (v) => setState(() => _knowsExtraCosts = v),
               ),
@@ -455,14 +449,14 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Ratio de endeudamiento mensual',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _kNavy),
+                    Text(
+                      'solvency.monthly_debt_ratio'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _kNavy),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Deudas mensuales totales ÷ ingresos netos mensuales',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                    Text(
+                      'solvency.debt_ratio_formula'.tr(),
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -510,14 +504,14 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                           color: const Color(0xFFFEF3C7),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 16),
-                            SizedBox(width: 8),
+                            const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706), size: 16),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Los bancos generalmente no conceden hipotecas si superas el 35%.',
-                                style: TextStyle(fontSize: 12, color: Color(0xFF92400E)),
+                                'solvency.debt_ratio_warning'.tr(),
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF92400E)),
                               ),
                             ),
                           ],
@@ -532,9 +526,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               // Emergency fund
               _YesNoQuestion(
                 question: _isMultiBuyer == true
-                    ? '¿Contais con un fondo de emergencia de al menos 3-6 meses de gastos?'
-                    : '¿Cuentas con un fondo de emergencia de al menos 3-6 meses de gastos?',
-                hint: 'Independiente del dinero para la compra.',
+                    ? 'solvency.has_emergency_fund_multi'.tr()
+                    : 'solvency.has_emergency_fund_single'.tr(),
+                hint: 'solvency.emergency_fund_hint'.tr(),
                 value: _hasEmergencyFund,
                 onChanged: (v) => setState(() => _hasEmergencyFund = v),
               ),
@@ -558,8 +552,8 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             children: [
               _SectionHeader(
                 icon: Icons.verified_user_outlined,
-                title: 'Declaración de Solvencia',
-                subtitle: 'Tu situación real de financiación',
+                title: 'solvency.declaration_title'.tr(),
+                subtitle: 'solvency.declaration_subtitle'.tr(),
               ),
               const SizedBox(height: 24),
 
@@ -568,20 +562,20 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '¿Cómo planeas financiar la compra?',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _kNavy),
+                    Text(
+                      'solvency.how_to_finance'.tr(),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: _kNavy),
                     ),
                     const SizedBox(height: 16),
                     ...[
-                      ('cash', 'Pago al contado', Icons.payments_outlined),
-                      ('mortgage_approved', 'Hipoteca aprobada', Icons.check_circle_outline),
-                      ('mortgage_pending', 'Hipoteca en tramitacion', Icons.hourglass_empty_outlined),
-                      ('savings_plus_mortgage', 'Ahorros + hipoteca', Icons.account_balance_outlined),
-                      ('house_to_sell', 'Venta de vivienda actual', Icons.home_outlined),
-                      ('bridge_mortgage', 'Hipoteca puente', Icons.swap_horiz_outlined),
-                      ('savings_only', 'Solo ahorros (Sin banco aun)', Icons.savings_outlined),
-                      ('no_process', 'Sin tramites iniciados', Icons.rule_folder_outlined),
+                      ('cash', 'solvency.cash'.tr(), Icons.payments_outlined),
+                      ('mortgage_approved', 'solvency.mortgage_approved'.tr(), Icons.check_circle_outline),
+                      ('mortgage_pending', 'solvency.mortgage_pending'.tr(), Icons.hourglass_empty_outlined),
+                      ('savings_plus_mortgage', 'solvency.savings_plus_mortgage'.tr(), Icons.account_balance_outlined),
+                      ('house_to_sell', 'solvency.house_to_sell'.tr(), Icons.home_outlined),
+                      ('bridge_mortgage', 'solvency.bridge_mortgage'.tr(), Icons.swap_horiz_outlined),
+                      ('savings_only', 'solvency.savings_only'.tr(), Icons.savings_outlined),
+                      ('no_process', 'solvency.no_process'.tr(), Icons.rule_folder_outlined),
                     ].map((opt) => _OptionTile(
                           value: opt.$1,
                           label: opt.$2,
@@ -596,9 +590,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
 
               _YesNoQuestion(
                 question: _isMultiBuyer == true
-                    ? '¿Disponeis de ahorros iniciales para la entrada y gastos?'
-                    : '¿Dispones de ahorros iniciales para la entrada y gastos?',
-                hint: 'Habitualmente entre un 20-30% del precio de la propiedad.',
+                    ? 'solvency.has_initial_savings_multi'.tr()
+                    : 'solvency.has_initial_savings_single'.tr(),
+                hint: 'solvency.initial_savings_hint'.tr(),
                 value: _hasInitialSavings,
                 onChanged: (v) => setState(() => _hasInitialSavings = v),
               ),
@@ -606,9 +600,9 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
 
               _YesNoQuestion(
                 question: _isMultiBuyer == true
-                    ? '¿Teneis una preaprobacion hipotecaria de un banco?'
-                    : '¿Tienes una preaprobacion hipotecaria de un banco?',
-                hint: 'Un documento oficial que confirma que el banco te prestaria el dinero.',
+                    ? 'solvency.has_preapproval_multi'.tr()
+                    : 'solvency.has_preapproval_single'.tr(),
+                hint: 'solvency.preapproval_hint'.tr(),
                 value: _hasPreApproval,
                 onChanged: (v) => setState(() => _hasPreApproval = v),
               ),
@@ -632,8 +626,8 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
             children: [
               _SectionHeader(
                 icon: Icons.analytics_outlined,
-                title: 'ADN Financiero',
-                subtitle: 'Calculo personalizado de viabilidad — opcional y privado',
+                title: 'solvency.step_financial_dna'.tr(),
+                subtitle: 'solvency.financial_dna_subtitle'.tr(),
               ),
               const SizedBox(height: 16),
               Container(
@@ -649,7 +643,7 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Estos datos se cifran con AES-256. El vendedor NUNCA ve tus ingresos ni deudas — solo recibe el resultado de viabilidad (Verde/Ambar/Rojo).',
+                        'solvency.data_privacy_info'.tr(),
                         style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSecondaryContainer, height: 1.4),
                       ),
                     ),
@@ -662,32 +656,32 @@ class _SolvencyWizardScreenState extends ConsumerState<SolvencyWizardScreen> {
               _MoneyField(
                 controller: _incomeCtrl,
                 label: _isMultiBuyer == true
-                    ? 'Ingresos netos mensuales (total compradores)'
-                    : 'Ingresos netos mensuales',
-                hint: 'ej. 2.500',
+                    ? 'solvency.monthly_income_multi'.tr()
+                    : 'solvency.monthly_income_single'.tr(),
+                hint: 'solvency.example_income'.tr(),
                 icon: Icons.account_balance_wallet_outlined,
               ),
               const SizedBox(height: 16),
               _MoneyField(
                 controller: _savingsCtrl,
                 label: _isMultiBuyer == true
-                    ? 'Ahorros liquidos totales (suma de compradores)'
-                    : 'Ahorros liquidos totales',
-                hint: 'ej. 50.000',
+                    ? 'solvency.total_savings_multi'.tr()
+                    : 'solvency.total_savings_single'.tr(),
+                hint: 'solvency.example_savings'.tr(),
                 icon: Icons.savings_outlined,
               ),
               const SizedBox(height: 16),
               _MoneyField(
                 controller: _debtCtrl,
                 label: _isMultiBuyer == true
-                    ? 'Deudas mensuales actuales (total compradores)'
-                    : 'Deudas mensuales actuales',
-                hint: 'ej. 300 (prestamos, tarjetas...)',
+                    ? 'solvency.monthly_debt_multi'.tr()
+                    : 'solvency.monthly_debt_single'.tr(),
+                hint: 'solvency.example_debt'.tr(),
                 icon: Icons.credit_card_outlined,
               ),
               const SizedBox(height: 24),
               Text(
-                'Si prefieres no rellenar estos campos ahora, puedes hacerlo mas adelante actualizando tu pasaporte.',
+                'solvency.optional_fields_hint'.tr(),
                 style: TextStyle(fontSize: 12, color: Colors.grey.shade500, height: 1.5),
                 textAlign: TextAlign.center,
               ),
@@ -787,7 +781,7 @@ class _YesNoQuestion extends StatelessWidget {
             children: [
               Expanded(
                 child: _ChoiceBtn(
-                  label: 'Si',
+                  label: 'common.yes'.tr(),
                   selected: value == true,
                   selectedColor: _kGreen,
                   icon: Icons.check_circle_outline,
@@ -797,7 +791,7 @@ class _YesNoQuestion extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _ChoiceBtn(
-                  label: 'No',
+                  label: 'common.no'.tr(),
                   selected: value == false,
                   selectedColor: Colors.red.shade600,
                   icon: Icons.cancel_outlined,
@@ -975,22 +969,22 @@ class _SolvencyPreviewCard extends StatelessWidget {
         borderColor = isDark ? const Color(0xFF92700A) : const Color(0xFFFCD34D);
         iconColor = _kGold;
         icon = Icons.emoji_events_outlined;
-        levelLabel = 'Oro';
-        description = 'Perfil financiero solido. Destaca frente a otros compradores.';
+        levelLabel = 'solvency.level_gold'.tr();
+        description = 'solvency.gold_preview_desc'.tr();
       case 'silver':
         bgColor = colorScheme.surfaceContainerHighest;
         borderColor = colorScheme.outlineVariant;
         iconColor = colorScheme.onSurfaceVariant;
         icon = Icons.verified_outlined;
-        levelLabel = 'Plata';
-        description = 'Buen perfil. Puedes mejorar con preaprobacion hipotecaria o menor endeudamiento.';
+        levelLabel = 'solvency.level_silver'.tr();
+        description = 'solvency.silver_preview_desc'.tr();
       default:
         bgColor = isDark ? const Color(0xFF2A1500) : const Color(0xFFFFF7ED);
         borderColor = isDark ? const Color(0xFF92400E) : const Color(0xFFFDBA74);
         iconColor = _kAmber;
         icon = Icons.shield_outlined;
-        levelLabel = 'Bronce';
-        description = 'Perfil basico. Completar el ADN Financiero puede mejorar tu puntuacion.';
+        levelLabel = 'solvency.level_bronze'.tr();
+        description = 'solvency.bronze_preview_desc'.tr();
     }
 
     return Container(
@@ -1018,11 +1012,11 @@ class _SolvencyPreviewCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      'Estimacion: ',
+                      'solvency.estimation_label'.tr(),
                       style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                     ),
                     Text(
-                      'Nivel $levelLabel',
+                      '${'solvency.level_label'.tr()} $levelLabel',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -1112,7 +1106,7 @@ class _BuyerTypeCard extends StatelessWidget {
               ),
             ),
             if (selected)
-              Icon(Icons.check_circle, color: _kNavy, size: 20),
+              const Icon(Icons.check_circle, color: _kNavy, size: 20),
           ],
         ),
       ),

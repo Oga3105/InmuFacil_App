@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/ai_metrics_service.dart';
 import '../../providers/auth_provider.dart';
@@ -116,8 +118,9 @@ class _AdminAiAnalyticsScreenState
               setState(() => _isLoading = true);
               _loadMetrics();
             },
-            tooltip: 'Actualizar',
+            tooltip: 'common.refresh'.tr(),
           ),
+
           if (MediaQuery.sizeOf(context).width >= 650)
           MouseRegion(
             cursor: SystemMouseCursors.click,
@@ -142,9 +145,10 @@ class _AdminAiAnalyticsScreenState
                   children: [
                     Icon(Icons.home_rounded, size: 16, color: Theme.of(context).colorScheme.onPrimary),
                     const SizedBox(width: 5),
-                    Text('Inicio', style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
+                    Text('transaction.home_btn'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.w600, fontSize: 13)),
                   ],
                 ),
+
               ),
             ),
           ),
@@ -191,16 +195,17 @@ class _AdminAiAnalyticsScreenState
           Icon(Icons.lock_outline_rounded, size: 64, color: colorScheme.onSurfaceVariant),
           const SizedBox(height: 16),
           Text(
-            'Acceso restringido',
+            'common.restricted_access'.tr(),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w600,
               color: colorScheme.onSurface,
             ),
           ),
+
           const SizedBox(height: 8),
           Text(
-            'Esta seccion es exclusiva para administradores.',
+            'common.admin_only_section'.tr(),
             style: TextStyle(fontSize: 14, color: colorScheme.onSurfaceVariant),
           ),
         ],
@@ -252,19 +257,21 @@ class _AdminAiAnalyticsScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Ratio de Resiliencia',
+                  'admin.ai_resilience_label'.tr(),
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
                   ),
                 ),
+
                 const SizedBox(height: 4),
                 Text(
-                  'Llamadas exitosas sobre el total. '
-                  '${_logs.isEmpty ? "Sin datos registrados." : "Basado en ${_logs.length} llamadas (30d)."}',
+                  '${'admin.ai_resilience_desc'.tr()} '
+                  '${_logs.isEmpty ? "common.no_data".tr() : "admin.ai_based_on_calls".tr(namedArgs: {"count": _logs.length.toString()})}',
                   style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                 ),
+
               ],
             ),
           ),
@@ -281,9 +288,9 @@ class _AdminAiAnalyticsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Llamadas por Funcionalidad',
-            style: TextStyle(
+          Text(
+            'admin.ai_calls_by_feature'.tr(),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Color(0xFF0F172A),
@@ -291,8 +298,9 @@ class _AdminAiAnalyticsScreenState
           ),
           const SizedBox(height: 12),
           if (entries.isEmpty)
-            const Text('Sin datos.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+            Text('common.no_data'.tr(),
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+
           else
             ...entries.map(
               (e) => Padding(
@@ -350,9 +358,9 @@ class _AdminAiAnalyticsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Log Reciente',
-            style: TextStyle(
+          Text(
+            'admin.ai_recent_log'.tr(),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Color(0xFF0F172A),
@@ -360,8 +368,9 @@ class _AdminAiAnalyticsScreenState
           ),
           const SizedBox(height: 12),
           if (recent.isEmpty)
-            const Text('Sin entradas.',
-                style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+            Text('common.no_data'.tr(),
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13))
+
           else
             ...recent.map((log) {
               final h = log.timestamp.hour.toString().padLeft(2, '0');
@@ -417,9 +426,9 @@ class _AdminAiAnalyticsScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Presupuesto IA Diario',
-            style: TextStyle(
+          Text(
+            'admin.ai_daily_budget'.tr(),
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
               color: Color(0xFF0F172A),
@@ -427,7 +436,11 @@ class _AdminAiAnalyticsScreenState
           ),
           const SizedBox(height: 4),
           Text(
-            '$_dailyCount / $_maxDailyRequests llamadas ($usedPercent%)',
+            'admin.ai_calls_ratio'.tr(namedArgs: {
+              'count': _dailyCount.toString(),
+              'max': _maxDailyRequests.toString(),
+              'percent': usedPercent
+            }),
             style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           ),
           const SizedBox(height: 10),
@@ -501,21 +514,24 @@ class _PanicControlCardState extends State<_PanicControlCard> {
         builder: (_) => AlertDialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: const Text('Confirmar activacion de Modo Panico'),
+          title: Text('admin.ai_panic_confirm_title'.tr()),
+
           content: Text(
-            'Deseas forzar el uso de ${_selectedModel.toUpperCase()} para todos los usuarios? '
-            'Esto anulara la logica de precision Pro.',
+            'admin.ai_panic_confirm_desc'.tr(namedArgs: {'model': _selectedModel.toUpperCase()}),
           ),
+
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
+              child: Text('common.cancel'.tr()),
             ),
+
             FilledButton(
               style: FilledButton.styleFrom(backgroundColor: _amber),
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Activar'),
+              child: Text('common.activate'.tr()),
             ),
+
           ],
         ),
       );
@@ -555,7 +571,7 @@ class _PanicControlCardState extends State<_PanicControlCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'CONTROL GLOBAL DE INFRAESTRUCTURA IA',
+            'admin.ai_infra_control'.tr(),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
@@ -566,9 +582,9 @@ class _PanicControlCardState extends State<_PanicControlCard> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Text(
-                'Modelo forzado:',
-                style: TextStyle(fontSize: 14, color: Color(0xFF334155)),
+              Text(
+                'admin.ai_forced_model'.tr(),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF334155)),
               ),
               const SizedBox(width: 12),
               DropdownButton<String>(
@@ -596,9 +612,9 @@ class _PanicControlCardState extends State<_PanicControlCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Modo Panico',
-                style: TextStyle(
+              Text(
+                'admin.ai_panic_title'.tr(),
+                style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF0F172A)),
@@ -629,7 +645,7 @@ class _PanicControlCardState extends State<_PanicControlCard> {
                 border: Border.all(color: _amber),
               ),
               child: Text(
-                'ACTIVO - Todos los usuarios usando ${_selectedModel.toUpperCase()}',
+                'admin.ai_panic_active'.tr(namedArgs: {'model': _selectedModel.toUpperCase()}),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -637,6 +653,7 @@ class _PanicControlCardState extends State<_PanicControlCard> {
                   letterSpacing: 0.3,
                 ),
               ),
+
             ),
           ],
         ],

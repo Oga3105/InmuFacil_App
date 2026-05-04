@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../providers/verification_provider.dart';
@@ -119,7 +120,7 @@ class _VerificationStatusScreenState
                   Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
                   const SizedBox(width: 6),
                   Text(
-                    'Inicio',
+                    'common.home'.tr(),
                     style: TextStyle(
                       color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
@@ -157,7 +158,7 @@ class _VerificationStatusScreenState
             const SizedBox(height: 16),
             Text(
               isSessionExpired
-                  ? 'Tu sesión ha expirado'
+                  ? 'common.session_expired'.tr()
                   : state.errorMessage!,
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -171,7 +172,7 @@ class _VerificationStatusScreenState
             if (isSessionExpired) ...[
               const SizedBox(height: 8),
               Text(
-                'Inicia sesión de nuevo para continuar.',
+                'common.login_again'.tr(),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
               ),
@@ -181,7 +182,7 @@ class _VerificationStatusScreenState
               ElevatedButton.icon(
                 onPressed: () => context.go('/login'),
                 icon: const Icon(Icons.login),
-                label: const Text('Iniciar sesión'),
+                label: Text('common.login'.tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
@@ -195,7 +196,7 @@ class _VerificationStatusScreenState
               TextButton(
                 onPressed: () =>
                     ref.read(verificationProvider.notifier).fetchKycStatus(),
-                child: const Text('Reintentar'),
+                child: Text('common.retry'.tr()),
               ),
           ],
         ),
@@ -251,7 +252,7 @@ class _VerificationStatusScreenState
             ),
             const SizedBox(height: 20),
             Text(
-              'Verifica tu identidad',
+              'kyc.verify_identity_title'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -260,13 +261,13 @@ class _VerificationStatusScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Todavia no has enviado tus documentos. Completa la verificacion para acceder a todas las funcionalidades.',
+              'kyc.not_started_desc'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
             ),
             const SizedBox(height: 28),
             PremiumButton(
-              label: 'Iniciar verificacion',
+              label: 'kyc.start_verification'.tr(),
               icon: Icons.arrow_forward,
               color: colorScheme.primary,
               onPressed: () => context.push('/verify-identity'),
@@ -312,7 +313,7 @@ class _VerificationStatusScreenState
                   Icon(Icons.schedule, size: 18, color: Colors.orange.shade700),
                   const SizedBox(width: 8),
                   Text(
-                    'VERIFICACIÓN EN CURSO',
+                    'kyc.verification_in_progress'.tr(),
                     style: TextStyle(
                       color: Colors.orange.shade700,
                       fontWeight: FontWeight.w700,
@@ -341,7 +342,7 @@ class _VerificationStatusScreenState
             const SizedBox(height: 20),
 
             Text(
-              'Estamos revisando tus documentos',
+              'kyc.reviewing_docs'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -350,7 +351,7 @@ class _VerificationStatusScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'El proceso de verificación puede tardar hasta 24 horas.',
+              'kyc.verification_time'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
             ),
@@ -371,7 +372,7 @@ class _VerificationStatusScreenState
             const SizedBox(height: 28),
 
             PremiumButton(
-              label: 'Volver al Inicio',
+              label: 'common.back_to_home'.tr(),
               icon: Icons.home_outlined,
               color: const Color(0xFF64748B),
               onPressed: () => context.go('/'),
@@ -385,7 +386,7 @@ class _VerificationStatusScreenState
                 context.go('/verify-identity');
               },
               child: Text(
-                'Volver a enviar documentos',
+                'kyc.resubmit_docs'.tr(),
                 style: TextStyle(
                   color: colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
@@ -402,11 +403,11 @@ class _VerificationStatusScreenState
   Widget _buildProgressSteps() {
     return Row(
       children: [
-        _buildStep('Enviado', Icons.check_circle, true),
+        _buildStep('kyc.submitted_step'.tr(), Icons.check_circle, true),
         _buildStepConnector(true),
-        _buildStep('Validando', Icons.pending, false),
+        _buildStep('kyc.validating_step'.tr(), Icons.pending, false),
         _buildStepConnector(false),
-        _buildStep('Listo', Icons.verified, false),
+        _buildStep('kyc.ready_step'.tr(), Icons.verified, false),
       ],
     );
   }
@@ -467,9 +468,9 @@ class _VerificationStatusScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
             color: greenColor,
-            child: const Center(
+            child: Center(
               child: Text(
-                'IDENTIDAD VERIFICADA',
+                'kyc.identity_verified'.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
@@ -517,7 +518,7 @@ class _VerificationStatusScreenState
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'ESTADO: VERIFICADO',
+                    'kyc.status_verified'.tr(),
                     style: TextStyle(
                       color: Colors.green.shade700,
                       fontWeight: FontWeight.w700,
@@ -530,7 +531,7 @@ class _VerificationStatusScreenState
                 const SizedBox(height: 16),
 
                 Text(
-                  'Tu identidad ha sido verificada correctamente.',
+                  'kyc.identity_verified_desc'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
@@ -541,7 +542,7 @@ class _VerificationStatusScreenState
                 const SizedBox(height: 28),
 
                 PremiumButton(
-                  label: 'Publicar Inmueble',
+                  label: 'kyc.publish_property'.tr(),
                   icon: Icons.add_home_outlined,
                   color: greenColor,
                   onPressed: () => context.go('/404-publish'),
@@ -552,7 +553,7 @@ class _VerificationStatusScreenState
                 TextButton(
                   onPressed: () => context.go('/profile'),
                   child: Text(
-                    'Volver al perfil',
+                    'kyc.back_to_profile'.tr(),
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,
@@ -591,13 +592,13 @@ class _VerificationStatusScreenState
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 14),
             color: colorScheme.error,
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.error, color: Colors.white, size: 20),
                 SizedBox(width: 8),
                 Text(
-                  'VERIFICACIÓN FALLIDA',
+                  'kyc.verification_failed'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
@@ -628,7 +629,7 @@ class _VerificationStatusScreenState
                 const SizedBox(height: 20),
 
                 Text(
-                  'No pudimos verificar tu identidad',
+                  'kyc.could_not_verify'.tr(),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -652,7 +653,7 @@ class _VerificationStatusScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Motivo del rechazo:',
+                          'kyc.rejection_reason'.tr(),
                           style: TextStyle(
                             color: Colors.red.shade700,
                             fontWeight: FontWeight.w700,
@@ -667,7 +668,7 @@ class _VerificationStatusScreenState
                                 r.contains('429') ||
                                 r.contains('RESOURCE');
                             return isApiError
-                                ? 'El servicio de verificación no está disponible en este momento. Inténtalo de nuevo más tarde.'
+                                ? 'kyc.service_unavailable'.tr()
                                 : r;
                           }(),
                           style: TextStyle(
@@ -682,7 +683,7 @@ class _VerificationStatusScreenState
                 const SizedBox(height: 24),
 
                 Text(
-                  'Puedes volver a enviar tus documentos corrigiendo los errores indicados.',
+                  'kyc.resubmit_desc'.tr(),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                 ),
@@ -690,7 +691,7 @@ class _VerificationStatusScreenState
                 const SizedBox(height: 24),
 
                 PremiumButton(
-                  label: 'Reintentar Verificación',
+                  label: 'kyc.retry_verification'.tr(),
                   icon: Icons.refresh,
                   color: colorScheme.primary,
                   onPressed: () {
@@ -704,7 +705,7 @@ class _VerificationStatusScreenState
                 TextButton(
                   onPressed: () => context.go('/profile'),
                   child: Text(
-                    'Volver al perfil',
+                    'kyc.back_to_profile'.tr(),
                     style: TextStyle(
                       color: colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w600,

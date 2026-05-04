@@ -109,14 +109,14 @@ class InfoScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text(
-                    'Inicio',
-                    style: TextStyle(
+                    'common.home_btn'.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -126,12 +126,12 @@ class InfoScreen extends StatelessWidget {
               ),
             ),
           ),
-          const Row(
+          Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(width: 12),
-              UserAvatarMenu(),
-              SizedBox(width: 16),
+              const SizedBox(width: 12),
+              const UserAvatarMenu(),
+              const SizedBox(width: 16),
             ],
           ),
         ],

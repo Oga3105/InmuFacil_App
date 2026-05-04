@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class RegistryLinkWidget extends StatelessWidget {
   const RegistryLinkWidget({
@@ -22,8 +23,8 @@ class RegistryLinkWidget extends StatelessWidget {
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No se pudo abrir el enlace'),
+          SnackBar(
+            content: Text('registry.error_opening_link'.tr()),
           ),
         );
       }
@@ -34,8 +35,8 @@ class RegistryLinkWidget extends StatelessWidget {
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Referencia copiada al portapapeles'),
+        SnackBar(
+          content: Text('registry.ref_copied'.tr()),
         ),
       );
     }
@@ -63,14 +64,14 @@ class RegistryLinkWidget extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.account_balance_outlined,
-                  color: const Color(0xFF135BEC),
+                  color: Color(0xFF135BEC),
                   size: 22,
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Registro de la Propiedad',
+                  'registry.title'.tr(),
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF135BEC),
@@ -81,7 +82,7 @@ class RegistryLinkWidget extends StatelessWidget {
             const SizedBox(height: 8),
             // Info text
             Text(
-              'Verifica la titularidad y cargas de este inmueble en el Registro de la Propiedad',
+              'registry.info_text'.tr(),
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
@@ -93,7 +94,7 @@ class RegistryLinkWidget extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () => _openRegistradores(context),
                 icon: const Icon(Icons.open_in_new, size: 18),
-                label: const Text('Consultar en Registradores.org'),
+                label: Text('registry.consult_btn'.tr()),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF135BEC),
                   foregroundColor: Colors.white,
@@ -109,7 +110,7 @@ class RegistryLinkWidget extends StatelessWidget {
             const SizedBox(height: 16),
             // Direct search section
             Text(
-              'Busqueda directa',
+              'registry.direct_search'.tr(),
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -130,7 +131,7 @@ class RegistryLinkWidget extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Referencia catastral',
+                            'registry.cadastral_ref'.tr(),
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: colorScheme.onSurfaceVariant,
                             ),
@@ -149,7 +150,7 @@ class RegistryLinkWidget extends StatelessWidget {
                     IconButton(
                       onPressed: () => _copyToClipboard(context, cadastralRef!),
                       icon: const Icon(Icons.copy_outlined, size: 20),
-                      tooltip: 'Copiar referencia catastral',
+                      tooltip: 'registry.copy_ref_tooltip'.tr(),
                       color: const Color(0xFF135BEC),
                     ),
                   ],
@@ -179,7 +180,7 @@ class RegistryLinkWidget extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Pasos para consultar',
+                        'registry.steps_title'.tr(),
                         style: theme.textTheme.labelMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFFF59E0B),
@@ -190,21 +191,22 @@ class RegistryLinkWidget extends StatelessWidget {
                   const SizedBox(height: 8),
                   _StepItem(
                     number: '1',
-                    text: "Pulse 'Consultar en Registradores.org'",
+                    text: 'registry.step_1'.tr(),
                   ),
                   const SizedBox(height: 4),
                   _StepItem(
                     number: '2',
-                    text: 'Seleccione su comunidad autonoma',
+                    text: 'registry.step_2'.tr(),
                   ),
                   const SizedBox(height: 4),
                   _StepItem(
                     number: '3',
-                    text: 'Introduzca la referencia catastral',
+                    text: 'registry.step_3'.tr(),
                   ),
                 ],
               ),
             ),
+
           ],
         ),
       ),

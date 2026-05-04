@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -53,19 +52,17 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       final token = await _storage.read(key: 'auth_token');
       if (token == null) return;
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/fein/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final data = resp.data as Map<String, dynamic>;
       if (!mounted) return;
       final buyerConfirmed = data['buyer_confirmed'] as bool? ?? false;
-      // FEIN is a buyer-bank process: process is complete when buyer confirms.
-      // Both buyer and seller see the success view once buyer has confirmed.
       if (buyerConfirmed) {
         setState(() => _submitted = true);
       }
     } catch (_) {
-      // non-blocking — show empty form
+      // non-blocking
     } finally {
       if (mounted) setState(() => _isInitializing = false);
     }
@@ -82,7 +79,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       final token = await _storage.read(key: 'auth_token');
       final dio   = buildAuthDio();
       await dio.post(
-        '$EnvConfig.apiBaseUrl/fein/${widget.offer.id}/confirm',
+        '${EnvConfig.apiBaseUrl}/fein/${widget.offer.id}/confirm',
         data: {
           'role': _isBuyer ? 'BUYER' : 'SELLER',
           'notes': 'Confirmacion de FEIN desde la app.',
@@ -91,15 +88,13 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
       );
       if (!mounted) return;
       setState(() => _submitted = true);
-      // Invalidate offers lists so urgency provider reflects FEIN confirmed
       ref.invalidate(sentOffersProvider);
       ref.invalidate(receivedOffersProvider);
     } on DioException catch (e) {
       if (!mounted) return;
       final detail = (e.response?.data as Map?)?['detail'] as String?;
       setState(() {
-        _errorMessage = detail ??
-            'transaction.fein_error_confirm'.tr();
+        _errorMessage = detail ?? 'transaction.fein_error_confirm'.tr();
       });
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -166,14 +161,14 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                  SizedBox(width: 6),
+                  const Icon(Icons.home_rounded, size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
                   Text(
                     'common.home'.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -187,12 +182,12 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             builder: (context, ref, _) {
               final isAuthenticated = ref.watch(authProvider).isAuthenticated;
               if (!isAuthenticated) return const SizedBox.shrink();
-              return const Row(
+              return Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(width: 12),
-                  UserAvatarMenu(),
-                  SizedBox(width: 16),
+                  const SizedBox(width: 12),
+                  const UserAvatarMenu(),
+                  const SizedBox(width: 16),
                 ],
               );
             },

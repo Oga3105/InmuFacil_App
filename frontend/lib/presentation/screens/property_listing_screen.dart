@@ -14,8 +14,10 @@ import '../widgets/common/app_bar_back_button.dart';
 import '../widgets/common/user_avatar_menu.dart';
 import '../widgets/common/demo_banner.dart';
 import '../widgets/property/neighborhood_twins_panel.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PropertyListingScreen extends ConsumerStatefulWidget {
+
   const PropertyListingScreen({super.key, this.highlightId, this.fromMap = false});
 
   /// If set, the listing will auto-scroll to the item with this property id
@@ -192,7 +194,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
               itemBuilder: (_) => [
                 PopupMenuItem(
                   value: 'how',
-                  child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), const Text('Cómo funciona')]),
+                  child: Row(children: [const Icon(Icons.info_outline), const SizedBox(width: 8), Text('property_listing.how_works'.tr())]),
                 ),
                 PopupMenuItem(
                   value: 'favorites',
@@ -200,18 +202,19 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                     Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border,
                         color: searchState.onlyFavorites ? theme.colorScheme.error : null),
                     const SizedBox(width: 8),
-                    Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : null)),
+                    Text('property_listing.favorites'.tr(), style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : null)),
                   ]),
                 ),
                 if (!isDesktop)
                   PopupMenuItem(
                     value: 'filters',
-                    child: Row(children: [const Icon(Icons.filter_list), const SizedBox(width: 8), const Text('Filtros')]),
+                    child: Row(children: [const Icon(Icons.filter_list), const SizedBox(width: 8), Text('property_listing.filters'.tr())]),
                   ),
                 PopupMenuItem(
                   value: 'publish',
-                  child: Builder(builder: (context) => Row(children: [Icon(Icons.add_home_outlined, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), Text('Publicar propiedad', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))])),
+                  child: Builder(builder: (context) => Row(children: [Icon(Icons.add_home_outlined, color: Theme.of(context).colorScheme.primary), const SizedBox(width: 8), Text('property_listing.publish_property'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))])),
                 ),
+
               ],
             ),
             if (isAuthenticated)
@@ -237,14 +240,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text('Cómo funciona', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    child: Text('property_listing.how_works'.tr(), style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                   ),
                   Container(height: 20, width: 1, color: theme.colorScheme.outlineVariant, margin: const EdgeInsets.symmetric(horizontal: 16)),
                   // Favorites Toggle
                   TextButton.icon(
                     onPressed: () => ref.read(searchProvider.notifier).toggleOnlyFavorites(),
                     icon: Icon(searchState.onlyFavorites ? Icons.favorite : Icons.favorite_border, color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, size: 20),
-                    label: Text('Favoritos', style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
+                    label: Text('property_listing.favorites'.tr(), style: TextStyle(color: searchState.onlyFavorites ? theme.colorScheme.error : theme.colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold)),
                     style: TextButton.styleFrom(
                       backgroundColor: searchState.onlyFavorites ? theme.colorScheme.error.withOpacity(0.05) : null,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -252,13 +255,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                   ),
                   const SizedBox(width: 16),
                   PremiumButton(
-                    label: 'Publicar propiedad',
+                    label: 'property_listing.publish_property'.tr(),
                     onPressed: () => handleProtectedAction('/property/create'),
                     color: theme.colorScheme.primary,
                     fontSize: 13,
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     fullWidth: false,
                   ),
+
                   const SizedBox(width: 16),
                   if (isAuthenticated)
                     const UserAvatarMenu()
@@ -299,8 +303,9 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                         OutlinedButton.icon(
                           onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
                           icon: const Icon(Icons.filter_list, size: 18),
-                          label: const Text('Filtros y búsqueda'),
+                          label: Text('property_listing.filters_and_search'.tr()),
                           style: OutlinedButton.styleFrom(
+
                             foregroundColor: Theme.of(context).colorScheme.primary,
                             side: BorderSide(color: Theme.of(context).colorScheme.primary),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -344,7 +349,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Resultados ordenados por compatibilidad con tu estilo de vida',
+                                      'property_listing.lifestyle_sorting_notice'.tr(),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: theme.colorScheme.primary,
@@ -352,6 +357,7 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                       ),
                                     ),
                                   ),
+
                                 ],
                               ),
                             ),
@@ -511,11 +517,13 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                    // Breadcrumbs (Mocked for now as we only have single string location)
                    Row(
                      children: [
-                       Text('España', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                       Text('property_listing.spain'.tr(), style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                        Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
-                       Text('Búsqueda', style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
+                       Text('property_listing.search'.tr(),
+ style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                        Icon(Icons.chevron_right, size: 14, color: theme.colorScheme.onSurfaceVariant),
-                       Text(searchState.location.isNotEmpty ? searchState.location : 'Todo',
+                       Text(searchState.location.isNotEmpty ? searchState.location : 'property_listing.all'.tr()
+,
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurfaceVariant),),
                      ],
                    ),
@@ -524,14 +532,17 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                      crossAxisAlignment: WrapCrossAlignment.center,
                      children: [
                        Text(
-                         searchState.location.isEmpty ? 'Todas las propiedades' : 'Propiedades en ${searchState.location}',
+                         searchState.location.isEmpty 
+                           ? 'property_listing.all_properties'.tr() 
+                           : 'property_listing.properties_in'.tr(args: [searchState.location]),
                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: navyColor, letterSpacing: -0.5),
                        ),
                        const SizedBox(width: 12),
                        Text(
-                         '$count resultados',
+                         'property_listing.results_count'.tr(args: [count.toString()]),
                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w300, color: theme.colorScheme.onSurfaceVariant),
                        ),
+
                      ],
                    ),
                  ],
@@ -553,13 +564,16 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                        ),
                         child: Row(
                           children: [
-                            _buildViewButton(Icons.list, 'Lista', searchState.viewMode == PropertyViewMode.list, () {
+                            _buildViewButton(Icons.list, 'property_listing.list_view'.tr(),
+ searchState.viewMode == PropertyViewMode.list, () {
                                ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.list);
                             }),
-                            _buildViewButton(Icons.grid_view_rounded, 'Cuadrícula', searchState.viewMode == PropertyViewMode.grid, () {
+                            _buildViewButton(Icons.grid_view_rounded, 'property_listing.grid_view'.tr(),
+ searchState.viewMode == PropertyViewMode.grid, () {
                                ref.read(searchProvider.notifier).updateViewMode(PropertyViewMode.grid);
                             }),
-                            _buildViewButton(Icons.map_outlined, 'Mapa', false, () => context.go('/')),
+                            _buildViewButton(Icons.map_outlined, 'property_listing.map_view'.tr(),
+ false, () => context.go('/')),
                           ],
                         ),
                      ),
@@ -610,14 +624,15 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
           Icon(Icons.search_off, size: 64, color: theme.colorScheme.outlineVariant),
           const SizedBox(height: 16),
           Text(
-            'No encontramos propiedades en esta zona.',
+            'property_listing.no_properties_found'.tr(),
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface),
           ),
           const SizedBox(height: 8),
           Text(
-            'Intenta cambiar los filtros o buscar en otra ubicación.',
+            'property_listing.try_changing_filters'.tr(),
             style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
           ),
+
         ],
       ),
     );
@@ -695,13 +710,14 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   
   Widget _buildSortingDropdown(BuildContext context, SearchState searchState, WidgetRef ref) {
     final sortOptions = {
-      SortOption.newest: 'Más recientes',
-      SortOption.relevance: 'Relevancia',
-      SortOption.priceLowToHigh: 'Precio: menor a mayor',
-      SortOption.priceHighToLow: 'Precio: mayor a menor',
+      SortOption.newest: 'property_listing.sort_by.newest'.tr(),
+      SortOption.relevance: 'property_listing.sort_by.relevance'.tr(),
+      SortOption.priceLowToHigh: 'property_listing.sort_by.price_low_high'.tr(),
+      SortOption.priceHighToLow: 'property_listing.sort_by.price_high_low'.tr(),
     };
 
-    final currentLabel = sortOptions[searchState.sortBy] ?? 'Ordenar';
+    final currentLabel = sortOptions[searchState.sortBy] ?? 'property_listing.sort_by.label'.tr();
+
 
     return PopupMenuButton<SortOption>(
       onSelected: (value) => ref.read(searchProvider.notifier).setSortBy(value),
@@ -790,9 +806,10 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
   Widget _buildSimpleFooter() {
      return Column(
        children: [
-         Builder(builder: (context) => Text('© 2026 InmuFácil. Todos los derechos reservados.', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12))),
+         Builder(builder: (context) => Text('property_listing.copyright'.tr(), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12))),
        ],
      );
+
   }
 
   Widget _buildUserAvatar(WidgetRef ref, {required bool authenticated}) {

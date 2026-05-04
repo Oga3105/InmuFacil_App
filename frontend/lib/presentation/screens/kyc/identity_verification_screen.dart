@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/services/ai_consent_service.dart';
@@ -101,7 +102,7 @@ class _IdentityVerificationScreenState
         documentTypeLabel: docLabel,
         onConfirm: (confirmedNumber) {
           notifier.confirmDocumentNumber(confirmedNumber);
-          _showSnackBar('Numero de documento confirmado correctamente.');
+          _showSnackBar('kyc.doc_number_confirmed'.tr());
         },
         onReject: () {},
         onReupload: () {
@@ -128,7 +129,7 @@ class _IdentityVerificationScreenState
         documentTypeLabel: docLabel,
         onConfirm: (confirmedNumber) {
           notifier.confirmDocumentNumber(confirmedNumber);
-          _showSnackBar('Numero de documento confirmado correctamente.');
+          _showSnackBar('kyc.doc_number_confirmed'.tr());
         },
         onReject: () {},
         onReupload: () {
@@ -149,14 +150,14 @@ class _IdentityVerificationScreenState
       documentTypeLabel: docLabel,
       onConfirm: (confirmedNumber) {
         notifier.confirmDocumentNumber(confirmedNumber);
-        _showSnackBar('Numero de documento confirmado correctamente.');
+        _showSnackBar('kyc.doc_number_confirmed'.tr());
       },
       onReject: () async {
         final imagesReset = notifier.rejectDocumentNumber();
         if (imagesReset) {
           if (mounted) {
             _showSnackBar(
-              'La imagen no es reconocible. Por favor, sube el documento de nuevo.',
+              'kyc.unrecognizable_image'.tr(),
               isError: true,
             );
           }
@@ -176,7 +177,7 @@ class _IdentityVerificationScreenState
       case DocumentType.nie:
         return 'NIE';
       case DocumentType.pasaporte:
-        return 'Pasaporte';
+        return 'kyc.passport'.tr();
       default:
         return 'DNI';
     }
@@ -216,14 +217,14 @@ class _IdentityVerificationScreenState
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('¿Cancelar verificación?'),
-        content: const Text(
-          'Si sales ahora, los documentos subidos no se guardarán y tendrás que empezar de nuevo.',
+        title: Text('kyc.cancel_verification_title'.tr()),
+        content: Text(
+          'kyc.cancel_verification_desc'.tr(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Seguir aquí'),
+            child: Text('kyc.stay_here'.tr()),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -231,7 +232,7 @@ class _IdentityVerificationScreenState
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sí, cancelar'),
+            child: Text('kyc.yes_cancel'.tr()),
           ),
         ],
       ),
@@ -288,9 +289,7 @@ class _IdentityVerificationScreenState
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Text(
-                        'Cumplimos estrictamente con el RGPD. Tus documentos y datos biométricos se cifran '
-                        'bajo el estándar AES-256 y se utilizan exclusivamente para la verificación legal '
-                        'de identidad en transacciones P2P.',
+                        'kyc.rgpd_footer'.tr(),
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
                       ),
@@ -299,11 +298,11 @@ class _IdentityVerificationScreenState
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _footerLink('Términos de Servicio'),
+                        _footerLink('kyc.tos'.tr()),
                         const SizedBox(width: 16),
-                        _footerLink('Privacidad'),
+                        _footerLink('kyc.privacy'.tr()),
                         const SizedBox(width: 16),
-                        _footerLink('Ayuda'),
+                        _footerLink('kyc.help'.tr()),
                       ],
                     ),
                     const SizedBox(height: 24),
@@ -398,7 +397,7 @@ class _IdentityVerificationScreenState
                   Icon(Icons.home_rounded, size: 18, color: colorScheme.onPrimary),
                   const SizedBox(width: 6),
                   Text(
-                    'Inicio',
+                    'common.home'.tr(),
                     style: TextStyle(
                       color: colorScheme.onPrimary,
                       fontWeight: FontWeight.w600,
@@ -449,7 +448,7 @@ class _IdentityVerificationScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Verifica tu Identidad',
+                        'kyc.verify_identity_title'.tr(),
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -458,7 +457,7 @@ class _IdentityVerificationScreenState
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Confirmación de seguridad para transacciones P2P seguras.',
+                        'kyc.verify_identity_subtitle'.tr(),
                         style: TextStyle(
                             color: Colors.grey.shade500, fontSize: 13),
                       ),
@@ -483,12 +482,12 @@ class _IdentityVerificationScreenState
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('verified_user',
+                          Text('kyc.badge_verified_user'.tr(),
                               style: TextStyle(
                                   color: Colors.blue.shade700,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700)),
-                          Text('AES-256 Encrypted',
+                          Text('kyc.badge_encrypted'.tr(),
                               style: TextStyle(
                                   color: Colors.blue.shade400,
                                   fontSize: 10,
@@ -524,13 +523,13 @@ class _IdentityVerificationScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSectionLabel('1', 'Tipo de documento'),
+                          _buildSectionLabel('1', 'kyc.doc_type_step'.tr()),
                           const SizedBox(height: 12),
                           _buildDocumentTypeSelector(state, notifier),
                           const SizedBox(height: 24),
                           _buildSectionLabel(
                             '2',
-                            'Escaneo de Documento',
+                            'kyc.doc_scan_step'.tr(),
                             locked: !step1Done,
                             confirmed: state.documentNumberConfirmed,
                           ),
@@ -541,7 +540,7 @@ class _IdentityVerificationScreenState
                               children: [
                                 Expanded(
                                   child: DocumentUploadCard(
-                                    title: 'Parte Frontal',
+                                    title: 'kyc.front_part'.tr(),
                                     onTap: () async {
                                       await notifier.pickFrontImage();
                                       await _onDocumentImagePicked(notifier);
@@ -557,7 +556,7 @@ class _IdentityVerificationScreenState
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: DocumentUploadCard(
-                                    title: 'Parte Trasera',
+                                    title: 'kyc.back_part'.tr(),
                                     onTap: () async {
                                       await notifier.pickBackImage();
                                       await _onDocumentImagePicked(notifier);
@@ -584,7 +583,7 @@ class _IdentityVerificationScreenState
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          _buildSectionLabel('3', 'Prueba de vida',
+                          _buildSectionLabel('3', 'kyc.liveness_step'.tr(),
                               locked: !step2Done),
                           const SizedBox(height: 12),
                           Expanded(
@@ -603,13 +602,13 @@ class _IdentityVerificationScreenState
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionLabel('1', 'Tipo de documento'),
+                    _buildSectionLabel('1', 'kyc.doc_type_step'.tr()),
                     const SizedBox(height: 12),
                     _buildDocumentTypeSelector(state, notifier),
                     const SizedBox(height: 24),
                     _buildSectionLabel(
                       '2',
-                      'Escaneo de Documento',
+                      'kyc.doc_scan_step'.tr(),
                       locked: !step1Done,
                       confirmed: state.documentNumberConfirmed,
                     ),
@@ -620,7 +619,7 @@ class _IdentityVerificationScreenState
                         children: [
                           Expanded(
                             child: DocumentUploadCard(
-                              title: 'Parte Frontal',
+                              title: 'kyc.front_part'.tr(),
                               onTap: () async {
                                 await notifier.pickFrontImage();
                                 await _onDocumentImagePicked(notifier);
@@ -634,7 +633,7 @@ class _IdentityVerificationScreenState
                           const SizedBox(width: 12),
                           Expanded(
                             child: DocumentUploadCard(
-                              title: 'Parte Trasera',
+                              title: 'kyc.back_part'.tr(),
                               onTap: () async {
                                 await notifier.pickBackImage();
                                 await _onDocumentImagePicked(notifier);
@@ -649,7 +648,7 @@ class _IdentityVerificationScreenState
                       ),
                     ),
                     const SizedBox(height: 24),
-                    _buildSectionLabel('3', 'Prueba de vida',
+                    _buildSectionLabel('3', 'kyc.liveness_step'.tr(),
                         locked: !step2Done),
                     const SizedBox(height: 12),
                     _lockedWrapper(
@@ -681,7 +680,7 @@ class _IdentityVerificationScreenState
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          state.errorMessage!,
+                          state.errorMessage!.tr(),
                           style: TextStyle(
                               color: Colors.red.shade700, fontSize: 13),
                         ),
@@ -702,7 +701,7 @@ class _IdentityVerificationScreenState
                         size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
                     Text(
-                      'SSL SECURE',
+                      'kyc.ssl_secure'.tr(),
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 11,
@@ -731,7 +730,7 @@ class _IdentityVerificationScreenState
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Cancelar',
+                  child: Text('common.cancel'.tr(),
                       style: TextStyle(color: Colors.red)),
                 ),
                 const SizedBox(width: 12),
@@ -760,8 +759,8 @@ class _IdentityVerificationScreenState
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: const Text(
-                      'Enviar Verificación',
+                    label: Text(
+                      'kyc.submit_verification'.tr(),
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -853,7 +852,7 @@ class _IdentityVerificationScreenState
               border: Border.all(color: (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)).withOpacity(0.4)),
             ),
             child: Text(
-              'Numero verificado',
+              'kyc.number_verified'.tr(),
               style: TextStyle(
                 color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A),
                 fontSize: 11,
@@ -887,7 +886,7 @@ class _IdentityVerificationScreenState
         _buildDocTypeChip('NIE', Icons.badge_outlined, DocumentType.nie,
             state.selectedDocumentType, notifier),
         const SizedBox(width: 8),
-        _buildDocTypeChip('Pasap.', Icons.menu_book, DocumentType.pasaporte,
+        _buildDocTypeChip('kyc.passport_short'.tr(), Icons.menu_book, DocumentType.pasaporte,
             state.selectedDocumentType, notifier),
       ],
     );
@@ -1010,7 +1009,7 @@ class _IdentityVerificationScreenState
           ),
           const SizedBox(height: 10),
           Text(
-            'Centra tu rostro',
+            'kyc.center_face'.tr(),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -1019,7 +1018,7 @@ class _IdentityVerificationScreenState
           ),
           const SizedBox(height: 2),
           Text(
-            'Iluminación uniforme, sin accesorios',
+            'kyc.face_lighting'.tr(),
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
           ),
@@ -1049,7 +1048,7 @@ class _IdentityVerificationScreenState
                   hasSelfie ? Icons.check_circle_outline : Icons.camera_alt,
                   size: 16),
               label: Text(
-                hasSelfie ? 'Repetir foto' : 'Iniciar Cámara',
+                hasSelfie ? 'kyc.retake_photo'.tr() : 'kyc.start_camera'.tr(),
                 style: const TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w600),
               ),
