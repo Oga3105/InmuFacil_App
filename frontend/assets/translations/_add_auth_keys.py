@@ -154,6 +154,7 @@ file_keys = {
     'fr-FR.json': FR_KEYS,
     'fr-CA.json': FR_KEYS,
     'ca-ES.json': CA_KEYS,
+    'va-ES.json': CA_KEYS,
     'eu-ES.json': EU_KEYS,
     'gl-ES.json': GL_KEYS,
 }

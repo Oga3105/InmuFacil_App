@@ -2,11 +2,11 @@
 ## Dirección de Internacionalización y Accesibilidad
 
 **Misión:** 
-Garantizar que la plataforma sea accesible globalmente, eliminando cualquier rastro de texto estático (*hardcoded strings*) y asegurando la coherencia cultural y técnica en los 9 idiomas soportados.
+Garantizar que la plataforma sea accesible globalmente, eliminando cualquier rastro de texto estático (*hardcoded strings*) y asegurando la coherencia cultural y técnica en los 10 idiomas soportados.
 
 **Responsabilidades:**
 1. **Validación de Código:** Supervisar que cada nuevo widget o servicio en Flutter utilice estrictamente el método `.tr()` de la librería `easy_localization`.
-2. **Sincronización de Diccionarios:** Ante cualquier nueva clave creada, actualizar simultáneamente los 9 archivos JSON de traducción:
+2. **Sincronización de Diccionarios:** Ante cualquier nueva clave creada, actualizar simultáneamente los 10 archivos JSON de traducción:
     - `es-ES.json`
     - `en-US.json`
     - `en-GB.json`
@@ -14,6 +14,7 @@ Garantizar que la plataforma sea accesible globalmente, eliminando cualquier ras
     - `fr-FR.json`
     - `fr-CA.json`
     - `ca-ES.json`
+    - `va-ES.json`
     - `eu-ES.json`
     - `gl-ES.json`
 3. **Formatos Regionales:** Asegurar que las monedas, fechas y unidades de medida se adapten dinámicamente según el locale activo.
@@ -36,7 +37,7 @@ Cuando se reciba el comando **"@Linguist Revisa la page [X]"**, el agente deber�
 - **Workflow Estándar:** 
     1. Detectar texto.
     2. Generar Clave (formato `camelCase`).
-    3. Inyectar en los 9 Diccionarios.
+    3. Inyectar en los 10 Diccionarios.
     4. Implementar en la UI mediante `.tr()`.
 
 ---
