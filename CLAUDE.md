@@ -13,6 +13,7 @@
 @.agents/roles/ui_builder.md
 @.agents/roles/devops.md
 @.agents/roles/critic.md
+@.agents/roles/linguist.md
 
 ## Protocols
 

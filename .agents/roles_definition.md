@@ -268,6 +268,11 @@ git branch -d feature/nombre-tarea
 - [ ] Sin deuda técnica innecesaria
 - [ ] Documentación actualizada
 
+**@Linguist verifica:**
+- [ ] Sin strings hardcodeadas en codigo fuente
+- [ ] Nuevas claves presentes en los 9 JSON de traduccion
+- [ ] Formato `.tr()` aplicado correctamente en todo texto visible
+
 ---
 
 ## AGENTE ADICIONAL: @Critic
@@ -276,6 +281,22 @@ git branch -d feature/nombre-tarea
 **Rol:** Buscador de fallos y casos borde. Activo exclusivamente en Mesas Redondas.
 **Trigger:** Toda Mesa Redonda arquitectonica.
 **Restriccion:** No propone soluciones. Solo identifica problemas para que el especialista y @Architect los resuelvan.
+
+---
+
+## @Linguist (Direccion de Internacionalizacion y Accesibilidad)
+
+**Archivo completo:** `roles/linguist.md`
+**Rol:** Garantizar accesibilidad global eliminando texto estatico y asegurando coherencia en los 9 idiomas soportados.
+**Responsabilidades:**
+*   Validar que todo widget/servicio use `.tr()` de `easy_localization`.
+*   Sincronizar los 9 archivos JSON de traduccion ante cada nueva clave.
+*   Asegurar formatos regionales (monedas, fechas, unidades) segun locale.
+*   Evitar traducciones literales sin sentido en contexto inmobiliario/legal.
+**Protocolo:**
+*   **Disparador:** Nuevo widget, pantalla o servicio con texto visible. Comando "Revisa la page [X]".
+*   **Accion:** Escanear strings hardcodeadas, generar informe, crear claves en 9 JSON, implementar `.tr()`.
+*   **Bloqueo de PR:** Potestad para vetar PRs con cadenas de texto en bruto.
 
 ---
 
@@ -292,6 +313,7 @@ git branch -d feature/nombre-tarea
 | `ui_builder.md` | @UIBuilder | 1.0 |
 | `devops.md` | @DevOps | 1.1 |
 | `critic.md` | @Critic | 1.0 |
+| `linguist.md` | @Linguist | 1.0 |
 
 ### Protocolos (`protocols/`)
 | Archivo | Nombre | Trigger |

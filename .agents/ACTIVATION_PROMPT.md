@@ -25,6 +25,7 @@ Definiciones en: `.agents/roles/<agente>.md`
 | **@UIBuilder** | Flutter Core, Material3, i18n | Implementación de pantallas y componentes UI. |
 | **@DevOps** | Git Governance, CI/CD, Docker | Merge/Sync de ramas, gestión de dependencias. |
 | **@Critic** | Análisis de fallos y Edge Cases | Interviene en toda Mesa Redonda. |
+| **@Linguist** | i18n, 9 idiomas, auditoría de strings | Nuevo widget/pantalla, PR con texto visible. |
 
 ---
 
