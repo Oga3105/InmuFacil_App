@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/l10n/valencian_localizations_delegate.dart';
 import 'core/events/session_events.dart';
 import 'core/theme/app_theme.dart';
 import 'config/router/app_router.dart';
@@ -54,6 +55,9 @@ class InmuFacilApp extends ConsumerWidget {
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: [
+        const ValencianMaterialLocalizationsDelegate(),
+        const ValencianCupertinoLocalizationsDelegate(),
+        const ValencianWidgetsLocalizationsDelegate(),
         ...context.localizationDelegates,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
