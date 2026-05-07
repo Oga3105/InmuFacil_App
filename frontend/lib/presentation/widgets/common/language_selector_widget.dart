@@ -91,16 +91,55 @@ class LanguageSelectorWidget extends ConsumerWidget {
             shrinkWrap: true,
             children: kSupportedLocales.map((l) {
               final isSelected = l.locale == currentLocale;
-              return ListTile(
-                leading: _FlagCircle(assetPath: l.flagAsset, radius: 14),
-                title: Text(l.label),
-                trailing: isSelected
-                    ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+              final colorScheme = Theme.of(context).colorScheme;
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 2),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: colorScheme.primaryContainer.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: colorScheme.primary.withValues(alpha: 0.4),
+                          width: 1.5,
+                        ),
+                      )
                     : null,
-                onTap: () {
-                  ref.read(localeProvider.notifier).setLocale(context, l.locale);
-                  Navigator.of(ctx).pop();
-                },
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  leading: _FlagCircle(
+                    assetPath: l.flagAsset,
+                    radius: isSelected ? 16 : 14,
+                  ),
+                  title: Text(
+                    l.label,
+                    style: isSelected
+                        ? TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.primary,
+                          )
+                        : null,
+                  ),
+                  trailing: isSelected
+                      ? Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        )
+                      : null,
+                  onTap: () {
+                    ref.read(localeProvider.notifier).setLocale(context, l.locale);
+                    Navigator.of(ctx).pop();
+                  },
+                ),
               );
             }).toList(),
           ),
