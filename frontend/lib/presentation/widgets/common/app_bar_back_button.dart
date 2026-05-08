@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Back button for AppBars.
@@ -7,11 +8,11 @@ class AppBarBackButton extends StatefulWidget {
   const AppBarBackButton({
     super.key,
     required this.onPressed,
-    this.tooltip = 'Volver',
+    this.tooltip,
   });
 
   final VoidCallback onPressed;
-  final String tooltip;
+  final String? tooltip;
 
   @override
   State<AppBarBackButton> createState() => _AppBarBackButtonState();
@@ -28,7 +29,7 @@ class _AppBarBackButtonState extends State<AppBarBackButton> {
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: widget.tooltip,
+      message: widget.tooltip ?? 'common.back'.tr(),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),
@@ -73,11 +74,11 @@ class AppBarCloseButton extends StatefulWidget {
   const AppBarCloseButton({
     super.key,
     required this.onPressed,
-    this.tooltip = 'Cancelar',
+    this.tooltip,
   });
 
   final VoidCallback onPressed;
-  final String tooltip;
+  final String? tooltip;
 
   @override
   State<AppBarCloseButton> createState() => _AppBarCloseButtonState();
@@ -94,7 +95,7 @@ class _AppBarCloseButtonState extends State<AppBarCloseButton> {
         ? Colors.white
         : Theme.of(context).colorScheme.onSurface;
     return Tooltip(
-      message: widget.tooltip,
+      message: widget.tooltip ?? 'common.cancel'.tr(),
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovered = true),

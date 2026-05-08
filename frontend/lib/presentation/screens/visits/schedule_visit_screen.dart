@@ -105,7 +105,7 @@ class _ScheduleVisitScreenState extends ConsumerState<ScheduleVisitScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${activeVisit.startTime.day}/${activeVisit.startTime.month}/${activeVisit.startTime.year} a las ${activeVisit.startTime.hour.toString().padLeft(2, '0')}:${activeVisit.startTime.minute.toString().padLeft(2, '0')}',
+                  '${activeVisit.startTime.day} ${'time.short_months.${const ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][activeVisit.startTime.month]}'.tr()} a las ${activeVisit.startTime.hour.toString().padLeft(2, '0')}:${activeVisit.startTime.minute.toString().padLeft(2, '0')}',
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF135BEC)),
                 ),
                 const SizedBox(height: 24),
@@ -826,26 +826,17 @@ class _BottomBar extends StatelessWidget {
   final BookingState bookingState;
   final VoidCallback onConfirm;
 
-  String _getMonthKey(int m) {
-    const keys = ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-    return keys[m];
-  }
-
-  String _shortMonth(int m) {
-    const names = [
-      '', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-    ];
-    return names[m];
-  }
-
   String get _summaryText {
     if (selectedDay == null || selectedSlot == null) return '';
     final d = selectedDay!;
     final t = selectedSlot!.startTime;
     final hour = t.hour.toString().padLeft(2, '0');
     final min = t.minute.toString().padLeft(2, '0');
-    return 'visits.visit_summary_text'.tr(namedArgs: {'day': d.day.toString(), 'month': 'time.short_months.' + _getMonthKey(d.month).tr(), 'time': hour + ':' + min});
+    return 'visits.visit_summary_text'.tr(namedArgs: {
+      'day': d.day.toString(),
+      'month': 'time.short_months.${d.month}'.tr(),
+      'time': '$hour:$min'
+    });
   }
 
   bool get _isLoading => bookingState.status == BookingStatus.loading;
@@ -990,7 +981,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              '${'time.months.' + _getMonthKeyLong(_focusedMonth.month).tr()} ${_focusedMonth.year}',
+              '${'time.months.${_focusedMonth.month}'.tr()} ${_focusedMonth.year}',
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
@@ -1022,7 +1013,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
 
         // Day-of-week headers — Monday first
         Row(
-          children: ['time.weekdays_short.mon'.tr(), 'time.weekdays_short.tue'.tr(), 'time.weekdays_short.wed'.tr(), 'time.weekdays_short.thu'.tr(), 'time.weekdays_short.fri'.tr(), 'time.weekdays_short.sat'.tr(), 'time.weekdays_short.sun'.tr()]
+          children: ['time.weekdays_short.1'.tr(), 'time.weekdays_short.2'.tr(), 'time.weekdays_short.3'.tr(), 'time.weekdays_short.4'.tr(), 'time.weekdays_short.5'.tr(), 'time.weekdays_short.6'.tr(), 'time.weekdays_short.7'.tr()]
               .map((d) => Expanded(
                     child: Center(
                       child: Text(

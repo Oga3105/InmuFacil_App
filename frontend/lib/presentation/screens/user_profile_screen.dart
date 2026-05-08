@@ -397,8 +397,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         SnackBar(
           content: Text(result['success'] == true
               ? 'profile.personal_info.save_success'.tr()
-              : '❌ ${result['error'] ?? 'common.error'.tr()}'),
-
+              : '${result['error'] ?? 'common.error'.tr()}'),
           backgroundColor: result['success'] == true
               ? const Color(0xFF16A34A)
               : Colors.red.shade700,
@@ -1189,10 +1188,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'profile.solvency.passport_title',
-                          style: TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
-                        ).tr(),
+                        Text(
+                          'profile.solvency.passport_title'.tr(),
+                          style: const TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
+                        ),
                         Text(
                           'profile.solvency.level'.tr(args: [levelLabel]),
                           style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
