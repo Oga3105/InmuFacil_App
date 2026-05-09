@@ -524,7 +524,7 @@ class _CeeSelectorWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Indica la calificacion energetica de la propiedad.',
+          'property_wizard.cee_hint'.tr(),
           style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
         ),
         const SizedBox(height: 12),
@@ -583,7 +583,7 @@ class _CeeSelectorWidget extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'En tramite',
+                  'property_wizard.cee_pending'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
@@ -605,8 +605,8 @@ class _CeeSelectorWidget extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 selected == 'en_tramite'
-                    ? 'Certificado en tramite seleccionado'
-                    : 'Calificacion $selected seleccionada',
+                    ? 'property_wizard.cee_pending_selected'.tr()
+                    : 'property_wizard.cee_rating_selected'.tr(args: [selected!]),
                 style: TextStyle(
                     fontSize: 12, color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A)),
               ),

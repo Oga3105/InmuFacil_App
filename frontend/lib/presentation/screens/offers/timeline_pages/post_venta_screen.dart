@@ -650,7 +650,7 @@ class _SellerDocCard extends StatelessWidget {
             ),
             _ActionButton(
               icon: Icons.block_outlined,
-              label: 'No aplica',
+              label: 'transaction.pv_not_applicable_btn'.tr(),
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               onTap: () => onFlag('not_applicable'),
             ),
@@ -994,7 +994,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
             children: [
               _ActionButton(
                 icon: Icons.handshake_outlined,
-                label: 'Entregado en mano',
+                label: 'transaction.pv_in_person_btn'.tr(),
                 color: _kBlue,
                 onTap: () => widget.onFlag!('in_person'),
               ),

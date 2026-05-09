@@ -339,7 +339,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 ),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 16),
-                  _InfoCard(icon: Icons.error_outline, color: Colors.red, title: 'Error', body: _errorMessage!),
+                  _InfoCard(icon: Icons.error_outline, color: Colors.red, title: 'common.error_title'.tr(), body: _errorMessage!),
                 ],
               ],
             ),
@@ -859,13 +859,10 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           children: [
             Image.asset('assets/images/logo_inmufacil.png', height: 32),
             const SizedBox(width: 8),
-            const Text.rich(TextSpan(
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-              children: [
-                TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
-                TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
-              ],
-            )),
+            Text(
+              'transaction.tasacion_app_bar_title'.tr(),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ],
         ),
       ),
@@ -944,7 +941,12 @@ class _AppointmentBadge extends StatelessWidget {
               Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.8), fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(
-                '${date.day}/${date.month}/${date.year}  ·  ${time.format(context)}',
+                'transaction.tasacion_appointment_format'.tr(namedArgs: {
+                  'day': date.day.toString(),
+                  'month': date.month.toString(),
+                  'year': date.year.toString(),
+                  'time': time.format(context)
+                }),
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: color),
               ),
             ],

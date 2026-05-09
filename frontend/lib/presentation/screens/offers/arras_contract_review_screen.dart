@@ -167,9 +167,8 @@ class _ArrasContractReviewScreenState
       ref.invalidate(_arrasContractProvider(widget.offer.id));
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Rechazo enviado. Ambas partes deben volver a confirmar sus entrevistas.'),
+          SnackBar(
+            content: Text('arras_interview.rejection_sent_snack'.tr()),
           ),
         );
         context.pop();
@@ -194,18 +193,17 @@ class _ArrasContractReviewScreenState
 
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return Scaffold(
       backgroundColor: colorScheme.surfaceContainerLowest,
       appBar: _buildAppBar(context, ref),
       body: arrasAsync.when(
         loading: () =>
             Center(child: CircularProgressIndicator(color: colorScheme.primary)),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(child: Text('common.error'.tr(namedArgs: {'error': e.toString()}))),
         data: (data) {
           if (data == null) {
-            return const Center(
-                child: Text('No hay informacion de la entrevista'));
+            return Center(
+                child: Text('arras_interview.no_interview_info'.tr()));
           }
           final contractStatus = data['contract_status'] as String?;
           final contractText = data['contract_text'] as String?;

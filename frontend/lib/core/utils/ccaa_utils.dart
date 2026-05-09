@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:easy_localization/easy_localization.dart';
 
 enum ComunidadAutonoma {
   andalucia,
@@ -23,28 +24,14 @@ enum ComunidadAutonoma {
   desconocida,
 }
 
-const Map<ComunidadAutonoma, String> ccaaDisplayName = {
-  ComunidadAutonoma.andalucia: 'Andalucia',
-  ComunidadAutonoma.aragon: 'Aragon',
-  ComunidadAutonoma.asturias: 'Asturias',
-  ComunidadAutonoma.baleares: 'Illes Balears',
-  ComunidadAutonoma.canarias: 'Canarias',
-  ComunidadAutonoma.cantabria: 'Cantabria',
-  ComunidadAutonoma.castillaLaMancha: 'Castilla-La Mancha',
-  ComunidadAutonoma.castillaYLeon: 'Castilla y Leon',
-  ComunidadAutonoma.cataluna: 'Cataluna',
-  ComunidadAutonoma.extremadura: 'Extremadura',
-  ComunidadAutonoma.galicia: 'Galicia',
-  ComunidadAutonoma.larioja: 'La Rioja',
-  ComunidadAutonoma.madrid: 'Madrid',
-  ComunidadAutonoma.murcia: 'Region de Murcia',
-  ComunidadAutonoma.navarra: 'Comunidad Foral de Navarra',
-  ComunidadAutonoma.paisVasco: 'Pais Vasco',
-  ComunidadAutonoma.cValenciana: 'Comunitat Valenciana',
-  ComunidadAutonoma.ceuta: 'Ceuta',
-  ComunidadAutonoma.melilla: 'Melilla',
-  ComunidadAutonoma.desconocida: 'Comunidad no identificada',
-};
+extension ComunidadAutonomaX on ComunidadAutonoma {
+  String get displayName => 'ccaa.$name'.tr();
+}
+
+/// Helper for backward compatibility (prefer using .displayName extension)
+Map<ComunidadAutonoma, String> get ccaaDisplayName => {
+      for (var val in ComunidadAutonoma.values) val: val.displayName,
+    };
 
 const Map<int, ComunidadAutonoma> _postalPrefixToCcaa = {
   1: ComunidadAutonoma.paisVasco,
@@ -172,7 +159,7 @@ bool ccaaRequiereCedula(ComunidadAutonoma ccaa) =>
 
 String arrasLegalReference(ComunidadAutonoma ccaa) {
   if (ccaa == ComunidadAutonoma.cataluna) {
-    return 'Art. 621-8 del Codigo Civil de Cataluna';
+    return 'arras_contract.legal_ref_cataluna'.tr();
   }
-  return 'Art. 1454 del Codigo Civil';
+  return 'arras_contract.legal_ref_general'.tr();
 }

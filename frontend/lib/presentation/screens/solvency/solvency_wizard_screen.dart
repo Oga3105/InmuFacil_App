@@ -1016,7 +1016,7 @@ class _SolvencyPreviewCard extends StatelessWidget {
                       style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
                     ),
                     Text(
-                      '${'solvency.level_label'.tr()} $levelLabel',
+                      'solvency.level_label'.tr() + levelLabel,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,

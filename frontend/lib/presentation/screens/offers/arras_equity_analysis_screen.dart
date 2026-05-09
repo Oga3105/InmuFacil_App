@@ -72,10 +72,8 @@ class ArrasEquityAnalysisScreen extends ConsumerWidget {
         },
         data: (data) {
           if (data == null) {
-            return const _ErrorView(
-              message:
-                  'El analisis no esta disponible. Asegurate de que el contrato ha sido generado.',
-            );
+            return Center(
+                child: Text('arras_interview.equity_no_data'.tr()));
           }
           final score = (data['score'] as num?)?.toInt() ?? 0;
           final rawItems = data['items'] as List<dynamic>? ?? [];
@@ -169,7 +167,7 @@ class _EquityBody extends StatelessWidget {
           _ScoreHeader(score: score, isBuyer: isBuyer),
           const SizedBox(height: 24),
           Text(
-            'Aspectos del contrato',
+            'arras_interview.equity_aspects_title'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -205,10 +203,10 @@ class _ScoreHeader extends StatelessWidget {
   }
 
   String get _scoreLabel {
-    if (score >= 75) return 'Favorable';
-    if (score >= 50) return 'Equilibrado';
-    if (score >= 30) return 'Con alertas';
-    return 'Desfavorable';
+    if (score >= 75) return 'arras_interview.equity_label_favorable'.tr();
+    if (score >= 50) return 'arras_interview.equity_label_balanced'.tr();
+    if (score >= 30) return 'arras_interview.equity_label_alerts'.tr();
+    return 'arras_interview.equity_label_unfavorable'.tr();
   }
 
   @override
@@ -235,8 +233,8 @@ class _ScoreHeader extends StatelessWidget {
         children: [
           Text(
             isBuyer
-                ? 'Tu posicion como Comprador'
-                : 'Tu posicion como Vendedor',
+                ? 'arras_interview.equity_buyer_pos'.tr()
+                : 'arras_interview.equity_seller_pos'.tr(),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 14,
@@ -429,13 +427,13 @@ class _EquityItemCard extends StatelessWidget {
   static String _statusLabel(String status) {
     switch (status) {
       case 'favorable':
-        return 'Favorable';
+        return 'arras_interview.equity_status_favorable'.tr();
       case 'neutral':
-        return 'Neutral';
+        return 'arras_interview.equity_status_neutral'.tr();
       case 'alerta':
-        return 'Alerta';
+        return 'arras_interview.equity_status_alert'.tr();
       case 'critico':
-        return 'Critico';
+        return 'arras_interview.equity_status_critical'.tr();
       default:
         return status;
     }
@@ -565,9 +563,9 @@ class _ErrorView extends StatelessWidget {
                   color: _kOrange, size: 52),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Analisis no disponible',
-              style: TextStyle(
+            Text(
+              'arras_interview.equity_not_available'.tr(),
+              style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: _kNavy),
@@ -622,8 +620,7 @@ class _DisclaimerFooter extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Este analisis es orientativo y ha sido generado por inteligencia artificial. '
-              'No constituye asesoramiento juridico. Consulta con un abogado antes de firmar.',
+              'arras_interview.equity_disclaimer'.tr(),
               style: TextStyle(
                   fontSize: 11,
                   color: Colors.grey.shade500,

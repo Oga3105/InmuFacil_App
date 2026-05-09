@@ -659,9 +659,9 @@ class _SellerSolvencyBanner extends ConsumerWidget {
 
         final level = passport.solvencyLevel ?? 'bronze';
         final (levelLabel, levelColor, levelIcon) = switch (level) {
-          'gold'   => ('Oro',    const Color(0xFFB8860B), Icons.emoji_events_rounded),
-          'silver' => ('Plata',  const Color(0xFF64748B), Icons.shield_rounded),
-          _        => ('Bronce', const Color(0xFFCD7F32), Icons.shield_outlined),
+          'gold'   => ('chat.level_gold'.tr(),    const Color(0xFFB8860B), Icons.emoji_events_rounded),
+          'silver' => ('chat.level_silver'.tr(),  const Color(0xFF64748B), Icons.shield_rounded),
+          _        => ('chat.level_bronze'.tr(), const Color(0xFFCD7F32), Icons.shield_outlined),
         };
 
         final stressLabel = switch (passport.stressIndex) {
@@ -831,7 +831,7 @@ class _PropertyBanner extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'REFERENCIA: ${conversation.propertyTitle.toUpperCase()}',
+                      'chat.reference'.tr(namedArgs: {'title': conversation.propertyTitle.toUpperCase()}),
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 11,
@@ -901,8 +901,8 @@ class _DateSeparator extends StatelessWidget {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(date.year, date.month, date.day);
-    if (d == today) return 'HOY';
-    if (d == today.subtract(const Duration(days: 1))) return 'AYER';
+    if (d == today) return 'chat.today'.tr();
+    if (d == today.subtract(const Duration(days: 1))) return 'chat.yesterday_caps'.tr();
     final diffDays = today.difference(d).inDays;
     if (diffDays < 7) {
       final days = ['time.weekdays_short.mon'.tr(), 'time.weekdays_short.tue'.tr(), 'time.weekdays_short.wed'.tr(), 'time.weekdays_short.thu'.tr(), 'time.weekdays_short.fri'.tr(), 'time.weekdays_short.sat'.tr(), 'time.weekdays_short.sun'.tr()];
@@ -1131,13 +1131,13 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
     return switch (_actionType) {
       'visit_request' => (
           Icons.calendar_month_outlined,
-          'Solicitud de Visita',
+          'chat.action_visit_request'.tr(),
           cs.primary,
           cs.primaryContainer,
         ),
       'visit_accepted' => (
           Icons.check_circle_outline,
-          'Visita Confirmada',
+          'chat.action_visit_accepted'.tr(),
           const Color(0xFF16A34A),
           Theme.of(context).brightness == Brightness.dark
               ? const Color(0xFF052E16)
@@ -1145,33 +1145,33 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
         ),
       'visit_rejected' => (
           Icons.cancel_outlined,
-          'Visita Rechazada',
+          'chat.action_visit_rejected'.tr(),
           cs.error,
           cs.errorContainer,
         ),
       'offer_proposal' => (
           Icons.monetization_on_outlined,
-          'Propuesta de Oferta',
+          'chat.action_offer_proposal'.tr(),
           _kGold,
           const Color(0xFFFFF7ED),
         ),
       'docs_request' => (
           Icons.folder_outlined,
-          'Solicitud de Documentos',
+          'chat.action_docs_request'.tr(),
           const Color(0xFF7C3AED),
           cs.surfaceContainerHighest,
         ),
       'visit_cancelled' => (
           Icons.event_busy_outlined,
-          'Visita Cancelada',
+          'chat.action_visit_cancelled'.tr(),
           const Color(0xFFD97706),
           const Color(0xFFFFF7ED),
         ),
       _ => (
           Icons.info_outline,
           _actionType.isNotEmpty
-              ? _actionType.replaceAll('_', ' ')
-              : 'Accion',
+              ? 'chat.action_generic'.tr()
+              : 'chat.action_generic'.tr(),
           cs.onSurfaceVariant,
           cs.surfaceContainerHighest,
         ),
@@ -1330,10 +1330,10 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                                   borderRadius: BorderRadius.circular(8)),
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
-                            onPressed: _loading ? null : () => _respond('rejected'),
-                            child: const Text(
-                              'Rechazar',
-                              style: TextStyle(
+                             onPressed: _loading ? null : () => _respond('rejected'),
+                            child: Text(
+                              'chat.reject'.tr(),
+                              style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -1357,9 +1357,9 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text(
-                                    'Aceptar',
-                                    style: TextStyle(
+                                : Text(
+                                    'chat.accept'.tr(),
+                                    style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w700),
                                   ),
@@ -1384,9 +1384,9 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             onPressed: _loading ? null : _reschedule,
-                            child: const Text(
-                              'Reprogramar',
-                              style: TextStyle(
+                            child: Text(
+                              'chat.reschedule'.tr(),
+                              style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -1403,9 +1403,9 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                               padding: const EdgeInsets.symmetric(vertical: 8),
                             ),
                             onPressed: _loading ? null : _cancel,
-                            child: const Text(
-                              'Anular',
-                              style: TextStyle(
+                            child: Text(
+                              'chat.cancel'.tr(),
+                              style: const TextStyle(
                                   fontSize: 12, fontWeight: FontWeight.w700),
                             ),
                           ),
@@ -1467,7 +1467,7 @@ class _QuickActionBar extends StatelessWidget {
           if (showVisita) ...[
             _QuickActionButton(
               icon: Icons.calendar_month_outlined,
-              label: 'Visita',
+              label: 'chat.quick_visit'.tr(),
               color: _kNavy,
               onTap: onVisit,
             ),
@@ -1476,7 +1476,7 @@ class _QuickActionBar extends StatelessWidget {
           if (!hasExistingOfferProposal) ...[
             _QuickActionButton(
               icon: Icons.payments_outlined,
-              label: 'Oferta',
+              label: 'chat.quick_offer'.tr(),
               color: _kGold,
               onTap: onOffer,
             ),
@@ -1550,7 +1550,7 @@ class _EncryptionNote extends StatelessWidget {
           Icon(Icons.lock_outline, size: 11, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 4),
           Text(
-            'Tus mensajes estan protegidos por cifrado de extremo a extremo.',
+            'chat.encryption_note'.tr(),
             style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant),
           ),
         ],

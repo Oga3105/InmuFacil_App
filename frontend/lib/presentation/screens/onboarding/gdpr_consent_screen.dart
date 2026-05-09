@@ -80,7 +80,7 @@ class GdprConsentScreen extends ConsumerWidget {
                           recognizer: TapGestureRecognizer()
                             ..onTap = () => context.push(InfoScreen.routeFor(InfoPageType.terms)),
                         ),
-                        const TextSpan(text: ' y la '),
+                        TextSpan(text: ' ${'auth.and_the'.tr()} '),
                         TextSpan(
                           text: 'onboarding.gdpr_privacy_link'.tr(),
                           style: TextStyle(

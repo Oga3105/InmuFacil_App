@@ -215,7 +215,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                               style: const TextStyle(color: Colors.white70, fontSize: 10, letterSpacing: 1.5, fontWeight: FontWeight.w600),
                             ),
                             Text(
-                              tr('solvency.level_label') + levelCfg.label,
+                              'solvency.level_label'.tr() + levelCfg.label,
                               style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                             ),
                           ],
@@ -242,7 +242,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                         const SizedBox(width: 6),
                         Text(
                           passport.expiresAt != null
-                              ? tr('solvency.expires_on') + _formatDate(passport.expiresAt!) + ' (' + daysLeft.toString() + tr('solvency.days') + ')'
+                              ? 'solvency.expires_on'.tr() + _formatDate(passport.expiresAt!) + ' (' + daysLeft.toString() + 'solvency.days'.tr() + ')'
                               : 'solvency.no_expiry'.tr(),
                           style: const TextStyle(color: Colors.white70, fontSize: 12),
                         ),
@@ -289,7 +289,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Text(
-                        '${'solvency.debt_ratio'.tr()}${((passport.debtRatio ?? 0) * 100).toStringAsFixed(0)}%',
+                        'solvency.debt_ratio'.tr() + '${((passport.debtRatio ?? 0) * 100).toStringAsFixed(0)}%',
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                     ),
@@ -309,7 +309,7 @@ class SolvencyPassportScreen extends ConsumerWidget {
                     _CheckRow('solvency.has_initial_savings'.tr(), passport.hasInitialSavings == true),
                     _CheckRow('solvency.has_preapproval'.tr(), passport.hasPreApproval == true),
                     _CheckRow(
-                      tr('solvency.payment_method') + _paymentLabel(passport.paymentMethod),
+                      'solvency.payment_method'.tr() + _paymentLabel(passport.paymentMethod),
                       passport.paymentMethod != null,
                     ),
                   ],

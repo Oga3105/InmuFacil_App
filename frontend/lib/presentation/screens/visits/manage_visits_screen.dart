@@ -60,7 +60,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                           text: 'Inmu',
                           style: TextStyle(color: Color(0xFF135BEC))),
                       TextSpan(
-                          text: 'Facil',
+                          text: 'Fácil',
                           style: TextStyle(color: Color(0xFF16A34A))),
                     ],
                   ),
@@ -310,7 +310,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                     )
                   : const Icon(Icons.check_circle_outline),
               label: Text(
-                _isCreating ? 'common.creating'.tr() : 'Crear ventana de disponibilidad',
+                _isCreating ? 'common.creating'.tr() : 'visits.create_window_btn'.tr(),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
               style: FilledButton.styleFrom(
@@ -469,13 +469,12 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
   }
 
   Widget _buildWindowCard(VisitWindow w) {
-    final dayNames = ['', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
-    final monthNames = [
-      '', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-    ];
-    final day = dayNames[w.startTime.weekday];
-    final month = monthNames[w.startTime.month];
+    final monthKey = _getMonthKeyShort(w.startTime.month);
+    final dayKey = _getWeekdayKeyShort(w.startTime.weekday);
+    
+    final dayStr = 'time.weekdays_short.$dayKey'.tr();
+    final monthStr = 'time.short_months.$monthKey'.tr();
+
     final startH = '${w.startTime.hour.toString().padLeft(2, '0')}:${w.startTime.minute.toString().padLeft(2, '0')}';
     final endH = '${w.endTime.hour.toString().padLeft(2, '0')}:${w.endTime.minute.toString().padLeft(2, '0')}';
     final isPast = w.endTime.isBefore(DateTime.now());
@@ -509,7 +508,7 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
                   ),
                 ),
                 Text(
-                  '$day $month',
+                  '$dayStr $monthStr',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w600,
@@ -593,4 +592,14 @@ class _ManageVisitsScreenState extends ConsumerState<ManageVisitsScreen> {
 
   String _formatTime(TimeOfDay t) =>
       '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+
+  String _getMonthKeyShort(int m) {
+    const keys = ['', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    return keys[m];
+  }
+
+  String _getWeekdayKeyShort(int d) {
+    const keys = ['', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    return keys[d];
+  }
 }

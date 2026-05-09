@@ -175,11 +175,11 @@ class _IdentityVerificationScreenState
   String _docTypeLabel(DocumentType? type) {
     switch (type) {
       case DocumentType.nie:
-        return 'NIE';
+        return 'kyc.nie'.tr();
       case DocumentType.pasaporte:
         return 'kyc.passport'.tr();
       default:
-        return 'DNI';
+        return 'kyc.dni'.tr();
     }
   }
 
@@ -880,10 +880,10 @@ class _IdentityVerificationScreenState
       VerificationState state, VerificationNotifier notifier) {
     return Row(
       children: [
-        _buildDocTypeChip('DNI', Icons.credit_card, DocumentType.dni,
+        _buildDocTypeChip('kyc.dni'.tr(), Icons.credit_card, DocumentType.dni,
             state.selectedDocumentType, notifier),
         const SizedBox(width: 8),
-        _buildDocTypeChip('NIE', Icons.badge_outlined, DocumentType.nie,
+        _buildDocTypeChip('kyc.nie'.tr(), Icons.badge_outlined, DocumentType.nie,
             state.selectedDocumentType, notifier),
         const SizedBox(width: 8),
         _buildDocTypeChip('kyc.passport_short'.tr(), Icons.menu_book, DocumentType.pasaporte,

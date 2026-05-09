@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 enum PropertyCondition {
   obraNew,
   goodState,
@@ -28,34 +29,34 @@ extension PropertyConditionX on PropertyCondition {
   String get displayLabel {
     switch (this) {
       case PropertyCondition.obraNew:
-        return 'Obra Nueva';
+        return 'property_wizard.condition_new'.tr();
       case PropertyCondition.goodState:
-        return 'Buen Estado';
+        return 'property_wizard.condition_good'.tr();
       case PropertyCondition.reformed:
-        return 'Reformado';
+        return 'property_wizard.condition_reformed'.tr();
       case PropertyCondition.toReform:
-        return 'A Reformar';
+        return 'property_wizard.condition_to_reform'.tr();
       case PropertyCondition.underConstruction:
-        return 'En Construccion';
+        return 'property_wizard.condition_construction'.tr();
       case PropertyCondition.toDemolish:
-        return 'Para Derribar';
+        return 'property_wizard.condition_demolish'.tr();
     }
   }
 
   String get sublabel {
     switch (this) {
       case PropertyCondition.obraNew:
-        return 'Inmueble a estrenar';
+        return 'property_wizard.condition_new_sub'.tr();
       case PropertyCondition.goodState:
-        return 'Listo para entrar a vivir';
+        return 'property_wizard.condition_good_sub'.tr();
       case PropertyCondition.reformed:
-        return 'Recientemente actualizado';
+        return 'property_wizard.condition_reformed_sub'.tr();
       case PropertyCondition.toReform:
-        return 'Necesita mejoras estructurales o esteticas';
+        return 'property_wizard.condition_to_reform_sub'.tr();
       case PropertyCondition.underConstruction:
-        return 'Proyecto en ejecucion';
+        return 'property_wizard.condition_construction_sub'.tr();
       case PropertyCondition.toDemolish:
-        return 'Solo valor de suelo/estructura';
+        return 'property_wizard.condition_demolish_sub'.tr();
     }
   }
 }

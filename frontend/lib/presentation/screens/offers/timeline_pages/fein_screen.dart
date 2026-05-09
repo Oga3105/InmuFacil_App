@@ -82,7 +82,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         '${EnvConfig.apiBaseUrl}/fein/${widget.offer.id}/confirm',
         data: {
           'role': _isBuyer ? 'BUYER' : 'SELLER',
-          'notes': 'Confirmacion de FEIN desde la app.',
+          'notes': 'transaction.fein_notes_confirm'.tr(),
         },
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );

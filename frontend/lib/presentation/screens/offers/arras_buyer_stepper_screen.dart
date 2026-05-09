@@ -458,12 +458,12 @@ class _ArrasBuyerStepperScreenState
 
   Widget _buildStep2() {
     final colorScheme = Theme.of(context).colorScheme;
-    const reasons = [
-      ('work', 'Motivos laborales'),
-      ('mortgage_delay', 'Retraso en hipoteca'),
-      ('family', 'Motivos familiares'),
-      ('legal', 'Procedimiento legal'),
-      ('other', 'Otras causas'),
+    final reasons = [
+      ('work', 'arras_interview.reason_work'.tr()),
+      ('mortgage_delay', 'arras_interview.reason_mortgage'.tr()),
+      ('family', 'arras_interview.reason_family'.tr()),
+      ('legal', 'arras_interview.reason_legal'.tr()),
+      ('other', 'arras_interview.reason_other'.tr()),
     ];
 
     return SingleChildScrollView(
@@ -473,8 +473,8 @@ class _ArrasBuyerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.shield_outlined,
-            title: 'Seguridad y Flexibilidad',
-            subtitle: 'Paso 2 de 3 — Condiciones y contingencias',
+            title: 'arras_interview.step2_title'.tr(),
+            subtitle: 'arras_interview.step2_subtitle'.tr(),
             color: const Color(0xFF7C3AED),
           ),
           const SizedBox(height: 24),
@@ -483,18 +483,18 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Sujeto a concesion de hipoteca',
+                  title: 'arras_interview.mortgage_subject_title'.tr(),
                   subtitle:
-                      'El contrato queda condicionado a la aprobacion del prestamo',
+                      'arras_interview.mortgage_subject_sub'.tr(),
                   value: _subjectToMortgage,
                   onChanged: (v) => setState(() => _subjectToMortgage = v),
                   icon: Icons.account_balance_outlined,
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Permite prorroga del plazo',
+                  title: 'arras_interview.extension_allowed_title'.tr(),
                   subtitle:
-                      'Se puede ampliar el plazo por causas justificadas',
+                      'arras_interview.extension_allowed_sub'.tr(),
                   value: _extensionAllowed,
                   onChanged: (v) => setState(() {
                     _extensionAllowed = v;
@@ -537,18 +537,18 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Acepta clausula de vicios ocultos',
+                  title: 'arras_interview.hidden_defects_title'.tr(),
                   subtitle:
-                      'Art. 1484 CC — El vendedor responde por defectos ocultos',
+                      'arras_interview.hidden_defects_sub'.tr(),
                   value: _hiddenDefectsAccepted,
                   onChanged: (v) => setState(() => _hiddenDefectsAccepted = v),
                   icon: Icons.find_in_page_outlined,
                 ),
                 const Divider(height: 24),
                 ArrasSwitchTile(
-                  title: 'Retencion por deudas de comunidad',
+                  title: 'arras_interview.community_debt_title'.tr(),
                   subtitle:
-                      'Se retiene parte del precio si el vendedor tiene deudas pendientes',
+                      'arras_interview.community_debt_sub'.tr(),
                   value: _communityDebtRetention,
                   onChanged: (v) =>
                       setState(() => _communityDebtRetention = v),
@@ -566,14 +566,14 @@ class _ArrasBuyerStepperScreenState
 
   Widget _buildStep3() {
     final colorScheme = Theme.of(context).colorScheme;
-    const methods = [
-      ('cash', 'Pago al contado', Icons.payments_outlined),
-      ('mortgage_approved', 'Hipoteca aprobada', Icons.check_circle_outline),
-      ('mortgage_pending', 'Hipoteca en tramitacion',
+    final methods = [
+      ('cash', 'arras_interview.method_cash'.tr(), Icons.payments_outlined),
+      ('mortgage_approved', 'arras_interview.method_mortgage_approved'.tr(), Icons.check_circle_outline),
+      ('mortgage_pending', 'arras_interview.method_mortgage_pending'.tr(),
           Icons.hourglass_empty_outlined),
-      ('savings_plus_mortgage', 'Ahorros + hipoteca',
+      ('savings_plus_mortgage', 'arras_interview.method_savings_plus_mortgage'.tr(),
           Icons.savings_outlined),
-      ('house_to_sell', 'Venta de vivienda actual', Icons.home_outlined),
+      ('house_to_sell', 'arras_interview.method_house_to_sell'.tr(), Icons.home_outlined),
     ];
 
     return SingleChildScrollView(
@@ -583,8 +583,8 @@ class _ArrasBuyerStepperScreenState
         children: [
           ArrasPageHeader(
             icon: Icons.receipt_long_outlined,
-            title: 'Impuestos y Cargas',
-            subtitle: 'Paso 3 de 3 — Fiscalidad y financiacion',
+            title: 'arras_interview.step3_title'.tr(),
+            subtitle: 'arras_interview.step3_subtitle'.tr(),
             color: const Color(0xFF0891B2),
           ),
           const SizedBox(height: 24),
@@ -593,9 +593,9 @@ class _ArrasBuyerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ArrasSwitchTile(
-                  title: 'Prorrateo de IBI por dias',
+                  title: 'arras_interview.ibi_proration_title'.tr(),
                   subtitle:
-                      'El IBI del año se reparte proporcionalmente entre comprador y vendedor',
+                      'arras_interview.ibi_proration_sub'.tr(),
                   value: _ibiProrrationByDays,
                   onChanged: (v) => setState(() => _ibiProrrationByDays = v),
                   icon: Icons.balance_outlined,

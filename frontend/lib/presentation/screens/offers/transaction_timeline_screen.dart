@@ -159,7 +159,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 28, 20, 4),
                   child: Text(
-                    'Estado de la Transaccion',
+                    'transaction.timeline_title'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20,
@@ -171,7 +171,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Text(
-                    'Sigue el progreso de tu venta en tiempo real',
+                    'transaction.timeline_subtitle'.tr(),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
@@ -752,9 +752,9 @@ class _HeaderCards extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = offer.propertyTitle ?? 'Propiedad';
+    final title = offer.propertyTitle ?? 'transaction.property_fallback'.tr();
     final price = offer.propertyPrice;
-    final counterparty = offer.sellerName ?? offer.buyerName ?? 'Contraparte';
+    final counterparty = offer.sellerName ?? offer.buyerName ?? 'transaction.counterparty_fallback'.tr();
     final counterPhotoUrl = offer.buyerPhotoUrl;
 
     return Row(

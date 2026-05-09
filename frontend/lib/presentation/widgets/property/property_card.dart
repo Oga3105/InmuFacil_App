@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../domain/entities/property.dart';
 import '../common/demo_banner.dart';
 import '../common/price_tag.dart';
@@ -108,9 +109,9 @@ class PropertyCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildFeature(Icons.bed, '${property.bedrooms} Hab.'),
-                      _buildFeature(Icons.bathtub_outlined, '${property.bathrooms} Baños'),
-                      _buildFeature(Icons.square_foot, '${property.squareMeters.toStringAsFixed(0)} m²'),
+                      _buildFeature(Icons.bed, '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}'),
+                      _buildFeature(Icons.bathtub_outlined, '${property.bathrooms} ${'property_listing.bathrooms_unit'.tr()}'),
+                      _buildFeature(Icons.square_foot, '${property.squareMeters.toStringAsFixed(0)} ${'property_listing.sqm_unit'.tr()}'),
                     ],
                   ),
                 ],

@@ -508,7 +508,7 @@ class _ArrasSellerStepperScreenState
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Entidad bancaria',
+                  'arras_interview.bank_name_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
@@ -571,7 +571,7 @@ class _ArrasSellerStepperScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Clausulas adicionales (opcional)',
+                  'arras_interview.additional_clauses_title'.tr(),
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -579,7 +579,7 @@ class _ArrasSellerStepperScreenState
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Cualquier condicion especial que quieras incluir en el contrato',
+                  'arras_interview.additional_clauses_desc'.tr(),
                   style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),

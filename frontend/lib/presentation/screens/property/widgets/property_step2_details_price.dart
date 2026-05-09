@@ -221,7 +221,7 @@ class _PropertyStep2DetailsPriceState
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'La descripcion comercial se genera con IA en el siguiente paso.',
+                              'property_wizard.title_ai_hint'.tr(),
                               style: TextStyle(fontSize: 12, color: greenColor),
                             ),
                           ),
@@ -510,12 +510,12 @@ class _MarketPriceHint extends ConsumerWidget {
                       style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600, height: 1.4),
                       children: [
                         TextSpan(
-                          text: 'Referencia de mercado: ',
+                          text: 'property_wizard.market_ref'.tr(),
                           style: TextStyle(fontWeight: FontWeight.w600, color: Colors.grey.shade700),
                         ),
                         TextSpan(text: '$lowStr - $highStr EUR '),
                         TextSpan(
-                          text: '($ppm2Str EUR/m\u00B2, ${result.zoneLabel})',
+                          text: 'property_wizard.market_ref_detail'.tr(args: [ppm2Str, result.zoneLabel]),
                           style: TextStyle(color: Colors.grey.shade500),
                         ),
                       ],

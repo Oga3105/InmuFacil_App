@@ -140,11 +140,7 @@ class ArrasInterviewScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         _InfoBox(
           icon: Icons.info_outline,
-          text:
-              'Cuando ambas partes completen y confirmen sus entrevistas, '
-              'la inteligencia artificial redactara el Contrato de Arras Penitenciales '
-              'con todas las condiciones acordadas. Podras revisarlo y proponer cambios '
-              'antes de firmarlo digitalmente.',
+          text: 'arras_interview.hub_info_box'.tr(),
         ),
         const SizedBox(height: 32),
       ],
@@ -250,12 +246,12 @@ class _HeroCard extends StatelessWidget {
         return 'arras_interview.hub_status_generating_draft'.tr();
       case 'buyer_done':
         return isBuyer
-            ? 'Tu entrevista completada — esperando al vendedor'
-            : 'Comprador listo — completa tu entrevista';
+            ? 'arras_interview.hub_status_buyer_done_buyer'.tr()
+            : 'arras_interview.hub_status_buyer_done_seller'.tr();
       case 'seller_done':
         return !isBuyer
-            ? 'Tu entrevista completada — esperando al comprador'
-            : 'Vendedor listo — completa tu entrevista';
+            ? 'arras_interview.hub_status_seller_done_seller'.tr()
+            : 'arras_interview.hub_status_seller_done_buyer'.tr();
       default:
         return 'arras_interview.hub_status_default'.tr();
     }
@@ -288,20 +284,20 @@ class _HeroCard extends StatelessWidget {
                     color: Colors.white, size: 22),
               ),
               const SizedBox(width: 12),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Contrato de Arras',
-                    style: TextStyle(
+                    'arras_interview.hub_hero_title'.tr(),
+                    style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Penitenciales',
+                    'arras_interview.hub_hero_subtitle'.tr(),
                     style:
-                        TextStyle(color: Colors.white60, fontSize: 13),
+                        const TextStyle(color: Colors.white60, fontSize: 13),
                   ),
                 ],
               ),
@@ -576,18 +572,18 @@ class _ContractCard extends StatelessWidget {
     } else if (isGenerating) {
       cardColor = _kBlue;
       cardIcon = Icons.auto_awesome_outlined;
-      cardTitle = 'Generando contrato...';
-      cardSubtitle = 'La IA esta redactando el contrato';
+      cardTitle = 'arras_interview.hub_contract_generating_title'.tr();
+      cardSubtitle = 'arras_interview.hub_contract_generating_desc'.tr();
     } else if (hasContract) {
       cardColor = const Color(0xFFD97706);
       cardIcon = Icons.description_outlined;
-      cardTitle = 'Contrato listo para revision';
-      cardSubtitle = 'Ambas partes deben leer y aceptar el contrato';
+      cardTitle = 'arras_interview.hub_contract_ready_title'.tr();
+      cardSubtitle = 'arras_interview.hub_contract_ready_desc'.tr();
     } else {
       cardColor = _kBlue;
       cardIcon = Icons.hourglass_empty_outlined;
-      cardTitle = 'Generando contrato...';
-      cardSubtitle = 'Espera mientras se prepara el borrador';
+      cardTitle = 'arras_interview.hub_contract_pending_title'.tr();
+      cardSubtitle = 'arras_interview.hub_contract_pending_desc'.tr();
     }
 
     return Container(
