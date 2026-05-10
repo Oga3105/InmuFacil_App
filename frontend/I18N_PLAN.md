@@ -136,10 +136,10 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 ## FASE E — Calidad gramatical
 > Prioridad: BAJA | Solo afecta calidad, no funcionalidad
 
-- [ ] **E1** Revision manual eu-ES (euskera — IA tiene menor calidad en este idioma)
-- [ ] **E2** Revision manual gl-ES (gallego — mayor porcentaje sin traducir = mas riesgo de errores)
-- [ ] **E3** Revision manual va-ES (valenciano — nuevo, encoding problemas ya corregidos)
-- [ ] **E4** Verificar que ccaa.* en idiomas que los tienen no tiene errores de traduccion
+- [x] **E1** Revision manual eu-ES — 271 claves revisadas/corregidas (chat, profile, arras_interview, ai_consent, registry, map). 97 same-as-en restantes son legitimas (brand, format strings, nombres geograficos).
+- [x] **E2** Revision manual gl-ES — 491+277+192+29 claves en 4 pasadas. Fallback ingles reducido de 1069 a ~74 (brand/format strings/cognatos legitimos).
+- [x] **E3** Revision va-ES — encoding corregido en sesion anterior. Sincronizado con ca-ES. 90% diferenciado.
+- [x] **E4** ccaa.* corregidos en fr-FR/fr-CA (frances), gl-ES (gallego), eu-ES (euskera). Nombres geograficos propios de cada idioma aplicados.
 
 ---
 
@@ -170,6 +170,10 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 | 2026-05-10 | C8   | gl-ES 39% → 97% diferenciado | DONE |
 | 2026-05-10 | D    | 5 strings hardcoded → .tr() (login, register, make_offer, step5_preview, regional_legal) | DONE |
 | 2026-05-10 | F2/F3| Delegates eu-ES/gl-ES/fr-CA verificados | DONE |
+| 2026-05-10 | E1   | eu-ES: 271 claves revisadas, 97 same-en restantes son legitimas | DONE |
+| 2026-05-10 | E2   | gl-ES: 4 pasadas, fallback ingles 1069 → ~74 | DONE |
+| 2026-05-10 | E3   | va-ES: encoding OK, sincronizado con ca-ES | DONE |
+| 2026-05-10 | E4   | ccaa.* corregidos fr-FR/fr-CA/gl-ES/eu-ES | DONE |
 
 ---
 
