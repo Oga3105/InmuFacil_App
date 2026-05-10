@@ -2,12 +2,12 @@
   "amenity": {
     "ac": "Air conditioning",
     "accessibility": "Reduced mobility access",
-    "exterior": "Exterior facing",
+    "exterior": "Exterior",
     "garage": "Garage",
     "garden": "Garden",
     "heating": "Heating",
-    "lift": "Elevator",
-    "pool": "Swimming pool",
+    "lift": "Lift",
+    "pool": "Pool",
     "storage": "Storage locker",
     "terrace": "Terrace",
     "wardrobes": "Built-in wardrobes"
@@ -284,7 +284,13 @@
     "retry": "Retry",
     "my_contracts": "My Contracts",
     "contracts_wip": "Contracts Area (Coming soon)",
-    "error_title": "Error"
+    "error_title": "Error",
+    "user": "User",
+    "session_expired": "Your session has expired",
+    "login_again": "Please sign in again",
+    "login": "Sign in",
+    "verified": "Verified",
+    "logout": "Sign out"
   },
   "discovery": {
     "twin_zones": {
@@ -318,7 +324,8 @@
     "regional_doc_title": "Regional Documentation",
     "request_coming_soon": "Coming soon — you will be able to request it from here",
     "select_file": "Select file",
-    "upload_coming_soon": "File upload coming soon"
+    "upload_coming_soon": "File upload coming soon",
+    "section_title": "Document verification"
   },
   "errors": {
     "connection_error": "Could not connect to the server. Check your internet connection.",
@@ -405,7 +412,7 @@
     "nav_contact": "Contact",
     "nav_guides": "Guides",
     "account_required_title": "Account required",
-    "account_required_body": "To list and sell a property you need an InmuFácil account. It's free and only takes a few minutes.",
+    "account_required_body": "You must be registered to perform this action.",
     "view_properties_count": "View {} Properties",
     "hero_title_part1": "No intermediaries.",
     "hero_title_part2": "0% commissions.",
@@ -883,7 +890,11 @@
     "error_unexpected": "Unexpected error.",
     "error_status": "Error checking status.",
     "dni": "DNI",
-    "nie": "NIE"
+    "nie": "NIE",
+    "no_camera": "No camera detected",
+    "camera_activating": "Activating camera...",
+    "switch_camera": "Switch camera",
+    "unreadable_body": "We could not read the document. Please try again with a clearer image."
   },
   "lifestyle": {
     "green_historic": "Historic centre",
@@ -1247,7 +1258,15 @@
       "no_conversations_title": "No active conversations",
       "no_conversations_desc": "When there are messages in an offer, they will appear here.",
       "yesterday": "YESTERDAY",
-      "days": "MON,TUE,WED,THU,FRI,SAT,SUN"
+      "days": {
+        "mon": "MON",
+        "tue": "TUE",
+        "wed": "WED",
+        "thu": "THU",
+        "fri": "FRI",
+        "sat": "SAT",
+        "sun": "SUN"
+      }
     },
     "manage_btn": "Manage",
     "visit_hours": "Visit hours",
@@ -2607,7 +2626,13 @@
     "equity_label_alerts": "With alerts",
     "equity_label_unfavorable": "Unfavourable",
     "equity_buyer_pos": "Your position as Buyer",
-    "equity_seller_pos": "Your position as Seller"
+    "equity_seller_pos": "Your position as Seller",
+    "error_save": "Error saving. Please try again.",
+    "utilities_info_box": "Include details of current utilities (water, gas, electricity, etc.).",
+    "seller_address_needed_sub": "Seller's current address",
+    "seller_address_hint": "E.g.: 123 Main Street, 28001 Madrid",
+    "levy_details_hint_full": "Detail any liens, mortgages or other rights on the property",
+    "mortgage_amount_hint_eur": "Total outstanding mortgage loan amount"
   },
   "visit_cancel": {
     "title_part1": "Cancel",
@@ -2786,7 +2811,14 @@
     "weekly_completed_desc": "{success} of {total} calls completed successfully",
     "weekly_savings_title": "{amount} € saved this week",
     "weekly_manual_comparison": "Compared to the equivalent manual process",
-    "weekly_calculation_desc": "Calculation based on 0.002 EUR per AI call vs estimated manual process cost."
+    "weekly_calculation_desc": "Calculation based on 0.002 EUR per AI call vs estimated manual process cost.",
+    "ai_resilience_label": "AI Resilience",
+    "ai_resilience_desc": "Percentage of successful calls.",
+    "ai_calls_by_feature": "Calls by feature",
+    "ai_recent_log": "Recent log",
+    "ai_daily_budget": "Daily AI budget",
+    "ai_panic_confirm_title": "Activate panic mode",
+    "ai_panic_title": "Panic mode activated"
   },
   "arras_contract": {
     "title": "Smart Arras Contract",
@@ -2824,7 +2856,8 @@
     "preview_section_desistimiento": "WITHDRAWAL CLAUSE",
     "preview_section_inventario": "INVENTORY",
     "legal_ref_cataluna": "Art. 621-8 of the Civil Code of Catalonia",
-    "legal_ref_general": "Art. 1454 of the Civil Code"
+    "legal_ref_general": "Art. 1454 of the Civil Code",
+    "preview_pending_date": "Pending confirmation"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "This passport is exclusive for buyers. It is only necessary if you intend to purchase a property.",
@@ -3190,5 +3223,77 @@
     "ceuta": "Ceuta",
     "melilla": "Melilla",
     "desconocida": "Comunidad no identificada"
+  },
+  "market_gap": {
+    "error": "Error calculating market analysis",
+    "low_data": "Insufficient data in the area for a reliable analysis",
+    "title": "Market analysis",
+    "gap_label": "Price gap",
+    "asking_price_label": "Asking price",
+    "real_price_label": "Market price"
+  },
+  "price_validator": {
+    "error": "Error validating price",
+    "title": "Price validator",
+    "disclaimer": "Based on historical market data and recent offers",
+    "verdict_justo": "Fair price",
+    "verdict_algo_alto": "Slightly high",
+    "verdict_algo_bajo": "Slightly low",
+    "verdict_muy_alto": "Very high",
+    "verdict_muy_bajo": "Very low",
+    "confidence_high": "High confidence",
+    "confidence_medium": "Medium confidence",
+    "confidence_low": "Low confidence",
+    "risk_low": "Low risk",
+    "risk_high": "High risk",
+    "risk_medium": "Medium risk"
+  },
+  "market_price": {
+    "low_density": "Low density data",
+    "unavailable": "Market price unavailable",
+    "title": "Market price",
+    "no_extrapolation": "No extrapolation available",
+    "confidence_high": "High confidence",
+    "confidence_medium": "Medium confidence",
+    "confidence_low": "Low confidence"
+  },
+  "urban_growth": {
+    "error": "Error loading urban growth analysis",
+    "low_data_default": "Insufficient data for analysis",
+    "no_projection": "No projection available",
+    "title": "Urban growth",
+    "projected_label": "5-year projection",
+    "milestones_title": "Urban milestones",
+    "signals_title": "Growth signals",
+    "zone_mature": "Consolidated zone",
+    "zone_emerging": "Emerging zone",
+    "zone_declining": "Declining zone",
+    "zone_unknown": "Unknown zone"
+  },
+  "signature": {
+    "seal_title": "Document seal",
+    "seal_subtitle": "Digitally verified document",
+    "seal_hash_label": "Document hash",
+    "hash_copied": "Hash copied to clipboard",
+    "verification_id_label": "Verification ID",
+    "timestamp_label": "Date and time",
+    "document_id_label": "Document ID",
+    "eidas_notice": "Electronic signature with legal validity under eIDAS",
+    "pad_title": "Digital signature",
+    "clear": "Clear",
+    "pad_hint": "Sign here",
+    "legal_notice": "Your signature is required for the legal validity of the document",
+    "confirm": "Confirm signature"
+  },
+  "solvency_passport": {
+    "title": "Solvency passport",
+    "verified": "Verified",
+    "level_label": "Solvency level",
+    "solvency_level": "Your current level",
+    "max_capacity_label": "Maximum offer capacity",
+    "capacity_prefix": "Up to",
+    "currency_suffix": "EUR",
+    "disclaimer": "Calculation based on your verified financial profile",
+    "seller_message_prefix": "Buyer with solvency level"
   }
 }

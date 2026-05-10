@@ -286,7 +286,13 @@
     "retry": "Reintentar",
     "my_contracts": "Os meus Contratos",
     "contracts_wip": "Área de contratos (En breve)",
-    "error_title": "Erro"
+    "error_title": "Erro",
+    "user": "Usuario",
+    "session_expired": "A túa sesión expirou",
+    "login_again": "Por favor, inicia sesión de novo",
+    "login": "Iniciar sesión",
+    "verified": "Verificado",
+    "logout": "Pechar sesión"
   },
   "discovery": {
     "twin_zones": {
@@ -320,7 +326,8 @@
     "regional_doc_title": "Documentación rexional",
     "request_coming_soon": "En breve poderás solicitalo desde aquí",
     "select_file": "Seleccionar ficheiro",
-    "upload_coming_soon": "Subida de ficheiros en breve dispoñible"
+    "upload_coming_soon": "Subida de ficheiros en breve dispoñible",
+    "section_title": "Verificación de documentos"
   },
   "errors": {
     "connection_error": "Non se puido conectar co servidor. Comproba a túa conexión a internet.",
@@ -392,7 +399,10 @@
     "property_type_land": "Terreos",
     "property_type_rustic_land": "Fincas rústicas",
     "zero_properties": "0 INMOBLES",
-    "verified_this_week": "Verificado esta semana"
+    "verified_this_week": "Verificado esta semana",
+    "account_required_title": "Conta requirida",
+    "account_required_body": "Debes estar rexistrado para realizar esta acción.",
+    "bedrooms_filter_label": "Habitacións"
   },
   "info": {
     "buyer_guide": {
@@ -857,7 +867,11 @@
     "error_unexpected": "Erro inesperado.",
     "error_status": "Erro ao consultar o estado.",
     "dni": "DNI",
-    "nie": "NIE"
+    "nie": "NIE",
+    "no_camera": "Non se detectou ningunha cámara",
+    "camera_activating": "Activando cámara...",
+    "switch_camera": "Cambiar cámara",
+    "unreadable_body": "Non puidemos ler o documento. Por favor, tenta de novo cunha imaxe máis clara."
   },
   "lifestyle": {
     "green_historic": "Centro histórico",
@@ -1221,7 +1235,15 @@
       "no_conversations_title": "Sen conversas activas",
       "no_conversations_desc": "Cando haxa mensaxes nunha oferta, aparecerán aquí.",
       "yesterday": "ONTE",
-      "days": "LUN,MAR,MER,XOV,VEN,SAB,DOM"
+      "days": {
+        "mon": "LUN",
+        "tue": "MAR",
+        "wed": "MER",
+        "thu": "XOV",
+        "fri": "VEN",
+        "sat": "SAB",
+        "sun": "DOM"
+      }
     },
     "manage_btn": "Xestionar",
     "visit_hours": "Horario de visitas",
@@ -2582,7 +2604,13 @@
     "equity_label_alerts": "Con alertas",
     "equity_label_unfavorable": "Desfavorable",
     "equity_buyer_pos": "A túa posición como Comprador",
-    "equity_seller_pos": "A túa posición como Vendedor"
+    "equity_seller_pos": "A túa posición como Vendedor",
+    "error_save": "Erro ao gardar. Por favor, tenta de novo.",
+    "utilities_info_box": "Inclúe os detalles dos subministros actuais (auga, gas, electricidade, etc.).",
+    "seller_address_needed_sub": "Enderezo actual do vendedor",
+    "seller_address_hint": "Ex.: Rúa Principal 123, 28001 Madrid",
+    "levy_details_hint_full": "Detalla calquera gravame, hipoteca ou outro dereito sobre a propiedade",
+    "mortgage_amount_hint_eur": "Importe total pendente do préstamo hipotecario"
   },
   "visit_cancel": {
     "title": "Cancelar visita",
@@ -2773,7 +2801,14 @@
     "filter_period": "Período",
     "report_title": "Informe semanal",
     "ai_weekly_title": "Informe semanal IA",
-    "refresh": "Actualizar"
+    "refresh": "Actualizar",
+    "ai_resilience_label": "Resiliencia da IA",
+    "ai_resilience_desc": "Porcentaxe de chamadas exitosas.",
+    "ai_calls_by_feature": "Chamadas por funcionalidade",
+    "ai_recent_log": "Rexistro recente",
+    "ai_daily_budget": "Orzamento diario de IA",
+    "ai_panic_confirm_title": "Activar modo pánico",
+    "ai_panic_title": "Modo pánico activado"
   },
   "arras_contract": {
     "title": "Contrato de Arras Intelixente",
@@ -2811,7 +2846,8 @@
     "preview_section_desistimiento": "CLÁUSULA DE DESISTIMENTO",
     "preview_section_inventario": "INVENTARIO",
     "legal_ref_cataluna": "Art. 621-8 do Código Civil de Cataluña",
-    "legal_ref_general": "Art. 1454 do Código Civil"
+    "legal_ref_general": "Art. 1454 do Código Civil",
+    "preview_pending_date": "Pendente de confirmar"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "Este pasaporte é exclusivo para compradores. Só é necesario se a túa intención é adquirir unha propiedade.",
@@ -3164,5 +3200,84 @@
     "ceuta": "Ceuta",
     "melilla": "Melilla",
     "desconocida": "Comunidade non identificada"
+  },
+  "amenity": {
+    "exterior": "Exterior",
+    "lift": "Ascensor",
+    "pool": "Piscina",
+    "garage": "Garaxe",
+    "terrace": "Terraza"
+  },
+  "market_gap": {
+    "error": "Erro ao calcular a análise de mercado",
+    "low_data": "Datos insuficientes na zona para unha análise fiable",
+    "title": "Análise de mercado",
+    "gap_label": "Gap de prezo",
+    "asking_price_label": "Prezo solicitado",
+    "real_price_label": "Prezo de mercado"
+  },
+  "price_validator": {
+    "error": "Erro ao validar o prezo",
+    "title": "Validador de prezo",
+    "disclaimer": "Baseado en datos históricos de mercado e ofertas recentes",
+    "verdict_justo": "Prezo xusto",
+    "verdict_algo_alto": "Un pouco alto",
+    "verdict_algo_bajo": "Un pouco baixo",
+    "verdict_muy_alto": "Moi alto",
+    "verdict_muy_bajo": "Moi baixo",
+    "confidence_high": "Alta confianza",
+    "confidence_medium": "Confianza media",
+    "confidence_low": "Baixa confianza",
+    "risk_low": "Risco baixo",
+    "risk_high": "Risco alto",
+    "risk_medium": "Risco medio"
+  },
+  "market_price": {
+    "low_density": "Datos de baixa densidade",
+    "unavailable": "Prezo de mercado non dispoñible",
+    "title": "Prezo de mercado",
+    "no_extrapolation": "Non hai extrapolación dispoñible",
+    "confidence_high": "Alta confianza",
+    "confidence_medium": "Confianza media",
+    "confidence_low": "Baixa confianza"
+  },
+  "urban_growth": {
+    "error": "Erro ao cargar a análise de crecemento urbano",
+    "low_data_default": "Datos insuficientes para realizar a análise",
+    "no_projection": "Sen proxección dispoñible",
+    "title": "Crecemento urbano",
+    "projected_label": "Proxección a 5 anos",
+    "milestones_title": "Fitos urbanos",
+    "signals_title": "Sinais de crecemento",
+    "zone_mature": "Zona consolidada",
+    "zone_emerging": "Zona emerxente",
+    "zone_declining": "Zona en declive",
+    "zone_unknown": "Zona descoñecida"
+  },
+  "signature": {
+    "seal_title": "Selo do documento",
+    "seal_subtitle": "Documento verificado dixitalmente",
+    "seal_hash_label": "Hash do documento",
+    "hash_copied": "Hash copiado ao portapapeis",
+    "verification_id_label": "ID de verificación",
+    "timestamp_label": "Data e hora",
+    "document_id_label": "ID do documento",
+    "eidas_notice": "Sinatura electrónica con validez legal conforme a eIDAS",
+    "pad_title": "Sinatura dixital",
+    "clear": "Limpar",
+    "pad_hint": "Asina aquí",
+    "legal_notice": "A túa sinatura é obrigatoria para a validez legal do documento",
+    "confirm": "Confirmar sinatura"
+  },
+  "solvency_passport": {
+    "title": "Pasaporte de solvencia",
+    "verified": "Verificado",
+    "level_label": "Nivel de solvencia",
+    "solvency_level": "O teu nivel actual",
+    "max_capacity_label": "Capacidade máxima de oferta",
+    "capacity_prefix": "Ata",
+    "currency_suffix": "EUR",
+    "disclaimer": "Cálculo baseado no teu perfil financeiro verificado",
+    "seller_message_prefix": "Comprador con nivel de solvencia"
   }
 }

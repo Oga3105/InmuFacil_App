@@ -284,7 +284,13 @@
     "retry": "Berriro saiatu",
     "my_contracts": "Nire Kontratuak",
     "contracts_wip": "Kontratu Eremua (Laster)",
-    "error_title": "Errorea"
+    "error_title": "Errorea",
+    "user": "Erabiltzailea",
+    "session_expired": "Zure saioa iraungitu da",
+    "login_again": "Mesedez, hasi berriz saioa",
+    "login": "Hasi saioa",
+    "verified": "Egiaztatuta",
+    "logout": "Itxi saioa"
   },
   "discovery": {
     "twin_zones": {
@@ -318,7 +324,8 @@
     "regional_doc_title": "Eskualdeko dokumentazioa",
     "request_coming_soon": "Laster hemen eskatu ahal izango duzu",
     "select_file": "Hautatu fitxategia",
-    "upload_coming_soon": "Fitxategiak igotzea laster erabilgarri"
+    "upload_coming_soon": "Fitxategiak igotzea laster erabilgarri",
+    "section_title": "Dokumentuen egiaztapena"
   },
   "errors": {
     "connection_error": "Ezin izan da zerbitzarira konektatu. Egiaztatu zure internet konexioa.",
@@ -390,7 +397,10 @@
     "property_type_land": "Lurrak",
     "property_type_rustic_land": "Baserri finkak",
     "zero_properties": "0 PROPIETATE",
-    "verified_this_week": "Aste honetan egiaztatuak"
+    "verified_this_week": "Aste honetan egiaztatuak",
+    "account_required_title": "Kontua beharrezkoa",
+    "account_required_body": "Erregistratuta egon behar zara ekintza hau egiteko.",
+    "bedrooms_filter_label": "Logelak"
   },
   "info": {
     "buyer_guide": {
@@ -855,7 +865,11 @@
     "error_unexpected": "Ustekabeko errorea.",
     "error_status": "Errorea egoera kontsultatzerakoan.",
     "dni": "DNI",
-    "nie": "NIE"
+    "nie": "NIE",
+    "no_camera": "Ez da kamerarik aurkitu",
+    "camera_activating": "Kamera aktibatzen...",
+    "switch_camera": "Aldatu kamera",
+    "unreadable_body": "Ezin izan dugu dokumentua irakurri. Mesedez, saiatu berriz irudi argiagoarekin."
   },
   "lifestyle": {
     "green_historic": "Erdialde historikoa",
@@ -1219,7 +1233,15 @@
       "no_conversations_title": "Ez dago elkarrizketa aktiborik",
       "no_conversations_desc": "Eskaintza batean mezuak daudenean, hemen agertuko dira.",
       "yesterday": "ATZO",
-      "days": "AST,MAR,OTZ,OST,OST,LAR,IGA"
+      "days": {
+        "mon": "AL",
+        "tue": "AS",
+        "wed": "AZ",
+        "thu": "OG",
+        "fri": "OR",
+        "sat": "LR",
+        "sun": "IG"
+      }
     },
     "manage_btn": "Kudeatu",
     "visit_hours": "Bisita-orduak",
@@ -2579,7 +2601,13 @@
     "equity_label_alerts": "Alertekin",
     "equity_label_unfavorable": "Aurkakoa",
     "equity_buyer_pos": "Zure posizioa Erosle gisa",
-    "equity_seller_pos": "Zure posizioa Saltzaile gisa"
+    "equity_seller_pos": "Zure posizioa Saltzaile gisa",
+    "error_save": "Errorea gordetzean. Mesedez, saiatu berriz.",
+    "utilities_info_box": "Sartu egungo zerbitzuen xehetasunak (ura, gasa, elektrizitatea, etab.).",
+    "seller_address_needed_sub": "Saltzailearen egungo helbidea",
+    "seller_address_hint": "Adib.: Kale Nagusia 123, 28001 Madril",
+    "levy_details_hint_full": "Xehatu jabetzaren gaineko karga, hipoteka edo beste eskubide guztiak",
+    "mortgage_amount_hint_eur": "Hipotekaren gainerako zenbateko osoa"
   },
   "visit_cancel": {
     "title": "Bisita bertan behera utzi",
@@ -2754,7 +2782,14 @@
     "weekly_completed_desc": "{success} dei {total}-(e)tik arrakastaz osatuta",
     "weekly_savings_title": "{amount} € aurreztuta aste honetan",
     "weekly_manual_comparison": "Eskuzko prozesu baliokidearekin alderatuta",
-    "weekly_calculation_desc": "Kalkulua IA dei bakoitzeko 0,002 EUR-tan oinarrituta, eskuzko prozesuaren kostu estimatuaren aurrean."
+    "weekly_calculation_desc": "Kalkulua IA dei bakoitzeko 0,002 EUR-tan oinarrituta, eskuzko prozesuaren kostu estimatuaren aurrean.",
+    "ai_resilience_label": "IAren erresilientzia",
+    "ai_resilience_desc": "Arrakastazko deialdien ehunekoa.",
+    "ai_calls_by_feature": "Deialdiak funtzionalitatearen arabera",
+    "ai_recent_log": "Azken erregistroa",
+    "ai_daily_budget": "IAren eguneko aurrekontua",
+    "ai_panic_confirm_title": "Larrialdi modua aktibatu",
+    "ai_panic_title": "Larrialdi modua aktibatuta"
   },
   "arras_contract": {
     "title": "Arras Kontratu Adimentsua",
@@ -2792,7 +2827,8 @@
     "preview_section_desistimiento": "ATZERA EGITEKO KLAUSULA",
     "preview_section_inventario": "INBENTARIOA",
     "legal_ref_cataluna": "Kataluniako Kode Zibileko 621-8 art.",
-    "legal_ref_general": "Kode Zibileko 1454 art."
+    "legal_ref_general": "Kode Zibileko 1454 art.",
+    "preview_pending_date": "Berresteko zain"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "Pasaporte hau erosleentzat esklusiboa da. Jabetza bat erosteko asmoa baduzu bakarrik beharrezkoa da.",
@@ -3145,5 +3181,84 @@
     "ceuta": "Ceuta",
     "melilla": "Melilla",
     "desconocida": "Identifikatu gabeko Erkidegoa"
+  },
+  "amenity": {
+    "exterior": "Kanpoaldea",
+    "lift": "Igogailua",
+    "pool": "Igerilekua",
+    "garage": "Garajea",
+    "terrace": "Terraza"
+  },
+  "market_gap": {
+    "error": "Errorea merkatuaren analisia kalkulatzean",
+    "low_data": "Datu nahikorik ez zona honetan analisi fidagarri bat egiteko",
+    "title": "Merkatuaren analisia",
+    "gap_label": "Prezio-tartea",
+    "asking_price_label": "Eskatutako prezioa",
+    "real_price_label": "Merkatuko prezioa"
+  },
+  "price_validator": {
+    "error": "Errorea prezioa balioztatzean",
+    "title": "Prezio-balioztagailua",
+    "disclaimer": "Merkatuko datu historiko eta azken eskaintzetan oinarrituta",
+    "verdict_justo": "Prezio zuzena",
+    "verdict_algo_alto": "Zertxobait altua",
+    "verdict_algo_bajo": "Zertxobait baxua",
+    "verdict_muy_alto": "Oso altua",
+    "verdict_muy_bajo": "Oso baxua",
+    "confidence_high": "Konfiantza altua",
+    "confidence_medium": "Konfiantza ertaina",
+    "confidence_low": "Konfiantza baxua",
+    "risk_low": "Arrisku baxua",
+    "risk_high": "Arrisku altua",
+    "risk_medium": "Arrisku ertaina"
+  },
+  "market_price": {
+    "low_density": "Dentsitate baxuko datuak",
+    "unavailable": "Merkatuko prezioa ez dago erabilgarri",
+    "title": "Merkatuko prezioa",
+    "no_extrapolation": "Ez dago extrapolaziorik erabilgarri",
+    "confidence_high": "Konfiantza altua",
+    "confidence_medium": "Konfiantza ertaina",
+    "confidence_low": "Konfiantza baxua"
+  },
+  "urban_growth": {
+    "error": "Errorea hiri-hazkundearen analisia kargatzean",
+    "low_data_default": "Datu nahikorik ez analisirako",
+    "no_projection": "Ez dago proiekziorik erabilgarri",
+    "title": "Hiri-hazkundea",
+    "projected_label": "5 urteko proiekzioa",
+    "milestones_title": "Hiri-mugarriak",
+    "signals_title": "Hazkundearen seinaleak",
+    "zone_mature": "Finkatutako zona",
+    "zone_emerging": "Zona emergentea",
+    "zone_declining": "Gainbeheran dagoen zona",
+    "zone_unknown": "Zona ezezaguna"
+  },
+  "signature": {
+    "seal_title": "Dokumentuaren zigilua",
+    "seal_subtitle": "Digitalki egiaztatutako dokumentua",
+    "seal_hash_label": "Dokumentuaren hash-a",
+    "hash_copied": "Hash-a arbelera kopiatu da",
+    "verification_id_label": "Egiaztapen IDa",
+    "timestamp_label": "Data eta ordua",
+    "document_id_label": "Dokumentuaren IDa",
+    "eidas_notice": "Sinadura elektronikoa eIDAS araudiaren araberako balio juridikoarekin",
+    "pad_title": "Sinadura digitala",
+    "clear": "Garbitu",
+    "pad_hint": "Sinatu hemen",
+    "legal_notice": "Zure sinadura beharrezkoa da dokumentuaren balizkotasun juridikorako",
+    "confirm": "Berretsi sinadura"
+  },
+  "solvency_passport": {
+    "title": "Solventzia-pasaportea",
+    "verified": "Egiaztatuta",
+    "level_label": "Solventzia-maila",
+    "solvency_level": "Zure uneko maila",
+    "max_capacity_label": "Eskaintzaren gehienezko ahalmena",
+    "capacity_prefix": "Arte",
+    "currency_suffix": "EUR",
+    "disclaimer": "Zure finantza-profil egiaztatuan oinarritutako kalkulua",
+    "seller_message_prefix": "Eroslea solventzia-mailarekin"
   }
 }

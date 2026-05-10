@@ -3478,7 +3478,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       // wait, I didn't add these keys.
       // I'll just use simple tr for days if I add them.
       // For now, let's just use the ones I added as a list if possible.
-      return 'profile.messages_tab.days'.tr().split(',')[date.weekday - 1]; // Hacky but works if I save it as comma separated.
+      const _dayKeys = ['mon','tue','wed','thu','fri','sat','sun'];
+      return 'profile.messages_tab.days.${_dayKeys[date.weekday - 1]}'.tr();
     } else {
       return '${date.day}/${date.month}';
     }

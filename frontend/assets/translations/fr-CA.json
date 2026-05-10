@@ -2,7 +2,7 @@
   "amenity": {
     "ac": "Climatisation",
     "accessibility": "Accès mobilité réduite",
-    "exterior": "Façade extérieure",
+    "exterior": "Extérieur",
     "garage": "Garage",
     "garden": "Jardin",
     "heating": "Chauffage",
@@ -284,7 +284,13 @@
     "retry": "Réessayer",
     "my_contracts": "Mes Contrats",
     "contracts_wip": "Zone des Contrats (Prochainement)",
-    "error_title": "Erreur"
+    "error_title": "Erreur",
+    "user": "Utilisateur",
+    "session_expired": "Votre session a expiré",
+    "login_again": "Veuillez vous reconnecter",
+    "login": "Se connecter",
+    "verified": "Vérifié",
+    "logout": "Se déconnecter"
   },
   "discovery": {
     "twin_zones": {
@@ -318,7 +324,8 @@
     "regional_doc_title": "Documentation régionale",
     "request_coming_soon": "Bientôt, vous pourrez le demander depuis ici",
     "select_file": "Sélectionner un fichier",
-    "upload_coming_soon": "Téléchargement de fichiers bientôt disponible"
+    "upload_coming_soon": "Téléchargement de fichiers bientôt disponible",
+    "section_title": "Vérification des documents"
   },
   "errors": {
     "connection_error": "Impossible de se connecter au serveur. Vérifiez votre connexion Internet.",
@@ -404,7 +411,7 @@
     "nav_contact": "Contact",
     "nav_guides": "Guides",
     "account_required_title": "Compte requis",
-    "account_required_body": "Pour publier et vendre un bien immobilier, vous avez besoin d'un compte InmuFácil. C'est gratuit et ne prend que quelques minutes.",
+    "account_required_body": "Vous devez être inscrit pour effectuer cette action.",
     "view_properties_count": "Voir {} propriétés",
     "hero_title_part1": "Sans intermédiaires.",
     "hero_title_part2": "0% de commissions.",
@@ -883,7 +890,11 @@
     "error_unexpected": "Erreur inattendue.",
     "error_status": "Erreur lors de la vérification du statut.",
     "dni": "DNI",
-    "nie": "NIE"
+    "nie": "NIE",
+    "no_camera": "Aucune caméra détectée",
+    "camera_activating": "Activation de la caméra...",
+    "switch_camera": "Changer de caméra",
+    "unreadable_body": "Nous n'avons pas pu lire le document. Veuillez réessayer avec une image plus claire."
   },
   "lifestyle": {
     "green_historic": "Centre historique",
@@ -1247,7 +1258,15 @@
       "no_conversations_title": "Aucune conversation active",
       "no_conversations_desc": "Lorsqu'il y a des messages dans une offre, ils apparaîtront ici.",
       "yesterday": "HIER",
-      "days": "LUN,MAR,MER,JEU,VEN,SAM,DIM"
+      "days": {
+        "mon": "LUN",
+        "tue": "MAR",
+        "wed": "MER",
+        "thu": "JEU",
+        "fri": "VEN",
+        "sat": "SAM",
+        "sun": "DIM"
+      }
     },
     "manage_btn": "Gérer",
     "visit_hours": "Horaires de visite",
@@ -2607,7 +2626,13 @@
     "equity_label_alerts": "Avec alertes",
     "equity_label_unfavorable": "Défavorable",
     "equity_buyer_pos": "Votre position en tant qu'Acheteur",
-    "equity_seller_pos": "Votre position en tant que Vendeur"
+    "equity_seller_pos": "Votre position en tant que Vendeur",
+    "error_save": "Erreur lors de l'enregistrement. Veuillez réessayer.",
+    "utilities_info_box": "Incluez les détails des services actuels (eau, gaz, électricité, etc.).",
+    "seller_address_needed_sub": "Adresse actuelle du vendeur",
+    "seller_address_hint": "Ex. : Rue Principale 123, 28001 Madrid",
+    "levy_details_hint_full": "Détaillez tout nantissement, hypothèque ou autre droit sur le bien",
+    "mortgage_amount_hint_eur": "Montant total restant du prêt hypothécaire"
   },
   "visit_cancel": {
     "title_part1": "Annuler",
@@ -2786,7 +2811,14 @@
     "weekly_completed_desc": "{success} sur {total} appels complétés avec succès",
     "weekly_savings_title": "{amount} € économisés cette semaine",
     "weekly_manual_comparison": "Par rapport au processus manuel équivalent",
-    "weekly_calculation_desc": "Calcul basé sur 0,002 EUR par appel IA par rapport au coût estimé du processus manuel."
+    "weekly_calculation_desc": "Calcul basé sur 0,002 EUR par appel IA par rapport au coût estimé du processus manuel.",
+    "ai_resilience_label": "Résilience de l'IA",
+    "ai_resilience_desc": "Pourcentage d'appels réussis.",
+    "ai_calls_by_feature": "Appels par fonctionnalité",
+    "ai_recent_log": "Journal récent",
+    "ai_daily_budget": "Budget IA quotidien",
+    "ai_panic_confirm_title": "Activer le mode panique",
+    "ai_panic_title": "Mode panique activé"
   },
   "arras_contract": {
     "title": "Contrat d'Arres Intelligent",
@@ -2824,7 +2856,8 @@
     "preview_section_desistimiento": "CLAUSE DE DÉSISTEMENT",
     "preview_section_inventario": "INVENTAIRE",
     "legal_ref_cataluna": "Art. 621-8 du Code Civil de Catalogne",
-    "legal_ref_general": "Art. 1454 du Code Civil"
+    "legal_ref_general": "Art. 1454 du Code Civil",
+    "preview_pending_date": "En attente de confirmation"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "Ce passeport est exclusif aux acheteurs. Il est uniquement nécessaire si vous avez l'intention d'acheter un bien.",
@@ -3190,5 +3223,77 @@
     "ceuta": "Ceuta",
     "melilla": "Melilla",
     "desconocida": "Communauté non identifiée"
+  },
+  "market_gap": {
+    "error": "Erreur lors du calcul de l'analyse de marché",
+    "low_data": "Données insuffisantes dans la zone pour une analyse fiable",
+    "title": "Analyse de marché",
+    "gap_label": "Écart de prix",
+    "asking_price_label": "Prix demandé",
+    "real_price_label": "Prix du marché"
+  },
+  "price_validator": {
+    "error": "Erreur lors de la validation du prix",
+    "title": "Validateur de prix",
+    "disclaimer": "Basé sur les données historiques du marché et les offres récentes",
+    "verdict_justo": "Prix juste",
+    "verdict_algo_alto": "Légèrement élevé",
+    "verdict_algo_bajo": "Légèrement bas",
+    "verdict_muy_alto": "Très élevé",
+    "verdict_muy_bajo": "Très bas",
+    "confidence_high": "Haute confiance",
+    "confidence_medium": "Confiance moyenne",
+    "confidence_low": "Faible confiance",
+    "risk_low": "Risque faible",
+    "risk_high": "Risque élevé",
+    "risk_medium": "Risque moyen"
+  },
+  "market_price": {
+    "low_density": "Données de faible densité",
+    "unavailable": "Prix du marché non disponible",
+    "title": "Prix du marché",
+    "no_extrapolation": "Aucune extrapolation disponible",
+    "confidence_high": "Haute confiance",
+    "confidence_medium": "Confiance moyenne",
+    "confidence_low": "Faible confiance"
+  },
+  "urban_growth": {
+    "error": "Erreur lors du chargement de l'analyse de croissance urbaine",
+    "low_data_default": "Données insuffisantes pour l'analyse",
+    "no_projection": "Aucune projection disponible",
+    "title": "Croissance urbaine",
+    "projected_label": "Projection à 5 ans",
+    "milestones_title": "Jalons urbains",
+    "signals_title": "Signaux de croissance",
+    "zone_mature": "Zone consolidée",
+    "zone_emerging": "Zone émergente",
+    "zone_declining": "Zone en déclin",
+    "zone_unknown": "Zone inconnue"
+  },
+  "signature": {
+    "seal_title": "Sceau du document",
+    "seal_subtitle": "Document vérifié numériquement",
+    "seal_hash_label": "Hash du document",
+    "hash_copied": "Hash copié dans le presse-papiers",
+    "verification_id_label": "ID de vérification",
+    "timestamp_label": "Date et heure",
+    "document_id_label": "ID du document",
+    "eidas_notice": "Signature électronique avec valeur juridique conformément à eIDAS",
+    "pad_title": "Signature numérique",
+    "clear": "Effacer",
+    "pad_hint": "Signez ici",
+    "legal_notice": "Votre signature est obligatoire pour la validité juridique du document",
+    "confirm": "Confirmer la signature"
+  },
+  "solvency_passport": {
+    "title": "Passeport de solvabilité",
+    "verified": "Vérifié",
+    "level_label": "Niveau de solvabilité",
+    "solvency_level": "Votre niveau actuel",
+    "max_capacity_label": "Capacité maximale d'offre",
+    "capacity_prefix": "Jusqu'à",
+    "currency_suffix": "EUR",
+    "disclaimer": "Calcul basé sur votre profil financier vérifié",
+    "seller_message_prefix": "Acheteur avec niveau de solvabilité"
   }
 }

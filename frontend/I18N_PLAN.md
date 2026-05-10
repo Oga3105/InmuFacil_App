@@ -164,6 +164,30 @@ Seccion afectada por idioma:
 
 ---
 
+## FASE H — Claves ausentes de TODOS los locales (raw key bug)
+> Prioridad: CRITICA | Muestra nombres de clave en pantalla en lugar de texto real
+
+**Causa raiz:** 107 claves existen en llamadas `.tr()` en el codigo Dart pero NO en ningun archivo JSON (ni siquiera en es-ES). La cadena de fallback no encuentra nada y muestra la clave cruda (ej: `home.account_required_title`).
+
+**Bloques afectados:**
+- `home.account_required_*`, `home.bedrooms_filter_label`
+- `common.user/session_expired/login_again/login/verified/logout`
+- `kyc.no_camera/camera_activating/switch_camera/unreadable_body`
+- `arras_interview.error_save/utilities_info_box/seller_address_needed_sub/...`
+- `amenity.*` (namespace singular, distinto de `amenities.*`)
+- `profile.messages_tab.days.mon-sun` (convertidos de string CSV a objeto)
+- `admin.ai_resilience_*`, `market_gap.*`, `price_validator.*`, `market_price.*`
+- `urban_growth.*`, `signature.*`, `solvency_passport.*`, `doc_verification.section_title`
+
+- [x] **H1** Audit completo: escaneo de 2071+ claves `.tr()` en todo el codigo Dart, cruzadas contra los 10 JSON
+- [x] **H2** Anadir 100 claves faltantes a los 10 locales (es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA, ca-ES, va-ES, eu-ES, gl-ES)
+- [x] **H3** Convertir `profile.messages_tab.days` de string CSV a objeto `{mon, tue, wed, thu, fri, sat, sun}` en los 10 locales
+- [x] **H4** Corregir abreviaturas duplicadas en ca-ES/va-ES (DIM×2→DL/DM/DC) y eu-ES (OST×2→OG/OR)
+- [x] **H5** Actualizar Dart `user_profile_screen.dart:3481` — sustituir `.split(',')` por lookup de clave individual
+- [x] **H6** Verificacion final: 0 claves `.tr()` ausentes de es-ES (auditoria automatizada)
+
+---
+
 ## FASE F — Flutter built-in widget strings en ingles
 > Ya identificado y parcialmente resuelto
 
@@ -199,6 +223,7 @@ Seccion afectada por idioma:
 | 2026-05-10 | G2   | gl-ES: 57 claves info.* + 3 adicionales → gallego | DONE |
 | 2026-05-10 | G3/4 | ca-ES/va-ES: 51 claves (registry, map, legal, property_listing, property_status) | DONE |
 | 2026-05-10 | G5/6 | fr-FR: 52 claves / fr-CA: 110 claves (idem + admin, solvency_dashboard, arras_contract) | DONE |
+| 2026-05-10 | H    | 107 claves crudas → 10 locales. days CSV→objeto. 0 .tr() sin resolver. | DONE |
 
 ---
 

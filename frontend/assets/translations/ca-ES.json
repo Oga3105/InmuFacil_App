@@ -284,7 +284,13 @@
     "retry": "Reintentar",
     "my_contracts": "Els meus Contractes",
     "contracts_wip": "Zona de Contractes (Properament)",
-    "error_title": "Error"
+    "error_title": "Error",
+    "user": "Usuari",
+    "session_expired": "La teva sessió ha expirat",
+    "login_again": "Torna a iniciar sessió",
+    "login": "Inicia sessió",
+    "verified": "Verificat",
+    "logout": "Tanca sessió"
   },
   "discovery": {
     "twin_zones": {
@@ -318,7 +324,8 @@
     "regional_doc_title": "Documentació regional",
     "request_coming_soon": "Aviat podràs sol·licitar-ho des d'aquí",
     "select_file": "Seleccionar fitxer",
-    "upload_coming_soon": "Pujada de fitxers aviat disponible"
+    "upload_coming_soon": "Pujada de fitxers aviat disponible",
+    "section_title": "Verificació de documents"
   },
   "errors": {
     "connection_error": "No s'ha pogut connectar amb el servidor. Comprova la teva connexió a internet.",
@@ -390,7 +397,10 @@
     "property_type_land": "Terrenys",
     "property_type_rustic_land": "Finques rústiques",
     "zero_properties": "0 IMMOBLES",
-    "verified_this_week": "Verificades aquesta setmana"
+    "verified_this_week": "Verificades aquesta setmana",
+    "account_required_title": "Cal un compte",
+    "account_required_body": "Has d'estar registrat per realitzar aquesta acció.",
+    "bedrooms_filter_label": "Habitacions"
   },
   "info": {
     "buyer_guide": {
@@ -855,7 +865,11 @@
     "error_unexpected": "Error inesperat.",
     "error_status": "Error en consultar l'estat.",
     "dni": "DNI",
-    "nie": "NIE"
+    "nie": "NIE",
+    "no_camera": "No s'ha detectat cap càmera",
+    "camera_activating": "Activant la càmera...",
+    "switch_camera": "Canvia de càmera",
+    "unreadable_body": "No hem pogut llegir el document. Torna a intentar-ho amb una imatge més clara."
   },
   "lifestyle": {
     "green_historic": "Centre històric",
@@ -1219,7 +1233,15 @@
       "no_conversations_title": "Sense converses actives",
       "no_conversations_desc": "Quan hi hagi missatges en una oferta, apareixeran aquí.",
       "yesterday": "AHIR",
-      "days": "DLL,DIM,DIM,DIJ,DIV,DIS,DIG"
+      "days": {
+        "mon": "DL",
+        "tue": "DM",
+        "wed": "DC",
+        "thu": "DJ",
+        "fri": "DV",
+        "sat": "DS",
+        "sun": "DG"
+      }
     },
     "manage_btn": "Gestionar",
     "visit_hours": "Horaris de visita",
@@ -2579,7 +2601,13 @@
     "equity_label_alerts": "Amb alertes",
     "equity_label_unfavorable": "Desfavorable",
     "equity_buyer_pos": "La teva posició com a Comprador",
-    "equity_seller_pos": "La teva posició com a Venedor"
+    "equity_seller_pos": "La teva posició com a Venedor",
+    "error_save": "Error en desar. Torna a intentar-ho.",
+    "utilities_info_box": "Inclou els detalls dels subministraments actuals (aigua, gas, electricitat, etc.).",
+    "seller_address_needed_sub": "Adreça actual del venedor",
+    "seller_address_hint": "Ex.: Carrer Principal 123, 28001 Madrid",
+    "levy_details_hint_full": "Detalla qualsevol gravamen, hipoteca o altre dret sobre la propietat",
+    "mortgage_amount_hint_eur": "Import total pendent del préstec hipotecari"
   },
   "visit_cancel": {
     "title": "Cancel·lar visita",
@@ -2754,7 +2782,14 @@
     "weekly_completed_desc": "{success} de {total} trucades completades amb èxit",
     "weekly_savings_title": "{amount} € estalviats aquesta setmana",
     "weekly_manual_comparison": "Davant del procés manual equivalent",
-    "weekly_calculation_desc": "Càlcul basat en 0,002 EUR per trucada IA vs cost estimat de procés manual."
+    "weekly_calculation_desc": "Càlcul basat en 0,002 EUR per trucada IA vs cost estimat de procés manual.",
+    "ai_resilience_label": "Resiliència de la IA",
+    "ai_resilience_desc": "Percentatge de trucades reeixides.",
+    "ai_calls_by_feature": "Trucades per funcionalitat",
+    "ai_recent_log": "Registre recent",
+    "ai_daily_budget": "Pressupost diari de IA",
+    "ai_panic_confirm_title": "Activar mode pànic",
+    "ai_panic_title": "Mode pànic activat"
   },
   "arras_contract": {
     "title": "Contracte d'Arres Intel·ligent",
@@ -2792,7 +2827,8 @@
     "preview_section_desistimiento": "CLÀUSULA DE DESISTIMENT",
     "preview_section_inventario": "INVENTARI",
     "legal_ref_cataluna": "Art. 621-8 del Codi Civil de Catalunya",
-    "legal_ref_general": "Art. 1454 del Codi Civil"
+    "legal_ref_general": "Art. 1454 del Codi Civil",
+    "preview_pending_date": "Pendent de confirmar"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "Aquest passaport és exclusiu per a compradors. Només és necessari si la teva intenció és adquirir una propietat.",
@@ -3145,5 +3181,84 @@
     "ceuta": "Ceuta",
     "melilla": "Melilla",
     "desconocida": "Comunitat no identificada"
+  },
+  "amenity": {
+    "exterior": "Exterior",
+    "lift": "Ascensor",
+    "pool": "Piscina",
+    "garage": "Garatge",
+    "terrace": "Terrassa"
+  },
+  "market_gap": {
+    "error": "Error en calcular l'anàlisi de mercat",
+    "low_data": "Dades insuficients a la zona per a una anàlisi fiable",
+    "title": "Anàlisi de mercat",
+    "gap_label": "Gap de preu",
+    "asking_price_label": "Preu demanat",
+    "real_price_label": "Preu de mercat"
+  },
+  "price_validator": {
+    "error": "Error en validar el preu",
+    "title": "Validador de preu",
+    "disclaimer": "Basat en dades històriques de mercat i ofertes recents",
+    "verdict_justo": "Preu just",
+    "verdict_algo_alto": "Una mica alt",
+    "verdict_algo_bajo": "Una mica baix",
+    "verdict_muy_alto": "Molt alt",
+    "verdict_muy_bajo": "Molt baix",
+    "confidence_high": "Alta confiança",
+    "confidence_medium": "Confiança mitjana",
+    "confidence_low": "Baixa confiança",
+    "risk_low": "Risc baix",
+    "risk_high": "Risc alt",
+    "risk_medium": "Risc mitjà"
+  },
+  "market_price": {
+    "low_density": "Dades de baixa densitat",
+    "unavailable": "Preu de mercat no disponible",
+    "title": "Preu de mercat",
+    "no_extrapolation": "No hi ha extrapolació disponible",
+    "confidence_high": "Alta confiança",
+    "confidence_medium": "Confiança mitjana",
+    "confidence_low": "Baixa confiança"
+  },
+  "urban_growth": {
+    "error": "Error en carregar l'anàlisi de creixement urbà",
+    "low_data_default": "Dades insuficients per fer l'anàlisi",
+    "no_projection": "Sense projecció disponible",
+    "title": "Creixement urbà",
+    "projected_label": "Projecció a 5 anys",
+    "milestones_title": "Fites urbanes",
+    "signals_title": "Senyals de creixement",
+    "zone_mature": "Zona consolidada",
+    "zone_emerging": "Zona emergent",
+    "zone_declining": "Zona en declivi",
+    "zone_unknown": "Zona desconeguda"
+  },
+  "signature": {
+    "seal_title": "Segell del document",
+    "seal_subtitle": "Document verificat digitalment",
+    "seal_hash_label": "Hash del document",
+    "hash_copied": "Hash copiat al porta-retalls",
+    "verification_id_label": "ID de verificació",
+    "timestamp_label": "Data i hora",
+    "document_id_label": "ID del document",
+    "eidas_notice": "Firma electrònica amb validesa legal conforme a eIDAS",
+    "pad_title": "Firma digital",
+    "clear": "Esborrar",
+    "pad_hint": "Firma aquí",
+    "legal_notice": "La teva firma és obligatòria per a la validesa legal del document",
+    "confirm": "Confirmar firma"
+  },
+  "solvency_passport": {
+    "title": "Passaport de solvència",
+    "verified": "Verificat",
+    "level_label": "Nivell de solvència",
+    "solvency_level": "El teu nivell actual",
+    "max_capacity_label": "Capacitat màxima d'oferta",
+    "capacity_prefix": "Fins a",
+    "currency_suffix": "EUR",
+    "disclaimer": "Càlcul basat en el teu perfil financer verificat",
+    "seller_message_prefix": "Comprador amb nivell de solvència"
   }
 }

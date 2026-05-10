@@ -95,7 +95,10 @@
     "property_type_building": "Edificios",
     "property_type_garage": "Garajes",
     "property_type_land": "Terrenos",
-    "property_type_rustic_land": "Fincas rústicas"
+    "property_type_rustic_land": "Fincas rústicas",
+    "account_required_title": "Cuenta requerida",
+    "account_required_body": "Debes estar registrado para realizar esta acción.",
+    "bedrooms_filter_label": "Habitaciones"
   },
   "auth": {
     "login_title": "Iniciar Sesión",
@@ -440,7 +443,13 @@
     "retry": "Reintentar",
     "my_contracts": "Mis Contratos",
     "contracts_wip": "Zona de Contratos (Proximamente)",
-    "error_title": "Error"
+    "error_title": "Error",
+    "user": "Usuario",
+    "session_expired": "Tu sesión ha expirado",
+    "login_again": "Por favor, inicia sesión de nuevo",
+    "login": "Iniciar sesión",
+    "verified": "Verificado",
+    "logout": "Cerrar sesión"
   },
   "property_wizard": {
     "info_basic_card": "Información Básica",
@@ -570,7 +579,8 @@
     "cedula_subtitle": "Obligatoria en algunas comunidades autónomas",
     "request_coming_soon": "Próximamente podrás solicitarlo desde aquí",
     "mvp_info": "En esta fase MVP los documentos son informativos. La verificación completa estará disponible próximamente.",
-    "upload_coming_soon": "Subida de archivos próximamente disponible"
+    "upload_coming_soon": "Subida de archivos próximamente disponible",
+    "section_title": "Verificación de documentos"
   },
   "errors": {
     "network_error": "Error de conexión",
@@ -917,7 +927,15 @@
       "no_conversations_title": "Sin conversaciones activas",
       "no_conversations_desc": "Cuando haya mensajes en una oferta, aparecerán aquí.",
       "yesterday": "AYER",
-      "days": "LUN,MAR,MIE,JUE,VIE,SAB,DOM"
+      "days": {
+        "mon": "LUN",
+        "tue": "MAR",
+        "wed": "MIE",
+        "thu": "JUE",
+        "fri": "VIE",
+        "sat": "SAB",
+        "sun": "DOM"
+      }
     },
     "manage_btn": "Gestionar",
     "visit_hours": "Horarios de visita",
@@ -1042,7 +1060,11 @@
     "error_reading_doc": "Error al leer el documento.",
     "error_submitting": "Error al enviar documentos.",
     "error_unexpected": "Error inesperado.",
-    "error_status": "Error al consultar estado."
+    "error_status": "Error al consultar estado.",
+    "no_camera": "No se detectó cámara disponible",
+    "camera_activating": "Activando cámara...",
+    "switch_camera": "Cambiar cámara",
+    "unreadable_body": "No pudimos leer el documento. Por favor intenta de nuevo con una imagen más clara."
   },
   "verification": {
     "home_button": "Inicio",
@@ -2649,7 +2671,13 @@
     "extension_reason_legal": "Trámites legales pendientes",
     "extension_reason_other": "Otros",
     "snack_sent": "Entrevista enviada correctamente",
-    "snack_error": "Error al enviar la entrevista. Inténtalo de nuevo."
+    "snack_error": "Error al enviar la entrevista. Inténtalo de nuevo.",
+    "error_save": "Error al guardar. Por favor, intenta de nuevo.",
+    "utilities_info_box": "Incluye los detalles de los suministros actuales (agua, gas, electricidad, etc.).",
+    "seller_address_needed_sub": "Dirección actual del vendedor",
+    "seller_address_hint": "Ej: Calle Principal 123, 28001 Madrid",
+    "levy_details_hint_full": "Detalla cualquier gravamen, hipoteca u otro derecho sobre la propiedad",
+    "mortgage_amount_hint_eur": "Importe total pendiente del préstamo hipotecario"
   },
   "visit_cancel": {
     "title_part1": "Anular",
@@ -2937,7 +2965,14 @@
     "weekly_completed_desc": "{success} de {total} llamadas completadas con exito",
     "weekly_savings_title": "{amount} € ahorrados esta semana",
     "weekly_manual_comparison": "Frente al proceso manual equivalente",
-    "weekly_calculation_desc": "Calculo basado en 0,002 EUR por llamada IA vs coste estimado de proceso manual."
+    "weekly_calculation_desc": "Calculo basado en 0,002 EUR por llamada IA vs coste estimado de proceso manual.",
+    "ai_resilience_label": "Resiliencia de IA",
+    "ai_resilience_desc": "Porcentaje de llamadas exitosas.",
+    "ai_calls_by_feature": "Llamadas por funcionalidad",
+    "ai_recent_log": "Registro reciente",
+    "ai_daily_budget": "Presupuesto diario de IA",
+    "ai_panic_confirm_title": "Activar modo pánico",
+    "ai_panic_title": "Modo pánico activado"
   },
   "arras_contract": {
     "title": "Contrato de Arras Inteligente",
@@ -2975,7 +3010,8 @@
     "preview_section_arras": "ARRAS (10%)",
     "preview_section_plazo": "PLAZO DE ESCRITURACION",
     "preview_section_desistimiento": "CLAUSULA DE DESISTIMIENTO",
-    "preview_section_inventario": "INVENTARIO"
+    "preview_section_inventario": "INVENTARIO",
+    "preview_pending_date": "Pendiente de confirmar"
   },
   "solvency_dashboard": {
     "buyer_exclusive": "Este pasaporte es exclusivo para compradores. Solo es necesario si tu intencion es adquirir una propiedad.",
@@ -3145,5 +3181,84 @@
       "marketing_emails": "Emails de Marketing",
       "marketing_emails_desc": "Recibir noticias sobre nuevas funciones y ofertas."
     }
+  },
+  "amenity": {
+    "exterior": "Exterior",
+    "lift": "Ascensor",
+    "pool": "Piscina",
+    "garage": "Garaje",
+    "terrace": "Terraza"
+  },
+  "market_gap": {
+    "error": "Error al calcular el análisis de mercado",
+    "low_data": "Datos insuficientes en la zona para un análisis fiable",
+    "title": "Análisis de mercado",
+    "gap_label": "Gap de precio",
+    "asking_price_label": "Precio solicitado",
+    "real_price_label": "Precio de mercado"
+  },
+  "price_validator": {
+    "error": "Error al validar el precio",
+    "title": "Validador de precio",
+    "disclaimer": "Basado en datos históricos de mercado y ofertas recientes",
+    "verdict_justo": "Precio justo",
+    "verdict_algo_alto": "Algo alto",
+    "verdict_algo_bajo": "Algo bajo",
+    "verdict_muy_alto": "Muy alto",
+    "verdict_muy_bajo": "Muy bajo",
+    "confidence_high": "Alta confianza",
+    "confidence_medium": "Confianza media",
+    "confidence_low": "Baja confianza",
+    "risk_low": "Riesgo bajo",
+    "risk_high": "Riesgo alto",
+    "risk_medium": "Riesgo medio"
+  },
+  "market_price": {
+    "low_density": "Datos de baja densidad",
+    "unavailable": "Precio de mercado no disponible",
+    "title": "Precio de mercado",
+    "no_extrapolation": "Sin extrapolación disponible",
+    "confidence_high": "Alta confianza",
+    "confidence_medium": "Confianza media",
+    "confidence_low": "Baja confianza"
+  },
+  "urban_growth": {
+    "error": "Error al cargar el análisis de crecimiento urbano",
+    "low_data_default": "Datos insuficientes para realizar el análisis",
+    "no_projection": "Sin proyección disponible",
+    "title": "Crecimiento urbano",
+    "projected_label": "Proyección a 5 años",
+    "milestones_title": "Hitos urbanos",
+    "signals_title": "Señales de crecimiento",
+    "zone_mature": "Zona consolidada",
+    "zone_emerging": "Zona emergente",
+    "zone_declining": "Zona en declive",
+    "zone_unknown": "Zona desconocida"
+  },
+  "signature": {
+    "seal_title": "Sello del documento",
+    "seal_subtitle": "Documento verificado digitalmente",
+    "seal_hash_label": "Hash del documento",
+    "hash_copied": "Hash copiado al portapapeles",
+    "verification_id_label": "ID de verificación",
+    "timestamp_label": "Fecha y hora",
+    "document_id_label": "ID del documento",
+    "eidas_notice": "Firma electrónica con validez legal conforme a eIDAS",
+    "pad_title": "Firma digital",
+    "clear": "Limpiar",
+    "pad_hint": "Firma aquí",
+    "legal_notice": "Tu firma es obligatoria para la validez legal del documento",
+    "confirm": "Confirmar firma"
+  },
+  "solvency_passport": {
+    "title": "Pasaporte de solvencia",
+    "verified": "Verificado",
+    "level_label": "Nivel de solvencia",
+    "solvency_level": "Tu nivel actual",
+    "max_capacity_label": "Capacidad máxima de oferta",
+    "capacity_prefix": "Hasta",
+    "currency_suffix": "EUR",
+    "disclaimer": "Cálculo basado en tu perfil financiero verificado",
+    "seller_message_prefix": "Comprador con nivel de solvencia"
   }
 }
