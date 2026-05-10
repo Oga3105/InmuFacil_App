@@ -822,7 +822,7 @@ class _Footer extends StatelessWidget {
           children: [
             Icon(Icons.home_work_outlined, size: 18, color: Colors.grey.shade400),
             const SizedBox(width: 6),
-            Text('InmuFácil',
+            Text('app.name'.tr(),
                 style: TextStyle(
                   fontSize: 14, fontWeight: FontWeight.w700,
                   color: Colors.grey.shade500,

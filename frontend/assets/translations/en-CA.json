@@ -1387,7 +1387,8 @@
     "offer_first_message": "The private chat with the seller opens upon making an offer. Both parties can chat from that moment.",
     "understood": "Understood",
     "image_counter": "{current} / {total}",
-    "eur_per_month": "EUR/month"
+    "eur_per_month": "EUR/month",
+    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust."
   },
   "property_wizard": {
     "add_photos": "ADD PHOTOS",

@@ -1359,7 +1359,8 @@
     "offer_first_message": "El xat privat amb el venedor s'obre en fer una oferta. Ambdues parts poden xatejar des d'aquell moment.",
     "understood": "Entès",
     "image_counter": "{current} / {total}",
-    "eur_per_month": "EUR/mes"
+    "eur_per_month": "EUR/mes",
+    "docs_unverified_notice": "El teu anunci és visible, però els compradors veuran que la documentació encara no ha estat verificada per InmuFácil. Completa'l per generar més confiança."
   },
   "property_wizard": {
     "add_photos": "AFEGIR FOTOS",

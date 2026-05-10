@@ -1359,7 +1359,8 @@
     "visit_scheduled": "Visit scheduled",
     "visits_disabled": "Visits disabled",
     "visits_enabled": "Interested parties can request a visit",
-    "eur_per_month": "EUR/month"
+    "eur_per_month": "EUR/month",
+    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust."
   },
   "property_wizard": {
     "add_photos": "ADD PHOTOS",

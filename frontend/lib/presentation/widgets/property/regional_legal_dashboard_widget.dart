@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../core/utils/ccaa_utils.dart';
 
@@ -271,9 +272,7 @@ class RegionalLegalDashboardWidget extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Tu anuncio es visible, pero los compradores veran que la '
-              'documentacion aun no ha sido verificada por InmuFácil. '
-              'Completalo para generar mas confianza.',
+              'property.docs_unverified_notice'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: const Color(0xFF92400E),
                     height: 1.4,

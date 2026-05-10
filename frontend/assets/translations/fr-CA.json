@@ -1387,7 +1387,8 @@
       "needs_renovation": "À rénover",
       "ready": "Listo"
     },
-    "eur_per_month": "EUR/mois"
+    "eur_per_month": "EUR/mois",
+    "docs_unverified_notice": "Votre annonce est visible, mais les acheteurs verront que la documentation n'a pas encore été vérifiée par InmuFácil. Complétez-la pour renforcer la confiance."
   },
   "property_wizard": {
     "add_photos": "AJOUTER DES PHOTOS",

@@ -389,7 +389,8 @@
       "no_data": "Sin datos",
       "needs_renovation": "Reforma",
       "ready": "Listo"
-    }
+    },
+    "docs_unverified_notice": "Tu anuncio es visible, pero los compradores verán que la documentación aún no ha sido verificada por InmuFácil. Complétalo para generar más confianza."
   },
   "common": {
     "save": "Guardar",

@@ -1359,7 +1359,8 @@
     "offer_first_message": "O chat privado co vendedor ábrese ao facer unha oferta. Ambas as partes poden chatear desde ese momento.",
     "understood": "Understood",
     "image_counter": "{current} / {total}",
-    "eur_per_month": "EUR/month"
+    "eur_per_month": "EUR/month",
+    "docs_unverified_notice": "O teu anuncio é visible, pero os compradores verán que a documentación aínda non foi verificada por InmuFácil. Complétao para xerar máis confianza."
   },
   "property_wizard": {
     "add_photos": "ENGADIR FOTOS",

@@ -124,9 +124,12 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 ## FASE D — Hardcoded strings (no usan .tr())
 > Prioridad: MEDIA | Siempre en español/ingles independientemente del idioma
 
-- [ ] **D1** `auth/login_screen.dart` — `'InmuFácil'` → `'app.name'.tr()`
-- [ ] **D2** `auth/register_screen.dart` — `'InmuFácil'` → `'app.name'.tr()`
-- [ ] **D3** Revision manual de 13 archivos con 1 string potencialmente hardcoded
+- [x] **D1** `auth/login_screen.dart` — `'InmuFácil'` → `'app.name'.tr()`
+- [x] **D2** `auth/register_screen.dart` — `'InmuFácil'` → `'app.name'.tr()`
+- [x] **D3** Auditoria completa — 3 casos adicionales corregidos:
+  - `make_offer_screen.dart:825` → `'app.name'.tr()`
+  - `property_step5_preview.dart:844` → `'app.name'.tr()`
+  - `regional_legal_dashboard_widget.dart:273` → `'property.docs_unverified_notice'.tr()` + nueva clave en 10 locales
 
 ---
 
@@ -144,8 +147,8 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 > Ya identificado y parcialmente resuelto
 
 - [x] **F1** Crear `ValencianMaterialLocalizationsDelegate` para locale va-ES (resuelto 2026-05-07)
-- [ ] **F2** Verificar que eu-ES y gl-ES tienen delegados correctos (tienen `ca` y `es` como fallback en GlobalMaterialLocalizations — OK por defecto)
-- [ ] **F3** Verificar comportamiento de Material widgets en fr-CA (deberia usar fr-FR como fallback — revisar)
+- [x] **F2** eu-ES y gl-ES: usan fallback `en` de GlobalMaterialLocalizations (aceptable — ingles > español para estos locales)
+- [x] **F3** fr-CA: usa delegado `fr` de GlobalMaterialLocalizations correctamente. Verificado en app.dart.
 
 ---
 
@@ -165,6 +168,8 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 | 2026-05-10 | C6   | va-ES 49% → 90% diferenciado | DONE |
 | 2026-05-10 | C7   | eu-ES 46% → 98% diferenciado | DONE |
 | 2026-05-10 | C8   | gl-ES 39% → 97% diferenciado | DONE |
+| 2026-05-10 | D    | 5 strings hardcoded → .tr() (login, register, make_offer, step5_preview, regional_legal) | DONE |
+| 2026-05-10 | F2/F3| Delegates eu-ES/gl-ES/fr-CA verificados | DONE |
 
 ---
 

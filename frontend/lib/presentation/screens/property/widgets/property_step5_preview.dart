@@ -840,9 +840,9 @@ class _PreviewCarouselState extends State<_PreviewCarousel> {
                   color: Colors.white.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Text(
-                  'InmuFacil',
-                  style: TextStyle(
+                child: Text(
+                  'app.name'.tr(),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

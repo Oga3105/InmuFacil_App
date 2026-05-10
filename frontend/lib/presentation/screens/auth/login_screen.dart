@@ -332,7 +332,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                                fit: BoxFit.contain,
                                              ),
                                              const SizedBox(height: 6),
-                                             Text('InmuFácil', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _tealBrandColor)),
+                                             Text('app.name'.tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: _tealBrandColor)),
                                            ],
                                          ),
                                        ),
