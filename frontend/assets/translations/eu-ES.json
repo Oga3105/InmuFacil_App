@@ -401,7 +401,7 @@
             "1": "Gorde gogokoak geroago alderatzeko",
             "2": "Aktibatu alertak zure bilaketarekin bat datozen anuntzi berriak jasotzeko"
           },
-          "title": "Preparation"
+          "title": "Prestaketa"
         },
         "1": {
           "items": {
@@ -410,7 +410,7 @@
             "2": "Zure solventzia-maila (Brontze/Zilar/Urre) saltzaileari modu anonimoan erakusten zaio",
             "3": "Informazioa eguneratuta mantentzeko 90 egunean iraungitzen da"
           },
-          "title": "Search"
+          "title": "Bilaketa"
         },
         "2": {
           "items": {
@@ -419,7 +419,7 @@
             "2": "Saltzaileak onartu, ukatu edo kontraeskaintza egin dezake",
             "3": "Eskaintza onartzen denean chat pribatu bat irekitzen da automatikoki"
           },
-          "title": "Visits"
+          "title": "Bisitaldiak"
         },
         "3": {
           "items": {
@@ -430,11 +430,11 @@
             "4": "Gestoria: gutxi gora behera 300-600 EUR",
             "5": "Aurreikusitako guztira: erosketa prezioaren gaineko %10-15"
           },
-          "title": "Offer and negotiation"
+          "title": "Eskaintza eta negoziazioa"
         }
       },
       "subtitle": "Agentzirik gabe erosteko behar duzun guztia.",
-      "title": "Buyer's Guide"
+      "title": "Eroslearen Gida"
     },
     "contact": {
       "email_action": "Email bidali",
@@ -448,7 +448,7 @@
       "privacy": "Pribatutasun Politika",
       "subtitle": "Aukeratu zuretzat egokiena den kanala.",
       "terms": "Erabilera Baldintzak",
-      "title": "Contact"
+      "title": "Kontaktua"
     },
     "faq": {
       "items": {
@@ -486,33 +486,33 @@
         }
       },
       "subtitle": "Aurkitu erantzunak InmuFácil-eri buruzko galdera ohikoenetarako.",
-      "title": "Frequently Asked Questions"
+      "title": "Ohiko galderak"
     },
     "how_it_works": {
       "steps": {
         "0": {
-          "body": "Sign up and verify your identity with our automated KYC system.",
-          "title": "Create your account"
+          "body": "Erregistratu eta egiaztatu zure identitatea gure KYC sistema automatikoaren bidez.",
+          "title": "Sortu zure kontua"
         },
         "1": {
-          "body": "Find properties on the interactive map or publish yours with the 5-step wizard.",
-          "title": "Search or publish"
+          "body": "Aurkitu propietateak mapa interaktiboan edo argitaratu zurea 5 urratseko laguntzailearekin.",
+          "title": "Bilatu edo argitaratu"
         },
         "2": {
-          "body": "Schedule visits, chat with sellers and compare properties.",
-          "title": "Visit and compare"
+          "body": "Antolatu bisitaldiak, txateatu saltzaileekin eta alderatu propietateak.",
+          "title": "Bisitatu eta alderatu"
         },
         "3": {
-          "body": "Submit a formal offer. The seller sees it instantly and can accept, reject or counter-offer.",
-          "title": "Make an offer"
+          "body": "Aurkeztu eskaintza formal bat. Saltzaileak berehala ikusten du eta onartu, baztertu edo kontraeskaintza egin dezake.",
+          "title": "Egin eskaintza"
         },
         "4": {
-          "body": "Counter-offer system with full visibility. Both parties see the negotiation history.",
-          "title": "Negotiate"
+          "body": "Kontraeskaintza sistema ikusgarritasun osoarekin. Bi alderdiek negoziazioaren historia ikus dezakete.",
+          "title": "Negoziatu"
         },
         "5": {
-          "body": "Arras contract, notary booking and full closing dossier.",
-          "title": "Sign at the notary"
+          "body": "Arras kontratua, notarioko hitzordua eta itxiera-dosier osoa.",
+          "title": "Notarioan sinatu"
         },
         "6": {
           "body": "Hipotekadun transakzioetarako soilik. Bankuak Europako Informazio Normalizatutako Fitxa (FEIN) igortzen du. Erosleak appean baieztatzen du notarioan sinatzea desblokeatzeko.",
@@ -528,7 +528,7 @@
         }
       },
       "subtitle": "Argitaldetik giltzak arte, dena plataforma batean. Bitartekorik gabe. %0 komisioak.",
-      "title": "How does it work?"
+      "title": "Nola funtzionatzen du?"
     },
     "legal": {
       "common": {
@@ -669,7 +669,7 @@
             "2": "Energia Ziurtagiria (CEE) derrigorrezkoa da eskaintzak jasotzeko",
             "3": "Konfiguratu bisitarako zure denbora-leihoak"
           },
-          "title": "Preparation"
+          "title": "Prestaketa"
         },
         "1": {
           "items": {
@@ -678,7 +678,7 @@
             "2": "Zuk bakarrik ikus dezakezu pasaporte hau eta guztiz anonimoa da",
             "3": "Prozesua aurrera dadin solventzia onartu behar duzu"
           },
-          "title": "Publication"
+          "title": "Argitalpena"
         },
         "2": {
           "items": {
@@ -689,7 +689,7 @@
             "4": "Erregistroko nota sinplea (3 hilabete baino gehiago ez)",
             "5": "Hipoteka bada: gelditzen den saldoaren ziurtagiria"
           },
-          "title": "Manage visits"
+          "title": "Bisitaldiak kudeatu"
         },
         "3": {
           "items": {
@@ -698,56 +698,56 @@
             "2": "Hipotekaren erregistro-ezeztatze (aplikatzen bada): 400-800 EUR",
             "3": "Notarioa: proportzionala (normalean erosleak bereganatua)"
           },
-          "title": "Receive offers"
+          "title": "Eskaintzak jaso"
         }
       },
-      "subtitle": "Sell your property without paying agency commissions.",
-      "title": "Seller's Guide"
+      "subtitle": "Saldu zure propietatea agentzia-komisiorik ordaindu gabe.",
+      "title": "Saltzailearen Gida"
     },
     "what_is": {
       "features": {
         "0": {
-          "body": "We connect buyers and sellers directly, eliminating agency commissions.",
-          "title": "No intermediaries"
+          "body": "Erosleak eta saltzaileak zuzenean lotzen ditugu, agentzia-komisioei uko eginez.",
+          "title": "Bitartekorik gabe"
         },
         "1": {
-          "body": "From the visit to the notary signing, we guide you step by step with legal and financial tools.",
-          "title": "Guided process"
+          "body": "Bisitalditik notarioko sinatzeraino, pausoz pauso gidatzen zaituztegu tresna juridiko eta finantzarioekin.",
+          "title": "Prozesu gidatua"
         },
         "2": {
-          "body": "KYC identity verification, AI-generated Arras Contract and electronic document signing.",
-          "title": "Legal security"
+          "body": "KYC identitate egiaztapena, AIk sortutako Arras Kontratua eta agiri elektronikoen sinatzea.",
+          "title": "Segurtasun juridikoa"
         },
         "3": {
-          "body": "Financial questionnaire so buyers know their real situation before making an offer.",
-          "title": "Conscious solvency"
+          "body": "Finantza-galdetegia erosleek eskaintza bat egin aurretik beren egoera erreala ezagutu dezaten.",
+          "title": "Solventzia kontzientea"
         },
         "4": {
-          "body": "Offer and negotiation history fully visible to both parties.",
-          "title": "Total transparency"
+          "body": "Eskaintza eta negoziazioen historia bi alderdientzat guztiz ikusgaia.",
+          "title": "Gardentasun osoa"
         }
       },
-      "hero_subtitle": "The P2P real estate platform without agency commissions.",
+      "hero_subtitle": "Agentzia-komisioak gabe P2P higiezinen plataforma.",
       "hero_title": "InmuFácil",
-      "savings_body": "What you would pay with a traditional agency:",
-      "savings_title": "0 EUR in agency commissions",
-      "title": "Why InmuFácil?",
+      "savings_body": "Agentzia tradizional batekin ordainduko zenukeen:",
+      "savings_title": "0 EUR agentzia-komisioetan",
+      "title": "Zergatik InmuFácil?",
       "savings_table": {
         "concept": "Kontzeptua",
         "seller": "Saltzailea",
         "buyer": "Eroslea",
         "percentage": "Ehunekoa",
-        "percentage_seller": "5%\n(range 3%–7%)",
-        "percentage_buyer": "3%\n(range 0%–5%)",
+        "percentage_seller": "%5\n(tartea %3–%7)",
+        "percentage_buyer": "%3\n(tartea %0–%5)",
         "fixed_min": "Gutxieneko finkoa",
-        "fixed_min_seller": "€7,260 – €9,000",
-        "fixed_min_buyer": "€3,000 – €4,500",
+        "fixed_min_seller": "7.260 € – 9.000 €",
+        "fixed_min_buyer": "3.000 € – 4.500 €",
         "online_fee": "Online tarifa",
-        "online_fee_seller": "€4,000 – €8,000",
+        "online_fee_seller": "4.000 € – 8.000 €",
         "online_fee_buyer": "Aldakorra",
         "financial": "Finantzarioa",
         "financial_seller": "N/A",
-        "financial_buyer": "€3,000 – €6,000"
+        "financial_buyer": "3.000 € – 6.000 €"
       }
     }
   },

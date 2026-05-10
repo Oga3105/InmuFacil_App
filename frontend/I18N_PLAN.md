@@ -143,6 +143,27 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 
 ---
 
+## FASE G — Secciones de guia/info en ingles en idiomas cooficiales
+> Prioridad: ALTA | El usuario ve las guias y pantallas de mapa/registro en ingles en eu-ES, gl-ES, ca-ES, va-ES, fr-FR, fr-CA
+
+**Causa raiz:** Las secciones `info.*`, `registry.*`, `map.*`, `legal.*`, `property_listing.*`, `property_status.*` y `solvency_dashboard.*` quedaron con fallback en-US en las fases anteriores porque no se habian traducido aun cuando se aplico el script de relleno.
+
+Seccion afectada por idioma:
+- eu-ES: 46 claves de `info.*` en ingles (guias del comprador/vendedor, como funciona, que es InmuFacil)
+- gl-ES: 57 claves de `info.*` en ingles (idem)
+- ca-ES / va-ES: 45 claves en ingles (registry, map, legal, property_listing, property_status, common, time)
+- fr-FR: 45 claves en ingles (registry, map, legal, property_listing, property_status + ajustes menores)
+- fr-CA: 80+ claves en ingles (idem + admin, solvency_dashboard, arras_contract, lifestyle)
+
+- [x] **G1** Traducir `info.*` (46 claves) a eu-ES — guias buyer/seller, como funciona, que es InmuFacil
+- [x] **G2** Traducir `info.*` (57 claves) a gl-ES — idem en gallego. + 3 claves adicionales (urgency, share)
+- [x] **G3** Traducir `registry.*`, `map.*`, `legal.*`, `property_listing.*`, `property_status.*`, `common.*`, `time.*` a ca-ES (51 claves)
+- [x] **G4** Igual que G3 a va-ES (51 claves, variantes valencianas aplicadas)
+- [x] **G5** Traducir `registry.*`, `map.*`, `legal.*`, `property_listing.*`, `property_status.*` + ajustes a fr-FR (52 claves). 55 restantes son cognatos legitimos (Garage, Messages, Description, Photos, Bronze, Contact, Zone...)
+- [x] **G6** Igual que G5 + `admin.*`, `solvency_dashboard.*`, `arras_contract.*`, `lifestyle.*` a fr-CA (110 claves)
+
+---
+
 ## FASE F — Flutter built-in widget strings en ingles
 > Ya identificado y parcialmente resuelto
 
@@ -174,6 +195,10 @@ Idiomas donde se ve la clave cruda: **es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA**
 | 2026-05-10 | E2   | gl-ES: 4 pasadas, fallback ingles 1069 → ~74 | DONE |
 | 2026-05-10 | E3   | va-ES: encoding OK, sincronizado con ca-ES | DONE |
 | 2026-05-10 | E4   | ccaa.* corregidos fr-FR/fr-CA/gl-ES/eu-ES | DONE |
+| 2026-05-10 | G1   | eu-ES: 46 claves info.* → euskera (guias, como funciona, que es InmuFacil) | DONE |
+| 2026-05-10 | G2   | gl-ES: 57 claves info.* + 3 adicionales → gallego | DONE |
+| 2026-05-10 | G3/4 | ca-ES/va-ES: 51 claves (registry, map, legal, property_listing, property_status) | DONE |
+| 2026-05-10 | G5/6 | fr-FR: 52 claves / fr-CA: 110 claves (idem + admin, solvency_dashboard, arras_contract) | DONE |
 
 ---
 

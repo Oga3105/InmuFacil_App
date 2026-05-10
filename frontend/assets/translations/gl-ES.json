@@ -403,7 +403,7 @@
             "1": "Garda os teus favoritos para comparar despois",
             "2": "Activa alertas para recibir novos anuncios que coincidan coa túa busca"
           },
-          "title": "Preparation"
+          "title": "Preparación"
         },
         "1": {
           "items": {
@@ -412,7 +412,7 @@
             "2": "O teu nivel de solvencia (Bronce/Prata/Ouro) móstrase ao vendedor de forma anónima",
             "3": "Caduca aos 90 días para manter a información actualizada"
           },
-          "title": "Search"
+          "title": "Busca"
         },
         "2": {
           "items": {
@@ -421,7 +421,7 @@
             "2": "O vendedor pode aceptar, rexeitar ou contraofertarche",
             "3": "Un chat privado ábrese automaticamente cando a oferta é aceptada"
           },
-          "title": "Visits"
+          "title": "Visitas"
         },
         "3": {
           "items": {
@@ -432,25 +432,25 @@
             "4": "Xestoría: aprox. 300-600 EUR",
             "5": "Total estimado: 10-15% sobre o prezo de compra"
           },
-          "title": "Offer and negotiation"
+          "title": "Oferta e negociación"
         }
       },
       "subtitle": "Todo o que necesitas saber para comprar sen axencias.",
-      "title": "Buyer's Guide"
+      "title": "Guía do Comprador"
     },
     "contact": {
-      "email_action": "Send email",
+      "email_action": "Enviar correo",
       "email_subtitle": "soporte@inmufacil.com",
-      "email_title": "Email",
+      "email_title": "Correo electrónico",
       "help_action": "Ver axuda",
       "help_subtitle": "Consulta as nosas guías e tutoriais",
       "help_title": "Centro de axuda",
-      "legal_info": "Legal information",
-      "legal_notice": "Legal Notice",
+      "legal_info": "Información xurídica",
+      "legal_notice": "Aviso legal",
       "privacy": "Política de Privacidade",
       "subtitle": "Selecciona o canal que mellor che conveña.",
       "terms": "Termos de Uso",
-      "title": "Contact"
+      "title": "Contacto"
     },
     "faq": {
       "items": {
@@ -488,37 +488,37 @@
         }
       },
       "subtitle": "Atopa respostas ás dúbidas máis comúns sobre InmuFácil.",
-      "title": "Frequently Asked Questions"
+      "title": "Preguntas frecuentes"
     },
     "how_it_works": {
       "steps": {
         "0": {
-          "body": "Sign up and verify your identity with our automated KYC system.",
-          "title": "Create your account"
+          "body": "Rexístrate e verifica a túa identidade co noso sistema KYC automatizado.",
+          "title": "Crea a túa conta"
         },
         "1": {
-          "body": "Find properties on the interactive map or publish yours with the 5-step wizard.",
-          "title": "Search or publish"
+          "body": "Atopa propiedades no mapa interactivo ou publica a túa co asistente de 5 pasos.",
+          "title": "Busca ou publica"
         },
         "2": {
-          "body": "Schedule visits, chat with sellers and compare properties.",
-          "title": "Visit and compare"
+          "body": "Programa visitas, chatea cos vendedores e compara propiedades.",
+          "title": "Visita e compara"
         },
         "3": {
-          "body": "Submit a formal offer. The seller sees it instantly and can accept, reject or counter-offer.",
-          "title": "Make an offer"
+          "body": "Presenta unha oferta formal. O vendedor véa ao instante e pode aceptar, rexeitar ou contraoferecer.",
+          "title": "Fai unha oferta"
         },
         "4": {
-          "body": "Counter-offer system with full visibility. Both parties see the negotiation history.",
-          "title": "Negotiate"
+          "body": "Sistema de contraoferta con plena visibilidade. Ambas as partes ven o historial de negociación.",
+          "title": "Negocia"
         },
         "5": {
-          "body": "Arras contract, notary booking and full closing dossier.",
-          "title": "Sign at the notary"
+          "body": "Contrato de arras, reserva notarial e dosier de peche completo.",
+          "title": "Asina ante notario"
         },
         "6": {
           "body": "Só para operacións con hipoteca. O banco emite a Ficha Europea de Información Normalizada (FEIN). O comprador confírmaa na app para desbloquear a sinatura na notaría.",
-          "title": "Bank Formalization — FEIN"
+          "title": "Formalización bancaria — FEIN"
         },
         "7": {
           "body": "InmuFácil mostra o checklist completo de documentos. Programa a cita notarial, asínase a escritura pública de compravenda e realízase a entrega de chaves no mesmo acto.",
@@ -530,13 +530,13 @@
         }
       },
       "subtitle": "Da publicación ás chaves, todo nunha plataforma. Sen intermediarios. 0% comisións.",
-      "title": "How does it work?"
+      "title": "Como funciona?"
     },
     "legal": {
       "common": {
         "footer_contact": "Para calquera consulta legal contacta connosco en legal@inmufacil.com",
         "security_badge": "Cifrado AES-256-GCM · RXPD · ISO 27001",
-        "updated_at": "Last updated: March 2026 · Version 1.0"
+        "updated_at": "Última actualización: marzo de 2026 · Versión 1.0"
       },
       "legal_notice": {
         "sections": {
@@ -550,7 +550,7 @@
           },
           "2": {
             "body": "Este sitio réxese pola lexislación española, conforme a:\n• Lei 34/2002, de servizos da sociedade da información (LSSICE).\n• Lei Orgánica 3/2018 (LOPDGDD) e Regulamento (UE) 2016/679 (RXPD).\n• Lei 29/1994 de Arrendamentos Urbanos (cando aplique).\n• Real Decreto 7/2019 de medidas urxentes en materia de vivenda.",
-            "title": "Applicable regulations"
+            "title": "Normativa aplicable"
           },
           "3": {
             "body": "Todos os contidos, deseños, códigos fonte e marcas de InmuFácil están protexidos por dereitos de propiedade intelectual e industrial. Queda prohibida a súa reprodución, distribución ou comunicación pública sen autorización expresa e por escrito de InmuFácil.",
@@ -671,7 +671,7 @@
             "2": "O Certificado Enerxético (CEE) é obrigatorio para recibir ofertas",
             "3": "Configura as túas xanelas horarias de visitas"
           },
-          "title": "Preparation"
+          "title": "Preparación"
         },
         "1": {
           "items": {
@@ -680,18 +680,18 @@
             "2": "Só ti podes ver este pasaporte e é completamente anónimo",
             "3": "Debes aceptar a solvencia para que o proceso avance"
           },
-          "title": "Publication"
+          "title": "Publicación"
         },
         "2": {
           "items": {
             "0": "Escritura de propiedade",
-            "1": "Latest paid IBI receipt",
+            "1": "Último recibo do IBI pagado",
             "2": "Certificado de non deber á comunidade",
             "3": "Certificado Enerxético (CEE) — obrigatorio",
             "4": "Nota simple do Rexistro (non máis de 3 meses)",
             "5": "Se hai hipoteca: certificado de saldo pendente"
           },
-          "title": "Manage visits"
+          "title": "Xestionar visitas"
         },
         "3": {
           "items": {
@@ -700,56 +700,56 @@
             "2": "Cancelación rexistral de hipoteca (se aplica): 400-800 EUR",
             "3": "Notaría: parte proporcional (normalmente asumida polo comprador)"
           },
-          "title": "Receive offers"
+          "title": "Recibir ofertas"
         }
       },
-      "subtitle": "Sell your property without paying agency commissions.",
-      "title": "Seller's Guide"
+      "subtitle": "Vende a túa propiedade sen pagar comisións de axencia.",
+      "title": "Guía do Vendedor"
     },
     "what_is": {
       "features": {
         "0": {
-          "body": "We connect buyers and sellers directly, eliminating agency commissions.",
-          "title": "No intermediaries"
+          "body": "Conectamos compradores e vendedores directamente, eliminando as comisións de axencia.",
+          "title": "Sen intermediarios"
         },
         "1": {
-          "body": "From the visit to the notary signing, we guide you step by step with legal and financial tools.",
-          "title": "Guided process"
+          "body": "Desde a visita ata a sinatura ante notario, guiámoste paso a paso con ferramentas xurídicas e financeiras.",
+          "title": "Proceso guiado"
         },
         "2": {
-          "body": "KYC identity verification, AI-generated Arras Contract and electronic document signing.",
-          "title": "Legal security"
+          "body": "Verificación de identidade KYC, Contrato de Arras xerado por IA e sinatura electrónica de documentos.",
+          "title": "Seguridade xurídica"
         },
         "3": {
-          "body": "Financial questionnaire so buyers know their real situation before making an offer.",
-          "title": "Conscious solvency"
+          "body": "Cuestionario financeiro para que os compradores coñezan a súa situación real antes de facer unha oferta.",
+          "title": "Solvencia consciente"
         },
         "4": {
-          "body": "Offer and negotiation history fully visible to both parties.",
-          "title": "Total transparency"
+          "body": "Historial de oferta e negociación completamente visible para ambas as partes.",
+          "title": "Transparencia total"
         }
       },
-      "hero_subtitle": "The P2P real estate platform without agency commissions.",
+      "hero_subtitle": "A plataforma inmobiliaria P2P sen comisións de axencia.",
       "hero_title": "InmuFácil",
-      "savings_body": "What you would pay with a traditional agency:",
-      "savings_title": "0 EUR in agency commissions",
-      "title": "Why InmuFácil?",
+      "savings_body": "O que pagarías cunha axencia tradicional:",
+      "savings_title": "0 EUR en comisións de axencia",
+      "title": "Por que InmuFácil?",
       "savings_table": {
-        "concept": "Concept",
-        "seller": "Seller",
-        "buyer": "Buyer",
+        "concept": "Concepto",
+        "seller": "Vendedor",
+        "buyer": "Comprador",
         "percentage": "Porcentaxe",
-        "percentage_seller": "5%\n(range 3%–7%)",
-        "percentage_buyer": "3%\n(range 0%–5%)",
+        "percentage_seller": "5%\n(rango 3%–7%)",
+        "percentage_buyer": "3%\n(rango 0%–5%)",
         "fixed_min": "Mínimo fixo",
-        "fixed_min_seller": "€7,260 – €9,000",
-        "fixed_min_buyer": "€3,000 – €4,500",
+        "fixed_min_seller": "7.260 € – 9.000 €",
+        "fixed_min_buyer": "3.000 € – 4.500 €",
         "online_fee": "Tarifa en liña",
-        "online_fee_seller": "€4,000 – €8,000",
+        "online_fee_seller": "4.000 € – 8.000 €",
         "online_fee_buyer": "Variable",
         "financial": "Financeiro",
         "financial_seller": "N/A",
-        "financial_buyer": "€3,000 – €6,000"
+        "financial_buyer": "3.000 € – 6.000 €"
       }
     }
   },
@@ -1501,8 +1501,8 @@
     "success_title": "Identidade Verificada"
   },
   "share": {
-    "bathrooms_short": "bath.",
-    "bedrooms_short": "bed.",
+    "bathrooms_short": "baño.",
+    "bedrooms_short": "hab.",
     "copy_link": "Copiar enlace",
     "energy_cert": "Certificacion enerxetica: {rating}",
     "link_copied": "Enlace copiado ao portapapeis",
@@ -1863,7 +1863,7 @@
     "solvency_pending": "Solicitude de solvencia pendente",
     "mortgage_docs": "Documentos de hipoteca pendentes",
     "survey_pending": "Enquisa post-venda pendente",
-    "complete_solvency": "Complete Solvency Passport",
+    "complete_solvency": "Completar o Pasaporte de Solvencia",
     "review_post_sale_buyer": "Revisar documentos de post-venda",
     "review_post_sale_seller": "Xestionar documentos de post-venda",
     "confirm_signing_keys": "Confirmar sinatura e entrega de chaves",
