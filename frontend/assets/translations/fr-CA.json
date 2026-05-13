@@ -290,7 +290,9 @@
     "login_again": "Veuillez vous reconnecter",
     "login": "Se connecter",
     "verified": "Vérifié",
-    "logout": "Se déconnecter"
+    "logout": "Se déconnecter",
+    "user_menu_tooltip": "Menu utilisateur",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "discovery": {
     "twin_zones": {
@@ -425,7 +427,8 @@
     "bedrooms_label": "Chambres",
     "extras_label": "Extras",
     "zero_properties": "0 BIENS",
-    "verified_this_week": "Vérifiées cette semaine"
+    "verified_this_week": "Vérifiées cette semaine",
+    "custom_price_tooltip": "Prix maximum personnalisé"
   },
   "info": {
     "buyer_guide": {

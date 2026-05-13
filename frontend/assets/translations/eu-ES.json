@@ -290,7 +290,9 @@
     "login_again": "Mesedez, hasi berriz saioa",
     "login": "Hasi saioa",
     "verified": "Egiaztatuta",
-    "logout": "Itxi saioa"
+    "logout": "Itxi saioa",
+    "user_menu_tooltip": "Erabiltzaile-menua",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "discovery": {
     "twin_zones": {
@@ -400,7 +402,8 @@
     "verified_this_week": "Aste honetan egiaztatuak",
     "account_required_title": "Kontua beharrezkoa",
     "account_required_body": "Erregistratuta egon behar zara ekintza hau egiteko.",
-    "bedrooms_filter_label": "Logelak"
+    "bedrooms_filter_label": "Logelak",
+    "custom_price_tooltip": "Gehieneko prezio pertsonalizatua"
   },
   "info": {
     "buyer_guide": {

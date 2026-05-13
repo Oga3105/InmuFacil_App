@@ -98,7 +98,8 @@
     "property_type_rustic_land": "Fincas rústicas",
     "account_required_title": "Cuenta requerida",
     "account_required_body": "Debes estar registrado para realizar esta acción.",
-    "bedrooms_filter_label": "Habitaciones"
+    "bedrooms_filter_label": "Habitaciones",
+    "custom_price_tooltip": "Precio máximo personalizado"
   },
   "auth": {
     "login_title": "Iniciar Sesión",
@@ -449,7 +450,9 @@
     "login_again": "Por favor, inicia sesión de nuevo",
     "login": "Iniciar sesión",
     "verified": "Verificado",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "user_menu_tooltip": "Menú de usuario",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "property_wizard": {
     "info_basic_card": "Información Básica",

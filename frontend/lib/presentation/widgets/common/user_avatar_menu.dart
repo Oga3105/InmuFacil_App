@@ -275,7 +275,7 @@ class UserAvatarMenu extends ConsumerWidget {
 
     return PopupMenuButton<_MenuValue>(
       offset: const Offset(0, 44),
-      tooltip: 'Menu de usuario',
+      tooltip: 'common.user_menu_tooltip'.tr(),
       color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.96),
       shape:
           RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

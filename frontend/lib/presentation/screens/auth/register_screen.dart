@@ -347,7 +347,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 
                 // Footer (only copyright, no links)
                 Text(
-                  '© 2026 INMUFÁCIL SECURE-TECH',
+                  'common.copyright'.tr(),
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.4),
                     fontSize: 10,

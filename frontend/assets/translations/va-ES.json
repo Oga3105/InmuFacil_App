@@ -312,7 +312,9 @@
     "login_again": "Torna a iniciar sessió",
     "login": "Inicia sessió",
     "verified": "Verificat",
-    "logout": "Tanca sessió"
+    "logout": "Tanca sessió",
+    "user_menu_tooltip": "Menú d'usuari",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "discovery": {
     "twin_zones": {
@@ -422,7 +424,8 @@
     "verified_this_week": "Verificades aquesta setmana",
     "account_required_title": "Cal un compte",
     "account_required_body": "Has d'estar registrat per a realitzar esta acció.",
-    "bedrooms_filter_label": "Habitacions"
+    "bedrooms_filter_label": "Habitacions",
+    "custom_price_tooltip": "Preu màxim personalitzat"
   },
   "info": {
     "buyer_guide": {

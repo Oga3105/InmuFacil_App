@@ -290,7 +290,9 @@
     "login_again": "Please sign in again",
     "login": "Sign in",
     "verified": "Verified",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "user_menu_tooltip": "User menu",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "discovery": {
     "twin_zones": {
@@ -400,7 +402,8 @@
     "verified_this_week": "Verified this week",
     "account_required_title": "Account required",
     "account_required_body": "You must be registered to perform this action.",
-    "bedrooms_filter_label": "Bedrooms"
+    "bedrooms_filter_label": "Bedrooms",
+    "custom_price_tooltip": "Custom maximum price"
   },
   "info": {
     "buyer_guide": {

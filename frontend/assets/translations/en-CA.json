@@ -290,7 +290,9 @@
     "login_again": "Please sign in again",
     "login": "Sign in",
     "verified": "Verified",
-    "logout": "Sign out"
+    "logout": "Sign out",
+    "user_menu_tooltip": "User menu",
+    "copyright": "© 2026 InmuFácil Secure-Tech"
   },
   "discovery": {
     "twin_zones": {
@@ -425,7 +427,8 @@
     "lifestyle_cta": "Discover your ideal neighborhood",
     "bedrooms_label": "Bedrooms",
     "extras_label": "Extras",
-    "zero_properties": "0 PROPERTIES"
+    "zero_properties": "0 PROPERTIES",
+    "custom_price_tooltip": "Custom maximum price"
   },
   "info": {
     "buyer_guide": {

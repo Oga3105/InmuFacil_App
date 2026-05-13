@@ -833,7 +833,7 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               IconButton(
                 icon: const Icon(Icons.add_circle_outline, size: 20),
                 onPressed: () => _showCustomPriceDialog(context, ref),
-                tooltip: 'Precio máximo personalizado',
+                tooltip: 'home.custom_price_tooltip'.tr(),
               ),
             ],
           ),
