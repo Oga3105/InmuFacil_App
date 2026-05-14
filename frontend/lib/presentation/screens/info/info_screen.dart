@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../widgets/common/app_bar_back_button.dart';
 import '../../widgets/common/user_avatar_menu.dart';
+import '../../widgets/contact/contact_email_dialog.dart';
 
 // ── Palette ───────────────────────────────────────────────────────────────────
 const _kBlue  = Color(0xFF135BEC);
@@ -624,7 +625,10 @@ class _ContactScreen extends StatelessWidget {
           title: 'info.contact.email_title'.tr(),
           subtitle: 'info.contact.email_subtitle'.tr(),
           actionLabel: 'info.contact.email_action'.tr(),
-          onTap: () {},
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (_) => const ContactEmailDialog(),
+          ),
         ),
         const SizedBox(height: 12),
         _ContactOption(

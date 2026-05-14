@@ -463,7 +463,20 @@
       "privacy": "Política de Privacidade",
       "subtitle": "Selecciona o canal que mellor che conveña.",
       "terms": "Termos de Uso",
-      "title": "Contacto"
+      "title": "Contacto",
+      "dialog": {
+        "title": "Escríbenos",
+        "name_label": "Nome",
+        "email_label": "Correo electrónico",
+        "subject_label": "Asunto",
+        "subject_hint": "En que podemos axudarte?",
+        "message_label": "Mensaxe",
+        "message_hint": "Describe a túa consulta con detalle...",
+        "send_button": "Enviar mensaxe",
+        "success": "Mensaxe enviada correctamente. Responderémosche axiña.",
+        "rate_limit": "Acadaches o límite de mensaxes. Téntao en 24 horas.",
+        "error": "Non se puido enviar a mensaxe. Téntao de novo."
+      }
     },
     "faq": {
       "items": {

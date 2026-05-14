@@ -461,7 +461,20 @@
       "privacy": "Privacy Policy",
       "subtitle": "Select the channel that suits you best.",
       "terms": "Terms of Use",
-      "title": "Contact"
+      "title": "Contact",
+      "dialog": {
+        "title": "Send us a message",
+        "name_label": "Name",
+        "email_label": "Email address",
+        "subject_label": "Subject",
+        "subject_hint": "How can we help you?",
+        "message_label": "Message",
+        "message_hint": "Describe your enquiry in detail...",
+        "send_button": "Send message",
+        "success": "Message sent successfully. We will get back to you shortly.",
+        "rate_limit": "You have reached the message limit. Please try again in 24 hours.",
+        "error": "Could not send the message. Please try again."
+      }
     },
     "faq": {
       "items": {

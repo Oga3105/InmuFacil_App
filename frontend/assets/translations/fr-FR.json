@@ -461,7 +461,20 @@
       "privacy": "Politique de confidentialité",
       "subtitle": "Sélectionnez le canal qui vous convient le mieux.",
       "terms": "Conditions d'utilisation",
-      "title": "Nous sommes là pour vous aider"
+      "title": "Nous sommes là pour vous aider",
+      "dialog": {
+        "title": "Écrivez-nous",
+        "name_label": "Nom",
+        "email_label": "Adresse e-mail",
+        "subject_label": "Objet",
+        "subject_hint": "Comment pouvons-nous vous aider ?",
+        "message_label": "Message",
+        "message_hint": "Décrivez votre demande en détail...",
+        "send_button": "Envoyer le message",
+        "success": "Message envoyé avec succès. Nous vous répondrons bientôt.",
+        "rate_limit": "Vous avez atteint la limite de messages. Réessayez dans 24 heures.",
+        "error": "Impossible d'envoyer le message. Veuillez réessayer."
+      }
     },
     "faq": {
       "items": {

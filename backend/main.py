@@ -499,6 +499,7 @@ from backend.src.routes import auth, users, kyc, properties, visits, offers, fin
 from backend.src.routes import notifications as notifications_router
 from backend.src.routes import lifestyle
 from backend.src.routes import reports as reports_router
+from backend.src.routes import contact as contact_router
 
 from fastapi import APIRouter
 
@@ -553,6 +554,7 @@ api_v1_router.include_router(ai_consent.router)             # GDPR - AI Consent 
 api_v1_router.include_router(ai_usage.router)               # AI Usage Tracking - GET /ai/usage/me
 api_v1_router.include_router(lifestyle.router)               # Lifestyle Profile (DB-persisted per user)
 api_v1_router.include_router(reports_router.router)           # Community Shield - User Reports
+api_v1_router.include_router(contact_router.router)           # Contact Message (authenticated, rate-limited)
 
 # Include V1 Router in App
 app.include_router(api_v1_router)

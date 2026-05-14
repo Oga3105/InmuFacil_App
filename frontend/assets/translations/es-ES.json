@@ -1553,7 +1553,20 @@
       "legal_info": "Información legal",
       "privacy": "Política de Privacidad",
       "terms": "Términos de Uso",
-      "legal_notice": "Aviso Legal"
+      "legal_notice": "Aviso Legal",
+      "dialog": {
+        "title": "Escríbenos",
+        "name_label": "Nombre",
+        "email_label": "Correo electrónico",
+        "subject_label": "Asunto",
+        "subject_hint": "¿En qué podemos ayudarte?",
+        "message_label": "Mensaje",
+        "message_hint": "Describe tu consulta con detalle...",
+        "send_button": "Enviar mensaje",
+        "success": "Mensaje enviado correctamente. Te responderemos pronto.",
+        "rate_limit": "Has alcanzado el límite de mensajes. Inténtalo en 24 horas.",
+        "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+      }
     },
     "buyer_guide": {
       "title": "Guía del Comprador",

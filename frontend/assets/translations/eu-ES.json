@@ -461,7 +461,20 @@
       "privacy": "Pribatutasun Politika",
       "subtitle": "Aukeratu zuretzat egokiena den kanala.",
       "terms": "Erabilera Baldintzak",
-      "title": "Kontaktua"
+      "title": "Kontaktua",
+      "dialog": {
+        "title": "Idatz iezaguzu",
+        "name_label": "Izena",
+        "email_label": "Helbide elektronikoa",
+        "subject_label": "Gaia",
+        "subject_hint": "Zertan lagun zaitzakegu?",
+        "message_label": "Mezua",
+        "message_hint": "Deskribatu zure kontsulta xehetasunez...",
+        "send_button": "Mezua bidali",
+        "success": "Mezua zuzen bidalita. Laster erantzungo dizugu.",
+        "rate_limit": "Mezuen muga gainditu duzu. Saiatu berriro 24 ordutan.",
+        "error": "Ezin izan da mezua bidali. Saiatu berriro."
+      }
     },
     "faq": {
       "items": {
