@@ -24,7 +24,7 @@ Para mantener una fuente unica de la verdad, toda la documentacion reside en el 
 - 📅 Visitas: calendario, reserva de slots, proximas/pasadas
 - 💰 Ofertas: contraofertas, timeline, arras, firma digital
 - 🪪 Solvency Passport: asistente de solvencia
-- 🌍 i18n: 9 idiomas (ES, EN-US, EN-GB, EN-CA, FR-FR, FR-CA, CA, EU, GL)
+- 🌍 i18n: 10 idiomas (ES, EN-US, EN-GB, EN-CA, FR-FR, FR-CA, CA-ES, VA-ES, EU-ES, GL-ES)
 - 🔒 GDPR: consentimiento IA, trust dashboard
 
 ## 🏗️ Estructura

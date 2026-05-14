@@ -30,11 +30,12 @@ Toda la infraestructura se ejecuta en Docker Compose. En local, el frontend apun
 ### Stack
 - **Flutter SDK** (ultima version estable)
 - **Riverpod 3.2.1** — gestion de estado global y reactivo
-- **GoRouter 17.1.0** — navegacion declarativa
+- **GoRouter 17.2.3** — navegacion declarativa
 - **Dio 5.9.2** — HTTP client con interceptores
 - **flutter_map 8.2.2** — mapas OpenStreetMap
-- **easy_localization 3.0.3** — i18n (9 idiomas)
-- **google_sign_in 6.2.1** — OAuth social sin Firebase en cliente
+- **easy_localization 3.0.3** — i18n (10 idiomas)
+- **flutter_secure_storage 10.1.0** — almacenamiento seguro JWT
+- **google_sign_in 6.3.0** — OAuth social sin Firebase en cliente
 
 ### Estructura de Directorios
 
@@ -101,8 +102,8 @@ Todas las rutas declaradas en `app_router.dart`. Rutas clave:
 
 ### i18n
 
-9 idiomas soportados via `easy_localization`:
-- `es-ES` (principal), `en-US`, `fr-FR`, `de-DE`, `it-IT`, `pt-PT`, `zh-CN`, `ar-SA`, `ro-RO`
+10 idiomas soportados via `easy_localization`:
+- `es-ES` (principal), `en-US`, `en-GB`, `en-CA`, `fr-FR`, `fr-CA`, `ca-ES`, `va-ES`, `eu-ES`, `gl-ES`
 
 **Politica estricta:** Prohibido hardcodear strings en widgets. Obligatorio usar `.tr()`.
 

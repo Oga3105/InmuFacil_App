@@ -239,6 +239,39 @@ username=user@example.com&password=SecurePass123!
 
 ---
 
+## Contacto — `/contact`
+
+| Metodo | Endpoint | Auth | Descripcion |
+|---|---|---|---|
+| POST | `/contact/message` | Si | Envia mensaje al soporte de InmuFacil |
+
+### POST /contact/message
+
+Permite a usuarios autenticados enviar un mensaje al equipo de soporte (`soporte@inmufacil.com`).
+Rate limiting: maximo **3 mensajes por usuario cada 24 horas**.
+
+```json
+// Headers
+Authorization: Bearer <jwt_token>
+
+// Body
+{
+  "subject": "Problema con mi oferta",   // 3-100 caracteres
+  "message": "Descripcion detallada..."  // 10-2000 caracteres
+}
+
+// Response 200
+{ "ok": true, "detail": "Mensaje enviado correctamente." }
+
+// Response 429 (rate limit)
+{ "detail": "Has alcanzado el limite de 3 mensajes en 24 horas. Intentalo mas tarde." }
+
+// Response 503 (SMTP error)
+{ "detail": "No se pudo enviar el mensaje. Intentalo de nuevo en unos minutos." }
+```
+
+---
+
 ## Otros
 
 | Endpoint | Descripcion |

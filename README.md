@@ -84,7 +84,8 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 - 📝 Arras: interview screen, buyer/seller stepper
 - ✍️ Firma digital, notaria, post-venta y entrega de llaves
 - 🪪 Solvency Passport: asistente de solvencia
-- 🌍 i18n: 9 idiomas
+- 🌍 i18n: 10 idiomas (es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA, ca-ES, va-ES, eu-ES, gl-ES)
+- 📧 Contacto: formulario autenticado con rate limiting (3 msg/24h)
 - 🔒 GDPR: consentimiento IA (RGPD Art. 6.1.a), trust dashboard
 
 ### ⚙️ DevOps
@@ -107,8 +108,8 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 | PostgreSQL | 15 | Base de datos (Docker) |
 | SQLAlchemy | 2.0.49 | ORM |
 | Pydantic | v2 | Validacion y serializacion |
-| cryptography | 47.0.0 | AES-256-GCM |
-| google-genai | >= 1.73.1 | Gemini Vision + IA |
+| cryptography | 48.0.0 | AES-256-GCM |
+| google-genai | >= 2.0.1 | Gemini Vision + IA |
 | ReportLab | - | Generacion PDF contratos |
 
 ### Frontend
@@ -116,11 +117,12 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 |------------|---------|-----|
 | Flutter | Latest stable | Web + Android |
 | Riverpod | 3.2.1 | Estado reactivo |
-| GoRouter | 17.2.2 | Navegacion declarativa |
+| GoRouter | 17.2.3 | Navegacion declarativa |
 | Dio | 5.9.2 | HTTP + interceptores JWT |
 | flutter_map | 8.2.2 | Mapas OpenStreetMap |
-| easy_localization | 3.0.3 | i18n (9 idiomas) |
-| google_sign_in | 6.2.1 | Google OAuth |
+| easy_localization | 3.0.3 | i18n (10 idiomas) |
+| flutter_secure_storage | 10.1.0 | Almacenamiento seguro JWT |
+| google_sign_in | 6.3.0 | Google OAuth |
 
 ### Infraestructura
 | Componente | Detalle |

@@ -42,7 +42,7 @@
 | KYC | OPERACIONAL | DNI/Pasaporte, Gemini Vision, cifrado AES-256 |
 | Chat | OPERACIONAL | Mensajeria en tiempo real (WebSocket) |
 | Contratos | OPERACIONAL | PDF dinamico con ReportLab, arras, firma digital |
-| i18n | OPERACIONAL | 9 idiomas (es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO) |
+| i18n | OPERACIONAL | 10 idiomas (es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA, ca-ES, va-ES, eu-ES, gl-ES) |
 | DNS/CDN | CONFIGURADO | Cloudflare — dominio inmufacil.com activo |
 | VPS Despliegue | OPERACIONAL | Debian 12, IP 87.106.247.84, Docker + Nginx |
 
@@ -177,10 +177,10 @@
 ### Frontend
 - **Flutter SDK** — ultima version estable, targets: Web + Android (APK)
 - **Riverpod 3.2.1** — gestion de estado reactiva (StateNotifier eliminado)
-- **GoRouter 17.1.0** — navegacion declarativa con nested routes
+- **GoRouter 17.2.3** — navegacion declarativa con nested routes
 - **Dio 5.9.2** — cliente HTTP con interceptores y FormData
 - **flutter_map 8.2.2** — mapas con OpenStreetMap (sin coste de licencia)
-- **easy_localization 3.0.3** — i18n con 9 idiomas
+- **easy_localization 3.0.3** — i18n con 10 idiomas
 - **flutter_secure_storage** — almacenamiento seguro de JWT
 - **google_sign_in 6.2.1** — Google OAuth sin Firebase en cliente
 - **flutter_dotenv** — variables de entorno en build

@@ -2,7 +2,7 @@
 
 ## 🌍 Overview
 
-InmuFácil supports 9 regional language variants with strict i18n protocols.
+InmuFácil supports 10 regional language variants with strict i18n protocols.
 
 ---
 
@@ -35,6 +35,7 @@ Text('auth.login_button').tr()
 | `en-CA` | English | Canada |
 | `fr-FR` | Français | France |
 | `fr-CA` | Français | Canada |
+| `va-ES` | Valenciano | Comunitat Valenciana |
 
 **Fallback:** `es-ES` (Spanish Spain)
 
@@ -121,7 +122,7 @@ JSON:
 }
 ```
 
-**Repeat for all 9 locales.**
+**Repeat for all 10 locales.**
 
 ### 2. Use in Code
 ```dart
@@ -162,7 +163,7 @@ ScaffoldMessenger.of(context).showSnackBar(
 ## ✅ Checklist for New Features
 
 - [ ] Add all strings to `es-ES.json` (base)
-- [ ] Translate to all 8 other locales
+- [ ] Translate to all 9 other locales
 - [ ] Use `.tr()` in all widgets
 - [ ] Test with different locales
 - [ ] No hardcoded strings remain
