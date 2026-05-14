@@ -20,7 +20,7 @@ bcrypt==5.0.0
 # Security (@Shield)
 # ============================================================================
 python-jose[cryptography]==3.5.0
-python-multipart==0.0.27
+python-multipart==0.0.28
 python-dotenv==1.2.2
 cryptography==47.0.0
 python-magic==0.4.27
