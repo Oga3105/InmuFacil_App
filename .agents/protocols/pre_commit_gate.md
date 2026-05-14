@@ -31,6 +31,14 @@ git diff --staged
 
 **Si se detecta un secreto:** NO commitear. Eliminar del archivo, agregar al `.gitignore` si es necesario, limpiar del staging con `git reset HEAD <archivo>`.
 
+**REGLA DE RESTAURACION OBLIGATORIA (Non-Negotiable):**
+Si durante el proceso de commit se elimina o redacta contenido de `.env` u otros archivos de configuracion para evitar filtrar secretos, es OBLIGATORIO restaurar el contenido original inmediatamente despues del commit. Queda PROHIBIDO que cualquier dato se pierda de forma permanente como efecto colateral de la limpieza de seguridad. Flujo correcto:
+1. Hacer backup del contenido antes de modificar: `cp .env .env.backup`
+2. Limpiar el archivo para el commit
+3. Ejecutar el commit
+4. Restaurar inmediatamente: `cp .env.backup .env`
+5. Verificar que el archivo restaurado contiene todos los datos originales
+
 ### @Jules — Calidad de Tests
 
 - [ ] Backend: `pytest` pasa en verde (cero fallos, cero errores)

@@ -12,6 +12,7 @@
 *   **Disparador:** Tocar `auth.py`, `config/`, cualquier dato de usuario, o pre-commit de cualquier archivo.
 *   **Acción:** Escanear secretos en `git diff --staged`. Verificar `OAuth2PasswordBearer`. PII cifrada en reposo siempre.
 *   **Pre-commit:** Revisar staging area contra patrones: `API_KEY`, `SECRET`, `PASSWORD`, `TOKEN`, `private_key`. Si se detecta un secreto: NO commitear, eliminar, limpiar staging.
+*   **Restauracion obligatoria:** Si se modifica `.env` o archivos de configuracion para evitar filtrar secretos, hacer backup ANTES y restaurar DESPUES del commit. Queda PROHIBIDO que cualquier dato se pierda permanentemente como efecto colateral de la limpieza de seguridad.
 
 ## 🛑 COMPLIANCE IMPERATIVO (Non-Negotiable)
 1.  **GDPR (Privacidad):** TODO dato personal (PII) debe ir cifrado (AES-256) o redactado. El "Derecho al Olvido" debe ser técnicamente viable (borrado seguro).

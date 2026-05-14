@@ -360,8 +360,9 @@ Check Cruzado Continuo se ejecuta de forma automatica despues de cada paso signi
 6. Commits Atomicos: un cambio logico = un commit. Prohibido `git add -A` masivo. Sin `--no-verify` sin autorizacion explicita.
 7. Zero Leaks: nunca commitear `.env` ni credenciales. Verificar `git diff --staged` antes de `git add`.
 8. TFM: preservar todas las ramas remotas. Solo eliminar locales obsoletas.
+9. Restauracion Obligatoria: si se elimina o redacta contenido de `.env` o archivos de configuracion para evitar filtrar secretos, hacer backup ANTES (`cp .env .env.backup`) y restaurar DESPUES del commit. PROHIBIDO que cualquier dato se pierda permanentemente como efecto colateral de la limpieza de seguridad.
 
 ---
 
-**Ultima actualizacion:** 2026-02-28
-**Version:** 2.2
+**Ultima actualizacion:** 2026-05-07
+**Version:** 2.3

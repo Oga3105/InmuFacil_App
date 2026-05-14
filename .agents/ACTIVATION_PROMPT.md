@@ -56,5 +56,6 @@ Definiciones en: `.agents/protocols/<protocolo>.md`
 5. **Safety First (Git):** Ante conflictos de código ajenos al commit actual, DETENERSE y notificar.
 6. **Commits Atómicos:** Un cambio lógico = un commit. Prohibido `git add -A` masivo.
 7. **Zero Leaks:** Nunca commitear `.env` o secretos.
+8. **Restauración Obligatoria:** Si se elimina contenido de `.env` o configuración para evitar filtrar secretos, hacer backup ANTES y restaurar DESPUÉS del commit. PROHIBIDO perder datos como efecto colateral de la limpieza de seguridad.
 
-**Versión:** 2.2 | **Control de Ejecución:** Automático con salvaguarda de borrado.
+**Versión:** 2.3 | **Control de Ejecución:** Automático con salvaguarda de borrado y restauración.
