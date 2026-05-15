@@ -42,6 +42,21 @@ backend/
     └── utils/               # Security, crypto, filters
 ```
 
+## Requisitos previos al build Docker
+
+El Dockerfile copia `firebase-key.json` desde la raiz del proyecto al contenedor
+(`COPY firebase-key.json ./firebase-key.json`). Sin este archivo el endpoint
+`POST /auth/google` devuelve 503.
+
+El archivo NO esta en git (`.gitignore`). Obtenerlo de 1Password / gestor de secretos
+y colocarlo en la raiz del proyecto antes de ejecutar `deploy-backend.sh` o
+`docker compose build`.
+
+> Nota: el Dockerfile usa `python:3.10-slim`. Mantener `numpy<2.3.0` en
+> `requirements.txt` — numpy 2.3+ requiere Python 3.11+.
+
+---
+
 ## 🚀 Inicio Rapido
 
 ```bash

@@ -208,6 +208,9 @@ Variables criticas:
 | `GEMINI_API_KEY` | API de Gemini |
 | `GOOGLE_WEB_CLIENT_ID` | OAuth Web Client ID |
 
+Ademas del `.env`, el build Docker requiere `firebase-key.json` en la raiz
+del proyecto (no esta en git). Ver `backend/README.md` para detalles.
+
 ### ▶️ Ejecutar
 
 ```bash
