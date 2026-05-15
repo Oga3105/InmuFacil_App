@@ -47,12 +47,15 @@ class EnvConfig {
   }
 
   /// Google OAuth Web Client ID (requerido por google_sign_in en Flutter Web)
-  static String get googleWebClientId {
+  /// Devuelve null si no esta disponible para que google_sign_in_web
+  /// use el meta tag <meta name="google-signin-client_id"> como fallback.
+  static String? get googleWebClientId {
     try {
-      return dotenv.env['GOOGLE_WEB_CLIENT_ID'] ?? '';
+      final id = dotenv.env['GOOGLE_WEB_CLIENT_ID'];
+      return (id == null || id.isEmpty) ? null : id;
     } catch (e) {
       debugPrint('⚠️ EnvConfig Warning: dotenv not initialized. No Google Client ID.');
-      return '';
+      return null;
     }
   }
 }
