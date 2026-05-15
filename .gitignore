@@ -34,6 +34,7 @@ Thumbs.db
 *.key
 secrets/
 firebase-key.json
+INCIDENCIAS_PRODUCCION.md
 curl_res.json
 brain/
 keys.txt
