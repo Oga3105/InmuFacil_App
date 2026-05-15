@@ -24,6 +24,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY backend ./backend
 
+# Firebase Admin SDK service account key (sensitive — never commit the actual file)
+COPY firebase-key.json ./firebase-key.json
+
 # Expose port
 EXPOSE 8000
 
