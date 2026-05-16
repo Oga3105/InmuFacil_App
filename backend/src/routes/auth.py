@@ -24,7 +24,10 @@ from backend.src.config.database import get_db
 from backend.src.models import User, UserType, DNIStatus
 from backend.src.utils.filters import validate_user_is_not_agency, log_blocked_attempt
 from backend.src.services.moderation_alerts import send_blocked_registration_alert
-from backend.src.utils.security import verify_password, get_password_hash, create_access_token
+from backend.src.utils.security import (
+    verify_password, get_password_hash, create_access_token,
+    get_current_active_user,
+)
 from backend.src.services.email_service import (
     generate_verification_token, get_token_expiration,
     send_verification_email, send_password_reset_email, verify_token
@@ -68,7 +71,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 # JWT Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480"))  # 8 h default
 
 
 # ============================================================================
@@ -555,3 +558,30 @@ async def google_auth(
         created_at=user.created_at,
         updated_at=user.updated_at
     )
+
+
+# ============================================================================
+# Token Renewal Endpoint
+# ============================================================================
+
+@router.post(
+    "/auth/renew",
+    response_model=Token,
+    summary="Silent token renewal",
+    description=(
+        "Exchange a still-valid JWT for a fresh one with a reset expiry window. "
+        "Called proactively by the client when the token has less than 1 hour remaining. "
+        "No credentials required — authentication is via the current Bearer token."
+    ),
+    tags=["Auth"],
+)
+async def renew_token(
+    current_user: User = Depends(get_current_active_user),
+):
+    """Issue a fresh JWT for an already-authenticated user."""
+    access_token = create_access_token(
+        data={"sub": current_user.email, "user_id": current_user.id},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+    logger.info("[AUTH] Token renewed for user_id=%s", current_user.id)
+    return {"access_token": access_token, "token_type": "bearer"}
