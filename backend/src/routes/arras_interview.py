@@ -434,7 +434,7 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
         client = get_client(api_key)
         preferred_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
         contract_text, _ = call_with_fallback(
-            client, contents=prompt, preferred_model=preferred_model
+            client, contents=[prompt], preferred_model=preferred_model
         )
 
         record.contract_text = contract_text

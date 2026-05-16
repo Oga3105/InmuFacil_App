@@ -294,7 +294,7 @@ final feinConfirmedProvider = FutureProvider.autoDispose
   if (token == null) return false;
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/fein/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/fein/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ??
@@ -312,7 +312,7 @@ final notariaApptStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']

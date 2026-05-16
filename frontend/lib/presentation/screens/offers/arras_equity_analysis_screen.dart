@@ -30,7 +30,7 @@ final _equityProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/arras/$offerId/equity',
+      '${EnvConfig.apiBaseUrl}/arras/$offerId/equity',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return resp.data as Map<String, dynamic>;

@@ -72,7 +72,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/post-sale/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -112,7 +112,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
       final file = MultipartFile.fromBytes(bytes, filename: filename);
       final formData = FormData.fromMap({'doc_type': docType, 'file': file});
       final resp = await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/documents',
+        '${EnvConfig.apiBaseUrl}/post-sale/${widget.offer.id}/documents',
         data: formData,
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -139,7 +139,7 @@ class _PostVentaScreenState extends ConsumerState<PostVentaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/post-sale/${widget.offer.id}/flag',
+        '${EnvConfig.apiBaseUrl}/post-sale/${widget.offer.id}/flag',
         data: {'doc_type': docType, 'flag': flag},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -898,7 +898,7 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final url =
-          '$EnvConfig.apiBaseUrl/post-sale/${widget.offerId}/documents/${widget.docId}/download';
+          '${EnvConfig.apiBaseUrl}/post-sale/${widget.offerId}/documents/${widget.docId}/download';
 
       final response = await buildAuthDio().get<List<int>>(
         url,

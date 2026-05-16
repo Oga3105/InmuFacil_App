@@ -27,7 +27,7 @@ final _arrasHubProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/arras/$offerId',
+      '${EnvConfig.apiBaseUrl}/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return resp.data as Map<String, dynamic>;

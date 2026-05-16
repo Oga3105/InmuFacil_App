@@ -24,7 +24,7 @@ final _arrasStatusProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/arras/$offerId',
+      '${EnvConfig.apiBaseUrl}/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
@@ -42,7 +42,7 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/tasacion/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/tasacion/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -59,7 +59,7 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']

@@ -72,7 +72,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -119,7 +119,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       final dateStr = _isoDate(_buyerDate!);
       final timeStr = _isoTime(_buyerTime!);
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/schedule',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/schedule',
         data: {'appointment_date': dateStr, 'appointment_time': timeStr, 'notes': _notesCtrl.text.trim()},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
@@ -144,7 +144,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/accept',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -163,7 +163,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/reject',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/reject',
         data: {
           'proposed_date': _isoDate(_rejectDate!),
           'proposed_time': _isoTime(_rejectTime!),
@@ -196,7 +196,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/accept-counter',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/accept-counter',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
@@ -221,7 +221,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/tasacion/${widget.offer.id}/confirm-visit',
+        '${EnvConfig.apiBaseUrl}/tasacion/${widget.offer.id}/confirm-visit',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (!mounted) return;
