@@ -401,8 +401,7 @@ class PropertyListingItem extends ConsumerWidget {
       return;
     }
     final dniStatus = (auth.user?.dniStatus ?? '').toUpperCase();
-    final isVerified = dniStatus == 'VALIDADO';
-    if (!isVerified) {
+    if (dniStatus != 'VALIDADO') {
       _showRequirementsDialog(
         context,
         title: 'property_listing.verification_required_title'.tr(),
@@ -410,57 +409,18 @@ class PropertyListingItem extends ConsumerWidget {
         icon: Icons.verified_user_outlined,
         cta: 'property_listing.verify_identity_btn'.tr(),
         onCta: () { Navigator.of(context).pop(); context.push('/verify-identity'); },
-
-      );
-      return;
-    }
-    // Check for active offer to open chat
-    const activeStatuses = {
-      'pending', 'counter_offer', 'countered', 'accepted',
-      'signing_pending', 'signed',
-    };
-    final sentOffers = ref.read(sentOffersProvider).asData?.value ?? [];
-    final activeOffer = sentOffers.where((o) =>
-      o.propertyId == property.id &&
-      activeStatuses.contains(o.status.toLowerCase()),
-    ).firstOrNull;
-
-    if (activeOffer == null) {
-      if (!context.mounted) return;
-      showDialog<void>(
-        context: context,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: Text('property_listing.make_offer_first_title'.tr()),
-          content: Text(
-            'property_listing.make_offer_first_msg'.tr(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('property_listing.understood'.tr()),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.push('/property/${property.id}/offer');
-              },
-              style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: Text('property_listing.make_offer_btn'.tr()),
-            ),
-          ],
-
-        ),
       );
       return;
     }
 
-    // Enable chat and navigate
+    // Open or reuse an inquiry/offer chat channel
     try {
-      await ref.read(sentOffersProvider.notifier).enableChat(activeOffer.id);
+      final offerId = await ref
+          .read(sentOffersProvider.notifier)
+          .startInquiry(property.id);
+      if (context.mounted) context.push('/chat/$offerId');
     } catch (_) {
-      // chat might already be enabled
+      // ignore — stay on page
     }
-    if (context.mounted) context.push('/chat/${activeOffer.id}');
   }
 }

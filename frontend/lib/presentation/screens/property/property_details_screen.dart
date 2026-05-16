@@ -2162,7 +2162,7 @@ class _MortgageCard extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _ContactarButton — navega directo al chat de la oferta activa
+// _ContactarButton — opens a chat with the seller (no offer required)
 // ---------------------------------------------------------------------------
 
 class _ContactarButton extends ConsumerStatefulWidget {
@@ -2176,34 +2176,22 @@ class _ContactarButton extends ConsumerStatefulWidget {
 class _ContactarButtonState extends ConsumerState<_ContactarButton> {
   bool _loading = false;
 
-  static const _activeStatuses = {
-    'pending', 'counter_offer', 'countered', 'accepted',
-    'signing_pending', 'signed',
-  };
-
   Future<void> _onPressed() async {
     final authState = ref.read(authProvider);
     if (authState.user == null) {
-      context.pushNamed('login');
+      if (mounted) context.pushNamed('login');
       return;
     }
 
-    final sentOffers = ref.read(sentOffersProvider).asData?.value ?? [];
-    final activeOffer = sentOffers.where((o) =>
-      o.propertyId == widget.propertyId &&
-      _activeStatuses.contains(o.status.toLowerCase()),
-    ).firstOrNull;
-
-    if (activeOffer == null) {
+    final dniStatus = (authState.user?.dniStatus ?? '').toUpperCase();
+    if (dniStatus != 'VALIDADO') {
       if (!mounted) return;
       showDialog<void>(
         context: context,
         builder: (_) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          title: Text('property.offer_first_title'.tr()),
-          content: Text(
-            'property.offer_first_message'.tr(),
-          ),
+          title: Text('property.verification_required_title'.tr()),
+          content: Text('property.verification_required_msg'.tr()),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -2212,10 +2200,10 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
             FilledButton(
               onPressed: () {
                 Navigator.pop(context);
-                context.push('/property/${widget.propertyId}/offer');
+                context.push('/verify-identity');
               },
               style: FilledButton.styleFrom(backgroundColor: const Color(0xFF135BEC)),
-              child: Text('property.make_offer'.tr()),
+              child: Text('property.verify_identity_btn'.tr()),
             ),
           ],
         ),
@@ -2225,13 +2213,15 @@ class _ContactarButtonState extends ConsumerState<_ContactarButton> {
 
     setState(() => _loading = true);
     try {
-      await ref.read(sentOffersProvider.notifier).enableChat(activeOffer.id);
+      final offerId = await ref
+          .read(sentOffersProvider.notifier)
+          .startInquiry(widget.propertyId);
+      if (mounted) context.push('/chat/$offerId');
     } catch (_) {
-      // ignore — chat might already be enabled
+      // ignore network errors — user stays on page
     } finally {
       if (mounted) setState(() => _loading = false);
     }
-    if (mounted) context.push('/chat/${activeOffer.id}');
   }
 
   @override

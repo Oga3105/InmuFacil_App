@@ -154,6 +154,16 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
     // Refresh chat list so the conversation appears in the inbox
     ref.invalidate(chatListProvider);
   }
+
+  /// Open a direct contact channel with the seller without a monetary offer.
+  /// Returns the offer id to use for chat navigation.
+  Future<String> startInquiry(String propertyId) async {
+    final resp = await _dio.post('/offers/properties/$propertyId/inquiry');
+    final offerId = resp.data['id'].toString();
+    ref.invalidate(chatListProvider);
+    await refresh();
+    return offerId;
+  }
 }
 
 // --- Received Offers Provider ---
