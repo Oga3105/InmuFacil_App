@@ -386,6 +386,61 @@ async def create_offer(
     return _serialize_offer(created, db)
 
 
+@router.post("/properties/{property_id}/inquiry", response_model=OfferResponse, status_code=status.HTTP_200_OK)
+async def start_inquiry(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Open a direct chat channel with the seller without a monetary offer.
+    Requires the buyer to have a verified identity (dni_status == VALIDADO).
+    If an existing offer or inquiry already has chat enabled for this
+    (buyer, property) pair, return that record instead of creating a duplicate.
+    """
+    from backend.src.models.enums import DNIStatus
+
+    if current_user.dni_status != DNIStatus.VALIDADO:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Identity verification required to contact the seller",
+        )
+
+    prop = db.query(Property).filter(Property.id == property_id).first()
+    if not prop:
+        raise HTTPException(status_code=404, detail="Property not found")
+
+    if prop.owner_id == current_user.id:
+        raise HTTPException(status_code=400, detail="Owner cannot contact themselves")
+
+    existing = (
+        db.query(PropertyOffer)
+        .filter(
+            PropertyOffer.property_id == property_id,
+            PropertyOffer.buyer_id == current_user.id,
+            PropertyOffer.is_chat_enabled == True,  # noqa: E712
+        )
+        .order_by(PropertyOffer.created_at.desc())
+        .first()
+    )
+    if existing:
+        return _serialize_offer(_offers_query(db).filter(PropertyOffer.id == existing.id).first(), db)
+
+    inquiry = PropertyOffer(
+        property_id=property_id,
+        buyer_id=current_user.id,
+        amount=0,
+        conditions=None,
+        valid_until=None,
+        status=OfferStatus.INQUIRY,
+        is_chat_enabled=True,
+    )
+    db.add(inquiry)
+    db.commit()
+    created = _offers_query(db).filter(PropertyOffer.id == inquiry.id).first()
+    return _serialize_offer(created, db)
+
+
 @router.get("/me/sent", response_model=List[OfferResponse])
 async def list_sent_offers(
     db: Session = Depends(get_db),

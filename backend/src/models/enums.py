@@ -149,6 +149,7 @@ class VisitStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 class OfferStatus(str, enum.Enum):
+    INQUIRY = "inquiry"       # Direct contact request without monetary offer
     PENDING = "pending"       # Offer sent, waiting for seller
     ACCEPTED = "accepted"     # Seller accepted
     REJECTED = "rejected"     # Seller rejected the offer
