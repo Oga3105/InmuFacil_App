@@ -274,7 +274,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final messagesAsync = ref.watch(chatDetailProvider(widget.offerId));
     final notifier = ref.read(chatDetailProvider(widget.offerId).notifier);
 
-    // Compute visit status: none | pending | accepted | rejected→none
+    // Compute visit status: none | pending | accepted | cancelled
     final _msgs = messagesAsync.asData?.value ?? [];
     String visitStatus = 'none';
     for (final m in _msgs) {
@@ -283,6 +283,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       if (t == 'visit_request') visitStatus = 'pending';
       else if (t == 'visit_accepted') visitStatus = 'accepted';
       else if (t == 'visit_rejected') visitStatus = 'none';
+      else if (t == 'visit_cancelled') visitStatus = 'none';
     }
 
     ref.listen<AsyncValue<List<ChatMessage>>>(
@@ -365,20 +366,32 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                         ? notifier.currentUserPhotoUrl
                         : notifier.otherUserPhotoUrl;
                     if (msg.isAction) {
+                      final actionType = msg.metadata?['action_type'] as String?;
+                      final msgIdx = messages.indexOf(msg);
+
                       // A visit_request is answered if a later message has visit_accepted/rejected
                       bool isAnswered = false;
-                      if (msg.metadata?['action_type'] == 'visit_request') {
-                        final msgIdx = messages.indexOf(msg);
+                      if (actionType == 'visit_request') {
                         isAnswered = messages.skip(msgIdx + 1).any((m) =>
                           m.isAction &&
                           (m.metadata?['action_type'] == 'visit_accepted' ||
                            m.metadata?['action_type'] == 'visit_rejected'));
                       }
+
+                      // A visit_accepted card is inactive if a later visit_cancelled exists
+                      bool isActive = true;
+                      if (actionType == 'visit_accepted') {
+                        isActive = !messages.skip(msgIdx + 1).any((m) =>
+                          m.isAction &&
+                          m.metadata?['action_type'] == 'visit_cancelled');
+                      }
+
                       return _ActionCard(
                         message: msg,
                         isMine: isMine,
                         offerId: widget.offerId,
                         isAnswered: isAnswered,
+                        isActive: isActive,
                         onReschedule: _sendVisitRequest,
                       );
                     }
@@ -1058,6 +1071,7 @@ class _ActionCard extends ConsumerStatefulWidget {
     required this.isMine,
     required this.offerId,
     this.isAnswered = false,
+    this.isActive = true,
     this.onReschedule,
   });
 
@@ -1065,6 +1079,8 @@ class _ActionCard extends ConsumerStatefulWidget {
   final bool isMine;
   final String offerId;
   final bool isAnswered;
+  /// For visit_accepted cards: false when a subsequent visit_cancelled exists.
+  final bool isActive;
   final VoidCallback? onReschedule;
 
   @override
@@ -1368,8 +1384,8 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                       ],
                     ),
                   ],
-                  // Replace / Cancel buttons for Confirmed visits
-                  if (_actionType == 'visit_accepted') ...[
+                  // Replace / Cancel buttons for Confirmed visits (hidden once cancelled)
+                  if (_actionType == 'visit_accepted' && widget.isActive) ...[
                     const SizedBox(height: 12),
                     Row(
                       children: [
