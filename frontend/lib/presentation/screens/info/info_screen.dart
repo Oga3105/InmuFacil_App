@@ -159,21 +159,21 @@ class InfoScreen extends StatelessWidget {
       case InfoPageType.privacy:
         return _LegalTextScreen(
           title: 'info.legal.privacy.title'.tr(),
-          sections: _privacySections,
+          sections: _buildPrivacySections(),
           heroIcon: Icons.privacy_tip_outlined,
           heroColor: _kBlue,
         );
       case InfoPageType.terms:
         return _LegalTextScreen(
           title: 'info.legal.terms.title'.tr(),
-          sections: _termsSections,
+          sections: _buildTermsSections(),
           heroIcon: Icons.description_outlined,
           heroColor: _kBlue,
         );
       case InfoPageType.legalNotice:
         return _LegalTextScreen(
           title: 'info.legal.legal_notice.title'.tr(),
-          sections: _legalNoticeSections,
+          sections: _buildLegalNoticeSections(),
           heroIcon: Icons.gavel_outlined,
           heroColor: _kGreen,
         );
@@ -1076,7 +1076,7 @@ class _LegalSectionTileState extends State<_LegalSectionTile> {
 
 // ── Privacy Policy Sections ────────────────────────────────────────────────
 
-final _privacySections = [
+List<_LegalSection> _buildPrivacySections() => [
   _LegalSection(
     title: 'info.legal.privacy.sections.0.title'.tr(),
     icon: Icons.business_outlined,
@@ -1133,7 +1133,7 @@ final _privacySections = [
 
 // ── Terms & Conditions Sections ───────────────────────────────────────────
 
-final _termsSections = [
+List<_LegalSection> _buildTermsSections() => [
   _LegalSection(
     title: 'info.legal.terms.sections.0.title'.tr(),
     icon: Icons.handshake_outlined,
@@ -1190,7 +1190,7 @@ final _termsSections = [
 
 // ── Legal Notice Sections ─────────────────────────────────────────────────
 
-final _legalNoticeSections = [
+List<_LegalSection> _buildLegalNoticeSections() => [
   _LegalSection(
     title: 'info.legal.legal_notice.sections.0.title'.tr(),
     icon: Icons.business_outlined,
@@ -1220,6 +1220,11 @@ final _legalNoticeSections = [
     title: 'info.legal.legal_notice.sections.5.title'.tr(),
     icon: Icons.account_balance_outlined,
     body: 'info.legal.legal_notice.sections.5.body'.tr(),
+  ),
+  _LegalSection(
+    title: 'info.legal.legal_notice.sections.6.title'.tr(),
+    icon: Icons.balance_outlined,
+    body: 'info.legal.legal_notice.sections.6.body'.tr(),
   ),
 ];
 
