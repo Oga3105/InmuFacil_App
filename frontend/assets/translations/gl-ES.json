@@ -1400,7 +1400,9 @@
     "understood": "Entendido",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/mes",
-    "docs_unverified_notice": "O teu anuncio é visible, pero os compradores verán que a documentación aínda non foi verificada por InmuFácil. Complétao para xerar máis confianza."
+    "docs_unverified_notice": "O teu anuncio é visible, pero os compradores verán que a documentación aínda non foi verificada por InmuFácil. Complétao para xerar máis confianza.",
+    "verification_required_msg": "Só os usuarios con identidade verificada poden contactar con particulares. Completa a túa verificación KYC para continuar.",
+    "verify_identity_btn": "Verificar identidade"
   },
   "property_wizard": {
     "add_photos": "ENGADIR FOTOS",

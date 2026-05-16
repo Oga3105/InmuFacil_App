@@ -1423,7 +1423,9 @@
       "ready": "Listo"
     },
     "eur_per_month": "EUR/mois",
-    "docs_unverified_notice": "Votre annonce est visible, mais les acheteurs verront que la documentation n'a pas encore été vérifiée par InmuFácil. Complétez-la pour renforcer la confiance."
+    "docs_unverified_notice": "Votre annonce est visible, mais les acheteurs verront que la documentation n'a pas encore été vérifiée par InmuFácil. Complétez-la pour renforcer la confiance.",
+    "verification_required_msg": "Seuls les utilisateurs avec une identité vérifiée peuvent contacter des vendeurs privés. Complétez votre vérification KYC pour continuer.",
+    "verify_identity_btn": "Vérifier mon identité"
   },
   "property_wizard": {
     "add_photos": "AJOUTER DES PHOTOS",

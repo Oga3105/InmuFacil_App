@@ -1423,7 +1423,9 @@
     "understood": "Understood",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/month",
-    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust."
+    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust.",
+    "verification_required_msg": "Only users with verified identity can contact private sellers. Complete your KYC verification to continue.",
+    "verify_identity_btn": "Verify identity"
   },
   "property_wizard": {
     "add_photos": "ADD PHOTOS",

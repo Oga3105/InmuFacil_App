@@ -1398,7 +1398,9 @@
     "understood": "Entès",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/mes",
-    "docs_unverified_notice": "El teu anunci és visible, però els compradors veuran que la documentació encara no ha estat verificada per InmuFácil. Completa'l per generar més confiança."
+    "docs_unverified_notice": "El teu anunci és visible, però els compradors veuran que la documentació encara no ha estat verificada per InmuFácil. Completa'l per generar més confiança.",
+    "verification_required_msg": "Només els usuaris amb identitat verificada poden contactar amb venedors privats. Completa la teva verificació KYC per continuar.",
+    "verify_identity_btn": "Verifica la identitat"
   },
   "property_wizard": {
     "add_photos": "AFEGIR FOTOS",

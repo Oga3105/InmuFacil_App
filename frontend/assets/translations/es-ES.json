@@ -394,7 +394,9 @@
       "needs_renovation": "Reforma",
       "ready": "Listo"
     },
-    "docs_unverified_notice": "Tu anuncio es visible, pero los compradores verán que la documentación aún no ha sido verificada por InmuFácil. Complétalo para generar más confianza."
+    "docs_unverified_notice": "Tu anuncio es visible, pero los compradores verán que la documentación aún no ha sido verificada por InmuFácil. Complétalo para generar más confianza.",
+    "verification_required_msg": "Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.",
+    "verify_identity_btn": "Verificar identidad"
   },
   "common": {
     "save": "Guardar",

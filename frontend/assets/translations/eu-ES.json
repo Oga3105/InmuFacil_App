@@ -1398,7 +1398,9 @@
     "understood": "Ulertuta",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/hil",
-    "docs_unverified_notice": "Zure iragarkia ikusgai dago, baina erosleek ikusiko dute dokumentazioa oraindik ez dela InmuFácil-ek egiaztatuta. Osatu ezazu konfiantza gehiago sortzeko."
+    "docs_unverified_notice": "Zure iragarkia ikusgai dago, baina erosleek ikusiko dute dokumentazioa oraindik ez dela InmuFácil-ek egiaztatuta. Osatu ezazu konfiantza gehiago sortzeko.",
+    "verification_required_msg": "Nortasuna egiaztatu duten erabiltzaileek bakarrik jar dezakete harremanetan partikularrekin. Osatu zure KYC egiaztapena jarraitzeko.",
+    "verify_identity_btn": "Nortasuna egiaztatu"
   },
   "property_wizard": {
     "add_photos": "ARGAZKIAK GEHITU",
