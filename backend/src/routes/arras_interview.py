@@ -6,7 +6,8 @@ Endpoints:
   POST /arras/{offer_id}                  Guardar respuestas genericas (legacy)
   POST /arras/{offer_id}/buyer            Guardar entrevista del comprador
   POST /arras/{offer_id}/seller           Guardar entrevista del vendedor
-  POST /arras/{offer_id}/buyer/confirm    Comprador confirma su entrevista
+  POST /arras/{offer_id}/buyer/confirm        Comprador confirma su entrevista
+  POST /arras/{offer_id}/buyer/cash-consent   Comprador acepta aviso legal de pago al contado
   POST /arras/{offer_id}/seller/confirm   Vendedor confirma su entrevista
   POST /arras/{offer_id}/contract/accept  Aceptar el contrato generado por IA
   POST /arras/{offer_id}/contract/reject  Rechazar contrato y pedir cambios
@@ -86,6 +87,11 @@ class SellerArrasAnswers(BaseModel):
     mortgage_amount: Optional[int] = None
     plusvalia_assumed: bool = True
     ibi_retention_accepted: bool = True
+    # Metodo de pago seleccionado: 'bank_transfer' | 'cash' | 'other'
+    seller_payment_method_type: Optional[str] = None
+    # Descripcion obligatoria cuando no es transferencia bancaria
+    seller_payment_description: Optional[str] = None
+    # Solo cuando seller_payment_method_type == 'bank_transfer'
     iban: Optional[str] = None
     bank_name: Optional[str] = None
     additional_clauses: Optional[str] = None
@@ -124,6 +130,10 @@ class ArrasInterviewResponse(BaseModel):
     seller_contract_accepted: bool = False
     buyer_rejection_notes: Optional[str] = None
     seller_rejection_notes: Optional[str] = None
+    # Payment method chosen by seller: 'bank_transfer' | 'cash' | 'other'
+    seller_payment_method_type: Optional[str] = None
+    # Timestamp when buyer accepted the cash legal warning
+    buyer_cash_consent_at: Optional[datetime] = None
     # Computed helper for the timeline
     arras_status: str = "none"
 
@@ -186,6 +196,8 @@ def _serialize(record: ArrasInterview, offer_amount: int = 0) -> ArrasInterviewR
         seller_contract_accepted=bool(record.seller_contract_accepted),
         buyer_rejection_notes=record.buyer_rejection_notes,
         seller_rejection_notes=record.seller_rejection_notes,
+        seller_payment_method_type=(record.seller_answers_json or {}).get("seller_payment_method_type"),
+        buyer_cash_consent_at=record.buyer_cash_consent_at,
         arras_status=_compute_arras_status(record),
     )
 
@@ -300,18 +312,27 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
         cadastral_reference = ba.get("cadastral_reference") or "A determinar"
         registry_data = ba.get("registry_data") or "A determinar"
 
-        # --- Full IBAN + bank name ---
-        iban_display = "A facilitar por el vendedor"
+        # --- Payment method for arras ---
+        seller_payment_type = sa.get("seller_payment_method_type") or "bank_transfer"
+        seller_payment_description = sa.get("seller_payment_description") or ""
         bank_name = sa.get("bank_name") or ""
-        if record.seller_iban_enc:
-            try:
-                iban_display = decrypt_data(record.seller_iban_enc)
-            except Exception:
-                iban_display = "Error al descifrar IBAN"
 
-        iban_bank_line = iban_display
-        if bank_name:
-            iban_bank_line = f"{iban_display} ({bank_name})"
+        if seller_payment_type == "bank_transfer":
+            iban_display = "A facilitar por el vendedor"
+            if record.seller_iban_enc:
+                try:
+                    iban_display = decrypt_data(record.seller_iban_enc)
+                except Exception:
+                    iban_display = "Error al descifrar IBAN"
+            iban_bank_line = f"{iban_display} ({bank_name})" if bank_name else iban_display
+            payment_arras_line = f"Transferencia bancaria — IBAN: {iban_bank_line}"
+        elif seller_payment_type == "cash":
+            payment_arras_line = f"Pago al contado — {seller_payment_description}"
+        else:
+            payment_arras_line = f"Otros — {seller_payment_description}"
+
+        # Keep iban_bank_line accessible for the Duodecima clause
+        iban_bank_line = payment_arras_line
 
         # --- Second buyer ---
         second_buyer_block = ""
@@ -377,7 +398,7 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
 - Importe hipoteca pendiente: {sa.get('mortgage_amount', 0)} EUR
 - Asume plusvalia municipal: {yn(sa.get('plusvalia_assumed', True))}
 - Acepta retencion IBI: {yn(sa.get('ibi_retention_accepted', True))}
-- IBAN para ingreso arras: {iban_bank_line}
+- Metodo de pago arras: {payment_arras_line}
 - Clausulas adicionales vendedor: {seller_clauses if seller_clauses else 'Ninguna'}"""
 
         prompt = f"""Eres un abogado especialista en derecho inmobiliario espanol. Genera un CONTRATO DE ARRAS PENITENCIALES completo y formal en espanol basado en los siguientes datos. El contrato debe ser riguroso, profesional y listo para revisar por las partes. No uses placeholders como "[X]" — usa los datos proporcionados.
@@ -411,7 +432,7 @@ Estructura el contrato con las siguientes secciones:
    - Novena: Estado de la vivienda y suministros
    - Decima: Vicios ocultos
    - Undecima: Clausulas adicionales de las partes
-   - Duodecima: Cuenta bancaria para el ingreso de las arras: {iban_bank_line}
+   - Duodecima: Metodo de pago para el ingreso de las arras: {payment_arras_line}
    - Decimotercera: Jurisdiccion
 4. FIRMAS — incluir nombre completo, DNI/NIE y espacio para firma de cada parte:
    - Comprador: {buyer_name}, DNI/NIE: {buyer_dni}{"" if not second_buyer_block else f" y segundo comprador"}
@@ -588,10 +609,19 @@ async def save_seller_answers(
     # Encrypt IBAN before storing; keep bank_name and seller_address in plain JSON
     answers = body.model_dump()
     iban_raw = answers.pop("iban", None)
-    record.seller_answers_json = answers
-    if iban_raw:
-        record.seller_iban_enc = encrypt_data(iban_raw)
 
+    payment_type = answers.get("seller_payment_method_type")
+
+    if payment_type == "bank_transfer":
+        if iban_raw:
+            record.seller_iban_enc = encrypt_data(iban_raw)
+        # cash consent is no longer relevant — clear it so buyer must re-accept if seller changes back
+    else:
+        # Non-bank-transfer: IBAN is not applicable; reset any stored IBAN and cash consent
+        record.seller_iban_enc = None
+        record.buyer_cash_consent_at = None
+
+    record.seller_answers_json = answers
     record.seller_interview_confirmed = False
     record.seller_confirmed = False
     record.seller_confirmed_at = None
@@ -623,6 +653,38 @@ async def confirm_buyer_interview(
     record.buyer_confirmed_at = now
 
     _maybe_trigger_generation(record, background_tasks)
+    db.commit()
+    db.refresh(record)
+    return _serialize(record, int(offer.amount))
+
+
+@router.post("/{offer_id}/buyer/cash-consent", response_model=ArrasInterviewResponse)
+async def buyer_cash_consent(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """
+    Buyer acknowledges the legal presence warning for cash payment.
+    Records the timestamp in buyer_cash_consent_at.
+    Only valid when seller_payment_method_type == 'cash'.
+    """
+    offer, role = _get_offer_and_role(offer_id, current_user, db)
+    if role != "BUYER":
+        raise HTTPException(status_code=403, detail="Solo el comprador puede registrar este consentimiento")
+
+    record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Entrevista no encontrada")
+
+    sa = record.seller_answers_json or {}
+    if sa.get("seller_payment_method_type") != "cash":
+        raise HTTPException(
+            status_code=400,
+            detail="El consentimiento de pago al contado solo aplica cuando el vendedor ha elegido ese metodo",
+        )
+
+    record.buyer_cash_consent_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(record)
     return _serialize(record, int(offer.amount))
