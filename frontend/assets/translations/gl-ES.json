@@ -2370,7 +2370,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "Confirmación de FEIN desde a app.",
     "keys_docs_delivery": "Documentación a entregar",
-    "pv_not_applicable_label": "Non aplica"
+    "pv_not_applicable_label": "Non aplica",
+    "offer_amount_label": "Oferta recibida: {amount} €"
   },
   "arras_interview": {
     "title_buyer": "Entrevista de arras — Comprador",
@@ -3195,7 +3196,15 @@
     "month_sep": "Set",
     "month_oct": "Out",
     "month_nov": "Nov",
-    "month_dec": "Dec"
+    "month_dec": "Dec",
+    "accept_ok": "Oferta aceptada correctamente",
+    "accept_error": "Erro ao aceptar a oferta. Téntao de novo.",
+    "counter_amount_label": "Novo importe (€)",
+    "counter_send_btn": "Enviar contraoferta",
+    "counter_ok": "Contraoferta enviada correctamente",
+    "counter_error": "Erro ao enviar a contraoferta. Téntao de novo.",
+    "reject_ok": "Oferta rexeitada",
+    "reject_error": "Erro ao rexeitar a oferta. Téntao de novo."
   },
   "ccaa": {
     "andalucia": "Andalucía",

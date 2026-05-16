@@ -2437,7 +2437,8 @@
     "snack_counter_rejected": "Contraoferta rechazada",
     "snack_offer_rejected": "Oferta rechazada",
     "snack_error": "Error al procesar la acción. Inténtalo de nuevo.",
-    "solvency_none": "No verificada"
+    "solvency_none": "No verificada",
+    "offer_amount_label": "Oferta recibida: {amount} €"
   },
   "arras_interview": {
     "confirm_my_part": "Confirmar mi parte",
@@ -2878,7 +2879,15 @@
     "month_sep": "Sep",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Dic"
+    "month_dec": "Dic",
+    "accept_ok": "Oferta aceptada correctamente",
+    "accept_error": "Error al aceptar la oferta. Inténtalo de nuevo.",
+    "counter_amount_label": "Nuevo importe (€)",
+    "counter_send_btn": "Enviar contraoferta",
+    "counter_ok": "Contraoferta enviada correctamente",
+    "counter_error": "Error al enviar la contraoferta. Inténtalo de nuevo.",
+    "reject_ok": "Oferta rechazada",
+    "reject_error": "Error al rechazar la oferta. Inténtalo de nuevo."
   },
   "visits": {
     "configured_windows": "VENTANAS CONFIGURADAS",

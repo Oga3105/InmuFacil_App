@@ -2367,7 +2367,8 @@
     "snack_counter_rejected": "Contre-offre rejetee",
     "snack_offer_rejected": "Offre rejetee",
     "snack_error": "Erreur lors du traitement de l'action. Veuillez reessayer.",
-    "solvency_none": "Non vérifié"
+    "solvency_none": "Non vérifié",
+    "offer_amount_label": "Offre reçue : {amount} €"
   },
   "arras_interview": {
     "confirm_my_part": "Confirmer ma partie",
@@ -3176,7 +3177,15 @@
     "month_sep": "Sep",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Déc"
+    "month_dec": "Déc",
+    "accept_ok": "Offre acceptée avec succès",
+    "accept_error": "Erreur lors de l'acceptation de l'offre. Veuillez réessayer.",
+    "counter_amount_label": "Nouveau montant (€)",
+    "counter_send_btn": "Envoyer la contre-offre",
+    "counter_ok": "Contre-offre envoyée avec succès",
+    "counter_error": "Erreur lors de l'envoi de la contre-offre. Veuillez réessayer.",
+    "reject_ok": "Offre refusée",
+    "reject_error": "Erreur lors du refus de l'offre. Veuillez réessayer."
   },
   "ccaa": {
     "andalucia": "Andalousie",

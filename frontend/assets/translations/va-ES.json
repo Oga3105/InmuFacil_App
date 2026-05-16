@@ -2389,7 +2389,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "Confirmació de FEIN des de l'app.",
     "keys_docs_delivery": "Documentació a lliurar",
-    "pv_not_applicable_label": "No aplica"
+    "pv_not_applicable_label": "No aplica",
+    "offer_amount_label": "Oferta rebuda: {amount} €"
   },
   "arras_interview": {
     "title_buyer": "Entrevista d'Arres — Comprador",
@@ -3198,7 +3199,15 @@
     "month_sep": "Set",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Des"
+    "month_dec": "Des",
+    "accept_ok": "Oferta acceptada correctament",
+    "accept_error": "Error en acceptar l'oferta. Torna-ho a intentar.",
+    "counter_amount_label": "Nou import (€)",
+    "counter_send_btn": "Enviar contraoferta",
+    "counter_ok": "Contraoferta enviada correctament",
+    "counter_error": "Error en enviar la contraoferta. Torna-ho a intentar.",
+    "reject_ok": "Oferta rebutjada",
+    "reject_error": "Error en rebutjar l'oferta. Torna-ho a intentar."
   },
   "amenity": {
     "exterior": "Exterior",

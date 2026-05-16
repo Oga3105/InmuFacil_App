@@ -2392,7 +2392,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "FEIN confirmation from the app.",
     "keys_docs_delivery": "Documentation to hand over",
-    "pv_not_applicable_label": "Not applicable"
+    "pv_not_applicable_label": "Not applicable",
+    "offer_amount_label": "Received offer: {amount} €"
   },
   "arras_interview": {
     "confirm_my_part": "Confirm my part",
@@ -3218,7 +3219,15 @@
     "month_sep": "Sep",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Dec"
+    "month_dec": "Dec",
+    "accept_ok": "Offer accepted successfully",
+    "accept_error": "Error accepting the offer. Please try again.",
+    "counter_amount_label": "New amount (€)",
+    "counter_send_btn": "Send counter-offer",
+    "counter_ok": "Counter-offer sent successfully",
+    "counter_error": "Error sending the counter-offer. Please try again.",
+    "reject_ok": "Offer rejected",
+    "reject_error": "Error rejecting the offer. Please try again."
   },
   "ccaa": {
     "andalucia": "Andalucía",
