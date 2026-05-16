@@ -39,18 +39,57 @@ final _arrasHubProvider = FutureProvider.autoDispose
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
-/// Hub screen for the Arras flow. Shows the status of both interviews
-/// and routes to the appropriate sub-screen.
-class ArrasInterviewScreen extends ConsumerWidget {
+class ArrasInterviewScreen extends ConsumerStatefulWidget {
   const ArrasInterviewScreen({super.key, required this.offer});
 
   final OfferData offer;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final arrasAsync = ref.watch(_arrasHubProvider(offer.id));
+  ConsumerState<ArrasInterviewScreen> createState() =>
+      _ArrasInterviewScreenState();
+}
+
+class _ArrasInterviewScreenState
+    extends ConsumerState<ArrasInterviewScreen> {
+  bool _consentLoading = false;
+
+  Future<void> _showCashConsentModal(
+      BuildContext context, WidgetRef ref) async {
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _CashConsentDialog(),
+    );
+    if (accepted == true && mounted) {
+      setState(() => _consentLoading = true);
+      try {
+        final dio = buildAuthDio();
+        await dio.post(
+            '${EnvConfig.apiBaseUrl}/arras/${widget.offer.id}/buyer/cash-consent');
+        ref.invalidate(_arrasHubProvider(widget.offer.id));
+      } on DioException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                (e.response?.data?['detail'] as String?) ??
+                    'arras_interview.error_save'.tr(),
+              ),
+            ),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _consentLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final arrasAsync =
+        ref.watch(_arrasHubProvider(widget.offer.id));
     final currentUser = ref.watch(authProvider).user;
-    final isBuyer = currentUser?.id == offer.buyerId;
+    final isBuyer = currentUser?.id == widget.offer.buyerId;
 
     return Scaffold(
       backgroundColor: _kBg,
@@ -58,13 +97,13 @@ class ArrasInterviewScreen extends ConsumerWidget {
       body: arrasAsync.when(
         loading: () =>
             const Center(child: CircularProgressIndicator(color: _kBlue)),
-        error: (_, __) => _buildBody(context, ref, isBuyer, null),
-        data: (data) => _buildBody(context, ref, isBuyer, data),
+        error: (_, __) => _buildBody(context, isBuyer, null),
+        data: (data) => _buildBody(context, isBuyer, data),
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, bool isBuyer,
+  Widget _buildBody(BuildContext context, bool isBuyer,
       Map<String, dynamic>? data) {
     final arrasStatus = data?['arras_status'] as String? ?? 'none';
     final buyerDone = data?['buyer_interview_confirmed'] == true;
@@ -73,6 +112,19 @@ class ArrasInterviewScreen extends ConsumerWidget {
     final hasContract = contractStatus != null;
     final isGenerating = contractStatus == 'generating';
     final fullyAccepted = contractStatus == 'fully_accepted';
+
+    // Cash consent state
+    final sellerPaymentType =
+        data?['seller_payment_method_type'] as String?;
+    final buyerCashConsentAt =
+        data?['buyer_cash_consent_at'] as String?;
+    final needsCashConsent = isBuyer &&
+        sellerDone &&
+        sellerPaymentType == 'cash' &&
+        buyerCashConsentAt == null;
+    final hasCashConsent = isBuyer &&
+        sellerPaymentType == 'cash' &&
+        buyerCashConsentAt != null;
 
     return ListView(
       padding: const EdgeInsets.all(24),
@@ -83,11 +135,26 @@ class ArrasInterviewScreen extends ConsumerWidget {
           buyerDone: buyerDone,
           sellerDone: sellerDone,
           arrasStatus: arrasStatus,
-          offerAmount: offer.amount,
+          offerAmount: widget.offer.amount,
           depositPercentage: data?['deposit_percentage'] as int?,
           deadlineDays: data?['deadline_days'] as int?,
         ),
         const SizedBox(height: 24),
+
+        // ── Cash consent banner (shown when required) ────────────
+        if (needsCashConsent) ...[
+          _CashConsentBanner(
+            loading: _consentLoading,
+            onTap: () => _showCashConsentModal(context, ref),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // ── Cash consent accepted badge ──────────────────────────
+        if (hasCashConsent) ...[
+          _CashConsentAcceptedBadge(consentAt: buyerCashConsentAt!),
+          const SizedBox(height: 16),
+        ],
 
         // ── Role cards ───────────────────────────────────────────
         _RoleCard(
@@ -96,13 +163,18 @@ class ArrasInterviewScreen extends ConsumerWidget {
           isMyRole: isBuyer,
           isDone: buyerDone,
           color: _kBlue,
-          statusLabel: buyerDone ? 'arras_interview.hub_completed'.tr() : 'arras_interview.hub_pending'.tr(),
+          statusLabel: buyerDone
+              ? 'arras_interview.hub_completed'.tr()
+              : 'arras_interview.hub_pending'.tr(),
           ctaLabel: isBuyer
-              ? (buyerDone ? 'arras_interview.hub_view_edit'.tr() : 'arras_interview.hub_start'.tr())
+              ? (buyerDone
+                  ? 'arras_interview.hub_view_edit'.tr()
+                  : 'arras_interview.hub_start'.tr())
               : null,
           onCta: isBuyer
-              ? () => context.push('/offers/${offer.id}/arras/buyer',
-                  extra: offer)
+              ? () => context.push(
+                  '/offers/${widget.offer.id}/arras/buyer',
+                  extra: widget.offer)
               : null,
         ),
         const SizedBox(height: 16),
@@ -113,13 +185,18 @@ class ArrasInterviewScreen extends ConsumerWidget {
           isMyRole: !isBuyer,
           isDone: sellerDone,
           color: _kGreen,
-          statusLabel: sellerDone ? 'arras_interview.hub_completed'.tr() : 'arras_interview.hub_pending'.tr(),
+          statusLabel: sellerDone
+              ? 'arras_interview.hub_completed'.tr()
+              : 'arras_interview.hub_pending'.tr(),
           ctaLabel: !isBuyer
-              ? (sellerDone ? 'arras_interview.hub_view_edit'.tr() : 'arras_interview.hub_start'.tr())
+              ? (sellerDone
+                  ? 'arras_interview.hub_view_edit'.tr()
+                  : 'arras_interview.hub_start'.tr())
               : null,
           onCta: !isBuyer
-              ? () => context.push('/offers/${offer.id}/arras/seller',
-                  extra: offer)
+              ? () => context.push(
+                  '/offers/${widget.offer.id}/arras/seller',
+                  extra: widget.offer)
               : null,
         ),
 
@@ -131,8 +208,9 @@ class ArrasInterviewScreen extends ConsumerWidget {
             hasContract: hasContract,
             fullyAccepted: fullyAccepted,
             contractStatus: contractStatus,
-            onView: () => context.push('/offers/${offer.id}/arras/contract',
-                extra: offer),
+            onView: () => context.push(
+                '/offers/${widget.offer.id}/arras/contract',
+                extra: widget.offer),
           ),
         ],
 
@@ -180,7 +258,7 @@ class ArrasInterviewScreen extends ConsumerWidget {
                       text: 'Inmu',
                       style: TextStyle(color: Color(0xFF135BEC))),
                   TextSpan(
-                      text: 'Fácil',
+                      text: 'Facil',
                       style: TextStyle(color: Color(0xFF16A34A))),
                 ],
               ),
@@ -190,12 +268,15 @@ class ArrasInterviewScreen extends ConsumerWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
+        child: Container(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            height: 1),
       ),
       actions: [
         Consumer(
           builder: (context, ref, _) {
-            final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+            final isAuthenticated =
+                ref.watch(authProvider).isAuthenticated;
             if (!isAuthenticated) return const SizedBox.shrink();
             return const Row(
               mainAxisSize: MainAxisSize.min,
@@ -207,6 +288,287 @@ class ArrasInterviewScreen extends ConsumerWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+// ── Cash consent banner ───────────────────────────────────────────────────────
+
+class _CashConsentBanner extends StatelessWidget {
+  const _CashConsentBanner({
+    required this.loading,
+    required this.onTap,
+  });
+
+  final bool loading;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF7ED),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFF97316), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.gavel_outlined,
+                  color: Color(0xFFEA580C), size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'arras_interview.cash_consent_banner_title'.tr(),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFFEA580C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'arras_interview.cash_consent_banner_desc'.tr(),
+            style: const TextStyle(
+                fontSize: 12, color: Color(0xFF9A3412), height: 1.4),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: loading ? null : onTap,
+              icon: loading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.verified_user_outlined, size: 16),
+              label: Text('arras_interview.cash_consent_banner_btn'.tr()),
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFFEA580C),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Cash consent accepted badge ───────────────────────────────────────────────
+
+class _CashConsentAcceptedBadge extends StatelessWidget {
+  const _CashConsentAcceptedBadge({required this.consentAt});
+
+  final String consentAt;
+
+  @override
+  Widget build(BuildContext context) {
+    String dateStr = consentAt;
+    try {
+      final dt = DateTime.parse(consentAt).toLocal();
+      dateStr =
+          '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year} '
+          '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
+    } catch (_) {}
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFF86EFAC)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_outline,
+              color: Color(0xFF16A34A), size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'arras_interview.cash_consent_modal_accepted_badge'
+                  .tr(namedArgs: {'date': dateStr}),
+              style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF166534),
+                  fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Cash consent dialog ───────────────────────────────────────────────────────
+
+class _CashConsentDialog extends StatefulWidget {
+  const _CashConsentDialog();
+
+  @override
+  State<_CashConsentDialog> createState() => _CashConsentDialogState();
+}
+
+class _CashConsentDialogState extends State<_CashConsentDialog> {
+  bool _checked = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ─────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7ED),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFB923C)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.gavel_outlined,
+                          color: Color(0xFFEA580C), size: 24),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'arras_interview.cash_consent_modal_title'.tr(),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Color(0xFFEA580C),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEA580C),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'arras_interview.cash_consent_modal_warning'.tr(),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Body text ───────────────────────────────────────
+            Text(
+              'arras_interview.cash_consent_modal_body'.tr(),
+              style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF374151),
+                  height: 1.6),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Checkbox ────────────────────────────────────────
+            InkWell(
+              onTap: () => setState(() => _checked = !_checked),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Checkbox(
+                      value: _checked,
+                      activeColor: const Color(0xFFEA580C),
+                      onChanged: (v) =>
+                          setState(() => _checked = v ?? false),
+                      materialTapTargetSize:
+                          MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'arras_interview.cash_consent_modal_checkbox'.tr(),
+                        style: const TextStyle(
+                            fontSize: 13, color: Color(0xFF374151)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Buttons ─────────────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                        'arras_interview.cash_consent_modal_cancel'.tr()),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: _checked
+                        ? () => Navigator.of(context).pop(true)
+                        : null,
+                    icon: const Icon(Icons.verified_user_outlined,
+                        size: 16),
+                    label: Text(
+                        'arras_interview.cash_consent_modal_accept'.tr()),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFFEA580C),
+                      disabledBackgroundColor:
+                          const Color(0xFFEA580C).withOpacity(0.3),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding:
+                          const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -296,8 +658,8 @@ class _HeroCard extends StatelessWidget {
                   ),
                   Text(
                     'arras_interview.hub_hero_subtitle'.tr(),
-                    style:
-                        const TextStyle(color: Colors.white60, fontSize: 13),
+                    style: const TextStyle(
+                        color: Colors.white60, fontSize: 13),
                   ),
                 ],
               ),
@@ -320,14 +682,18 @@ class _HeroCard extends StatelessWidget {
               if (depositPercentage != null) ...[
                 const SizedBox(width: 8),
                 _Chip(
-                  label: 'arras_interview.hub_hero_arras_pct'.tr(namedArgs: {'pct': depositPercentage.toString()}),
+                  label: 'arras_interview.hub_hero_arras_pct'.tr(
+                      namedArgs: {
+                        'pct': depositPercentage.toString()
+                      }),
                   icon: Icons.payments_outlined,
                 ),
               ],
               if (deadlineDays != null) ...[
                 const SizedBox(width: 8),
                 _Chip(
-                  label: 'arras_interview.hub_hero_deadline'.tr(namedArgs: {'days': deadlineDays.toString()}),
+                  label: 'arras_interview.hub_hero_deadline'.tr(
+                      namedArgs: {'days': deadlineDays.toString()}),
                   icon: Icons.schedule_outlined,
                 ),
               ],
@@ -337,10 +703,14 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               _StatusDot(
-                  label: 'arras_interview.hub_hero_buyer'.tr(), active: buyerDone, color: _kGreen),
+                  label: 'arras_interview.hub_hero_buyer'.tr(),
+                  active: buyerDone,
+                  color: _kGreen),
               const SizedBox(width: 16),
               _StatusDot(
-                  label: 'arras_interview.hub_hero_seller'.tr(), active: sellerDone, color: _kGreen),
+                  label: 'arras_interview.hub_hero_seller'.tr(),
+                  active: sellerDone,
+                  color: _kGreen),
             ],
           ),
         ],
@@ -462,7 +832,8 @@ class _RoleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon,
-                color: isDone ? color : Colors.grey.shade400, size: 20),
+                color: isDone ? color : Colors.grey.shade400,
+                size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -488,7 +859,8 @@ class _RoleCard extends StatelessWidget {
                           color: _kBlue.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text('arras_interview.hub_role_you'.tr(),
+                        child: Text(
+                            'arras_interview.hub_role_you'.tr(),
                             style: TextStyle(
                                 color: _kBlue,
                                 fontSize: 10,
@@ -524,7 +896,8 @@ class _RoleCard extends StatelessWidget {
             FilledButton(
               onPressed: onCta,
               style: FilledButton.styleFrom(
-                backgroundColor: isDone ? Colors.grey.shade200 : color,
+                backgroundColor:
+                    isDone ? Colors.grey.shade200 : color,
                 foregroundColor: isDone ? color : Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -533,7 +906,9 @@ class _RoleCard extends StatelessWidget {
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
-              child: Text(isDone ? 'arras_interview.hub_btn_view'.tr() : 'arras_interview.hub_btn_start'.tr()),
+              child: Text(isDone
+                  ? 'arras_interview.hub_btn_view'.tr()
+                  : 'arras_interview.hub_btn_start'.tr()),
             ),
           ],
         ],
@@ -568,22 +943,28 @@ class _ContractCard extends StatelessWidget {
       cardColor = _kGreen;
       cardIcon = Icons.verified_outlined;
       cardTitle = 'arras_interview.hub_contract_accepted_title'.tr();
-      cardSubtitle = 'arras_interview.hub_contract_accepted_desc'.tr();
+      cardSubtitle =
+          'arras_interview.hub_contract_accepted_desc'.tr();
     } else if (isGenerating) {
       cardColor = _kBlue;
       cardIcon = Icons.auto_awesome_outlined;
-      cardTitle = 'arras_interview.hub_contract_generating_title'.tr();
-      cardSubtitle = 'arras_interview.hub_contract_generating_desc'.tr();
+      cardTitle =
+          'arras_interview.hub_contract_generating_title'.tr();
+      cardSubtitle =
+          'arras_interview.hub_contract_generating_desc'.tr();
     } else if (hasContract) {
       cardColor = const Color(0xFFD97706);
       cardIcon = Icons.description_outlined;
       cardTitle = 'arras_interview.hub_contract_ready_title'.tr();
-      cardSubtitle = 'arras_interview.hub_contract_ready_desc'.tr();
+      cardSubtitle =
+          'arras_interview.hub_contract_ready_desc'.tr();
     } else {
       cardColor = _kBlue;
       cardIcon = Icons.hourglass_empty_outlined;
-      cardTitle = 'arras_interview.hub_contract_pending_title'.tr();
-      cardSubtitle = 'arras_interview.hub_contract_pending_desc'.tr();
+      cardTitle =
+          'arras_interview.hub_contract_pending_title'.tr();
+      cardSubtitle =
+          'arras_interview.hub_contract_pending_desc'.tr();
     }
 
     return Container(
@@ -591,8 +972,7 @@ class _ContractCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border:
-            Border.all(color: cardColor.withValues(alpha: 0.25)),
+        border: Border.all(color: cardColor.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -622,7 +1002,8 @@ class _ContractCard extends StatelessWidget {
                         color: cardColor)),
                 Text(cardSubtitle,
                     style: TextStyle(
-                        fontSize: 12, color: Colors.grey.shade600)),
+                        fontSize: 12,
+                        color: Colors.grey.shade600)),
               ],
             ),
           ),
@@ -639,7 +1020,8 @@ class _ContractCard extends StatelessWidget {
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
-              child: Text('arras_interview.hub_contract_view_btn'.tr()),
+              child: Text(
+                  'arras_interview.hub_contract_view_btn'.tr()),
             ),
           ],
         ],
