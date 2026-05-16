@@ -342,7 +342,8 @@ async def create_offer(
         amount=offer_data.amount,
         conditions=offer_data.conditions,
         valid_until=valid_until,
-        status=OfferStatus.PENDING
+        status=OfferStatus.PENDING,
+        is_chat_enabled=True,
     )
     
     db.add(offer)
