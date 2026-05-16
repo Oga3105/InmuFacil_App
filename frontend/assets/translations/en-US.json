@@ -233,6 +233,8 @@
     "level_bronze": "Bronze Level",
     "yesterday_caps": "YESTERDAY",
     "action_visit_cancelled": "Visit Cancelled",
+    "action_cee_pending_title": "Energy Certificate Required",
+    "action_cee_pending_desc": "You have a pending offer that the buyer cannot see. Add the energy certificate rating (A-G) to your property details to activate it.",
     "reject": "Reject",
     "accept": "Accept",
     "reschedule": "Reschedule",

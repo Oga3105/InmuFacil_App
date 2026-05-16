@@ -690,6 +690,8 @@
     "level_bronze": "Nivel Bronce",
     "yesterday_caps": "AYER",
     "action_visit_cancelled": "Visita Cancelada",
+    "action_cee_pending_title": "Certificado Energetico Requerido",
+    "action_cee_pending_desc": "Tienes una oferta pendiente que el comprador no puede ver. Anade la clasificacion del certificado energetico (A-G) en los datos de tu propiedad para activarla.",
     "reject": "Rechazar",
     "accept": "Aceptar",
     "reschedule": "Reprogramar",

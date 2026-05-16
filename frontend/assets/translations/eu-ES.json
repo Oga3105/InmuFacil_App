@@ -211,6 +211,8 @@
     "level_bronze": "Brontzezko Maila",
     "yesterday_caps": "ATZO",
     "action_visit_cancelled": "Bisita Bertan Behera",
+    "action_cee_pending_title": "Energia Ziurtagiria Beharrezkoa",
+    "action_cee_pending_desc": "Erosleek ikusi ezin duten eskaintza zain daukazu. Gehitu energia ziurtagiriaren sailkapena (A-G) zure propietatearen datuetan aktibatzeko.",
     "reject": "Ukatu",
     "accept": "Onartu",
     "reschedule": "Berreprogramatu",

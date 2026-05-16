@@ -1183,6 +1183,12 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
           const Color(0xFFD97706),
           const Color(0xFFFFF7ED),
         ),
+      'cee_pending' => (
+          Icons.energy_savings_leaf_outlined,
+          'chat.action_cee_pending_title'.tr(),
+          const Color(0xFFD97706),
+          const Color(0xFFFFF7ED),
+        ),
       _ => (
           Icons.info_outline,
           _actionType.isNotEmpty
@@ -1330,6 +1336,18 @@ class _ActionCardState extends ConsumerState<_ActionCard> {
                           ),
                         ],
                       ),
+                  ],
+                  // CEE pending description
+                  if (_actionType == 'cee_pending') ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      'chat.action_cee_pending_desc'.tr(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: const Color(0xFF92400E),
+                        height: 1.5,
+                      ),
+                    ),
                   ],
                   // Action buttons (only to receiver, only while not yet answered)
                   if (!widget.isMine && _actionType == 'visit_request' && !widget.isAnswered) ...[

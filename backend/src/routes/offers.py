@@ -22,6 +22,7 @@ from backend.src.services.email_service import (
     send_offer_accepted_confirmation_email,
     send_counter_offer_notification_email,
     send_counter_offer_confirmation_email,
+    send_cee_pending_offer_email,
 )
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
@@ -301,14 +302,9 @@ async def create_offer(
     if not prop:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    # 1b. CEE Gate — block offers on EXPOSED properties (missing energy certificate)
+    # 1b. Hard block: EXPOSED properties are legally barred from receiving offers
     from backend.src.models.enums import PropertyStatus, EnergyCertification
     if prop.status == PropertyStatus.EXPOSED:
-        raise HTTPException(
-            status_code=400,
-            detail="Incluye el CEE para recibir ofertas",
-        )
-    if prop.legal and prop.legal.energy_certification == EnergyCertification.EN_TRAMITE:
         raise HTTPException(
             status_code=400,
             detail="Incluye el CEE para recibir ofertas",
@@ -317,36 +313,66 @@ async def create_offer(
     # 2. Defense in Depth: No Self-Offers
     if prop.owner_id == current_user.id:
         raise HTTPException(status_code=400, detail="Owner cannot bid on own property")
-        
+
     # 3. Validate Amount
     if offer_data.amount <= 0:
         raise HTTPException(status_code=400, detail="Amount must be positive")
-        
-    # 4. Check active offers (Optional: limit 1 active offer per property per user)
-    active_offer = db.query(PropertyOffer).filter(
+
+    # 4. Check for existing active offer (PENDING or CEE_PENDING) from this buyer
+    existing_offer = db.query(PropertyOffer).filter(
         PropertyOffer.property_id == offer_data.property_id,
         PropertyOffer.buyer_id == current_user.id,
-        cast(PropertyOffer.status, String) == OfferStatus.PENDING.name
+        PropertyOffer.status.in_([OfferStatus.PENDING, OfferStatus.CEE_PENDING]),
     ).first()
-    
-    if active_offer:
+    if existing_offer:
         raise HTTPException(status_code=409, detail="You already have a pending offer for this property")
 
-    # 5. Create
+    # 5. Determine whether the property has a valid energy certificate
+    _legal = prop.legal
+    _has_valid_cee = (
+        _legal is not None
+        and _legal.energy_certification is not None
+        and _legal.energy_certification != EnergyCertification.EN_TRAMITE
+    )
+
     from datetime import timedelta
     valid_until = datetime.utcnow() + timedelta(days=offer_data.valid_days)
-    
+
+    offer_status = OfferStatus.PENDING if _has_valid_cee else OfferStatus.CEE_PENDING
+
     offer = PropertyOffer(
         property_id=offer_data.property_id,
         buyer_id=current_user.id,
         amount=offer_data.amount,
         conditions=offer_data.conditions,
         valid_until=valid_until,
-        status=OfferStatus.PENDING,
+        status=offer_status,
         is_chat_enabled=True,
     )
-    
+
     db.add(offer)
+    db.flush()  # get offer.id before injecting the chat message
+
+    # 5b. If CEE is missing, inject an action message so the seller sees it in chat
+    if not _has_valid_cee:
+        _cee_msg_text = (
+            "Se ha recibido una oferta para esta propiedad, pero no es visible para el "
+            "comprador porque falta el certificado energetico. Anade la clasificacion "
+            "(A-G) en los datos de tu propiedad para activarla."
+        )
+        _cee_msg = OfferMessage(
+            offer_id=offer.id,
+            sender_id=prop.owner_id,
+            message_encrypted=encrypt_data(_cee_msg_text),
+            message_type="action",
+            action_data={
+                "action_type": "cee_pending",
+                "display_text": _cee_msg_text,
+            },
+            is_read=False,
+        )
+        db.add(_cee_msg)
+
     db.commit()
     # Re-fetch with eager loads so the response includes nested property and buyer
     created = _offers_query(db).filter(PropertyOffer.id == offer.id).first()
@@ -356,32 +382,45 @@ async def create_offer(
     property_address = prop.location or prop.street or prop.city or f"Propiedad #{prop.id}"
     valid_until_str = valid_until.strftime("%d/%m/%Y %H:%M") if valid_until else "—"
 
-    # Notify seller of new offer (only if notifications enabled)
-    if seller and getattr(seller, "email_notifications_enabled", True):
+    if not _has_valid_cee:
+        # Notify seller that they have a blocked offer and need to add CEE
+        if seller and getattr(seller, "email_notifications_enabled", True):
+            asyncio.create_task(
+                send_cee_pending_offer_email(
+                    seller_email=seller.email,
+                    seller_name=seller.full_name,
+                    buyer_name=current_user.full_name,
+                    property_title=prop.title or f"Propiedad #{prop.id}",
+                    property_address=property_address,
+                    amount=offer_data.amount,
+                )
+            )
+    else:
+        # Normal flow: notify seller of new offer
+        if seller and getattr(seller, "email_notifications_enabled", True):
+            asyncio.create_task(
+                send_offer_received_email(
+                    seller_email=seller.email,
+                    seller_name=seller.full_name,
+                    buyer_name=current_user.full_name,
+                    property_title=prop.title or f"Propiedad #{prop.id}",
+                    property_address=property_address,
+                    amount=offer_data.amount,
+                    valid_until=valid_until_str,
+                )
+            )
+        # Confirm to buyer that their offer was sent
         asyncio.create_task(
-            send_offer_received_email(
-                seller_email=seller.email,
-                seller_name=seller.full_name,
+            send_offer_sent_confirmation_email(
+                buyer_email=current_user.email,
                 buyer_name=current_user.full_name,
                 property_title=prop.title or f"Propiedad #{prop.id}",
                 property_address=property_address,
                 amount=offer_data.amount,
+                seller_name=seller.full_name if seller else "el vendedor",
                 valid_until=valid_until_str,
             )
         )
-
-    # Confirm to buyer that their offer was sent (always)
-    asyncio.create_task(
-        send_offer_sent_confirmation_email(
-            buyer_email=current_user.email,
-            buyer_name=current_user.full_name,
-            property_title=prop.title or f"Propiedad #{prop.id}",
-            property_address=property_address,
-            amount=offer_data.amount,
-            seller_name=seller.full_name if seller else "el vendedor",
-            valid_until=valid_until_str,
-        )
-    )
 
     return _serialize_offer(created, db)
 
@@ -447,10 +486,11 @@ async def list_sent_offers(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Buyer sees offers they made.
+    Buyer sees offers they made. CEE_PENDING offers are hidden until seller adds certificate.
     """
     offers = _offers_query(db).filter(
-        PropertyOffer.buyer_id == current_user.id
+        PropertyOffer.buyer_id == current_user.id,
+        PropertyOffer.status != OfferStatus.CEE_PENDING,
     ).all()
     return [_serialize_offer(o, db) for o in offers]
 

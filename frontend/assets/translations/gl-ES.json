@@ -213,6 +213,8 @@
     "level_bronze": "Nivel Bronce",
     "yesterday_caps": "ONTE",
     "action_visit_cancelled": "Visita cancelada",
+    "action_cee_pending_title": "Certificado Enerxetico Requirido",
+    "action_cee_pending_desc": "Tes unha oferta pendente que o comprador non pode ver. Engade a clasificacion do certificado enerxetico (A-G) nos datos da tua propiedade para activala.",
     "reject": "Rexeitar",
     "accept": "Aceptar",
     "reschedule": "Reprogramar",

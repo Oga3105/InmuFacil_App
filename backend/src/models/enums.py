@@ -149,15 +149,16 @@ class VisitStatus(str, enum.Enum):
     CANCELLED = "cancelled"
 
 class OfferStatus(str, enum.Enum):
-    INQUIRY = "inquiry"       # Direct contact request without monetary offer
-    PENDING = "pending"       # Offer sent, waiting for seller
-    ACCEPTED = "accepted"     # Seller accepted
-    REJECTED = "rejected"     # Seller rejected the offer
-    WITHDRAWN = "withdrawn"   # Buyer withdrew their own offer
+    INQUIRY = "inquiry"           # Direct contact request without monetary offer
+    CEE_PENDING = "cee_pending"   # Offer saved but property lacks valid energy certificate
+    PENDING = "pending"           # Offer sent, waiting for seller
+    ACCEPTED = "accepted"         # Seller accepted
+    REJECTED = "rejected"         # Seller rejected the offer
+    WITHDRAWN = "withdrawn"       # Buyer withdrew their own offer
     COUNTER_OFFER = "counter_offer" # Seller made a counter-offer
     SIGNING_PENDING = "signing_pending" # Hito 13: Waiting for signature
-    SIGNED = "signed"         # Hito 13: Signed by both parties
-    COMPLETED = "completed"   # Hito 15: Transaction Finalized
+    SIGNED = "signed"             # Hito 13: Signed by both parties
+    COMPLETED = "completed"       # Hito 15: Transaction Finalized
 
 class NotaryStatus(str, enum.Enum):
     NOT_ASSIGNED = "not_assigned"

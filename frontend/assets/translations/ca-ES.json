@@ -211,6 +211,8 @@
     "level_bronze": "Nivell Bronze",
     "yesterday_caps": "AHIR",
     "action_visit_cancelled": "Visita Cancel·lada",
+    "action_cee_pending_title": "Certificat Energetic Requerit",
+    "action_cee_pending_desc": "Tens una oferta en espera que el comprador no pot veure. Afegeix la classificacio del certificat energetic (A-G) a les dades de la teva propietat per activar-la.",
     "reject": "Rebutjar",
     "accept": "Acceptar",
     "reschedule": "Reprogramar",
