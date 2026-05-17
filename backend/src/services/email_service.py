@@ -1360,3 +1360,111 @@ async def send_ai_abuse_alert_email(
         subject=f"[InmuFacil ALERTA IA] {label} — user_id={user_id} feature={feature}",
         html_body=html,
     )
+
+
+# ---------------------------------------------------------------------------
+# CEE Pending — Offer saved but property lacks valid energy certificate
+# ---------------------------------------------------------------------------
+
+def _build_cee_pending_offer_html(
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> str:
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    dashboard_link = f"{FRONTEND_BASE_URL}/profile"
+    return f"""<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oferta pendiente - certificado energetico requerido</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0"
+             style="background:#ffffff;border-radius:16px;overflow:hidden;
+                    box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#D97706;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:800;">InmuFacil</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:13px;">
+              Plataforma inmobiliaria entre particulares
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="margin:0 0 12px;color:#0F172A;font-size:20px;font-weight:700;">
+              Tienes una oferta pendiente
+            </h2>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              Hola <strong>{seller_name}</strong>,
+            </p>
+            <p style="margin:0 0 20px;color:#475569;font-size:15px;line-height:1.6;">
+              <strong>{buyer_name}</strong> ha realizado una oferta por tu propiedad, pero
+              <strong>no puedes recibirla hasta que anadas el certificado energetico</strong>.
+            </p>
+            <div style="background:#FFFBEB;border-left:4px solid #D97706;border-radius:8px;
+                        padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#92400E;">
+                <strong>Propiedad:</strong> {property_title}<br>
+                <strong>Direccion:</strong> {property_address}<br>
+                <strong>Oferta recibida:</strong> {formatted_amount} EUR<br>
+                <strong>Comprador:</strong> {buyer_name}
+              </p>
+            </div>
+            <div style="background:#FEF3C7;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+              <p style="margin:0;font-size:14px;color:#78350F;line-height:1.6;">
+                Para que el comprador pueda ver su oferta y continuar el proceso,
+                accede a tu propiedad en InmuFacil y anade la clasificacion del
+                certificado energetico (A, B, C, D, E, F o G).
+                En cuanto lo hagas, la oferta se activara automaticamente.
+              </p>
+            </div>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="{dashboard_link}"
+                 style="display:inline-block;background:#D97706;color:#ffffff;
+                        text-decoration:none;padding:14px 32px;border-radius:10px;
+                        font-size:15px;font-weight:700;">
+                Anadir certificado energetico
+              </a>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
+                     padding:24px 40px;text-align:center;">
+            <p style="margin:0;color:#94A3B8;font-size:12px;">
+              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+
+async def send_cee_pending_offer_email(
+    seller_email: str,
+    seller_name: str,
+    buyer_name: str,
+    property_title: str,
+    property_address: str,
+    amount: int,
+) -> bool:
+    """Notifica al VENDEDOR que tiene una oferta pendiente por falta de certificado energetico."""
+    formatted_amount = f"{amount:,}".replace(",", ".")
+    html = _build_cee_pending_offer_html(
+        seller_name, buyer_name, property_title, property_address, amount
+    )
+    return await _send_email(
+        to=seller_email,
+        subject=f"Oferta pendiente en '{property_title}' — Anade el certificado energetico",
+        html_body=html,
+    )

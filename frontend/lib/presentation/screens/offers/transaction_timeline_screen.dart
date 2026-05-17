@@ -24,7 +24,7 @@ final _arrasStatusProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/arras/$offerId',
+      '${EnvConfig.apiBaseUrl}/arras/$offerId',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['arras_status'] as String? ??
@@ -42,7 +42,7 @@ final _tasacionStatusProvider = FutureProvider.autoDispose
   final dio = buildAuthDio();
   try {
     final resp = await dio.get(
-      '$EnvConfig.apiBaseUrl/tasacion/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/tasacion/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -59,7 +59,7 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']
@@ -199,6 +199,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
+                    sellerActions: !isBuyer && s == 'pending'
+                        ? _SellerPendingOfferActions(offer: liveOffer)
+                        : null,
                     // Withdraw in step 0 only for pending/counter_offer
                     withdrawAction:
                         canWithdraw && (s == 'pending' || s == 'counter_offer')
@@ -326,6 +329,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     bool feinBuyerConfirmed = false,
     String notariaApptStatus = 'pending',
     Widget? buyerActions,
+    Widget? sellerActions,
     Widget? withdrawAction,
     Widget? solvencyActionsWidget,
   }) {
@@ -364,11 +368,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
 
     // Combina los botones de acción para el paso 0 si aplica
     Widget? step0Actions;
-    if (buyerActions != null || withdrawAction != null) {
+    if (buyerActions != null || sellerActions != null || withdrawAction != null) {
       step0Actions = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (buyerActions != null) buyerActions,
+          if (sellerActions != null) sellerActions,
           if (withdrawAction != null) ...[const SizedBox(height: 8), withdrawAction],
         ],
       );
@@ -1660,6 +1665,398 @@ class _BuyerCounterOfferActionsState
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+// ── Seller pending-offer actions (accept / counter / reject) ─────────────────
+
+class _SellerPendingOfferActions extends ConsumerStatefulWidget {
+  const _SellerPendingOfferActions({required this.offer});
+  final OfferData offer;
+
+  @override
+  ConsumerState<_SellerPendingOfferActions> createState() =>
+      _SellerPendingOfferActionsState();
+}
+
+class _SellerPendingOfferActionsState
+    extends ConsumerState<_SellerPendingOfferActions> {
+  bool _loading = false;
+
+  Future<void> _accept() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text('offers.accept_title'.tr()),
+        content: Text(
+          'offers.accept_body'.tr(
+            namedArgs: {
+              'amount': CurrencyInputFormatter.format(widget.offer.amount),
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12))),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF135BEC),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('common.accept'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .accept(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.accept_ok'.tr())),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.accept_error'.tr())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _counter() async {
+    final controller = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: 'offers.counter_title_prefix'.tr(),
+                style: const TextStyle(
+                    color: Color(0xFF135BEC), fontWeight: FontWeight.w800),
+              ),
+              TextSpan(
+                text: 'offers.counter_title_suffix'.tr(),
+                style: const TextStyle(
+                    color: Color(0xFF16A34A), fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+        ),
+        content: Form(
+          key: formKey,
+          child: TextFormField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: [CurrencyInputFormatter()],
+            textAlign: TextAlign.right,
+            decoration: InputDecoration(
+              labelText: 'offers.counter_amount_label'.tr(),
+              suffixText: ' €',
+              border: const OutlineInputBorder(),
+            ),
+            validator: (v) {
+              if (v == null || v.isEmpty) {
+                return 'chat.error_amount_required'.tr();
+              }
+              final parsed = CurrencyInputFormatter.parse(v);
+              if (parsed == null || parsed <= 0) {
+                return 'chat.error_amount_invalid'.tr();
+              }
+              return null;
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12))),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFEA580C),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () {
+              if (formKey.currentState!.validate()) Navigator.pop(ctx, true);
+            },
+            child: Text('offers.counter_send_btn'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final amount = CurrencyInputFormatter.parse(controller.text);
+    if (amount == null || amount <= 0) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .counter(widget.offer.id, amount);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.counter_ok'.tr())),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.counter_error'.tr())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _reject() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Text('offers.reject_title'.tr()),
+        content: Text('offers.reject_body'.tr()),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12))),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text('common.reject'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    setState(() => _loading = true);
+    try {
+      await ref
+          .read(receivedOffersProvider.notifier)
+          .reject(widget.offer.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.reject_ok'.tr())),
+        );
+        context.go('/profile?tab=2');
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('offers.reject_error'.tr())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Info pill showing the offer amount
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF135BEC).withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: const Color(0xFF135BEC).withValues(alpha: 0.18)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.payments_outlined,
+                  size: 16, color: Color(0xFF135BEC)),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'transaction.offer_amount_label'.tr(namedArgs: {
+                    'amount':
+                        CurrencyInputFormatter.format(widget.offer.amount),
+                  }),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF135BEC),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Action buttons: adapt layout to screen size
+        if (isMobile)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              FilledButton.icon(
+                onPressed: _loading ? null : _accept,
+                icon: const Icon(Icons.check_circle_outline, size: 16),
+                label: Text(
+                  'offers.accept_btn'.tr(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700, fontSize: 13),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF135BEC),
+                  minimumSize: const Size(0, 42),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _loading ? null : _counter,
+                      icon: const Icon(Icons.edit_outlined,
+                          size: 15, color: Color(0xFFEA580C)),
+                      label: Text(
+                        'offers.counter_btn'.tr(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Color(0xFFEA580C)),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFEA580C),
+                        side: const BorderSide(color: Color(0xFFEA580C)),
+                        minimumSize: const Size(0, 42),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _loading ? null : _reject,
+                      icon: const Icon(Icons.cancel_outlined,
+                          size: 15, color: Colors.red),
+                      label: Text(
+                        'offers.reject_btn'.tr(),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: Colors.red),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        minimumSize: const Size(0, 42),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )
+        else
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: FilledButton.icon(
+                  onPressed: _loading ? null : _accept,
+                  icon: const Icon(Icons.check_circle_outline, size: 15),
+                  label: Text(
+                    'offers.accept_btn'.tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700, fontSize: 13),
+                  ),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF135BEC),
+                    minimumSize: const Size(0, 42),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _loading ? null : _counter,
+                  icon: const Icon(Icons.edit_outlined,
+                      size: 15, color: Color(0xFFEA580C)),
+                  label: Text(
+                    'offers.counter_btn'.tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: Color(0xFFEA580C)),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFEA580C),
+                    side: const BorderSide(color: Color(0xFFEA580C)),
+                    minimumSize: const Size(0, 42),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _loading ? null : _reject,
+                  icon: const Icon(Icons.cancel_outlined,
+                      size: 15, color: Colors.red),
+                  label: Text(
+                    'offers.reject_btn'.tr(),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                        color: Colors.red),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red),
+                    minimumSize: const Size(0, 42),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }

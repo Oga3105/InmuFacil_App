@@ -211,6 +211,8 @@
     "level_bronze": "Brontzezko Maila",
     "yesterday_caps": "ATZO",
     "action_visit_cancelled": "Bisita Bertan Behera",
+    "action_cee_pending_title": "Energia Ziurtagiria Beharrezkoa",
+    "action_cee_pending_desc": "Erosleek ikusi ezin duten eskaintza zain daukazu. Gehitu energia ziurtagiriaren sailkapena (A-G) zure propietatearen datuetan aktibatzeko.",
     "reject": "Ukatu",
     "accept": "Onartu",
     "reschedule": "Berreprogramatu",
@@ -1398,7 +1400,9 @@
     "understood": "Ulertuta",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/hil",
-    "docs_unverified_notice": "Zure iragarkia ikusgai dago, baina erosleek ikusiko dute dokumentazioa oraindik ez dela InmuFácil-ek egiaztatuta. Osatu ezazu konfiantza gehiago sortzeko."
+    "docs_unverified_notice": "Zure iragarkia ikusgai dago, baina erosleek ikusiko dute dokumentazioa oraindik ez dela InmuFácil-ek egiaztatuta. Osatu ezazu konfiantza gehiago sortzeko.",
+    "verification_required_msg": "Nortasuna egiaztatu duten erabiltzaileek bakarrik jar dezakete harremanetan partikularrekin. Osatu zure KYC egiaztapena jarraitzeko.",
+    "verify_identity_btn": "Nortasuna egiaztatu"
   },
   "property_wizard": {
     "add_photos": "ARGAZKIAK GEHITU",
@@ -2365,7 +2369,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "FEINren baieztapena apptik.",
     "keys_docs_delivery": "Entregatzeko dokumentazioa",
-    "pv_not_applicable_label": "Ez aplikagarri"
+    "pv_not_applicable_label": "Ez aplikagarri",
+    "offer_amount_label": "Jasotako eskaintza: {amount} €"
   },
   "arras_interview": {
     "title_buyer": "Arras Elkarrizketa — Eroslea",
@@ -2623,7 +2628,27 @@
     "seller_address_needed_sub": "Saltzailearen egungo helbidea",
     "seller_address_hint": "Adib.: Kale Nagusia 123, 28001 Madril",
     "levy_details_hint_full": "Xehatu jabetzaren gaineko karga, hipoteka edo beste eskubide guztiak",
-    "mortgage_amount_hint_eur": "Hipotekaren gainerako zenbateko osoa"
+    "mortgage_amount_hint_eur": "Hipotekaren gainerako zenbateko osoa",
+    "seller_payment_selector_title": "Arretaren ordainketa modua",
+    "seller_payment_selector_subtitle": "Aukeratu nola jasoko duzun arretaren zenbatekoa",
+    "payment_bank_transfer": "Banku-transferentzia",
+    "payment_bank_transfer_sub": "IBAN eta banku-datuak sarrerako transferentziarako",
+    "payment_cash_sub": "Dirutan edo banku-txekez sinatzeko unean",
+    "payment_other_sub": "Aldeen artean adostutako beste metodo bat",
+    "payment_description_label": "Ordainketa moduaren deskribapena",
+    "payment_description_hint_sub": "Nahitaezkoa. Azaldu nola egingo den arretaren ordainketa",
+    "payment_description_hint": "Adib.: Banku-txeke ziurtatua, momentuko transferentzia...",
+    "payment_description_required": "Ordainketa modua deskribatu behar duzu jarraitu aurretik",
+    "cash_consent_banner_title": "Oharra: dirutan ordainketa",
+    "cash_consent_banner_desc": "Saltzaileak arretak dirutan edo txekez jasotzea aukeratu du. Testigu presentziaren inguruko ohar legala irakurri eta onartu behar duzu jarraitu aurretik.",
+    "cash_consent_banner_btn": "Ohar legala irakurri eta onartu",
+    "cash_consent_modal_title": "Baimena: Dirutan ordainketa",
+    "cash_consent_modal_warning": "OHARRA LEGAL",
+    "cash_consent_modal_body": "Saltzaileak arretaren ordainketa dirutan egingo dela adierazi du. Higiezinen eragiketa mota hauetan, inpartziala den testigu bat egotea gomendatzen da —ahal bada notarioa, abokatua edo erregistratutako agentea— ordainketaren unean.\n\nInmuFácil-ek praktika hau iruzurraren edo geroagoko eztabaiden aurkako babes neurri gisa jakinarazten dizu. Onartuz, arrisku honi buruz informatua egon zarela eta saltzaileak aukeratutako ordainketa metodoarekin jarraitzea erabaki duzula zure erantzukizunpean baieztatzen duzu.\n\nOnarpena data eta ordu zehatzekin erregistratuko da eragiketaren espedientean.",
+    "cash_consent_modal_checkbox": "Irakurri dut eta notario-presentziarik gabeko dirutan ordainketaren arriskuak ulertzen ditut",
+    "cash_consent_modal_accept": "Onartzen dut eta arriskua ulertzen dut",
+    "cash_consent_modal_cancel": "Utzi",
+    "cash_consent_modal_accepted_badge": "Ohar legala onartua {date}(e)an"
   },
   "visit_cancel": {
     "title": "Bisita bertan behera utzi",
@@ -3174,7 +3199,15 @@
     "month_sep": "Ira",
     "month_oct": "Urr",
     "month_nov": "Aza",
-    "month_dec": "Abe"
+    "month_dec": "Abe",
+    "accept_ok": "Eskaintza ongi onartu da",
+    "accept_error": "Errorea eskaintza onartzean. Saiatu berriro.",
+    "counter_amount_label": "Zenbateko berria (€)",
+    "counter_send_btn": "Bidali kontrakoa",
+    "counter_ok": "Kontrakoa ongi bidali da",
+    "counter_error": "Errorea kontraeskaintza bidaltzean. Saiatu berriro.",
+    "reject_ok": "Eskaintza baztertua",
+    "reject_error": "Errorea eskaintza baztertzean. Saiatu berriro."
   },
   "ccaa": {
     "andalucia": "Andaluzia",

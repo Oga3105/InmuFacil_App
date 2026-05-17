@@ -154,6 +154,16 @@ class SentOffersNotifier extends AsyncNotifier<List<OfferData>> {
     // Refresh chat list so the conversation appears in the inbox
     ref.invalidate(chatListProvider);
   }
+
+  /// Open a direct contact channel with the seller without a monetary offer.
+  /// Returns the offer id to use for chat navigation.
+  Future<String> startInquiry(String propertyId) async {
+    final resp = await _dio.post('/offers/properties/$propertyId/inquiry');
+    final offerId = resp.data['id'].toString();
+    ref.invalidate(chatListProvider);
+    await refresh();
+    return offerId;
+  }
 }
 
 // --- Received Offers Provider ---
@@ -284,7 +294,7 @@ final feinConfirmedProvider = FutureProvider.autoDispose
   if (token == null) return false;
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/fein/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/fein/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['buyer_confirmed'] as bool? ??
@@ -302,7 +312,7 @@ final notariaApptStatusProvider = FutureProvider.autoDispose
   if (token == null) return 'pending';
   try {
     final resp = await buildAuthDio().get(
-      '$EnvConfig.apiBaseUrl/notaria-appt/$offerId/status',
+      '${EnvConfig.apiBaseUrl}/notaria-appt/$offerId/status',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
     return (resp.data as Map<String, dynamic>)['appointment_status']

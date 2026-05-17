@@ -213,6 +213,8 @@
     "level_bronze": "Nivel Bronce",
     "yesterday_caps": "ONTE",
     "action_visit_cancelled": "Visita cancelada",
+    "action_cee_pending_title": "Certificado Enerxetico Requirido",
+    "action_cee_pending_desc": "Tes unha oferta pendente que o comprador non pode ver. Engade a clasificacion do certificado enerxetico (A-G) nos datos da tua propiedade para activala.",
     "reject": "Rexeitar",
     "accept": "Aceptar",
     "reschedule": "Reprogramar",
@@ -1400,7 +1402,9 @@
     "understood": "Entendido",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/mes",
-    "docs_unverified_notice": "O teu anuncio é visible, pero os compradores verán que a documentación aínda non foi verificada por InmuFácil. Complétao para xerar máis confianza."
+    "docs_unverified_notice": "O teu anuncio é visible, pero os compradores verán que a documentación aínda non foi verificada por InmuFácil. Complétao para xerar máis confianza.",
+    "verification_required_msg": "Só os usuarios con identidade verificada poden contactar con particulares. Completa a túa verificación KYC para continuar.",
+    "verify_identity_btn": "Verificar identidade"
   },
   "property_wizard": {
     "add_photos": "ENGADIR FOTOS",
@@ -2368,7 +2372,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "Confirmación de FEIN desde a app.",
     "keys_docs_delivery": "Documentación a entregar",
-    "pv_not_applicable_label": "Non aplica"
+    "pv_not_applicable_label": "Non aplica",
+    "offer_amount_label": "Oferta recibida: {amount} €"
   },
   "arras_interview": {
     "title_buyer": "Entrevista de arras — Comprador",
@@ -2626,7 +2631,27 @@
     "seller_address_needed_sub": "Enderezo actual do vendedor",
     "seller_address_hint": "Ex.: Rúa Principal 123, 28001 Madrid",
     "levy_details_hint_full": "Detalla calquera gravame, hipoteca ou outro dereito sobre a propiedade",
-    "mortgage_amount_hint_eur": "Importe total pendente do préstamo hipotecario"
+    "mortgage_amount_hint_eur": "Importe total pendente do préstamo hipotecario",
+    "seller_payment_selector_title": "Forma de pagamento das arras",
+    "seller_payment_selector_subtitle": "Escolle como recibirás o importe das arras",
+    "payment_bank_transfer": "Transferencia bancaria",
+    "payment_bank_transfer_sub": "IBAN e datos bancarios para o ingreso",
+    "payment_cash_sub": "Efectivo ou cheque bancario no momento da sinatura",
+    "payment_other_sub": "Outro método acordado entre as partes",
+    "payment_description_label": "Descrición do método de pagamento",
+    "payment_description_hint_sub": "Obrigatorio. Explica como se realizará o pagamento das arras",
+    "payment_description_hint": "Ex: Cheque bancario certificado, transferencia no acto...",
+    "payment_description_required": "Debes describir o método de pagamento antes de continuar",
+    "cash_consent_banner_title": "Aviso legal: pagamento ao contado",
+    "cash_consent_banner_desc": "O vendedor escolheu recibir as arras en efectivo ou cheque. Debes ler e aceptar o aviso legal sobre presenza de testemuña antes de continuar.",
+    "cash_consent_banner_btn": "Ler e aceptar aviso legal",
+    "cash_consent_modal_title": "Consentimento informado: Pagamento ao contado",
+    "cash_consent_modal_warning": "ADVERTENCIA LEGAL",
+    "cash_consent_modal_body": "O vendedor indicou que o pagamento das arras realizarase ao contado (efectivo ou cheque bancario). En operacións inmobiliarias deste tipo, recoméndase encarecidamente a presenza dun testemuño imparcial —preferiblemente un notario, avogado ou xestor colexiado— no momento do pagamento.\n\nInmuFácil infórmache desta práctica como medida de protección fronte a posibles fraudes ou disputas posteriores. Ao aceptar, confirmas que fuches informado deste risco e que decides continuar co método de pagamento elixido polo vendedor baixo a túa propia responsabilidade.\n\nEsta aceptación quedará rexistrada con data e hora exactas no expediente da operación.",
+    "cash_consent_modal_checkbox": "Lin e comprendo os riscos do pagamento ao contado sen presenza notarial",
+    "cash_consent_modal_accept": "Acepto e comprendo o risco",
+    "cash_consent_modal_cancel": "Cancelar",
+    "cash_consent_modal_accepted_badge": "Aviso legal aceptado o {date}"
   },
   "visit_cancel": {
     "title": "Cancelar visita",
@@ -3193,7 +3218,15 @@
     "month_sep": "Set",
     "month_oct": "Out",
     "month_nov": "Nov",
-    "month_dec": "Dec"
+    "month_dec": "Dec",
+    "accept_ok": "Oferta aceptada correctamente",
+    "accept_error": "Erro ao aceptar a oferta. Téntao de novo.",
+    "counter_amount_label": "Novo importe (€)",
+    "counter_send_btn": "Enviar contraoferta",
+    "counter_ok": "Contraoferta enviada correctamente",
+    "counter_error": "Erro ao enviar a contraoferta. Téntao de novo.",
+    "reject_ok": "Oferta rexeitada",
+    "reject_error": "Erro ao rexeitar a oferta. Téntao de novo."
   },
   "ccaa": {
     "andalucia": "Andalucía",

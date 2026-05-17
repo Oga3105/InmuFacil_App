@@ -211,6 +211,8 @@
     "level_bronze": "Bronze Level",
     "yesterday_caps": "YESTERDAY",
     "action_visit_cancelled": "Visit Cancelled",
+    "action_cee_pending_title": "Energy Certificate Required",
+    "action_cee_pending_desc": "You have a pending offer that the buyer cannot see. Add the energy certificate rating (A-G) to your property details to activate it.",
     "reject": "Reject",
     "accept": "Accept",
     "reschedule": "Reschedule",
@@ -1423,7 +1425,9 @@
     "understood": "Understood",
     "image_counter": "{current} / {total}",
     "eur_per_month": "EUR/month",
-    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust."
+    "docs_unverified_notice": "Your listing is visible, but buyers will see that the documentation has not yet been verified by InmuFácil. Complete it to build more trust.",
+    "verification_required_msg": "Only users with verified identity can contact private sellers. Complete your KYC verification to continue.",
+    "verify_identity_btn": "Verify identity"
   },
   "property_wizard": {
     "add_photos": "ADD PHOTOS",
@@ -2390,7 +2394,8 @@
     "tasacion_appointment_format": "{day}/{month}/{year}  ·  {time}",
     "fein_notes_confirm": "FEIN confirmation from the app.",
     "keys_docs_delivery": "Documentation to hand over",
-    "pv_not_applicable_label": "Not applicable"
+    "pv_not_applicable_label": "Not applicable",
+    "offer_amount_label": "Received offer: {amount} €"
   },
   "arras_interview": {
     "confirm_my_part": "Confirm my part",
@@ -2648,7 +2653,27 @@
     "seller_address_needed_sub": "Seller's current address",
     "seller_address_hint": "E.g.: 123 Main Street, 28001 Madrid",
     "levy_details_hint_full": "Detail any liens, mortgages or other rights on the property",
-    "mortgage_amount_hint_eur": "Total outstanding mortgage loan amount"
+    "mortgage_amount_hint_eur": "Total outstanding mortgage loan amount",
+    "seller_payment_selector_title": "Arras payment method",
+    "seller_payment_selector_subtitle": "Choose how you will receive the arras deposit",
+    "payment_bank_transfer": "Bank transfer",
+    "payment_bank_transfer_sub": "IBAN and bank details for the transfer",
+    "payment_cash_sub": "Cash or certified bank check at signing",
+    "payment_other_sub": "Another method agreed between both parties",
+    "payment_description_label": "Payment method description",
+    "payment_description_hint_sub": "Required. Explain how the arras payment will be made",
+    "payment_description_hint": "e.g. Certified bank check, wire transfer at the time of signing...",
+    "payment_description_required": "You must describe the payment method before continuing",
+    "cash_consent_banner_title": "Legal notice: cash payment",
+    "cash_consent_banner_desc": "The seller has chosen to receive the arras deposit in cash or check. You must read and accept the legal notice regarding witness presence before continuing.",
+    "cash_consent_banner_btn": "Read and accept legal notice",
+    "cash_consent_modal_title": "Informed consent: Cash payment",
+    "cash_consent_modal_warning": "LEGAL WARNING",
+    "cash_consent_modal_body": "The seller has indicated the arras deposit will be paid in cash (cash or bank check). In real estate transactions of this type, it is strongly recommended to have an impartial witness present — preferably a notary, solicitor, or registered agent — at the time of payment.\n\nInmuFácil is informing you of this practice as a protective measure against potential fraud or future disputes. By accepting, you confirm you have been informed of this risk and choose to proceed with the seller's chosen payment method at your own responsibility.\n\nThis acceptance will be recorded with an exact date and timestamp in the transaction file.",
+    "cash_consent_modal_checkbox": "I have read and understand the risks of cash payment without notarial presence",
+    "cash_consent_modal_accept": "I accept and understand the risk",
+    "cash_consent_modal_cancel": "Cancel",
+    "cash_consent_modal_accepted_badge": "Legal notice accepted on {date}"
   },
   "visit_cancel": {
     "title_part1": "Cancel",
@@ -3216,7 +3241,15 @@
     "month_sep": "Sep",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Dec"
+    "month_dec": "Dec",
+    "accept_ok": "Offer accepted successfully",
+    "accept_error": "Error accepting the offer. Please try again.",
+    "counter_amount_label": "New amount (€)",
+    "counter_send_btn": "Send counter-offer",
+    "counter_ok": "Counter-offer sent successfully",
+    "counter_error": "Error sending the counter-offer. Please try again.",
+    "reject_ok": "Offer rejected",
+    "reject_error": "Error rejecting the offer. Please try again."
   },
   "ccaa": {
     "andalucia": "Andalucía",

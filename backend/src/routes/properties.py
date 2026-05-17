@@ -9,10 +9,11 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File,
 from sqlalchemy.orm import Session, joinedload
 from backend.src.config.database import get_db, engine
 from backend.src.models import (
-    Property, User, PropertyFeatures, PropertyLegal, 
+    Property, User, PropertyFeatures, PropertyLegal,
     PropertyFinancial, PropertyEnvironment, PropertyMedia, MediaType,
     Reservation, PropertyStatus, PropertyType, OperationType, # Hito 8 + Search
-    PropertyDocument, DocumentType, PropertyValuation # Hito 9 + Valuation
+    PropertyDocument, DocumentType, PropertyValuation, # Hito 9 + Valuation
+    PropertyOffer, OfferStatus,
 )
 from backend.src.schemas.base import PropertyCreate, PropertyDraftCreate, StatusUpdate, PropertyResponse, PropertyMediaResponse, PropertyMediaCreate
 from backend.src.schemas.valuation import ValuationRequest, ValuationResponse
@@ -491,6 +492,24 @@ async def update_property(
 
     # Recalculate Metrics
     calculate_metrics(property)
+
+    # CEE reconciliation — if the seller just added a valid energy certificate,
+    # activate all CEE_PENDING offers for this property so buyers can see them.
+    _new_legal = property_update.legal
+    if _new_legal is not None:
+        from backend.src.models.enums import EnergyCertification
+        _new_cert = getattr(_new_legal, "energy_certification", None)
+        _cert_is_valid = (
+            _new_cert is not None
+            and _new_cert != EnergyCertification.EN_TRAMITE
+        )
+        if _cert_is_valid:
+            _pending_cee_offers = db.query(PropertyOffer).filter(
+                PropertyOffer.property_id == property_id,
+                PropertyOffer.status == OfferStatus.CEE_PENDING,
+            ).all()
+            for _o in _pending_cee_offers:
+                _o.status = OfferStatus.PENDING
 
     db.commit()
     # Re-query with eager joins — db.refresh() only reloads core columns; Pydantic

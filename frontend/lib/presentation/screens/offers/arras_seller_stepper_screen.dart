@@ -14,7 +14,6 @@ import '../../../core/config/env_config.dart';
 import 'arras_shared_widgets.dart';
 import '../../../../core/network/dio_factory.dart';
 
-// Dark-mode-aware colors are resolved at build time via colorScheme / isDark.
 const _kNavy = Color(0xFF135BEC);
 const kArrasBlue = Color(0xFF135BEC);
 
@@ -50,8 +49,11 @@ class _ArrasSellerStepperScreenState
   // ── Step 3: Finanzas e Impuestos ─────────────────────────────
   bool _plusvaliaAssumed = true;
   bool _ibiRetentionAccepted = true;
+  // Payment method: 'bank_transfer' | 'cash' | 'other'
+  String _paymentMethodType = 'bank_transfer';
   final _ibanCtrl = TextEditingController();
   final _bankNameCtrl = TextEditingController();
+  final _paymentDescriptionCtrl = TextEditingController();
   final _additionalClausesCtrl = TextEditingController();
   bool _ibanObscured = true;
 
@@ -62,6 +64,7 @@ class _ArrasSellerStepperScreenState
     _mortgageAmountCtrl.dispose();
     _ibanCtrl.dispose();
     _bankNameCtrl.dispose();
+    _paymentDescriptionCtrl.dispose();
     _additionalClausesCtrl.dispose();
     _sellerAddressCtrl.dispose();
     super.dispose();
@@ -70,8 +73,7 @@ class _ArrasSellerStepperScreenState
   Future<Dio?> _buildDio() async {
     final token = await const FlutterSecureStorage().read(key: 'auth_token');
     if (token == null) return null;
-    final dio = buildAuthDio();
-    return dio;
+    return buildAuthDio();
   }
 
   void _nextPage() => _pageCtrl.nextPage(
@@ -81,7 +83,7 @@ class _ArrasSellerStepperScreenState
       duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
   Map<String, dynamic> _buildPayload() {
-    return {
+    final payload = <String, dynamic>{
       'property_free_of_tenants': _propertyFreeOfTenants,
       'utilities_active': _utilitiesActive,
       'utilities_maintenance_commitment': _utilitiesMaintenanceCommitment,
@@ -96,10 +98,7 @@ class _ArrasSellerStepperScreenState
           : null,
       'plusvalia_assumed': _plusvaliaAssumed,
       'ibi_retention_accepted': _ibiRetentionAccepted,
-      'iban': _ibanCtrl.text.trim().isEmpty ? null : _ibanCtrl.text.trim(),
-      'bank_name': _bankNameCtrl.text.trim().isEmpty
-          ? null
-          : _bankNameCtrl.text.trim(),
+      'seller_payment_method_type': _paymentMethodType,
       'additional_clauses': _additionalClausesCtrl.text.isEmpty
           ? null
           : _additionalClausesCtrl.text.trim(),
@@ -107,9 +106,41 @@ class _ArrasSellerStepperScreenState
           ? null
           : _sellerAddressCtrl.text.trim(),
     };
+
+    if (_paymentMethodType == 'bank_transfer') {
+      payload['iban'] =
+          _ibanCtrl.text.trim().isEmpty ? null : _ibanCtrl.text.trim();
+      payload['bank_name'] =
+          _bankNameCtrl.text.trim().isEmpty ? null : _bankNameCtrl.text.trim();
+      payload['seller_payment_description'] = null;
+    } else {
+      payload['iban'] = null;
+      payload['bank_name'] = null;
+      payload['seller_payment_description'] =
+          _paymentDescriptionCtrl.text.trim().isEmpty
+              ? null
+              : _paymentDescriptionCtrl.text.trim();
+    }
+
+    return payload;
+  }
+
+  bool _validateStep3() {
+    if (_paymentMethodType != 'bank_transfer' &&
+        _paymentDescriptionCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('arras_interview.payment_description_required'.tr()),
+          backgroundColor: Colors.red.shade700,
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 
   Future<void> _saveAndConfirm() async {
+    if (!_validateStep3()) return;
     setState(() => _loading = true);
     final dio = await _buildDio();
     if (dio == null) {
@@ -130,7 +161,8 @@ class _ArrasSellerStepperScreenState
         context.pop();
       }
     } on DioException catch (e) {
-      final msg = e.response?.data?['detail'] ?? 'arras_interview.error_save'.tr();
+      final msg =
+          e.response?.data?['detail'] ?? 'arras_interview.error_save'.tr();
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(msg.toString())));
@@ -174,7 +206,6 @@ class _ArrasSellerStepperScreenState
 
   Widget _buildStep1() {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -241,7 +272,8 @@ class _ArrasSellerStepperScreenState
                 const SizedBox(height: 4),
                 Text(
                   'arras_interview.seller_address_needed_sub'.tr(),
-                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      fontSize: 12, color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -255,10 +287,12 @@ class _ArrasSellerStepperScreenState
                         horizontal: 12, vertical: 12),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                        borderSide:
+                            BorderSide(color: colorScheme.outlineVariant)),
                     enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: colorScheme.outlineVariant)),
+                        borderSide:
+                            BorderSide(color: colorScheme.outlineVariant)),
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                         borderSide:
@@ -310,14 +344,17 @@ class _ArrasSellerStepperScreenState
                     controller: _levyDetailsCtrl,
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'arras_interview.levy_details_hint_full'.tr(),
+                      hintText:
+                          'arras_interview.levy_details_hint_full'.tr(),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade300),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade300),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -332,7 +369,8 @@ class _ArrasSellerStepperScreenState
                   title: 'arras_interview.zero_debt_cert_title'.tr(),
                   subtitle: 'arras_interview.zero_debt_cert_sub'.tr(),
                   value: _zeroDebtCertificate,
-                  onChanged: (v) => setState(() => _zeroDebtCertificate = v),
+                  onChanged: (v) =>
+                      setState(() => _zeroDebtCertificate = v),
                   icon: Icons.verified_outlined,
                 ),
               ],
@@ -362,17 +400,20 @@ class _ArrasSellerStepperScreenState
                       FilteringTextInputFormatter.digitsOnly
                     ],
                     decoration: InputDecoration(
-                      hintText: 'arras_interview.mortgage_amount_hint_eur'.tr(),
+                      hintText:
+                          'arras_interview.mortgage_amount_hint_eur'.tr(),
                       suffixText: 'EUR',
                       prefixIcon: const Icon(Icons.euro_outlined,
                           color: kArrasBlue),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade300),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderSide:
+                            BorderSide(color: Colors.grey.shade300),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -390,12 +431,10 @@ class _ArrasSellerStepperScreenState
     );
   }
 
-  // ─── Step 3: Finanzas e Impuestos ─────────────────────────────────────────
+  // ─── Step 3: Finanzas, Impuestos y Pago ──────────────────────────────────
 
   Widget _buildStep3() {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -416,7 +455,8 @@ class _ArrasSellerStepperScreenState
                   title: 'arras_interview.plusvalia_title'.tr(),
                   subtitle: 'arras_interview.plusvalia_sub'.tr(),
                   value: _plusvaliaAssumed,
-                  onChanged: (v) => setState(() => _plusvaliaAssumed = v),
+                  onChanged: (v) =>
+                      setState(() => _plusvaliaAssumed = v),
                   icon: Icons.location_city_outlined,
                 ),
                 const Divider(height: 24),
@@ -432,140 +472,72 @@ class _ArrasSellerStepperScreenState
             ),
           ),
           const SizedBox(height: 16),
+          // ── Payment method selector ───────────────────────────
           ArrasInterviewCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Icon(Icons.lock_outline, size: 14, color: _kNavy),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'arras_interview.iban_title'.tr(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: _kNavy,
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'arras_interview.seller_payment_selector_title'.tr(),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: colorScheme.onPrimaryContainer,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const SizedBox(width: 22),
-                    Expanded(
-                      child: Text(
-                        'arras_interview.iban_encrypted'.tr(),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: _kNavy.withOpacity(0.7),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _ibanCtrl,
-                  obscureText: _ibanObscured,
-                  textCapitalization: TextCapitalization.characters,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'[A-Z0-9 ]')),
-                    LengthLimitingTextInputFormatter(29),
-                  ],
-                  decoration: InputDecoration(
-                    hintText: 'ES00 0000 0000 0000 0000 0000',
-                    prefixIcon:
-                        const Icon(Icons.lock_outlined, color: kArrasBlue),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _ibanObscured
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () =>
-                          setState(() => _ibanObscured = !_ibanObscured),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide:
-                          const BorderSide(color: kArrasBlue, width: 2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
                 Text(
-                  'arras_interview.bank_name_title'.tr(),
+                  'arras_interview.seller_payment_selector_subtitle'.tr(),
                   style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      color: colorScheme.onPrimaryContainer),
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant),
                 ),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _bankNameCtrl,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(
-                    hintText: 'arras_interview.bank_placeholder'.tr(),
-
-                    prefixIcon: const Icon(Icons.account_balance_outlined,
-                        color: kArrasBlue, size: 18),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 12),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Colors.grey.shade300)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide:
-                            const BorderSide(color: kArrasBlue, width: 2)),
-                  ),
+                const SizedBox(height: 16),
+                _PaymentMethodTile(
+                  value: 'bank_transfer',
+                  groupValue: _paymentMethodType,
+                  icon: Icons.account_balance_outlined,
+                  label: 'arras_interview.payment_bank_transfer'.tr(),
+                  subtitle: 'arras_interview.payment_bank_transfer_sub'.tr(),
+                  color: _kNavy,
+                  onChanged: (v) =>
+                      setState(() => _paymentMethodType = v!),
                 ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: _kNavy.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.shield_outlined, size: 16, color: _kNavy),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'arras_interview.iban_security_disclaimer'.tr(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: _kNavy.withOpacity(0.8),
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 8),
+                _PaymentMethodTile(
+                  value: 'cash',
+                  groupValue: _paymentMethodType,
+                  icon: Icons.payments_outlined,
+                  label: 'arras_interview.payment_cash'.tr(),
+                  subtitle: 'arras_interview.payment_cash_sub'.tr(),
+                  color: const Color(0xFF16A34A),
+                  onChanged: (v) =>
+                      setState(() => _paymentMethodType = v!),
+                ),
+                const SizedBox(height: 8),
+                _PaymentMethodTile(
+                  value: 'other',
+                  groupValue: _paymentMethodType,
+                  icon: Icons.more_horiz_outlined,
+                  label: 'arras_interview.payment_other'.tr(),
+                  subtitle: 'arras_interview.payment_other_sub'.tr(),
+                  color: const Color(0xFF7C3AED),
+                  onChanged: (v) =>
+                      setState(() => _paymentMethodType = v!),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
+          // ── Conditional fields based on payment method ────────
+          if (_paymentMethodType == 'bank_transfer') ...[
+            _buildBankTransferFields(colorScheme),
+            const SizedBox(height: 16),
+          ] else ...[
+            _buildPaymentDescriptionField(colorScheme),
+            const SizedBox(height: 16),
+          ],
+          // ── Additional clauses ────────────────────────────────
           ArrasInterviewCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -580,22 +552,26 @@ class _ArrasSellerStepperScreenState
                 const SizedBox(height: 4),
                 Text(
                   'arras_interview.additional_clauses_desc'.tr(),
-                  style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _additionalClausesCtrl,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: 'arras_interview.furniture_placeholder'.tr(),
-
+                    hintText:
+                        'arras_interview.furniture_placeholder'.tr(),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade300),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade300),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -605,6 +581,186 @@ class _ArrasSellerStepperScreenState
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBankTransferFields(ColorScheme colorScheme) {
+    return ArrasInterviewCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.lock_outline, size: 14, color: _kNavy),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'arras_interview.iban_title'.tr(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: _kNavy,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const SizedBox(width: 22),
+              Expanded(
+                child: Text(
+                  'arras_interview.iban_encrypted'.tr(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: _kNavy.withOpacity(0.7),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _ibanCtrl,
+            obscureText: _ibanObscured,
+            textCapitalization: TextCapitalization.characters,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9 ]')),
+              LengthLimitingTextInputFormatter(29),
+            ],
+            decoration: InputDecoration(
+              hintText: 'ES00 0000 0000 0000 0000 0000',
+              prefixIcon:
+                  const Icon(Icons.lock_outlined, color: kArrasBlue),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _ibanObscured
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.grey,
+                ),
+                onPressed: () =>
+                    setState(() => _ibanObscured = !_ibanObscured),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: kArrasBlue, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'arras_interview.bank_name_title'.tr(),
+            style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: colorScheme.onPrimaryContainer),
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _bankNameCtrl,
+            textCapitalization: TextCapitalization.words,
+            decoration: InputDecoration(
+              hintText: 'arras_interview.bank_placeholder'.tr(),
+              prefixIcon: const Icon(Icons.account_balance_outlined,
+                  color: kArrasBlue, size: 18),
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 12),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade300)),
+              enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colors.grey.shade300)),
+              focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide:
+                      const BorderSide(color: kArrasBlue, width: 2)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: _kNavy.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.shield_outlined,
+                    size: 16, color: _kNavy),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'arras_interview.iban_security_disclaimer'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: _kNavy.withOpacity(0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentDescriptionField(ColorScheme colorScheme) {
+    final isCash = _paymentMethodType == 'cash';
+    final color = isCash ? const Color(0xFF16A34A) : const Color(0xFF7C3AED);
+    return ArrasInterviewCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'arras_interview.payment_description_label'.tr(),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: colorScheme.onPrimaryContainer),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'arras_interview.payment_description_hint_sub'.tr(),
+            style: TextStyle(
+                fontSize: 12, color: colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _paymentDescriptionCtrl,
+            maxLines: 3,
+            textCapitalization: TextCapitalization.sentences,
+            decoration: InputDecoration(
+              hintText: 'arras_interview.payment_description_hint'.tr(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: color, width: 2),
+              ),
             ),
           ),
         ],
@@ -630,17 +786,21 @@ class _ArrasSellerStepperScreenState
             const SizedBox(width: 8),
             Text.rich(
               TextSpan(
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.w800),
                 children: [
                   TextSpan(
                       text: 'Inmu',
-                      style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.primary)),
                   TextSpan(
-                      text: 'Fácil',
-                      style: TextStyle(color: Theme.of(context).brightness == Brightness.dark
-                          ? const Color(0xFF4ADE80)
-                          : const Color(0xFF16A34A))),
+                      text: 'Facil',
+                      style: TextStyle(
+                          color: Theme.of(context).brightness ==
+                                  Brightness.dark
+                              ? const Color(0xFF4ADE80)
+                              : const Color(0xFF16A34A))),
                 ],
               ),
             ),
@@ -649,45 +809,50 @@ class _ArrasSellerStepperScreenState
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
+        child: Container(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            height: 1),
       ),
       actions: [
         if (MediaQuery.sizeOf(context).width >= 650)
-        GestureDetector(
-          onTap: () => context.go('/'),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF135BEC),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF135BEC).withOpacity(0.25),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.home_rounded, size: 18, color: Colors.white),
-                const SizedBox(width: 6),
-                Text(
-                  'common.home_btn'.tr(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
+          GestureDetector(
+            onTap: () => context.go('/'),
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF135BEC),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF135BEC).withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
                   ),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.home_rounded,
+                      size: 18, color: Colors.white),
+                  const SizedBox(width: 6),
+                  Text(
+                    'common.home_btn'.tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         Consumer(
           builder: (context, ref, _) {
-            final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+            final isAuthenticated =
+                ref.watch(authProvider).isAuthenticated;
             if (!isAuthenticated) return const SizedBox.shrink();
             return Row(
               mainAxisSize: MainAxisSize.min,
@@ -703,6 +868,88 @@ class _ArrasSellerStepperScreenState
     );
   }
 }
+
+// ─── Payment method selection tile ───────────────────────────────────────────
+
+class _PaymentMethodTile extends StatelessWidget {
+  const _PaymentMethodTile({
+    required this.value,
+    required this.groupValue,
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.color,
+    required this.onChanged,
+  });
+
+  final String value;
+  final String groupValue;
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final Color color;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = value == groupValue;
+    return InkWell(
+      onTap: () => onChanged(value),
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: selected ? color.withOpacity(0.08) : Colors.transparent,
+          border: Border.all(
+            color: selected ? color : Colors.grey.shade300,
+            width: selected ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: selected ? color : Colors.grey, size: 22),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: selected ? color : Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: selected
+                          ? color.withOpacity(0.7)
+                          : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Radio<String>(
+              value: value,
+              groupValue: groupValue,
+              activeColor: color,
+              onChanged: onChanged,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Info box helper ──────────────────────────────────────────────────────────
 
 class _InfoBox extends StatelessWidget {
   const _InfoBox({

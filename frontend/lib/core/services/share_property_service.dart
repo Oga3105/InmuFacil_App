@@ -8,8 +8,11 @@ import '../../../domain/entities/property.dart';
 class SharePropertyService {
   SharePropertyService._();
 
+  // Web app is deployed under /TFM/ — this must match manifest.json start_url.
+  static const _webBase = 'https://inmufacil.com/TFM';
+
   static String propertyUrl(String propertyId) =>
-      'https://inmufacil.com/property/$propertyId';
+      '$_webBase/property/$propertyId';
 
   static String buildShareText(Property property) {
     final buf = StringBuffer();
@@ -47,11 +50,6 @@ class SharePropertyService {
     buf.writeln();
     buf.writeln(
         '${'share.view_property'.tr()}: ${propertyUrl(property.id)}');
-
-    if (property.imageUrl != null) {
-      buf.writeln();
-      buf.writeln(property.imageUrl);
-    }
 
     return buf.toString();
   }

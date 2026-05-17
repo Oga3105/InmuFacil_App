@@ -394,7 +394,9 @@
       "needs_renovation": "Reforma",
       "ready": "Listo"
     },
-    "docs_unverified_notice": "Tu anuncio es visible, pero los compradores verán que la documentación aún no ha sido verificada por InmuFácil. Complétalo para generar más confianza."
+    "docs_unverified_notice": "Tu anuncio es visible, pero los compradores verán que la documentación aún no ha sido verificada por InmuFácil. Complétalo para generar más confianza.",
+    "verification_required_msg": "Solo los usuarios con identidad verificada pueden contactar con particulares. Completa tu verificación KYC para continuar.",
+    "verify_identity_btn": "Verificar identidad"
   },
   "common": {
     "save": "Guardar",
@@ -688,6 +690,8 @@
     "level_bronze": "Nivel Bronce",
     "yesterday_caps": "AYER",
     "action_visit_cancelled": "Visita Cancelada",
+    "action_cee_pending_title": "Certificado Energetico Requerido",
+    "action_cee_pending_desc": "Tienes una oferta pendiente que el comprador no puede ver. Anade la clasificacion del certificado energetico (A-G) en los datos de tu propiedad para activarla.",
     "reject": "Rechazar",
     "accept": "Aceptar",
     "reschedule": "Reprogramar",
@@ -2435,7 +2439,8 @@
     "snack_counter_rejected": "Contraoferta rechazada",
     "snack_offer_rejected": "Oferta rechazada",
     "snack_error": "Error al procesar la acción. Inténtalo de nuevo.",
-    "solvency_none": "No verificada"
+    "solvency_none": "No verificada",
+    "offer_amount_label": "Oferta recibida: {amount} €"
   },
   "arras_interview": {
     "confirm_my_part": "Confirmar mi parte",
@@ -2693,7 +2698,27 @@
     "seller_address_needed_sub": "Dirección actual del vendedor",
     "seller_address_hint": "Ej: Calle Principal 123, 28001 Madrid",
     "levy_details_hint_full": "Detalla cualquier gravamen, hipoteca u otro derecho sobre la propiedad",
-    "mortgage_amount_hint_eur": "Importe total pendiente del préstamo hipotecario"
+    "mortgage_amount_hint_eur": "Importe total pendiente del préstamo hipotecario",
+    "seller_payment_selector_title": "Forma de pago de las arras",
+    "seller_payment_selector_subtitle": "Elige cómo recibirás el importe de las arras",
+    "payment_bank_transfer": "Transferencia bancaria",
+    "payment_bank_transfer_sub": "IBAN y datos bancarios para el ingreso",
+    "payment_cash_sub": "Efectivo o cheque bancario en el momento de la firma",
+    "payment_other_sub": "Otro método acordado entre las partes",
+    "payment_description_label": "Descripción del método de pago",
+    "payment_description_hint_sub": "Obligatorio. Explica cómo se realizará el pago de las arras",
+    "payment_description_hint": "Ej: Cheque bancario certificado, transferencia en el acto...",
+    "payment_description_required": "Debes describir el método de pago antes de continuar",
+    "cash_consent_banner_title": "Aviso legal: pago al contado",
+    "cash_consent_banner_desc": "El vendedor ha elegido recibir las arras en efectivo o cheque. Debes leer y aceptar el aviso legal sobre presencia de testigo antes de continuar.",
+    "cash_consent_banner_btn": "Leer y aceptar aviso legal",
+    "cash_consent_modal_title": "Consentimiento informado: Pago al contado",
+    "cash_consent_modal_warning": "ADVERTENCIA LEGAL",
+    "cash_consent_modal_body": "El vendedor ha indicado que el pago de las arras se realizará al contado (efectivo o cheque bancario). En operaciones inmobiliarias de este tipo, se recomienda encarecidamente la presencia de un testigo imparcial —preferiblemente un notario, abogado o gestor colegiado— en el momento del pago.\n\nInmuFácil te informa de esta práctica como medida de protección frente a posibles fraudes o disputas posteriores. Al aceptar, confirmas que has sido informado de este riesgo y que decides continuar con el método de pago elegido por el vendedor bajo tu propia responsabilidad.\n\nEsta aceptación quedará registrada con fecha y hora exactas en el expediente de la operación.",
+    "cash_consent_modal_checkbox": "He leído y comprendo los riesgos del pago al contado sin presencia notarial",
+    "cash_consent_modal_accept": "Acepto y comprendo el riesgo",
+    "cash_consent_modal_cancel": "Cancelar",
+    "cash_consent_modal_accepted_badge": "Aviso legal aceptado el {date}"
   },
   "visit_cancel": {
     "title_part1": "Anular",
@@ -2876,7 +2901,15 @@
     "month_sep": "Sep",
     "month_oct": "Oct",
     "month_nov": "Nov",
-    "month_dec": "Dic"
+    "month_dec": "Dic",
+    "accept_ok": "Oferta aceptada correctamente",
+    "accept_error": "Error al aceptar la oferta. Inténtalo de nuevo.",
+    "counter_amount_label": "Nuevo importe (€)",
+    "counter_send_btn": "Enviar contraoferta",
+    "counter_ok": "Contraoferta enviada correctamente",
+    "counter_error": "Error al enviar la contraoferta. Inténtalo de nuevo.",
+    "reject_ok": "Oferta rechazada",
+    "reject_error": "Error al rechazar la oferta. Inténtalo de nuevo."
   },
   "visits": {
     "configured_windows": "VENTANAS CONFIGURADAS",

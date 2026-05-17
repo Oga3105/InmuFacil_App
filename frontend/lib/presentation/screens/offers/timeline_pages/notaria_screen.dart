@@ -63,7 +63,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
     try {
       final token = await _storage.read(key: 'auth_token');
       final resp = await buildAuthDio().get(
-        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/status',
+        '${EnvConfig.apiBaseUrl}/notaria-appt/${widget.offer.id}/status',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       final d = resp.data as Map<String, dynamic>;
@@ -129,7 +129,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       final d = _selectedDate!;
       final t = _selectedTime!;
       await buildAuthDio().post(
-        '$EnvConfig.apiBaseUrl/notaria-appt/${widget.offer.id}/schedule',
+        '${EnvConfig.apiBaseUrl}/notaria-appt/${widget.offer.id}/schedule',
         data: {
           'city': _cityCtrl.text.trim(),
           'appointment_date':
