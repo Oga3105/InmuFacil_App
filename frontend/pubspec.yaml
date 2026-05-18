@@ -29,7 +29,7 @@ dependencies:
   flutter_dotenv: 6.0.1
    
   # Secure Storage
-  flutter_secure_storage: ^10.1.0
+  flutter_secure_storage: ^10.2.0
 
   # Local Persistence (favoritos cache)
   shared_preferences: ^2.5.5
