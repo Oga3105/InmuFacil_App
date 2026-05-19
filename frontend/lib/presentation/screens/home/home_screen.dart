@@ -9,6 +9,7 @@ import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart';
 import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
+import 'package:inmufacil_frontend/presentation/widgets/common/price_tag.dart';
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
@@ -362,12 +363,9 @@ class _MapSection extends ConsumerWidget {
             builder: (context, ref, _) {
               final selectedProperty = ref.watch(selectedPropertyProvider);
               return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 220),
-                transitionBuilder: (child, animation) => SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0, 1),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                duration: const Duration(milliseconds: 160),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
                   child: child,
                 ),
                 child: selectedProperty == null
@@ -454,25 +452,21 @@ class _MobilePropertyCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      property.formattedPrice,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: cs.primary,
-                        height: 1.1,
-                      ),
+                    PriceTag(
+                      price: property.price,
+                      previousPrice: property.previousPrice,
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Text(
                       property.title,
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface,
+                        height: 1.3,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
+                      overflow: TextOverflow.visible,
                     ),
                     const SizedBox(height: 6),
                     Row(
@@ -1155,7 +1149,11 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                  padding: const EdgeInsets.only(top: 12),
                  child: _PremiumGlowButton(
                    label: 'home.clear_filters'.tr(),
-                   onPressed: () => ref.read(searchProvider.notifier).resetFilters(),
+                   onPressed: () {
+                     ref.read(searchProvider.notifier).resetFilters();
+                     // On mobile: close the bottom sheet so the user sees the map
+                     widget.onSearchDone?.call();
+                   },
                    color: const Color(0xFFB91C1C), // Shadow will be red too
                    icon: Icons.refresh,
                  ),
