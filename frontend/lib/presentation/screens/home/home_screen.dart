@@ -357,25 +357,26 @@ class _MapSection extends ConsumerWidget {
             ),
           ),
 
-        // MOBILE ONLY: Floating property card near the bottom when a marker is tapped
+        // MOBILE ONLY: Floating property card near the bottom when a marker is tapped.
+        // Positioned must be a direct child of Stack — AnimatedSwitcher goes inside it.
         if (isMobile)
-          Consumer(
-            builder: (context, ref, _) {
-              final selectedProperty = ref.watch(selectedPropertyProvider);
-              return AnimatedSwitcher(
-                duration: const Duration(milliseconds: 160),
-                transitionBuilder: (child, animation) => FadeTransition(
-                  opacity: animation,
-                  child: child,
-                ),
-                child: selectedProperty == null
-                    ? const SizedBox.shrink()
-                    : Positioned(
-                        key: ValueKey(selectedProperty.id),
-                        left: 16,
-                        right: 16,
-                        bottom: 96,
-                        child: _MobilePropertyCard(
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: 96,
+            child: Consumer(
+              builder: (context, ref, _) {
+                final selectedProperty = ref.watch(selectedPropertyProvider);
+                return AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 160),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: selectedProperty == null
+                      ? const SizedBox.shrink()
+                      : _MobilePropertyCard(
+                          key: ValueKey(selectedProperty.id),
                           property: selectedProperty,
                           onClose: () => ref.read(selectedPropertyProvider.notifier).select(null),
                           onTap: () {
@@ -386,9 +387,9 @@ class _MapSection extends ConsumerWidget {
                             );
                           },
                         ),
-                      ),
-              );
-            },
+                );
+              },
+            ),
           ),
       ],
     );
