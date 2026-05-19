@@ -14,8 +14,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from sqlalchemy import func
+
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.properties import Property as PropertyModel
+from backend.src.models.enums import PropertyStatus
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
@@ -27,6 +31,9 @@ logger = logging.getLogger(__name__)
 class NeighborhoodTwinsRequest(BaseModel):
     postal_code: str
     city: str | None = None
+    # Cities currently visible/active in the frontend (search location or map viewport).
+    # When provided, Gemini is constrained to suggest only within these cities.
+    context_cities: list[str] | None = None
     lifestyle_pace: str | None = None
     work_style: str | None = None
     mobility_style: str | None = None
@@ -44,6 +51,10 @@ class NeighborhoodTwin(BaseModel):
     key_similarities: list[str]
     key_differences: list[str]
     vibe: str
+    # Stock enrichment — properties available on InmuFacil in this twin zone
+    available_count: int = 0
+    price_from: int | None = None
+    price_to: int | None = None
 
 
 class NeighborhoodTwinsResponse(BaseModel):
@@ -95,8 +106,20 @@ async def get_neighborhood_twins(
 
     city_context = f" en {body.city}" if body.city else " en Espana"
 
-    prompt = f"""Eres un experto en urbanismo espanol. Encuentra los {body.max_results} barrios mas similares al codigo postal {body.postal_code}{city_context}.
-Perfil de usuario:{lifestyle_context if lifestyle_context else " generico"}
+    # Build city restriction when the frontend provides context cities
+    city_restriction = ""
+    # Ask for more candidates so we have room to filter after DB cross-check
+    gemini_max = max(body.max_results * 3, 15)
+    if body.context_cities:
+        cities_str = ", ".join(body.context_cities)
+        city_restriction = (
+            f"\nRESTRICCION OBLIGATORIA: Solo puedes sugerir barrios DENTRO de estas ciudades: {cities_str}. "
+            "No sugieras barrios de otras ciudades. "
+            "Si no hay suficiente variedad, devuelve los que haya aunque sean pocos."
+        )
+
+    prompt = f"""Eres un experto en urbanismo espanol. Encuentra los {gemini_max} barrios mas similares al codigo postal {body.postal_code}{city_context}.
+Perfil de usuario:{lifestyle_context if lifestyle_context else " generico"}{city_restriction}
 
 REGLAS: Solo barrios REALES en Espana. similarity_score 0-100. avg_price_sqm en euros/m2 o null.
 Responde SOLO con JSON valido:
@@ -148,9 +171,49 @@ Responde SOLO con JSON valido:
             except (ValueError, TypeError) as e:
                 logger.warning("neighborhood_twins: skipping malformed twin: %s", e)
 
+        # Enrich each twin with real stock data from the DB
+        enriched: list[NeighborhoodTwin] = []
+        for twin in twins:
+            stats = db.query(
+                func.count(PropertyModel.id),
+                func.min(PropertyModel.price),
+                func.max(PropertyModel.price),
+            ).filter(
+                PropertyModel.city.ilike(f"%{twin.city}%"),
+                PropertyModel.status == PropertyStatus.PUBLISHED,
+            ).first()
+
+            count = stats[0] or 0
+            # When context_cities is provided, only include twins that have real stock
+            if body.context_cities and count == 0:
+                continue
+            enriched.append(NeighborhoodTwin(
+                postal_code=twin.postal_code,
+                neighborhood_name=twin.neighborhood_name,
+                city=twin.city,
+                similarity_score=twin.similarity_score,
+                avg_price_sqm=twin.avg_price_sqm,
+                key_similarities=twin.key_similarities,
+                key_differences=twin.key_differences,
+                vibe=twin.vibe,
+                available_count=count,
+                price_from=int(stats[1]) if stats[1] else None,
+                price_to=int(stats[2]) if stats[2] else None,
+            ))
+            if len(enriched) >= body.max_results:
+                break
+
+        if not enriched:
+            return NeighborhoodTwinsResponse(
+                source_postal_code=body.postal_code,
+                twins=[],
+                low_data=True,
+                disclaimer=_DISCLAIMER,
+            )
+
         return NeighborhoodTwinsResponse(
             source_postal_code=body.postal_code,
-            twins=twins[: body.max_results],
+            twins=enriched,
             low_data=False,
             disclaimer=_DISCLAIMER,
         )

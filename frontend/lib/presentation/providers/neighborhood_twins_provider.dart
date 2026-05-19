@@ -18,6 +18,9 @@ class NeighborhoodTwin {
     this.keySimilarities = const [],
     this.keyDifferences = const [],
     this.vibe = '',
+    this.availableCount = 0,
+    this.priceFrom,
+    this.priceTo,
   });
 
   final String postalCode;
@@ -28,6 +31,10 @@ class NeighborhoodTwin {
   final List<String> keySimilarities;
   final List<String> keyDifferences;
   final String vibe;
+  // Real stock on InmuFacil for this twin zone
+  final int availableCount;
+  final int? priceFrom;
+  final int? priceTo;
 
   factory NeighborhoodTwin.fromJson(Map<String, dynamic> json) {
     return NeighborhoodTwin(
@@ -45,6 +52,9 @@ class NeighborhoodTwin {
               .toList() ??
           [],
       vibe: json['vibe'] as String? ?? '',
+      availableCount: (json['available_count'] as num?)?.toInt() ?? 0,
+      priceFrom: (json['price_from'] as num?)?.toInt(),
+      priceTo: (json['price_to'] as num?)?.toInt(),
     );
   }
 }
@@ -80,19 +90,36 @@ class NeighborhoodTwinsResult {
 // ---------------------------------------------------------------------------
 
 class TwinsRequestKey {
-  const TwinsRequestKey({required this.postalCode, this.city});
+  const TwinsRequestKey({
+    required this.postalCode,
+    this.city,
+    this.contextCities,
+  });
   final String postalCode;
   final String? city;
+  // Cities visible/active in the frontend — constrains Gemini to local stock
+  final List<String>? contextCities;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is TwinsRequestKey &&
           other.postalCode == postalCode &&
-          other.city == city;
+          other.city == city &&
+          _listEquals(other.contextCities, contextCities);
 
   @override
-  int get hashCode => Object.hash(postalCode, city);
+  int get hashCode => Object.hash(postalCode, city, contextCities?.join(','));
+
+  static bool _listEquals(List<String>? a, List<String>? b) {
+    if (a == null && b == null) return true;
+    if (a == null || b == null) return false;
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -111,6 +138,8 @@ final neighborhoodTwinsProvider = FutureProvider.autoDispose
   final body = <String, dynamic>{
     'postal_code': key.postalCode,
     if (key.city != null) 'city': key.city,
+    if (key.contextCities != null && key.contextCities!.isNotEmpty)
+      'context_cities': key.contextCities,
     'lifestyle_pace': lifestyle.pace.name,
     'work_style': lifestyle.workStyle.name,
     'mobility_style': lifestyle.mobility.name,

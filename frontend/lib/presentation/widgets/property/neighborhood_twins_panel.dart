@@ -3,25 +3,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../providers/neighborhood_twins_provider.dart';
+import '../../providers/search_provider.dart';
 
 /// Displays a panel of "barrios gemelos" (twin neighborhoods) below search
 /// results when a postal code is available for the current search.
+/// When [contextCities] is provided, only twins with real stock on InmuFacil
+/// within those cities are shown.
 class NeighborhoodTwinsPanel extends ConsumerWidget {
   const NeighborhoodTwinsPanel({
     super.key,
     required this.postalCode,
     this.city,
+    this.contextCities,
   });
 
   final String postalCode;
   final String? city;
+  final List<String>? contextCities;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (postalCode.isEmpty) return const SizedBox.shrink();
 
-    final key = TwinsRequestKey(postalCode: postalCode, city: city);
-    final asyncResult = ref.watch(neighborhoodTwinsProvider(key));
+    final requestKey = TwinsRequestKey(
+      postalCode: postalCode,
+      city: city,
+      contextCities: contextCities,
+    );
+    final asyncResult = ref.watch(neighborhoodTwinsProvider(requestKey));
 
     return asyncResult.when(
       loading: () => _LoadingState(),
@@ -30,7 +39,13 @@ class NeighborhoodTwinsPanel extends ConsumerWidget {
         if (result == null || result.twins.isEmpty || result.lowData) {
           return const SizedBox.shrink();
         }
-        return _TwinsContent(twins: result.twins, disclaimer: result.disclaimer);
+        return _TwinsContent(
+          twins: result.twins,
+          disclaimer: result.disclaimer,
+          onViewProperties: (city) {
+            ref.read(searchProvider.notifier).searchCity(city);
+          },
+        );
       },
     );
   }
@@ -68,10 +83,15 @@ class _LoadingState extends StatelessWidget {
 }
 
 class _TwinsContent extends StatelessWidget {
-  const _TwinsContent({required this.twins, required this.disclaimer});
+  const _TwinsContent({
+    required this.twins,
+    required this.disclaimer,
+    required this.onViewProperties,
+  });
 
   final List<NeighborhoodTwin> twins;
   final String disclaimer;
+  final void Function(String city) onViewProperties;
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +129,10 @@ class _TwinsContent extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // Twin cards
-        ...twins.map((twin) => _TwinNeighborhoodCard(twin: twin)),
+        ...twins.map((twin) => _TwinNeighborhoodCard(
+              twin: twin,
+              onViewProperties: () => onViewProperties(twin.city),
+            )),
         // Disclaimer
         Padding(
           padding: const EdgeInsets.only(top: 8),
@@ -125,9 +148,13 @@ class _TwinsContent extends StatelessWidget {
 }
 
 class _TwinNeighborhoodCard extends StatelessWidget {
-  const _TwinNeighborhoodCard({required this.twin});
+  const _TwinNeighborhoodCard({
+    required this.twin,
+    required this.onViewProperties,
+  });
 
   final NeighborhoodTwin twin;
+  final VoidCallback onViewProperties;
 
   @override
   Widget build(BuildContext context) {
@@ -251,9 +278,51 @@ class _TwinNeighborhoodCard extends StatelessWidget {
               }).toList(),
             ),
           ],
+          // Stock row + "Ver inmuebles" button
+          if (twin.availableCount > 0) ...[
+            const SizedBox(height: 12),
+            Divider(height: 1, color: cs.outlineVariant.withOpacity(0.4)),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Icon(Icons.home_work_outlined, size: 14, color: cs.primary),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    _stockLabel(twin),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    ),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: onViewProperties,
+                  icon: const Icon(Icons.search, size: 14),
+                  label: Text('discovery.twins.view_properties_btn'.tr()),
+                  style: TextButton.styleFrom(
+                    foregroundColor: cs.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  String _stockLabel(NeighborhoodTwin t) {
+    final count = t.availableCount;
+    final from = t.priceFrom != null ? _formatNumber(t.priceFrom!) : null;
+    if (from != null) {
+      return '$count ${'discovery.twins.available_count'.tr()} · desde ${from}\u20AC';
+    }
+    return '$count ${'discovery.twins.available_count'.tr()}';
   }
 
   static String _formatNumber(int n) {

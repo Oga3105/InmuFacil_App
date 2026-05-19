@@ -471,11 +471,23 @@ class _PropertyListingScreenState extends ConsumerState<PropertyListingScreen> {
                                         ?.group(1) ??
                                     '');
                             if (firstPc.isEmpty) return const SizedBox.shrink();
+                            // Priority: explicit search location > cities from visible results
+                            final contextCities = searchState.location.isNotEmpty
+                                ? [searchState.location]
+                                : allFilteredProperties
+                                    .map((p) => RegExp(r',\s*([^,]+?)\s*(?:\d{5}|$)')
+                                        .firstMatch(p.address)
+                                        ?.group(1)
+                                        ?.trim())
+                                    .whereType<String>()
+                                    .toSet()
+                                    .toList();
                             return NeighborhoodTwinsPanel(
                               postalCode: firstPc,
                               city: searchState.location.isNotEmpty
                                   ? searchState.location
                                   : null,
+                              contextCities: contextCities.isNotEmpty ? contextCities : null,
                             );
                           }),
                           // Pagination
