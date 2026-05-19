@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import 'package:inmufacil_frontend/domain/entities/property_type.dart';
+import 'package:inmufacil_frontend/domain/entities/property.dart';
 import 'package:inmufacil_frontend/presentation/providers/search_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/map_state_provider.dart';
 import 'package:inmufacil_frontend/presentation/providers/hover_provider.dart';
 import 'package:inmufacil_frontend/presentation/widgets/map/property_floating_card.dart';
+import 'package:inmufacil_frontend/presentation/widgets/common/price_tag.dart';
 import 'package:inmufacil_frontend/presentation/widgets/open_street_map_widget.dart';
 import 'package:inmufacil_frontend/presentation/widgets/common/premium_button.dart';
 import '../../providers/auth_provider.dart';
@@ -259,7 +261,9 @@ class _MapSection extends ConsumerWidget {
                           ),
                           builder: (ctx) => SizedBox(
                             height: MediaQuery.of(context).size.height * 0.92,
-                            child: _SearchPanel(),
+                            child: _SearchPanel(
+                              onSearchDone: () => Navigator.of(ctx).pop(),
+                            ),
                           ),
                         );
                       },
@@ -352,13 +356,168 @@ class _MapSection extends ConsumerWidget {
               ),
             ),
           ),
+
+        // MOBILE ONLY: Floating property card near the bottom when a marker is tapped
+        if (isMobile)
+          Consumer(
+            builder: (context, ref, _) {
+              final selectedProperty = ref.watch(selectedPropertyProvider);
+              return AnimatedSwitcher(
+                duration: const Duration(milliseconds: 160),
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+                child: selectedProperty == null
+                    ? const SizedBox.shrink()
+                    : Positioned(
+                        key: ValueKey(selectedProperty.id),
+                        left: 16,
+                        right: 16,
+                        bottom: 96,
+                        child: _MobilePropertyCard(
+                          property: selectedProperty,
+                          onClose: () => ref.read(selectedPropertyProvider.notifier).select(null),
+                          onTap: () {
+                            ref.read(searchProvider.notifier).clearError();
+                            context.pushNamed(
+                              'property-details',
+                              pathParameters: {'id': selectedProperty.id},
+                            );
+                          },
+                        ),
+                      ),
+              );
+            },
+          ),
       ],
+    );
+  }
+}
+
+/// Compact card shown at the bottom of the map on mobile when a marker is tapped.
+/// Shows thumbnail + key data (price, title, m², rooms) + close button + navigate CTA.
+/// Height ~104px — leaves most of the map visible for comparison.
+class _MobilePropertyCard extends StatelessWidget {
+  const _MobilePropertyCard({
+    required this.property,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final Property property;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      elevation: 8,
+      shadowColor: Colors.black38,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outlineVariant, width: 1),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  property.imageUrl ?? 'https://via.placeholder.com/80x80',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 80,
+                    height: 80,
+                    color: cs.surfaceContainerHighest,
+                    child: Icon(Icons.image_not_supported, color: cs.onSurfaceVariant),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Info column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    PriceTag(
+                      price: property.price,
+                      previousPrice: property.previousPrice,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      property.title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                        height: 1.3,
+                      ),
+                      maxLines: 3,
+                      overflow: TextOverflow.visible,
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.bed_outlined, size: 14, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}',
+                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                        ),
+                        const SizedBox(width: 10),
+                        Icon(Icons.square_foot, size: 14, color: cs.onSurfaceVariant),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${property.squareMeters}m\u00b2',
+                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              // Close + navigate column
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                    onPressed: onClose,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                    tooltip: 'common.close'.tr(),
+                  ),
+                  const SizedBox(height: 4),
+                  Icon(Icons.chevron_right, color: cs.primary, size: 22),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
 
 /// Search panel with hero section and search form
 class _SearchPanel extends ConsumerWidget {
+  const _SearchPanel({this.onSearchDone});
+  final VoidCallback? onSearchDone;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
@@ -473,7 +632,7 @@ class _SearchPanel extends ConsumerWidget {
                         const SizedBox(height: 24), // Spacing (Yellow): Normalized to 24px per user request
                         
                          // [Search Form]
-                         _SearchForm(),
+                         _SearchForm(onSearchDone: onSearchDone),
                          
                          const SizedBox(height: 32),
 
@@ -745,6 +904,9 @@ class _FeatureItem extends StatelessWidget {
 /// Search form with filters
 /// Search form with filters
 class _SearchForm extends ConsumerStatefulWidget {
+  const _SearchForm({this.onSearchDone});
+  final VoidCallback? onSearchDone;
+
   @override
   ConsumerState<_SearchForm> createState() => _SearchFormState();
 }
@@ -964,6 +1126,8 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
               } else {
                  ref.read(searchProvider.notifier).search();
               }
+              // On mobile: close the bottom sheet so the user sees the map results
+              widget.onSearchDone?.call();
             },
             color: theme.colorScheme.primary,
             icon: Icons.search, // Keep Lupita as requested
@@ -985,7 +1149,11 @@ class _SearchFormState extends ConsumerState<_SearchForm> {
                  padding: const EdgeInsets.only(top: 12),
                  child: _PremiumGlowButton(
                    label: 'home.clear_filters'.tr(),
-                   onPressed: () => ref.read(searchProvider.notifier).resetFilters(),
+                   onPressed: () {
+                     ref.read(searchProvider.notifier).resetFilters();
+                     // On mobile: close the bottom sheet so the user sees the map
+                     widget.onSearchDone?.call();
+                   },
                    color: const Color(0xFFB91C1C), // Shadow will be red too
                    icon: Icons.refresh,
                  ),
