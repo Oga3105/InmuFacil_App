@@ -307,7 +307,9 @@
       "loading": "Searching for twin neighborhoods...",
       "match_score": "{score}% match",
       "section_subtitle": "Zones with a similar profile to your current search",
-      "section_title": "TWIN NEIGHBORHOODS"
+      "section_title": "TWIN NEIGHBORHOODS",
+      "available_count": "properties available",
+      "view_properties_btn": "View properties"
     }
   },
   "doc_verification": {

@@ -329,7 +329,9 @@
       "loading": "Cercant barris bessons...",
       "match_score": "{score}% compatibilitat",
       "section_subtitle": "Zones amb perfil similar a la teva cerca actual",
-      "section_title": "BARRIS BESSONS"
+      "section_title": "BARRIS BESSONS",
+      "available_count": "immobles disponibles",
+      "view_properties_btn": "Veure immobles"
     }
   },
   "doc_verification": {

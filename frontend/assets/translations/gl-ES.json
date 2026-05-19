@@ -309,7 +309,9 @@
       "loading": "Buscando barrios xemelgos...",
       "match_score": "{score}% compatibilidade",
       "section_subtitle": "Zonas con perfil similar á túa busca actual",
-      "section_title": "BARRIOS XEMELGOS"
+      "section_title": "BARRIOS XEMELGOS",
+      "available_count": "inmobles dispoñibles",
+      "view_properties_btn": "Ver inmobles"
     }
   },
   "doc_verification": {

@@ -307,7 +307,9 @@
       "loading": "Recherche de quartiers jumeaux...",
       "match_score": "{score}% de compatibilité",
       "section_subtitle": "Zones au profil similaire à votre recherche actuelle",
-      "section_title": "QUARTIERS JUMEAUX"
+      "section_title": "QUARTIERS JUMEAUX",
+      "available_count": "biens disponibles",
+      "view_properties_btn": "Voir les biens"
     }
   },
   "doc_verification": {

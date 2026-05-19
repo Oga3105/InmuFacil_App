@@ -307,7 +307,9 @@
       "loading": "Auzokide bikoiztuak bilatzen...",
       "match_score": "{score}% bateragarritasuna",
       "section_subtitle": "Zure uneko bilaketaren profil antzeko eremuak",
-      "section_title": "AUZOKIDE BIKOIZTUAK"
+      "section_title": "AUZOKIDE BIKOIZTUAK",
+      "available_count": "ondasun erabilgarriak",
+      "view_properties_btn": "Ondasunak ikusi"
     }
   },
   "doc_verification": {
