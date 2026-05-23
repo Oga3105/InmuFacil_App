@@ -401,6 +401,7 @@ class _MapSection extends ConsumerWidget {
 /// Height ~104px — leaves most of the map visible for comparison.
 class _MobilePropertyCard extends StatelessWidget {
   const _MobilePropertyCard({
+    super.key,
     required this.property,
     required this.onTap,
     required this.onClose,
@@ -413,101 +414,108 @@ class _MobilePropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      elevation: 8,
-      shadowColor: Colors.black38,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cs.outlineVariant, width: 1),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Thumbnail
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  property.imageUrl ?? 'https://via.placeholder.com/80x80',
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: cs.outlineVariant, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                property.imageUrl ?? '',
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
                   width: 80,
                   height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    width: 80,
-                    height: 80,
-                    color: cs.surfaceContainerHighest,
-                    child: Icon(Icons.image_not_supported, color: cs.onSurfaceVariant),
-                  ),
+                  color: cs.surfaceContainerHighest,
+                  child: Icon(Icons.image_not_supported, color: cs.onSurfaceVariant),
                 ),
               ),
-              const SizedBox(width: 12),
-              // Info column
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PriceTag(
-                      price: property.price,
-                      previousPrice: property.previousPrice,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      property.title,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                        height: 1.3,
-                      ),
-                      maxLines: 3,
-                      overflow: TextOverflow.visible,
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Icon(Icons.bed_outlined, size: 14, color: cs.onSurfaceVariant),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}',
-                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-                        ),
-                        const SizedBox(width: 10),
-                        Icon(Icons.square_foot, size: 14, color: cs.onSurfaceVariant),
-                        const SizedBox(width: 3),
-                        Text(
-                          '${property.squareMeters}m\u00b2',
-                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 4),
-              // Close + navigate column
-              Column(
+            ),
+            const SizedBox(width: 12),
+            // Info column
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(
-                    icon: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
-                    onPressed: onClose,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                    tooltip: 'common.close'.tr(),
+                  PriceTag(
+                    price: property.price,
+                    previousPrice: property.previousPrice,
                   ),
                   const SizedBox(height: 4),
-                  Icon(Icons.chevron_right, color: cs.primary, size: 22),
+                  Text(
+                    property.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: cs.onSurface,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(Icons.bed_outlined, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          '${property.bedrooms} ${'property_listing.bedrooms_unit'.tr()}',
+                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Icon(Icons.square_foot, size: 14, color: cs.onSurfaceVariant),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          '${property.squareMeters}m\u00b2',
+                          style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 4),
+            // Close + navigate column
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: onClose,
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: Icon(Icons.close, size: 18, color: cs.onSurfaceVariant),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Icon(Icons.chevron_right, color: cs.primary, size: 22),
+              ],
+            ),
+          ],
         ),
       ),
     );
