@@ -410,7 +410,7 @@ class _ArrasBuyerStepperScreenState
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
-                      color: colorScheme.onPrimaryContainer),
+                      color: colorScheme.onSurface),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -423,28 +423,6 @@ class _ArrasBuyerStepperScreenState
                   controller: _buyerAddressCtrl,
                   hint: 'arras_interview.address_hint'.tr(),
                   icon: Icons.home_outlined,
-                ),
-                const SizedBox(height: 12),
-                _LabeledField(
-                  label: 'arras_interview.property_address_label'.tr(),
-                  controller: _propertyAddressCtrl,
-                  hint: 'arras_interview.address_hint'.tr(),
-                  icon: Icons.location_on_outlined,
-                ),
-                const SizedBox(height: 12),
-                _LabeledField(
-                  label: 'arras_interview.cadastral_label'.tr(),
-                  controller: _cadastralRefCtrl,
-                  hint: 'arras_interview.cadastral_hint'.tr(),
-                  icon: Icons.grid_view_outlined,
-                  caps: TextCapitalization.characters,
-                ),
-                const SizedBox(height: 12),
-                _LabeledField(
-                  label: 'arras_interview.registry_label'.tr(),
-                  controller: _registryDataCtrl,
-                  hint: 'arras_interview.registry_hint'.tr(),
-                  icon: Icons.article_outlined,
                 ),
               ],
             ),
@@ -787,14 +765,12 @@ class _LabeledField extends StatelessWidget {
     required this.controller,
     required this.hint,
     required this.icon,
-    this.caps = TextCapitalization.sentences,
   });
 
   final String label;
   final TextEditingController controller;
   final String hint;
   final IconData icon;
-  final TextCapitalization caps;
 
   @override
   Widget build(BuildContext context) {
@@ -807,12 +783,12 @@ class _LabeledField extends StatelessWidget {
           style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 13,
-              color: colorScheme.onPrimaryContainer),
+              color: colorScheme.onSurface),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
-          textCapitalization: caps,
+          textCapitalization: TextCapitalization.sentences,
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, color: colorScheme.primary, size: 18),
