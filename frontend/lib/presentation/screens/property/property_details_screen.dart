@@ -441,8 +441,10 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       // DESHACER: MarketPriceWidget removed from property details UI.
                       const SizedBox(height: 32),
                       _OwnerCard(property: property, isOwner: isOwner),
-                      const SizedBox(height: 24),
-                      _SellerMetricsCard(propertyId: property.id, status: property.status),
+                      if (isOwner) ...[
+                        const SizedBox(height: 24),
+                        _SellerMetricsCard(propertyId: property.id, status: property.status),
+                      ],
                       if (isOwner) ...[
                         const SizedBox(height: 24),
                         DocumentStatusSection(
@@ -1057,8 +1059,10 @@ class _SummaryCard extends ConsumerWidget {
           ],
           const SizedBox(height: 16),
           _OwnerCard(property: property, isOwner: isOwner),
-          const SizedBox(height: 24),
-          _SellerMetricsCard(propertyId: property.id, status: property.status),
+          if (isOwner) ...[
+            const SizedBox(height: 24),
+            _SellerMetricsCard(propertyId: property.id, status: property.status),
+          ],
           const SizedBox(height: 16),
           // Viability widget — only shown to non-owners (buyers)
           if (!isOwner) ...[
