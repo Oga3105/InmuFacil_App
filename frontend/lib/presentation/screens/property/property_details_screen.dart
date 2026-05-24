@@ -1971,78 +1971,125 @@ class _OwnerCard extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.transparent),
-      ),
-      child: Row(
-        children: [
-          Builder(
-            builder: (context) {
-              final ts = DateTime.now().millisecondsSinceEpoch;
-              return SizedBox(
-                width: 40,
-                height: 40,
-                child: ClipOval(
-                  child: photoUrl != null
-                      ? Image.network(
-                          '$photoUrl?v=$ts',
-                          width: 40,
-                          height: 40,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFF135BEC),
-                            alignment: Alignment.center,
-                            child: const Icon(Icons.person, color: Colors.white, size: 20),
-                          ),
-                        )
-                      : Container(
-                          color: const Color(0xFF135BEC),
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.person, color: Colors.white, size: 20),
-                        ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
-                const SizedBox(height: 2),
-                if (isVerified)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF16A34A).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
-                        const SizedBox(width: 4),
-                        Text('property.identity_verified'.tr(), style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
-                      ],
+    final reportButton = (!isOwner && property.ownerId != null)
+        ? ReportButton(reportedUserId: int.tryParse(property.ownerId!) ?? 0)
+        : null;
+
+    final avatarWidget = Builder(
+      builder: (context) {
+        final ts = DateTime.now().millisecondsSinceEpoch;
+        return SizedBox(
+          width: 40,
+          height: 40,
+          child: ClipOval(
+            child: photoUrl != null
+                ? Image.network(
+                    '$photoUrl?v=$ts',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFF135BEC),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.person, color: Colors.white, size: 20),
                     ),
                   )
-                else
-                  Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
-                if (!isOwner && property.ownerId != null) ...[
-                  const SizedBox(height: 8),
-                  ReportButton(reportedUserId: int.tryParse(property.ownerId!) ?? 0),
-                ],
+                : Container(
+                    color: const Color(0xFF135BEC),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.person, color: Colors.white, size: 20),
+                  ),
+          ),
+        );
+      },
+    );
+
+    final infoColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+        const SizedBox(height: 2),
+        if (isVerified)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: const Color(0xFF16A34A).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
+                const SizedBox(width: 4),
+                Text('property.identity_verified'.tr(), style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
               ],
             ),
-          ),
+          )
+        else
+          Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+        if (reportButton != null) ...[
+          const SizedBox(height: 8),
+          reportButton,
         ],
-      ),
+      ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.transparent),
+          ),
+          child: Row(
+            children: [
+              avatarWidget,
+              const SizedBox(width: 12),
+              Expanded(
+                child: isMobile
+                    ? infoColumn
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(name, style: TextStyle(fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+                                const SizedBox(height: 2),
+                                if (isVerified)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF16A34A).withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(4),
+                                      border: Border.all(color: const Color(0xFF16A34A).withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.verified, size: 10, color: Color(0xFF16A34A)),
+                                        const SizedBox(width: 4),
+                                        Text('property.identity_verified'.tr(), style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Color(0xFF16A34A), letterSpacing: 0.5)),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                  Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+                              ],
+                            ),
+                          ),
+                          if (reportButton != null) reportButton,
+                        ],
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
