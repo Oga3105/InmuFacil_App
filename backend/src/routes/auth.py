@@ -565,7 +565,7 @@ async def google_auth(
 # ============================================================================
 
 @router.post(
-    "/auth/renew",
+    "/renew",
     response_model=Token,
     summary="Silent token renewal",
     description=(
