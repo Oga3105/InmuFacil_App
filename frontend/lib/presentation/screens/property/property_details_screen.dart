@@ -155,6 +155,8 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final isFavorite = favoriteIds.contains(property.id);
 
     final colorScheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobileAppBar = screenWidth < 650;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -176,7 +178,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
         ),
         titleSpacing: 0,
         title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: isMobileAppBar ? 4 : 24),
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
@@ -184,12 +186,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset('assets/images/logo_inmufacil.png', height: 32),
-                  const SizedBox(width: 8),
-                  const Text.rich(
+                  Image.asset('assets/images/logo_inmufacil.png', height: isMobileAppBar ? 26 : 32),
+                  const SizedBox(width: 6),
+                  Text.rich(
                     TextSpan(
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                      children: [
+                      style: TextStyle(fontSize: isMobileAppBar ? 17 : 20, fontWeight: FontWeight.w800),
+                      children: const [
                         TextSpan(text: 'Inmu', style: TextStyle(color: Color(0xFF135BEC))),
                         TextSpan(text: 'Fácil', style: TextStyle(color: Color(0xFF16A34A))),
                       ],
