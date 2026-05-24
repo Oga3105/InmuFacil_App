@@ -350,10 +350,15 @@ class _CashConsentBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bannerBg = isDark ? const Color(0xFF1A0E00) : const Color(0xFFFFF7ED);
+    final bannerTitle = isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C);
+    final bannerDesc = isDark ? const Color(0xFFFBD38D) : const Color(0xFF9A3412);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF7ED),
+        color: bannerBg,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFF97316), width: 1.5),
       ),
@@ -362,16 +367,15 @@ class _CashConsentBanner extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.gavel_outlined,
-                  color: Color(0xFFEA580C), size: 20),
+              Icon(Icons.gavel_outlined, color: bannerTitle, size: 20),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'arras_interview.cash_consent_banner_title'.tr(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Color(0xFFEA580C),
+                    color: bannerTitle,
                   ),
                 ),
               ),
@@ -380,8 +384,7 @@ class _CashConsentBanner extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'arras_interview.cash_consent_banner_desc'.tr(),
-            style: const TextStyle(
-                fontSize: 12, color: Color(0xFF9A3412), height: 1.4),
+            style: TextStyle(fontSize: 12, color: bannerDesc, height: 1.4),
           ),
           const SizedBox(height: 12),
           SizedBox(
@@ -426,10 +429,14 @@ class _CashConsentAcceptedBadge extends StatelessWidget {
           '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (_) {}
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final badgeBg = isDark ? const Color(0xFF0D2010) : const Color(0xFFF0FDF4);
+    final badgeText = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: badgeBg,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: const Color(0xFF86EFAC)),
       ),
@@ -442,9 +449,9 @@ class _CashConsentAcceptedBadge extends StatelessWidget {
             child: Text(
               'arras_interview.cash_consent_modal_accepted_badge'
                   .tr(namedArgs: {'date': dateStr}),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 12,
-                  color: Color(0xFF166534),
+                  color: badgeText,
                   fontWeight: FontWeight.w500),
             ),
           ),
@@ -468,6 +475,12 @@ class _CashConsentDialogState extends State<_CashConsentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final headerBg = isDark ? const Color(0xFF1A0E00) : const Color(0xFFFFF7ED);
+    final headerTitle = isDark ? const Color(0xFFFB923C) : const Color(0xFFEA580C);
+    final bodyText = isDark ? colorScheme.onSurface : const Color(0xFF374151);
+
     return Dialog(
       insetPadding:
           const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -483,7 +496,7 @@ class _CashConsentDialogState extends State<_CashConsentDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF7ED),
+                color: headerBg,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: const Color(0xFFFB923C)),
               ),
@@ -492,16 +505,15 @@ class _CashConsentDialogState extends State<_CashConsentDialog> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.gavel_outlined,
-                          color: Color(0xFFEA580C), size: 24),
+                      Icon(Icons.gavel_outlined, color: headerTitle, size: 24),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'arras_interview.cash_consent_modal_title'.tr(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color: Color(0xFFEA580C),
+                            color: headerTitle,
                           ),
                         ),
                       ),
@@ -532,10 +544,7 @@ class _CashConsentDialogState extends State<_CashConsentDialog> {
             // ── Body text ───────────────────────────────────────
             Text(
               'arras_interview.cash_consent_modal_body'.tr(),
-              style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF374151),
-                  height: 1.6),
+              style: TextStyle(fontSize: 13, color: bodyText, height: 1.6),
             ),
             const SizedBox(height: 20),
 
@@ -845,15 +854,22 @@ class _RoleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final inactiveBorder = isDark ? colorScheme.outlineVariant : Colors.grey.shade200;
+    final inactiveIconBg = isDark ? colorScheme.surfaceContainerHighest : Colors.grey.shade100;
+    final inactiveIcon = isDark ? colorScheme.onSurfaceVariant : Colors.grey.shade400;
+    final inactiveTitle = isDark ? colorScheme.onSurface : Colors.grey.shade600;
+    final inactiveStatus = isDark ? colorScheme.onSurfaceVariant : Colors.grey.shade500;
+    final doneBtnBg = isDark ? colorScheme.surfaceContainerHighest : Colors.grey.shade200;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDone
-              ? color.withValues(alpha: 0.3)
-              : Colors.grey.shade200,
+          color: isDone ? color.withValues(alpha: 0.3) : inactiveBorder,
           width: isDone ? 1.5 : 1,
         ),
         boxShadow: [
@@ -869,14 +885,10 @@ class _RoleCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isDone
-                  ? color.withValues(alpha: 0.1)
-                  : Colors.grey.shade100,
+              color: isDone ? color.withValues(alpha: 0.1) : inactiveIconBg,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon,
-                color: isDone ? color : Colors.grey.shade400,
-                size: 20),
+            child: Icon(icon, color: isDone ? color : inactiveIcon, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -889,9 +901,7 @@ class _RoleCard extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          color: isDone
-                              ? const Color(0xFF135BEC)
-                              : Colors.grey.shade600,
+                          color: isDone ? colorScheme.primary : inactiveTitle,
                         )),
                     if (isMyRole) ...[
                       const SizedBox(width: 8),
@@ -899,13 +909,13 @@ class _RoleCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: _kBlue.withValues(alpha: 0.1),
+                          color: colorScheme.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                             'arras_interview.hub_role_you'.tr(),
                             style: TextStyle(
-                                color: _kBlue,
+                                color: colorScheme.primary,
                                 fontSize: 10,
                                 fontWeight: FontWeight.bold)),
                       ),
@@ -916,19 +926,15 @@ class _RoleCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      isDone
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                      color: isDone ? color : Colors.grey.shade400,
+                      isDone ? Icons.check_circle : Icons.radio_button_unchecked,
+                      color: isDone ? color : inactiveIcon,
                       size: 12,
                     ),
                     const SizedBox(width: 4),
                     Text(statusLabel,
                         style: TextStyle(
                             fontSize: 12,
-                            color: isDone
-                                ? color
-                                : Colors.grey.shade500)),
+                            color: isDone ? color : inactiveStatus)),
                   ],
                 ),
               ],
@@ -939,13 +945,11 @@ class _RoleCard extends StatelessWidget {
             FilledButton(
               onPressed: onCta,
               style: FilledButton.styleFrom(
-                backgroundColor:
-                    isDone ? Colors.grey.shade200 : color,
+                backgroundColor: isDone ? doneBtnBg : color,
                 foregroundColor: isDone ? color : Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 minimumSize: const Size(0, 36),
                 textStyle: const TextStyle(fontSize: 12),
               ),
