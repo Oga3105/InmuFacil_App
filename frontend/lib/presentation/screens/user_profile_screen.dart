@@ -860,32 +860,32 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
               child: _isChangingPassword
                   ? _buildChangePasswordForm()
-                  : Row(
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('profile.password_label'.tr(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text(
-                                'profile.password_update_hint'.tr(),
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
-                          ],
-                        ),
-                        const Spacer(),
-                        OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isChangingPassword = true;
-                            });
-                          },
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
+                        Text('profile.password_label'.tr(),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 4),
+                        Text(
+                            'profile.password_update_hint'.tr(),
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _isChangingPassword = true;
+                              });
+                            },
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: Text('profile.change_password'.tr()),
                           ),
-                          child: Text('profile.change_password'.tr()),
                         ),
                       ],
                     ),
@@ -894,12 +894,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
 
           const SizedBox(height: 16),
 
-          // [UPDATED] Suspension + Deletion Row
-          Row(
+          // Suspension + Deletion Column
+          Column(
             children: [
-              // 50% Suspension
-              Expanded(
-                child: Builder(builder: (context) => Container(
+              // Suspension
+              Builder(builder: (context) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                       color: const Color(0xFFFFF7ED),
@@ -943,11 +942,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ],
                   ),
                 )),
-              ),
-              const SizedBox(width: 16),
-              // 50% Deletion
-              Expanded(
-                child: Builder(builder: (context) => Container(
+              const SizedBox(height: 16),
+              // Deletion
+              Builder(builder: (context) => Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.errorContainer,
@@ -985,7 +982,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ],
                   ),
                 )),
-              ),
             ],
           ),
         ],
