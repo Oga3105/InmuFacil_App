@@ -15,15 +15,16 @@ class DocumentStatusSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final ccaa = ccaaFromPostalCode(postalCode);
     final requiresCedula = ccaaRequiereCedula(ccaa);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -39,22 +40,22 @@ class DocumentStatusSection extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.verified_outlined,
-                  color: Color(0xFF135BEC),
+                  color: colorScheme.primary,
                   size: 18,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
                 'doc_verification.section_title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
-                  color: Color(0xFF1E293B),
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -98,10 +99,12 @@ class _DocIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor =
         isPresent ? const Color(0xFF16A34A) : const Color(0xFFEF4444);
-    final statusBg =
-        isPresent ? const Color(0xFFF0FDF4) : const Color(0xFFFEF2F2);
+    final statusBg = isPresent
+        ? (isDark ? const Color(0xFF0D2010) : const Color(0xFFF0FDF4))
+        : (isDark ? const Color(0xFF1F0808) : const Color(0xFFFEF2F2));
     final statusBorder =
         isPresent ? const Color(0xFF16A34A) : const Color(0xFFEF4444);
 
@@ -109,7 +112,7 @@ class _DocIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         color: statusBg,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: statusBorder.withOpacity(0.3)),
+        border: Border.all(color: statusBorder.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Row(
