@@ -717,15 +717,16 @@ class _HeroCard extends StatelessWidget {
                 color: Colors.white, fontSize: 14, height: 1.4),
           ),
           const SizedBox(height: 16),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
             children: [
               _Chip(
                 label:
                     '${CurrencyInputFormatter.format(offerAmount)} EUR',
                 icon: Icons.euro_outlined,
               ),
-              if (depositPercentage != null) ...[
-                const SizedBox(width: 8),
+              if (depositPercentage != null)
                 _Chip(
                   label: 'arras_interview.hub_hero_arras_pct'.tr(
                       namedArgs: {
@@ -733,15 +734,12 @@ class _HeroCard extends StatelessWidget {
                       }),
                   icon: Icons.payments_outlined,
                 ),
-              ],
-              if (deadlineDays != null) ...[
-                const SizedBox(width: 8),
+              if (deadlineDays != null)
                 _Chip(
                   label: 'arras_interview.hub_hero_deadline'.tr(
                       namedArgs: {'days': deadlineDays.toString()}),
                   icon: Icons.schedule_outlined,
                 ),
-              ],
             ],
           ),
           const SizedBox(height: 12),
