@@ -1238,7 +1238,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           style: const TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          'profile.solvency.level'.tr(args: [levelLabel]),
+                          'profile.solvency.level'.tr(namedArgs: {'level': levelLabel}),
                           style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
 
