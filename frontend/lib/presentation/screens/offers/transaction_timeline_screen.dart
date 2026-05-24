@@ -1131,9 +1131,11 @@ class _ActiveRow extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         step.description!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF475569),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB0BEC5)
+                              : const Color(0xFF475569),
                           height: 1.5,
                         ),
                       ),
