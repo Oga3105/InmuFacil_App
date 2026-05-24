@@ -589,6 +589,8 @@ class _ArrasSellerStepperScreenState
   }
 
   Widget _buildBankTransferFields(ColorScheme colorScheme) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const kLightBlue = Color(0xFF93C5FD);
     return ArrasInterviewCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -618,7 +620,7 @@ class _ArrasSellerStepperScreenState
                   'arras_interview.iban_encrypted'.tr(),
                   style: TextStyle(
                     fontSize: 11,
-                    color: _kNavy.withOpacity(0.7),
+                    color: isDark ? kLightBlue : _kNavy.withOpacity(0.7),
                   ),
                 ),
               ),
@@ -695,21 +697,21 @@ class _ArrasSellerStepperScreenState
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: _kNavy.withOpacity(0.05),
+              color: isDark ? const Color(0xFF0D1A3A) : _kNavy.withOpacity(0.05),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.shield_outlined,
-                    size: 16, color: _kNavy),
+                Icon(Icons.shield_outlined,
+                    size: 16, color: isDark ? kLightBlue : _kNavy),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'arras_interview.iban_security_disclaimer'.tr(),
                     style: TextStyle(
                       fontSize: 12,
-                      color: _kNavy.withOpacity(0.8),
+                      color: isDark ? kLightBlue : _kNavy.withOpacity(0.8),
                       height: 1.4,
                     ),
                   ),

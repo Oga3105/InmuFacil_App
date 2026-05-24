@@ -114,10 +114,10 @@ class ArrasBottomBar extends StatelessWidget {
               onPressed: onPrev,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                side: BorderSide(color: Colors.grey.shade400),
+                side: BorderSide(color: isDark ? Colors.white38 : Colors.grey.shade400),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('arras_interview.shared_back'.tr(), style: TextStyle(color: Colors.grey.shade700)),
+              child: Text('arras_interview.shared_back'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.grey.shade700)),
             ),
           const Spacer(),
           if (page < 2)
