@@ -1521,6 +1521,7 @@
   },
   "report": {
     "button_tooltip": "Denunciar usuario",
+    "button_label": "Denunciar",
     "category_commission": "Pide comisión",
     "category_inaccurate": "Datos incorrectos",
     "category_professional": "Profesional encuberto",

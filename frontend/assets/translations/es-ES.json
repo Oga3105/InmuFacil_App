@@ -1934,6 +1934,7 @@
   },
   "report": {
     "button_tooltip": "Reportar usuario",
+    "button_label": "Denunciar",
     "modal_title": "Reportar usuario sospechoso",
     "modal_subtitle": "Selecciona el motivo de tu denuncia. Las denuncias falsas pueden ser sancionadas.",
     "category_professional": "Profesional camuflado",

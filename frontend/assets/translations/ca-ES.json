@@ -1519,6 +1519,7 @@
   },
   "report": {
     "button_tooltip": "Reportar usuari",
+    "button_label": "Denunciar",
     "category_commission": "Demana comissió",
     "category_inaccurate": "Dades inexactes",
     "category_professional": "Professional camuflat",

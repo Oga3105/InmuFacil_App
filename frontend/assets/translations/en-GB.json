@@ -1519,6 +1519,7 @@
   },
   "report": {
     "button_tooltip": "Report user",
+    "button_label": "Report",
     "category_commission": "Asks for commission",
     "category_inaccurate": "Inaccurate data",
     "category_professional": "Camouflaged professional",

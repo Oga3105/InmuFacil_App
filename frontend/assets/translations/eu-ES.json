@@ -1519,6 +1519,7 @@
   },
   "report": {
     "button_tooltip": "Erabiltzailea salatu",
+    "button_label": "Salatu",
     "category_commission": "Komisioa eskatzen du",
     "category_inaccurate": "Datu inexaktuak",
     "category_professional": "Profesional mozorrotua",

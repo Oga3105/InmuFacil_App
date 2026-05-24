@@ -1519,6 +1519,7 @@
   },
   "report": {
     "button_tooltip": "Signaler l'utilisateur",
+    "button_label": "Signaler",
     "category_commission": "Demande une commission",
     "category_inaccurate": "Données inexactes",
     "category_professional": "Professionnel déguisé",
