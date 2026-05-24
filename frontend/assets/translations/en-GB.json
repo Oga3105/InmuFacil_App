@@ -1472,6 +1472,7 @@
     "title_label": "Listing title *",
     "type_label": "Property type *",
     "visits_card": "Viewings",
+    "step_counter": "Step {current} of {total}",
     "step_location": "Location",
     "step_details": "Details",
     "step_photos": "Photos",

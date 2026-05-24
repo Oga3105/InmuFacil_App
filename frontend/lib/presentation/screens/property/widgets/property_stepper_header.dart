@@ -20,33 +20,99 @@ class PropertyStepperHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentStep = ref.watch(propertyFormProvider.select((s) => s.currentStep));
     final colorScheme = Theme.of(context).colorScheme;
-
     final steps = _steps();
-    return Container(
-      color: colorScheme.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (i) {
-          if (i.isOdd) {
-            // Connector line
-            final stepIndex = i ~/ 2;
-            final completed = currentStep > stepIndex;
-            return Expanded(
-              child: Container(
-                height: 2,
-                color: completed ? colorScheme.primary : colorScheme.outlineVariant,
-              ),
-            );
-          }
-          final stepIndex = i ~/ 2;
-          return _StepCircle(
-            index: stepIndex,
-            label: steps[stepIndex],
-            isActive: currentStep == stepIndex,
-            isCompleted: currentStep > stepIndex,
+    final total = steps.length;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 600;
+
+        if (isMobile) {
+          // Show a sliding window of 3 steps: previous, current, next.
+          // At the first step show [0,1,2]; at the last show [total-3, total-2, total-1].
+          final start = (currentStep == 0
+                  ? 0
+                  : currentStep >= total - 1
+                      ? total - 3
+                      : currentStep - 1)
+              .clamp(0, total - 3);
+          final visibleIndices = [start, start + 1, start + 2];
+
+          return Container(
+            color: colorScheme.surface,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  'property_wizard.step_counter'.tr(namedArgs: {
+                    'current': '${currentStep + 1}',
+                    'total': '$total',
+                  }),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: List.generate(visibleIndices.length * 2 - 1, (i) {
+                    if (i.isOdd) {
+                      final stepIdx = visibleIndices[i ~/ 2];
+                      final completed = currentStep > stepIdx;
+                      return Expanded(
+                        child: Container(
+                          height: 2,
+                          color: completed
+                              ? colorScheme.primary
+                              : colorScheme.outlineVariant,
+                        ),
+                      );
+                    }
+                    final stepIdx = visibleIndices[i ~/ 2];
+                    return _StepCircle(
+                      index: stepIdx,
+                      label: steps[stepIdx],
+                      isActive: currentStep == stepIdx,
+                      isCompleted: currentStep > stepIdx,
+                    );
+                  }),
+                ),
+              ],
+            ),
           );
-        }),
-      ),
+        }
+
+        // Desktop: full 6-step row (unchanged)
+        return Container(
+          color: colorScheme.surface,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          child: Row(
+            children: List.generate(total * 2 - 1, (i) {
+              if (i.isOdd) {
+                final stepIndex = i ~/ 2;
+                final completed = currentStep > stepIndex;
+                return Expanded(
+                  child: Container(
+                    height: 2,
+                    color: completed
+                        ? colorScheme.primary
+                        : colorScheme.outlineVariant,
+                  ),
+                );
+              }
+              final stepIndex = i ~/ 2;
+              return _StepCircle(
+                index: stepIndex,
+                label: steps[stepIndex],
+                isActive: currentStep == stepIndex,
+                isCompleted: currentStep > stepIndex,
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }
@@ -67,11 +133,18 @@ class _StepCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final circleColor = (isActive || isCompleted) ? colorScheme.primary : Colors.transparent;
-    final borderColor = (isActive || isCompleted) ? colorScheme.primary : colorScheme.outlineVariant;
-    final numberColor = (isActive || isCompleted) ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
+    final circleColor =
+        (isActive || isCompleted) ? colorScheme.primary : Colors.transparent;
+    final borderColor = (isActive || isCompleted)
+        ? colorScheme.primary
+        : colorScheme.outlineVariant;
+    final numberColor = (isActive || isCompleted)
+        ? colorScheme.onPrimary
+        : colorScheme.onSurfaceVariant;
     final labelWeight = isActive ? FontWeight.bold : FontWeight.normal;
-    final labelColor = isActive ? colorScheme.primary : (isCompleted ? colorScheme.primary : colorScheme.onSurfaceVariant);
+    final labelColor = isActive
+        ? colorScheme.primary
+        : (isCompleted ? colorScheme.primary : colorScheme.onSurfaceVariant);
 
     return Column(
       mainAxisSize: MainAxisSize.min,

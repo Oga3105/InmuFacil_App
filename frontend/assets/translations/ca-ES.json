@@ -1472,6 +1472,7 @@
     "title_label": "Títol de l'anunci *",
     "type_label": "Tipus de propietat *",
     "visits_card": "Visites",
+    "step_counter": "Pas {current} de {total}",
     "step_location": "Ubicacio",
     "step_details": "Detalls",
     "step_photos": "Fotos",

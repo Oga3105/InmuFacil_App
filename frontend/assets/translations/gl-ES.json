@@ -1474,6 +1474,7 @@
     "title_label": "Título do anuncio *",
     "type_label": "Tipo de propiedade *",
     "visits_card": "Visitas",
+    "step_counter": "Paso {current} de {total}",
     "step_location": "Localización",
     "step_details": "Detalles",
     "step_photos": "Fotos",

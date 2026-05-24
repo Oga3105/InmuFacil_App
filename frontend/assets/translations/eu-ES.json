@@ -1472,6 +1472,7 @@
     "title_label": "Iragarkiaren izenburua *",
     "type_label": "Jabetza mota *",
     "visits_card": "Bisitaldiak",
+    "step_counter": "Urratsa {current} / {total}",
     "step_location": "Kokapena",
     "step_details": "Xehetasunak",
     "step_photos": "Argazkiak",

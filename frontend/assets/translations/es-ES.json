@@ -522,6 +522,7 @@
     "condition_construction_sub": "Proyecto en ejecución",
     "condition_demolish": "Para Derribar",
     "condition_demolish_sub": "Solo valor de suelo/estructura",
+    "step_counter": "Paso {current} de {total}",
     "step_location": "Ubicacion",
     "step_details": "Detalles",
     "step_photos": "Fotos",
