@@ -894,8 +894,10 @@ class _LocationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text('property.approx_location'.tr(), style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
             Container(
@@ -906,6 +908,7 @@ class _LocationSection extends StatelessWidget {
                 border: Border.all(color: colorScheme.primary.withValues(alpha: 0.3)),
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.shield_outlined, size: 14, color: colorScheme.primary),
                   const SizedBox(width: 4),
