@@ -3058,48 +3058,48 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
+                if (isUpcoming && v.role == 'seller' && v.status == 'requested') ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      _VisitActionButton(
+                        icon: Icons.check_circle_outline,
+                        color: const Color(0xFF16A34A),
+                        label: 'profile.visits_tab.accept_btn'.tr(),
+                        onTap: () async {
+                          final ok = await updateVisitStatus(v.id, 'approved');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(ok ? 'profile.visits_tab.accept_success'.tr() : 'profile.visits_tab.accept_error'.tr()),
+                              backgroundColor: ok ? const Color(0xFF16A34A) : Colors.red,
+                            ));
+                            ref.invalidate(myVisitsProvider);
+                          }
+                        },
+                      ),
+                      _VisitActionButton(
+                        icon: Icons.cancel_outlined,
+                        color: Colors.red,
+                        label: 'profile.visits_tab.reject_btn'.tr(),
+                        onTap: () async {
+                          final ok = await updateVisitStatus(v.id, 'rejected');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(ok ? 'profile.visits_tab.reject_success'.tr() : 'profile.visits_tab.reject_error'.tr()),
+                              backgroundColor: ok ? const Color(0xFF64748B) : Colors.red,
+                            ));
+                            ref.invalidate(myVisitsProvider);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          // Seller: Approve/Reject buttons for pending visits
-          if (isUpcoming && v.role == 'seller' && v.status == 'requested')
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _VisitActionButton(
-                  icon: Icons.check_circle_outline,
-                  color: const Color(0xFF16A34A),
-                  label: 'profile.visits_tab.accept_btn'.tr(),
-                  onTap: () async {
-                    final ok = await updateVisitStatus(v.id, 'approved');
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok ? 'profile.visits_tab.accept_success'.tr() : 'profile.visits_tab.accept_error'.tr()),
-                        backgroundColor: ok ? const Color(0xFF16A34A) : Colors.red,
-                      ));
-                      ref.invalidate(myVisitsProvider);
-                    }
-                  },
-                ),
-                const SizedBox(width: 8),
-                _VisitActionButton(
-                  icon: Icons.cancel_outlined,
-                  color: Colors.red,
-                  label: 'profile.visits_tab.reject_btn'.tr(),
-                  onTap: () async {
-                    final ok = await updateVisitStatus(v.id, 'rejected');
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok ? 'profile.visits_tab.reject_success'.tr() : 'profile.visits_tab.reject_error'.tr()),
-                        backgroundColor: ok ? const Color(0xFF64748B) : Colors.red,
-                      ));
-                      ref.invalidate(myVisitsProvider);
-                    }
-                  },
-
-                ),
-              ],
-            ),
           // Actions Menu (reschedule / cancel)
           if (isUpcoming && v.status != 'cancelled' && v.status != 'rejected')
             PopupMenuButton<String>(
