@@ -3243,7 +3243,13 @@
     "lift": "Igogailua",
     "pool": "Igerilekua",
     "garage": "Garajea",
-    "terrace": "Terraza"
+    "terrace": "Terraza",
+    "garden": "Lorategia",
+    "ac": "Aire egokitua",
+    "heating": "Berokuntza",
+    "storage": "Biltegi-gela",
+    "wardrobes": "Armairu txertatuak",
+    "accessibility": "Irisgarritasuna"
   },
   "market_gap": {
     "error": "Errorea merkatuaren analisia kalkulatzean",

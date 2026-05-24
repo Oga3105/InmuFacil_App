@@ -3243,7 +3243,13 @@
     "lift": "Ascensor",
     "pool": "Piscina",
     "garage": "Garatge",
-    "terrace": "Terrassa"
+    "terrace": "Terrassa",
+    "garden": "Jardí",
+    "ac": "Aire condicionat",
+    "heating": "Calefacció",
+    "storage": "Traster",
+    "wardrobes": "Armaris encastats",
+    "accessibility": "Accessibilitat"
   },
   "market_gap": {
     "error": "Error en calcular l'anàlisi de mercat",

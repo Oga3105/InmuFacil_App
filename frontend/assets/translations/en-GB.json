@@ -3243,7 +3243,13 @@
     "lift": "Lift",
     "pool": "Pool",
     "garage": "Garage",
-    "terrace": "Terrace"
+    "terrace": "Terrace",
+    "garden": "Garden",
+    "ac": "Air conditioning",
+    "heating": "Heating",
+    "storage": "Storage room",
+    "wardrobes": "Built-in wardrobes",
+    "accessibility": "Accessibility"
   },
   "market_gap": {
     "error": "Error calculating market analysis",
