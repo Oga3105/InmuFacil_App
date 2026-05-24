@@ -2032,11 +2032,13 @@ class _OwnerCard extends StatelessWidget {
                   )
                 else
                   Text('property.identity_pending'.tr(), style: TextStyle(fontSize: 11, color: colorScheme.onSurfaceVariant)),
+                if (!isOwner && property.ownerId != null) ...[
+                  const SizedBox(height: 8),
+                  ReportButton(reportedUserId: int.tryParse(property.ownerId!) ?? 0),
+                ],
               ],
             ),
           ),
-          if (!isOwner && property.ownerId != null)
-            ReportButton(reportedUserId: int.tryParse(property.ownerId!) ?? 0),
         ],
       ),
     );
