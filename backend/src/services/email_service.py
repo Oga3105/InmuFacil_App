@@ -161,7 +161,7 @@ def _build_password_reset_html(token: str) -> str:
             <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                        padding:24px 40px;text-align:center;">
               <p style="margin:0;color:#94A3B8;font-size:12px;">
-                InmuFacil &copy; 2025 &middot; Compraventa inmobiliaria entre particulares<br>
+                InmuFacil &copy; 2026 &middot; Compraventa inmobiliaria entre particulares<br>
                 Este es un mensaje automatico. No respondas a este correo.
               </p>
             </td>
@@ -240,7 +240,7 @@ def _build_welcome_html(token: str) -> str:
             <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                        padding:24px 40px;text-align:center;">
               <p style="margin:0;color:#94A3B8;font-size:12px;">
-                InmuFacil &copy; 2025 &middot; Este es un mensaje automatico.
+                InmuFacil &copy; 2026 &middot; Este es un mensaje automatico.
               </p>
             </td>
           </tr>
@@ -375,7 +375,7 @@ def _build_comfort_request_html(seller_name: str, property_title: str, buyer_nam
             <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                        padding:24px 40px;text-align:center;">
               <p style="margin:0;color:#94A3B8;font-size:12px;">
-                InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+                InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
               </p>
             </td>
           </tr>
@@ -545,7 +545,7 @@ def _build_ai_abuse_alert_html(
             <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                        padding:20px 40px;text-align:center;">
               <p style="margin:0;color:#94A3B8;font-size:11px;">
-                InmuFacil &copy; 2025 &middot; Sistema de Alertas de Seguridad IA<br>
+                InmuFacil &copy; 2026 &middot; Sistema de Alertas de Seguridad IA<br>
                 Este es un mensaje automatico. No respondas a este correo.
               </p>
             </td>
@@ -629,7 +629,7 @@ def _build_comfort_request_confirmation_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -727,7 +727,7 @@ def _build_offer_received_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -832,7 +832,7 @@ def _build_offer_sent_confirmation_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -933,7 +933,7 @@ def _build_offer_accepted_notification_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -1035,7 +1035,7 @@ def _build_offer_accepted_confirmation_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -1152,7 +1152,7 @@ def _build_counter_offer_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
@@ -1290,7 +1290,7 @@ def _build_visit_request_html(
             <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                        padding:24px 40px;text-align:center;">
               <p style="margin:0;color:#94A3B8;font-size:12px;">
-                InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+                InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
               </p>
             </td>
           </tr>
@@ -1439,7 +1439,7 @@ def _build_cee_pending_offer_html(
           <td style="background:#F8FAFC;border-top:1px solid #E2E8F0;
                      padding:24px 40px;text-align:center;">
             <p style="margin:0;color:#94A3B8;font-size:12px;">
-              InmuFacil &copy; 2025 &middot; Este es un mensaje automatico. No respondas a este correo.
+              InmuFacil &copy; 2026 &middot; Este es un mensaje automatico. No respondas a este correo.
             </p>
           </td>
         </tr>
