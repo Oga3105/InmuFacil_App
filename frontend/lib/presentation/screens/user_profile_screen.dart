@@ -855,7 +855,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: Builder(builder: (context) => Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
               child: _isChangingPassword
@@ -909,23 +909,34 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
           // Suspension + Deletion (responsive)
           LayoutBuilder(builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+
+            // Suspend card — amber/warning tone, dark-mode friendly
+            final suspendBg = isDark ? const Color(0xFF221500) : const Color(0xFFFFF7ED);
+            final suspendTitle = isDark ? const Color(0xFFFBBF24) : const Color(0xFF9A3412);
+            final suspendHint = isDark ? const Color(0xFFD97706) : const Color(0xFFB45309);
+            final suspendBorder = isDark ? const Color(0xFFFBBF24) : Colors.orange;
+
             final suspendCard = Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
-                  borderRadius: BorderRadius.circular(8)),
+                  color: suspendBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF78350F)
+                          : Colors.orange.withValues(alpha: 0.3))),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('profile.suspend_account'.tr(),
-                      style: const TextStyle(
+                      style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                          color: Color(0xFF9A3412))),
+                          color: suspendTitle)),
                   const SizedBox(height: 4),
                   Text('profile.suspend_hint'.tr(),
-                      style: const TextStyle(
-                          color: Color(0xFFB45309), fontSize: 12)),
+                      style: TextStyle(color: suspendHint, fontSize: 12)),
                   const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
@@ -940,52 +951,70 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                         }
                       },
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.orange),
+                        side: BorderSide(color: suspendBorder),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(isSuspended ? 'profile.reactivate'.tr() : 'profile.suspend_button'.tr(),
-                          style: const TextStyle(color: Colors.orange)),
+                      child: Text(
+                          isSuspended
+                              ? 'profile.reactivate'.tr()
+                              : 'profile.suspend_button'.tr(),
+                          style: TextStyle(color: suspendBorder)),
                     ),
                   ),
                 ],
               ),
             );
-            final deleteCard = Builder(builder: (ctx) => Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  color: Theme.of(ctx).colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(8)),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('profile.delete_account'.tr(),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Theme.of(ctx).colorScheme.onErrorContainer)),
-                  const SizedBox(height: 4),
-                  Text('profile.delete_hint'.tr(),
-                      style: TextStyle(
-                          color: Theme.of(ctx).colorScheme.onErrorContainer.withOpacity(0.7), fontSize: 12)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+
+            // Delete card — error/danger tone, muted in dark mode
+            final deleteBg = isDark ? const Color(0xFF1F0808) : null;
+            final deleteTitle = isDark ? const Color(0xFFFCA5A5) : null;
+            final deleteHint = isDark ? const Color(0xFFEF9999) : null;
+            final deleteButtonBg = isDark ? const Color(0xFF7F1D1D) : Colors.red;
+
+            final deleteCard = Builder(builder: (ctx) {
+              final cs = Theme.of(ctx).colorScheme;
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    color: deleteBg ?? cs.errorContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: isDark
+                        ? Border.all(color: const Color(0xFF7F1D1D))
+                        : null),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('profile.delete_account'.tr(),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: deleteTitle ?? cs.onErrorContainer)),
+                    const SizedBox(height: 4),
+                    Text('profile.delete_hint'.tr(),
+                        style: TextStyle(
+                            color: (deleteHint ?? cs.onErrorContainer)
+                                .withValues(alpha: 0.8),
+                            fontSize: 12)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: deleteButtonBg,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('common.delete'.tr(),
+                            style: const TextStyle(color: Colors.white)),
                       ),
-                      child: Text('common.delete'.tr(),
-                          style: const TextStyle(color: Colors.white)),
                     ),
-                  ),
-                ],
-              ),
-            ));
+                  ],
+                ),
+              );
+            });
             if (isMobile) {
               return Column(
                 children: [
