@@ -572,7 +572,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Text(
-                          'profile.member_since'.tr(args: [user.createdAt?.year.toString() ?? '—']),
+                          'profile.member_since'.tr(namedArgs: {'year': user.createdAt?.year.toString() ?? '—'}),
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
                     ],
@@ -2965,6 +2965,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ),
                   ],
                 ),
+                if (v.otherUserName != null && v.otherUserName!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.person_outline,
+                          size: 13, color: Color(0xFF94A3B8)),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          v.otherUserName!,
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Container(
                   padding:

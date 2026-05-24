@@ -106,6 +106,7 @@ class MyVisit {
     required this.status,
     required this.role, // 'buyer' or 'seller'
     this.notes,
+    this.otherUserName,
   });
 
   final String id;
@@ -115,6 +116,7 @@ class MyVisit {
   final String status;
   final String role;
   final String? notes;
+  final String? otherUserName;
 }
 
 /// Fetches chat-based visits by scanning action messages via the existing
@@ -159,9 +161,15 @@ final chatVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
   final visits = <MyVisit>[];
   await Future.wait(allOffers.map((offer) async {
     final offerId = (offer['id'] ?? '').toString();
-    final propTitle = ((offer['property'] as Map?)?['title'] as String?) ?? 'Propiedad';
-    final propId = ((offer['property'] as Map?)?['id'] ?? offer['property_id'] ?? '').toString();
+    final prop = offer['property'] as Map?;
+    final propTitle = (prop?['title'] as String?) ?? 'Propiedad';
+    final propId = (prop?['id'] ?? offer['property_id'] ?? '').toString();
     final role = offer['_role'] as String? ?? 'buyer';
+    final buyer = offer['buyer'] as Map?;
+    final seller = prop?['owner'] as Map?;
+    final otherName = role == 'buyer'
+        ? ((seller?['full_name'] ?? seller?['name']) as String?)
+        : ((buyer?['full_name'] ?? buyer?['name']) as String?);
 
     try {
       final resp = await dio.get('/offers/$offerId/chat');
@@ -194,6 +202,7 @@ final chatVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
           startTime: _parseVisitDateStr(visitDate) ?? DateTime.now(),
           status: visitStatus!,
           role: role,
+          otherUserName: otherName,
         ));
       }
     } catch (_) {
@@ -243,18 +252,20 @@ final myVisitsProvider = FutureProvider<List<MyVisit>>((ref) async {
 
   MyVisit _map(dynamic item, String role) {
     final map = item as Map<String, dynamic>;
-    final window = map['window'] as Map<String, dynamic>? ?? {};
-    final property = window['property'] as Map<String, dynamic>? ?? {};
+    final otherName = role == 'buyer'
+        ? map['seller_full_name'] as String?
+        : map['buyer_full_name'] as String?;
     return MyVisit(
       id: (map['id'] ?? '').toString(),
-      propertyTitle: (property['title'] as String?) ?? 'Propiedad',
-      propertyId: (property['id'] ?? '').toString(),
+      propertyTitle: (map['property_title'] as String?) ?? 'Propiedad',
+      propertyId: (map['property_id'] ?? 0).toString(),
       startTime:
           DateTime.tryParse(map['start_time'] as String? ?? '') ??
               DateTime.now(),
       status: (map['status'] as String?) ?? 'requested',
       role: role,
       notes: map['notes'] as String?,
+      otherUserName: otherName,
     );
   }
 
@@ -440,14 +451,12 @@ final activeVisitForPropertyProvider = FutureProvider.autoDispose
     final List<dynamic> data = resp.data is List ? resp.data as List : [];
     for (final item in data) {
       final map = item as Map<String, dynamic>;
-      final window = map['window'] as Map<String, dynamic>? ?? {};
-      final property = window['property'] as Map<String, dynamic>? ?? {};
-      final propId = (property['id'] ?? '').toString();
+      final propId = (map['property_id'] ?? 0).toString();
       final status = (map['status'] as String?) ?? '';
       if (propId == propertyId && (status == 'requested' || status == 'approved')) {
         return MyVisit(
           id: (map['id'] ?? '').toString(),
-          propertyTitle: (property['title'] as String?) ?? 'Propiedad',
+          propertyTitle: (map['property_title'] as String?) ?? 'Propiedad',
           propertyId: propId,
           startTime: DateTime.tryParse(map['start_time'] as String? ?? '') ?? DateTime.now(),
           status: status,
