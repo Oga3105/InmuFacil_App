@@ -400,7 +400,7 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
 - Metodo de pago arras: {payment_arras_line}
 - Clausulas adicionales vendedor: {seller_clauses if seller_clauses else 'Ninguna'}"""
 
-        prompt = f"""Eres un abogado especialista en derecho inmobiliario espanol. Genera un CONTRATO DE ARRAS PENITENCIALES completo y formal en espanol basado en los siguientes datos. El contrato debe ser riguroso, profesional y listo para revisar por las partes. No uses placeholders como "[X]" — usa los datos proporcionados.
+        prompt = f"""Eres un abogado especialista en derecho inmobiliario espanol. Genera un CONTRATO DE ARRAS PENITENCIALES completo y formal en espanol basado en los siguientes datos. El contrato debe ser riguroso, profesional y listo para revisar por las partes. No uses placeholders como "[X]" — usa los datos proporcionados. IMPORTANTE: responde EXCLUSIVAMENTE con el texto del contrato, sin ningun comentario introductorio, explicacion previa ni texto fuera del propio contrato.
 
 DATOS DE LA OPERACION:
 - Comprador: {buyer_name}, DNI/NIE: {buyer_dni}, Domicilio: {buyer_address}{second_buyer_block}
