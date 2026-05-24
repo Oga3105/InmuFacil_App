@@ -207,92 +207,120 @@ class _MakeOfferScreenState extends ConsumerState<MakeOfferScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // ── Payment method (full width) ───────────────────────────
-                  Text(
-                    'offers.payment_method'.tr(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _PaymentOption(
-                    label: 'offers.cash_label'.tr(),
-                    sublabel: 'offers.cash_subtitle'.tr(),
-                    value: 'cash',
-                    groupValue: _paymentTerm,
-                    onChanged: (v) => setState(() => _paymentTerm = v),
-                  ),
-                  const SizedBox(height: 8),
-                  _PaymentOption(
-                    label: 'offers.mortgage_label'.tr(),
-                    sublabel: 'offers.mortgage_subtitle'.tr(),
-                    value: 'mortgage',
-                    groupValue: _paymentTerm,
-                    onChanged: (v) => setState(() => _paymentTerm = v),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ── Signing date (full width) ─────────────────────────────
-                  Text(
-                    'offers.signing_date_label'.tr(),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(10),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now().add(const Duration(days: 30)),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 730)),
-                        );
-                        if (picked != null) setState(() => _closingDate = picked);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                        child: Row(
-                          children: [
-                            Icon(Icons.calendar_month_outlined,
-                                size: 16, color: Colors.grey.shade500),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _closingDate != null
-                                    ? '${_closingDate!.day.toString().padLeft(2, '0')}/'
-                                      '${_closingDate!.month.toString().padLeft(2, '0')}/'
-                                      '${_closingDate!.year}'
-                                    : 'offers.date_placeholder'.tr(),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: _closingDate != null
-                                      ? colorScheme.onSurface
-                                      : colorScheme.onSurfaceVariant,
-                                ),
+                  // ── Payment + Date (responsive) ───────────────────────────
+                  LayoutBuilder(builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    final paymentWidget = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'offers.payment_method'.tr(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _PaymentOption(
+                          label: 'offers.cash_label'.tr(),
+                          sublabel: 'offers.cash_subtitle'.tr(),
+                          value: 'cash',
+                          groupValue: _paymentTerm,
+                          onChanged: (v) => setState(() => _paymentTerm = v),
+                        ),
+                        const SizedBox(height: 8),
+                        _PaymentOption(
+                          label: 'offers.mortgage_label'.tr(),
+                          sublabel: 'offers.mortgage_subtitle'.tr(),
+                          value: 'mortgage',
+                          groupValue: _paymentTerm,
+                          onChanged: (v) => setState(() => _paymentTerm = v),
+                        ),
+                      ],
+                    );
+                    final dateWidget = Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'offers.signing_date_label'.tr(),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () async {
+                              final picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now().add(const Duration(days: 30)),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.now().add(const Duration(days: 730)),
+                              );
+                              if (picked != null) setState(() => _closingDate = picked);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_month_outlined,
+                                      size: 16, color: Colors.grey.shade500),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _closingDate != null
+                                          ? '${_closingDate!.day.toString().padLeft(2, '0')}/'
+                                            '${_closingDate!.month.toString().padLeft(2, '0')}/'
+                                            '${_closingDate!.year}'
+                                          : 'offers.date_placeholder'.tr(),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: _closingDate != null
+                                            ? colorScheme.onSurface
+                                            : colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'offers.signing_date_note'.tr(),
-                    style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
-                  ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'offers.signing_date_note'.tr(),
+                          style: TextStyle(fontSize: 10, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    );
+                    if (isMobile) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          paymentWidget,
+                          const SizedBox(height: 16),
+                          dateWidget,
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 3, child: paymentWidget),
+                        const SizedBox(width: 16),
+                        Expanded(flex: 2, child: dateWidget),
+                      ],
+                    );
+                  }),
                   const SizedBox(height: 20),
 
                   // ── Message to seller ─────────────────────────────────────

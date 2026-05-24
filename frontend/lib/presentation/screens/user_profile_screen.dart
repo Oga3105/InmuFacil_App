@@ -860,130 +860,150 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
               child: _isChangingPassword
                   ? _buildChangePasswordForm()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('profile.password_label'.tr(),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14)),
-                        const SizedBox(height: 4),
-                        Text(
-                            'profile.password_update_hint'.tr(),
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                _isChangingPassword = true;
-                              });
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                            ),
-                            child: Text('profile.change_password'.tr()),
-                          ),
+                  : LayoutBuilder(builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 600;
+                      final textBlock = Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('profile.password_label'.tr(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 4),
+                          Text(
+                              'profile.password_update_hint'.tr(),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
+                        ],
+                      );
+                      final button = OutlinedButton(
+                        onPressed: () => setState(() => _isChangingPassword = true),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
-                      ],
-                    ),
+                        child: Text('profile.change_password'.tr()),
+                      );
+                      if (isMobile) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            textBlock,
+                            const SizedBox(height: 12),
+                            SizedBox(width: double.infinity, child: button),
+                          ],
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(child: textBlock),
+                          const SizedBox(width: 16),
+                          button,
+                        ],
+                      );
+                    }),
             )),
           ),
 
           const SizedBox(height: 16),
 
-          // Suspension + Deletion Column
-          Column(
-            children: [
-              // Suspension
-              Builder(builder: (context) => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7ED),
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('profile.suspend_account'.tr(),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Color(0xFF9A3412))),
-                      const SizedBox(height: 4),
-                      Text('profile.suspend_hint'.tr(),
-                          style: const TextStyle(
-                              color: Color(0xFFB45309), fontSize: 12)),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            // TODO: Account suspension via backend when endpoint is ready
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'profile.security.suspension_not_available'.tr())),
-                              );
-                            }
-
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.orange),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Text(isSuspended ? 'profile.reactivate'.tr() : 'profile.suspend_button'.tr(),
-                              style: const TextStyle(color: Colors.orange)),
-                        ),
+          // Suspension + Deletion (responsive)
+          LayoutBuilder(builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+            final suspendCard = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFFFF7ED),
+                  borderRadius: BorderRadius.circular(8)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('profile.suspend_account'.tr(),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFF9A3412))),
+                  const SizedBox(height: 4),
+                  Text('profile.suspend_hint'.tr(),
+                      style: const TextStyle(
+                          color: Color(0xFFB45309), fontSize: 12)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'profile.security.suspension_not_available'.tr())),
+                          );
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.orange),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                    ],
+                      child: Text(isSuspended ? 'profile.reactivate'.tr() : 'profile.suspend_button'.tr(),
+                          style: const TextStyle(color: Colors.orange)),
+                    ),
                   ),
-                )),
-              const SizedBox(height: 16),
-              // Deletion
-              Builder(builder: (context) => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Builder(builder: (ctx) => Text('profile.delete_account'.tr(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Theme.of(ctx).colorScheme.onErrorContainer))),
-                      const SizedBox(height: 4),
-                      Builder(builder: (ctx) => Text('profile.delete_hint'.tr(),
-                          style: TextStyle(
-                              color: Theme.of(ctx).colorScheme.onErrorContainer.withOpacity(0.7), fontSize: 12))),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Dialog logic...
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(12)), // 12px radius
-                          ),
-                          child: Text('common.delete'.tr(),
-                              style: const TextStyle(color: Colors.white)),
-                        ),
+                ],
+              ),
+            );
+            final deleteCard = Builder(builder: (ctx) => Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('profile.delete_account'.tr(),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Theme.of(ctx).colorScheme.onErrorContainer)),
+                  const SizedBox(height: 4),
+                  Text('profile.delete_hint'.tr(),
+                      style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onErrorContainer.withOpacity(0.7), fontSize: 12)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                    ],
+                      child: Text('common.delete'.tr(),
+                          style: const TextStyle(color: Colors.white)),
+                    ),
                   ),
-                )),
-            ],
-          ),
+                ],
+              ),
+            ));
+            if (isMobile) {
+              return Column(
+                children: [
+                  suspendCard,
+                  const SizedBox(height: 16),
+                  deleteCard,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: suspendCard),
+                const SizedBox(width: 16),
+                Expanded(child: deleteCard),
+              ],
+            );
+          }),
         ],
       ),
     );
