@@ -1605,7 +1605,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+            return Row(
           children: [
             // Thumbnail
             ClipRRect(
@@ -1621,26 +1624,37 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   : _thumbPlaceholder(),
             ),
             const SizedBox(width: 14),
-            // Title + status + location
+            // Title + status + location (+ price on mobile)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (p.title.isNotEmpty) ...[
+                    Text(
+                      p.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Row(
                     children: [
-                      Flexible(
-                        child: Text(
-                          p.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       _StatusPill(status: status),
+                      if (isMobile) ...[
+                        const Spacer(),
+                        Text(
+                          '${_formatPrice(p.price)}€',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF135BEC),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -1666,10 +1680,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Price + analytics (views + favorites)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            // Price + analytics (views + favorites) — desktop only
+            if (!isMobile) ...[
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   '${_formatPrice(p.price)}\u20AC',
@@ -1740,6 +1755,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ),
               ],
             ),
+            ], // end if (!isMobile)
             const SizedBox(width: 12),
             // Gestionar button
             _GestionarMenu(
@@ -1784,6 +1800,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               },
             ),
           ],
+            );
+          },
         ),
       ),
     );
