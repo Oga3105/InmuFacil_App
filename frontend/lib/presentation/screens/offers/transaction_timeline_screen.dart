@@ -761,128 +761,142 @@ class _HeaderCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = offer.propertyTitle ?? 'transaction.property_fallback'.tr();
     final price = offer.propertyPrice;
-    final counterparty = offer.sellerName ?? offer.buyerName ?? 'transaction.counterparty_fallback'.tr();
+    final counterparty = offer.buyerName ?? 'transaction.counterparty_fallback'.tr();
     final counterPhotoUrl = offer.buyerPhotoUrl;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Property card
-        Expanded(
-          flex: 3,
-          child: Container(
-            padding: const EdgeInsets.all(14),
+    final propertyCard = Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              color: isDark ? const Color(0xFF0D2010) : const Color(0xFFEEF6EE),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
+            child: const Icon(Icons.home_outlined,
+                color: Color(0xFF16A34A), size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF6EE),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.home_outlined,
-                      color: Color(0xFF16A34A), size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      if (price != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatPrice(price),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF135BEC),
-                          ),
-                        ),
-                      ],
-                    ],
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
+                if (price != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatPrice(price),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF135BEC),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        // Counterparty card
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        ],
+      ),
+    );
+
+    final buyerCard = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'transaction.buyer_header_label'.tr(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF94A3B8),
+              letterSpacing: 0.6,
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'transaction.buyer_header_label'.tr(),
-                style: const TextStyle(
-                  fontSize: 9,
+                counterparty,
+                style: TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF94A3B8),
-                  letterSpacing: 0.6,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    counterparty,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: const Color(0xFFDBEAFE),
-                    backgroundImage: (counterPhotoUrl != null &&
-                            counterPhotoUrl.isNotEmpty)
-                        ? NetworkImage(counterPhotoUrl)
-                        : null,
-                    child: (counterPhotoUrl == null || counterPhotoUrl.isEmpty)
-                        ? Text(
-                            counterparty.isNotEmpty
-                                ? counterparty[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Color(0xFF135BEC),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            ),
-                          )
-                        : null,
-                  ),
-                ],
+              const SizedBox(width: 8),
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: const Color(0xFFDBEAFE),
+                backgroundImage: (counterPhotoUrl != null &&
+                        counterPhotoUrl.isNotEmpty)
+                    ? NetworkImage(counterPhotoUrl)
+                    : null,
+                child: (counterPhotoUrl == null || counterPhotoUrl.isEmpty)
+                    ? Text(
+                        counterparty.isNotEmpty
+                            ? counterparty[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Color(0xFF135BEC),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      )
+                    : null,
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              propertyCard,
+              const SizedBox(height: 10),
+              buyerCard,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 3, child: propertyCard),
+            const SizedBox(width: 10),
+            buyerCard,
+          ],
+        );
+      },
     );
   }
 
