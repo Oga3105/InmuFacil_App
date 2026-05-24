@@ -253,7 +253,7 @@ class _ArrasInterviewScreenState
             onView: () => context.push(
                 '/offers/${widget.offer.id}/arras/contract',
                 extra: widget.offer),
-            onRegenerate: contractStatus == 'error'
+            onRegenerate: (contractStatus == 'error' || contractStatus == 'generating')
                 ? () => _triggerRegenerate(context, ref)
                 : null,
           ),
@@ -1064,7 +1064,9 @@ class _ContractCard extends StatelessWidget {
               icon: const Icon(Icons.refresh, size: 14),
               label: Text('arras_interview.hub_contract_retry_btn'.tr()),
               style: FilledButton.styleFrom(
-                backgroundColor: Colors.red.shade700,
+                backgroundColor: contractStatus == 'error'
+                    ? Colors.red.shade700
+                    : _kBlue,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
                 padding: const EdgeInsets.symmetric(

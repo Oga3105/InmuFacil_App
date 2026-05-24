@@ -478,14 +478,27 @@ Fecha del contrato: {datetime.now(timezone.utc).strftime('%d de %B de %Y')}
             user_msg = "La clave de API de Gemini no es valida. Contacta con el administrador."
         else:
             user_msg = "Error al generar el contrato. Puedes reintentar."
+        # Use a fresh session — the original `db` may be in a broken state after the exception.
+        recovery_db: Session = SessionLocal()
         try:
-            record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
+            record = recovery_db.query(ArrasInterview).filter(
+                ArrasInterview.offer_id == offer_id
+            ).first()
             if record:
                 record.contract_status = "error"
                 record.contract_text = user_msg
-                db.commit()
-        except Exception:
-            pass
+                recovery_db.commit()
+                logger.info(
+                    "Arras contract status set to error for offer_id=%s: %s",
+                    offer_id, user_msg,
+                )
+        except Exception as recovery_exc:
+            logger.error(
+                "Failed to persist error status for offer_id=%s: %s",
+                offer_id, recovery_exc,
+            )
+        finally:
+            recovery_db.close()
     finally:
         db.close()
 
@@ -502,6 +515,29 @@ def _maybe_trigger_generation(record: ArrasInterview, background_tasks: Backgrou
 # ============================================================================
 # Endpoints
 # ============================================================================
+
+@router.get("/{offer_id}/debug", tags=["Arras Interview"])
+async def debug_contract_status(
+    offer_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user),
+):
+    """Returns raw contract state for debugging stuck generations. Buyer/Seller only."""
+    offer, role = _get_offer_and_role(offer_id, current_user, db)
+    record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
+    if not record:
+        return {"offer_id": offer_id, "record": None}
+    return {
+        "offer_id": offer_id,
+        "role": role,
+        "contract_status": record.contract_status,
+        "generation_count": record.generation_count,
+        "buyer_interview_confirmed": record.buyer_interview_confirmed,
+        "seller_interview_confirmed": record.seller_interview_confirmed,
+        "contract_text_preview": (record.contract_text or "")[:200] or None,
+        "updated_at": record.updated_at.isoformat() if record.updated_at else None,
+    }
+
 
 @router.get("/{offer_id}", response_model=ArrasInterviewResponse)
 async def get_interview(
