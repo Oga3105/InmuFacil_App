@@ -16,7 +16,7 @@ class ArrasStepIndicator extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: colorScheme.primary,
+      color: isDark ? const Color(0xFF1A2D6E) : colorScheme.primary,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
         children: List.generate(total, (i) {

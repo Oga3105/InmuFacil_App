@@ -131,7 +131,7 @@ class _ArrasInterviewScreenState
     final isBuyer = currentUser?.id == widget.offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, ref),
       body: arrasAsync.when(
         loading: () =>
@@ -1106,23 +1106,28 @@ class _InfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    final bg = isDark ? const Color(0xFF0D1A3A) : Colors.blue.shade50;
+    final iconColor = isDark ? colorScheme.primary : Colors.blue.shade700;
+    final textColor = isDark ? colorScheme.primary : Colors.blue.shade800;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: bg,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.blue.shade700, size: 16),
+          Icon(icon, color: iconColor, size: 16),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
                   fontSize: 12,
-                  color: Colors.blue.shade800,
+                  color: textColor,
                   height: 1.5),
             ),
           ),
