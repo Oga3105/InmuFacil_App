@@ -2165,13 +2165,18 @@ class _SellerSolvencySectionState
     final passportAsync =
         ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF0A1A0D) : const Color(0xFFF0FDF4);
+    final cardBorder = isDark ? const Color(0xFF1A4A20) : const Color(0xFF86EFAC);
+    final titleColor = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
+
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF86EFAC)),
+        border: Border.all(color: cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2183,10 +2188,10 @@ class _SellerSolvencySectionState
               const SizedBox(width: 8),
               Text(
                 'transaction.buyer_solvency_title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: Color(0xFF166534)),
+                    color: titleColor),
               ),
             ],
           ),
@@ -2214,19 +2219,19 @@ class _SellerSolvencySectionState
                 'gold' => (
                   'transaction.solvency_level_gold'.tr(),
                   const Color(0xFFB8860B),
-                  const Color(0xFFFFFBEB),
+                  isDark ? const Color(0xFF1A1400) : const Color(0xFFFFFBEB),
                   Icons.emoji_events_outlined
                 ),
                 'silver' => (
                   'transaction.solvency_level_silver'.tr(),
-                  const Color(0xFF64748B),
-                  const Color(0xFFF8FAFC),
+                  const Color(0xFF94A3B8),
+                  isDark ? const Color(0xFF12181F) : const Color(0xFFF8FAFC),
                   Icons.verified_outlined
                 ),
                 _ => (
                   'transaction.solvency_level_bronze'.tr(),
                   const Color(0xFFD97706),
-                  const Color(0xFFFFF7ED),
+                  isDark ? const Color(0xFF1A0F00) : const Color(0xFFFFF7ED),
                   Icons.shield_outlined
                 ),
               };
@@ -2293,33 +2298,32 @@ class _SellerSolvencySectionState
             },
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: (_accepting || _loading)
-                      ? null
-                      : () => _acceptSolvency(context),
-                  icon: _accepting
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.verified_user_outlined, size: 16),
-                  label: Text('transaction.accept_solvency_btn'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF16A34A),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 600;
+              final acceptBtn = FilledButton.icon(
+                onPressed: (_accepting || _loading)
+                    ? null
+                    : () => _acceptSolvency(context),
+                icon: _accepting
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.verified_user_outlined, size: 16),
+                label: Text('transaction.accept_solvency_btn'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF16A34A),
+                  minimumSize: const Size(double.infinity, 44),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
+              );
+              final rejectBtn = FilledButton.icon(
                 onPressed: (_loading || _accepting)
                     ? null
                     : () => _confirmReject(context),
@@ -2335,13 +2339,26 @@ class _SellerSolvencySectionState
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 12, horizontal: 16),
+                  minimumSize: const Size(double.infinity, 44),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-              ),
-            ],
+              );
+              if (isMobile) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [acceptBtn, const SizedBox(height: 8), rejectBtn],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: acceptBtn),
+                  const SizedBox(width: 8),
+                  Expanded(child: rejectBtn),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -2356,24 +2373,31 @@ class _SolvencyRowCompact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueColor = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          SizedBox(
-            width: 210,
+          Expanded(
+            flex: 3,
             child: Text(
               label,
               style: TextStyle(
                   fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF166534)),
+          Flexible(
+            flex: 2,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor),
+            ),
           ),
         ],
       ),
