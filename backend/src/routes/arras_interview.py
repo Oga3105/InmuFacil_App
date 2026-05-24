@@ -259,11 +259,10 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
     Background task: generates the Arras Penitenciales contract text using Gemini.
     Triggered when both buyer and seller confirm their interviews.
     """
-    from backend.src.models.solvency import SolvencyPassport
-
     api_key = os.getenv("GEMINI_API_KEY", "")
     db: Session = SessionLocal()
     try:
+        from backend.src.models.solvency import BuyerSolvency
         record = db.query(ArrasInterview).filter(ArrasInterview.offer_id == offer_id).first()
         if not record:
             logger.error("Arras contract generation: no record for offer_id=%s", offer_id)
@@ -336,8 +335,8 @@ def _generate_arras_contract_gemini(offer_id: int) -> None:
 
         # --- Second buyer ---
         second_buyer_block = ""
-        solvency = db.query(SolvencyPassport).filter(
-            SolvencyPassport.buyer_id == (buyer.id if buyer else -1)
+        solvency = db.query(BuyerSolvency).filter(
+            BuyerSolvency.buyer_id == (buyer.id if buyer else -1)
         ).first()
         if solvency and solvency.second_buyer_status == "verified" and solvency.second_buyer_name_enc:
             try:
