@@ -401,7 +401,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
             ? 'transaction.seller_accepted_offer'.tr()
             : stage == 0
                 ? (s == 'counter_offer'
-                    ? 'transaction.seller_counter_offered'.tr()
+                    ? 'transaction.seller_counter_offered'.tr(namedArgs: {
+                        'amount': '${CurrencyInputFormatter.format(offerData.amount)} €',
+                      })
                     : 'transaction.pending_seller_response'.tr())
                 : (s == 'withdrawn' ? 'transaction.withdrawn_by_buyer'.tr() : 'transaction.rejected_by_seller'.tr()),
         state: stage < 0 ? _StepState.locked : stepState(0),
@@ -1601,72 +1603,77 @@ class _BuyerCounterOfferActionsState
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: _loading ? null : _accept,
-            icon: const Icon(Icons.check_circle_outline, size: 14),
-            label: Text(
-              'common.accept'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF135BEC),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _loading ? null : _counterBack,
-            icon: const Icon(Icons.edit_outlined,
-                size: 14, color: Color(0xFFEA580C)),
-            label: Text(
-              'transaction.new_offer_btn'.tr(),
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  color: Color(0xFFEA580C)),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFEA580C),
-              side: const BorderSide(color: Color(0xFFEA580C)),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _loading ? null : _reject,
-            icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
-            label: Text(
-              'common.reject'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-      ],
+    final acceptBtn = FilledButton.icon(
+      onPressed: _loading ? null : _accept,
+      icon: const Icon(Icons.check_circle_outline, size: 14),
+      label: Text(
+        'common.accept'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+      ),
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFF135BEC),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
+    final counterBtn = OutlinedButton.icon(
+      onPressed: _loading ? null : _counterBack,
+      icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFFEA580C)),
+      label: Text(
+        'transaction.new_offer_btn'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Color(0xFFEA580C)),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFFEA580C),
+        side: const BorderSide(color: Color(0xFFEA580C)),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+    final rejectBtn = OutlinedButton.icon(
+      onPressed: _loading ? null : _reject,
+      icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
+      label: Text(
+        'common.reject'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red,
+        side: const BorderSide(color: Colors.red),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth < 600) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            acceptBtn,
+            const SizedBox(height: 8),
+            counterBtn,
+            const SizedBox(height: 8),
+            rejectBtn,
+          ],
+        );
+      }
+      return Row(
+        children: [
+          Expanded(child: acceptBtn),
+          const SizedBox(width: 6),
+          Expanded(child: counterBtn),
+          const SizedBox(width: 6),
+          Expanded(child: rejectBtn),
+        ],
+      );
+    });
   }
 }
 

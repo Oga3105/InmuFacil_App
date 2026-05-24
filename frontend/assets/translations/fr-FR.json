@@ -1933,7 +1933,7 @@
     "offer_withdrawn_step": "Offre Retirée",
     "offer_rejected_step": "Offre Refusée",
     "seller_accepted_offer": "Le vendeur a accepté l'offre",
-    "seller_counter_offered": "Le vendeur a fait une contre-offre",
+    "seller_counter_offered": "Le vendeur a fait une contre-offre, proposant {amount}",
     "pending_seller_response": "En attente de la réponse du vendeur",
     "withdrawn_by_buyer": "Offre retirée par l'acheteur",
     "rejected_by_seller": "Offre refusée par le vendeur",

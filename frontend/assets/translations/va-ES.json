@@ -2270,7 +2270,7 @@
     "offer_withdrawn_step": "Oferta Retirada",
     "offer_rejected_step": "Oferta Rebutjada",
     "seller_accepted_offer": "El venedor ha acceptat l'oferta",
-    "seller_counter_offered": "El venedor ha fet una contraoferta",
+    "seller_counter_offered": "El venedor ha fet una contraoferta, proposa {amount}",
     "pending_seller_response": "Pendent de resposta del venedor",
     "withdrawn_by_buyer": "Oferta retirada pel comprador",
     "rejected_by_seller": "Oferta rebutjada pel venedor",

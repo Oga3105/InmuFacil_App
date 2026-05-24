@@ -2248,7 +2248,7 @@
     "offer_withdrawn_step": "Eskaintza Erretiratua",
     "offer_rejected_step": "Eskaintza Ukatuta",
     "seller_accepted_offer": "Saltzaileak eskaintza onartu du",
-    "seller_counter_offered": "Saltzaileak kontraeskaintza egin du",
+    "seller_counter_offered": "Saltzaileak kontraeskaintza egin du, {amount} proposatzen du",
     "pending_seller_response": "Saltzailearen erantzunaren zain",
     "withdrawn_by_buyer": "Erosleak erretiratu du eskaintza",
     "rejected_by_seller": "Saltzaileak ukatu du eskaintza",

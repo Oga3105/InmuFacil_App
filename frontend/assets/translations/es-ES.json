@@ -2003,7 +2003,7 @@
     "offer_withdrawn_step": "Oferta Retirada",
     "offer_rejected_step": "Oferta Rechazada",
     "seller_accepted_offer": "Vendedor aceptó la oferta",
-    "seller_counter_offered": "El vendedor ha realizado una contraoferta",
+    "seller_counter_offered": "El vendedor ha realizado una contraoferta, propone {amount}",
     "pending_seller_response": "Pendiente de respuesta del vendedor",
     "withdrawn_by_buyer": "Oferta retirada por el comprador",
     "rejected_by_seller": "Oferta rechazada por el vendedor",

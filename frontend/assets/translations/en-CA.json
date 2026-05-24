@@ -1958,7 +1958,7 @@
     "offer_withdrawn_step": "Offer Withdrawn",
     "offer_rejected_step": "Offer Rejected",
     "seller_accepted_offer": "Seller accepted the offer",
-    "seller_counter_offered": "The seller has made a counter-offer",
+    "seller_counter_offered": "The seller has made a counter-offer, proposing {amount}",
     "pending_seller_response": "Pending seller's response",
     "withdrawn_by_buyer": "Offer withdrawn by the buyer",
     "rejected_by_seller": "Offer rejected by the seller",
