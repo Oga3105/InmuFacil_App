@@ -350,120 +350,127 @@ class _PropertyHeaderCard extends ConsumerWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // Property image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: (property?.images?.isNotEmpty == true)
-                  ? Image.network(
-                      property!.images.first,
-                      width: 80,
-                      height: 80,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _imagePlaceholder(),
-                    )
-                  : _imagePlaceholder(),
-            ),
-            const SizedBox(width: 14),
-            // Title + badge + price
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+
+            Widget statsWidget() => analyticsAsync.when(
+              loading: () => const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              error: (_, __) => Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    children: [
-                      _StatusBadgeSmall(
-                        label: _statusLabel(property?.status),
-                        color: _statusColor(property?.status),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Ref. IF-${propertyId.padLeft(4, '0')}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    property?.title ?? 'offers.property_fallback'.tr(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on_outlined,
-                          size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                      const SizedBox(width: 2),
-                      Expanded(
-                        child: Text(
-                          property != null
-                              ? 'offers.starting_price'.tr(args: [_formatPrice(property?.price)])
-                              : 'offers.starting_price_empty'.tr(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
+                  _StatCell(label: 'offers.stat_offers'.tr(), value: '\u2014'),
+                  _StatDivider(),
+                  _StatCell(label: 'offers.stat_visits'.tr(), value: '\u2014'),
+                  _StatDivider(),
+                  _StatCell(label: 'offers.stat_favorites'.tr(), value: '\u2014'),
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            // Stats column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              data: (analytics) {
+                final a = analytics ??
+                    const PropertyAnalytics(views: 0, favorites: 0, offers: 0);
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _StatCell(label: 'offers.stat_offers'.tr(), value: '${a.offers}'),
+                    _StatDivider(),
+                    _StatCell(label: 'offers.stat_visits'.tr(), value: '${a.views}'),
+                    _StatDivider(),
+                    _StatCell(label: 'offers.stat_favorites'.tr(), value: '${a.favorites}'),
+                  ],
+                );
+              },
+            );
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                analyticsAsync.when(
-                  loading: () => const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  error: (_, __) => Row(
-                    mainAxisSize: MainAxisSize.min,
+                // Property image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: (property?.images?.isNotEmpty == true)
+                      ? Image.network(
+                          property!.images.first,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => _imagePlaceholder(),
+                        )
+                      : _imagePlaceholder(),
+                ),
+                const SizedBox(width: 14),
+                // Title + badge + price (+ stats on mobile)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _StatCell(label: 'offers.stat_offers'.tr(), value: '\u2014'),
-                      _StatDivider(),
-                      _StatCell(label: 'offers.stat_visits'.tr(), value: '\u2014'),
-                      _StatDivider(),
-                      _StatCell(label: 'offers.stat_favorites'.tr(), value: '\u2014'),
+                      Row(
+                        children: [
+                          _StatusBadgeSmall(
+                            label: _statusLabel(property?.status),
+                            color: _statusColor(property?.status),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Ref. IF-${propertyId.padLeft(4, '0')}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        property?.title ?? 'offers.property_fallback'.tr(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on_outlined,
+                              size: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          const SizedBox(width: 2),
+                          Expanded(
+                            child: Text(
+                              property != null
+                                  ? 'offers.starting_price'.tr(args: [_formatPrice(property?.price)])
+                                  : 'offers.starting_price_empty'.tr(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (isMobile) ...[
+                        const SizedBox(height: 10),
+                        statsWidget(),
+                      ],
                     ],
                   ),
-                  data: (analytics) {
-                    final a = analytics ??
-                        const PropertyAnalytics(
-                            views: 0, favorites: 0, offers: 0);
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _StatCell(
-                            label: 'offers.stat_offers'.tr(), value: '${a.offers}'),
-                        _StatDivider(),
-                        _StatCell(
-                            label: 'offers.stat_visits'.tr(), value: '${a.views}'),
-                        _StatDivider(),
-                        _StatCell(
-                            label: 'offers.stat_favorites'.tr(), value: '${a.favorites}'),
-                      ],
-                    );
-                  },
                 ),
+                if (!isMobile) ...[
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [statsWidget()],
+                  ),
+                ],
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -655,77 +662,114 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
           // ---- Top section: buyer info + action buttons ----
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Buyer avatar
-                CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
-                      ? NetworkImage(photoUrl)
-                      : null,
-                  child: (photoUrl == null || photoUrl.isEmpty)
-                      ? Text(
-                          buyerInitial,
-                          style: const TextStyle(
-                            color: Color(0xFF135BEC),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 18,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+                final buyerInfo = Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Buyer avatar
+                    CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      backgroundImage: (photoUrl != null && photoUrl.isNotEmpty)
+                          ? NetworkImage(photoUrl)
+                          : null,
+                      child: (photoUrl == null || photoUrl.isEmpty)
+                          ? Text(
+                              buyerInitial,
+                              style: const TextStyle(
+                                color: Color(0xFF135BEC),
+                                fontWeight: FontWeight.w800,
+                                fontSize: 18,
+                              ),
+                            )
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    // Buyer name + date + badge
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            offer.buyerName ?? 'offers.buyer_fallback'.tr(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
+                          if (dateStr.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              'offers.received_on'.tr(args: [dateStr]),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 6),
+                          if (offer.buyerIsVerified) const _BuyerVerifiedBadge(),
+                        ],
+                      ),
+                    ),
+                    if (!isMobile) ...[
+                      const SizedBox(width: 8),
+                      if (isPending)
+                        _ActionButtonsRow(
+                          offer: offer,
+                          onAccept: () => _confirmAccept(context),
+                          onCounter: () => _showCounterDialog(context),
+                          onReject: () => _confirmReject(context),
                         )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                // Buyer name + date + badge
-                Expanded(
-                  child: Column(
+                      else
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _StatusBadge(status: offer.status),
+                            if (offer.status != 'withdrawn' &&
+                                offer.status != 'rejected') ...[
+                              const SizedBox(width: 8),
+                              _ChatButtonSmall(offerId: offer.id),
+                            ],
+                          ],
+                        ),
+                    ],
+                  ],
+                );
+
+                if (isMobile) {
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        offer.buyerName ?? 'offers.buyer_fallback'.tr(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                          color: Theme.of(context).colorScheme.onSurface,
+                      buyerInfo,
+                      const SizedBox(height: 10),
+                      if (isPending)
+                        _ActionButtonsRow(
+                          offer: offer,
+                          onAccept: () => _confirmAccept(context),
+                          onCounter: () => _showCounterDialog(context),
+                          onReject: () => _confirmReject(context),
+                        )
+                      else
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _StatusBadge(status: offer.status),
+                            if (offer.status != 'withdrawn' &&
+                                offer.status != 'rejected') ...[
+                              const SizedBox(width: 8),
+                              _ChatButtonSmall(offerId: offer.id),
+                            ],
+                          ],
                         ),
-                      ),
-                      if (dateStr.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          'offers.received_on'.tr(args: [dateStr]),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                      const SizedBox(height: 6),
-                      if (offer.buyerIsVerified) const _BuyerVerifiedBadge(),
                     ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (isPending)
-                  _ActionButtonsRow(
-                    offer: offer,
-                    onAccept: () => _confirmAccept(context),
-                    onCounter: () => _showCounterDialog(context),
-                    onReject: () => _confirmReject(context),
-                  )
-                else
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _StatusBadge(status: offer.status),
-                      if (offer.status != 'withdrawn' &&
-                          offer.status != 'rejected') ...[
-                        const SizedBox(width: 8),
-                        _ChatButtonSmall(offerId: offer.id),
-                      ],
-                    ],
-                  ),
-              ],
+                  );
+                }
+                return buyerInfo;
+              },
             ),
           ),
 
