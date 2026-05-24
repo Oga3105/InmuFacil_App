@@ -691,29 +691,11 @@ class _IdentityVerificationScreenState
               ),
 
             // ── Footer: SSL + botones ──
-            Row(
-              children: [
-                // SSL badge
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.lock_outline,
-                        size: 14, color: Colors.grey.shade500),
-                    const SizedBox(width: 4),
-                    Text(
-                      'kyc.ssl_secure'.tr(),
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                // Botón Cancelar — mismo estilo que en Seguridad y Privacidad
-                OutlinedButton(
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isMobile = constraints.maxWidth < 600;
+
+                final cancelBtn = OutlinedButton(
                   onPressed: () async {
                     final state = ref.read(verificationProvider);
                     if (_hasProgress(state)) {
@@ -731,40 +713,79 @@ class _IdentityVerificationScreenState
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text('common.cancel'.tr(),
-                      style: TextStyle(color: Colors.red)),
-                ),
-                const SizedBox(width: 12),
-                // Botón Enviar — mismo estilo que en Seguridad y Privacidad
-                if (state.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2)),
-                  )
-                else
-                  ElevatedButton.icon(
-                    onPressed: _canSubmit(state)
-                        ? () => _submit(notifier)
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _canSubmit(state)
-                          ? colorScheme.onSurface
-                          : colorScheme.onSurface.withOpacity(0.12),
-                      foregroundColor: colorScheme.surface,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      style: const TextStyle(color: Colors.red)),
+                );
+
+                final submitBtn = state.isLoading
+                    ? const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24),
+                        child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2)),
+                      )
+                    : ElevatedButton.icon(
+                        onPressed: _canSubmit(state)
+                            ? () => _submit(notifier)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _canSubmit(state)
+                              ? colorScheme.onSurface
+                              : colorScheme.onSurface.withOpacity(0.12),
+                          foregroundColor: colorScheme.surface,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        icon: const Icon(Icons.arrow_forward, size: 18),
+                        label: Text(
+                          'kyc.submit_verification'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      );
+
+                final sslBadge = Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline,
+                        size: 14, color: Colors.grey.shade500),
+                    const SizedBox(width: 4),
+                    Text(
+                      'kyc.ssl_secure'.tr(),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    icon: const Icon(Icons.arrow_forward, size: 18),
-                    label: Text(
-                      'kyc.submit_verification'.tr(),
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-              ],
+                  ],
+                );
+
+                if (isMobile) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      submitBtn,
+                      const SizedBox(height: 8),
+                      cancelBtn,
+                      const SizedBox(height: 12),
+                      Center(child: sslBadge),
+                    ],
+                  );
+                }
+
+                return Row(
+                  children: [
+                    sslBadge,
+                    const Spacer(),
+                    cancelBtn,
+                    const SizedBox(width: 12),
+                    submitBtn,
+                  ],
+                );
+              },
             ),
           ],
         ),
