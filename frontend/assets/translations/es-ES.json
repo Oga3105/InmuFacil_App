@@ -2184,7 +2184,7 @@
     "notaria_info_body": "El comprador propone la fecha y el lugar de la notaría. El vendedor confirma o propone una alternativa. Ambas partes deben acudir con la documentación completa.",
     "notaria_form_title": "Proponer cita notarial",
     "notaria_city_label": "Ciudad / Notaria",
-    "notaria_city_hint": "Ej: Notaria Hernández, Sevilla",
+    "notaria_city_hint": "Ej: Notaria Gómez-Ferrufino, Sevilla",
     "notaria_date_label": "Fecha",
     "notaria_select_date": "Seleccionar fecha",
     "notaria_time_label": "Hora",
