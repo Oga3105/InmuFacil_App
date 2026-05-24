@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -52,6 +54,43 @@ class ArrasInterviewScreen extends ConsumerStatefulWidget {
 class _ArrasInterviewScreenState
     extends ConsumerState<ArrasInterviewScreen> {
   bool _consentLoading = false;
+  Timer? _pollTimer;
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _triggerRegenerate(BuildContext context, WidgetRef ref) async {
+    try {
+      final dio = buildAuthDio();
+      await dio.post(
+          '${EnvConfig.apiBaseUrl}/arras/${widget.offer.id}/contract/regenerate');
+      ref.invalidate(_arrasHubProvider(widget.offer.id));
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(e.response?.data?['detail'] ??
+              'arras_interview.error_regenerate'.tr()),
+          backgroundColor: Colors.red,
+        ));
+      }
+    }
+  }
+
+  void _maybeStartPolling(String? contractStatus) {
+    if (contractStatus == 'generating') {
+      _pollTimer ??= Timer.periodic(const Duration(seconds: 5), (_) {
+        if (mounted) {
+          ref.invalidate(_arrasHubProvider(widget.offer.id));
+        }
+      });
+    } else {
+      _pollTimer?.cancel();
+      _pollTimer = null;
+    }
+  }
 
   Future<void> _showCashConsentModal(
       BuildContext context, WidgetRef ref) async {
@@ -98,7 +137,10 @@ class _ArrasInterviewScreenState
         loading: () =>
             const Center(child: CircularProgressIndicator(color: _kBlue)),
         error: (_, __) => _buildBody(context, isBuyer, null),
-        data: (data) => _buildBody(context, isBuyer, data),
+        data: (data) {
+          _maybeStartPolling(data?['contract_status'] as String?);
+          return _buildBody(context, isBuyer, data);
+        },
       ),
     );
   }
@@ -205,12 +247,15 @@ class _ArrasInterviewScreenState
           const SizedBox(height: 24),
           _ContractCard(
             isGenerating: isGenerating,
-            hasContract: hasContract,
+            hasContract: hasContract && contractStatus != 'error',
             fullyAccepted: fullyAccepted,
             contractStatus: contractStatus,
             onView: () => context.push(
                 '/offers/${widget.offer.id}/arras/contract',
                 extra: widget.offer),
+            onRegenerate: contractStatus == 'error'
+                ? () => _triggerRegenerate(context, ref)
+                : null,
           ),
         ],
 
@@ -924,6 +969,7 @@ class _ContractCard extends StatelessWidget {
     required this.fullyAccepted,
     required this.contractStatus,
     required this.onView,
+    this.onRegenerate,
   });
 
   final bool isGenerating;
@@ -931,6 +977,7 @@ class _ContractCard extends StatelessWidget {
   final bool fullyAccepted;
   final String? contractStatus;
   final VoidCallback onView;
+  final VoidCallback? onRegenerate;
 
   @override
   Widget build(BuildContext context) {
@@ -945,6 +992,11 @@ class _ContractCard extends StatelessWidget {
       cardTitle = 'arras_interview.hub_contract_accepted_title'.tr();
       cardSubtitle =
           'arras_interview.hub_contract_accepted_desc'.tr();
+    } else if (contractStatus == 'error') {
+      cardColor = Colors.red.shade700;
+      cardIcon = Icons.error_outline;
+      cardTitle = 'arras_interview.hub_contract_error_title'.tr();
+      cardSubtitle = 'arras_interview.hub_contract_error_desc'.tr();
     } else if (isGenerating) {
       cardColor = _kBlue;
       cardIcon = Icons.auto_awesome_outlined;
@@ -1007,7 +1059,23 @@ class _ContractCard extends StatelessWidget {
               ],
             ),
           ),
-          if (hasContract && !isGenerating) ...[
+          if (onRegenerate != null) ...[
+            const SizedBox(width: 8),
+            FilledButton.icon(
+              onPressed: onRegenerate,
+              icon: const Icon(Icons.refresh, size: 14),
+              label: Text('arras_interview.hub_contract_retry_btn'.tr()),
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.red.shade700,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 14, vertical: 10),
+                minimumSize: const Size(0, 36),
+                textStyle: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ] else if (hasContract && !isGenerating) ...[
             const SizedBox(width: 8),
             FilledButton(
               onPressed: onView,
