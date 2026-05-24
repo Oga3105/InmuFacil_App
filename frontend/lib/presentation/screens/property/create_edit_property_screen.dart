@@ -46,11 +46,15 @@ class _CreateEditPropertyScreenState
         title: Text('property_wizard.cancel_title'.tr()),
         content: Text('property_wizard.cancel_message'.tr()),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            style: TextButton.styleFrom(
+            style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
+              ),
+              side: BorderSide(
+                color: Theme.of(ctx).colorScheme.primary,
+                width: 1.5,
               ),
             ),
             child: Text('property_wizard.keep_editing'.tr()),

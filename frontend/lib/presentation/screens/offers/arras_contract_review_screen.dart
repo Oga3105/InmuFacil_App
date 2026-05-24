@@ -206,7 +206,7 @@ class _ArrasContractReviewScreenState
                 child: Text('arras_interview.no_interview_info'.tr()));
           }
           final contractStatus = data['contract_status'] as String?;
-          final contractText = data['contract_text'] as String?;
+          final contractText = _stripPreamble(data['contract_text'] as String?);
           final buyerAccepted = data['buyer_contract_accepted'] == true;
           final sellerAccepted = data['seller_contract_accepted'] == true;
           final myAccepted = isBuyer ? buyerAccepted : sellerAccepted;
@@ -243,6 +243,19 @@ class _ArrasContractReviewScreenState
   }
 
   // ─── Views ────────────────────────────────────────────────────────────────
+
+  // Strips any AI preamble that appears before the actual contract content.
+  // Gemini occasionally adds an intro paragraph before the first "---" separator;
+  // we discard everything up to and including that separator.
+  String? _stripPreamble(String? raw) {
+    if (raw == null) return null;
+    final separatorIndex = raw.indexOf('\n---');
+    if (separatorIndex != -1) {
+      final afterSeparator = raw.substring(separatorIndex + 4).trimLeft();
+      return afterSeparator.isNotEmpty ? afterSeparator : raw;
+    }
+    return raw;
+  }
 
   Widget _buildErrorView(String message) {
     final colorScheme = Theme.of(context).colorScheme;

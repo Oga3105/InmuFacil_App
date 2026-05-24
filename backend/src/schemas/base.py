@@ -452,11 +452,31 @@ class VisitAppointmentResponse(BaseModel):
     q_solvency: Optional[str] = None
     q_timeline: Optional[str] = None
     q_maturity: Optional[str] = None
-    
+
     created_at: datetime
-    
+
     # Optional: include basic user/property info if needed, but keeping it light for now
-    
+
+    class Config:
+        from_attributes = True
+
+
+class VisitAgendaItemResponse(BaseModel):
+    """
+    Agenda view: appointment enriched with property title and participant names.
+    """
+    id: int
+    window_id: int
+    buyer_id: int
+    start_time: datetime
+    status: str
+    notes: Optional[str] = None
+    created_at: datetime
+    property_title: str = "Propiedad"
+    property_id: int = 0
+    buyer_full_name: Optional[str] = None
+    seller_full_name: Optional[str] = None
+
     class Config:
         from_attributes = True
 

@@ -112,42 +112,54 @@ class _PropertyStep2DetailsPriceState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Price & Surface
-                Row(
-                  children: [
-                    Expanded(
-                      child: _LabeledField(
-                        label: 'property_wizard.price_label'.tr(),
-                        child: TextField(
-                          controller: _priceCtrl,
-                          focusNode: _priceFocus,
-                          cursorColor: cursorColor,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [CurrencyInputFormatter()],
-                          decoration: _inputDec('0', suffixSymbol: '€'),
-                          onChanged: notifier.setPrice,
-                        ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    final priceField = _LabeledField(
+                      label: 'property_wizard.price_label'.tr(),
+                      child: TextField(
+                        controller: _priceCtrl,
+                        focusNode: _priceFocus,
+                        cursorColor: cursorColor,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [CurrencyInputFormatter()],
+                        decoration: _inputDec('0', suffixSymbol: '€'),
+                        onChanged: notifier.setPrice,
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _LabeledField(
-                        label: 'property_wizard.surface_label'.tr(),
-                        child: TextField(
-                          controller: _surfaceCtrl,
-                          focusNode: _surfaceFocus,
-                          cursorColor: cursorColor,
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                                RegExp(r'[0-9.]'))
-                          ],
-                          decoration: _inputDec('0', suffixSymbol: 'm²'),
-                          onChanged: notifier.setSurface,
-                        ),
+                    );
+                    final surfaceField = _LabeledField(
+                      label: 'property_wizard.surface_label'.tr(),
+                      child: TextField(
+                        controller: _surfaceCtrl,
+                        focusNode: _surfaceFocus,
+                        cursorColor: cursorColor,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))
+                        ],
+                        decoration: _inputDec('0', suffixSymbol: 'm²'),
+                        onChanged: notifier.setSurface,
                       ),
-                    ),
-                  ],
+                    );
+                    if (isMobile) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          priceField,
+                          const SizedBox(height: 16),
+                          surfaceField,
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: priceField),
+                        const SizedBox(width: 16),
+                        Expanded(child: surfaceField),
+                      ],
+                    );
+                  },
                 ),
                 // ── Market price hint ──────────────────────────
                 _MarketPriceHint(
@@ -156,27 +168,39 @@ class _PropertyStep2DetailsPriceState
                   propertyType: s.selectedType?.backendValue ?? 'piso',
                 ),
                 const SizedBox(height: 16),
-                // Bedrooms & Bathrooms (label inline)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _CounterRow(
-                        label: 'property_wizard.bedrooms_label'.tr(),
-                        value: s.bedrooms,
-                        onDecrement: notifier.decrementBedrooms,
-                        onIncrement: notifier.incrementBedrooms,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _CounterRow(
-                        label: 'property_wizard.bathrooms_label'.tr(),
-                        value: s.bathrooms,
-                        onDecrement: notifier.decrementBathrooms,
-                        onIncrement: notifier.incrementBathrooms,
-                      ),
-                    ),
-                  ],
+                // Bedrooms & Bathrooms
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isMobile = constraints.maxWidth < 600;
+                    final bedroomsWidget = _CounterRow(
+                      label: 'property_wizard.bedrooms_label'.tr(),
+                      value: s.bedrooms,
+                      onDecrement: notifier.decrementBedrooms,
+                      onIncrement: notifier.incrementBedrooms,
+                    );
+                    final bathroomsWidget = _CounterRow(
+                      label: 'property_wizard.bathrooms_label'.tr(),
+                      value: s.bathrooms,
+                      onDecrement: notifier.decrementBathrooms,
+                      onIncrement: notifier.incrementBathrooms,
+                    );
+                    if (isMobile) {
+                      return Column(
+                        children: [
+                          bedroomsWidget,
+                          const SizedBox(height: 12),
+                          bathroomsWidget,
+                        ],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: bedroomsWidget),
+                        const SizedBox(width: 16),
+                        Expanded(child: bathroomsWidget),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),

@@ -401,7 +401,9 @@ class TransactionTimelineScreen extends ConsumerWidget {
             ? 'transaction.seller_accepted_offer'.tr()
             : stage == 0
                 ? (s == 'counter_offer'
-                    ? 'transaction.seller_counter_offered'.tr()
+                    ? 'transaction.seller_counter_offered'.tr(namedArgs: {
+                        'amount': '${CurrencyInputFormatter.format(offerData.amount)} €',
+                      })
                     : 'transaction.pending_seller_response'.tr())
                 : (s == 'withdrawn' ? 'transaction.withdrawn_by_buyer'.tr() : 'transaction.rejected_by_seller'.tr()),
         state: stage < 0 ? _StepState.locked : stepState(0),
@@ -759,128 +761,142 @@ class _HeaderCards extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = offer.propertyTitle ?? 'transaction.property_fallback'.tr();
     final price = offer.propertyPrice;
-    final counterparty = offer.sellerName ?? offer.buyerName ?? 'transaction.counterparty_fallback'.tr();
+    final counterparty = offer.buyerName ?? 'transaction.counterparty_fallback'.tr();
     final counterPhotoUrl = offer.buyerPhotoUrl;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Property card
-        Expanded(
-          flex: 3,
-          child: Container(
-            padding: const EdgeInsets.all(14),
+    final propertyCard = Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              color: isDark ? const Color(0xFF0D2010) : const Color(0xFFEEF6EE),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
+            child: const Icon(Icons.home_outlined,
+                color: Color(0xFF16A34A), size: 24),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEEF6EE),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.home_outlined,
-                      color: Color(0xFF16A34A), size: 24),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                      ),
-                      if (price != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          _formatPrice(price),
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF135BEC),
-                          ),
-                        ),
-                      ],
-                    ],
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
+                if (price != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatPrice(price),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF135BEC),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
-        const SizedBox(width: 10),
-        // Counterparty card
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        ],
+      ),
+    );
+
+    final buyerCard = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'transaction.buyer_header_label'.tr(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF94A3B8),
+              letterSpacing: 0.6,
+            ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'transaction.buyer_header_label'.tr(),
-                style: const TextStyle(
-                  fontSize: 9,
+                counterparty,
+                style: TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF94A3B8),
-                  letterSpacing: 0.6,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(height: 6),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    counterparty,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    radius: 16,
-                    backgroundColor: const Color(0xFFDBEAFE),
-                    backgroundImage: (counterPhotoUrl != null &&
-                            counterPhotoUrl.isNotEmpty)
-                        ? NetworkImage(counterPhotoUrl)
-                        : null,
-                    child: (counterPhotoUrl == null || counterPhotoUrl.isEmpty)
-                        ? Text(
-                            counterparty.isNotEmpty
-                                ? counterparty[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(
-                              color: Color(0xFF135BEC),
-                              fontWeight: FontWeight.w800,
-                              fontSize: 13,
-                            ),
-                          )
-                        : null,
-                  ),
-                ],
+              const SizedBox(width: 8),
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: const Color(0xFFDBEAFE),
+                backgroundImage: (counterPhotoUrl != null &&
+                        counterPhotoUrl.isNotEmpty)
+                    ? NetworkImage(counterPhotoUrl)
+                    : null,
+                child: (counterPhotoUrl == null || counterPhotoUrl.isEmpty)
+                    ? Text(
+                        counterparty.isNotEmpty
+                            ? counterparty[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Color(0xFF135BEC),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                        ),
+                      )
+                    : null,
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 600) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              propertyCard,
+              const SizedBox(height: 10),
+              buyerCard,
+            ],
+          );
+        }
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(flex: 3, child: propertyCard),
+            const SizedBox(width: 10),
+            buyerCard,
+          ],
+        );
+      },
     );
   }
 
@@ -1129,9 +1145,11 @@ class _ActiveRow extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         step.description!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF475569),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFFB0BEC5)
+                              : const Color(0xFF475569),
                           height: 1.5,
                         ),
                       ),
@@ -1601,72 +1619,77 @@ class _BuyerCounterOfferActionsState
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: FilledButton.icon(
-            onPressed: _loading ? null : _accept,
-            icon: const Icon(Icons.check_circle_outline, size: 14),
-            label: Text(
-              'common.accept'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF135BEC),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _loading ? null : _counterBack,
-            icon: const Icon(Icons.edit_outlined,
-                size: 14, color: Color(0xFFEA580C)),
-            label: Text(
-              'transaction.new_offer_btn'.tr(),
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 12,
-                  color: Color(0xFFEA580C)),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFEA580C),
-              side: const BorderSide(color: Color(0xFFEA580C)),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-        const SizedBox(width: 6),
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: _loading ? null : _reject,
-            icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
-            label: Text(
-              'common.reject'.tr(),
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red,
-              side: const BorderSide(color: Colors.red),
-              minimumSize: const Size(0, 36),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-        ),
-      ],
+    final acceptBtn = FilledButton.icon(
+      onPressed: _loading ? null : _accept,
+      icon: const Icon(Icons.check_circle_outline, size: 14),
+      label: Text(
+        'common.accept'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+      ),
+      style: FilledButton.styleFrom(
+        backgroundColor: const Color(0xFF135BEC),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
+    final counterBtn = OutlinedButton.icon(
+      onPressed: _loading ? null : _counterBack,
+      icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFFEA580C)),
+      label: Text(
+        'transaction.new_offer_btn'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Color(0xFFEA580C)),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFFEA580C),
+        side: const BorderSide(color: Color(0xFFEA580C)),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+    final rejectBtn = OutlinedButton.icon(
+      onPressed: _loading ? null : _reject,
+      icon: const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
+      label: Text(
+        'common.reject'.tr(),
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.red),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: Colors.red,
+        side: const BorderSide(color: Colors.red),
+        minimumSize: const Size(double.infinity, 36),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+
+    return LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth < 600) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            acceptBtn,
+            const SizedBox(height: 8),
+            counterBtn,
+            const SizedBox(height: 8),
+            rejectBtn,
+          ],
+        );
+      }
+      return Row(
+        children: [
+          Expanded(child: acceptBtn),
+          const SizedBox(width: 6),
+          Expanded(child: counterBtn),
+          const SizedBox(width: 6),
+          Expanded(child: rejectBtn),
+        ],
+      );
+    });
   }
 }
 
@@ -2158,13 +2181,18 @@ class _SellerSolvencySectionState
     final passportAsync =
         ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardBg = isDark ? const Color(0xFF0A1A0D) : const Color(0xFFF0FDF4);
+    final cardBorder = isDark ? const Color(0xFF1A4A20) : const Color(0xFF86EFAC);
+    final titleColor = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
+
     return Container(
       margin: const EdgeInsets.only(top: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0FDF4),
+        color: cardBg,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF86EFAC)),
+        border: Border.all(color: cardBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2176,10 +2204,10 @@ class _SellerSolvencySectionState
               const SizedBox(width: 8),
               Text(
                 'transaction.buyer_solvency_title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: Color(0xFF166534)),
+                    color: titleColor),
               ),
             ],
           ),
@@ -2207,19 +2235,19 @@ class _SellerSolvencySectionState
                 'gold' => (
                   'transaction.solvency_level_gold'.tr(),
                   const Color(0xFFB8860B),
-                  const Color(0xFFFFFBEB),
+                  isDark ? const Color(0xFF1A1400) : const Color(0xFFFFFBEB),
                   Icons.emoji_events_outlined
                 ),
                 'silver' => (
                   'transaction.solvency_level_silver'.tr(),
-                  const Color(0xFF64748B),
-                  const Color(0xFFF8FAFC),
+                  const Color(0xFF94A3B8),
+                  isDark ? const Color(0xFF12181F) : const Color(0xFFF8FAFC),
                   Icons.verified_outlined
                 ),
                 _ => (
                   'transaction.solvency_level_bronze'.tr(),
                   const Color(0xFFD97706),
-                  const Color(0xFFFFF7ED),
+                  isDark ? const Color(0xFF1A0F00) : const Color(0xFFFFF7ED),
                   Icons.shield_outlined
                 ),
               };
@@ -2286,33 +2314,32 @@ class _SellerSolvencySectionState
             },
           ),
           const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: (_accepting || _loading)
-                      ? null
-                      : () => _acceptSolvency(context),
-                  icon: _accepting
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Icon(Icons.verified_user_outlined, size: 16),
-                  label: Text('transaction.accept_solvency_btn'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.w700)),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF16A34A),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < 600;
+              final acceptBtn = FilledButton.icon(
+                onPressed: (_accepting || _loading)
+                    ? null
+                    : () => _acceptSolvency(context),
+                icon: _accepting
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.verified_user_outlined, size: 16),
+                label: Text('transaction.accept_solvency_btn'.tr(),
+                    style: const TextStyle(fontWeight: FontWeight.w700)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF16A34A),
+                  minimumSize: const Size(double.infinity, 44),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.icon(
+              );
+              final rejectBtn = FilledButton.icon(
                 onPressed: (_loading || _accepting)
                     ? null
                     : () => _confirmReject(context),
@@ -2328,13 +2355,26 @@ class _SellerSolvencySectionState
                     style: const TextStyle(fontWeight: FontWeight.w700)),
                 style: FilledButton.styleFrom(
                   backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 12, horizontal: 16),
+                  minimumSize: const Size(double.infinity, 44),
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                 ),
-              ),
-            ],
+              );
+              if (isMobile) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [acceptBtn, const SizedBox(height: 8), rejectBtn],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: acceptBtn),
+                  const SizedBox(width: 8),
+                  Expanded(child: rejectBtn),
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -2349,24 +2389,31 @@ class _SolvencyRowCompact extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final valueColor = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
-          SizedBox(
-            width: 210,
+          Expanded(
+            flex: 3,
             child: Text(
               label,
               style: TextStyle(
                   fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF166534)),
+          Flexible(
+            flex: 2,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor),
+            ),
           ),
         ],
       ),

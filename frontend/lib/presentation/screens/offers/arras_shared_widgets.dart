@@ -16,7 +16,7 @@ class ArrasStepIndicator extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: colorScheme.onPrimaryContainer,
+      color: isDark ? const Color(0xFF1A2D6E) : colorScheme.primary,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
         children: List.generate(total, (i) {
@@ -59,7 +59,7 @@ class ArrasStepIndicator extends StatelessWidget {
                           '${i + 1}',
                           style: TextStyle(
                             color: active
-                                ? colorScheme.onPrimaryContainer
+                                ? colorScheme.onPrimary
                                 : Colors.white60,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -114,10 +114,10 @@ class ArrasBottomBar extends StatelessWidget {
               onPressed: onPrev,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                side: BorderSide(color: Colors.grey.shade400),
+                side: BorderSide(color: isDark ? Colors.white38 : Colors.grey.shade400),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('arras_interview.shared_back'.tr(), style: TextStyle(color: Colors.grey.shade700)),
+              child: Text('arras_interview.shared_back'.tr(), style: TextStyle(color: isDark ? Colors.white70 : Colors.grey.shade700)),
             ),
           const Spacer(),
           if (page < 2)

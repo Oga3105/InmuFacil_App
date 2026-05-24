@@ -17,7 +17,8 @@ from backend.src.models import (
 )
 from backend.src.schemas.base import (
     VisitWindowCreate, VisitWindowResponse,
-    VisitSlotResponse, VisitRequest, VisitAppointmentResponse
+    VisitSlotResponse, VisitRequest, VisitAppointmentResponse,
+    VisitAgendaItemResponse,
 )
 from backend.src.utils.security import get_current_active_user
 from backend.src.routes.properties import verify_property_ownership
@@ -194,29 +195,57 @@ async def update_visit_status(
     return appointment
 
 
-@router.get("/agenda", response_model=List[VisitAppointmentResponse])
+@router.get("/agenda", response_model=List[VisitAgendaItemResponse])
 async def get_visit_agenda(
-    role: str = "seller", # seller / buyer
+    role: str = "seller",
     status_filter: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Dashboard Agenda: List visits based on role.
+    Dashboard Agenda: appointments enriched with property title and participant names.
     """
-    query = db.query(VisitAppointment).join(VisitWindow).join(Property)
-    
+    query = (
+        db.query(VisitAppointment)
+        .join(VisitWindow)
+        .join(Property)
+        .options(
+            joinedload(VisitAppointment.window).joinedload(VisitWindow.property).joinedload(Property.owner),
+            joinedload(VisitAppointment.buyer),
+        )
+    )
+
     if role == "seller":
         query = query.filter(Property.owner_id == current_user.id)
     elif role == "buyer":
         query = query.filter(VisitAppointment.buyer_id == current_user.id)
     else:
         raise HTTPException(status_code=400, detail="Invalid role")
-        
+
     if status_filter:
         query = query.filter(VisitAppointment.status == status_filter)
-        
-    return query.order_by(VisitAppointment.start_time.asc()).all()
+
+    appointments = query.order_by(VisitAppointment.start_time.asc()).all()
+
+    result = []
+    for apt in appointments:
+        prop = apt.window.property if apt.window else None
+        buyer = apt.buyer
+        seller = prop.owner if prop else None
+        result.append(VisitAgendaItemResponse(
+            id=apt.id,
+            window_id=apt.window_id,
+            buyer_id=apt.buyer_id,
+            start_time=apt.start_time,
+            status=apt.status,
+            notes=apt.notes,
+            created_at=apt.created_at,
+            property_title=prop.title if prop else "Propiedad",
+            property_id=prop.id if prop else 0,
+            buyer_full_name=buyer.full_name if buyer else None,
+            seller_full_name=seller.full_name if seller else None,
+        ))
+    return result
 
 
 # ============================================================================

@@ -572,7 +572,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
                       const SizedBox(width: 4),
                       Text(
-                          'profile.member_since'.tr(args: [user.createdAt?.year.toString() ?? '—']),
+                          'profile.member_since'.tr(namedArgs: {'year': user.createdAt?.year.toString() ?? '—'}),
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
                     ],
@@ -855,139 +855,184 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             child: Builder(builder: (context) => Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant)),
               child: _isChangingPassword
                   ? _buildChangePasswordForm()
-                  : Row(
-                      children: [
-                        Column(
+                  : LayoutBuilder(builder: (context, constraints) {
+                      final isMobile = constraints.maxWidth < 600;
+                      final textBlock = Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('profile.password_label'.tr(),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 14)),
+                          const SizedBox(height: 4),
+                          Text(
+                              'profile.password_update_hint'.tr(),
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
+                        ],
+                      );
+                      final button = OutlinedButton(
+                        onPressed: () => setState(() => _isChangingPassword = true),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text('profile.change_password'.tr()),
+                      );
+                      if (isMobile) {
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('profile.password_label'.tr(),
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 14)),
-                            Text(
-                                'profile.password_update_hint'.tr(),
-                                style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12)),
+                            textBlock,
+                            const SizedBox(height: 12),
+                            SizedBox(width: double.infinity, child: button),
                           ],
-                        ),
-                        const Spacer(),
-                        OutlinedButton(
-                          onPressed: () {
-                            setState(() {
-                              _isChangingPassword = true;
-                            });
-                          },
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Text('profile.change_password'.tr()),
-                        ),
-                      ],
-                    ),
+                        );
+                      }
+                      return Row(
+                        children: [
+                          Expanded(child: textBlock),
+                          const SizedBox(width: 16),
+                          button,
+                        ],
+                      );
+                    }),
             )),
           ),
 
           const SizedBox(height: 16),
 
-          // [UPDATED] Suspension + Deletion Row
-          Row(
-            children: [
-              // 50% Suspension
-              Expanded(
-                child: Builder(builder: (context) => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7ED),
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('profile.suspend_account'.tr(),
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Color(0xFF9A3412))),
-                      const SizedBox(height: 4),
-                      Text('profile.suspend_hint'.tr(),
-                          style: const TextStyle(
-                              color: Color(0xFFB45309), fontSize: 12)),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: () async {
-                            // TODO: Account suspension via backend when endpoint is ready
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'profile.security.suspension_not_available'.tr())),
-                              );
-                            }
+          // Suspension + Deletion (responsive)
+          LayoutBuilder(builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
 
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.orange),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: Text(isSuspended ? 'profile.reactivate'.tr() : 'profile.suspend_button'.tr(),
-                              style: const TextStyle(color: Colors.orange)),
-                        ),
+            // Suspend card — amber/warning tone, dark-mode friendly
+            final suspendBg = isDark ? const Color(0xFF221500) : const Color(0xFFFFF7ED);
+            final suspendTitle = isDark ? const Color(0xFFFBBF24) : const Color(0xFF9A3412);
+            final suspendHint = isDark ? const Color(0xFFD97706) : const Color(0xFFB45309);
+            final suspendBorder = isDark ? const Color(0xFFFBBF24) : Colors.orange;
+
+            final suspendCard = Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: suspendBg,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF78350F)
+                          : Colors.orange.withValues(alpha: 0.3))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('profile.suspend_account'.tr(),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: suspendTitle)),
+                  const SizedBox(height: 4),
+                  Text('profile.suspend_hint'.tr(),
+                      style: TextStyle(color: suspendHint, fontSize: 12)),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'profile.security.suspension_not_available'.tr())),
+                          );
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: suspendBorder),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                    ],
+                      child: Text(
+                          isSuspended
+                              ? 'profile.reactivate'.tr()
+                              : 'profile.suspend_button'.tr(),
+                          style: TextStyle(color: suspendBorder)),
+                    ),
                   ),
-                )),
+                ],
               ),
-              const SizedBox(width: 16),
-              // 50% Deletion
-              Expanded(
-                child: Builder(builder: (context) => Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.errorContainer,
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Builder(builder: (ctx) => Text('profile.delete_account'.tr(),
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Theme.of(ctx).colorScheme.onErrorContainer))),
-                      const SizedBox(height: 4),
-                      Builder(builder: (ctx) => Text('profile.delete_hint'.tr(),
-                          style: TextStyle(
-                              color: Theme.of(ctx).colorScheme.onErrorContainer.withOpacity(0.7), fontSize: 12))),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Dialog logic...
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                    BorderRadius.circular(12)), // 12px radius
-                          ),
-                          child: Text('common.delete'.tr(),
-                              style: const TextStyle(color: Colors.white)),
+            );
+
+            // Delete card — error/danger tone, muted in dark mode
+            final deleteBg = isDark ? const Color(0xFF1F0808) : null;
+            final deleteTitle = isDark ? const Color(0xFFFCA5A5) : null;
+            final deleteHint = isDark ? const Color(0xFFEF9999) : null;
+            final deleteButtonBg = isDark ? const Color(0xFF7F1D1D) : Colors.red;
+
+            final deleteCard = Builder(builder: (ctx) {
+              final cs = Theme.of(ctx).colorScheme;
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                    color: deleteBg ?? cs.errorContainer,
+                    borderRadius: BorderRadius.circular(8),
+                    border: isDark
+                        ? Border.all(color: const Color(0xFF7F1D1D))
+                        : null),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('profile.delete_account'.tr(),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: deleteTitle ?? cs.onErrorContainer)),
+                    const SizedBox(height: 4),
+                    Text('profile.delete_hint'.tr(),
+                        style: TextStyle(
+                            color: (deleteHint ?? cs.onErrorContainer)
+                                .withValues(alpha: 0.8),
+                            fontSize: 12)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: deleteButtonBg,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                         ),
+                        child: Text('common.delete'.tr(),
+                            style: const TextStyle(color: Colors.white)),
                       ),
-                    ],
-                  ),
-                )),
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                ),
+              );
+            });
+            if (isMobile) {
+              return Column(
+                children: [
+                  suspendCard,
+                  const SizedBox(height: 16),
+                  deleteCard,
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: suspendCard),
+                const SizedBox(width: 16),
+                Expanded(child: deleteCard),
+              ],
+            );
+          }),
         ],
       ),
     );
@@ -1193,7 +1238,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                           style: const TextStyle(color: Colors.white70, fontSize: 9, letterSpacing: 1.2, fontWeight: FontWeight.w600),
                         ),
                         Text(
-                          'profile.solvency.level'.tr(args: [levelLabel]),
+                          'profile.solvency.level'.tr(namedArgs: {'level': levelLabel}),
                           style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                         ),
 
@@ -1589,7 +1634,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isMobile = constraints.maxWidth < 600;
+            return Row(
           children: [
             // Thumbnail
             ClipRRect(
@@ -1605,26 +1653,37 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   : _thumbPlaceholder(),
             ),
             const SizedBox(width: 14),
-            // Title + status + location
+            // Title + status + location (+ price on mobile)
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (p.title.isNotEmpty) ...[
+                    Text(
+                      p.title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                  ],
                   Row(
                     children: [
-                      Flexible(
-                        child: Text(
-                          p.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
                       _StatusPill(status: status),
+                      if (isMobile) ...[
+                        const Spacer(),
+                        Text(
+                          '${_formatPrice(p.price)}€',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF135BEC),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -1650,10 +1709,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                 ],
               ),
             ),
-            const SizedBox(width: 12),
-            // Price + analytics (views + favorites)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            // Price + analytics (views + favorites) — desktop only
+            if (!isMobile) ...[
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   '${_formatPrice(p.price)}\u20AC',
@@ -1724,6 +1784,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ),
               ],
             ),
+            ], // end if (!isMobile)
             const SizedBox(width: 12),
             // Gestionar button
             _GestionarMenu(
@@ -1768,6 +1829,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               },
             ),
           ],
+            );
+          },
         ),
       ),
     );
@@ -2949,6 +3012,25 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     ),
                   ],
                 ),
+                if (v.otherUserName != null && v.otherUserName!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.person_outline,
+                          size: 13, color: Color(0xFF94A3B8)),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          v.otherUserName!,
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 const SizedBox(height: 6),
                 Container(
                   padding:
@@ -2976,48 +3058,48 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
+                if (isUpcoming && v.role == 'seller' && v.status == 'requested') ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    children: [
+                      _VisitActionButton(
+                        icon: Icons.check_circle_outline,
+                        color: const Color(0xFF16A34A),
+                        label: 'profile.visits_tab.accept_btn'.tr(),
+                        onTap: () async {
+                          final ok = await updateVisitStatus(v.id, 'approved');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(ok ? 'profile.visits_tab.accept_success'.tr() : 'profile.visits_tab.accept_error'.tr()),
+                              backgroundColor: ok ? const Color(0xFF16A34A) : Colors.red,
+                            ));
+                            ref.invalidate(myVisitsProvider);
+                          }
+                        },
+                      ),
+                      _VisitActionButton(
+                        icon: Icons.cancel_outlined,
+                        color: Colors.red,
+                        label: 'profile.visits_tab.reject_btn'.tr(),
+                        onTap: () async {
+                          final ok = await updateVisitStatus(v.id, 'rejected');
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text(ok ? 'profile.visits_tab.reject_success'.tr() : 'profile.visits_tab.reject_error'.tr()),
+                              backgroundColor: ok ? const Color(0xFF64748B) : Colors.red,
+                            ));
+                            ref.invalidate(myVisitsProvider);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
-          // Seller: Approve/Reject buttons for pending visits
-          if (isUpcoming && v.role == 'seller' && v.status == 'requested')
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _VisitActionButton(
-                  icon: Icons.check_circle_outline,
-                  color: const Color(0xFF16A34A),
-                  label: 'profile.visits_tab.accept_btn'.tr(),
-                  onTap: () async {
-                    final ok = await updateVisitStatus(v.id, 'approved');
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok ? 'profile.visits_tab.accept_success'.tr() : 'profile.visits_tab.accept_error'.tr()),
-                        backgroundColor: ok ? const Color(0xFF16A34A) : Colors.red,
-                      ));
-                      ref.invalidate(myVisitsProvider);
-                    }
-                  },
-                ),
-                const SizedBox(width: 8),
-                _VisitActionButton(
-                  icon: Icons.cancel_outlined,
-                  color: Colors.red,
-                  label: 'profile.visits_tab.reject_btn'.tr(),
-                  onTap: () async {
-                    final ok = await updateVisitStatus(v.id, 'rejected');
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text(ok ? 'profile.visits_tab.reject_success'.tr() : 'profile.visits_tab.reject_error'.tr()),
-                        backgroundColor: ok ? const Color(0xFF64748B) : Colors.red,
-                      ));
-                      ref.invalidate(myVisitsProvider);
-                    }
-                  },
-
-                ),
-              ],
-            ),
           // Actions Menu (reschedule / cancel)
           if (isUpcoming && v.status != 'cancelled' && v.status != 'rejected')
             PopupMenuButton<String>(

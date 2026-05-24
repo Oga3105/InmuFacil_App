@@ -243,7 +243,10 @@ class _PropertyStep1TypeLocationState
                   side: BorderSide(
                     color: selected
                         ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.outlineVariant,
+                        : Theme.of(context).brightness == Brightness.dark
+                            ? Theme.of(context).colorScheme.outline
+                            : Theme.of(context).colorScheme.outlineVariant,
+                    width: selected ? 1.0 : Theme.of(context).brightness == Brightness.dark ? 1.5 : 1.0,
                   ),
                 ),
                 showCheckmark: false,
