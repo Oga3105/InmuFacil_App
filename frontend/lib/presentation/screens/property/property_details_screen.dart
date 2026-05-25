@@ -2037,7 +2037,7 @@ class _OwnerCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isMobile = constraints.maxWidth < 600;
+        final isMobile = MediaQuery.of(context).size.width < 650;
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
