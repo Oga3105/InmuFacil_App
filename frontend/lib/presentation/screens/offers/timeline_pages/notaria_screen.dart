@@ -94,6 +94,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Future<void> _pickDate() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final adaptiveBlue = Color.lerp(_kBlue, Colors.white, 0.4)!;
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
@@ -101,7 +103,9 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-            colorScheme: const ColorScheme.light(primary: _kBlue)),
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: adaptiveBlue)
+                : const ColorScheme.light(primary: _kBlue)),
         child: child!,
       ),
     );
@@ -109,12 +113,16 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Future<void> _pickTime() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final adaptiveBlue = Color.lerp(_kBlue, Colors.white, 0.4)!;
     final picked = await showTimePicker(
       context: context,
       initialTime: const TimeOfDay(hour: 11, minute: 0),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
-            colorScheme: const ColorScheme.light(primary: _kBlue)),
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: adaptiveBlue)
+                : const ColorScheme.light(primary: _kBlue)),
         child: child!,
       ),
     );
@@ -163,11 +171,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentUser = ref.watch(authProvider).user;
     final isBuyer = currentUser?.id == widget.offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -282,12 +291,21 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
+                      color: isDark
+                          ? Colors.red.shade900.withValues(alpha: 0.30)
+                          : Colors.red.shade50,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.shade200),
+                      border: Border.all(
+                          color: isDark
+                              ? Colors.red.shade700
+                              : Colors.red.shade200),
                     ),
                     child: Text(_errorMessage!,
-                        style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
+                        style: TextStyle(
+                            color: isDark
+                                ? Colors.red.shade300
+                                : Colors.red.shade700,
+                            fontSize: 13)),
                   ),
                 ],
                 const SizedBox(height: 24),
@@ -304,30 +322,32 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildInfoBanner() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Color.lerp(_kBlue, Colors.white, 0.45)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kBlue.withOpacity(0.07),
+        color: _kBlue.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBlue.withOpacity(0.25)),
+        border: Border.all(color: _kBlue.withValues(alpha: isDark ? 0.55 : 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.account_balance_outlined, color: _kBlue, size: 22),
+          Icon(Icons.account_balance_outlined, color: textColor, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('transaction.notaria_info_title'.tr(),
-                    style: const TextStyle(
-                        color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
+                    style: TextStyle(
+                        color: textColor, fontWeight: FontWeight.w800, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
                   'transaction.notaria_info_body'.tr(),
                   style: TextStyle(
-                      color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
+                      color: textColor.withValues(alpha: 0.85), fontSize: 13, height: 1.5),
                 ),
               ],
             ),
@@ -338,15 +358,18 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildBuyerForm() {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2)),
         ],
@@ -355,26 +378,28 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('transaction.notaria_form_title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF135BEC))),
+                  color: titleColor)),
           const SizedBox(height: 16),
           // City field
           TextField(
             controller: _cityCtrl,
+            style: TextStyle(color: cs.onSurface),
             decoration: InputDecoration(
               labelText: 'transaction.notaria_city_label'.tr(),
               hintText: 'transaction.notaria_city_hint'.tr(),
-              prefixIcon: const Icon(Icons.location_on_outlined, color: _kBlue),
+              hintStyle: TextStyle(color: cs.onSurfaceVariant),
+              prefixIcon: Icon(Icons.location_on_outlined, color: titleColor),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: cs.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _kBlue, width: 2),
+                borderSide: BorderSide(color: titleColor, width: 2),
               ),
             ),
           ),
@@ -412,7 +437,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               label: Text('transaction.notaria_send_proposal'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kBlue,
-                disabledBackgroundColor: Colors.grey.shade300,
+                disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -425,14 +450,17 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildConfirmedBanner() {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCompleted = _apptStatus == 'completed';
     final accentColor = isCompleted ? _kGreen : _kBlue;
+    final pendingIconColor = isDark ? cs.outlineVariant : Colors.grey.shade400;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.08),
+        color: accentColor.withValues(alpha: isDark ? 0.22 : 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: accentColor.withOpacity(0.3)),
+        border: Border.all(color: accentColor.withValues(alpha: isDark ? 0.55 : 0.3)),
       ),
       child: Column(
         children: [
@@ -455,7 +483,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               '${_savedCity ?? ''}\n${_savedDate ?? ''}'
               '${_savedTime != null ? ' a las $_savedTime' : ''}',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+              style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13),
             ),
           if (_apptStatus == 'scheduled') ...[
             const SizedBox(height: 8),
@@ -463,14 +491,14 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.check_circle, size: 16,
-                    color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
+                    color: _buyerConfirmed ? _kGreen : pendingIconColor),
                 const SizedBox(width: 4),
-                Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
                 const SizedBox(width: 16),
                 Icon(Icons.check_circle, size: 16,
-                    color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
+                    color: _sellerConfirmed ? _kGreen : pendingIconColor),
                 const SizedBox(width: 4),
-                Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
               ],
             ),
           ],
@@ -480,16 +508,22 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildSellerView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? Colors.orange.shade900.withValues(alpha: 0.25) : Colors.orange.shade50;
+    final borderColor = isDark ? Colors.orange.shade600 : Colors.orange.shade200;
+    final iconColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+    final titleColor = isDark ? Colors.orange.shade200 : Colors.orange.shade800;
+    final bodyColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade200),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          Icon(Icons.hourglass_empty, color: Colors.orange.shade700, size: 28),
+          Icon(Icons.hourglass_empty, color: iconColor, size: 28),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -498,12 +532,12 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                 Text('transaction.notaria_waiting_title'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade800,
+                        color: titleColor,
                         fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
                   'transaction.notaria_waiting_body'.tr(),
-                  style: TextStyle(color: Colors.orange.shade700, fontSize: 13),
+                  style: TextStyle(color: bodyColor, fontSize: 13),
                 ),
               ],
             ),
@@ -514,22 +548,26 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildSellerScheduledView() {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
+    final pendingIconColor = isDark ? cs.outlineVariant : Colors.grey.shade400;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8)],
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            const Icon(Icons.event_outlined, color: _kBlue, size: 20),
+            Icon(Icons.event_outlined, color: titleColor, size: 20),
             const SizedBox(width: 8),
             Text('transaction.notaria_seller_view_title'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: titleColor)),
           ]),
           const SizedBox(height: 12),
           if (_savedCity != null)
@@ -542,14 +580,14 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           Row(
             children: [
               Icon(Icons.check_circle, size: 16,
-                  color: _buyerConfirmed ? _kGreen : Colors.grey.shade400),
+                  color: _buyerConfirmed ? _kGreen : pendingIconColor),
               const SizedBox(width: 4),
-              Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notaria_buyer_label'.tr(), style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
               const SizedBox(width: 16),
               Icon(Icons.check_circle, size: 16,
-                  color: _sellerConfirmed ? _kGreen : Colors.grey.shade400),
+                  color: _sellerConfirmed ? _kGreen : pendingIconColor),
               const SizedBox(width: 4),
-              Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              Text('transaction.notaria_seller_label'.tr(), style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
             ],
           ),
         ],
@@ -558,18 +596,21 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildWaitingBanner(bool isBuyer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenTitle = isDark ? Color.lerp(_kGreen, Colors.white, 0.4)! : const Color(0xFF14532D);
+    final greenBody  = isDark ? Color.lerp(_kGreen, Colors.white, 0.3)! : _kGreen.withValues(alpha: 0.85);
     final otherParty = isBuyer ? 'transaction.notaria_other_seller'.tr() : 'transaction.notaria_other_buyer'.tr();
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.07),
+        color: _kGreen.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kGreen.withOpacity(0.3)),
+        border: Border.all(color: _kGreen.withValues(alpha: isDark ? 0.55 : 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.verified_outlined, color: _kGreen, size: 28),
+          Icon(Icons.verified_outlined, color: greenTitle, size: 28),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -577,10 +618,10 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               children: [
                 Text(
                   'transaction.notaria_your_confirmation_title'.tr(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF14532D),
+                    color: greenTitle,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -588,7 +629,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
                   'transaction.notaria_your_confirmation_body'.tr(namedArgs: {'party': otherParty}),
                   style: TextStyle(
                     fontSize: 13,
-                    color: _kGreen.withOpacity(0.85),
+                    color: greenBody,
                     height: 1.5,
                   ),
                 ),
@@ -601,26 +642,29 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildSigningCta(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final greenTitle = isDark ? Color.lerp(_kGreen, Colors.white, 0.4)! : const Color(0xFF14532D);
+    final greenBody  = isDark ? Color.lerp(_kGreen, Colors.white, 0.3)! : _kGreen.withValues(alpha: 0.85);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.07),
+        color: _kGreen.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kGreen.withOpacity(0.3)),
+        border: Border.all(color: _kGreen.withValues(alpha: isDark ? 0.55 : 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.verified_outlined, color: _kGreen, size: 20),
+              Icon(Icons.verified_outlined, color: greenTitle, size: 20),
               const SizedBox(width: 8),
               Text(
                 'transaction.notaria_signing_title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF14532D)),
+                    color: greenTitle),
               ),
             ],
           ),
@@ -628,7 +672,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
           Text(
             'transaction.notaria_signing_body'.tr(),
             style: TextStyle(
-                fontSize: 13, color: _kGreen.withOpacity(0.85), height: 1.5),
+                fontSize: 13, color: greenBody, height: 1.5),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -654,6 +698,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
   }
 
   Widget _buildDocumentChecklist() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     final buyerDocs = [
       'transaction.notaria_doc_buyer_1'.tr(),
       'transaction.notaria_doc_buyer_2'.tr(),
@@ -675,8 +721,8 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
       children: [
         Text(
           'transaction.notaria_docs_title'.tr(),
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC)),
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: titleColor),
         ),
         const SizedBox(height: 16),
         _DocsSection(title: 'transaction.notaria_buyer_label'.tr(), icon: Icons.person_outline, docs: buyerDocs),
@@ -702,25 +748,28 @@ class _DatePickerRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: cs.outlineVariant),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(icon, color: _kBlue, size: 20),
+            Icon(icon, color: blue, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(value,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w500, fontSize: 14, color: Color(0xFF135BEC))),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500, fontSize: 14, color: blue)),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
+            Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 18),
           ],
         ),
       ),
@@ -736,15 +785,18 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, color: _kBlue, size: 16),
+          Icon(icon, color: blue, size: 16),
           const SizedBox(width: 8),
-          Text('$label: ', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+          Text('$label: ', style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
           Expanded(child: Text(value,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF135BEC)))),
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: blue))),
         ],
       ),
     );
@@ -760,23 +812,26 @@ class _DocsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, color: _kBlue, size: 18),
+              Icon(icon, color: blue, size: 18),
               const SizedBox(width: 8),
               Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF135BEC))),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 14, color: blue)),
             ],
           ),
           const SizedBox(height: 12),
@@ -784,13 +839,13 @@ class _DocsSection extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.check_box_outline_blank,
-                        color: _kBlue, size: 18),
+                    Icon(Icons.check_box_outline_blank,
+                        color: blue, size: 18),
                     const SizedBox(width: 10),
                     Expanded(
                         child: Text(doc,
                             style: TextStyle(
-                                fontSize: 13, color: Colors.grey.shade700))),
+                                fontSize: 13, color: cs.onSurfaceVariant))),
                   ],
                 ),
               )),
