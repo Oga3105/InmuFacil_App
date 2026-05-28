@@ -255,25 +255,39 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     if (p != null) setState(() => _rejectTime = p);
   }
 
-  Future<DateTime?> _datePicker() => showDatePicker(
-        context: context,
-        initialDate: DateTime.now().add(const Duration(days: 3)),
-        firstDate: DateTime.now(),
-        lastDate: DateTime.now().add(const Duration(days: 90)),
-        builder: (ctx, child) => Theme(
-          data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: _kBlue)),
-          child: child!,
-        ),
-      );
+  Future<DateTime?> _datePicker() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final adaptiveBlue = Color.lerp(_kBlue, Colors.white, 0.4)!;
+    return showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 3)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: adaptiveBlue)
+                : const ColorScheme.light(primary: _kBlue)),
+        child: child!,
+      ),
+    );
+  }
 
-  Future<TimeOfDay?> _timePicker() => showTimePicker(
-        context: context,
-        initialTime: const TimeOfDay(hour: 10, minute: 0),
-        builder: (ctx, child) => Theme(
-          data: Theme.of(ctx).copyWith(colorScheme: const ColorScheme.light(primary: _kBlue)),
-          child: child!,
-        ),
-      );
+  Future<TimeOfDay?> _timePicker() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final adaptiveBlue = Color.lerp(_kBlue, Colors.white, 0.4)!;
+    return showTimePicker(
+      context: context,
+      initialTime: const TimeOfDay(hour: 10, minute: 0),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+            colorScheme: isDark
+                ? ColorScheme.dark(primary: adaptiveBlue)
+                : const ColorScheme.light(primary: _kBlue)),
+        child: child!,
+      ),
+    );
+  }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -312,7 +326,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
     final isSeller = currentUser?.id != widget.offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _buildAppBar(),
       body: _isInitializing
           ? const Center(child: CircularProgressIndicator())
@@ -386,40 +400,50 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             onTap: _pickBuyerTime,
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _notesCtrl,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: 'transaction.tasacion_notes_label'.tr(),
-              labelStyle: TextStyle(color: Colors.grey.shade600),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colors.grey.shade300)),
-              focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: _kBlue, width: 2)),
-            ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: (!_isLoading && _buyerDate != null && _buyerTime != null)
-                  ? _scheduleAppointment
-                  : null,
-              icon: _isLoading
-                  ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Icon(Icons.send_outlined),
-              label: Text('transaction.tasacion_send_proposal'.tr()),
-              style: FilledButton.styleFrom(
-                backgroundColor: _kBlue,
-                disabledBackgroundColor: Colors.grey.shade300,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(vertical: 16),
+          Builder(builder: (context) {
+            final cs = Theme.of(context).colorScheme;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return TextField(
+              controller: _notesCtrl,
+              style: TextStyle(color: cs.onSurface),
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: 'transaction.tasacion_notes_label'.tr(),
+                labelStyle: TextStyle(color: cs.onSurfaceVariant),
+                hintStyle: TextStyle(color: cs.onSurfaceVariant),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: cs.outlineVariant)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: _kBlue, width: 2)),
               ),
-            ),
-          ),
+            );
+          }),
+          const SizedBox(height: 20),
+          Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            return SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: (!_isLoading && _buyerDate != null && _buyerTime != null)
+                    ? _scheduleAppointment
+                    : null,
+                icon: _isLoading
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : const Icon(Icons.send_outlined),
+                label: Text('transaction.tasacion_send_proposal'.tr()),
+                style: FilledButton.styleFrom(
+                  backgroundColor: _kBlue,
+                  disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                  disabledForegroundColor: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -434,55 +458,62 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
       );
 
   // proposed — comprador (esperando respuesta del vendedor)
-  Widget _buildBuyerWaiting() => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: _kOrange.withOpacity(0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kOrange.withOpacity(0.3)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(children: [
-              const Icon(Icons.schedule_outlined, color: _kOrange, size: 20),
-              const SizedBox(width: 8),
-              Text('transaction.tasacion_proposed_badge'.tr(),
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: _kOrange, fontSize: 14)),
-            ]),
-            const SizedBox(height: 12),
-            if (_buyerDate != null && _buyerTime != null)
-              _AppointmentBadge(
-                date: _buyerDate!,
-                time: _buyerTime!,
-                label: 'transaction.tasacion_your_proposal'.tr(),
-                color: _kOrange,
-              ),
-            const SizedBox(height: 10),
-            Text('transaction.tasacion_proposed_hint'.tr(),
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
-          ],
-        ),
-      );
-
-  // proposed — vendedor (puede aceptar o rechazar)
-  Widget _buildSellerDecision(BuildContext context) {
+  Widget _buildBuyerWaiting() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: _kOrange.withValues(alpha: isDark ? 0.18 : 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        border: Border.all(color: _kOrange.withValues(alpha: isDark ? 0.5 : 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            const Icon(Icons.calendar_month_outlined, color: _kBlue, size: 20),
+            const Icon(Icons.schedule_outlined, color: _kOrange, size: 20),
+            const SizedBox(width: 8),
+            Text('transaction.tasacion_proposed_badge'.tr(),
+                style: const TextStyle(fontWeight: FontWeight.bold, color: _kOrange, fontSize: 14)),
+          ]),
+          const SizedBox(height: 12),
+          if (_buyerDate != null && _buyerTime != null)
+            _AppointmentBadge(
+              date: _buyerDate!,
+              time: _buyerTime!,
+              label: 'transaction.tasacion_your_proposal'.tr(),
+              color: _kOrange,
+            ),
+          const SizedBox(height: 10),
+          Text('transaction.tasacion_proposed_hint'.tr(),
+              style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+        ],
+      ),
+    );
+  }
+
+  // proposed — vendedor (puede aceptar o rechazar)
+  Widget _buildSellerDecision(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(Icons.calendar_month_outlined, color: blue, size: 20),
             const SizedBox(width: 8),
             Text('transaction.tasacion_buyer_proposes'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: blue)),
           ]),
           const SizedBox(height: 14),
           if (_buyerDate != null && _buyerTime != null)
@@ -492,18 +523,18 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.notes_outlined, size: 16, color: Colors.grey.shade500),
+                  Icon(Icons.notes_outlined, size: 16, color: cs.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(_notesCtrl.text,
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                        style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
                   ),
                 ],
               ),
@@ -536,7 +567,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               label: Text(_showRejectForm ? 'transaction.tasacion_cancel_label'.tr() : 'transaction.tasacion_reject_propose'.tr()),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _kOrange,
-                side: BorderSide(color: _kOrange.withOpacity(0.6)),
+                side: BorderSide(color: _kOrange.withValues(alpha: 0.6)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -553,12 +584,14 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
 
   // Formulario inline para que el vendedor proponga nueva fecha
   Widget _buildRejectForm(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kOrange.withOpacity(0.05),
+        color: _kOrange.withValues(alpha: isDark ? 0.15 : 0.05),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _kOrange.withOpacity(0.25)),
+        border: Border.all(color: _kOrange.withValues(alpha: isDark ? 0.45 : 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -582,14 +615,15 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _rejectNotesCtrl,
+            style: TextStyle(color: cs.onSurface),
             maxLines: 2,
             decoration: InputDecoration(
               labelText: 'transaction.tasacion_alt_notes'.tr(),
-              labelStyle: TextStyle(color: Colors.grey.shade600),
+              labelStyle: TextStyle(color: cs.onSurfaceVariant),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: _kOrange.withOpacity(0.4))),
+                  borderSide: BorderSide(color: _kOrange.withValues(alpha: 0.4))),
               focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(color: _kOrange, width: 2)),
@@ -608,7 +642,8 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               label: Text('transaction.tasacion_send_counter'.tr()),
               style: FilledButton.styleFrom(
                 backgroundColor: _kOrange,
-                disabledBackgroundColor: Colors.grey.shade300,
+                disabledBackgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+                disabledForegroundColor: isDark ? Colors.grey.shade500 : Colors.grey.shade600,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -621,13 +656,16 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
 
   // rejected — comprador (ve la contraoferta del vendedor)
   Widget _buildBuyerCounterProposal(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -636,11 +674,11 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             const Icon(Icons.event_repeat_outlined, color: _kOrange, size: 20),
             const SizedBox(width: 8),
             Text('transaction.tasacion_seller_counter_title'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF135BEC))),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: blue)),
           ]),
           const SizedBox(height: 6),
           Text('transaction.tasacion_seller_counter_body'.tr(),
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+              style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: 14),
           if (_sellerDate != null && _sellerTime != null)
             _AppointmentBadge(date: _sellerDate!, time: _sellerTime!, label: 'transaction.tasacion_seller_proposal'.tr(), color: _kOrange),
@@ -649,17 +687,17 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: cs.outlineVariant),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.notes_outlined, size: 16, color: Colors.grey.shade500),
+                  Icon(Icons.notes_outlined, size: 16, color: cs.onSurfaceVariant),
                   const SizedBox(width: 8),
                   Expanded(child: Text(_sellerRejectionNotes,
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade700))),
+                      style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant))),
                 ],
               ),
             ),
@@ -695,8 +733,8 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
               icon: const Icon(Icons.edit_calendar_outlined, size: 18),
               label: Text('transaction.tasacion_propose_other'.tr()),
               style: OutlinedButton.styleFrom(
-                foregroundColor: _kBlue,
-                side: const BorderSide(color: _kBlue),
+                foregroundColor: blue,
+                side: BorderSide(color: blue),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
@@ -717,12 +755,14 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
 
   // accepted — ambas partes acordaron la fecha
   Widget _buildAccepted(BuildContext context, {required bool isSeller}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.07),
+        color: _kGreen.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kGreen.withOpacity(0.3)),
+        border: Border.all(color: _kGreen.withValues(alpha: isDark ? 0.55 : 0.3)),
       ),
       child: Column(
         children: [
@@ -734,7 +774,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
           if (_buyerDate != null && _buyerTime != null)
             Text(
               'transaction.tasacion_confirmed_at'.tr(namedArgs: {'date': _formatDate(_buyerDate!), 'time': _formatTime(_buyerTime!, context)}),
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+              style: TextStyle(fontSize: 14, color: cs.onSurfaceVariant),
             ),
           const SizedBox(height: 6),
           Text(
@@ -742,7 +782,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 ? 'transaction.tasacion_seller_confirm_hint'.tr()
                 : 'transaction.tasacion_buyer_confirm_hint'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -751,6 +791,9 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
 
   // accepted — vendedor: ve la cita + boton confirmar visita
   Widget _buildSellerConfirmVisit() {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Column(
       children: [
         _buildAccepted(context, isSeller: true),
@@ -758,22 +801,22 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cs.surfaceContainerLow,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: cs.outlineVariant),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                const Icon(Icons.home_work_outlined, color: _kBlue, size: 20),
+                Icon(Icons.home_work_outlined, color: blue, size: 20),
                 const SizedBox(width: 8),
                 Text('transaction.tasacion_confirm_visit_title'.tr(),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: blue)),
               ]),
               const SizedBox(height: 8),
               Text('transaction.tasacion_confirm_visit_body'.tr(),
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4)),
+                  style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant, height: 1.4)),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -799,12 +842,14 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
 
   // completed
   Widget _buildCompleted(BuildContext context, bool isSeller) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kGreen.withOpacity(0.07),
+        color: _kGreen.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kGreen.withOpacity(0.3)),
+        border: Border.all(color: _kGreen.withValues(alpha: isDark ? 0.55 : 0.3)),
       ),
       child: Column(
         children: [
@@ -818,7 +863,7 @@ class _TasacionScreenState extends ConsumerState<TasacionScreen> {
                 ? 'transaction.tasacion_completed_seller'.tr()
                 : 'transaction.tasacion_completed_buyer'.tr(),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
           ),
           if (!isSeller) ...[
             const SizedBox(height: 16),
@@ -924,12 +969,13 @@ class _AppointmentBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.07),
+        color: color.withValues(alpha: isDark ? 0.20 : 0.07),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.5 : 0.25)),
       ),
       child: Row(
         children: [
@@ -938,7 +984,7 @@ class _AppointmentBadge extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 11, color: color.withOpacity(0.8), fontWeight: FontWeight.w600)),
+              Text(label, style: TextStyle(fontSize: 11, color: color.withValues(alpha: 0.8), fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
               Text(
                 'transaction.tasacion_appointment_format'.tr(namedArgs: {
@@ -966,12 +1012,13 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.07),
+        color: color.withValues(alpha: isDark ? 0.20 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.25)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.50 : 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -984,7 +1031,7 @@ class _InfoCard extends StatelessWidget {
               children: [
                 Text(title, style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
-                Text(body, style: TextStyle(color: color.withOpacity(0.85), fontSize: 13, height: 1.5)),
+                Text(body, style: TextStyle(color: color.withValues(alpha: 0.85), fontSize: 13, height: 1.5)),
               ],
             ),
           ),
@@ -1002,20 +1049,23 @@ class _TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(const Color(0xFF135BEC), Colors.white, 0.4)! : const Color(0xFF135BEC);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 8, offset: const Offset(0, 2))],
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
+          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: blue)),
           const SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+          Text(subtitle, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: 16),
           child,
         ],
@@ -1033,25 +1083,28 @@ class _DateTimeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(const Color(0xFF135BEC), Colors.white, 0.4)! : const Color(0xFF135BEC);
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: cs.outlineVariant),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
           children: [
-            Icon(icon, color: _kBlue, size: 20),
+            Icon(icon, color: blue, size: 20),
             const SizedBox(width: 12),
-            Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+            Text(label, style: TextStyle(color: cs.onSurfaceVariant, fontSize: 13)),
             const Spacer(),
             Text(value,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF135BEC))),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: blue)),
             const SizedBox(width: 8),
-            Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 18),
+            Icon(Icons.chevron_right, color: cs.onSurfaceVariant, size: 18),
           ],
         ),
       ),
@@ -1066,18 +1119,21 @@ class _ChecklistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(const Color(0xFF135BEC), Colors.white, 0.4)! : const Color(0xFF135BEC);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF135BEC))),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: blue)),
           const SizedBox(height: 12),
           ...items.map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -1085,7 +1141,7 @@ class _ChecklistCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.check_circle_outline, color: _kGreen, size: 18),
                     const SizedBox(width: 10),
-                    Expanded(child: Text(item, style: TextStyle(fontSize: 13, color: Colors.grey.shade700))),
+                    Expanded(child: Text(item, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant))),
                   ],
                 ),
               )),
