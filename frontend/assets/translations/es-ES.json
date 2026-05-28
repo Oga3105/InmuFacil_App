@@ -836,6 +836,8 @@
     "home_button": "Inicio",
     "action_activate": "Activar",
     "action_deactivate": "Desactivar",
+    "action_reserve": "Marcar como Reservado",
+    "action_unreserve": "Quitar Reserva",
     "personal_info": {
       "full_name": "Nombre completo",
       "phone": "Teléfono",
@@ -871,7 +873,8 @@
     "property_status": {
       "active": "ACTIVO",
       "draft": "BORRADOR",
-      "in_review": "EN REVISIÓN"
+      "in_review": "EN REVISIÓN",
+      "reserved": "RESERVADO"
     },
     "property_analytics": {
       "views": "{} vistas"

@@ -46,6 +46,13 @@ class MyPropertiesNotifier extends AsyncNotifier<List<Property>> {
     await refresh();
   }
 
+  Future<void> markReserved(String propertyId) async {
+    final token = await _storage.read(key: 'auth_token');
+    if (token != null) _dio.options.headers['Authorization'] = 'Bearer $token';
+    await _dio.post('/properties/$propertyId/mark-reserved');
+    await refresh();
+  }
+
   Future<void> deleteProperty(String propertyId) async {
     await _dio.delete('/properties/$propertyId');
     await refresh();
