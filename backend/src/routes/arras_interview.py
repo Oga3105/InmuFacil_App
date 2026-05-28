@@ -32,6 +32,7 @@ import io
 from backend.src.config.database import get_db, SessionLocal
 from backend.src.models import User, PropertyOffer, Property
 from backend.src.models.arras_interview import ArrasInterview
+from backend.src.models.enums import PropertyStatus
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.crypto import encrypt_data, decrypt_data
@@ -780,6 +781,12 @@ async def accept_contract(
         if sa_func.upper(cast(offer.status, String)) != "SIGNED":
             from backend.src.models.enums import OfferStatus
             offer.status = OfferStatus.SIGNED
+        # Auto-reserve property: hide from public map and search
+        prop = db.query(Property).filter(Property.id == offer.property_id).first()
+        if prop and prop.status != PropertyStatus.RESERVED:
+            prop.status = PropertyStatus.RESERVED
+            prop.hide_when_reserved = True
+            logger.info("Property %s auto-reserved after arras fully_accepted for offer %s", prop.id, offer_id)
         logger.info("Arras contract fully accepted for offer_id=%s — offer advanced to SIGNED", offer_id)
     elif role == "BUYER":
         record.contract_status = "buyer_accepted"
