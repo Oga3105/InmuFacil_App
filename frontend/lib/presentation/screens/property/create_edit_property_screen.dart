@@ -42,35 +42,57 @@ class _CreateEditPropertyScreenState
   void _confirmCancel(BuildContext context) {
     showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('property_wizard.cancel_title'.tr()),
-        content: Text('property_wizard.cancel_message'.tr()),
-        actions: [
-          OutlinedButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: BorderSide(
-                color: Theme.of(ctx).colorScheme.primary,
-                width: 1.5,
-              ),
+      builder: (ctx) {
+        final isMobile = MediaQuery.of(ctx).size.width < 600;
+
+        final keepEditingButton = OutlinedButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Text('property_wizard.keep_editing'.tr()),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+            side: BorderSide(
+              color: Theme.of(ctx).colorScheme.primary,
+              width: 1.5,
             ),
-            child: Text('property_wizard.cancel_exit'.tr()),
           ),
-        ],
-      ),
+          child: Text('property_wizard.keep_editing'.tr()),
+        );
+
+        final cancelExitButton = FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(ctx).colorScheme.error,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Text('property_wizard.cancel_exit'.tr()),
+        );
+
+        if (isMobile) {
+          return AlertDialog(
+            title: Text('property_wizard.cancel_title'.tr()),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('property_wizard.cancel_message'.tr()),
+                const SizedBox(height: 24),
+                keepEditingButton,
+                const SizedBox(height: 12),
+                cancelExitButton,
+              ],
+            ),
+          );
+        }
+
+        return AlertDialog(
+          title: Text('property_wizard.cancel_title'.tr()),
+          content: Text('property_wizard.cancel_message'.tr()),
+          actions: [keepEditingButton, cancelExitButton],
+        );
+      },
     ).then((confirmed) {
       if (confirmed == true && context.mounted) {
         ref.read(propertyFormProvider.notifier).reset();
@@ -178,7 +200,7 @@ class _CreateEditPropertyScreenState
           onPressed: () => _confirmCancel(context),
         ),
       ),
-      // ── Title: logo + label ──────────────────────────────────────────────
+      // ── Title: logo + label (label hidden on mobile to avoid crowding) ──
       title: GestureDetector(
         onTap: () => context.go('/'),
         child: MouseRegion(
@@ -187,26 +209,28 @@ class _CreateEditPropertyScreenState
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset('assets/images/logo_inmufacil.png', height: 28),
-              const SizedBox(width: 8),
-              Builder(
-                builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
-                  final cs = Theme.of(context).colorScheme;
-                  return Text.rich(
-                    TextSpan(
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                      children: [
-                        TextSpan(
-                            text: 'Inmu',
-                            style: TextStyle(color: cs.primary)),
-                        TextSpan(
-                            text: 'Fácil',
-                            style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              if (MediaQuery.sizeOf(context).width >= 600) ...[
+                const SizedBox(width: 8),
+                Builder(
+                  builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    final cs = Theme.of(context).colorScheme;
+                    return Text.rich(
+                      TextSpan(
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                        children: [
+                          TextSpan(
+                              text: 'Inmu',
+                              style: TextStyle(color: cs.primary)),
+                          TextSpan(
+                              text: 'Fácil',
+                              style: TextStyle(color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ),

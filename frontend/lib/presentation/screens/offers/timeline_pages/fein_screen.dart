@@ -104,7 +104,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -220,17 +220,19 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildInfoBanner() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.45)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kBlue.withOpacity(0.07),
+        color: _kBlue.withValues(alpha: isDark ? 0.22 : 0.07),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBlue.withOpacity(0.25)),
+        border: Border.all(color: _kBlue.withValues(alpha: isDark ? 0.55 : 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.account_balance_outlined, color: _kBlue, size: 22),
+          Icon(Icons.account_balance_outlined, color: blue, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -238,14 +240,14 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
               children: [
                 Text('transaction.fein_title'.tr(),
                     style: TextStyle(
-                        color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14)),
+                        color: blue, fontWeight: FontWeight.bold, fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
                   _isBuyer
                       ? 'transaction.fein_buyer_banner'.tr()
                       : 'transaction.fein_seller_banner'.tr(),
                   style: TextStyle(
-                      color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
+                      color: blue.withValues(alpha: 0.85), fontSize: 13, height: 1.5),
                 ),
               ],
             ),
@@ -256,6 +258,9 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildWhatIsFein() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     final items = [
       ('transaction.fein_faq1_title'.tr(), 'transaction.fein_faq1_body'.tr()),
       ('transaction.fein_faq2_title'.tr(), 'transaction.fein_faq2_body'.tr()),
@@ -265,12 +270,12 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -281,7 +286,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         children: [
           Text('transaction.fein_what_is'.tr(),
               style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
+                  fontSize: 15, fontWeight: FontWeight.bold, color: cs.onSurface)),
           const SizedBox(height: 12),
           ...items.map((item) => Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -291,21 +296,21 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: _kBlue.withOpacity(0.1),
+                        color: _kBlue.withValues(alpha: isDark ? 0.25 : 0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(item.$1,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: _kBlue)),
+                              color: blue)),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(item.$2,
                           style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey.shade600,
+                              color: cs.onSurfaceVariant,
                               height: 1.4)),
                     ),
                   ],
@@ -317,6 +322,9 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildTimeline() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     final steps = [
       ('transaction.fein_step1_title'.tr(), 'transaction.fein_step1_body'.tr(), true),
       ('transaction.fein_step2_title'.tr(), 'transaction.fein_step2_body'.tr(), true),
@@ -328,16 +336,16 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('transaction.fein_process_title'.tr(),
               style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
+                  fontSize: 15, fontWeight: FontWeight.bold, color: cs.onSurface)),
           const SizedBox(height: 16),
           ...steps.asMap().entries.map((e) {
             final index = e.key;
@@ -353,7 +361,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: step.$3 ? _kGreen : _kBlue.withOpacity(0.12),
+                          color: step.$3 ? _kGreen : _kBlue.withValues(alpha: isDark ? 0.30 : 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
@@ -363,14 +371,14 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: _kBlue.withOpacity(0.7))),
+                                      color: blue.withValues(alpha: isDark ? 1.0 : 0.7))),
                         ),
                       ),
                       if (index < steps.length - 1)
                         Container(
                           width: 2,
                           height: 20,
-                          color: Colors.grey.shade200,
+                          color: cs.outlineVariant,
                         ),
                     ],
                   ),
@@ -383,10 +391,10 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                             style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: step.$3 ? _kGreen : _kNavy)),
+                                color: step.$3 ? _kGreen : cs.onSurface)),
                         Text(step.$2,
                             style: TextStyle(
-                                fontSize: 12, color: Colors.grey.shade500)),
+                                fontSize: 12, color: cs.onSurfaceVariant)),
                       ],
                     ),
                   ),
@@ -400,15 +408,17 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildBuyerConfirmationForm() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -419,7 +429,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         children: [
           Text('transaction.fein_form_title'.tr(),
               style: TextStyle(
-                  fontSize: 15, fontWeight: FontWeight.bold, color: _kNavy)),
+                  fontSize: 15, fontWeight: FontWeight.bold, color: cs.onSurface)),
           const SizedBox(height: 16),
           _CheckItem(
             value: _feinReceived,
@@ -436,19 +446,22 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber.shade50,
+              color: Colors.amber.withValues(alpha: isDark ? 0.15 : 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.shade200),
+              border: Border.all(color: Colors.amber.withValues(alpha: isDark ? 0.5 : 0.4)),
             ),
             child: Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.amber.shade700, size: 18),
+                Icon(Icons.info_outline,
+                    color: isDark ? Colors.amber.shade300 : Colors.amber.shade700, size: 18),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'transaction.fein_form_warn'.tr(),
                     style: TextStyle(
-                        fontSize: 12, color: Colors.amber.shade900, height: 1.4),
+                        fontSize: 12,
+                        color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                        height: 1.4),
                   ),
                 ),
               ],
@@ -460,16 +473,22 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildSellerWaitView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor     = isDark ? Colors.orange.shade900.withValues(alpha: 0.25) : Colors.orange.shade50;
+    final borderColor = isDark ? Colors.orange.shade600 : Colors.orange.shade200;
+    final iconColor   = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+    final titleColor  = isDark ? Colors.orange.shade200 : Colors.orange.shade800;
+    final bodyColor   = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.shade200),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         children: [
-          Icon(Icons.hourglass_empty, color: Colors.orange.shade700, size: 28),
+          Icon(Icons.hourglass_empty, color: iconColor, size: 28),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -478,12 +497,12 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                 Text('transaction.fein_seller_wait_title'.tr(),
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange.shade800,
+                        color: titleColor,
                         fontSize: 14)),
                 const SizedBox(height: 4),
                 Text(
                   'transaction.fein_seller_wait_body'.tr(),
-                  style: TextStyle(color: Colors.orange.shade700, fontSize: 13),
+                  style: TextStyle(color: bodyColor, fontSize: 13),
                 ),
               ],
             ),
@@ -494,20 +513,24 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildErrorBanner() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
+        color: Colors.red.withValues(alpha: isDark ? 0.18 : 0.06),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red.shade200),
+        border: Border.all(color: Colors.red.withValues(alpha: isDark ? 0.5 : 0.3)),
       ),
       child: Row(
         children: [
-          Icon(Icons.error_outline, color: Colors.red.shade700, size: 18),
+          Icon(Icons.error_outline,
+              color: isDark ? Colors.red.shade300 : Colors.red.shade700, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Text(_errorMessage!,
-                style: TextStyle(fontSize: 13, color: Colors.red.shade700)),
+                style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.red.shade300 : Colors.red.shade700)),
           ),
         ],
       ),
@@ -531,7 +554,9 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
         label: Text('transaction.fein_form_title'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kBlue,
-          disabledBackgroundColor: Colors.grey.shade300,
+          disabledBackgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade800
+              : Colors.grey.shade300,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -541,6 +566,9 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
   }
 
   Widget _buildSuccessView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+    final blue = isDark ? Color.lerp(_kBlue, Colors.white, 0.4)! : _kBlue;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -551,7 +579,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: _kGreen.withOpacity(0.1),
+                color: _kGreen.withValues(alpha: isDark ? 0.25 : 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.verified, color: _kGreen, size: 44),
@@ -559,7 +587,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             const SizedBox(height: 24),
             Text('transaction.fein_success_title'.tr(),
               style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
+                  fontSize: 22, fontWeight: FontWeight.bold, color: cs.onSurface),
             ),
             const SizedBox(height: 12),
             Text(
@@ -568,26 +596,27 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
                   : 'transaction.fein_success_seller'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 14, color: Colors.grey.shade600, height: 1.6),
+                  fontSize: 14, color: cs.onSurfaceVariant, height: 1.6),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
+                color: Colors.amber.withValues(alpha: isDark ? 0.15 : 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(color: Colors.amber.withValues(alpha: isDark ? 0.5 : 0.4)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.amber.shade700, size: 18),
+                  Icon(Icons.info_outline,
+                      color: isDark ? Colors.amber.shade300 : Colors.amber.shade700, size: 18),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'transaction.fein_success_warn'.tr(),
                       style: TextStyle(
                           fontSize: 12,
-                          color: Colors.amber.shade900,
+                          color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
                           height: 1.4),
                     ),
                   ),
@@ -616,7 +645,7 @@ class _FeinScreenState extends ConsumerState<FeinScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text('transaction.fein_back_timeline'.tr(),
-                  style: TextStyle(color: _kBlue)),
+                  style: TextStyle(color: blue)),
             ),
           ],
         ),
@@ -660,7 +689,7 @@ class _CheckItem extends StatelessWidget {
                 child: Text(label,
                     style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.4)),
               ),
             ),

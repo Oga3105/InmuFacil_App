@@ -118,7 +118,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     final isBuyer = currentUser?.id.toString() == widget.offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -169,7 +169,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF135BEC).withOpacity(0.25),
+                    color: const Color(0xFF135BEC).withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -215,43 +215,55 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
           : ListView(
               padding: const EdgeInsets.all(20),
               children: [
-                _buildInfoBanner(isBuyer),
+                _buildInfoBanner(context, isBuyer),
                 const SizedBox(height: 20),
-                _buildStatusCard(isBuyer),
+                _buildStatusCard(context, isBuyer),
                 const SizedBox(height: 20),
-                _buildConfirmationForm(isBuyer),
+                _buildConfirmationForm(context, isBuyer),
                 const SizedBox(height: 24),
-                _buildSubmitButton(),
+                _buildSubmitButton(context),
                 if (_errorMessage != null) ...[
                   const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.shade200),
-                    ),
-                    child: Text(_errorMessage!,
-                        style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
-                  ),
+                  Builder(builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.red.shade900.withValues(alpha: 0.30)
+                            : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: isDark ? Colors.red.shade700 : Colors.red.shade200),
+                      ),
+                      child: Text(_errorMessage!,
+                          style: TextStyle(
+                              color: isDark ? Colors.red.shade300 : Colors.red.shade700,
+                              fontSize: 13)),
+                    );
+                  }),
                 ],
               ],
             ),
     );
   }
 
-  Widget _buildInfoBanner(bool isBuyer) {
+  Widget _buildInfoBanner(BuildContext context, bool isBuyer) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bannerColor = _kBlue.withValues(alpha: isDark ? 0.22 : 0.07);
+    final borderColor = _kBlue.withValues(alpha: isDark ? 0.55 : 0.25);
+    final textColor = isDark ? Color.lerp(_kBlue, Colors.white, 0.45)! : _kBlue;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kBlue.withOpacity(0.07),
+        color: bannerColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBlue.withOpacity(0.25)),
+        border: Border.all(color: borderColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.gavel, color: _kBlue, size: 22),
+          Icon(Icons.gavel, color: textColor, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -260,13 +272,13 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
                 Text(
                   'transaction.notary_close_title'.tr(),
                   style: TextStyle(
-                      color: _kBlue, fontWeight: FontWeight.bold, fontSize: 14),
+                      color: textColor, fontWeight: FontWeight.bold, fontSize: 14),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   isBuyer ? 'transaction.notary_buyer_desc'.tr() : 'transaction.notary_seller_desc'.tr(),
                   style: TextStyle(
-                      color: _kBlue.withOpacity(0.85), fontSize: 13, height: 1.5),
+                      color: textColor.withValues(alpha: 0.85), fontSize: 13, height: 1.5),
                 ),
               ],
             ),
@@ -276,18 +288,19 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     );
   }
 
-  Widget _buildStatusCard(bool isBuyer) {
+  Widget _buildStatusCard(BuildContext context, bool isBuyer) {
+    final cs = Theme.of(context).colorScheme;
     final myConfirmed    = isBuyer ? _buyerConfirmed  : _sellerConfirmed;
     final otherConfirmed = isBuyer ? _sellerConfirmed : _buyerConfirmed;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -299,7 +312,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
           Text(
             'transaction.notary_status_title'.tr(),
             style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.bold, color: _kNavy),
+                fontSize: 14, fontWeight: FontWeight.bold, color: cs.onSurface),
           ),
           const SizedBox(height: 12),
           _StatusRow(
@@ -318,16 +331,18 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     );
   }
 
-  Widget _buildConfirmationForm(bool isBuyer) {
+  Widget _buildConfirmationForm(BuildContext context, bool isBuyer) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: cs.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -339,7 +354,7 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
           Text(
             'transaction.notary_declare_title'.tr(),
             style: TextStyle(
-                fontSize: 14, fontWeight: FontWeight.bold, color: _kNavy),
+                fontSize: 14, fontWeight: FontWeight.bold, color: cs.onSurface),
           ),
           const SizedBox(height: 16),
           _CheckItem(
@@ -357,20 +372,23 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.amber.shade50,
+              color: isDark ? Colors.amber.shade900.withValues(alpha: 0.25) : Colors.amber.shade50,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.amber.shade200),
+              border: Border.all(
+                  color: isDark ? Colors.amber.shade600 : Colors.amber.shade200),
             ),
             child: Row(
               children: [
                 Icon(Icons.warning_amber_rounded,
-                    color: Colors.amber.shade700, size: 18),
+                    color: isDark ? Colors.amber.shade300 : Colors.amber.shade700, size: 18),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'transaction.notary_declare_warning'.tr(),
                     style: TextStyle(
-                        fontSize: 12, color: Colors.amber.shade900, height: 1.4),
+                        fontSize: 12,
+                        color: isDark ? Colors.amber.shade200 : Colors.amber.shade900,
+                        height: 1.4),
                   ),
                 ),
               ],
@@ -381,8 +399,9 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
     );
   }
 
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(BuildContext context) {
     final canSubmit = _signingConfirmed && _keysConfirmed;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
@@ -398,7 +417,10 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
         label: Text('transaction.notary_confirm_btn'.tr()),
         style: FilledButton.styleFrom(
           backgroundColor: _kGreen,
-          disabledBackgroundColor: Colors.grey.shade300,
+          disabledBackgroundColor:
+              isDark ? Colors.grey.shade800 : Colors.grey.shade300,
+          disabledForegroundColor:
+              isDark ? Colors.grey.shade500 : Colors.grey.shade600,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -408,6 +430,8 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
   }
 
   Widget _buildSuccessView(BuildContext context, bool isBuyer) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -418,23 +442,25 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: _kGreen.withOpacity(0.1),
+                color: _kGreen.withValues(alpha: isDark ? 0.25 : 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.verified, color: _kGreen, size: 44),
+              child: Icon(Icons.verified,
+                  color: isDark ? Color.lerp(_kGreen, Colors.white, 0.3)! : _kGreen,
+                  size: 44),
             ),
             const SizedBox(height: 24),
             Text(
               'transaction.notary_success_title'.tr(),
               style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold, color: _kNavy),
+                  fontSize: 22, fontWeight: FontWeight.bold, color: cs.onSurface),
             ),
             const SizedBox(height: 12),
             Text(
               isBuyer ? 'transaction.notary_success_buyer'.tr() : 'transaction.notary_success_seller'.tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: 14, color: Colors.grey.shade600, height: 1.6),
+                  fontSize: 14, color: cs.onSurfaceVariant, height: 1.6),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -457,8 +483,19 @@ class _NotarySigningPageState extends ConsumerState<NotarySigningPage> {
             const SizedBox(height: 12),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('transaction.back_to_timeline'.tr(),
-                  style: TextStyle(color: _kBlue)),
+              child: Text(
+                'transaction.back_to_timeline'.tr(),
+                style: TextStyle(
+                  color: isDark
+                      ? Color.lerp(_kBlue, Colors.white, 0.45)!
+                      : _kBlue,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationColor: isDark
+                      ? Color.lerp(_kBlue, Colors.white, 0.45)!
+                      : _kBlue,
+                ),
+              ),
             ),
           ],
         ),
@@ -480,6 +517,8 @@ class _StatusRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isPending ? Colors.orange.shade600 : _kGreen;
     final icon  = isPending ? Icons.hourglass_empty : Icons.check_circle;
     final text  = isPending ? 'transaction.notary_pending'.tr() : 'transaction.notary_confirmed'.tr();
@@ -492,12 +531,12 @@ class _StatusRow extends StatelessWidget {
           child: Text(label,
               style: TextStyle(
                   fontSize: 13,
-                  color: isCurrentUser ? _kNavy : Colors.grey.shade600)),
+                  color: isCurrentUser ? cs.onSurface : cs.onSurfaceVariant)),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: isDark ? 0.25 : 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(text,
@@ -546,7 +585,7 @@ class _CheckItem extends StatelessWidget {
                 child: Text(label,
                     style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         height: 1.4)),
               ),
             ),

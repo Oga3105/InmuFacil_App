@@ -629,33 +629,40 @@ class _SellerDocCard extends StatelessWidget {
     }
 
     // status == null — show three action buttons + drag-and-drop zone
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final uploadBtn = _ActionButton(
+      icon: Icons.upload_file_outlined,
+      label: 'transaction.pv_upload_btn'.tr(),
+      color: _kBlue,
+      onTap: onUpload,
+    );
+    final inPersonBtn = _ActionButton(
+      icon: Icons.handshake_outlined,
+      label: 'transaction.pv_in_person_btn'.tr(),
+      color: _kGreen,
+      onTap: () => onFlag('in_person'),
+    );
+    final notApplicableBtn = _ActionButton(
+      icon: Icons.block_outlined,
+      label: 'transaction.pv_not_applicable_btn'.tr(),
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      onTap: () => onFlag('not_applicable'),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 6,
-          children: [
-            _ActionButton(
-              icon: Icons.upload_file_outlined,
-              label: 'transaction.pv_upload_btn'.tr(),
-              color: _kBlue,
-              onTap: onUpload,
-            ),
-            _ActionButton(
-              icon: Icons.handshake_outlined,
-              label: 'transaction.pv_in_person_btn'.tr(),
-              color: _kGreen,
-              onTap: () => onFlag('in_person'),
-            ),
-            _ActionButton(
-              icon: Icons.block_outlined,
-              label: 'transaction.pv_not_applicable_btn'.tr(),
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              onTap: () => onFlag('not_applicable'),
-            ),
-          ],
-        ),
+        if (isMobile) ...[
+          uploadBtn,
+          const SizedBox(height: 6),
+          inPersonBtn,
+          const SizedBox(height: 6),
+          notApplicableBtn,
+        ] else
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: [uploadBtn, inPersonBtn, notApplicableBtn],
+          ),
         const SizedBox(height: 8),
         FileDropZone(onDrop: onDropBytes),
       ],
@@ -714,13 +721,17 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final effectiveColor = isDark
+        ? Color.lerp(color, Colors.white, 0.35)!
+        : color;
     return OutlinedButton.icon(
       onPressed: onTap,
       icon: Icon(icon, size: 14),
       label: Text(label, style: const TextStyle(fontSize: 12)),
       style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color.withOpacity(0.4)),
+        foregroundColor: effectiveColor,
+        side: BorderSide(color: effectiveColor.withValues(alpha: isDark ? 0.7 : 0.4)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
@@ -824,20 +835,25 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 22,
-                            height: 22,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: _kBlue.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text('${e.key + 1}',
-                                style: const TextStyle(
-                                    color: _kBlue,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold)),
-                          ),
+                          Builder(builder: (context) {
+                            final isDark = Theme.of(context).brightness == Brightness.dark;
+                            return Container(
+                              width: 22,
+                              height: 22,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: _kBlue.withValues(alpha: isDark ? 0.35 : 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text('${e.key + 1}',
+                                  style: TextStyle(
+                                      color: isDark
+                                          ? Color.lerp(_kBlue, Colors.white, 0.5)!
+                                          : _kBlue,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold)),
+                            );
+                          }),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(e.value,
@@ -984,28 +1000,33 @@ class _BuyerTransferCardState extends State<_BuyerTransferCard> {
 
     // Pending (null) + buyer can flag → show flag buttons above disabled download
     if (widget.docStatus == null && widget.onFlag != null && widget.canInteract) {
+      final isMobile = MediaQuery.sizeOf(context).width < 600;
+      final inPersonBtn = _ActionButton(
+        icon: Icons.handshake_outlined,
+        label: 'transaction.pv_in_person_btn'.tr(),
+        color: _kBlue,
+        onTap: () => widget.onFlag!('in_person'),
+      );
+      final notApplicableBtn = _ActionButton(
+        icon: Icons.block_outlined,
+        label: 'transaction.pv_not_applicable_btn'.tr(),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        onTap: () => widget.onFlag!('not_applicable'),
+      );
       return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const SizedBox(height: 4),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              _ActionButton(
-                icon: Icons.handshake_outlined,
-                label: 'transaction.pv_in_person_btn'.tr(),
-                color: _kBlue,
-                onTap: () => widget.onFlag!('in_person'),
-              ),
-              _ActionButton(
-                icon: Icons.block_outlined,
-                label: 'transaction.pv_not_applicable_btn'.tr(),
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                onTap: () => widget.onFlag!('not_applicable'),
-              ),
-            ],
-          ),
+          if (isMobile) ...[
+            inPersonBtn,
+            const SizedBox(height: 6),
+            notApplicableBtn,
+          ] else
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: [inPersonBtn, notApplicableBtn],
+            ),
           downloadRow,
         ],
       );

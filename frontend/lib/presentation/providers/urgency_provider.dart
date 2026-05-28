@@ -237,7 +237,7 @@ UrgentAction? buyerBlockingAction(
         offerId: offer.id,
         propertyTitle: title,
         type: UrgentActionType.confirmTasacion,
-        label: 'urgency.appraiser_appt_confirmed',
+        label: 'urgency.appraiser_visit_scheduled',
         route: '/offers/${offer.id}/tasacion',
         routeExtra: offer,
         offer: offer,
