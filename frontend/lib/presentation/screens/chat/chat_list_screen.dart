@@ -283,6 +283,7 @@ class _ConversationTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasUnread = conversation.unreadCount > 0;
 
     return Material(
@@ -388,7 +389,7 @@ class _ConversationTile extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 11,
                                 color: hasUnread
-                                    ? _kNavy
+                                    ? (isDark ? const Color(0xFF89ABEF) : _kNavy)
                                     : colorScheme.onSurfaceVariant,
                                 fontWeight: hasUnread
                                     ? FontWeight.w600
@@ -410,7 +411,7 @@ class _ConversationTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           color: hasUnread
-                              ? colorScheme.onSurface
+                              ? (isDark ? Colors.white : colorScheme.onSurface)
                               : colorScheme.onSurfaceVariant,
                           fontWeight: hasUnread
                               ? FontWeight.w500
@@ -455,10 +456,11 @@ class _TrustBadgeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final (label, color, bg) = switch (badge) {
-      TrustBadge.gold   => ('chat.trust_gold'.tr(), _kGold, _kGoldLight),
-      TrustBadge.silver => ('chat.trust_silver'.tr(), _kSilver, const Color(0xFFECEFF1)),
-      TrustBadge.bronze => ('chat.trust_bronze'.tr(), _kBronze, const Color(0xFFFBEFEB)),
+      TrustBadge.gold   => ('chat.trust_gold'.tr(), _kGold, isDark ? _kGold.withValues(alpha: 0.18) : _kGoldLight),
+      TrustBadge.silver => ('chat.trust_silver'.tr(), _kSilver, isDark ? _kSilver.withValues(alpha: 0.18) : const Color(0xFFECEFF1)),
+      TrustBadge.bronze => ('chat.trust_bronze'.tr(), _kBronze, isDark ? _kBronze.withValues(alpha: 0.18) : const Color(0xFFFBEFEB)),
       TrustBadge.none   => ('', Colors.transparent, Colors.transparent),
     };
     if (badge == TrustBadge.none) return const SizedBox.shrink();
@@ -525,6 +527,7 @@ class _EmptyListState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -535,7 +538,7 @@ class _EmptyListState extends StatelessWidget {
               width: 72,
               height: 72,
               decoration: BoxDecoration(
-                color: _kNavyLight,
+                color: isDark ? _kNavy.withValues(alpha: 0.25) : _kNavyLight,
                 borderRadius: BorderRadius.circular(36),
               ),
               child: const Icon(
@@ -578,6 +581,7 @@ class _EmptyDetailPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerLow,
       child: Center(
@@ -596,7 +600,7 @@ class _EmptyDetailPane extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: _kNavyLight,
+                  color: isDark ? _kNavy.withValues(alpha: 0.25) : _kNavyLight,
                   borderRadius: BorderRadius.circular(32),
                 ),
                 child: const Icon(
