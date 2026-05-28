@@ -1637,7 +1637,48 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isMobile = constraints.maxWidth < 600;
-            return Row(
+            final gestionarMenu = _GestionarMenu(
+              property: p,
+              onView: () => context.push('/property/${p.id}'),
+              onOffers: () => context.push('/property/${p.id}/offers'),
+              onEdit: () => context.push('/property/${p.id}/edit'),
+              onManageVisits: () => context.push('/property/${p.id}/visits/manage'),
+              onDeactivate: () async {
+                final target =
+                    status == 'published' ? 'unpublished' : 'published';
+                await ref
+                    .read(myPropertiesProvider.notifier)
+                    .updateStatus(p.id, target);
+              },
+              onDelete: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    title: Text('profile.delete_property_title'.tr()),
+                    content: Text('profile.delete_property_confirm'.tr()),
+                    actions: [
+                      TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: Text('common.cancel'.tr())),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style:
+                            TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: Text('common.delete'.tr()),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref
+                      .read(myPropertiesProvider.notifier)
+                      .deleteProperty(p.id);
+                }
+              },
+            );
+            final row = Row(
           children: [
             // Thumbnail
             ClipRRect(
@@ -1785,51 +1826,26 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               ],
             ),
             ], // end if (!isMobile)
-            const SizedBox(width: 12),
-            // Gestionar button
-            _GestionarMenu(
-              property: p,
-              onView: () => context.push('/property/${p.id}'),
-              onOffers: () => context.push('/property/${p.id}/offers'),
-              onEdit: () => context.push('/property/${p.id}/edit'),
-              onManageVisits: () => context.push('/property/${p.id}/visits/manage'),
-              onDeactivate: () async {
-                final target =
-                    status == 'published' ? 'unpublished' : 'published';
-                await ref
-                    .read(myPropertiesProvider.notifier)
-                    .updateStatus(p.id, target);
-              },
-              onDelete: () async {
-                final confirmed = await showDialog<bool>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    title: Text('profile.delete_property_title'.tr()),
-                    content: Text('profile.delete_property_confirm'.tr()),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text('common.cancel'.tr())),
-                      TextButton(
-                        onPressed: () => Navigator.pop(context, true),
-                        style:
-                            TextButton.styleFrom(foregroundColor: Colors.red),
-                        child: Text('common.delete'.tr()),
-                      ),
-                    ],
-                  ),
-                );
-                if (confirmed == true) {
-                  await ref
-                      .read(myPropertiesProvider.notifier)
-                      .deleteProperty(p.id);
-                }
-              },
-            ),
+            if (!isMobile) ...[
+              const SizedBox(width: 12),
+              gestionarMenu,
+            ],
           ],
             );
+            if (isMobile) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  row,
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: gestionarMenu,
+                  ),
+                ],
+              );
+            }
+            return row;
           },
         ),
       ),
