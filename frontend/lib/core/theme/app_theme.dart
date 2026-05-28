@@ -45,14 +45,15 @@ class AppTheme {
       primary: primaryColor,
       brightness: Brightness.dark,
     ).copyWith(
-      surface: const Color(0xFF1C3F73), // Navy brillante para tarjetas
-      surfaceDim: const Color(0xFF1C3F73),
+      surface: const Color(0xFF1C3F73),
+      surfaceDim: const Color(0xFF152E55),
       surfaceBright: const Color(0xFF234983),
-      surfaceContainerLowest: const Color(0xFF1C3F73),
-      surfaceContainerLow: const Color(0xFF1C3F73),
-      surfaceContainer: const Color(0xFF1C3F73),
-      surfaceContainerHigh: const Color(0xFF234983),
-      surfaceContainerHighest: const Color(0xFF234983),
+      surfaceContainerLowest: const Color(0xFF152E55),
+      surfaceContainerLow: const Color(0xFF234983), // cards elevadas (un tono sobre surface)
+      surfaceContainer: const Color(0xFF2A5298),
+      surfaceContainerHigh: const Color(0xFF2E5CA6),
+      surfaceContainerHighest: const Color(0xFF3464B8),
+      outlineVariant: const Color(0xFF3B6CBD), // borde visible en dark mode
     );
     return ThemeData(
       useMaterial3: true,
