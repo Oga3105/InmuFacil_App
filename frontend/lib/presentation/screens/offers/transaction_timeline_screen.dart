@@ -70,6 +70,27 @@ final _notariaStatusProvider = FutureProvider.autoDispose
   }
 });
 
+final _postVentaAllDoneProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, offerId) async {
+  final token = await const FlutterSecureStorage().read(key: 'auth_token');
+  if (token == null) return false;
+  try {
+    final resp = await buildAuthDio().get(
+      '${EnvConfig.apiBaseUrl}/post-sale/$offerId/status',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    final data = resp.data as Map<String, dynamic>;
+    const keys = ['electricity', 'water', 'gas', 'ibi', 'community'];
+    return keys.every((k) {
+      final v = data[k] as Map<String, dynamic>?;
+      final st = v?['status'] as String?;
+      return st != null && st != 'uploading';
+    });
+  } catch (_) {
+    return false;
+  }
+});
+
 /// Transaction timeline screen — shows the lifecycle of a purchase offer.
 class TransactionTimelineScreen extends ConsumerWidget {
   const TransactionTimelineScreen({super.key, required this.offer});
@@ -141,6 +162,11 @@ class TransactionTimelineScreen extends ConsumerWidget {
             'pending'
         : liveOffer.notariaApptStatus ?? 'pending';
 
+    // Post-venta completion — live query only when offer is fully completed
+    final postVentaDone = s == 'completed'
+        ? (ref.watch(_postVentaAllDoneProvider(liveOffer.id)).asData?.value ?? false)
+        : false;
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, ref),
@@ -196,6 +222,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
                     tasacionApptStatus: tasacionApptStatus,
                     feinBuyerConfirmed: feinBuyerConfirmed,
                     notariaApptStatus: notariaApptStatus,
+                    postVentaDone: postVentaDone,
                     buyerActions: isBuyer && s == 'counter_offer'
                         ? _BuyerCounterOfferActions(offer: liveOffer)
                         : null,
@@ -216,6 +243,12 @@ class TransactionTimelineScreen extends ConsumerWidget {
                         : null,
                   )),
                 ),
+                // ── Congratulations banner (post-venta fully done) ──────────
+                if (postVentaDone && s == 'completed')
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                    child: _CongratsBanner(isBuyer: isBuyer),
+                  ),
                 // ── Help footer ─────────────────────────────────────────────
                 const _HelpFooter(),
                 const SizedBox(height: 8),
@@ -328,6 +361,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
     String tasacionApptStatus = 'pending',
     bool feinBuyerConfirmed = false,
     String notariaApptStatus = 'pending',
+    bool postVentaDone = false,
     Widget? buyerActions,
     Widget? sellerActions,
     Widget? withdrawAction,
@@ -553,6 +587,7 @@ class TransactionTimelineScreen extends ConsumerWidget {
             ? 'transaction.post_sale_subtitle'.tr()
             : 'transaction.post_sale_locked'.tr(),
         state: stage >= 4 ? _StepState.active : _StepState.locked,
+        completedBadge: postVentaDone,
         ctaLabel: stage >= 4 ? 'transaction.post_sale_btn'.tr() : null,
         ctaIcon: stage >= 4 ? Icons.receipt_long_outlined : null,
         ctaCallback: stage >= 4
@@ -919,6 +954,7 @@ class _TimelineStep {
     this.ctaRoute,
     this.ctaCallback,
     this.actionsWidget,
+    this.completedBadge = false,
   });
 
   final String title;
@@ -934,6 +970,8 @@ class _TimelineStep {
   final VoidCallback? ctaCallback;
   /// Optional widget (e.g. action buttons) rendered at the bottom of the active card.
   final Widget? actionsWidget;
+  /// When true, the active card badge shows "FINALIZADO" (green) instead of "EN CURSO" (blue).
+  final bool completedBadge;
 }
 
 class _TimelineWidget extends StatelessWidget {
@@ -1083,7 +1121,7 @@ class _ActiveRow extends StatelessWidget {
               child: const Icon(Icons.edit_document,
                   size: 18, color: Colors.white),
             ),
-            lineColor: const Color(0xFFE2E8F0),
+            lineColor: Theme.of(context).colorScheme.outlineVariant,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1111,25 +1149,38 @@ class _ActiveRow extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF6FF),
-                            borderRadius: BorderRadius.circular(6),
-                            border:
-                                Border.all(color: const Color(0xFFBFDBFE)),
-                          ),
-                          child: const Text(
-                            'EN CURSO',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF135BEC),
-                              letterSpacing: 0.4,
+                        Builder(builder: (context) {
+                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                          final done = step.completedBadge;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: done
+                                  ? (isDark ? const Color(0xFF0D2010) : const Color(0xFFDCFCE7))
+                                  : (isDark ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF)),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: done
+                                    ? (isDark ? const Color(0xFF16A34A) : const Color(0xFF86EFAC))
+                                    : (isDark ? const Color(0xFF3B82F6) : const Color(0xFFBFDBFE)),
+                              ),
                             ),
-                          ),
-                        ),
+                            child: Text(
+                              done
+                                  ? 'transaction.status_done'.tr()
+                                  : 'transaction.status_in_progress'.tr(),
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w800,
+                                color: done
+                                    ? const Color(0xFF16A34A)
+                                    : const Color(0xFF135BEC),
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
                     const SizedBox(height: 4),
@@ -1216,7 +1267,7 @@ class _LockedRow extends StatelessWidget {
               child: const Icon(Icons.lock_outline_rounded,
                   size: 16, color: Color(0xFFCBD5E1)),
             ),
-            lineColor: const Color(0xFFE2E8F0),
+            lineColor: Theme.of(context).colorScheme.outlineVariant,
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1227,19 +1278,19 @@ class _LockedRow extends StatelessWidget {
                 children: [
                   Text(
                     step.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF94A3B8),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     step.subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
-                      color: Color(0xFFCBD5E1),
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                 ],
@@ -2421,6 +2472,86 @@ class _SolvencyRowCompact extends StatelessWidget {
   }
 }
 
+// ── Congratulations banner ────────────────────────────────────────────────────
+
+class _CongratsBanner extends StatelessWidget {
+  const _CongratsBanner({required this.isBuyer});
+
+  final bool isBuyer;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const kGreen = Color(0xFF16A34A);
+    final bgColor = isDark ? const Color(0xFF0D2010) : const Color(0xFFF0FDF4);
+    final borderColor = isDark ? const Color(0xFF1A4A20) : const Color(0xFF86EFAC);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor, width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: kGreen.withValues(alpha: isDark ? 0.15 : 0.10),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.home_rounded, size: 44, color: kGreen),
+              ),
+              Positioned(
+                right: -4,
+                top: -4,
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFEA580C),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.celebration, size: 16, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            (isBuyer
+                ? 'transaction.congrats_buyer_title'
+                : 'transaction.congrats_seller_title')
+                .tr(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: kGreen,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'transaction.congrats_desc'.tr(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Brand bar ─────────────────────────────────────────────────────────────────
 
 class _BrandBar extends StatelessWidget {
@@ -2428,36 +2559,57 @@ class _BrandBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+
+    final brandText = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.verified_user_outlined, size: 14, color: cs.onSurfaceVariant),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            'transaction.brand_text'.tr(),
+            style: TextStyle(fontSize: 10, color: cs.onSurfaceVariant),
+            softWrap: true,
+          ),
+        ),
+      ],
+    );
+
+    final links = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _FooterLink('transaction.footer_help'.tr()),
+        const SizedBox(width: 10),
+        _FooterLink('transaction.footer_legal'.tr()),
+        const SizedBox(width: 10),
+        _FooterLink('transaction.footer_security'.tr()),
+      ],
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+        color: cs.surface,
+        border: Border(top: BorderSide(color: cs.outlineVariant)),
       ),
-      child: Row(
-        children: [
-          Icon(Icons.verified_user_outlined,
-              size: 14, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'transaction.brand_text'.tr(),
-              style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
-              overflow: TextOverflow.ellipsis,
+      child: isMobile
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                brandText,
+                const SizedBox(height: 8),
+                links,
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: brandText),
+                const SizedBox(width: 12),
+                links,
+              ],
             ),
-          ),
-          const SizedBox(width: 12),
-          Row(
-            children: [
-              _FooterLink('transaction.footer_help'.tr()),
-              const SizedBox(width: 10),
-              _FooterLink('transaction.footer_legal'.tr()),
-              const SizedBox(width: 10),
-              _FooterLink('transaction.footer_security'.tr()),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
