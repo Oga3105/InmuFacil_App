@@ -740,8 +740,10 @@ class _ContractStatusBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      color: Theme.of(context).colorScheme.onPrimaryContainer,
+      color: isDark ? cs.surfaceContainerLow : cs.onPrimaryContainer,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
         children: [
@@ -862,8 +864,7 @@ class _ContractActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final kGreen = isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A);
+    const kGreen = Color(0xFF16A34A);
     return Container(
       color: colorScheme.surface,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
@@ -968,8 +969,9 @@ class _EquityAnalysisBanner extends StatelessWidget {
         child: Builder(
           builder: (context) {
             final cs = Theme.of(context).colorScheme;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             return Container(
-          color: cs.primaryContainer,
+          color: isDark ? cs.surfaceContainer : cs.primaryContainer,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: Row(
             children: [
