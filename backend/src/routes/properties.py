@@ -407,6 +407,46 @@ async def update_property_status(
     return prop
 
 
+@router.post("/{property_id}/mark-reserved", response_model=PropertyResponse)
+async def mark_property_reserved(
+    property_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Toggle RESERVADO for a property owned by the current user.
+    PUBLISHED -> RESERVED (hide_when_reserved=True)
+    RESERVED   -> PUBLISHED (hide_when_reserved=False)
+    """
+    prop = verify_property_ownership(db, property_id, current_user.id)
+    if prop.status not in (PropertyStatus.PUBLISHED, PropertyStatus.RESERVED):
+        raise HTTPException(
+            status_code=400,
+            detail="Solo se puede reservar un inmueble publicado"
+        )
+    if prop.status == PropertyStatus.RESERVED:
+        prop.status = PropertyStatus.PUBLISHED
+        prop.hide_when_reserved = False
+    else:
+        prop.status = PropertyStatus.RESERVED
+        prop.hide_when_reserved = True
+    db.commit()
+    prop = (
+        db.query(Property)
+        .options(
+            joinedload(Property.features),
+            joinedload(Property.legal),
+            joinedload(Property.financial),
+            joinedload(Property.environment),
+            joinedload(Property.media),
+            joinedload(Property.owner),
+        )
+        .filter(Property.id == property_id)
+        .first()
+    )
+    return prop
+
+
 @router.patch("/{property_id}/allow-visits", response_model=PropertyResponse)
 async def toggle_allow_visits(
     property_id: int,

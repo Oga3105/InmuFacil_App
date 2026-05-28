@@ -1643,6 +1643,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
               onOffers: () => context.push('/property/${p.id}/offers'),
               onEdit: () => context.push('/property/${p.id}/edit'),
               onManageVisits: () => context.push('/property/${p.id}/visits/manage'),
+              onReserve: () async {
+                await ref
+                    .read(myPropertiesProvider.notifier)
+                    .markReserved(p.id);
+              },
               onDeactivate: () async {
                 final target =
                     status == 'published' ? 'unpublished' : 'published';
@@ -3830,6 +3835,8 @@ class _StatusPill extends StatelessWidget {
         return {'label': 'profile.property_status.draft'.tr(), 'color': const Color(0xFFF59E0B)};
       case 'unpublished':
         return {'label': 'profile.property_status.in_review'.tr(), 'color': const Color(0xFF6366F1)};
+      case 'reserved':
+        return {'label': 'profile.property_status.reserved'.tr(), 'color': const Color(0xFFEA580C)};
       default:
         return {'label': 'profile.property_status.active'.tr(), 'color': const Color(0xFF16A34A)};
     }
@@ -3849,6 +3856,7 @@ class _GestionarMenu extends StatelessWidget {
     required this.onDeactivate,
     required this.onDelete,
     this.onManageVisits,
+    this.onReserve,
   });
 
   final Property property;
@@ -3858,8 +3866,10 @@ class _GestionarMenu extends StatelessWidget {
   final VoidCallback onDeactivate;
   final VoidCallback onDelete;
   final VoidCallback? onManageVisits;
+  final VoidCallback? onReserve;
 
   bool get _isActive => (property.status ?? 'published') == 'published';
+  bool get _isReserved => (property.status ?? '') == 'reserved';
 
   @override
   Widget build(BuildContext context) {
@@ -3880,6 +3890,9 @@ class _GestionarMenu extends StatelessWidget {
             break;
           case 'deactivate':
             onDeactivate();
+            break;
+          case 'reserve':
+            onReserve?.call();
             break;
           case 'delete':
             onDelete();
@@ -3956,6 +3969,28 @@ class _GestionarMenu extends StatelessWidget {
             ],
           ),
         ),
+        if (_isActive || _isReserved)
+          PopupMenuItem(
+            value: 'reserve',
+            child: Row(
+              children: [
+                Icon(
+                  _isReserved
+                      ? Icons.lock_open_outlined
+                      : Icons.lock_outlined,
+                  size: 18,
+                  color: const Color(0xFFEA580C),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  _isReserved
+                      ? 'profile.action_unreserve'.tr()
+                      : 'profile.action_reserve'.tr(),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFFEA580C)),
+                ),
+              ],
+            ),
+          ),
         const PopupMenuDivider(height: 1),
         PopupMenuItem(
           value: 'delete',

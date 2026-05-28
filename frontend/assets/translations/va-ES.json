@@ -1050,6 +1050,8 @@
   "profile": {
     "action_activate": "Activar",
     "action_deactivate": "Desactivar",
+    "action_reserve": "Marcar com a Reservat",
+    "action_unreserve": "Llevar Reserva",
     "another_property": "Tens una altra propietat?",
     "change_password": "Canviar contrasenya",
     "confirm_password": "Confirmar Nova Contrasenya",
@@ -1306,7 +1308,8 @@
     "property_status": {
       "active": "ACTIU",
       "draft": "ESBORRANY",
-      "in_review": "EN REVISIÓ"
+      "in_review": "EN REVISIÓ",
+      "reserved": "RESERVAT"
     }
   },
   "property": {

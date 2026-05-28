@@ -1053,6 +1053,8 @@
   "profile": {
     "action_activate": "Activer",
     "action_deactivate": "Désactiver",
+    "action_reserve": "Marquer comme Réservé",
+    "action_unreserve": "Annuler la Réservation",
     "another_property": "Avez-vous un autre bien ?",
     "change_password": "Changer de mot de passe",
     "confirm_password": "Confirmer le nouveau mot de passe",
@@ -1309,7 +1311,8 @@
     "property_status": {
       "active": "ACTIF",
       "draft": "BROUILLON",
-      "in_review": "EN RÉVISION"
+      "in_review": "EN RÉVISION",
+      "reserved": "RÉSERVÉ"
     }
   },
   "property": {

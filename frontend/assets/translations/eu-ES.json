@@ -1028,6 +1028,8 @@
   "profile": {
     "action_activate": "Aktibatu",
     "action_deactivate": "Desaktibatu",
+    "action_reserve": "Erreserbatu",
+    "action_unreserve": "Erreserba Kendu",
     "another_property": "Beste propietate bat al duzu?",
     "change_password": "Pasahitza aldatu",
     "confirm_password": "Pasahitz Berria Berretsi",
@@ -1284,7 +1286,8 @@
     "property_status": {
       "active": "AKTIBO",
       "draft": "ZIRRIBORROA",
-      "in_review": "BERRIKUSPENPEAN"
+      "in_review": "BERRIKUSPENPEAN",
+      "reserved": "ERRESERBATUA"
     }
   },
   "property": {

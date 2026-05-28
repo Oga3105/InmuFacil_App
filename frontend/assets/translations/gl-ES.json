@@ -1030,6 +1030,8 @@
   "profile": {
     "action_activate": "Activar",
     "action_deactivate": "Desactivar",
+    "action_reserve": "Marcar como Reservado",
+    "action_unreserve": "Quitar Reserva",
     "another_property": "Tes outro inmoble?",
     "change_password": "Cambiar contrasinal",
     "confirm_password": "Confirmar Novo Contrasinal",
@@ -1286,7 +1288,8 @@
     "property_status": {
       "active": "ACTIVO",
       "draft": "BORRADOR",
-      "in_review": "EN REVISIÓN"
+      "in_review": "EN REVISIÓN",
+      "reserved": "RESERVADO"
     }
   },
   "property": {

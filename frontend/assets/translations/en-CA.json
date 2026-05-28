@@ -1053,6 +1053,8 @@
   "profile": {
     "action_activate": "Activate",
     "action_deactivate": "Deactivate",
+    "action_reserve": "Mark as Reserved",
+    "action_unreserve": "Remove Reservation",
     "another_property": "Do you have another property?",
     "change_password": "Change Password",
     "confirm_password": "Confirm New Password",
@@ -1309,7 +1311,8 @@
     "property_status": {
       "active": "ACTIVE",
       "draft": "DRAFT",
-      "in_review": "IN REVIEW"
+      "in_review": "IN REVIEW",
+      "reserved": "RESERVED"
     }
   },
   "property": {
