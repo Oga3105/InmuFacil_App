@@ -2613,6 +2613,7 @@
     "hub_contract_drafting_title": "Generando contrato...",
     "hub_contract_drafting_desc": "Espera mientras se prepara el borrador",
     "hub_contract_view_btn": "Revisar Contrato",
+    "hub_contract_modify_btn": "Solicitar modificación",
     "hub_contract_error_title": "Error al generar el contrato",
     "hub_contract_error_desc": "La IA no pudo redactar el contrato. Pulsa reintentar.",
     "hub_contract_retry_btn": "Reintentar",

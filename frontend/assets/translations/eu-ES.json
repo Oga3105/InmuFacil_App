@@ -2486,6 +2486,7 @@
     "hub_contract_drafting_title": "Kontratua sortzen...",
     "hub_contract_drafting_desc": "Itxaron zirriborroa prestatzen den bitartean",
     "hub_contract_view_btn": "Kontratua Berrikusi",
+    "hub_contract_modify_btn": "Aldaketak eskatu",
     "hub_contract_error_title": "Errorea kontratua sortzean",
     "hub_contract_error_desc": "AIak ezin izan du kontratua idatzi. Saiatu berriro.",
     "hub_contract_retry_btn": "Berriro saiatu",

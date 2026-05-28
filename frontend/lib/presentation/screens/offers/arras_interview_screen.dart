@@ -208,12 +208,12 @@ class _ArrasInterviewScreenState
           statusLabel: buyerDone
               ? 'arras_interview.hub_completed'.tr()
               : 'arras_interview.hub_pending'.tr(),
-          ctaLabel: isBuyer
+          ctaLabel: (isBuyer && !fullyAccepted)
               ? (buyerDone
                   ? 'arras_interview.hub_view_edit'.tr()
                   : 'arras_interview.hub_start'.tr())
               : null,
-          onCta: isBuyer
+          onCta: (isBuyer && !fullyAccepted)
               ? () => context.push(
                   '/offers/${widget.offer.id}/arras/buyer',
                   extra: widget.offer)
@@ -230,12 +230,12 @@ class _ArrasInterviewScreenState
           statusLabel: sellerDone
               ? 'arras_interview.hub_completed'.tr()
               : 'arras_interview.hub_pending'.tr(),
-          ctaLabel: !isBuyer
+          ctaLabel: (!isBuyer && !fullyAccepted)
               ? (sellerDone
                   ? 'arras_interview.hub_view_edit'.tr()
                   : 'arras_interview.hub_start'.tr())
               : null,
-          onCta: !isBuyer
+          onCta: (!isBuyer && !fullyAccepted)
               ? () => context.push(
                   '/offers/${widget.offer.id}/arras/seller',
                   extra: widget.offer)
@@ -255,6 +255,14 @@ class _ArrasInterviewScreenState
                 extra: widget.offer),
             onRegenerate: (contractStatus == 'error' || contractStatus == 'generating')
                 ? () => _triggerRegenerate(context, ref)
+                : null,
+            onModify: (hasContract &&
+                    contractStatus != 'error' &&
+                    !isGenerating &&
+                    !fullyAccepted)
+                ? () => context.push(
+                    '/offers/${widget.offer.id}/arras/${isBuyer ? 'buyer' : 'seller'}',
+                    extra: widget.offer)
                 : null,
           ),
         ],
@@ -972,6 +980,7 @@ class _ContractCard extends StatelessWidget {
     required this.contractStatus,
     required this.onView,
     this.onRegenerate,
+    this.onModify,
   });
 
   final bool isGenerating;
@@ -980,6 +989,7 @@ class _ContractCard extends StatelessWidget {
   final String? contractStatus;
   final VoidCallback onView;
   final VoidCallback? onRegenerate;
+  final VoidCallback? onModify;
 
   @override
   Widget build(BuildContext context) {
@@ -1081,19 +1091,44 @@ class _ContractCard extends StatelessWidget {
             ),
           ] else if (hasContract && !isGenerating) ...[
             const SizedBox(width: 8),
-            FilledButton(
-              onPressed: onView,
-              style: FilledButton.styleFrom(
-                backgroundColor: cardColor,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 10),
-                minimumSize: const Size(0, 36),
-                textStyle: const TextStyle(fontSize: 12),
-              ),
-              child: Text(
-                  'arras_interview.hub_contract_view_btn'.tr()),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FilledButton(
+                  onPressed: onView,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: cardColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    minimumSize: const Size(0, 36),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  child: Text(
+                      'arras_interview.hub_contract_view_btn'.tr()),
+                ),
+                if (onModify != null) ...[
+                  const SizedBox(height: 6),
+                  OutlinedButton(
+                    onPressed: onModify,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: cardColor,
+                      side: BorderSide(
+                          color: cardColor.withValues(alpha: 0.5)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 10),
+                      minimumSize: const Size(0, 36),
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                    child: Text(
+                        'arras_interview.hub_contract_modify_btn'.tr()),
+                  ),
+                ],
+              ],
             ),
           ],
         ],

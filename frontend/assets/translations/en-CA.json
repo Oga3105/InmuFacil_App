@@ -2565,6 +2565,7 @@
     "hub_contract_drafting_title": "Generating contract...",
     "hub_contract_drafting_desc": "Please wait while the draft is prepared",
     "hub_contract_view_btn": "Review Contract",
+    "hub_contract_modify_btn": "Request changes",
     "hub_contract_error_title": "Error generating contract",
     "hub_contract_error_desc": "The AI could not draft the contract. Please try again.",
     "hub_contract_retry_btn": "Retry",

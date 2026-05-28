@@ -2508,6 +2508,7 @@
     "hub_contract_drafting_title": "Generant contracte...",
     "hub_contract_drafting_desc": "Espera mentre es prepara l'esborrany",
     "hub_contract_view_btn": "Revisar Contracte",
+    "hub_contract_modify_btn": "Sol·licitar modificació",
     "hub_contract_error_title": "Error en generar el contracte",
     "hub_contract_error_desc": "La IA no ha pogut redactar el contracte. Torna-ho a intentar.",
     "hub_contract_retry_btn": "Tornar a intentar",

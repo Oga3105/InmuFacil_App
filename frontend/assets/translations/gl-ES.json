@@ -2489,6 +2489,7 @@
     "hub_contract_drafting_title": "Xerando contrato...",
     "hub_contract_drafting_desc": "Agarda mentres se prepara o borrador",
     "hub_contract_view_btn": "Revisar contrato",
+    "hub_contract_modify_btn": "Solicitar modificación",
     "hub_contract_error_title": "Erro ao xerar o contrato",
     "hub_contract_error_desc": "A IA non puido redactar o contrato. Téntao de novo.",
     "hub_contract_retry_btn": "Reintentar",

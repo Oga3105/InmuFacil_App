@@ -2540,6 +2540,7 @@
     "hub_contract_drafting_title": "Generation du contrat...",
     "hub_contract_drafting_desc": "Veuillez patienter pendant la preparation de l'ebauche",
     "hub_contract_view_btn": "Réviser le Contrat",
+    "hub_contract_modify_btn": "Demander des modifications",
     "hub_contract_error_title": "Erreur lors de la génération du contrat",
     "hub_contract_error_desc": "L'IA n'a pas pu rédiger le contrat. Veuillez réessayer.",
     "hub_contract_retry_btn": "Réessayer",
