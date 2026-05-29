@@ -1400,18 +1400,21 @@ class _HelpFooter extends StatelessWidget {
               const Icon(Icons.chat_bubble_outline,
                   size: 15, color: _blue),
               const SizedBox(width: 6),
-              GestureDetector(
-                onTap: () => _showAdvisorDialog(context),
-                child: const Text(
-                  'transaction.talk_to_advisor',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: _blue,
-                    decoration: TextDecoration.underline,
-                    decorationColor: _blue,
-                  ),
-                ).tr(),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () => _showAdvisorDialog(context),
+                  child: const Text(
+                    'transaction.talk_to_advisor',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: _blue,
+                      decoration: TextDecoration.underline,
+                      decorationColor: _blue,
+                    ),
+                  ).tr(),
+                ),
               ),
             ],
           ),
@@ -2629,7 +2632,7 @@ class _BrandBar extends StatelessWidget {
         const SizedBox(width: 10),
         _FooterLink('transaction.footer_legal'.tr(), route: '/info/legal'),
         const SizedBox(width: 10),
-        _FooterLink('transaction.footer_security'.tr(), route: '/trust-dashboard'),
+        _FooterLink('transaction.footer_terms'.tr(), route: '/info/terms'),
       ],
     );
 
@@ -2667,14 +2670,17 @@ class _FooterLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.go(route),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          decoration: TextDecoration.underline,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: () => context.go(route),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            decoration: TextDecoration.underline,
+          ),
         ),
       ),
     );
