@@ -2340,6 +2340,8 @@
     "visit_date_last": "Última actividade: {date}",
     "visit_btn": "Ver axenda de visitas",
     "talk_to_advisor": "Falar cun asesor legal",
+    "advisor_dialog_title": "En breve dispoñible",
+    "advisor_dialog_content": "O servizo de asesoría legal personalizada estará dispoñible en breve. Mentres tanto, podes consultar a nosa sección de axuda legal.",
     "withdraw_dialog_title": "Retirar oferta",
     "withdraw_dialog_content": "Seguro que queres retirar a túa oferta? Esta acción non se pode desfacer.",
     "withdraw_btn": "Retirar",

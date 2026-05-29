@@ -2024,6 +2024,8 @@
     "visit_btn": "View visit schedule",
     "help_question": "Need help with this step?",
     "talk_to_advisor": "Talk to a legal adviser",
+    "advisor_dialog_title": "Coming soon",
+    "advisor_dialog_content": "The personalised legal advisory service will be available soon. In the meantime, you can check our legal help section.",
     "withdraw_dialog_title": "Withdraw offer",
     "withdraw_dialog_content": "Are you sure you want to withdraw your offer? This action cannot be undone.",
     "withdraw_btn": "Withdraw",

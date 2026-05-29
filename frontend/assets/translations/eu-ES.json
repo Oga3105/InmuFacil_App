@@ -2337,6 +2337,8 @@
     "visit_date_last": "Azken jarduera: {date}",
     "visit_btn": "Bisiten agenda ikusi",
     "talk_to_advisor": "Lege-aholkulari batekin hitz egin",
+    "advisor_dialog_title": "Laster erabilgarri",
+    "advisor_dialog_content": "Lege-aholkularitza zerbitzu pertsonalizatua laster egongo da erabilgarri. Bitartean, gure laguntza juridikoko atala kontsulta dezakezu.",
     "withdraw_dialog_title": "Eskaintza erretiratu",
     "withdraw_dialog_content": "Ziur zaude zure eskaintza erretiratu nahi duzula? Ekintza hau ezin da desegin.",
     "withdraw_btn": "Erretiratu",
