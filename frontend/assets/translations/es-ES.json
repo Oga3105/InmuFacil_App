@@ -2094,6 +2094,8 @@
     "visit_btn": "Ver agenda de visitas",
     "help_question": "¿Necesitas ayuda con este paso?",
     "talk_to_advisor": "Hablar con un asesor legal",
+    "advisor_dialog_title": "Próximamente disponible",
+    "advisor_dialog_content": "El servicio de asesoría legal personalizada estará disponible próximamente. Mientras tanto, puedes consultar nuestra sección de ayuda legal.",
     "withdraw_dialog_title": "Retirar oferta",
     "withdraw_dialog_content": "¿Seguro que quieres retirar tu oferta? Esta acción no se puede deshacer.",
     "withdraw_btn": "Retirar",

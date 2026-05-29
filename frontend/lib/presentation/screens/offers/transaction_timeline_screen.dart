@@ -1342,6 +1342,44 @@ class _DotColumn extends StatelessWidget {
 class _HelpFooter extends StatelessWidget {
   const _HelpFooter();
 
+  static const _blue = Color(0xFF135BEC);
+
+  void _showAdvisorDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        icon: const Icon(Icons.support_agent_outlined, size: 36, color: _blue),
+        title: Text(
+          'transaction.advisor_dialog_title'.tr(),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'transaction.advisor_dialog_content'.tr(),
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: _blue,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            ),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'common.accept'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1360,20 +1398,20 @@ class _HelpFooter extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.chat_bubble_outline,
-                  size: 15, color: Color(0xFF135BEC)),
+                  size: 15, color: _blue),
               const SizedBox(width: 6),
               GestureDetector(
-                onTap: () {},
-                child: Text(
-                  'transaction.talk_to_advisor'.tr(),
+                onTap: () => _showAdvisorDialog(context),
+                child: const Text(
+                  'transaction.talk_to_advisor',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF135BEC),
+                    color: _blue,
                     decoration: TextDecoration.underline,
-                    decorationColor: Color(0xFF135BEC),
+                    decorationColor: _blue,
                   ),
-                ),
+                ).tr(),
               ),
             ],
           ),
@@ -2587,11 +2625,11 @@ class _BrandBar extends StatelessWidget {
     final links = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _FooterLink('transaction.footer_help'.tr()),
+        _FooterLink('transaction.footer_help'.tr(), route: '/info/faq'),
         const SizedBox(width: 10),
-        _FooterLink('transaction.footer_legal'.tr()),
+        _FooterLink('transaction.footer_legal'.tr(), route: '/info/legal'),
         const SizedBox(width: 10),
-        _FooterLink('transaction.footer_security'.tr()),
+        _FooterLink('transaction.footer_security'.tr(), route: '/trust-dashboard'),
       ],
     );
 
@@ -2622,14 +2660,15 @@ class _BrandBar extends StatelessWidget {
 }
 
 class _FooterLink extends StatelessWidget {
-  const _FooterLink(this.label);
+  const _FooterLink(this.label, {required this.route});
 
   final String label;
+  final String route;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => context.go(route),
       child: Text(
         label,
         style: TextStyle(

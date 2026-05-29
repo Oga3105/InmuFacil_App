@@ -2049,6 +2049,8 @@
     "visit_btn": "Voir l'agenda des visites",
     "help_question": "Besoin d'aide pour cette étape ?",
     "talk_to_advisor": "Parler à un conseiller juridique",
+    "advisor_dialog_title": "Bientôt disponible",
+    "advisor_dialog_content": "Le service de conseil juridique personnalisé sera disponible prochainement. En attendant, vous pouvez consulter notre section d'aide légale.",
     "withdraw_dialog_title": "Retirer l'offre",
     "withdraw_dialog_content": "Êtes-vous sûr de vouloir retirer votre offre ? Cette action est irréversible.",
     "withdraw_btn": "Retirer",

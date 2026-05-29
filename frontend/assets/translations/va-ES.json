@@ -2359,6 +2359,8 @@
     "visit_date_last": "Última activitat: {date}",
     "visit_btn": "Veure agenda de visites",
     "talk_to_advisor": "Parlar amb un assessor legal",
+    "advisor_dialog_title": "Prompte disponible",
+    "advisor_dialog_content": "El servei d'assessoria legal personalitzada estarà disponible prompte. Mentrestant, pots consultar la nostra secció d'ajuda legal.",
     "withdraw_dialog_title": "Retirar oferta",
     "withdraw_dialog_content": "Segur que vols retirar la teva oferta? Aquesta acció no es pot desfer.",
     "withdraw_btn": "Retirar",
