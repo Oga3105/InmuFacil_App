@@ -107,7 +107,7 @@ Una plataforma **peer-to-peer** que permite a particulares comprar y vender prop
 <h3 style="margin-top:0; color:#60A5FA !important;">Backend</h3>
 <div style="font-size:0.82em;">
 
-- **FastAPI** (Python 3.10)
+- **FastAPI** (Python 3.11)
 - **PostgreSQL 15** (Docker)
 - **SQLAlchemy 2.0** + **Pydantic v2**
 - **Gemini AI** (Vision + Asistente)
@@ -125,7 +125,7 @@ Una plataforma **peer-to-peer** que permite a particulares comprar y vender prop
 - **GoRouter 17** (Navegaci&oacute;n)
 - **Dio** (HTTP + JWT interceptors)
 - **flutter_map** (OpenStreetMap)
-- **easy_localization** (9 idiomas)
+- **easy_localization** (10 idiomas)
 </div>
 </div>
 
@@ -547,7 +547,7 @@ Popup expl&iacute;cito antes de cualquier procesamiento con IA &middot; Trust Da
 
 | M&eacute;trica | Valor |
 |---------|-------|
-| ADRs documentados | **22+** |
+| ADRs documentados | **23+** |
 | Cifrado | **AES-256-GCM** |
 | OWASP Top 10 | **10/10** |
 | Compliance | **GDPR, PCI, ISO** |
