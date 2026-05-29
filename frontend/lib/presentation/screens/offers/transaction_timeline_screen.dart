@@ -2673,7 +2673,7 @@ class _FooterLink extends StatelessWidget {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
-        onTap: () => context.go(route),
+        onTap: () => context.push(route),
         child: Text(
           label,
           style: TextStyle(

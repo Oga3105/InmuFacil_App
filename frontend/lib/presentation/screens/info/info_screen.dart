@@ -60,7 +60,13 @@ class InfoScreen extends StatelessWidget {
         leading: Padding(
           padding: const EdgeInsets.only(left: 8),
           child: AppBarBackButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/');
+              }
+            },
           ),
         ),
         title: GestureDetector(
