@@ -34,7 +34,7 @@ mypy==2.1.0
 
 # KYC - Modern Image Processing (@Jules)
 pillow==12.2.0  # Image processing
-numpy>=2.0.0,<2.3.0  # capped at <2.3 for Python 3.10 compat (Docker)
+numpy>=2.4.6,<2.5.0  # capped at <2.3 for Python 3.10 compat (Docker)
 opencv-python-headless>=4.10.0.84
 
 # OCR - Semantic Document Analysis (@Jules)
@@ -46,7 +46,7 @@ easyocr>=1.7.2
 reportlab>=4.5.1
 
 # AI Identity Verification — Gemini Vision
-google-genai>=2.4.0
+google-genai>=2.6.0
 
 # Google OAuth — Firebase Admin SDK (@Shield)
 firebase-admin>=7.4.0
