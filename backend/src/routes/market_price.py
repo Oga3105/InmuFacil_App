@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
@@ -16,12 +16,15 @@ from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiMarketPriceCache
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Market Price Analytics"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_DAYS = 7
 
 
 class MarketPriceRequest(BaseModel):
@@ -62,6 +65,25 @@ async def get_market_price(
     low_density=True y nunca extrapola datos ficticios.
     """
     ip = request.client.host if request.client else "unknown"
+
+    # DB cache lookup — keyed by postal_code + property_type, TTL 7 days
+    cache_row = db.query(AiMarketPriceCache).filter(
+        AiMarketPriceCache.postal_code == body.postal_code,
+        AiMarketPriceCache.property_type == body.property_type,
+    ).first()
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[MarketPrice] Cache HIT %s / %s", body.postal_code, body.property_type)
+            try:
+                return MarketPriceResponse(**json.loads(cache_row.response_json))
+            except Exception:
+                pass  # corrupt row — fall through to Gemini
+        else:
+            cache_row = None  # expired — signal for upsert below
+
     await check_ai_rate_limit(current_user.id, "market_price", db, ip)
 
     try:
@@ -129,7 +151,7 @@ Tipo de propiedad: {body.property_type}"""
                 message="Densidad de mercado baja: No hay datos suficientes",
             )
 
-        return MarketPriceResponse(
+        result = MarketPriceResponse(
             price_per_m2=price_per_m2,
             sample_size=sample_size,
             zone_label=zone_label,
@@ -137,6 +159,27 @@ Tipo de propiedad: {body.property_type}"""
             low_density=False,
             message=None,
         )
+
+        # Persist to DB cache (upsert)
+        expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+        payload = json.dumps(result.model_dump())
+        existing = db.query(AiMarketPriceCache).filter(
+            AiMarketPriceCache.postal_code == body.postal_code,
+            AiMarketPriceCache.property_type == body.property_type,
+        ).first()
+        if existing:
+            existing.response_json = payload
+            existing.expires_at = expires
+        else:
+            db.add(AiMarketPriceCache(
+                postal_code=body.postal_code,
+                property_type=body.property_type,
+                response_json=payload,
+                expires_at=expires,
+            ))
+        db.commit()
+
+        return result
 
     except HTTPException:
         raise
