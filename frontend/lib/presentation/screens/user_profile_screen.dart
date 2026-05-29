@@ -1530,38 +1530,63 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
             break;
         }
 
+        final isMobileProperties = MediaQuery.sizeOf(context).width < 600;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('profile.my_properties_title'.tr(),
-                        style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface)),
-                    const SizedBox(height: 4),
-                    Text('profile.my_properties_subtitle'.tr(),
-                        style: const TextStyle(color: Colors.grey, fontSize: 13)),
-                  ],
-                ),
-                _SortButton<String>(
-                  value: _propertiesSortBy,
-                  options: {
-                    'newest': 'property_listing.sort_by.newest'.tr(),
-                    'oldest': 'profile.my_properties.sort_oldest'.tr(),
-                    'price_asc': 'property_listing.sort_by.price_low_high'.tr(),
-                    'price_desc': 'property_listing.sort_by.price_high_low'.tr(),
-                  },
-
-                  onChanged: (v) => setState(() => _propertiesSortBy = v),
-                ),
-              ],
-            ),
+            if (isMobileProperties) ...[
+              Text('profile.my_properties_title'.tr(),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface)),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('profile.my_properties_subtitle'.tr(),
+                      style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  _SortButton<String>(
+                    value: _propertiesSortBy,
+                    options: {
+                      'newest': 'property_listing.sort_by.newest'.tr(),
+                      'oldest': 'profile.my_properties.sort_oldest'.tr(),
+                      'price_asc': 'property_listing.sort_by.price_low_high'.tr(),
+                      'price_desc': 'property_listing.sort_by.price_high_low'.tr(),
+                    },
+                    onChanged: (v) => setState(() => _propertiesSortBy = v),
+                  ),
+                ],
+              ),
+            ] else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('profile.my_properties_title'.tr(),
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface)),
+                      const SizedBox(height: 4),
+                      Text('profile.my_properties_subtitle'.tr(),
+                          style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                    ],
+                  ),
+                  _SortButton<String>(
+                    value: _propertiesSortBy,
+                    options: {
+                      'newest': 'property_listing.sort_by.newest'.tr(),
+                      'oldest': 'profile.my_properties.sort_oldest'.tr(),
+                      'price_asc': 'property_listing.sort_by.price_low_high'.tr(),
+                      'price_desc': 'property_listing.sort_by.price_high_low'.tr(),
+                    },
+                    onChanged: (v) => setState(() => _propertiesSortBy = v),
+                  ),
+                ],
+              ),
             const SizedBox(height: 12),
             // Status filter chips
             SingleChildScrollView(
@@ -1575,7 +1600,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   _buildFilterChip('draft', 'profile.my_properties.filter_drafts'.tr()),
                   const SizedBox(width: 8),
                   _buildFilterChip('unpublished', 'profile.my_properties.filter_unpublished'.tr()),
-
                 ],
               ),
             ),
