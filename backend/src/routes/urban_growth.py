@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import math
-import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
@@ -17,12 +17,15 @@ from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiUrbanGrowthCache
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Urban Growth Index"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_DAYS = 30
 
 # ---------------------------------------------------------------------------
 # Schemas
@@ -109,6 +112,24 @@ async def get_urban_growth(
     - Para zonas emergentes: usa formula compuesta con neighborhood_bonus.
     """
     ip = request.client.host if request.client else "unknown"
+
+    # DB cache lookup — keyed by postal_code, TTL 30 days
+    cache_row = db.query(AiUrbanGrowthCache).filter(
+        AiUrbanGrowthCache.postal_code == body.postal_code,
+    ).first()
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[UrbanGrowth] Cache HIT postal_code=%s", body.postal_code)
+            try:
+                return UrbanGrowthResponse(**json.loads(cache_row.response_json))
+            except Exception:
+                pass  # corrupt row — fall through to Gemini
+        else:
+            cache_row = None  # expired
+
     await check_ai_rate_limit(current_user.id, "urban_growth", db, ip)
 
     try:
@@ -203,7 +224,7 @@ Formato de respuesta obligatorio:
             projected_value_5yr_pct = None
             message = _LOW_DATA_MESSAGE
 
-        return UrbanGrowthResponse(
+        result = UrbanGrowthResponse(
             base_growth_rate=base_growth_rate,
             neighborhood_bonus=neighborhood_bonus,
             projected_value_5yr_pct=projected_value_5yr_pct,
@@ -214,6 +235,25 @@ Formato de respuesta obligatorio:
             message=message,
             disclaimer=_DISCLAIMER,
         )
+
+        # Persist to DB cache (upsert)
+        expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+        payload = json.dumps(result.model_dump())
+        existing = db.query(AiUrbanGrowthCache).filter(
+            AiUrbanGrowthCache.postal_code == body.postal_code,
+        ).first()
+        if existing:
+            existing.response_json = payload
+            existing.expires_at = expires
+        else:
+            db.add(AiUrbanGrowthCache(
+                postal_code=body.postal_code,
+                response_json=payload,
+                expires_at=expires,
+            ))
+        db.commit()
+
+        return result
 
     except HTTPException:
         raise
