@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from backend.src.config.database import get_db
 from backend.src.models import Property, User
+from backend.src.models.ai_cache import AiComfortIndexCache
 from backend.src.models.ai_consent import AIConsentLog
 from backend.src.services.gemini_service import call_with_fallback, get_client
 import asyncio
@@ -105,18 +106,21 @@ def _score_to_grade(score: int) -> str:
     return "D"
 
 
-def _cache_is_valid(prop: Property) -> bool:
-    if not prop.ai_comfort_data_cache or not prop.ai_comfort_cache_expires_at:
-        return False
-    expires = prop.ai_comfort_cache_expires_at
+def _get_cache(property_id: int, db: Session) -> AiComfortIndexCache | None:
+    row = db.query(AiComfortIndexCache).filter(
+        AiComfortIndexCache.property_id == str(property_id)
+    ).first()
+    if row is None:
+        return None
+    expires = row.expires_at
     if expires.tzinfo is None:
         expires = expires.replace(tzinfo=timezone.utc)
-    return datetime.now(timezone.utc) < expires
+    return row if datetime.now(timezone.utc) < expires else None
 
 
-def _parse_cached(prop: Property) -> ComfortIndexResponse | None:
+def _parse_cached(row: AiComfortIndexCache) -> ComfortIndexResponse | None:
     try:
-        data = json.loads(prop.ai_comfort_data_cache)
+        data = json.loads(row.response_json)
         return ComfortIndexResponse(**data, cached=True, status="ok")
     except Exception:
         return None
@@ -236,14 +240,16 @@ async def get_comfort_index(
     if not prop.ai_comfort_consent:
         return _NO_CONSENT_RESPONSE
 
+    cache_row = _get_cache(property_id, db)
+
     # Rate limit only when we will actually call Gemini (cache miss)
-    if not _cache_is_valid(prop):
+    if cache_row is None:
         ip = request.client.host if request.client else "unknown"
         await check_ai_rate_limit(current_user.id, "comfort_index", db, ip)
 
     # Return cached result if still valid
-    if _cache_is_valid(prop):
-        cached = _parse_cached(prop)
+    if cache_row is not None:
+        cached = _parse_cached(cache_row)
         if cached:
             return cached
 
@@ -254,7 +260,6 @@ async def get_comfort_index(
         raise HTTPException(status_code=503, detail=str(e))
     except (json.JSONDecodeError, ValueError) as e:
         logger.warning("comfort_index: JSON parse failed for property_id=%s: %s", property_id, e)
-        # Return low_data fallback but still save nothing
         return ComfortIndexResponse(
             status="low_data",
             overall_score=0,
@@ -271,10 +276,21 @@ async def get_comfort_index(
         logger.error("comfort_index: unexpected error property_id=%s: %s", property_id, e)
         raise HTTPException(status_code=500, detail=f"Error inesperado: {e}")
 
-    # Persist cache (exclude 'cached' field from stored JSON)
+    # Persist to dedicated cache table (upsert via delete + insert)
     cache_payload = result.model_dump(exclude={"cached", "status"})
-    prop.ai_comfort_data_cache = json.dumps(cache_payload)
-    prop.ai_comfort_cache_expires_at = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+    expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+    existing = db.query(AiComfortIndexCache).filter(
+        AiComfortIndexCache.property_id == str(property_id)
+    ).first()
+    if existing:
+        existing.response_json = json.dumps(cache_payload)
+        existing.expires_at = expires
+    else:
+        db.add(AiComfortIndexCache(
+            property_id=str(property_id),
+            response_json=json.dumps(cache_payload),
+            expires_at=expires,
+        ))
     db.commit()
 
     return result
