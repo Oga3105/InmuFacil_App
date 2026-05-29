@@ -6,9 +6,10 @@ Endpoints:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
@@ -18,6 +19,7 @@ from sqlalchemy import func
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiNeighborhoodTwinsCache
 from backend.src.models.properties import Property as PropertyModel
 from backend.src.models.enums import PropertyStatus
 from backend.src.services.gemini_service import call_with_fallback, get_client
@@ -26,6 +28,26 @@ from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Neighborhood Twins"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_DAYS = 30
+
+
+def _cache_key(body: "NeighborhoodTwinsRequest") -> str:
+    """
+    Stable 64-char hex key from postal_code + sorted lifestyle filters.
+    context_cities and max_results are excluded (viewport/request-specific).
+    """
+    parts = [
+        body.postal_code,
+        body.city or "",
+        body.lifestyle_pace or "",
+        body.work_style or "",
+        body.mobility_style or "",
+        body.green_needs or "",
+        body.budget_range or "",
+    ]
+    raw = "|".join(parts)
+    return hashlib.sha256(raw.encode()).hexdigest()
 
 
 class NeighborhoodTwinsRequest(BaseModel):
@@ -81,7 +103,28 @@ async def get_neighborhood_twins(
     Encuentra barrios gemelos al codigo postal dado, filtrados por perfil de lifestyle.
     """
     ip = request.client.host if request.client else "unknown"
-    await check_ai_rate_limit(current_user.id, "neighborhood_twins", db, ip)
+    ck = _cache_key(body)
+
+    # DB cache lookup — raw Gemini twins list (stock enrichment is always live)
+    cache_row = db.query(AiNeighborhoodTwinsCache).filter(
+        AiNeighborhoodTwinsCache.cache_key == ck,
+    ).first()
+    cached_twins: list[dict] | None = None
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[NeighborhoodTwins] Cache HIT key=%s", ck[:12])
+            try:
+                cached_twins = json.loads(cache_row.response_json)
+            except Exception:
+                pass  # corrupt row — fall through
+        else:
+            cache_row = None  # expired
+
+    if cached_twins is None:
+        await check_ai_rate_limit(current_user.id, "neighborhood_twins", db, ip)
 
     try:
         client = get_client()
@@ -140,23 +183,43 @@ Responde SOLO con JSON valido:
 }}"""
 
     try:
-        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
+        if cached_twins is None:
+            raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            raw = "\n".join(line for line in lines if not line.startswith("```")).strip()
+            if raw.startswith("```"):
+                lines = raw.splitlines()
+                raw = "\n".join(line for line in lines if not line.startswith("```")).strip()
 
-        try:
-            data = json.loads(raw)
-        except (json.JSONDecodeError, ValueError):
-            logger.warning("neighborhood_twins: JSON parse failed for postal_code=%s", body.postal_code)
-            return NeighborhoodTwinsResponse(source_postal_code=body.postal_code, twins=[], low_data=True, disclaimer=_DISCLAIMER)
+            try:
+                data = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                logger.warning("neighborhood_twins: JSON parse failed for postal_code=%s", body.postal_code)
+                return NeighborhoodTwinsResponse(source_postal_code=body.postal_code, twins=[], low_data=True, disclaimer=_DISCLAIMER)
 
-        if bool(data.get("low_data", False)):
-            return NeighborhoodTwinsResponse(source_postal_code=body.postal_code, twins=[], low_data=True, disclaimer=_DISCLAIMER)
+            if bool(data.get("low_data", False)):
+                return NeighborhoodTwinsResponse(source_postal_code=body.postal_code, twins=[], low_data=True, disclaimer=_DISCLAIMER)
+
+            cached_twins = data.get("twins") or []
+
+            # Persist raw twins list to DB cache (upsert)
+            expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+            payload = json.dumps(cached_twins)
+            existing = db.query(AiNeighborhoodTwinsCache).filter(
+                AiNeighborhoodTwinsCache.cache_key == ck,
+            ).first()
+            if existing:
+                existing.response_json = payload
+                existing.expires_at = expires
+            else:
+                db.add(AiNeighborhoodTwinsCache(
+                    cache_key=ck,
+                    response_json=payload,
+                    expires_at=expires,
+                ))
+            db.commit()
 
         twins: list[NeighborhoodTwin] = []
-        for item in (data.get("twins") or []):
+        for item in (cached_twins or []):
             try:
                 twins.append(NeighborhoodTwin(
                     postal_code=str(item.get("postal_code") or ""),
