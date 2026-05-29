@@ -1,7 +1,7 @@
 # Memoria del Proyecto InmuFacil
 
-**Version:** 13.0
-**Fecha ultima actualizacion:** 2026-04-22
+**Version:** 14.0
+**Fecha ultima actualizacion:** 2026-05-29
 **Estado:** MVP OPERACIONAL — Backend + Frontend desplegados en produccion
 **Repositorio:** https://github.com/Oga3105/InmuFacil_App.git
 **Rama principal de desarrollo:** `develop`
@@ -90,22 +90,32 @@
 - GDPR AI Consent (RGPD Art. 6.1.a), historial de consentimientos
 
 ### i18n
-- 9 idiomas: es-ES, en-US, fr-FR, de-DE, it-IT, pt-PT, zh-CN, ar-SA, ro-RO
+- 10 idiomas: es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA, ca-ES, va-ES, eu-ES, gl-ES
 
 ---
+
+## PRs y Commits Recientes (Mayo 2026)
+
+| Commit/PR | Descripcion | Estado |
+|---|---|---|
+| dfaf1a1 | fix(navigation): context.push para footer links — back button vuelve correctamente al timeline | Merged |
+| 4b6254b | fix(timeline): cursor mano en links del footer + renombrar Security a Terminos (10 JSON) | Merged |
+| 2ad6fed | chore(docker): actualizar imagen base a python:3.11-slim — fix numpy>=2.4.6 incompatible con 3.10 | Merged |
+| PR #325 | fix(timeline): enlaces footer (Ayuda/Legal/Seguridad) redirigen a pages reales + dialogo asesor legal | Merged |
+| PR #324 | fix(listing): filtro pisos vendidos (backend func.upper + frontend safety net) + verde FINALIZADO | Merged |
+| PR #323 | fix(profile): boton ordenar no desborda en movil (MediaQuery < 600) | Merged |
 
 ## PRs Recientes (Abril 2026)
 
 | PR | Descripcion | Estado |
 |---|---|---|
+| #322 | feat(reserved): badge RESERVADO, menu gestionar, i18n 10 locales | Merged |
+| #321 | feat(ai-cache): migrar caches IA a tablas DB con TTL (comfort, legal, market, urban, twins, price) | Merged |
 | #246 | fix(chat): remove non-functional documents button | Merged |
 | #245 | feat(visits): split into upcoming and past sections | Merged |
 | #244 | feat(visits): buyer notes and labeled action buttons | Merged |
 | #243 | fix(visits): free slots when visit is cancelled | Merged |
 | #242 | feat(visits): complete visit flow (approve/reject, duplicate guard, status banner) | Merged |
-| #241 | fix(visit): cancel endpoint and timezone offset | Merged |
-| #240 | fix(visits): appbar styling and booking 422 fix | Merged |
-| #239 | fix(comfort): remove cached label and improve AI disclaimer | Merged |
 
 ---
 
