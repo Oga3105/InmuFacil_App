@@ -146,4 +146,5 @@
 | `docs/API_REFERENCE.md` | ACTUALIZADO (v3.0) | Todos los endpoints actuales |
 | `docs/DEPLOYMENT_GUIDE.md` | ACTUALIZADO (v2.0) | VPS + Docker + Cloudflare |
 | `docs/GETTING_STARTED.md` | ACTUALIZADO (v2.0) | Setup completo local + produccion |
-| `docs/adrs/001-020` | Existentes | Decisiones arquitectonicas |
+| `docs/adrs/001-022` | Existentes | Decisiones arquitectonicas |
+| `docs/adrs/023_ai_cache_db_strategy.md` | NUEVO (2026-05-29) | Persistencia de resultados IA en tablas DB con TTL |

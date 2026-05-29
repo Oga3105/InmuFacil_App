@@ -103,10 +103,10 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 ### Backend
 | Tecnologia | Version | Uso |
 |------------|---------|-----|
-| FastAPI | 0.136.1 | Framework async, OpenAPI 3.1 |
-| Python | 3.10 | Runtime (Docker prod) |
+| FastAPI | 0.136.3 | Framework async, OpenAPI 3.1 |
+| Python | 3.11 | Runtime (Docker prod) |
 | PostgreSQL | 15 | Base de datos (Docker) |
-| SQLAlchemy | 2.0.49 | ORM |
+| SQLAlchemy | 2.0.50 | ORM |
 | Pydantic | v2 | Validacion y serializacion |
 | cryptography | 48.0.0 | AES-256-GCM |
 | google-genai | >= 2.0.1 | Gemini Vision + IA |
@@ -166,7 +166,7 @@ InmuFacil permite que particulares compren y vendan propiedades directamente, si
 ## 🚀 Instalacion y Configuracion
 
 ### Requisitos Previos
-- 🐍 Python 3.10+
+- 🐍 Python 3.11+
 - 💙 Flutter SDK
 - 🐳 Docker + Docker Compose
 - 📦 Git
@@ -280,7 +280,7 @@ InmuFacil_Project/
 │           ├── widgets/           # Reusable components
 │           └── providers/         # Riverpod state management
 ├── 📚 docs/                       # Documentacion tecnica
-│   └── ADR/                       # Decision records (20+)
+│   └── adrs/                      # Decision records (23+)
 ├── 🤖 .agents/                    # Agent governance & protocols
 │   ├── roles/                     # @Architect, @Jules, @Shield...
 │   └── protocols/                 # TDD, pre-commit, git governance

@@ -52,8 +52,8 @@ El archivo NO esta en git (`.gitignore`). Obtenerlo de 1Password / gestor de sec
 y colocarlo en la raiz del proyecto antes de ejecutar `deploy-backend.sh` o
 `docker compose build`.
 
-> Nota: el Dockerfile usa `python:3.10-slim`. Mantener `numpy<2.3.0` en
-> `requirements.txt` — numpy 2.3+ requiere Python 3.11+.
+> Nota: el Dockerfile usa `python:3.11-slim`. `numpy>=2.4.6` requiere Python 3.11+;
+> mantener la imagen base en 3.11 o superior.
 
 ---
 
