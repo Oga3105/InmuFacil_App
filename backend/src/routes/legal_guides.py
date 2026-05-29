@@ -6,8 +6,9 @@ Endpoints:
 """
 from __future__ import annotations
 
+import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiLegalGuideCache
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
@@ -23,10 +25,7 @@ from backend.src.utils.security import get_current_active_user
 router = APIRouter(prefix="/ai", tags=["Legal Guides"])
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# In-memory cache: key = "{ccaa}_{guide_type}" -> LegalGuideResponse
-# ---------------------------------------------------------------------------
-_guide_cache: Dict[str, "LegalGuideResponse"] = {}
+_CACHE_TTL_DAYS = 90
 
 VALID_GUIDE_TYPES = {
     "itp_guide",
@@ -137,13 +136,23 @@ async def generate_legal_guide(
             detail=f"guide_type invalido. Valores permitidos: {', '.join(sorted(VALID_GUIDE_TYPES))}",
         )
 
-    cache_key = f"{ccaa}_{guide_type}"
+    # DB cache lookup
+    cache_row = db.query(AiLegalGuideCache).filter(
+        AiLegalGuideCache.ccaa == ccaa,
+        AiLegalGuideCache.guide_type == guide_type,
+    ).first()
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[LegalGuides] Cache HIT for %s / %s", ccaa, guide_type)
+            try:
+                return LegalGuideResponse(**json.loads(cache_row.response_json))
+            except Exception:
+                pass  # corrupt row — fall through to Gemini
 
-    if cache_key in _guide_cache:
-        logger.info("[LegalGuides] Cache HIT for key: %s", cache_key)
-        return _guide_cache[cache_key]
-
-    logger.info("[LegalGuides] Cache MISS for key: %s — calling Gemini", cache_key)
+    logger.info("[LegalGuides] Cache MISS for %s / %s — calling Gemini", ccaa, guide_type)
 
     try:
         client = get_client()
@@ -183,7 +192,20 @@ async def generate_legal_guide(
         disclaimer=DISCLAIMER,
     )
 
-    _guide_cache[cache_key] = result
-    logger.info("[LegalGuides] Cached guide for key: %s", cache_key)
+    # Persist to DB cache (upsert)
+    expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+    payload = json.dumps(result.model_dump())
+    if cache_row is not None:
+        cache_row.response_json = payload
+        cache_row.expires_at = expires
+    else:
+        db.add(AiLegalGuideCache(
+            ccaa=ccaa,
+            guide_type=guide_type,
+            response_json=payload,
+            expires_at=expires,
+        ))
+    db.commit()
+    logger.info("[LegalGuides] Cached guide for %s / %s (TTL %dd)", ccaa, guide_type, _CACHE_TTL_DAYS)
 
     return result
