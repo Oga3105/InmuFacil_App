@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -17,12 +17,15 @@ from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiMarketGapCache
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Market Gap Analyzer"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_DAYS = 7
 
 _DATA_SOURCE = "Fuente: Ministerio de Vivienda / Catastro (datos estimados por IA)"
 _DISCLAIMER = "Cifras estimadas por IA. Verifique con datos oficiales del Ministerio de Vivienda."
@@ -93,25 +96,40 @@ async def get_market_gap(
     rather than extrapolating unreliable data.
     """
     ip = request.client.host if request.client else "unknown"
-    await check_ai_rate_limit(current_user.id, "market_gap", db, ip)
+
+    # DB cache lookup — keyed by postal_code only (zone-level data, TTL 7d)
+    cache_row = db.query(AiMarketGapCache).filter(
+        AiMarketGapCache.postal_code == body.postal_code,
+    ).first()
+    cached_data: dict | None = None
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[MarketGap] Cache HIT postal_code=%s", body.postal_code)
+            try:
+                cached_data = json.loads(cache_row.response_json)
+            except Exception:
+                pass  # corrupt row — fall through to Gemini
+        else:
+            cache_row = None  # expired — signal for upsert below
+
+    if cached_data is None:
+        await check_ai_rate_limit(current_user.id, "market_gap", db, ip)
 
     try:
         client = get_client()
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    prompt = f"""Eres un analista de datos inmobiliarios especializado en el mercado espanol.
+    if cached_data is None:
+        prompt = f"""Eres un analista de datos inmobiliarios especializado en el mercado espanol.
 
 Tu tarea es estimar el precio REAL de cierre (precio al que se firman las escrituras,
 no el precio de oferta publicado) por metro cuadrado en el codigo postal "{body.postal_code}",
 basandote en datos de transacciones reales del Ministerio de Vivienda, Catastro y
 registros notariales espanoles.
-
-Contexto de la propiedad a analizar:
-  - Codigo postal: {body.postal_code}
-  - Precio solicitado por el vendedor: {body.asking_price} EUR
-  - Superficie: {body.surface_m2} m2
-  - Precio por m2 solicitado: {int(body.asking_price / body.surface_m2)} EUR/m2
 
 REGLAS CRITICAS:
 1. Si no tienes datos de transacciones reales de cierre para esa zona (menos de 10
@@ -127,35 +145,57 @@ Formato de respuesta obligatorio:
   "real_transaction_price_per_m2": <entero EUR/m2 de cierre real, o 0 si sin datos>,
   "sample_size": <numero de transacciones conocidas, 0 si sin datos>,
   "recommendation": "<recomendacion breve de negociacion para el comprador, en espanol>"
-}}"""
+}}
 
-    try:
-        raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
-
-        if raw.startswith("```"):
-            lines = raw.splitlines()
-            raw = "\n".join(
-                line for line in lines if not line.startswith("```")
-            ).strip()
+Codigo postal: {body.postal_code}"""
 
         try:
-            data = json.loads(raw)
-        except (json.JSONDecodeError, ValueError):
-            logger.warning(
-                "market_gap: JSON parse failed for postal_code=%s", body.postal_code
-            )
-            data = {}
+            raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")
 
-    except HTTPException:
-        raise
-    except Exception as exc:
-        logger.error(
-            "market_gap: unexpected error postal_code=%s: %s", body.postal_code, exc
-        )
-        raise HTTPException(
-            status_code=503,
-            detail="Error al calcular el gap de mercado. Intentalo de nuevo.",
-        )
+            if raw.startswith("```"):
+                lines = raw.splitlines()
+                raw = "\n".join(
+                    line for line in lines if not line.startswith("```")
+                ).strip()
+
+            try:
+                cached_data = json.loads(raw)
+            except (json.JSONDecodeError, ValueError):
+                logger.warning(
+                    "market_gap: JSON parse failed for postal_code=%s", body.postal_code
+                )
+                cached_data = {}
+
+            # Persist zone-level data to DB cache (upsert)
+            if cached_data:
+                expires = datetime.now(timezone.utc) + timedelta(days=_CACHE_TTL_DAYS)
+                payload = json.dumps(cached_data)
+                existing = db.query(AiMarketGapCache).filter(
+                    AiMarketGapCache.postal_code == body.postal_code,
+                ).first()
+                if existing:
+                    existing.response_json = payload
+                    existing.expires_at = expires
+                else:
+                    db.add(AiMarketGapCache(
+                        postal_code=body.postal_code,
+                        response_json=payload,
+                        expires_at=expires,
+                    ))
+                db.commit()
+
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.error(
+                "market_gap: unexpected error postal_code=%s: %s", body.postal_code, exc
+            )
+            raise HTTPException(
+                status_code=503,
+                detail="Error al calcular el gap de mercado. Intentalo de nuevo.",
+            )
+
+    data = cached_data or {}
 
     real_price_per_m2: int = 0
     try:
