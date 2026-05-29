@@ -6,9 +6,10 @@ Endpoints:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
-import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
@@ -16,12 +17,28 @@ from sqlalchemy.orm import Session
 
 from backend.src.config.database import get_db
 from backend.src.models import User
+from backend.src.models.ai_cache import AiPriceValidationCache
 from backend.src.services.gemini_service import call_with_fallback, get_client
 from backend.src.utils.ai_rate_limit import check_ai_rate_limit
 from backend.src.utils.security import get_current_active_user
 
 router = APIRouter(prefix="/ai", tags=["Price Validator"])
 logger = logging.getLogger(__name__)
+
+_CACHE_TTL_HOURS = 24
+
+
+def _cache_key(postal_code: str, pct_diff: float, asking_price_per_m2: float) -> str:
+    """
+    64-char hex key from postal_code + rounded pct_diff band (5% steps)
+    + rounded asking_price_per_m2 band (500 EUR steps).
+    Offers that are essentially equivalent from a zone/price perspective
+    will share a cached verdict.
+    """
+    pct_band = round(pct_diff / 5) * 5
+    price_band = round(asking_price_per_m2 / 500) * 500
+    raw = f"{postal_code}|{pct_band}|{price_band}"
+    return hashlib.sha256(raw.encode()).hexdigest()
 
 _VALID_VERDICTS = {"JUSTO", "ALGO_ALTO", "ALGO_BAJO", "MUY_ALTO", "MUY_BAJO"}
 _VALID_CONFIDENCES = {"LOW", "MEDIUM", "HIGH"}
@@ -54,14 +71,33 @@ async def validate_price(
     y al contexto del mercado de la zona usando Gemini Flash.
     """
     ip = request.client.host if request.client else "unknown"
+    pct_diff = ((body.offer_price - body.asking_price) / body.asking_price) * 100
+    asking_per_m2 = body.asking_price / body.surface_area
+    ck = _cache_key(body.postal_code, pct_diff, asking_per_m2)
+
+    # DB cache lookup — TTL 24h
+    cache_row = db.query(AiPriceValidationCache).filter(
+        AiPriceValidationCache.cache_key == ck,
+    ).first()
+    if cache_row is not None:
+        expires = cache_row.expires_at
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) < expires:
+            logger.info("[PriceValidator] Cache HIT key=%s", ck[:12])
+            try:
+                return PriceValidationResponse(**json.loads(cache_row.response_json))
+            except Exception:
+                pass  # corrupt row — fall through
+        else:
+            cache_row = None  # expired
+
     await check_ai_rate_limit(current_user.id, "price_validator", db, ip)
 
     try:
         client = get_client()
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
-
-    pct_diff = ((body.offer_price - body.asking_price) / body.asking_price) * 100
 
     prompt = f"""Eres un analista inmobiliario senior especializado en el mercado espanol.
 
@@ -132,12 +168,31 @@ Formato de respuesta obligatorio:
         if risk_level not in _VALID_RISKS:
             risk_level = "MEDIUM"
 
-        return PriceValidationResponse(
+        result = PriceValidationResponse(
             verdict=verdict,
             confidence=confidence,
             reasoning=reasoning,
             risk_level=risk_level,
         )
+
+        # Persist to DB cache (upsert)
+        expires = datetime.now(timezone.utc) + timedelta(hours=_CACHE_TTL_HOURS)
+        payload = json.dumps(result.model_dump())
+        existing = db.query(AiPriceValidationCache).filter(
+            AiPriceValidationCache.cache_key == ck,
+        ).first()
+        if existing:
+            existing.response_json = payload
+            existing.expires_at = expires
+        else:
+            db.add(AiPriceValidationCache(
+                cache_key=ck,
+                response_json=payload,
+                expires_at=expires,
+            ))
+        db.commit()
+
+        return result
 
     except HTTPException:
         raise
