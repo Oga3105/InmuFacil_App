@@ -1097,15 +1097,22 @@ class _DoneRow extends StatelessWidget {
   }
 }
 
-// Active step: blue dot + expanded card with CTA
+// Active step: dot + expanded card with CTA.
+// When completedBadge=true the accent colour switches from blue to green.
 class _ActiveRow extends StatelessWidget {
   const _ActiveRow({required this.step, required this.isLast});
 
   final _TimelineStep step;
   final bool isLast;
 
+  static const _blue = Color(0xFF135BEC);
+  static const _green = Color(0xFF16A34A);
+
   @override
   Widget build(BuildContext context) {
+    final done = step.completedBadge;
+    final accent = done ? _green : _blue;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1114,12 +1121,15 @@ class _ActiveRow extends StatelessWidget {
             dot: Container(
               width: 32,
               height: 32,
-              decoration: const BoxDecoration(
-                color: Color(0xFF135BEC),
+              decoration: BoxDecoration(
+                color: accent,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.edit_document,
-                  size: 18, color: Colors.white),
+              child: Icon(
+                done ? Icons.check_rounded : Icons.edit_document,
+                size: 18,
+                color: Colors.white,
+              ),
             ),
             lineColor: Theme.of(context).colorScheme.outlineVariant,
           ),
@@ -1132,7 +1142,7 @@ class _ActiveRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF135BEC), width: 1.5),
+                  border: Border.all(color: accent, width: 1.5),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1151,7 +1161,6 @@ class _ActiveRow extends StatelessWidget {
                         ),
                         Builder(builder: (context) {
                           final isDark = Theme.of(context).brightness == Brightness.dark;
-                          final done = step.completedBadge;
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 3),
@@ -1162,7 +1171,7 @@ class _ActiveRow extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6),
                               border: Border.all(
                                 color: done
-                                    ? (isDark ? const Color(0xFF16A34A) : const Color(0xFF86EFAC))
+                                    ? (isDark ? _green : const Color(0xFF86EFAC))
                                     : (isDark ? const Color(0xFF3B82F6) : const Color(0xFFBFDBFE)),
                               ),
                             ),
@@ -1173,9 +1182,7 @@ class _ActiveRow extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.w800,
-                                color: done
-                                    ? const Color(0xFF16A34A)
-                                    : const Color(0xFF135BEC),
+                                color: done ? _green : _blue,
                                 letterSpacing: 0.4,
                               ),
                             ),
@@ -1186,10 +1193,10 @@ class _ActiveRow extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       step.subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF135BEC),
+                        color: accent,
                       ),
                     ),
                     if (step.description != null) ...[
@@ -1220,7 +1227,7 @@ class _ActiveRow extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.w700),
                           ),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF135BEC),
+                            backgroundColor: accent,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12)),

@@ -35,6 +35,7 @@ class PropertyModel {
     this.ownerIsVerified = false,
     this.ownerPhotoUrl,
     this.hideExactLocation = false,
+    this.status,
     this.energyCertification,
     this.previousPrice,
     this.priceUpdatedAt,
@@ -112,6 +113,7 @@ class PropertyModel {
       ownerIsVerified: json['owner_is_verified'] as bool? ?? false,
       ownerPhotoUrl: json['owner_photo_url'] as String?,
       hideExactLocation: json['hide_exact_location'] as bool? ?? false,
+      status: (json['status'] as String?)?.toLowerCase(),
       energyCertification: legal['energy_certification'] as String?,
       previousPrice: json['previous_price'] != null ? (json['previous_price'] as num).toDouble() : null,
       priceUpdatedAt: json['price_updated_at'] != null ? DateTime.tryParse(json['price_updated_at'] as String) : null,
@@ -141,6 +143,7 @@ class PropertyModel {
   final bool ownerIsVerified;
   final String? ownerPhotoUrl;
   final bool hideExactLocation;
+  final String? status;
   final String? energyCertification;
   final double? previousPrice;
   final DateTime? priceUpdatedAt;
@@ -169,6 +172,7 @@ class PropertyModel {
       ownerIsVerified: ownerIsVerified,
       ownerPhotoUrl: ownerPhotoUrl,
       hideExactLocation: hideExactLocation,
+      status: status,
       energyCertification: energyCertification,
       previousPrice: previousPrice,
       priceUpdatedAt: priceUpdatedAt,

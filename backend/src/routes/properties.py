@@ -24,7 +24,7 @@ from backend.src.services.payment_service import MockPaymentProvider
 from backend.src.services.document_service import process_document, get_decrypted_document, get_decrypted_document_from_path, ComplianceError
 from pydantic import BaseModel
 from typing import Optional
-from sqlalchemy import or_, cast, String
+from sqlalchemy import or_, cast, String, func
 
 # Ensure tables exist (fail-safe for new satellites)
 # Base.metadata.create_all(bind=engine)
@@ -101,12 +101,12 @@ async def list_properties(
     )
     
     # 2. Logic: Visibility (Hito 8)
-    # Cast to VARCHAR + compare against enum NAME (UPPERCASE), which is what
-    # SQLAlchemy Enum(native_enum=False) persists by default.
-    _status_col = cast(Property.status, String)
+    # Use UPPER() for case-insensitive comparison — closing_service stores
+    # the enum value (lowercase) while legacy rows may store the name (uppercase).
+    _status_upper = func.upper(cast(Property.status, String))
     query = query.filter(
-        (_status_col == PropertyStatus.PUBLISHED.name) |
-        ((_status_col == PropertyStatus.RESERVED.name) & (Property.hide_when_reserved == False))
+        (_status_upper == PropertyStatus.PUBLISHED.name) |
+        ((_status_upper == PropertyStatus.RESERVED.name) & (Property.hide_when_reserved == False))
     )
     
     # 3. Dynamic Filters

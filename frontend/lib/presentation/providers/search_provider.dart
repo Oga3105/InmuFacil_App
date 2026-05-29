@@ -489,7 +489,14 @@ class SearchNotifier extends Notifier<SearchState> {
       (properties) {
         // CLIENT-SIDE FILTERING (Type, Bedrooms, Extras)
         var filteredList = properties;
-        
+
+        // 0. Exclude sold properties (safety net — backend also filters, but
+        //    a case mismatch between legacy UPPERCASE names and lowercase values
+        //    stored by closing_service can let sold rows slip through).
+        filteredList = filteredList
+            .where((p) => (p.status ?? '').toLowerCase() != 'sold')
+            .toList();
+
         // 1. Filter by Property Type (Guarantee strict match regardless of backend)
         if (state.propertyType != PropertyType.all) {
           filteredList = filteredList.where((p) => p.type == state.propertyType).toList();
