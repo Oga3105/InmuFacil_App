@@ -53,7 +53,9 @@ class ClosingService:
             raise HTTPException(404, "Offer not found")
             
         property_obj = db.query(Property).filter(Property.id == offer.property_id).first()
-        
+        if not property_obj:
+            raise HTTPException(404, f"Property {offer.property_id} not found during closing")
+
         # 2. Update Property
         property_obj.status = PropertyStatus.SOLD
         property_obj.updated_at = datetime.utcnow()

@@ -151,11 +151,8 @@ class TimelineService:
         # If this was the last pending step, trigger closing
         if step.status == StepStatus.COMPLETED:
             from backend.src.services.closing_service import ClosingService # Lazy import to avoid circular dependency
-            try:
-                if ClosingService.validate_closing_eligibility(self.db, step.offer_id):
-                    ClosingService.execute_closing(self.db, step.offer_id)
-            except Exception as e:
-                logger.error(f"Auto-Closing Failed: {e}")
+            if ClosingService.validate_closing_eligibility(self.db, step.offer_id):
+                ClosingService.execute_closing(self.db, step.offer_id)
                 
         return step
 
