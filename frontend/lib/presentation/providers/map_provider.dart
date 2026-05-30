@@ -27,7 +27,9 @@ class MapPropertiesNotifier extends Notifier<AsyncValue<List<Property>>> {
       
       result.fold(
         (failure) => state = AsyncValue.error(failure.message, StackTrace.current),
-        (properties) => state = AsyncValue.data(properties),
+        (properties) => state = AsyncValue.data(
+          properties.where((p) => (p.status ?? '').toLowerCase() != 'sold').toList(),
+        ),
       );
     } catch (e, st) {
       state = AsyncValue.error(e.toString(), st);
