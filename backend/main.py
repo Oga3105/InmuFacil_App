@@ -114,23 +114,34 @@ async def add_security_headers(request: Request, call_next):
 
     response = await call_next(request)
 
+    # Suppress server fingerprint
+    response.headers["Server"] = "inmufacil"
+
     # Prevent MIME type sniffing
     response.headers["X-Content-Type-Options"] = "nosniff"
 
     # Prevent clickjacking
     response.headers["X-Frame-Options"] = "DENY"
 
-    # Enable XSS protection
+    # Referrer policy — do not leak URL to third parties
+    response.headers["Referrer-Policy"] = "no-referrer"
+
+    # HSTS — enforce HTTPS (also set at nginx level for non-proxied responses)
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+    # Enable XSS protection (legacy browsers)
     response.headers["X-XSS-Protection"] = "1; mode=block"
 
-    # Content Security Policy - Adjusted for Swagger UI
+    # Content Security Policy - scoped for Swagger UI
     csp_policy = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
         "img-src 'self' data: https://fastapi.tiangolo.com; "
         "font-src 'self' data:; "
-        "connect-src *"
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'"
     )
     response.headers["Content-Security-Policy"] = csp_policy
 
