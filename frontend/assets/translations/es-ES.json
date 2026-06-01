@@ -868,13 +868,15 @@
       "filter_published": "Publicadas",
       "filter_drafts": "Borradores",
       "filter_unpublished": "Retiradas",
+      "filter_sold": "Vendidas",
       "sort_oldest": "Más antiguas"
     },
     "property_status": {
       "active": "ACTIVO",
       "draft": "BORRADOR",
       "in_review": "EN REVISIÓN",
-      "reserved": "RESERVADO"
+      "reserved": "RESERVADO",
+      "sold": "VENDIDO"
     },
     "property_analytics": {
       "views": "{} vistas"

@@ -1191,7 +1191,8 @@
       "filter_all": "All",
       "filter_published": "Published",
       "filter_drafts": "Drafts",
-      "filter_unpublished": "Unpublished"
+      "filter_unpublished": "Unpublished",
+      "filter_sold": "Sold"
     },
     "property_analytics": {
       "views": "{} views"
@@ -1287,7 +1288,8 @@
       "active": "ACTIVE",
       "draft": "DRAFT",
       "in_review": "IN REVIEW",
-      "reserved": "RESERVED"
+      "reserved": "RESERVED",
+      "sold": "SOLD"
     }
   },
   "property": {
@@ -2011,7 +2013,6 @@
     "post_sale_subtitle": "Manage the change of utility account holders",
     "post_sale_locked": "Accessible after notary signing",
     "post_sale_btn": "Manage utilities",
-    "status_in_progress": "IN PROGRESS",
     "status_done": "COMPLETED",
     "congrats_buyer_title": "Congratulations on your purchase",
     "congrats_seller_title": "Congratulations on your sale",

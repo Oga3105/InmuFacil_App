@@ -1191,7 +1191,8 @@
       "filter_published": "Argitaratuak",
       "filter_drafts": "Zirriborroak",
       "filter_unpublished": "Argitaratu gabeak",
-      "sort_oldest": "Zaharrenak"
+      "sort_oldest": "Zaharrenak",
+      "filter_sold": "Saldutakoak"
     },
     "property_analytics": {
       "views": "{} ikustaldi"
@@ -1287,7 +1288,8 @@
       "active": "AKTIBO",
       "draft": "ZIRRIBORROA",
       "in_review": "BERRIKUSPENPEAN",
-      "reserved": "ERRESERBATUA"
+      "reserved": "ERRESERBATUA",
+      "sold": "SALDUTA"
     }
   },
   "property": {
@@ -1928,7 +1930,6 @@
   },
   "transaction": {
     "title": "Transakzioaren Egoera",
-    "status_in_progress": "ABIAN",
     "role_buyer": "EROSLEAK",
     "role_seller": "SALTZAILEA",
     "step_offer": "Eskaintza Bidalita",

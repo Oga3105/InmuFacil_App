@@ -1191,7 +1191,8 @@
       "filter_published": "Publicades",
       "filter_drafts": "Esborranys",
       "filter_unpublished": "Retirades",
-      "sort_oldest": "Més antigues"
+      "sort_oldest": "Més antigues",
+      "filter_sold": "Venudes"
     },
     "property_analytics": {
       "views": "{} vistes"
@@ -1287,7 +1288,8 @@
       "active": "ACTIU",
       "draft": "ESBORRANY",
       "in_review": "EN REVISIÓ",
-      "reserved": "RESERVAT"
+      "reserved": "RESERVAT",
+      "sold": "VENUT"
     }
   },
   "property": {
@@ -1928,7 +1930,6 @@
   },
   "transaction": {
     "title": "Estat de la Transacció",
-    "status_in_progress": "EN CURS",
     "role_buyer": "COMPRADOR",
     "role_seller": "VENEDOR",
     "step_offer": "Oferta Enviada",

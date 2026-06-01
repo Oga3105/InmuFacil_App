@@ -1193,7 +1193,8 @@
       "filter_published": "Publicados",
       "filter_drafts": "Borradores",
       "filter_unpublished": "Non publicados",
-      "sort_oldest": "Máis antigas"
+      "sort_oldest": "Máis antigas",
+      "filter_sold": "Vendidos"
     },
     "property_analytics": {
       "views": "{} visitas"
@@ -1289,7 +1290,8 @@
       "active": "ACTIVO",
       "draft": "BORRADOR",
       "in_review": "EN REVISIÓN",
-      "reserved": "RESERVADO"
+      "reserved": "RESERVADO",
+      "sold": "VENDIDO"
     }
   },
   "property": {
@@ -1931,7 +1933,6 @@
   },
   "transaction": {
     "title": "Estado da Transacción",
-    "status_in_progress": "EN PROGRESO",
     "role_buyer": "COMPRADOR",
     "role_seller": "VENDEDOR",
     "step_offer": "Oferta enviada",

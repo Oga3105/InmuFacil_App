@@ -1216,7 +1216,8 @@
       "filter_all": "Toutes",
       "filter_published": "Publiées",
       "filter_drafts": "Brouillons",
-      "filter_unpublished": "Retirées"
+      "filter_unpublished": "Retirées",
+      "filter_sold": "Vendus"
     },
     "property_analytics": {
       "views": "{} vues"
@@ -1312,7 +1313,8 @@
       "active": "ACTIF",
       "draft": "BROUILLON",
       "in_review": "EN RÉVISION",
-      "reserved": "RÉSERVÉ"
+      "reserved": "RÉSERVÉ",
+      "sold": "VENDU"
     }
   },
   "property": {
@@ -2036,7 +2038,6 @@
     "post_sale_subtitle": "Gérez le changement de titulaire des contrats de fournitures",
     "post_sale_locked": "Accessible après la signature chez le notaire",
     "post_sale_btn": "Gérer les fournitures",
-    "status_in_progress": "EN COURS",
     "status_done": "FINALISÉ",
     "congrats_buyer_title": "Félicitations pour votre achat",
     "congrats_seller_title": "Félicitations pour votre vente",

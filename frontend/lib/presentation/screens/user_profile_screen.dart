@@ -1600,6 +1600,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen>
                   _buildFilterChip('draft', 'profile.my_properties.filter_drafts'.tr()),
                   const SizedBox(width: 8),
                   _buildFilterChip('unpublished', 'profile.my_properties.filter_unpublished'.tr()),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('sold', 'profile.my_properties.filter_sold'.tr()),
                 ],
               ),
             ),
@@ -3852,7 +3854,7 @@ class _StatusPill extends StatelessWidget {
   }
 
   Map<String, dynamic> _cfg(String s) {
-    switch (s) {
+    switch (s.toLowerCase()) {
       case 'published':
         return {'label': 'profile.property_status.active'.tr(), 'color': const Color(0xFF16A34A)};
       case 'draft':
@@ -3861,6 +3863,8 @@ class _StatusPill extends StatelessWidget {
         return {'label': 'profile.property_status.in_review'.tr(), 'color': const Color(0xFF6366F1)};
       case 'reserved':
         return {'label': 'profile.property_status.reserved'.tr(), 'color': const Color(0xFFEA580C)};
+      case 'sold':
+        return {'label': 'profile.property_status.sold'.tr(), 'color': const Color(0xFF64748B)};
       default:
         return {'label': 'profile.property_status.active'.tr(), 'color': const Color(0xFF16A34A)};
     }
@@ -3892,8 +3896,12 @@ class _GestionarMenu extends StatelessWidget {
   final VoidCallback? onManageVisits;
   final VoidCallback? onReserve;
 
-  bool get _isActive => (property.status ?? 'published') == 'published';
-  bool get _isReserved => (property.status ?? '') == 'reserved';
+  String get _statusNorm => (property.status ?? 'published').toLowerCase();
+  bool get _isActive => _statusNorm == 'published';
+  bool get _isReserved => _statusNorm == 'reserved';
+  bool get _isSold => _statusNorm == 'sold';
+  bool get _isUnpublished => _statusNorm == 'unpublished';
+  bool get _isDraft => _statusNorm == 'draft';
 
   @override
   Widget build(BuildContext context) {
@@ -3927,7 +3935,78 @@ class _GestionarMenu extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Theme.of(context).colorScheme.surface,
       elevation: 8,
-      itemBuilder: (_) => [
+      itemBuilder: (_) {
+        // SOLD: solo lectura — ver y consultar oferta completada
+        if (_isSold) {
+          return [
+            PopupMenuItem(
+              value: 'view',
+              child: Row(children: [
+                Icon(Icons.house_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('chat.view_property'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+            PopupMenuItem(
+              value: 'offers',
+              child: Row(children: [
+                Icon(Icons.handshake_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('profile.tab_offers'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+          ];
+        }
+
+        // UNPUBLISHED: retirado de venta, no vendido — puede reactivar o editar
+        if (_isUnpublished) {
+          return [
+            PopupMenuItem(
+              value: 'view',
+              child: Row(children: [
+                Icon(Icons.house_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('chat.view_property'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+            PopupMenuItem(
+              value: 'offers',
+              child: Row(children: [
+                Icon(Icons.handshake_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('profile.tab_offers'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+            PopupMenuItem(
+              value: 'edit',
+              child: Row(children: [
+                Icon(Icons.edit_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('common.edit'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+            PopupMenuItem(
+              value: 'deactivate',
+              child: Row(children: [
+                Icon(Icons.visibility_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('profile.action_activate'.tr(), style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ]),
+            ),
+            const PopupMenuDivider(height: 1),
+            PopupMenuItem(
+              value: 'delete',
+              child: Row(children: [
+                const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFDC2626)),
+                const SizedBox(width: 12),
+                Text('common.delete'.tr(), style: const TextStyle(fontSize: 13, color: Color(0xFFDC2626))),
+              ]),
+            ),
+          ];
+        }
+
+        // PUBLISHED / RESERVED / DRAFT: menú completo
+        return [
         PopupMenuItem(
           value: 'view',
           child: Row(
@@ -3962,54 +4041,49 @@ class _GestionarMenu extends StatelessWidget {
             ],
           ),
         ),
-        PopupMenuItem(
-          value: 'visits',
-          child: Row(
-            children: [
-              Icon(Icons.calendar_month_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
-              const SizedBox(width: 12),
-              Text('profile.visit_hours'.tr(),
-                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
-
-            ],
+        if (_isActive || _isReserved)
+          PopupMenuItem(
+            value: 'visits',
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month_outlined, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Text('profile.visit_hours'.tr(),
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface)),
+              ],
+            ),
           ),
-        ),
-        PopupMenuItem(
-          value: 'deactivate',
-          child: Row(
-            children: [
-              Icon(
-                _isActive
-                    ? Icons.visibility_off_outlined
-                    : Icons.visibility_outlined,
-                size: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                _isActive ? 'profile.action_deactivate'.tr() : 'profile.action_activate'.tr(),
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface),
-              ),
-            ],
+        if (!_isDraft)
+          PopupMenuItem(
+            value: 'deactivate',
+            child: Row(
+              children: [
+                Icon(
+                  _isActive ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  size: 18,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  _isActive ? 'profile.action_deactivate'.tr() : 'profile.action_activate'.tr(),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurface),
+                ),
+              ],
+            ),
           ),
-        ),
         if (_isActive || _isReserved)
           PopupMenuItem(
             value: 'reserve',
             child: Row(
               children: [
                 Icon(
-                  _isReserved
-                      ? Icons.lock_open_outlined
-                      : Icons.lock_outlined,
+                  _isReserved ? Icons.lock_open_outlined : Icons.lock_outlined,
                   size: 18,
                   color: const Color(0xFFEA580C),
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  _isReserved
-                      ? 'profile.action_unreserve'.tr()
-                      : 'profile.action_reserve'.tr(),
+                  _isReserved ? 'profile.action_unreserve'.tr() : 'profile.action_reserve'.tr(),
                   style: const TextStyle(fontSize: 13, color: Color(0xFFEA580C)),
                 ),
               ],
@@ -4028,7 +4102,8 @@ class _GestionarMenu extends StatelessWidget {
             ],
           ),
         ),
-      ],
+        ];
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(

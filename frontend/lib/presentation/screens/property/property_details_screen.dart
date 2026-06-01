@@ -19,6 +19,7 @@ import '../../providers/offers_provider.dart';
 import '../../providers/solvency_provider.dart' as solvency_prov;
 import '../../providers/property_form_provider.dart';
 import '../../providers/property_analytics_provider.dart';
+import '../../providers/my_properties_provider.dart';
 import '../../widgets/common/price_tag.dart';
 import '../../widgets/common/time_badge.dart';
 import '../../widgets/common/app_bar_back_button.dart';
@@ -115,18 +116,25 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Try search cache first (fast path)
+    // 1. Try search cache first (fast path — excludes sold/unpublished)
     final properties = ref.watch(searchProvider).filteredProperties;
     final Property? cachedProperty = properties
         .cast<Property?>()
         .firstWhere((p) => p?.id == widget.propertyId, orElse: () => null);
 
     // 2. Always watch direct-fetch provider (Riverpod requires unconditional watches).
-    //    Result is only used when not in cache (e.g. just created / just edited).
+    //    Result is only used when not in cache (e.g. just created / just edited / sold).
     final directFetchAsync = ref.watch(propertyByIdProvider(widget.propertyId));
 
+    // 3. Owner fallback: sold/unpublished properties are filtered from searchProvider
+    //    but always present in myPropertiesProvider — use it so the owner sees full data.
+    final myPropertiesAsync = ref.watch(myPropertiesProvider);
+    final Property? ownerCachedProperty = myPropertiesAsync.asData?.value
+        .cast<Property?>()
+        .firstWhere((p) => p?.id == widget.propertyId, orElse: () => null);
+
     // Show spinner while fetching from API (cache miss path)
-    if (cachedProperty == null && directFetchAsync.isLoading) {
+    if (cachedProperty == null && ownerCachedProperty == null && directFetchAsync.isLoading) {
       return Scaffold(
         backgroundColor: Theme.of(context).colorScheme.surface,
         body: const Center(child: CircularProgressIndicator()),
@@ -134,6 +142,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     }
 
     final property = cachedProperty ??
+        ownerCachedProperty ??
         directFetchAsync.value ??
         Property.empty();
 
