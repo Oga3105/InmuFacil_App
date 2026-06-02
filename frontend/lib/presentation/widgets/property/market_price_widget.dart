@@ -55,21 +55,33 @@ class MarketPriceArgs {
     required this.postalCode,
     required this.surfaceArea,
     required this.propertyType,
+    this.city,
+    this.province,
+    this.street,
+    this.latitude,
+    this.longitude,
   });
 
   final String postalCode;
   final double surfaceArea;
   final String propertyType;
+  final String? city;
+  final String? province;
+  final String? street;
+  final double? latitude;
+  final double? longitude;
 
   @override
   bool operator ==(Object other) =>
       other is MarketPriceArgs &&
       other.postalCode == postalCode &&
       other.surfaceArea == surfaceArea &&
-      other.propertyType == propertyType;
+      other.propertyType == propertyType &&
+      other.city == city &&
+      other.street == street;
 
   @override
-  int get hashCode => Object.hash(postalCode, surfaceArea, propertyType);
+  int get hashCode => Object.hash(postalCode, surfaceArea, propertyType, city, street);
 }
 
 const _storage = FlutterSecureStorage();
@@ -86,6 +98,11 @@ final marketPriceProvider =
           'postal_code': args.postalCode,
           'surface_area': args.surfaceArea,
           'property_type': args.propertyType,
+          if (args.city != null && args.city!.isNotEmpty) 'city': args.city,
+          if (args.province != null && args.province!.isNotEmpty) 'province': args.province,
+          if (args.street != null && args.street!.isNotEmpty) 'street': args.street,
+          if (args.latitude != null) 'latitude': args.latitude,
+          if (args.longitude != null) 'longitude': args.longitude,
         },
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})

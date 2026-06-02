@@ -31,6 +31,11 @@ class MarketPriceRequest(BaseModel):
     postal_code: str
     surface_area: float
     property_type: str
+    city: str | None = None
+    province: str | None = None
+    street: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
 
 
 class MarketPriceResponse(BaseModel):
@@ -91,30 +96,46 @@ async def get_market_price(
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
+    # Build location context — more data = more precise neighborhood identification
+    location_lines: list[str] = [f"- Codigo postal: {body.postal_code}"]
+    if body.city:
+        location_lines.append(f"- Ciudad: {body.city}")
+    if body.province and body.province != body.city:
+        location_lines.append(f"- Provincia: {body.province}")
+    if body.street:
+        location_lines.append(f"- Calle/Via: {body.street}")
+    if body.latitude is not None and body.longitude is not None:
+        location_lines.append(f"- Coordenadas GPS: {body.latitude:.6f}, {body.longitude:.6f}")
+    location_block = "\n".join(location_lines)
+
     prompt = f"""Eres un analista inmobiliario especializado en el mercado espanol.
 
 Tu tarea es estimar el precio por metro cuadrado (EUR/m2) para viviendas de tipo
-"{body.property_type}" en el codigo postal "{body.postal_code}" basandote
-en datos de mercado reales y actuales del mercado espanol.
+"{body.property_type}" en la ubicacion exacta indicada, basandote en datos de
+mercado reales y actuales del mercado espanol.
 
-REGLAS CRITICAS:
-1. Si no tienes datos suficientes para esa zona concreta (menos de 5 transacciones
-   recientes conocidas), devuelve sample_size=0 y NO extrapoles ningun precio.
-2. Si conoces datos reales del mercado para esa zona, proporciona una estimacion
-   fundamentada.
-3. Responde EXCLUSIVAMENTE con un objeto JSON valido sin markdown ni texto extra.
+DATOS DE UBICACION (usa TODOS para identificar el barrio exacto):
+{location_block}
+- Superficie de referencia: {body.surface_area} m2
+- Tipo de propiedad: {body.property_type}
+
+INSTRUCCIONES CRITICAS:
+1. Usa la calle y las coordenadas GPS para identificar el barrio EXACTO, no el mas
+   conocido del codigo postal. Un mismo CP puede abarcar varios barrios con precios
+   muy distintos.
+2. Si no tienes datos suficientes para esa ubicacion concreta (menos de 5
+   transacciones recientes conocidas), devuelve sample_size=0 y NO extrapoles.
+3. El campo "zone_label" debe ser el nombre del barrio especifico al que pertenece
+   la calle indicada, NO el barrio mas famoso del CP.
+4. Responde EXCLUSIVAMENTE con un objeto JSON valido sin markdown ni texto extra.
 
 Formato de respuesta obligatorio:
 {{
   "price_per_m2": <entero en EUR/m2, o 0 si no hay datos>,
   "sample_size": <numero de transacciones conocidas en la zona, 0 si desconocido>,
-  "zone_label": "<nombre del barrio o zona, o 'Sin datos' si se desconoce>",
+  "zone_label": "<nombre del barrio exacto segun la calle/coordenadas, no el CP>",
   "confidence": "<LOW | MEDIUM | HIGH segun certeza del dato>"
-}}
-
-Superficie de referencia de la propiedad: {body.surface_area} m2
-Codigo postal: {body.postal_code}
-Tipo de propiedad: {body.property_type}"""
+}}"""
 
     try:
         raw, _ = call_with_fallback(client, contents=[prompt], preferred_model="gemini-2.5-flash")

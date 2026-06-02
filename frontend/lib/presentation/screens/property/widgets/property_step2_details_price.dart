@@ -166,6 +166,11 @@ class _PropertyStep2DetailsPriceState
                   postalCode: s.postalCodeText,
                   surfaceText: s.surfaceText,
                   propertyType: s.selectedType?.backendValue ?? 'piso',
+                  city: s.cityText,
+                  province: s.provinceText,
+                  street: '${s.streetText} ${s.streetNumberText}'.trim(),
+                  latitude: s.selectedLocation?.latitude,
+                  longitude: s.selectedLocation?.longitude,
                 ),
                 const SizedBox(height: 16),
                 // Bedrooms & Bathrooms
@@ -479,11 +484,21 @@ class _MarketPriceHint extends ConsumerWidget {
     required this.postalCode,
     required this.surfaceText,
     required this.propertyType,
+    this.city,
+    this.province,
+    this.street,
+    this.latitude,
+    this.longitude,
   });
 
   final String postalCode;
   final String surfaceText;
   final String propertyType;
+  final String? city;
+  final String? province;
+  final String? street;
+  final double? latitude;
+  final double? longitude;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -496,6 +511,11 @@ class _MarketPriceHint extends ConsumerWidget {
       postalCode: postalCode,
       surfaceArea: surface,
       propertyType: propertyType,
+      city: city?.isNotEmpty == true ? city : null,
+      province: province?.isNotEmpty == true ? province : null,
+      street: street?.isNotEmpty == true ? street : null,
+      latitude: latitude,
+      longitude: longitude,
     );
     final async = ref.watch(marketPriceProvider(args));
 
