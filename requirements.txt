@@ -52,4 +52,4 @@ google-genai>=2.7.0
 firebase-admin>=7.4.0
 
 # Email — SMTP async (IONOS / cualquier SMTP)
-aiosmtplib>=5.1.0
+aiosmtplib>=5.1.1
