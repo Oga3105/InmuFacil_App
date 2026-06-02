@@ -194,7 +194,7 @@ Genera UNICAMENTE el texto de la descripcion."""
     except HTTPException:
         raise
     except Exception as exc:
-        logger.error("Gemini description generation error: %s", exc)
+        logger.error("Gemini description generation error: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=503,
             detail="Error al generar la descripcion con IA. Intentalo de nuevo.",
