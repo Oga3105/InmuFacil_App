@@ -144,5 +144,15 @@ def _is_permission_denied(exc: Exception) -> bool:
     return "PERMISSION_DENIED" in s or "403" in s or "permission" in s.lower()
 
 
+def _is_unavailable(exc: Exception) -> bool:
+    s = str(exc)
+    return "UNAVAILABLE" in s or "overloaded" in s.lower() or "high demand" in s.lower()
+
+
 def _is_skippable(exc: Exception) -> bool:
-    return _is_quota(exc) or _is_model_not_found(exc) or _is_permission_denied(exc)
+    return (
+        _is_quota(exc)
+        or _is_model_not_found(exc)
+        or _is_permission_denied(exc)
+        or _is_unavailable(exc)
+    )
