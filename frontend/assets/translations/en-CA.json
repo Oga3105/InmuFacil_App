@@ -3089,7 +3089,8 @@
       "section_marketing": "News and Information",
       "marketing_emails": "Marketing Emails",
       "marketing_emails_desc": "Receive news about new features and offers."
-    }
+    },
+    "inbox_header": "New activity"
   },
   "amenities": {
     "ac": "Aire Acondicionado",

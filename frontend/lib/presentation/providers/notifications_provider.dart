@@ -112,6 +112,47 @@ Future<void> syncUrgencyNotifications(WidgetRef ref) async {
   }
 }
 
+// ─── Provider persistente para el menu avatar ─────────────────────────────────
+
+/// Notificaciones de tipo "info" no leidas (ofertas recibidas, visitas).
+/// No autoDispose: debe sobrevivir fuera de la pantalla de notificaciones.
+final inboxNotificationsProvider =
+    AsyncNotifierProvider<InboxNotificationsNotifier, List<NotificationModel>>(
+  InboxNotificationsNotifier.new,
+);
+
+class InboxNotificationsNotifier
+    extends AsyncNotifier<List<NotificationModel>> {
+  @override
+  Future<List<NotificationModel>> build() async {
+    final isAuth = ref.watch(authProvider).isAuthenticated;
+    if (!isAuth) return [];
+    return _fetch();
+  }
+
+  Future<List<NotificationModel>> _fetch() async {
+    final token = await _getToken();
+    if (token == null) return [];
+    final dio = _buildDio();
+    final response = await dio.get(
+      '/notifications',
+      queryParameters: {'unread_only': true, 'limit': 10},
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    final model = NotificationListModel.fromJson(
+      response.data as Map<String, dynamic>,
+    );
+    return model.items
+        .where((n) => n.notificationType == 'info')
+        .toList();
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(_fetch);
+  }
+}
+
 /// Registra el token FCM del dispositivo en el backend.
 Future<void> registerFcmToken(String fcmToken) async {
   final token = await _getToken();

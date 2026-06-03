@@ -3079,7 +3079,8 @@
       "section_marketing": "Novidades e Información",
       "marketing_emails": "Correos de marketing",
       "marketing_emails_desc": "Recibir noticias sobre novas funcións e ofertas."
-    }
+    },
+    "inbox_header": "Nova actividade"
   },
   "search": {
     "verified_this_week": "Verificado esta semana",

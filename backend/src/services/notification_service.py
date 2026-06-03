@@ -202,6 +202,70 @@ def upsert_urgency_notification(
         ).first()
 
 
+def create_event_notification(
+    db: Session,
+    *,
+    user_id: int,
+    offer_id: Optional[int],
+    event_type: str,
+    title: str,
+    body: str,
+    deep_link: Optional[str] = None,
+) -> Optional[NotificationLog]:
+    """
+    Crea una notificacion de tipo informativo (nueva oferta, solicitud de visita).
+    Usa event_type como urgency_type para deduplicacion por (user_id, offer_id, event_type).
+    Si ya existe una con la misma clave, no crea duplicado.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        return None
+
+    existing = db.query(NotificationLog).filter(
+        NotificationLog.user_id == user_id,
+        NotificationLog.offer_id == offer_id,
+        NotificationLog.urgency_type == event_type,
+    ).first()
+
+    if existing:
+        return existing
+
+    sent_at = None
+    if user.fcm_token:
+        pushed = _send_fcm_push(user.fcm_token, title, body, deep_link)
+        if pushed:
+            sent_at = datetime.utcnow()
+
+    notification = NotificationLog(
+        user_id=user_id,
+        title=title,
+        body=body,
+        notification_type="info",
+        is_read=False,
+        deep_link=deep_link,
+        offer_id=offer_id,
+        urgency_type=event_type,
+        sent_at=sent_at,
+    )
+
+    try:
+        db.add(notification)
+        db.commit()
+        db.refresh(notification)
+        logger.info(
+            f"[NOTIF] Evento creado: id={notification.id} user={user_id} type={event_type}"
+        )
+        return notification
+
+    except IntegrityError:
+        db.rollback()
+        return db.query(NotificationLog).filter(
+            NotificationLog.user_id == user_id,
+            NotificationLog.offer_id == offer_id,
+            NotificationLog.urgency_type == event_type,
+        ).first()
+
+
 def mark_notification_read(db: Session, notification_id: int, user_id: int) -> Optional[NotificationLog]:
     """
     Marca una notificacion como leida.
