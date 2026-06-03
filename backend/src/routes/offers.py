@@ -24,6 +24,7 @@ from backend.src.services.email_service import (
     send_counter_offer_confirmation_email,
     send_cee_pending_offer_email,
 )
+from backend.src.services.notification_service import create_event_notification
 
 router = APIRouter(prefix="/offers", tags=["Offers"])
 
@@ -422,6 +423,22 @@ async def create_offer(
             )
         )
 
+    # In-app notification to seller (best-effort, no crash if it fails)
+    try:
+        property_title = prop.title or f"Propiedad #{prop.id}"
+        buyer_name = current_user.full_name or "Un comprador"
+        create_event_notification(
+            db,
+            user_id=prop.owner_id,
+            offer_id=offer.id,
+            event_type="newOffer",
+            title="Nueva oferta recibida",
+            body=f"{buyer_name} ha enviado una oferta de {offer_data.amount:,} EUR por {property_title}.",
+            deep_link=f"/property/{prop.id}/offers",
+        )
+    except Exception:
+        pass
+
     return _serialize_offer(created, db)
 
 
@@ -477,6 +494,23 @@ async def start_inquiry(
     db.add(inquiry)
     db.commit()
     created = _offers_query(db).filter(PropertyOffer.id == inquiry.id).first()
+
+    # In-app notification to seller (best-effort)
+    try:
+        property_title = prop.title or f"Propiedad #{prop.id}"
+        buyer_name = current_user.full_name or "Un comprador"
+        create_event_notification(
+            db,
+            user_id=prop.owner_id,
+            offer_id=inquiry.id,
+            event_type="visitRequest",
+            title="Solicitud de visita recibida",
+            body=f"{buyer_name} quiere visitar {property_title}.",
+            deep_link=f"/property/{prop.id}/offers",
+        )
+    except Exception:
+        pass
+
     return _serialize_offer(created, db)
 
 
@@ -491,6 +525,7 @@ async def list_sent_offers(
     offers = _offers_query(db).filter(
         PropertyOffer.buyer_id == current_user.id,
         PropertyOffer.status != OfferStatus.CEE_PENDING,
+        PropertyOffer.status != OfferStatus.INQUIRY,
     ).all()
     return [_serialize_offer(o, db) for o in offers]
 
@@ -501,11 +536,14 @@ async def list_received_offers(
     current_user: User = Depends(get_current_active_user)
 ):
     """
-    Seller sees offers for their properties.
+    Seller sees offers for their properties. Inquiries (chat-only, amount=0) are excluded.
     """
     # Use subquery to avoid conflicting JOIN with joinedload on the same table
     owned_ids = db.query(Property.id).filter(Property.owner_id == current_user.id).subquery()
-    offers = _offers_query(db).filter(PropertyOffer.property_id.in_(owned_ids)).all()
+    offers = _offers_query(db).filter(
+        PropertyOffer.property_id.in_(owned_ids),
+        PropertyOffer.status != OfferStatus.INQUIRY,
+    ).all()
     return [_serialize_offer(o, db) for o in offers]
 
 
