@@ -187,7 +187,9 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
             ),
             data: (allOffers) {
               final offers = _sorted(allOffers
-                  .where((o) => o.propertyId == widget.propertyId)
+                  .where((o) =>
+                      o.propertyId == widget.propertyId &&
+                      o.status.toLowerCase() != 'inquiry')
                   .toList());
               if (offers.isEmpty) {
                 return Padding(
