@@ -3060,7 +3060,8 @@
       "section_marketing": "Berriak eta Informazioa",
       "marketing_emails": "Marketing Emailak",
       "marketing_emails_desc": "Jaso funtzio eta eskaintza berrien berriak."
-    }
+    },
+    "inbox_header": "Jarduera berriak"
   },
   "search": {
     "verified_this_week": "Aste honetan egiaztatuak",

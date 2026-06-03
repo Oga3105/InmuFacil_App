@@ -2083,7 +2083,6 @@
     "post_sale_subtitle": "Gestiona el cambio de titularidad de los suministros",
     "post_sale_locked": "Accesible tras la firma en notaría",
     "post_sale_btn": "Gestionar suministros",
-    "status_in_progress": "EN CURSO",
     "status_done": "FINALIZADO",
     "congrats_buyer_title": "Enhorabuena por tu compra",
     "congrats_seller_title": "Enhorabuena por tu venta",
@@ -3252,7 +3251,8 @@
       "section_marketing": "Novedades e Información",
       "marketing_emails": "Emails de Marketing",
       "marketing_emails_desc": "Recibir noticias sobre nuevas funciones y ofertas."
-    }
+    },
+    "inbox_header": "Novedades"
   },
   "amenity": {
     "exterior": "Exterior",

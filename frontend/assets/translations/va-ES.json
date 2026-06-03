@@ -3082,7 +3082,8 @@
       "section_marketing": "Novetats i Informació",
       "marketing_emails": "Emails de Màrqueting",
       "marketing_emails_desc": "Rebre notícies sobre noves funcions i ofertes."
-    }
+    },
+    "inbox_header": "Noves activitats"
   },
   "search": {
     "verified_this_week": "Verificades aquesta setmana",
