@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/my_properties_provider.dart';
+import '../../providers/notifications_provider.dart';
 import '../../providers/offers_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../providers/urgency_provider.dart';
@@ -60,6 +61,11 @@ class UserAvatarMenu extends ConsumerWidget {
     // Urgency engine
     final urgentActions = ref.watch(urgencyProvider);
     final hasUrgency = urgentActions.isNotEmpty;
+
+    // Info notifications (new offers / visits)
+    final inboxNotifs =
+        ref.watch(inboxNotificationsProvider).asData?.value ?? [];
+    final hasInbox = inboxNotifs.isNotEmpty;
 
     const urgencyGreen = Color(kUrgencyGreen);
     const actionBlue = Color(kUrgencyBlue);
@@ -138,7 +144,76 @@ class UserAvatarMenu extends ConsumerWidget {
       items.add(const PopupMenuDivider());
     }
 
-    // 2. Standard navigation items
+    // 2. Info notifications (new offers / visit requests)
+    if (hasInbox) {
+      items.add(
+        PopupMenuItem<_MenuValue>(
+          enabled: false,
+          height: 28,
+          child: Text(
+            'notifications.inbox_header'.tr(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: actionBlue,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+          ),
+        ),
+      );
+
+      for (final notif in inboxNotifs.take(3)) {
+        items.add(
+          PopupMenuItem<_MenuValue>(
+            value: _NavValue('notifications'),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Container(
+              decoration: BoxDecoration(
+                color: actionBlue.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: actionBlue.withOpacity(0.25)),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.notifications_outlined,
+                      color: actionBlue, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          notif.title,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: actionBlue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          notif.body,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: actionBlue.withOpacity(0.75),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded,
+                      color: actionBlue, size: 12),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      items.add(const PopupMenuDivider());
+    }
+
+    // 3. Standard navigation items
     items.add(
       PopupMenuItem<_MenuValue>(
         value: _NavValue('profile'),
@@ -298,6 +373,8 @@ class UserAvatarMenu extends ConsumerWidget {
           case _NavValue(:final key):
             ref.read(searchProvider.notifier).clearError();
             switch (key) {
+              case 'notifications':
+                context.push('/notifications');
               case 'profile':
                 onTabSelected != null
                     ? onTabSelected!(0)
@@ -331,7 +408,7 @@ class UserAvatarMenu extends ConsumerWidget {
       },
       child: _AvatarWithDot(
         photoUrl: user?.profilePhotoUrl,
-        showDot: hasUrgency,
+        showDot: hasUrgency || hasInbox,
       ),
     );
   }
