@@ -54,3 +54,5 @@ node_modules/
 
 # Stitch Design Files (temporary)
 frontend/design_inbox/
+# Local git mirror
+InmuFacil_App.git/
