@@ -42,9 +42,7 @@
 
 ## Pendiente — Alta Prioridad (TFM)
 
-- [ ] **Slides URL**: Exportar slides/slides.md a PDF o desplegar en Netlify/Vercel para tener URL publica
-  - El formulario TFM pide URL o documento adjunto con la presentacion
-  - Slidev permite `npm run export` para generar PDF
+- [x] **Slides URL**: Desplegadas en https://inmufacil.com/TFM/slides — URL publica disponible para el formulario TFM
 - [ ] Confirmar visibilidad publica del repositorio GitHub (o conceder acceso a mouredev@gmail.com)
 
 ## Pendiente — UX/UI

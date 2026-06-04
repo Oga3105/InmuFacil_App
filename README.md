@@ -297,19 +297,18 @@ InmuFacil_Project/
 
 ## 🎞️ Presentacion (TFM Slides)
 
-La presentacion del proyecto esta disponible en el directorio `/slides/` (formato Slidev — Markdown).
+**URL publica:** 🎯 https://inmufacil.com/TFM/slides
+
+La presentacion cubre: problema, solucion, arquitectura, stack, seguridad, demo y roadmap.
+
+El codigo fuente de las slides esta en el directorio `/slides/` (formato Slidev — Markdown).
 
 ```bash
 # Ver en local
 cd slides
 npm install
 npm run dev   # http://localhost:3030
-
-# Exportar a PDF
-npm run export
 ```
-
-> La presentacion cubre: problema, solucion, arquitectura, stack, seguridad, demo y roadmap.
 
 ---
 
