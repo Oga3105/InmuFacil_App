@@ -187,7 +187,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
             onPressed: () => Navigator.of(context).pop(),
           ),
         ),
-        title: GestureDetector(
+        title: MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
           onTap: () => context.go('/'),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -211,7 +211,7 @@ class _NotariaScreenState extends ConsumerState<NotariaScreen> {
               ),
             ],
           ),
-        ),
+        )),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),

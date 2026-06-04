@@ -167,7 +167,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      title: GestureDetector(
+      title: MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
         onTap: () => context.go('/'),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -191,7 +191,7 @@ class AiConsentHistoryScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
+      )),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(color: Theme.of(context).colorScheme.outlineVariant, height: 1),
