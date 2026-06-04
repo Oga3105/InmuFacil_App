@@ -2493,21 +2493,23 @@ class _SolvencyRowCompact extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: 3,
+            flex: 5,
             child: Text(
               label,
               style: TextStyle(
                   fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ),
-          Flexible(
-            flex: 2,
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 5,
             child: Text(
               value,
               textAlign: TextAlign.end,
-              overflow: TextOverflow.ellipsis,
+              softWrap: true,
               style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
