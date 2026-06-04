@@ -7,7 +7,7 @@ Generacion de tokens MFA, validacion y envio SMTP real via IONOS (aiosmtplib).
 import os
 import secrets
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Tuple
@@ -42,7 +42,7 @@ def generate_verification_token() -> str:
 
 def get_token_expiration() -> datetime:
     """Expiracion: 15 minutos desde ahora (UTC)."""
-    return datetime.utcnow() + timedelta(minutes=15)
+    return datetime.now(timezone.utc) + timedelta(minutes=15)
 
 
 def verify_token(
@@ -51,7 +51,8 @@ def verify_token(
     expiration: datetime,
 ) -> Tuple[bool, str]:
     """Valida token con comparacion en tiempo constante y chequeo de expiracion."""
-    if datetime.utcnow() > expiration:
+    exp = expiration if expiration.tzinfo else expiration.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > exp:
         logger.warning("[AUTH] Token expirado")
         return False, "El codigo ha expirado. Solicita uno nuevo."
 
