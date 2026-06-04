@@ -606,7 +606,7 @@ class _StatDivider extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _OfferCard extends ConsumerStatefulWidget {
-  const _OfferCard({required this.offer, this.askingPrice = 0});
+  const _OfferCard({super.key, required this.offer, this.askingPrice = 0});
 
   final OfferData offer;
   final double askingPrice;
