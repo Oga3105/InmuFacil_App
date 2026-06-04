@@ -54,7 +54,7 @@ class ArrasEquityAnalysisScreen extends ConsumerWidget {
         ref.watch(authProvider).user?.id == offer.buyerId;
 
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: _buildAppBar(context, ref, isBuyer),
       body: equityAsync.when(
         loading: () =>
@@ -171,7 +171,7 @@ class _EquityBody extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 12),
@@ -394,18 +394,22 @@ class _EquityItemCard extends StatelessWidget {
     }
   }
 
-  static Color _statusBg(String status) {
+  static Color _statusBg(String status, bool isDark) {
+    if (isDark) {
+      switch (status) {
+        case 'favorable': return const Color(0xFF0F2518);
+        case 'neutral':   return const Color(0xFF0D1E3D);
+        case 'alerta':    return const Color(0xFF2A1500);
+        case 'critico':   return const Color(0xFF2A0808);
+        default:          return const Color(0xFF1A1F2E);
+      }
+    }
     switch (status) {
-      case 'favorable':
-        return const Color(0xFFF0FDF4);
-      case 'neutral':
-        return const Color(0xFFEFF6FF);
-      case 'alerta':
-        return const Color(0xFFFFF7ED);
-      case 'critico':
-        return const Color(0xFFFEF2F2);
-      default:
-        return Colors.grey.shade50;
+      case 'favorable': return const Color(0xFFF0FDF4);
+      case 'neutral':   return const Color(0xFFEFF6FF);
+      case 'alerta':    return const Color(0xFFFFF7ED);
+      case 'critico':   return const Color(0xFFFEF2F2);
+      default:          return const Color(0xFFF8FAFC);
     }
   }
 
@@ -446,8 +450,9 @@ class _EquityItemCard extends StatelessWidget {
     final description = (item['description'] as String?) ?? '';
     final isCritico = status == 'critico';
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = _statusColor(status);
-    final bg = _statusBg(status);
+    final bg = _statusBg(status, isDark);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -505,7 +510,7 @@ class _EquityItemCard extends StatelessWidget {
               description,
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey.shade700,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 height: 1.5,
               ),
             ),
@@ -576,7 +581,7 @@ class _ErrorView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   height: 1.5),
             ),
             if (onRetry != null) ...[
@@ -606,24 +611,25 @@ class _ErrorView extends StatelessWidget {
 class _DisclaimerFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, size: 16, color: Colors.grey.shade500),
+          Icon(Icons.info_outline, size: 16, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               'arras_interview.equity_disclaimer'.tr(),
               style: TextStyle(
                   fontSize: 11,
-                  color: Colors.grey.shade500,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5),
             ),
           ),
