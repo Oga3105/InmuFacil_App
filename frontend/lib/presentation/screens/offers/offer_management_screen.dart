@@ -1538,15 +1538,15 @@ class _SolvencyAcceptanceSectionState
         children: [
           Row(
             children: [
-              const Icon(Icons.verified_user_outlined,
-                  color: Color(0xFF16A34A), size: 18),
+              Icon(Icons.verified_user_outlined,
+                  color: colorScheme.onSecondaryContainer, size: 18),
               const SizedBox(width: 8),
               Text(
                 'offers.solvency_title'.tr(),
-                style: const TextStyle(
+                style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: Color(0xFF166534)),
+                    color: colorScheme.onSecondaryContainer),
               ),
             ],
           ),
@@ -1730,15 +1730,18 @@ class _SolvencyRow extends StatelessWidget {
             width: 220,
             child: Text(
               label,
-              style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+              ),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF166534),
+              color: Theme.of(context).colorScheme.onSecondaryContainer,
             ),
           ),
         ],
