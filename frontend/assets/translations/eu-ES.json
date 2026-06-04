@@ -3168,6 +3168,8 @@
     "hide_message": "Ezkutatu mezua",
     "read_message": "Irakurri mezu osoa",
     "accept_title": "Eskaintza onartu",
+    "accept_title_prefix": "Eskaintza ",
+    "accept_title_suffix": "onartu",
     "accept_body": "{} eskaintza onartzera zoaz. Ekintza hau ezin da desegin.",
     "reject_title": "Eskaintza ukatu",
     "reject_body": "Erosleari jakinaraziko zaio bere eskaintza ukatu dela.",

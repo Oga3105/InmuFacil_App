@@ -3168,6 +3168,8 @@
     "hide_message": "Amagar missatge",
     "read_message": "Llegir missatge complet",
     "accept_title": "Acceptar oferta",
+    "accept_title_prefix": "Acceptar ",
+    "accept_title_suffix": "oferta",
     "accept_body": "Vas a acceptar l'oferta de {}. Aquesta acció no es pot desfer.",
     "reject_title": "Rebutjar oferta",
     "reject_body": "El comprador serà notificat que la seva oferta ha estat rebutjada.",

@@ -3190,6 +3190,8 @@
     "hide_message": "Hide message",
     "read_message": "Read full message",
     "accept_title": "Accept offer",
+    "accept_title_prefix": "Accept ",
+    "accept_title_suffix": "offer",
     "accept_body": "You are about to accept the offer of {}. This action cannot be undone.",
     "reject_title": "Reject offer",
     "reject_body": "The buyer will be notified that their offer has been rejected.",

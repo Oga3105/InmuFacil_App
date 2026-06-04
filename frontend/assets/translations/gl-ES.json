@@ -3187,6 +3187,8 @@
     "hide_message": "Ocultar mensaxe",
     "read_message": "Ler mensaxe completo",
     "accept_title": "Aceptar oferta",
+    "accept_title_prefix": "Aceptar ",
+    "accept_title_suffix": "oferta",
     "accept_body": "Vas a aceptar a oferta de {}. Esta acción non se pode desfacer.",
     "reject_title": "Rexeitar oferta",
     "reject_body": "O comprador será notificado de que a súa oferta foi rexeitada.",

@@ -806,7 +806,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                         textBaseline: TextBaseline.alphabetic,
                         children: [
                           Text(
-                            '\u20AC${_formatAmount(offer.amount)}',
+                            '${_formatAmount(offer.amount)}\u20AC',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -956,19 +956,45 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
   Future<void> _confirmAccept(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12)),
-        title: Text('offers.accept_title'.tr()),
+        title: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: 'offers.accept_title_prefix'.tr(),
+                style: const TextStyle(
+                  color: Color(0xFF135BEC),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              TextSpan(
+                text: 'offers.accept_title_suffix'.tr(),
+                style: const TextStyle(
+                  color: Color(0xFF16A34A),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
         content: Text(
-            'offers.accept_body'.tr(args: ['\u20AC${widget.offer.amount.toStringAsFixed(0)}'])),
+            'offers.accept_body'.tr(args: ['${widget.offer.amount.toStringAsFixed(0)}\u20AC'])),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Theme.of(dialogContext).colorScheme.onSurface,
+              side: BorderSide(
+                color: Theme.of(dialogContext).colorScheme.outline,
+              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
             child: Text('common.cancel'.tr()),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(dialogContext, true),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF16A34A),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1774,15 +1800,18 @@ class _TrustFooter extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {},
-            child: Text(
-              'offers.view_closing'.tr(),
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                fontSize: 11,
-                color: Color(0xFF135BEC),
-                fontWeight: FontWeight.w700,
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => context.go('/info/how-it-works'),
+              child: Text(
+                'offers.view_closing'.tr(),
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF135BEC),
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -1825,11 +1854,9 @@ class _PageFooter extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _FooterLink(label: 'offers.help'.tr(), onTap: () {}),
+              _FooterLink(label: 'offers.help'.tr(), onTap: () => context.go('/info/faq')),
               const SizedBox(width: 10),
-              _FooterLink(label: 'offers.legal_link'.tr(), onTap: () {}),
-              const SizedBox(width: 10),
-              _FooterLink(label: 'offers.security_mgmt_link'.tr(), onTap: () {}),
+              _FooterLink(label: 'offers.legal_link'.tr(), onTap: () => context.go('/info/legal')),
             ],
           ),
           const SizedBox(height: 8),
@@ -1847,14 +1874,17 @@ class _FooterLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          decoration: TextDecoration.underline,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            decoration: TextDecoration.underline,
+          ),
         ),
       ),
     );
@@ -1902,8 +1932,14 @@ class _ChatButtonSmallState extends ConsumerState<_ChatButtonSmall> {
       label: Text('offers.chat'.tr(),
           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
       style: OutlinedButton.styleFrom(
-        foregroundColor: const Color(0xFF135BEC),
-        side: const BorderSide(color: Color(0xFF135BEC)),
+        foregroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.white
+            : const Color(0xFF135BEC),
+        side: BorderSide(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.7)
+              : const Color(0xFF135BEC),
+        ),
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8))),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
