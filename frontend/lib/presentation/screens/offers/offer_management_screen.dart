@@ -1525,6 +1525,8 @@ class _SolvencyAcceptanceSectionState
         ref.watch(solvency_prov.buyerPassportProvider(widget.offer.id));
 
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final solvencyColor = isDark ? const Color(0xFF86EFAC) : const Color(0xFF166534);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(16),
@@ -1539,14 +1541,14 @@ class _SolvencyAcceptanceSectionState
           Row(
             children: [
               Icon(Icons.verified_user_outlined,
-                  color: colorScheme.onSecondaryContainer, size: 18),
+                  color: solvencyColor, size: 18),
               const SizedBox(width: 8),
               Text(
                 'offers.solvency_title'.tr(),
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: colorScheme.onSecondaryContainer),
+                    color: solvencyColor),
               ),
             ],
           ),
@@ -1732,7 +1734,7 @@ class _SolvencyRow extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 12,
-                color: Theme.of(context).colorScheme.onSecondaryContainer.withValues(alpha: 0.8),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1741,7 +1743,9 @@ class _SolvencyRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF86EFAC)
+                  : const Color(0xFF166534),
             ),
           ),
         ],
