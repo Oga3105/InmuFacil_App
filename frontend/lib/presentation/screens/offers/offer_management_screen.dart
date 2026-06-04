@@ -1803,7 +1803,7 @@ class _TrustFooter extends StatelessWidget {
           MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () => context.go('/info/how-it-works'),
+              onTap: () => context.push('/info/how-it-works'),
               child: Text(
                 'offers.view_closing'.tr(),
                 textAlign: TextAlign.right,
@@ -1854,9 +1854,9 @@ class _PageFooter extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              _FooterLink(label: 'offers.help'.tr(), onTap: () => context.go('/info/faq')),
+              _FooterLink(label: 'offers.help'.tr(), onTap: () => context.push('/info/faq')),
               const SizedBox(width: 10),
-              _FooterLink(label: 'offers.legal_link'.tr(), onTap: () => context.go('/info/legal')),
+              _FooterLink(label: 'offers.legal_link'.tr(), onTap: () => context.push('/info/legal')),
             ],
           ),
           const SizedBox(height: 8),
