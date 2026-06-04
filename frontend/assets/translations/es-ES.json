@@ -2869,6 +2869,8 @@
     "hide_message": "Ocultar mensaje",
     "read_message": "Leer mensaje completo",
     "accept_title": "Aceptar oferta",
+    "accept_title_prefix": "Aceptar ",
+    "accept_title_suffix": "oferta",
     "accept_body": "Vas a aceptar la oferta de {}. Esta accion no se puede deshacer.",
     "reject_title": "Rechazar oferta",
     "reject_body": "El comprador será notificado de que su oferta ha sido rechazada.",

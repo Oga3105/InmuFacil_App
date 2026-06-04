@@ -3168,6 +3168,8 @@
     "hide_message": "Masquer le message",
     "read_message": "Lire le message complet",
     "accept_title": "Accepter l'offre",
+    "accept_title_prefix": "Accepter ",
+    "accept_title_suffix": "l'offre",
     "accept_body": "Vous êtes sur le point d'accepter l'offre de {}. Cette action ne peut pas être annulée.",
     "reject_title": "Rejeter l'offre",
     "reject_body": "L'acheteur sera informé que son offre a été rejetée.",
