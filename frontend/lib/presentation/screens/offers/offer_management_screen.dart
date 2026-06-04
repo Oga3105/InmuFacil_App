@@ -216,6 +216,7 @@ class _OfferManagementScreenState extends ConsumerState<OfferManagementScreen> {
               return Column(
                 children: offers
                     .map((o) => _OfferCard(
+                          key: ValueKey(o.id),
                           offer: o,
                           askingPrice: property?.price ?? 0,
                         ))
@@ -1008,6 +1009,7 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
       await ref
           .read(receivedOffersProvider.notifier)
           .accept(widget.offer.id);
+      if (mounted) ref.invalidate(receivedOffersProvider);
     }
   }
 
