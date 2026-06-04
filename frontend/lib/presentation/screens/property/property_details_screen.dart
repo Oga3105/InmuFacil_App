@@ -452,10 +452,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       // DESHACER: MarketPriceWidget removed from property details UI.
                       const SizedBox(height: 32),
                       _OwnerCard(property: property, isOwner: isOwner),
-                      if (isOwner) ...[
-                        const SizedBox(height: 24),
-                        _SellerMetricsCard(propertyId: property.id, status: property.status),
-                      ],
+                      const SizedBox(height: 24),
+                      _SellerMetricsCard(
+                        propertyId: property.id,
+                        status: property.status,
+                        showOffers: isOwner,
+                      ),
                       if (isOwner) ...[
                         const SizedBox(height: 24),
                         DocumentStatusSection(
@@ -1073,10 +1075,12 @@ class _SummaryCard extends ConsumerWidget {
           ],
           const SizedBox(height: 16),
           _OwnerCard(property: property, isOwner: isOwner),
-          if (isOwner) ...[
-            const SizedBox(height: 24),
-            _SellerMetricsCard(propertyId: property.id, status: property.status),
-          ],
+          const SizedBox(height: 24),
+          _SellerMetricsCard(
+            propertyId: property.id,
+            status: property.status,
+            showOffers: isOwner,
+          ),
           const SizedBox(height: 16),
           // Viability widget — only shown to non-owners (buyers)
           if (!isOwner) ...[
@@ -1783,9 +1787,10 @@ class _StatItem extends StatelessWidget {
 // ─── Seller Metrics Card (V32) ────────────────────────────────────────────────
 
 class _SellerMetricsCard extends ConsumerWidget {
-  const _SellerMetricsCard({required this.propertyId, this.status});
+  const _SellerMetricsCard({required this.propertyId, this.status, this.showOffers = true});
   final String propertyId;
   final String? status;
+  final bool showOffers;
 
   static const _blue = Color(0xFF135BEC);
   static const _green = Color(0xFF16A34A);
@@ -1904,13 +1909,15 @@ class _SellerMetricsCard extends ConsumerWidget {
                     icon: Icons.favorite_border_outlined,
                     color: const Color(0xFFDC2626),
                   ),
-                  _MetricDivider(),
-                  _MetricCell(
-                    value: data.offers,
-                    label: 'property.metric_offers'.tr(),
-                    icon: Icons.payments_outlined,
-                    color: _green,
-                  ),
+                  if (showOffers) ...[
+                    _MetricDivider(),
+                    _MetricCell(
+                      value: data.offers,
+                      label: 'property.metric_offers'.tr(),
+                      icon: Icons.payments_outlined,
+                      color: _green,
+                    ),
+                  ],
                 ],
               );
             },

@@ -1807,9 +1807,9 @@ class _TrustFooter extends StatelessWidget {
               child: Text(
                 'offers.view_closing'.tr(),
                 textAlign: TextAlign.right,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
-                  color: Color(0xFF135BEC),
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                   fontWeight: FontWeight.w700,
                 ),
               ),

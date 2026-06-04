@@ -48,7 +48,7 @@ final propertyByIdProvider =
   (ref, propertyId) async {
     final client = ref.watch(apiClientProvider);
     try {
-      final resp = await client.client.get('/api/v1/properties/$propertyId');
+      final resp = await client.client.get('/properties/$propertyId');
       if (resp.statusCode == 200) {
         return PropertyModel.fromJson(
                 resp.data as Map<String, dynamic>)
