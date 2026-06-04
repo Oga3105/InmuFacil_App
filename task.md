@@ -1,8 +1,25 @@
 # Estado de Tareas — InmuFacil
 
-**Ultima actualizacion:** 2026-05-29
+**Ultima actualizacion:** 2026-06-04
 **Rama activa:** `develop`
-**Estado general:** MVP operacional. Fase de pulido UX/UI y correcciones de produccion.
+**Estado general:** MVP operacional. Fase de pulido UX/UI, correcciones de produccion y preparacion de entrega TFM.
+
+---
+
+## Completadas (Junio 2026)
+
+- [x] fix(offers): simbolo euro detras de la cantidad, titulo "Aceptar oferta" bicolor, boton Cancelar visible oscuro, footer links con navegacion real — PR #334
+- [x] fix(offers): context.push en footer links (back button preservado) — PR #335
+- [x] fix(property): metricas visitas/favoritos visibles a no-propietarios, fix URL doble /api/v1, "Ver proceso de cierre" visible en oscuro — PR #336
+- [x] fix(offers): ValueKey en _OfferCard + ref.invalidate tras aceptar para recargar UI — PR #337
+- [x] fix(offers): texto card solvencia visible en modo oscuro (verde adaptativo) — PR #338, #341
+- [x] fix(offers): super.key en _OfferCard — fix error compilacion dart2js — PR #339
+- [x] fix(timeline): "Financiacion" no se trunca en movil — PR #340
+- [x] fix(timeline): valores solvencia alineados a izquierda — PR #342
+- [x] fix(timeline): fondo card solvencia modo oscuro azul marino en lugar de verde oscuro — PR #343
+- [x] feat(arras): modo oscuro completo en ArrasEquityAnalysisScreen — PR #344
+- [x] fix(auth): 500 en /reset-password por bug naive/aware datetime (utcnow->now(timezone.utc)) — PR #345
+- [x] feat(ui): cursor pointer en logo AppBar en 11 pantallas — PR #346
 
 ---
 
@@ -23,11 +40,17 @@
 
 ---
 
-## Pendiente — Alta Prioridad
+## Pendiente — Alta Prioridad (TFM)
+
+- [ ] **Slides URL**: Exportar slides/slides.md a PDF o desplegar en Netlify/Vercel para tener URL publica
+  - El formulario TFM pide URL o documento adjunto con la presentacion
+  - Slidev permite `npm run export` para generar PDF
+- [ ] Confirmar visibilidad publica del repositorio GitHub (o conceder acceso a mouredev@gmail.com)
+
+## Pendiente — UX/UI
 
 - [ ] fix(property-detail): avatar del usuario no se ve en la AppBar de la pantalla de detalle
   - URL: /TFM/property/:id
-  - Sintoma: avatar invisible (posiblemente color transparente o fallo en carga de foto)
   - Archivo: frontend/lib/presentation/screens/property/property_details_screen.dart
 
 ---
@@ -35,7 +58,7 @@
 ## Pendiente — Media Prioridad
 
 - [ ] Verificar en produccion que pisos vendidos ya no aparecen tras el reinicio del backend (Docker)
-- [ ] Revisar que _buildUserAvatar en property_details_screen muestra el fallback correcto cuando no hay foto
+- [ ] Limpiar archivos basura del root del repo (*.db, diff.txt, curl_res.json, *.dart sueltos)
 
 ---
 

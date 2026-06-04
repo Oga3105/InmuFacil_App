@@ -1,7 +1,7 @@
 # Memoria del Proyecto InmuFacil
 
-**Version:** 14.0
-**Fecha ultima actualizacion:** 2026-05-29
+**Version:** 15.0
+**Fecha ultima actualizacion:** 2026-06-04
 **Estado:** MVP OPERACIONAL — Backend + Frontend desplegados en produccion
 **Repositorio:** https://github.com/Oga3105/InmuFacil_App.git
 **Rama principal de desarrollo:** `develop`
@@ -93,6 +93,24 @@
 - 10 idiomas: es-ES, en-US, en-GB, en-CA, fr-FR, fr-CA, ca-ES, va-ES, eu-ES, gl-ES
 
 ---
+
+## PRs Recientes (Junio 2026)
+
+| PR | Descripcion | Estado |
+|---|---|---|
+| #334 | fix(offers): euro despues cantidad, titulo bicolor, Cancelar OutlinedButton, footer links, quitar Seguridad | Merged |
+| #335 | fix(offers): context.push en footer links para preservar back navigation | Merged |
+| #336 | fix(property): analiticas visibles a no-propietarios (sin ofertas), fix URL doble /api/v1, dark mode ver-proceso | Merged |
+| #337 | fix(offers): ValueKey en _OfferCard + invalidate provider tras aceptar oferta | Merged |
+| #338 | fix(offers): contraste texto card solvencia modo oscuro (Color(0xFF166534) -> onSecondaryContainer) | Merged |
+| #339 | fix(offers): super.key en _OfferCard para fix error compilacion dart2js | Merged |
+| #340 | fix(timeline): truncamiento "Financiacion" en movil — Flexible+ellipsis -> Expanded(flex:5) | Merged |
+| #341 | fix(offers): paleta verde adaptativa en card solvencia (0xFF166534 claro / 0xFF86EFAC oscuro) | Merged |
+| #342 | fix(timeline): alinear valores solvencia a izquierda (textAlign.end -> textAlign.start) | Merged |
+| #343 | fix(timeline): fondo card solvencia modo oscuro verde->azul (#0E1E3D, borde #2B4F8A) | Merged |
+| #344 | feat(arras): modo oscuro completo en ArrasEquityAnalysisScreen | Merged |
+| #345 | fix(auth): 500 en /reset-password por comparacion naive/aware datetime (utcnow->now(timezone.utc)) | Merged |
+| #346 | feat(ui): cursor pointer en logo InmuFacil AppBar en 11 pantallas que faltaban | Merged |
 
 ## PRs y Commits Recientes (Mayo 2026)
 
