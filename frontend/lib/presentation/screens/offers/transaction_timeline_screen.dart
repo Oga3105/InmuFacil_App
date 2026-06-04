@@ -2533,8 +2533,8 @@ class _CongratsBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const kGreen = Color(0xFF16A34A);
-    final bgColor = isDark ? const Color(0xFF0D2010) : const Color(0xFFF0FDF4);
-    final borderColor = isDark ? const Color(0xFF1A4A20) : const Color(0xFF86EFAC);
+    final bgColor = isDark ? const Color(0xFF0E1E3D) : const Color(0xFFF0FDF4);
+    final borderColor = isDark ? const Color(0xFF2B4F8A) : const Color(0xFF86EFAC);
 
     return Container(
       width: double.infinity,
