@@ -2508,7 +2508,7 @@ class _SolvencyRowCompact extends StatelessWidget {
             flex: 5,
             child: Text(
               value,
-              textAlign: TextAlign.end,
+              textAlign: TextAlign.start,
               softWrap: true,
               style: TextStyle(
                   fontSize: 12,
