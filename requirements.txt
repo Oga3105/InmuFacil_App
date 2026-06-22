@@ -43,7 +43,7 @@ easyocr>=1.7.2
 # Note: First run will download Spanish language model (~500MB)
 
 # Legal & Documents (@Architect)
-reportlab>=4.5.1
+reportlab>=5.0.0
 
 # AI Identity Verification — Gemini Vision
 google-genai>=2.8.0
