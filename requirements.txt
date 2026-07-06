@@ -33,7 +33,7 @@ flake8==7.3.0
 mypy==2.1.0
 
 # KYC - Modern Image Processing (@Jules)
-pillow==12.2.0  # Image processing
+pillow==12.3.0  # Image processing
 numpy>=2.4.6,<2.5.0
 opencv-python-headless>=4.10.0.84
 
